@@ -1,0 +1,27 @@
+id: front-api-token
+info:
+  name: Front API Token
+  author: prowl
+  severity: high
+  description: Front (frontapp) API token, a JWT issued for the Front Core API.
+  reference:
+    - https://dev.frontapp.com/docs/create-and-revoke-api-tokens
+  tags: front,frontapp,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - front
+      - frontapp
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)front(?:app)?[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?(eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})["'']?'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)front(?:app)?[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?(eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})["'']?'
+    group: 1

@@ -1,0 +1,29 @@
+id: pagerduty-api-token
+info:
+  name: PagerDuty API Token
+  author: prowl
+  severity: high
+  description: PagerDuty REST API token (20-char base64url, often u+ prefixed) for the v2 API.
+  reference:
+    - https://developer.pagerduty.com/docs/authentication
+  tags: pagerduty,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pagerduty
+      - pd_token
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)pagerduty[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9_+-]{20})["'']?'
+      - '\bToken token=([A-Za-z0-9_+-]{20})\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)pagerduty[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9_+-]{20})["'']?'
+      - '\bToken token=([A-Za-z0-9_+-]{20})\b'
+    group: 1

@@ -1,0 +1,26 @@
+id: mailchimp-api-key
+info:
+  name: Mailchimp API Key
+  author: prowl
+  severity: high
+  description: Mailchimp API key (32 hex chars suffixed with the data-center, e.g. -us21).
+  reference:
+    - https://mailchimp.com/developer/marketing/guides/quick-start/
+  tags: mailchimp,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - mailchimp
+      - '-us'
+    condition: or
+  - type: regex
+    regex:
+      - '\b[a-f0-9]{32}-us[0-9]{1,2}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b[a-f0-9]{32}-us[0-9]{1,2}\b'

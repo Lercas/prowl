@@ -1,0 +1,26 @@
+id: openrouter-api-key
+info:
+  name: OpenRouter API Key
+  author: prowl
+  severity: high
+  description: OpenRouter API key (sk-or-v1-) granting access to the OpenRouter model gateway.
+  reference:
+    - https://openrouter.ai/docs/api/reference/authentication
+  tags: openrouter,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sk-or-v1-
+    condition: or
+  - type: regex
+    regex:
+      - '\bsk-or-v1-[a-f0-9]{64}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bsk-or-v1-[a-f0-9]{64}\b'
+    group: 0

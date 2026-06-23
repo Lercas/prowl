@@ -1,0 +1,24 @@
+id: mongodb-connection-uri
+info:
+  name: MongoDB Connection URI with Password
+  author: prowl
+  severity: critical
+  description: MongoDB connection string (mongodb:// or mongodb+srv://) embedding a user:password credential.
+  reference:
+    - https://www.mongodb.com/docs/manual/reference/connection-string/
+  tags: mongodb,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'mongodb'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)mongodb(?:\+srv)?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)mongodb(?:\+srv)?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

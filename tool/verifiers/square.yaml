@@ -1,0 +1,16 @@
+id: square
+info:
+  name: Square
+  author: prowl
+  reference: https://developer.squareup.com/reference/square/merchants-api/list-merchants
+match: [square, sq0atp, EAAA]
+requests:
+  - method: GET
+    url: https://connect.squareup.com/v2/merchants
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Square-Version: "2024-01-18"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

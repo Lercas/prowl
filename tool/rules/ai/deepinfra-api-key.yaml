@@ -1,0 +1,26 @@
+id: deepinfra-api-key
+info:
+  name: DeepInfra API Key
+  author: prowl
+  severity: high
+  description: DeepInfra API token (32-char token) detected next to a deepinfra context anchor.
+  reference:
+    - https://docs.deepinfra.com/account/authentication
+  tags: deepinfra,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - deepinfra
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)deepinfra[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)deepinfra[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})\b'
+    group: 1

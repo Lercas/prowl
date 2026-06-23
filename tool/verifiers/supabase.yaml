@@ -1,0 +1,34 @@
+id: supabase
+info:
+  name: Supabase Service Role Key
+  author: prowl
+  reference: https://supabase.com/docs/guides/api
+# Supabase's PostgREST API lives at https://<project_ref>.supabase.co/rest/v1/ and is
+# key-auth'd via the `apikey` header. We intentionally send the key in `apikey` ONLY and do
+# NOT add Authorization: Bearer — new opaque `sb_secret_` keys are not JWTs, so a Bearer
+# header makes the gateway parse them as a JWT and reject with "Invalid JWT" (a false-dead).
+# The `apikey` header alone authenticates BOTH legacy JWT service_role keys and the new
+# `sb_secret_` keys. The project ref is project-specific and NOT derivable from the key, so it
+# is extracted from the surrounding context (a co-located https://<ref>.supabase.co URL). The
+# ref lands in the URL host (an extracted context value, allowed by the exfil-guard); the
+# secret stays in the apikey header only. With no extractable ref this verifier simply can't
+# run (=> unsupported), the intended fail-closed behaviour. A live key returns 200 on the REST
+# root; a revoked/invalid key returns 401 with "Invalid API key".
+match: [supabase, service_role, sb_secret_]
+extract:
+  project_ref: '[a-z0-9]{20}'
+requests:
+  - method: GET
+    url: https://{{project_ref}}.supabase.co/rest/v1/
+    headers:
+      apikey: "{{secret}}"
+      Accept: "application/json"
+      User-Agent: prowl-verify
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['Invalid API key', 'Invalid authentication credentials']
+        negative: true

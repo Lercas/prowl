@@ -1,0 +1,23 @@
+id: spotify
+info:
+  name: Spotify
+  author: prowl
+  reference: https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
+match: [spotify]
+# client_secret is the detected value ({{secret}}); the client_id is pulled from the surrounding
+# context. The engine's extract takes the WHOLE regex match (no capture groups, FindString), so the
+# pattern must match only the bare 32-hex id — typically the first such token, since config files put
+# client_id before client_secret. A wrong guess just yields a clean 400/401 (read-only, no mutation).
+extract:
+  client_id: '\b[0-9a-f]{32}\b'
+requests:
+  - method: POST
+    url: https://accounts.spotify.com/api/token
+    headers:
+      Authorization: "Basic {{base64(client_id:secret)}}"
+      Content-Type: "application/x-www-form-urlencoded"
+      Accept: application/json
+    body: "grant_type=client_credentials"
+    matchers:
+      - type: status
+        status: [200]

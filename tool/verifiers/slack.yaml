@@ -1,0 +1,14 @@
+id: slack
+info:
+  name: Slack
+  reference: https://api.slack.com/methods/auth.test
+match: [slack, xoxb, xoxp, xoxa]
+requests:
+  - method: POST
+    url: https://slack.com/api/auth.test
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: word
+        part: body
+        words: ['"ok":true']

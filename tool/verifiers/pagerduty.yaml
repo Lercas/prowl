@@ -1,0 +1,15 @@
+id: pagerduty
+info:
+  name: PagerDuty
+  author: prowl
+  reference: https://developer.pagerduty.com/api-reference/
+match: [pagerduty]
+requests:
+  - method: GET
+    url: https://api.pagerduty.com/users?limit=1
+    headers:
+      Authorization: "Token token={{secret}}"
+      Accept: "application/vnd.pagerduty+json;version=2"
+    matchers:
+      - type: status
+        status: [200]

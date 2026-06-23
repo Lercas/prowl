@@ -1,0 +1,15 @@
+id: anthropic
+info:
+  name: Anthropic
+  author: prowl
+  reference: https://docs.anthropic.com/en/api/models-list
+match: [anthropic, sk-ant-api03-, sk-ant-admin01-, sk-ant-]
+requests:
+  - method: GET
+    url: https://api.anthropic.com/v1/models
+    headers:
+      x-api-key: "{{secret}}"
+      anthropic-version: "2023-06-01"
+    matchers:
+      - type: status
+        status: [200]

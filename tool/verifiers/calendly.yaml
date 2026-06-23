@@ -1,0 +1,15 @@
+id: calendly
+info:
+  name: Calendly
+  author: prowl
+  reference: https://developer.calendly.com/api-docs/005832c83abED-get-current-user
+match: [calendly, calendly-personal-token]
+requests:
+  - method: GET
+    url: https://api.calendly.com/users/me
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: "application/json"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,26 @@
+id: nuget-api-key
+info:
+  name: NuGet API Key
+  author: prowl
+  severity: high
+  description: NuGet.org API key (oy2…) granting package publish/unlist rights.
+  reference:
+    - https://learn.microsoft.com/en-us/nuget/nuget-org/scoped-api-keys
+  tags: nuget,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - oy2
+    condition: or
+  - type: regex
+    regex:
+      - '\boy2[a-z0-9]{43}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\boy2[a-z0-9]{43}\b'
+    group: 0

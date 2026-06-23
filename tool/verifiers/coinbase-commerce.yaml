@@ -1,0 +1,16 @@
+id: coinbase-commerce
+info:
+  name: Coinbase Commerce
+  author: prowl
+  reference: https://docs.cloud.coinbase.com/commerce/reference/getcharges
+match: [coinbase]
+requests:
+  - method: GET
+    url: https://api.commerce.coinbase.com/charges
+    headers:
+      X-CC-Api-Key: "{{secret}}"
+      X-CC-Version: "2018-03-22"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

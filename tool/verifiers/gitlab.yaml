@@ -1,0 +1,13 @@
+id: gitlab
+info:
+  name: GitLab
+  reference: https://docs.gitlab.com/ee/api/users.html
+match: [gitlab, glpat]
+requests:
+  - method: GET
+    url: https://gitlab.com/api/v4/user
+    headers:
+      PRIVATE-TOKEN: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,29 @@
+id: vault-service-token
+info:
+  name: HashiCorp Vault Token
+  author: prowl
+  severity: high
+  description: HashiCorp Vault token — service (hvs.) or batch (hvb.) — authenticating to Vault.
+  reference:
+    - https://developer.hashicorp.com/vault/docs/concepts/tokens
+  tags: vault,auth,credentials,token
+category: auth
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'hvs'
+      - 'hvb'
+    condition: or
+  - type: regex
+    regex:
+      - '\bhvs\.[A-Za-z0-9_-]{24,120}\b'
+      - '\bhvb\.[A-Za-z0-9_-]{90,}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bhvs\.[A-Za-z0-9_-]{24,120}\b'
+      - '\bhvb\.[A-Za-z0-9_-]{90,}'
+    group: 0

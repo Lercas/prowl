@@ -1,0 +1,15 @@
+id: pinecone
+info:
+  name: Pinecone
+  author: prowl
+  reference: https://docs.pinecone.io/reference/api/2024-07/control-plane/list_indexes
+match: [pinecone, pcsk_]
+requests:
+  - method: GET
+    url: https://api.pinecone.io/indexes
+    headers:
+      Api-Key: "{{secret}}"
+      X-Pinecone-Api-Version: "2025-04"
+    matchers:
+      - type: status
+        status: [200]

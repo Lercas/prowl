@@ -1,0 +1,35 @@
+name: 'Prowl Secret Scan'
+description: 'Fast ML-cascade secret scanner — catch leaked secrets in code (multi-class type, on-prem).'
+author: 'sugar'
+branding:
+  icon: 'eye'
+  color: 'purple'
+inputs:
+  path:
+    description: 'Path to scan'
+    required: false
+    default: '.'
+  format:
+    description: 'pretty | json | sarif'
+    required: false
+    default: 'sarif'
+  fail-on:
+    description: 'Fail the build (exit 1) on findings of this severity or higher'
+    required: false
+    default: 'high'
+  output:
+    description: 'Write the report to this file (for SARIF upload)'
+    required: false
+    default: 'prowl.sarif'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - 'scan'
+    - ${{ inputs.path }}
+    - '--format'
+    - ${{ inputs.format }}
+    - '--fail-on'
+    - ${{ inputs.fail-on }}
+    - '--output'
+    - ${{ inputs.output }}

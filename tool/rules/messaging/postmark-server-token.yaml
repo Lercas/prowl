@@ -1,0 +1,27 @@
+id: postmark-server-token
+info:
+  name: Postmark Server Token
+  author: prowl
+  severity: high
+  description: Postmark server or account API token (UUID) used to send mail and call the API.
+  reference:
+    - https://postmarkapp.com/support/article/1008-what-are-the-account-and-server-api-tokens
+  tags: postmark,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - postmark
+      - X-Postmark-Server-Token
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)postmark[_\-]?(?:server[_\-]?|account[_\-]?)?token["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)postmark[_\-]?(?:server[_\-]?|account[_\-]?)?token["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+    group: 1

@@ -1,0 +1,27 @@
+id: twitter-access-token
+info:
+  name: Twitter / X Access Token
+  author: prowl
+  severity: high
+  description: Twitter/X OAuth1 access token (numeric user id, dash, 40+ base62 chars).
+  reference:
+    - https://developer.x.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens
+  tags: twitter,x,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - twitter
+      - access_token
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:twitter|x)[_\-]?access[_\-]?token["'' :=]{1,5}["'']?([0-9]{15,25}-[A-Za-z0-9]{40})["'']?'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:twitter|x)[_\-]?access[_\-]?token["'' :=]{1,5}["'']?([0-9]{15,25}-[A-Za-z0-9]{40})["'']?'
+    group: 1

@@ -1,0 +1,28 @@
+id: datadog-api-key
+info:
+  name: Datadog API Key
+  author: prowl
+  severity: high
+  description: Datadog API key (32 hex chars) assigned in a datadog context.
+  reference:
+    - https://docs.datadoghq.com/account_management/api-app-keys/
+  tags: datadog,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - datadog
+      - dd_api_key
+      - DD-API-KEY
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:datadog|dd)[_\-]?api[_\-]?key["'' :=]{1,5}["'']?([a-f0-9]{32})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:datadog|dd)[_\-]?api[_\-]?key["'' :=]{1,5}["'']?([a-f0-9]{32})["'']?'
+    group: 1

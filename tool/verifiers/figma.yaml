@@ -1,0 +1,13 @@
+id: figma
+info:
+  name: Figma API
+  reference: https://www.figma.com/developers/api#get-me-endpoint
+match: [figma]
+requests:
+  - method: GET
+    url: https://api.figma.com/v1/me
+    headers:
+      X-Figma-Token: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

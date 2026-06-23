@@ -1,0 +1,26 @@
+id: alibaba-access-key-id
+info:
+  name: Alibaba Cloud Access Key ID
+  author: prowl
+  severity: high
+  description: Alibaba Cloud (Aliyun) AccessKey ID (LTAI-prefixed identifier).
+  reference:
+    - https://www.alibabacloud.com/help/en/ram/user-guide/create-an-accesskey-pair
+  tags: alibaba,aliyun,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - LTAI
+    condition: or
+  - type: regex
+    regex:
+      - '\bLTAI[a-zA-Z0-9]{20}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bLTAI[a-zA-Z0-9]{20}\b'
+    group: 0

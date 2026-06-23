@@ -1,0 +1,30 @@
+id: twitter-api-key
+info:
+  name: Twitter / X API Key & Secret
+  author: prowl
+  severity: high
+  description: Twitter/X consumer API key (25 chars), API secret (50 chars) or access token secret.
+  reference:
+    - https://developer.x.com/en/docs/authentication/oauth-1-0a/api-key-and-secret
+  tags: twitter,x,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - twitter
+      - consumer_secret
+      - access_token_secret
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:twitter|consumer|x)[_\-]?(?:api[_\-]?)?(?:key|secret)["'' :=]{1,5}["'']?([A-Za-z0-9]{25,50})["'']?'
+      - '(?i)access[_\-]?token[_\-]?secret["'' :=]{1,5}["'']?([A-Za-z0-9]{45})["'']?'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:twitter|consumer|x)[_\-]?(?:api[_\-]?)?(?:key|secret)["'' :=]{1,5}["'']?([A-Za-z0-9]{25,50})["'']?'
+      - '(?i)access[_\-]?token[_\-]?secret["'' :=]{1,5}["'']?([A-Za-z0-9]{45})["'']?'
+    group: 1

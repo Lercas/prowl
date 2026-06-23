@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+defaults:
+  run:
+    working-directory: tool
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: tool/go.sum
+      - name: gofmt
+        run: test -z "$(gofmt -l internal cmd)" || { gofmt -l internal cmd; exit 1; }
+      - name: vet
+        run: go vet ./...
+      - name: build
+        run: go build ./...
+      - name: test (race)
+        run: go test -race ./...
+      - name: e2e
+        run: bash test/e2e.sh
+      - name: rules & verifiers valid
+        run: |
+          go build -o /tmp/prowl ./cmd/prowl
+          /tmp/prowl rules validate rules/
+          /tmp/prowl verifiers validate verifiers/
+
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: tool/go.sum
+      - name: fuzz (short)
+        run: |
+          set -e
+          go test ./internal/detect/ -run '^$' -fuzz '^FuzzScan$'          -fuzztime 30s
+          go test ./internal/detect/ -run '^$' -fuzz '^FuzzLowerScratch$'  -fuzztime 30s
+          go test ./internal/detect/ -run '^$' -fuzz '^FuzzScanStructure$' -fuzztime 20s
+          go test ./internal/rules/  -run '^$' -fuzz '^FuzzParseTemplate$' -fuzztime 20s
+          go test ./internal/verify/ -run '^$' -fuzz '^FuzzInterpolate$'   -fuzztime 20s

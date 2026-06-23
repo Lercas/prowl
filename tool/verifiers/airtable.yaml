@@ -1,0 +1,13 @@
+id: airtable
+info:
+  name: Airtable API
+  reference: https://airtable.com/developers/web/api/get-user-id-scopes
+match: [airtable]
+requests:
+  - method: GET
+    url: https://api.airtable.com/v0/meta/whoami
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

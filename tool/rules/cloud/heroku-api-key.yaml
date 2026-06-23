@@ -1,0 +1,26 @@
+id: heroku-api-key
+info:
+  name: Heroku API Key
+  author: prowl
+  severity: high
+  description: Heroku platform API key (UUID-shaped token in a heroku context).
+  reference:
+    - https://devcenter.heroku.com/articles/platform-api-quickstart
+  tags: heroku,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - heroku
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)heroku[a-z0-9_\- "'':=]{0,20}\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'
+    group: 0

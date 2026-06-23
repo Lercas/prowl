@@ -1,0 +1,13 @@
+id: datadog
+info:
+  name: Datadog
+  reference: https://docs.datadoghq.com/api/latest/authentication/
+match: [datadog]
+requests:
+  - method: GET
+    url: https://api.datadoghq.com/api/v1/validate
+    headers:
+      DD-API-KEY: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

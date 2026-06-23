@@ -1,0 +1,14 @@
+id: opsgenie
+info:
+  name: Opsgenie
+  author: prowl
+  reference: https://docs.opsgenie.com/docs/account-api
+match: [opsgenie]
+requests:
+  - method: GET
+    url: https://api.opsgenie.com/v2/account
+    headers:
+      Authorization: "GenieKey {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,28 @@
+id: ibm-cloud-api-key
+info:
+  name: IBM Cloud IAM API Key
+  author: prowl
+  severity: high
+  description: IBM Cloud IAM API key (44-char base64url value in an ibm/iam context).
+  reference:
+    - https://cloud.ibm.com/docs/account?topic=account-userapikey
+  tags: ibm,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ibm
+      - iam
+      - apikey
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:ibm[_\-]?cloud[_\-]?api[_\-]?key|iam[_\-]?apikey|"apikey")["'' :=]{1,5}["'']?([A-Za-z0-9_\-]{44})["'']?'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:ibm[_\-]?cloud[_\-]?api[_\-]?key|iam[_\-]?apikey|"apikey")["'' :=]{1,5}["'']?([A-Za-z0-9_\-]{44})["'']?'
+    group: 1

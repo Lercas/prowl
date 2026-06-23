@@ -1,0 +1,26 @@
+id: azure-storage-account-key
+info:
+  name: Azure Storage Account Key
+  author: prowl
+  severity: critical
+  description: Azure Storage account access key (88-char base64 secret, often in AccountKey=).
+  reference:
+    - https://learn.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage
+  tags: azure,microsoft,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AccountKey
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)AccountKey\s*=\s*([A-Za-z0-9/+]{86}==)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)AccountKey\s*=\s*([A-Za-z0-9/+]{86}==)'
+    group: 1

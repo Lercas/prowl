@@ -1,0 +1,36 @@
+id: mongodb-atlas-api-key
+info:
+  name: MongoDB Atlas Administration API Key
+  author: prowl
+  severity: high
+  description: MongoDB Atlas / Cloud Manager programmatic API key — an 8-char public key paired with a UUID-format private key, used as username:password for the Atlas Admin API.
+  reference:
+    - https://www.mongodb.com/docs/atlas/configure-api-access/
+    - https://www.mongodb.com/docs/atlas/api/api-authentication/
+  tags: mongodb,atlas,database,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  # Require Atlas/MongoDB context: the private key is a generic UUID, meaningful only nearby.
+  - type: word
+    words:
+      - atlas
+      - mongodb
+      - cloud.mongodb.com
+      - publicKey
+      - privateKey
+    condition: or
+  - type: regex
+    regex:
+      # The secret is a UUID private key; anchor it to an explicit privateKey assignment for precision.
+      - '(?i)private[_-]?key["'' :=]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+      # Or the documented public:private pair form (8-char public key + UUID private key).
+      - '\b[a-z]{8}:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)private[_-]?key["'' :=]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+      - '\b[a-z]{8}:([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b'
+    group: 1

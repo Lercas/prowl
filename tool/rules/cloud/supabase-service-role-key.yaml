@@ -1,0 +1,35 @@
+id: supabase-service-role-key
+info:
+  name: Supabase Service Role / Secret API Key
+  author: prowl
+  severity: critical
+  description: Supabase server-side key that bypasses Row Level Security — either a legacy service_role JWT (eyJ...) or a new sb_secret_ key, anchored to a supabase.co project.
+  reference:
+    - https://supabase.com/docs/guides/api/api-keys
+  tags: supabase,cloud,database,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  # Cheap pre-filter: brand/host, the service_role claim, or the new secret-key prefix.
+  - type: word
+    words:
+      - supabase
+      - service_role
+      - sb_secret_
+    condition: or
+  - type: regex
+    regex:
+      # New-style sb_secret_ key. Non-\b trailing boundary so a dash-terminated key isn't truncated.
+      - '\b(sb_secret_[A-Za-z0-9_\-]{20,})(?:[^A-Za-z0-9_\-]|$)'
+      # Legacy service_role JWT: "service_role" base64url-encodes to "c2VydmljZV9yb2xl" in the payload segment.
+      - 'eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]*c2VydmljZV9yb2xl[A-Za-z0-9_\-]*\.[A-Za-z0-9_\-]{20,}'
+      # Decoded form: the literal service_role claim (relies on the supabase context pre-filter).
+      - '(?i)"role"\s*:\s*"service_role"'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(sb_secret_[A-Za-z0-9_\-]{20,})(?:[^A-Za-z0-9_\-]|$)'
+      - 'eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]*c2VydmljZV9yb2xl[A-Za-z0-9_\-]*\.[A-Za-z0-9_\-]{20,}'
+    group: 1

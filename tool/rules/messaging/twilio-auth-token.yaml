@@ -1,0 +1,27 @@
+id: twilio-auth-token
+info:
+  name: Twilio Auth Token
+  author: prowl
+  severity: high
+  description: Twilio account auth token (32 hex chars) assigned in a twilio context.
+  reference:
+    - https://www.twilio.com/docs/iam/access-tokens
+  tags: twilio,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - twilio
+      - auth_token
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)twilio[_\-]?(?:auth[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{32})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)twilio[_\-]?(?:auth[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{32})["'']?'
+    group: 1

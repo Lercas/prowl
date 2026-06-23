@@ -1,0 +1,17 @@
+id: sentry
+info:
+  name: Sentry
+  author: prowl
+  reference: https://docs.sentry.io/api/
+# Only Sentry auth tokens (sntrys_ / org / user / internal-integration tokens)
+# are Bearer-authenticatable. A Sentry DSN is NOT a bearer token and cannot be
+# validated against this endpoint, so it is intentionally excluded here.
+match: [sentry, sntrys_]
+requests:
+  - method: GET
+    url: https://sentry.io/api/0/
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

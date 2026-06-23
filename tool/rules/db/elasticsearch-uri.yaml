@@ -1,0 +1,25 @@
+id: elasticsearch-connection-uri
+info:
+  name: Elasticsearch Connection URI with Password
+  author: prowl
+  severity: high
+  description: Elasticsearch HTTP(S) URI embedding a user:password credential (typically on port 9200).
+  reference:
+    - https://www.elastic.co/guide/en/elasticsearch/client/index.html
+  tags: elasticsearch,elastic,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ':9200'
+      - 'elastic'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)https?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]*(?::9200|\.(?:es|elastic)[^\s/]*)'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)https?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]*(?::9200|\.(?:es|elastic)[^\s/]*)'
+    group: 1

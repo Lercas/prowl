@@ -1,0 +1,14 @@
+id: together
+info:
+  name: Together AI
+  author: prowl
+  reference: https://docs.together.ai/reference/models-1
+match: [together]
+requests:
+  - method: GET
+    url: https://api.together.xyz/v1/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

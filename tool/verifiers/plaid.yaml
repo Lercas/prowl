@@ -1,0 +1,28 @@
+id: plaid
+info:
+  name: Plaid
+  author: prowl
+  reference: https://plaid.com/docs/api/institutions/#institutionsget
+# The detected value ({{secret}}) is the Plaid secret (30-hex); the client_id (24-hex) is pulled from
+# the surrounding context. Lengths differ, so the extract pattern can't accidentally grab the secret.
+# The engine takes the WHOLE regex match (no capture groups), hence a bare 24-hex anchor.
+# /institutions/get is a read-only listing; a wrong/incomplete guess just returns 400 (no mutation).
+#
+# ENV TRADEOFF: a Plaid secret's environment (sandbox|development|production) is NOT derivable from the
+# secret itself, and each env has a distinct host. We probe production.plaid.com because leaked/committed
+# secrets are most often the production secret (highest blast radius, the common leak case). Consequence:
+# a *sandbox*-only secret probed here returns 400 INVALID_API_KEYS and is reported false-dead. This is
+# the deliberate higher-recall choice (catching live production secrets) over verifying sandbox keys.
+match: [plaid]
+extract:
+  client_id: '\b[0-9a-f]{24}\b'
+requests:
+  - method: POST
+    url: https://production.plaid.com/institutions/get
+    headers:
+      Content-Type: "application/json"
+      Accept: application/json
+    body: '{"client_id":"{{client_id}}","secret":"{{secret}}","count":1,"offset":0,"country_codes":["US"]}'
+    matchers:
+      - type: status
+        status: [200]

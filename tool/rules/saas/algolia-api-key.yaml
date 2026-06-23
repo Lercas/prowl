@@ -1,0 +1,26 @@
+id: algolia-api-key
+info:
+  name: Algolia API Key
+  author: prowl
+  severity: high
+  description: Algolia admin/API key (32-char hex value in an algolia context) for the Algolia API.
+  reference:
+    - https://www.algolia.com/doc/guides/security/api-keys/
+  tags: algolia,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - algolia
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)algolia[a-z0-9_\- "'':=]{0,20}\b([a-f0-9]{32})\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)algolia[a-z0-9_\- "'':=]{0,20}\b([a-f0-9]{32})\b'
+    group: 1

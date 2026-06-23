@@ -1,0 +1,28 @@
+id: oracle-cloud-api-key
+info:
+  name: Oracle Cloud (OCI) API Signing Key
+  author: prowl
+  severity: high
+  description: Oracle Cloud Infrastructure API signing key fingerprint or OCID with key context.
+  reference:
+    - https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm
+  tags: oracle,oci,cloud,credentials,pki
+category: cloud
+matchers-condition: and
+matchers:
+  # Anchor on the Oracle-specific OCID: a bare colon-hex fingerprint is a generic PUBLIC id shared
+  # by SSH/TLS/GPG, so anchoring on "fingerprint" mass-fires. Real OCI keys carry their tenancy/user OCID.
+  - type: word
+    words:
+      - ocid1
+  - type: regex
+    regex:
+      - '\bocid1\.(?:user|tenancy)\.oc1\.\.[a-z0-9]{60,}\b'
+      - '(?i)fingerprint["'' :=]{1,5}["'']?((?:[0-9a-f]{2}:){15}[0-9a-f]{2})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)fingerprint["'' :=]{1,5}["'']?((?:[0-9a-f]{2}:){15}[0-9a-f]{2})["'']?'
+    group: 1

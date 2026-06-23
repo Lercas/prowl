@@ -1,0 +1,26 @@
+id: cloudinary-url
+info:
+  name: Cloudinary Credentials URL
+  author: prowl
+  severity: high
+  description: Cloudinary connection URL (cloudinary://) embedding the API key and API secret.
+  reference:
+    - https://cloudinary.com/documentation/cloudinary_credentials_tutorial
+  tags: cloudinary,saas,credentials
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'cloudinary://'
+    condition: or
+  - type: regex
+    regex:
+      - 'cloudinary://[0-9]{15}:([A-Za-z0-9_-]{27})@[a-zA-Z][a-zA-Z0-9-]{2,49}'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - 'cloudinary://[0-9]{15}:([A-Za-z0-9_-]{27})@[a-zA-Z][a-zA-Z0-9-]{2,49}'
+    group: 1

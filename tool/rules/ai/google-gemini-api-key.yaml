@@ -1,0 +1,27 @@
+id: google-gemini-api-key
+info:
+  name: Google Gemini API Key
+  author: prowl
+  severity: high
+  description: Google Gemini / Generative Language API key (AIza-prefixed 39-char token).
+  reference:
+    - https://ai.google.dev/gemini-api/docs/api-key
+  tags: gemini,google,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AIza
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated AIza key isn't missed; value in group 1.
+      - '\b(AIza[0-9A-Za-z_\-]{35})(?:[^0-9A-Za-z_\-]|$)'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\b(AIza[0-9A-Za-z_\-]{35})(?:[^0-9A-Za-z_\-]|$)'
+    group: 1

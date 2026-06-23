@@ -1,0 +1,25 @@
+id: neo4j-connection-uri
+info:
+  name: Neo4j / Bolt Connection URI with Password
+  author: prowl
+  severity: high
+  description: Neo4j connection URI (neo4j://, neo4j+s://, bolt://, bolt+s://) embedding a user:password credential.
+  reference:
+    - https://neo4j.com/docs/driver-manual/current/client-applications/
+  tags: neo4j,bolt,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'neo4j'
+      - 'bolt'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:neo4j|bolt)(?:\+s|\+ssc)?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:neo4j|bolt)(?:\+s|\+ssc)?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

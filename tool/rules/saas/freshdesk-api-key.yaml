@@ -1,0 +1,35 @@
+id: freshdesk-api-key
+info:
+  name: Freshdesk API Key
+  author: prowl
+  severity: high
+  description: Freshdesk API key (~20-char base62) used for Basic auth against <domain>.freshdesk.com.
+  reference:
+    - https://developers.freshdesk.com/api/
+  tags: freshdesk,support,saas,credentials
+category: saas
+matchers-condition: and
+matchers:
+  # The key is a bare ~20-char base62 blob; a freshdesk keyword pre-filters but floods on its own,
+  # so the regex requires the key glued to a real use site (*.freshdesk.com host or a -u "KEY:X" pair).
+  - type: word
+    words:
+      - freshdesk
+    condition: or
+  - type: regex
+    regex:
+      # a quoted/curl key immediately before a *.freshdesk.com host (key-before-host, incl. -u "KEY:X")
+      - '(?i)["'']([a-zA-Z0-9]{20})["'':][^"'']{0,80}?\.freshdesk\.com'
+      # host-before-key (e.g. domain on one line, api_key on the next)
+      - '(?i)\.freshdesk\.com[a-z0-9 \t\r\n."'':=,/_-]{0,80}?["'']([a-zA-Z0-9]{20})["'']'
+      # basic-auth: curl -u "KEY:X" (dummy ":X" password) on a freshdesk request
+      - '(?i)-u\s+["'']([a-zA-Z0-9]{20}):[a-zA-Z]{1,8}["'']'
+  - type: entropy
+    min: 4.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)["'']([a-zA-Z0-9]{20})["'':][^"'']{0,80}?\.freshdesk\.com'
+      - '(?i)\.freshdesk\.com[a-z0-9 \t\r\n."'':=,/_-]{0,80}?["'']([a-zA-Z0-9]{20})["'']'
+      - '(?i)-u\s+["'']([a-zA-Z0-9]{20}):[a-zA-Z]{1,8}["'']'
+    group: 1

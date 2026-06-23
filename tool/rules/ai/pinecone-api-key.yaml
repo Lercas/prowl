@@ -1,0 +1,26 @@
+id: pinecone-api-key
+info:
+  name: Pinecone API Key
+  author: prowl
+  severity: high
+  description: Pinecone API key (pcsk_) granting access to Pinecone vector database indexes.
+  reference:
+    - https://docs.pinecone.io/guides/projects/manage-api-keys
+  tags: pinecone,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pcsk_
+    condition: or
+  - type: regex
+    regex:
+      - '\bpcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bpcsk_[A-Za-z0-9]{5,6}_[A-Za-z0-9]{63}\b'
+    group: 0

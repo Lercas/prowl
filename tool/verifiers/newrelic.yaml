@@ -1,0 +1,22 @@
+id: newrelic
+info:
+  name: New Relic
+  author: prowl
+  reference: https://docs.newrelic.com/docs/apis/nerdgraph/get-started/introduction-new-relic-nerdgraph/
+match: [newrelic, nrak]
+requests:
+  - method: POST
+    url: https://api.newrelic.com/graphql
+    headers:
+      API-Key: "{{secret}}"
+      Content-Type: "application/json"
+    body: '{"query":"{ actor { user { email } } }"}'
+    # NerdGraph returns HTTP 200 even on an auth failure (errors are in the JSON
+    # body), so status alone is insufficient — require a successful "actor" field.
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"actor"']

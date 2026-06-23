@@ -1,0 +1,53 @@
+id: anthropic-api-key
+info:
+  name: Anthropic API Key
+  author: prowl
+  severity: high
+  description: Anthropic (Claude) API key (sk-ant-api03-...AA) granting access to the Anthropic API.
+  reference:
+    - https://docs.anthropic.com/en/api/getting-started
+  tags: anthropic,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sk-ant-api03-
+    condition: or
+  - type: regex
+    regex:
+      - '\bsk-ant-api03-[A-Za-z0-9_\-]{86,100}AA\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bsk-ant-api03-[A-Za-z0-9_\-]{86,100}AA\b'
+    group: 0
+---
+id: anthropic-admin-api-key
+info:
+  name: Anthropic Admin API Key
+  author: prowl
+  severity: critical
+  description: Anthropic admin API key (sk-ant-admin01-...AA) able to manage org members and API keys.
+  reference:
+    - https://docs.anthropic.com/en/api/administration-api
+  tags: anthropic,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sk-ant-admin01-
+    condition: or
+  - type: regex
+    regex:
+      - '\bsk-ant-admin01-[A-Za-z0-9_\-]{86,100}AA\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bsk-ant-admin01-[A-Za-z0-9_\-]{86,100}AA\b'
+    group: 0

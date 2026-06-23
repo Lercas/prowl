@@ -1,0 +1,83 @@
+id: square-oauth-access-token
+info:
+  name: Square OAuth Access Token
+  author: prowl
+  severity: critical
+  description: Square personal/OAuth access token (sq0atp-) granting Seller API access.
+  reference:
+    - https://developer.squareup.com/docs/build-basics/access-tokens
+  tags: square,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sq0atp-
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(sq0atp-[0-9A-Za-z_\-]{22})(?:[^0-9A-Za-z_\-]|$)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(sq0atp-[0-9A-Za-z_\-]{22})(?:[^0-9A-Za-z_\-]|$)'
+    group: 1
+---
+id: square-oauth-secret
+info:
+  name: Square OAuth Application Secret
+  author: prowl
+  severity: critical
+  description: Square OAuth application secret (sq0csp-) used to exchange authorization codes.
+  reference:
+    - https://developer.squareup.com/docs/oauth-api/overview
+  tags: square,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sq0csp-
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(sq0csp-[0-9A-Za-z_\-]{43})(?:[^0-9A-Za-z_\-]|$)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(sq0csp-[0-9A-Za-z_\-]{43})(?:[^0-9A-Za-z_\-]|$)'
+    group: 1
+---
+id: square-production-token
+info:
+  name: Square Production Access Token (EAAA)
+  author: prowl
+  severity: critical
+  description: Square production access token beginning with EAAA.
+  reference:
+    - https://developer.squareup.com/docs/build-basics/access-tokens
+  tags: square,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - EAAA
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't truncated by one char; value in group 1.
+      - '\b(EAAA[0-9A-Za-z_\-]{56,64})(?:[^0-9A-Za-z_\-]|$)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(EAAA[0-9A-Za-z_\-]{56,64})(?:[^0-9A-Za-z_\-]|$)'
+    group: 1

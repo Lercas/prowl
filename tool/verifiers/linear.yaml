@@ -1,0 +1,21 @@
+id: linear
+info:
+  name: Linear GraphQL API
+  reference: https://developers.linear.app/docs/graphql/working-with-the-graphql-api
+match: [linear, lin_api]
+requests:
+  # GraphQL: POST query + JSON body; 200 alone is insufficient (errors also return 200),
+  # so require the "viewer" field to be echoed back in the response.
+  - method: POST
+    url: https://api.linear.app/graphql
+    headers:
+      Authorization: "{{secret}}"
+      Content-Type: "application/json"
+    body: '{"query":"{ viewer { id } }"}'
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"viewer"']

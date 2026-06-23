@@ -1,0 +1,33 @@
+id: planetscale-service-token
+info:
+  name: PlanetScale Service Token / Password
+  author: prowl
+  severity: high
+  description: PlanetScale API service token (pscale_tkn_) or database password (pscale_pw_) granting access to a PlanetScale organization/database.
+  reference:
+    - https://planetscale.com/docs/concepts/service-tokens
+  tags: planetscale,database,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pscale_tkn_
+      - pscale_pw_
+      - pscale_oauth_
+    condition: or
+  - type: regex
+    regex:
+      # Prefix + 43 token chars (trufflehog-compatible), for service token / db password / oauth.
+      - '\bpscale_tkn_[A-Za-z0-9_]{43}\b'
+      - '\bpscale_pw_[A-Za-z0-9_]{43}\b'
+      - '\bpscale_oauth_[A-Za-z0-9_]{43}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bpscale_tkn_[A-Za-z0-9_]{43}\b'
+      - '\bpscale_pw_[A-Za-z0-9_]{43}\b'
+      - '\bpscale_oauth_[A-Za-z0-9_]{43}\b'
+    group: 0

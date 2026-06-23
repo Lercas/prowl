@@ -1,0 +1,31 @@
+id: gitlab-ci-job-token
+info:
+  name: GitLab CI Job Token
+  author: prowl
+  severity: high
+  description: GitLab CI job token (glcbt- prefix, or CI_JOB_TOKEN assignment) scoped to a running pipeline job.
+  reference:
+    - https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - glcbt-
+      - CI_JOB_TOKEN
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated glcbt- token isn't dropped/truncated (group 1).
+      # The ci_job_token context form ends in an optional-quote boundary and handles this already.
+      - '\b(glcbt-[A-Za-z0-9_\-]{20,50})(?:[^A-Za-z0-9_\-]|$)'
+      - '(?i)ci_job_token["'' :=]{1,5}["'']?([A-Za-z0-9_\-]{20,50})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(glcbt-[A-Za-z0-9_\-]{20,50})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

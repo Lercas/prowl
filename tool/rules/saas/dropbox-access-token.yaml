@@ -1,0 +1,26 @@
+id: dropbox-access-token
+info:
+  name: Dropbox Access Token
+  author: prowl
+  severity: high
+  description: Dropbox short-lived access token (sl.) granting access to the Dropbox API.
+  reference:
+    - https://developers.dropbox.com/oauth-guide
+  tags: dropbox,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'sl'
+    condition: or
+  - type: regex
+    regex:
+      - '\bsl\.(?:u\.)?[A-Za-z0-9_-]{130,}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bsl\.(?:u\.)?[A-Za-z0-9_-]{130,}'
+    group: 0

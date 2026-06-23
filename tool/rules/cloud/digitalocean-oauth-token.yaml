@@ -1,0 +1,27 @@
+id: digitalocean-oauth-token
+info:
+  name: DigitalOcean OAuth / Refresh Token
+  author: prowl
+  severity: high
+  description: DigitalOcean OAuth access (doo_v1_) or refresh (dor_v1_) token, 64 hex chars.
+  reference:
+    - https://docs.digitalocean.com/reference/api/oauth/
+  tags: digitalocean,cloud,credentials,auth
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - doo_v1_
+      - dor_v1_
+    condition: or
+  - type: regex
+    regex:
+      - '\b(?:doo_v1_|dor_v1_)[a-f0-9]{64}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(?:doo_v1_|dor_v1_)[a-f0-9]{64}\b'
+    group: 0

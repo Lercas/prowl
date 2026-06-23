@@ -1,0 +1,14 @@
+id: heroku
+info:
+  name: Heroku Platform API
+  reference: https://devcenter.heroku.com/articles/platform-api-reference#account
+match: [heroku]
+requests:
+  - method: GET
+    url: https://api.heroku.com/account
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: "application/vnd.heroku+json; version=3"
+    matchers:
+      - type: status
+        status: [200]

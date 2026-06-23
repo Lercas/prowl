@@ -1,0 +1,16 @@
+id: travisci
+info:
+  name: Travis CI
+  author: prowl
+  reference: https://developer.travis-ci.com/resource/user
+match: [travis]
+requests:
+  - method: GET
+    url: https://api.travis-ci.com/user
+    headers:
+      Authorization: "token {{secret}}"
+      Travis-API-Version: "3"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

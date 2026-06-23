@@ -1,0 +1,15 @@
+id: terraform
+info:
+  name: Terraform Cloud
+  author: prowl
+  reference: https://developer.hashicorp.com/terraform/cloud-docs/api-docs/account
+match: [terraform, atlasv1]
+requests:
+  - method: GET
+    url: https://app.terraform.io/api/v2/account/details
+    headers:
+      Authorization: "Bearer {{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

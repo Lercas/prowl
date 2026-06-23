@@ -1,0 +1,15 @@
+id: bitbucket
+info:
+  name: Bitbucket
+  author: prowl
+  reference: https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get
+match: [bitbucket, atctt]
+requests:
+  - method: GET
+    url: https://api.bitbucket.org/2.0/user
+    headers:
+      Authorization: "Bearer {{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

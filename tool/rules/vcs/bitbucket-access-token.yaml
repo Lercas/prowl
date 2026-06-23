@@ -1,0 +1,26 @@
+id: bitbucket-access-token
+info:
+  name: Bitbucket Access Token
+  author: prowl
+  severity: high
+  description: Bitbucket repository / project / workspace access token (ATCTT prefix) granting scoped API access.
+  reference:
+    - https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/
+  tags: bitbucket,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ATCTT
+    condition: or
+  - type: regex
+    regex:
+      - '\bATCTT[A-Za-z0-9_\-=]{60,250}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bATCTT[A-Za-z0-9_\-=]{60,250}\b'
+    group: 0

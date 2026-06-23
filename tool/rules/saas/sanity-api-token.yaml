@@ -1,0 +1,26 @@
+id: sanity-api-token
+info:
+  name: Sanity API Token
+  author: prowl
+  severity: high
+  description: Sanity API token (sk… value in a sanity context) for the Sanity Content Lake API.
+  reference:
+    - https://www.sanity.io/docs/http-auth
+  tags: sanity,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sanity
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)sanity[a-z0-9_\- "'':=]{0,20}\b(sk[A-Za-z0-9]{76,82})\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)sanity[a-z0-9_\- "'':=]{0,20}\b(sk[A-Za-z0-9]{76,82})\b'
+    group: 1

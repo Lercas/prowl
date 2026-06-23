@@ -1,0 +1,27 @@
+id: github-server-to-server-token
+info:
+  name: GitHub Server-to-Server / App Installation Token
+  author: prowl
+  severity: high
+  description: GitHub App server-to-server token (ghs_), also issued as the app installation access token.
+  reference:
+    - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+    - https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation
+  tags: github,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ghs_
+    condition: or
+  - type: regex
+    regex:
+      - '\bghs_[A-Za-z0-9]{36}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bghs_[A-Za-z0-9]{36}\b'
+    group: 0

@@ -1,0 +1,26 @@
+id: digitalocean-pat
+info:
+  name: DigitalOcean Personal Access Token
+  author: prowl
+  severity: high
+  description: DigitalOcean personal access token (dop_v1_ followed by 64 hex chars).
+  reference:
+    - https://docs.digitalocean.com/reference/api/create-personal-access-token/
+  tags: digitalocean,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - dop_v1_
+    condition: or
+  - type: regex
+    regex:
+      - '\bdop_v1_[a-f0-9]{64}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bdop_v1_[a-f0-9]{64}\b'
+    group: 0

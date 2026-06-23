@@ -1,0 +1,23 @@
+id: rollbar
+info:
+  name: Rollbar
+  author: prowl
+  reference: https://docs.rollbar.com/reference/getting-started-1
+# Project access token with `read` scope. Ingest tokens (post_server_item /
+# post_client_item) cannot read and will fail this GET, so a success cleanly
+# indicates a read-capable token. Require "err": 0 in the body since Rollbar
+# wraps API responses as {"err": 0, "result": {...}}.
+match: [rollbar]
+requests:
+  - method: GET
+    url: https://api.rollbar.com/api/1/environments
+    headers:
+      X-Rollbar-Access-Token: "{{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"err": 0', '"err":0']
+        condition: or

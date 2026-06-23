@@ -1,0 +1,14 @@
+id: brevo
+info:
+  name: Brevo (Sendinblue)
+  reference: https://developers.brevo.com/reference/getaccount
+match: [brevo, sendinblue, xkeysib]
+requests:
+  - method: GET
+    url: https://api.brevo.com/v3/account
+    headers:
+      Accept: "application/json"
+      api-key: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

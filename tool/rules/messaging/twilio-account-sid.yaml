@@ -1,0 +1,26 @@
+id: twilio-account-sid
+info:
+  name: Twilio Account SID
+  author: prowl
+  severity: medium
+  description: Twilio Account SID (AC followed by 32 hex chars) identifying a Twilio account.
+  reference:
+    - https://www.twilio.com/docs/glossary/what-is-a-sid
+  tags: twilio,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AC
+      - twilio
+    condition: or
+  - type: regex
+    regex:
+      - '\bAC[a-f0-9]{32}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bAC[a-f0-9]{32}\b'

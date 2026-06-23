@@ -1,0 +1,13 @@
+id: front
+info:
+  name: Front
+  reference: https://dev.frontapp.com/reference/identity
+match: [front]
+requests:
+  - method: GET
+    url: https://api2.frontapp.com/me
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

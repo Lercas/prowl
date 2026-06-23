@@ -1,0 +1,29 @@
+id: discord-bot-token
+info:
+  name: Discord Bot Token
+  author: prowl
+  severity: high
+  description: Discord bot token used to authenticate a bot against the Discord API.
+  reference:
+    - https://discord.com/developers/docs/reference#authentication
+  tags: discord,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - discord
+      - Bot
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)discord[A-Za-z0-9_]*["'' :=]{1,5}["'']?([MNO][A-Za-z0-9_-]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,})'
+      - '\bBot\s+([MNO][A-Za-z0-9_-]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)discord[A-Za-z0-9_]*["'' :=]{1,5}["'']?([MNO][A-Za-z0-9_-]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,})'
+      - '\bBot\s+([MNO][A-Za-z0-9_-]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,})\b'
+    group: 1
