@@ -1,0 +1,26 @@
+id: okta-api-token
+info:
+  name: Okta API Token
+  author: prowl
+  severity: high
+  description: Okta API token (00… 42-char value in an okta context) for the Okta management API.
+  reference:
+    - https://developer.okta.com/docs/guides/create-an-api-token/
+  tags: okta,auth,credentials,token
+category: auth
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - okta
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)okta[a-z0-9_\- "'':=]{0,20}\b(00[A-Za-z0-9_-]{40})(?:[^A-Za-z0-9_-]|$)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)okta[a-z0-9_\- "'':=]{0,20}\b(00[A-Za-z0-9_-]{40})(?:[^A-Za-z0-9_-]|$)'
+    group: 1

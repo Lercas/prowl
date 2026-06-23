@@ -1,0 +1,15 @@
+id: buildkite
+info:
+  name: Buildkite
+  author: prowl
+  reference: https://buildkite.com/docs/apis/rest-api/user
+match: [buildkite]
+requests:
+  - method: GET
+    url: https://api.buildkite.com/v2/user
+    headers:
+      Authorization: "Bearer {{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

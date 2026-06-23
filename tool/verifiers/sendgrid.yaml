@@ -1,0 +1,13 @@
+id: sendgrid
+info:
+  name: SendGrid
+  reference: https://docs.sendgrid.com/api-reference/api-key-permissions
+match: [sendgrid]
+requests:
+  - method: GET
+    url: https://api.sendgrid.com/v3/scopes
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

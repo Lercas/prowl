@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 812 190" width="812" height="190" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<defs><marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2DD4BF"/></marker></defs>
+<text x="4" y="90" font-size="14" font-weight="600" fill="#E2E8F0">text</text>
+<line x1="42" y1="85" x2="74" y2="85" stroke="#2DD4BF" stroke-width="2" marker-end="url(#a)"/>
+<rect x="78" y="40" width="180" height="92" rx="9" fill="none" stroke="#94A3B8" stroke-width="1.7"/>
+<text x="168.0" y="72" text-anchor="middle" font-size="14.5" font-weight="700" fill="#E2E8F0">Stage 1 · cascade</text>
+<text x="168.0" y="94" text-anchor="middle" font-size="11" fill="#94A3B8">regex · checksum · entropy</text>
+<text x="168.0" y="111" text-anchor="middle" font-size="10.5" fill="#94A3B8">Go · in-binary</text>
+<text x="279" y="91" text-anchor="middle" font-size="18" fill="#2DD4BF">∪</text>
+<rect x="300" y="40" width="180" height="92" rx="9" fill="none" stroke="#94A3B8" stroke-width="1.7"/>
+<text x="390.0" y="72" text-anchor="middle" font-size="14.5" font-weight="700" fill="#E2E8F0">Stage 2 · text model</text>
+<text x="390.0" y="94" text-anchor="middle" font-size="11" fill="#94A3B8">char + word TF-IDF</text>
+<text x="390.0" y="111" text-anchor="middle" font-size="10.5" fill="#94A3B8">free-form · multilingual</text>
+<text x="501" y="91" text-anchor="middle" font-size="18" fill="#2DD4BF">∪</text>
+<rect x="522" y="40" width="180" height="92" rx="9" fill="none" stroke="#94A3B8" stroke-width="1.7"/>
+<text x="612.0" y="72" text-anchor="middle" font-size="14.5" font-weight="700" fill="#E2E8F0">Stage 3 · encoder</text>
+<text x="612.0" y="94" text-anchor="middle" font-size="11" fill="#94A3B8">multilingual transformer</text>
+<text x="612.0" y="111" text-anchor="middle" font-size="10.5" fill="#94A3B8">prose · code tail</text>
+<line x1="702" y1="85" x2="746" y2="85" stroke="#2DD4BF" stroke-width="2" marker-end="url(#a)"/>
+<text x="754" y="80" font-size="14" font-weight="700" fill="#E2E8F0">finding</text>
+<text x="754" y="98" font-size="10.5" fill="#94A3B8">+ confidence</text>
+<text x="356" y="166" text-anchor="middle" font-size="11" fill="#94A3B8">union: any confident stage yields a finding, de-duplicated by position</text>
+</svg>

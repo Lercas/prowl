@@ -1,0 +1,53 @@
+id: huggingface-access-token
+info:
+  name: HuggingFace Access Token
+  author: prowl
+  severity: high
+  description: HuggingFace user access token (hf_) granting access to the Hugging Face Hub API.
+  reference:
+    - https://huggingface.co/docs/hub/security-tokens
+  tags: huggingface,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - hf_
+    condition: or
+  - type: regex
+    regex:
+      - '\bhf_[A-Za-z0-9]{34}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bhf_[A-Za-z0-9]{34}\b'
+    group: 0
+---
+id: huggingface-organization-token
+info:
+  name: HuggingFace Organization API Token
+  author: prowl
+  severity: high
+  description: HuggingFace organization API token (api_org_) granting org-scoped Hub access.
+  reference:
+    - https://huggingface.co/docs/hub/security-tokens
+  tags: huggingface,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - api_org_
+    condition: or
+  - type: regex
+    regex:
+      - '\bapi_org_[A-Za-z0-9]{34}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bapi_org_[A-Za-z0-9]{34}\b'
+    group: 0

@@ -1,0 +1,26 @@
+id: aws-access-key-id
+info:
+  name: AWS Access Key ID
+  author: prowl
+  severity: high
+  description: Amazon AWS access key identifier (AKIA/ASIA/AGPA/AIDA…).
+  reference:
+    - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+  tags: aws,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AKIA
+      - ASIA
+    condition: or
+  - type: regex
+    regex:
+      - '\b(?:AKIA|ASIA|AGPA|AIDA|AROA)[0-9A-Z]{16}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(?:AKIA|ASIA|AGPA|AIDA|AROA)[0-9A-Z]{16}\b'

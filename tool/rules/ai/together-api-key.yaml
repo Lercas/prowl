@@ -1,0 +1,26 @@
+id: together-api-key
+info:
+  name: Together AI API Key
+  author: prowl
+  severity: high
+  description: Together AI API key (64-char hex token) detected next to a together context anchor.
+  reference:
+    - https://docs.together.ai/docs/quickstart
+  tags: together,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - together
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)together[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([a-f0-9]{64})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)together[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([a-f0-9]{64})\b'
+    group: 1

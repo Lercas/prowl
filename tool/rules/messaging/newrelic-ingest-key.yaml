@@ -1,0 +1,27 @@
+id: newrelic-ingest-key
+info:
+  name: New Relic Ingest / Insights Key
+  author: prowl
+  severity: high
+  description: New Relic browser (NRJS-), insights insert (NRII-) or account (NRAA-) keys.
+  reference:
+    - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/
+  tags: newrelic,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - NRJS-
+      - NRII-
+      - NRAA-
+    condition: or
+  - type: regex
+    regex:
+      - '\b(?:NRJS-|NRII-|NRAA-)[A-Za-z0-9]{19,27}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\b(?:NRJS-|NRII-|NRAA-)[A-Za-z0-9]{19,27}\b'

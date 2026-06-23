@@ -1,0 +1,15 @@
+id: razorpay
+info:
+  name: Razorpay
+  author: prowl
+  reference: https://razorpay.com/docs/api/authentication/
+match: [razorpay, rzp_live]
+requests:
+  - method: GET
+    url: https://api.razorpay.com/v1/payments
+    headers:
+      Authorization: "Basic {{base64(secret:)}}"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

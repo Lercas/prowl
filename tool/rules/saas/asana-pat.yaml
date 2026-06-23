@@ -1,0 +1,28 @@
+id: asana-personal-access-token
+info:
+  name: Asana Personal Access Token
+  author: prowl
+  severity: high
+  description: Asana personal access token (digit/hex form in an asana context) for the Asana API.
+  reference:
+    - https://developers.asana.com/docs/personal-access-token
+  tags: asana,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - asana
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)asana[a-z0-9_\- "'':=]{0,20}\b(1/[0-9]{14,16}:[a-f0-9]{32})\b'
+      - '(?i)asana[a-z0-9_\- "'':=]{0,20}\b(0/[0-9a-f]{28,32})\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)asana[a-z0-9_\- "'':=]{0,20}\b(1/[0-9]{14,16}:[a-f0-9]{32})\b'
+      - '(?i)asana[a-z0-9_\- "'':=]{0,20}\b(0/[0-9a-f]{28,32})\b'
+    group: 1

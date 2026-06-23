@@ -1,0 +1,25 @@
+id: slack-webhook-url
+info:
+  name: Slack Incoming Webhook URL
+  author: prowl
+  severity: medium
+  description: Slack incoming webhook URL that lets anyone post messages into a channel.
+  reference:
+    - https://api.slack.com/messaging/webhooks
+  tags: slack,messaging,webhook,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - hooks.slack.com
+    condition: or
+  - type: regex
+    regex:
+      - 'https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]{24}'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - 'https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]{24}'

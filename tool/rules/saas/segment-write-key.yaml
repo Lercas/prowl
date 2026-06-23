@@ -1,0 +1,26 @@
+id: segment-write-key
+info:
+  name: Segment Write Key
+  author: prowl
+  severity: medium
+  description: Segment source write key (base62 value in a segment context) used by the Tracking API.
+  reference:
+    - https://segment.com/docs/connections/find-writekey/
+  tags: segment,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - segment
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)segment[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{32})\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)segment[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{32})\b'
+    group: 1

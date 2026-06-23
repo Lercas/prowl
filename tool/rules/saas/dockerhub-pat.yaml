@@ -1,0 +1,29 @@
+id: dockerhub-pat
+info:
+  name: Docker Hub Personal Access Token
+  author: prowl
+  severity: high
+  description: Docker Hub personal access token (dckr_pat_) used to authenticate registry pushes/pulls.
+  reference:
+    - https://docs.docker.com/security/for-developers/access-tokens/
+  tags: dockerhub,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - dckr_pat_
+      - dckr_oat_
+    condition: or
+  - type: regex
+    regex:
+      - '\bdckr_pat_[A-Za-z0-9_-]{27}\b'
+      - '\bdckr_oat_[A-Za-z0-9_-]{32}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bdckr_pat_[A-Za-z0-9_-]{27}\b'
+      - '\bdckr_oat_[A-Za-z0-9_-]{32}\b'
+    group: 0

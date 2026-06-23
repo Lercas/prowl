@@ -1,0 +1,14 @@
+id: honeycomb
+info:
+  name: Honeycomb
+  author: prowl
+  reference: https://docs.honeycomb.io/api/tag/Auth#operation/getAuth
+match: [honeycomb]
+requests:
+  - method: GET
+    url: https://api.honeycomb.io/1/auth
+    headers:
+      X-Honeycomb-Team: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

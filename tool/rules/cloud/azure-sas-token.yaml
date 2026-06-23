@@ -1,0 +1,42 @@
+id: azure-sas-token
+info:
+  name: Azure Shared Access Signature (SAS) Token
+  author: prowl
+  severity: high
+  description: Azure Storage SAS query string carrying a base64 HMAC signature (sig=) alongside SAS parameters (sv/se/sp/sr/ss/srt/st).
+  reference:
+    - https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview
+  tags: azure,microsoft,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  # Pre-filter: a SAS query string always carries the sig= param...
+  - type: word
+    words:
+      - sig=
+  # ...AND at least one genuine SAS param (sv/se/sp/sr/ss/srt/st), rejecting base64 blobs
+  # that merely sit next to a stray "sig=".
+  - type: word
+    words:
+      - sv=
+      - se=
+      - sp=
+      - sr=
+      - ss=
+      - srt=
+      - st=
+    condition: or
+  # Structural anchor: sig= must sit in the same &-joined chain as a SAS param (not just
+  # co-occur in the file). Two alternatives cover SAS-param-before-sig and sig-before-SAS-param.
+  - type: regex
+    regex:
+      - '(?i)[?&](?:sv=|se=|sp=|sr=|ss=|srt=|st=|spr=|si=|tn=)[^"'' &]*(?:&[^"'' &]+=[^"'' &]*)*?&sig=((?:[A-Za-z0-9/+]|%2[BbFf]){20,}(?:%3[Dd])+)'
+      - '(?i)[?&]sig=((?:[A-Za-z0-9/+]|%2[BbFf]){20,}(?:%3[Dd])+)&(?:sv=|se=|sp=|sr=|ss=|srt=|st=|spr=|si=|tn=)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)[?&](?:sv=|se=|sp=|sr=|ss=|srt=|st=|spr=|si=|tn=)[^"'' &]*(?:&[^"'' &]+=[^"'' &]*)*?&sig=((?:[A-Za-z0-9/+]|%2[BbFf]){20,}(?:%3[Dd])+)'
+      - '(?i)[?&]sig=((?:[A-Za-z0-9/+]|%2[BbFf]){20,}(?:%3[Dd])+)&(?:sv=|se=|sp=|sr=|ss=|srt=|st=|spr=|si=|tn=)'
+    group: 1

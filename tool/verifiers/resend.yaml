@@ -1,0 +1,13 @@
+id: resend
+info:
+  name: Resend
+  reference: https://resend.com/docs/api-reference/api-keys/list-api-keys
+match: [resend, re_]
+requests:
+  - method: GET
+    url: https://api.resend.com/api-keys
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

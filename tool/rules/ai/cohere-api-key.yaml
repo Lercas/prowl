@@ -1,0 +1,27 @@
+id: cohere-api-key
+info:
+  name: Cohere API Key
+  author: prowl
+  severity: high
+  description: Cohere API key (40-char token) detected next to a cohere/CO_API_KEY context anchor.
+  reference:
+    - https://docs.cohere.com/reference/about
+  tags: cohere,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - cohere
+      - co_api_key
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:cohere|co_api_key)[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{40})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:cohere|co_api_key)[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{40})\b'
+    group: 1

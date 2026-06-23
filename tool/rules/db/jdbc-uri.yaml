@@ -1,0 +1,24 @@
+id: jdbc-connection-password
+info:
+  name: JDBC Connection String with Password
+  author: prowl
+  severity: critical
+  description: JDBC connection URL with an inline password parameter (e.g. jdbc:mysql://host/db?password=...).
+  reference:
+    - https://docs.oracle.com/javase/tutorial/jdbc/basics/connecting.html
+  tags: jdbc,java,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'jdbc:'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)jdbc:[a-z0-9]+:[^\s]*[?&;](?:password|pwd)=([^&;\s"'']{4,})'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)jdbc:[a-z0-9]+:[^\s]*[?&;](?:password|pwd)=([^&;\s"'']{4,})'
+    group: 1

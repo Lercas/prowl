@@ -1,0 +1,15 @@
+id: dropbox
+info:
+  name: Dropbox API
+  reference: https://www.dropbox.com/developers/documentation/http/documentation#users-get_current_account
+match: [dropbox]
+requests:
+  # POST with a null body is required by this endpoint (no request parameters).
+  - method: POST
+    url: https://api.dropboxapi.com/2/users/get_current_account
+    headers:
+      Authorization: "Bearer {{secret}}"
+    body: "null"
+    matchers:
+      - type: status
+        status: [200]

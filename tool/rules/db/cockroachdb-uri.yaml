@@ -1,0 +1,27 @@
+id: cockroachdb-connection-uri
+info:
+  name: CockroachDB Connection URI with Password
+  author: prowl
+  severity: critical
+  description: CockroachDB connection URI (cockroachdb:// scheme, or postgres wire over the default port 26257) embedding a user:password credential.
+  reference:
+    - https://www.cockroachlabs.com/docs/stable/connection-parameters
+  tags: cockroachdb,cockroach,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'cockroachdb://'
+      - ':26257'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:cockroachdb|postgres|postgresql)://[^:@\s/]+:([^@\s/]{4,})@[^\s/]*:26257'
+      - '(?i)cockroachdb://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:cockroachdb|postgres|postgresql)://[^:@\s/]+:([^@\s/]{4,})@[^\s/]*:26257'
+      - '(?i)cockroachdb://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

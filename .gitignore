@@ -1,0 +1,65 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+data/raw/*
+data/processed/*
+data/synthetic/*
+data/interim/*
+!data/**/.gitkeep
+*.pkl
+*.joblib
+*.bin
+.DS_Store
+mlruns/
+wandb/
+
+# transient fleet-agent file-writes
+tool/corpus_*/
+corpus_*/
+carriers*/
+qsharp_corpus/
+tool/prowl
+*.prof
+
+# benchmark scratch
+benchmark/_*
+*.sarif
+
+# documentation — kept out of the repo
+/docs/
+/tool/docs/
+
+# AI-assisted pipeline & research artifacts (kept out of the repo)
+.claude/
+CLAUDE.md
+/src/llm/
+/references/research.json
+/references/research_raw.json
+/references/competitors_arxiv.json
+/references/templates/
+/agent-*.jsonl
+*.agent.log
+
+# stray fleet-carrier fixtures + build artifacts under tool/ (not part of the product)
+tool/[0-9][0-9]_*
+tool/.env.prod
+tool/config/
+tool/handlers/
+tool/test/charge.test.js
+tool/detect.test
+tool/purrloin
+tool/*.test
+
+# benchmark — lives in github.com/Lercas/prowlbench
+/benchmark/
+
+# logo design scratch
+assets/concepts/
+
+# non-tool: ML research pipeline + research sources (this repo is the scanner only)
+/src/
+/references/
+/tests/
+/pyproject.toml
+/data/

@@ -1,0 +1,19 @@
+id: grafana
+info:
+  name: Grafana Cloud
+  author: prowl
+  reference: https://grafana.com/docs/grafana-cloud/developer-resources/api-reference/cloud-api/
+# grafana.com Cloud Access Policy tokens (glc_) authenticate against the fixed
+# grafana.com host. stack-regions is the cleanest validator: no org slug in the
+# path and no required region query param (unlike /api/v1/* endpoints).
+# Per-stack URLs (https://<stack>.grafana.net) and glsa_ service-account tokens
+# are stack-scoped and intentionally NOT handled here.
+match: [grafana, glc_]
+requests:
+  - method: GET
+    url: https://grafana.com/api/stack-regions
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

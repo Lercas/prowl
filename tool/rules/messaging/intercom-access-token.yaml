@@ -1,0 +1,30 @@
+id: intercom-access-token
+info:
+  name: Intercom Access Token
+  author: prowl
+  severity: high
+  description: Intercom access token (dG9r-prefixed base64url value) for the Intercom API.
+  reference:
+    - https://developers.intercom.com/building-apps/docs/authentication-types
+  tags: intercom,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - intercom
+      - dG9r
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a '='/'-'-terminated dG9r token isn't missed/truncated (group 1).
+      # The intercom-context form ends in an optional-quote boundary and handles this already.
+      - '\b(dG9r[A-Za-z0-9+/=_-]{50,80})(?:[^A-Za-z0-9+/=_-]|$)'
+      - '(?i)intercom[_\-]?(?:access[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9+/=_-]{50,80})["'']?'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(dG9r[A-Za-z0-9+/=_-]{50,80})(?:[^A-Za-z0-9+/=_-]|$)'
+      - '(?i)intercom[_\-]?(?:access[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9+/=_-]{50,80})["'']?'

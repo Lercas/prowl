@@ -1,0 +1,24 @@
+id: redis-connection-uri
+info:
+  name: Redis Connection URI with Password
+  author: prowl
+  severity: high
+  description: Redis connection URI (redis:// or rediss://) embedding a password, with or without a username.
+  reference:
+    - https://www.iana.org/assignments/uri-schemes/prov/redis
+  tags: redis,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'redis'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)rediss?://(?:[^:@\s/]*:)?([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)rediss?://(?:[^:@\s/]*:)?([^@\s/]{4,})@[^\s/]+'
+    group: 1

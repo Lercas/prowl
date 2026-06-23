@@ -1,0 +1,24 @@
+id: amqp-rabbitmq-connection-uri
+info:
+  name: AMQP / RabbitMQ Connection URI with Password
+  author: prowl
+  severity: high
+  description: AMQP connection URI (amqp:// or amqps://, e.g. RabbitMQ) embedding a user:password credential.
+  reference:
+    - https://www.rabbitmq.com/uri-spec.html
+  tags: amqp,rabbitmq,messaging,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'amqp'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)amqps?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)amqps?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

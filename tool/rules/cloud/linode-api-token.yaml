@@ -1,0 +1,26 @@
+id: linode-api-token
+info:
+  name: Linode API Token
+  author: prowl
+  severity: high
+  description: Linode (Akamai) personal access token (64-char hex value in a linode context).
+  reference:
+    - https://www.linode.com/docs/products/tools/api/guides/manage-api-tokens/
+  tags: linode,akamai,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - linode
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)linode[a-z0-9_\-]{0,16}(?:token|api[_\-]?key)?["'' :=]{1,5}["'']?([0-9a-f]{64})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)linode[a-z0-9_\-]{0,16}(?:token|api[_\-]?key)?["'' :=]{1,5}["'']?([0-9a-f]{64})["'']?'
+    group: 1

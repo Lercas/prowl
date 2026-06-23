@@ -1,0 +1,27 @@
+id: scaleway-secret-key
+info:
+  name: Scaleway Secret Key
+  author: prowl
+  severity: critical
+  description: Scaleway API secret key (UUID-shaped secret paired with SCW access keys).
+  reference:
+    - https://www.scaleway.com/en/docs/identity-and-access-management/iam/how-to/create-api-keys/
+  tags: scaleway,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - scaleway
+      - scw
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:scw|scaleway)[a-z0-9_\-]{0,16}(?:secret[_\-]?key|token)["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:scw|scaleway)[a-z0-9_\-]{0,16}(?:secret[_\-]?key|token)["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+    group: 1

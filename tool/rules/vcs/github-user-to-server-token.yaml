@@ -1,0 +1,27 @@
+id: github-user-to-server-token
+info:
+  name: GitHub User-to-Server Token
+  author: prowl
+  severity: high
+  description: GitHub App user-to-server access token (ghu_) acting as a user via a GitHub App.
+  reference:
+    - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+    - https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app
+  tags: github,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ghu_
+    condition: or
+  - type: regex
+    regex:
+      - '\bghu_[A-Za-z0-9]{36}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bghu_[A-Za-z0-9]{36}\b'
+    group: 0

@@ -1,0 +1,13 @@
+id: digitalocean
+info:
+  name: DigitalOcean
+  reference: https://docs.digitalocean.com/reference/api/
+match: [digitalocean, dop_v1_]
+requests:
+  - method: GET
+    url: https://api.digitalocean.com/v2/account
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

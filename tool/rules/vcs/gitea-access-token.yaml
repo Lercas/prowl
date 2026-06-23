@@ -1,0 +1,27 @@
+id: gitea-access-token
+info:
+  name: Gitea / Gogs Access Token
+  author: prowl
+  severity: high
+  description: Gitea or Gogs personal access token (40-char hex) assigned in a gitea/gogs context.
+  reference:
+    - https://docs.gitea.com/development/api-usage
+  tags: gitea,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - gitea
+      - gogs
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:gitea|gogs)[a-z0-9_-]{0,20}(?:token|access[_-]?token|api[_-]?key|secret)["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:gitea|gogs)[a-z0-9_-]{0,20}(?:token|access[_-]?token|api[_-]?key|secret)["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+    group: 1

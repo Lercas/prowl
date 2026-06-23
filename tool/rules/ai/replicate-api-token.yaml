@@ -1,0 +1,26 @@
+id: replicate-api-token
+info:
+  name: Replicate API Token
+  author: prowl
+  severity: high
+  description: Replicate API token (r8_) granting access to run and manage models on Replicate.
+  reference:
+    - https://replicate.com/docs/topics/security/api-tokens
+  tags: replicate,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - r8_
+    condition: or
+  - type: regex
+    regex:
+      - '\br8_[A-Za-z0-9]{37}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\br8_[A-Za-z0-9]{37}\b'
+    group: 0

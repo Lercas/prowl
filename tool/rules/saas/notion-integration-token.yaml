@@ -1,0 +1,29 @@
+id: notion-integration-token
+info:
+  name: Notion Integration Token
+  author: prowl
+  severity: high
+  description: Notion internal integration token (ntn_ new format, or legacy secret_) for the Notion API.
+  reference:
+    - https://developers.notion.com/reference/authentication
+  tags: notion,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ntn_
+      - secret_
+    condition: or
+  - type: regex
+    regex:
+      - '\bntn_[A-Za-z0-9]{46,}\b'
+      - '\bsecret_[A-Za-z0-9]{43}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bntn_[A-Za-z0-9]{46,}\b'
+      - '\bsecret_[A-Za-z0-9]{43}\b'
+    group: 0

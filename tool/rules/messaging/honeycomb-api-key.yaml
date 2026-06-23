@@ -1,0 +1,29 @@
+id: honeycomb-api-key
+info:
+  name: Honeycomb API Key
+  author: prowl
+  severity: high
+  description: Honeycomb ingest/configuration API key assigned in a honeycomb context.
+  reference:
+    - https://docs.honeycomb.io/configure/environments/manage-api-keys/
+  tags: honeycomb,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - honeycomb
+      - X-Honeycomb-Team
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)honeycomb[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([A-Za-z0-9]{22,64})["'']?'
+      - '(?i)X-Honeycomb-Team["'' :=]{1,5}["'']?([A-Za-z0-9]{22,64})["'']?'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)honeycomb[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([A-Za-z0-9]{22,64})["'']?'
+      - '(?i)X-Honeycomb-Team["'' :=]{1,5}["'']?([A-Za-z0-9]{22,64})["'']?'
+    group: 1

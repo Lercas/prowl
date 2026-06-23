@@ -1,0 +1,15 @@
+id: clickup
+info:
+  name: ClickUp
+  author: prowl
+  reference: https://developer.clickup.com/reference/getauthorizeduser
+match: [clickup, clickup-api-token, pk_]
+requests:
+  - method: GET
+    url: https://api.clickup.com/api/v2/user
+    headers:
+      Authorization: "{{secret}}"
+      Accept: "application/json"
+    matchers:
+      - type: status
+        status: [200]

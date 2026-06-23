@@ -1,0 +1,32 @@
+id: jfrog-access-token
+info:
+  name: JFrog Artifactory Access Token
+  author: prowl
+  severity: high
+  description: JFrog Artifactory access/identity token (reference token cmVmdGtu... or jfrt@-scoped JWT) used to authenticate to Artifactory/Xray.
+  reference:
+    - https://jfrog.com/help/r/jfrog-platform-administration-documentation/access-tokens
+  tags: jfrog,artifactory,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  # Anchor on the platform name so the generic token shapes below only fire near a JFrog reference.
+  - type: word
+    words:
+      - jfrog
+      - artifactory
+    condition: or
+  - type: regex
+    regex:
+      # Reference token: ~64-char base64url beginning with cmVmdGtu (base64 of "reftkn").
+      - '\bcmVmdGtu[A-Za-z0-9_-]{48,72}\b'
+      # Scoped identity token: a JWT with a JFrog service-audience subject (jfrt@/jfac@/other jf*) in the payload.
+      - '\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]*?jf(?:rt|ac|xr|pip|ds|mc|evt|md|con)@[A-Za-z0-9_-]*\.[A-Za-z0-9_-]{20,}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bcmVmdGtu[A-Za-z0-9_-]{48,72}\b'
+      - '\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]*?jf(?:rt|ac|xr|pip|ds|mc|evt|md|con)@[A-Za-z0-9_-]*\.[A-Za-z0-9_-]{20,}'
+    group: 0

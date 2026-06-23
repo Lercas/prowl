@@ -1,0 +1,22 @@
+title = "gitleaks demo config"
+
+[[rules]]
+id = "stripe-access-token"
+description = "Stripe Access Token"
+regex = '''(?i)sk_live_[0-9a-z]{24}'''
+keywords = ["sk_live"]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(?:api[_-]?key)['"]?\s*[:=]\s*['"]?([0-9a-z]{32})'''
+keywords = ["api"]
+entropy = 3.5
+  [[rules.allowlists]]
+  regexes = ['''EXAMPLE''']
+  stopwords = ["example", "sample"]
+
+[allowlist]
+description = "global"
+paths = ['''(.*?)(test|spec)\.(js|ts)$''']
+stopwords = ["dummy"]

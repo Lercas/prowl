@@ -1,0 +1,28 @@
+id: gitlab-oauth-token
+info:
+  name: GitLab OAuth Access Token
+  author: prowl
+  severity: high
+  description: GitLab OAuth application secret / access token (gloas- prefix, or 64-char hex OAuth token).
+  reference:
+    - https://docs.gitlab.com/ee/api/oauth2.html
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - gloas-
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(gloas-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(gloas-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

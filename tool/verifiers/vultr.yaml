@@ -1,0 +1,13 @@
+id: vultr
+info:
+  name: Vultr API
+  reference: https://www.vultr.com/api/#tag/account
+match: [vultr]
+requests:
+  - method: GET
+    url: https://api.vultr.com/v2/account
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

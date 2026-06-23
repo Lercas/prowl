@@ -1,0 +1,13 @@
+id: npm
+info:
+  name: npm registry
+  reference: https://docs.npmjs.com/
+match: [npm]
+requests:
+  - method: GET
+    url: https://registry.npmjs.org/-/whoami
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

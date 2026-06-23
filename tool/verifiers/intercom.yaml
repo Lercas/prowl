@@ -1,0 +1,14 @@
+id: intercom
+info:
+  name: Intercom
+  reference: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/identify-an-admin
+match: [intercom]
+requests:
+  - method: GET
+    url: https://api.intercom.io/me
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: "application/json"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,13 @@
+# Add to .gitlab-ci.yml
+secret_scan:
+  image: golang:1.24
+  script:
+    - go install github.com/Lercas/prowl/cmd/prowl@latest
+    - $(go env GOPATH)/bin/prowl scan . --format sarif --output prowl.sarif --fail-on high
+  artifacts:
+    when: always
+    paths:
+      - prowl.sarif
+    reports:
+      sast: prowl.sarif   # surfaces findings in the MR Security widget
+  allow_failure: false       # block the pipeline on high+ findings

@@ -1,0 +1,66 @@
+# GoReleaser config for prowl. Cut a release with:  git tag v0.1.0 && git push --tags
+# (the release workflow runs `goreleaser release`). Validate locally with `goreleaser check`.
+version: 2
+project_name: prowl
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: prowl
+    main: ./cmd/prowl
+    binary: prowl
+    # CGO_ENABLED=0 keeps cross-compilation toolchain-free, so these static binaries run the full
+    # cascade + rule templates + live verification on every platform. The in-process --ml model is the
+    # ONE thing that needs cgo: its compression_ratio feature must use the system zlib to match the
+    # trained model byte-for-byte, so a nocgo binary REFUSES --ml (fail-closed, clear message) rather
+    # than score secrets differently from the validated model. For --ml, build from source with cgo
+    # (the default for `go install` / `make build`) or run the --ml-url sidecar.
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+
+archives:
+  - id: prowl
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+# Publishes a Homebrew formula to github.com/Lercas/homebrew-tap so users can `brew install Lercas/tap/prowl`.
+# Requires a HOMEBREW_TAP_GITHUB_TOKEN secret with write access to that tap repo.
+brews:
+  - name: prowl
+    repository:
+      owner: Lercas
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/Lercas/prowl"
+    description: "Fast ML-cascade secret scanner (regex + checksum + entropy + ML) with live verification."
+    install: |
+      bin.install "prowl"
+    test: |
+      system "#{bin}/prowl", "version"

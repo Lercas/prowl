@@ -1,0 +1,29 @@
+id: atlassian-api-token
+info:
+  name: Atlassian API Token
+  author: prowl
+  severity: high
+  description: Atlassian API token (ATATT) or Connect token (ATCTT) for Jira/Confluence Cloud REST APIs.
+  reference:
+    - https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
+  tags: atlassian,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ATATT
+      - ATCTT
+    condition: or
+  - type: regex
+    regex:
+      - '\bATATT3[A-Za-z0-9_=-]{186}\b'
+      - '\bATCTT3xFfG[A-Za-z0-9+/=_-]{150,200}=[A-Za-z0-9]{8}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bATATT3[A-Za-z0-9_=-]{186}\b'
+      - '\bATCTT3xFfG[A-Za-z0-9+/=_-]{150,200}=[A-Za-z0-9]{8}\b'
+    group: 0

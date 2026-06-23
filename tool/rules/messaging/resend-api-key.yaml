@@ -1,0 +1,26 @@
+id: resend-api-key
+info:
+  name: Resend API Key
+  author: prowl
+  severity: high
+  description: Resend email API key (re_ prefix followed by a base62 token, no internal underscores) for the Resend REST API.
+  reference:
+    - https://resend.com/docs/api-reference/api-keys/list-api-keys
+  tags: resend,messaging,email,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - re_
+    condition: or
+  # Resend keys are re_ + base62 with NO internal '_'; allowing '_' matched snake_case identifiers.
+  - type: regex
+    regex:
+      - '\bre_[A-Za-z0-9]{20,40}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bre_[A-Za-z0-9]{20,40}\b'

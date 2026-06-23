@@ -1,0 +1,20 @@
+id: cohere
+info:
+  name: Cohere
+  author: prowl
+  reference: https://docs.cohere.com/reference/check-api-key
+match: [cohere]
+requests:
+  # check-api-key returns HTTP 200 with {"valid": false} for a bad key, so require "valid":true.
+  - method: POST
+    url: https://api.cohere.com/v1/check-api-key
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"valid":true', '"valid": true']
+        condition: or

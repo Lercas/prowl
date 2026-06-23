@@ -1,0 +1,15 @@
+id: hubspot
+info:
+  name: HubSpot
+  author: prowl
+  reference: https://developers.hubspot.com/docs/api-reference/account-account-info-v3/guide
+match: [hubspot, hubspot-private-app-token, pat-na, pat-eu]
+requests:
+  - method: GET
+    url: https://api.hubapi.com/account-info/v3/details
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: "application/json"
+    matchers:
+      - type: status
+        status: [200]

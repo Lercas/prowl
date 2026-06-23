@@ -1,0 +1,11 @@
+detectors:
+- name: GroqCloud
+  keywords:
+  - gsk_
+  regex:
+    apikey: 'gsk_[A-Za-z0-9]{52}'
+- name: AcmeToken
+  keywords:
+  - acme
+  regex:
+    token: 'acme-[0-9a-f]{40}'

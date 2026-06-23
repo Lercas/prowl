@@ -1,0 +1,13 @@
+id: fastly
+info:
+  name: Fastly API
+  reference: https://www.fastly.com/documentation/reference/api/account/user/#describe-current-user
+match: [fastly]
+requests:
+  - method: GET
+    url: https://api.fastly.com/current_user
+    headers:
+      Fastly-Key: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

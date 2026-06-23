@@ -1,0 +1,26 @@
+id: sparkpost-api-key
+info:
+  name: SparkPost API Key
+  author: prowl
+  severity: high
+  description: SparkPost API key (40-char hex value) assigned in a sparkpost context.
+  reference:
+    - https://developers.sparkpost.com/api/#header-authentication
+  tags: sparkpost,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sparkpost
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)sparkpost[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)sparkpost[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+    group: 1

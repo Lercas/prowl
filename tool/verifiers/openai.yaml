@@ -1,0 +1,14 @@
+id: openai
+info:
+  name: OpenAI
+  author: prowl
+  reference: https://platform.openai.com/docs/api-reference/models/list
+match: [openai, sk-proj-, sk-svcacct-, sk-admin-, t3blbkfj]
+requests:
+  - method: GET
+    url: https://api.openai.com/v1/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

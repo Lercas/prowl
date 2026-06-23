@@ -1,0 +1,17 @@
+id: discord
+info:
+  name: Discord bot token
+  reference: https://discord.com/developers/docs/resources/user#get-current-user
+match: [discord]
+requests:
+  - method: GET
+    url: https://discord.com/api/v10/users/@me
+    headers:
+      Authorization: "Bot {{secret}}"
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"id"']
+    matchers-condition: and

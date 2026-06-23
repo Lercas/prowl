@@ -1,0 +1,26 @@
+id: fireworks-api-key
+info:
+  name: Fireworks AI API Key
+  author: prowl
+  severity: high
+  description: Fireworks AI API key (fw_ prefixed token) granting access to the Fireworks API.
+  reference:
+    - https://docs.fireworks.ai/api-reference/introduction
+  tags: fireworks,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - fw_
+    condition: or
+  - type: regex
+    regex:
+      - '\bfw_[A-Za-z0-9]{24,40}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bfw_[A-Za-z0-9]{24,40}\b'
+    group: 0

@@ -1,0 +1,53 @@
+id: langsmith-api-key
+info:
+  name: LangSmith API Key
+  author: prowl
+  severity: high
+  description: LangSmith / LangChain API key (lsv2_pt_/lsv2_sk_) granting access to the LangSmith API.
+  reference:
+    - https://docs.smith.langchain.com/administration/how_to_guides/organization_management/create_account_api_key
+  tags: langsmith,langchain,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - lsv2_
+    condition: or
+  - type: regex
+    regex:
+      - '\blsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\blsv2_(?:pt|sk)_[a-f0-9]{32}_[a-f0-9]{10}\b'
+    group: 0
+---
+id: langsmith-legacy-api-key
+info:
+  name: LangSmith API Key (legacy)
+  author: prowl
+  severity: high
+  description: Legacy LangSmith / LangChain API key (ls__ prefixed) granting access to the LangSmith API.
+  reference:
+    - https://docs.smith.langchain.com/administration/how_to_guides/organization_management/create_account_api_key
+  tags: langsmith,langchain,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ls__
+    condition: or
+  - type: regex
+    regex:
+      - '\bls__[a-f0-9]{32}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bls__[a-f0-9]{32}\b'
+    group: 0

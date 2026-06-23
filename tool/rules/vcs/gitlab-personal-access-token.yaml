@@ -1,0 +1,28 @@
+id: gitlab-personal-access-token
+info:
+  name: GitLab Personal Access Token
+  author: prowl
+  severity: high
+  description: GitLab personal access token (glpat-) granting API access scoped to a user.
+  reference:
+    - https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - glpat-
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(glpat-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\b(glpat-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

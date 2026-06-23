@@ -1,0 +1,13 @@
+id: stripe
+info:
+  name: Stripe
+  reference: https://stripe.com/docs/api/accounts
+match: [stripe]
+requests:
+  - method: GET
+    url: https://api.stripe.com/v1/account
+    headers:
+      Authorization: "Basic {{base64(secret:)}}"
+    matchers:
+      - type: status
+        status: [200]

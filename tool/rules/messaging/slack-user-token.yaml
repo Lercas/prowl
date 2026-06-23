@@ -1,0 +1,25 @@
+id: slack-user-token
+info:
+  name: Slack User Token
+  author: prowl
+  severity: high
+  description: Slack user OAuth token (xoxp-) acting on behalf of a Slack user.
+  reference:
+    - https://api.slack.com/authentication/token-types
+  tags: slack,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - xoxp-
+    condition: or
+  - type: regex
+    regex:
+      - '\bxoxp-[0-9]{10,13}-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{32}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bxoxp-[0-9]{10,13}-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{32}\b'

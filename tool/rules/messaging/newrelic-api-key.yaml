@@ -1,0 +1,25 @@
+id: newrelic-api-key
+info:
+  name: New Relic User API Key
+  author: prowl
+  severity: high
+  description: New Relic personal/user API key (NRAK- prefix with 27 base36 chars).
+  reference:
+    - https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/
+  tags: newrelic,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - NRAK-
+    condition: or
+  - type: regex
+    regex:
+      - '\bNRAK-[A-Z0-9]{27}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bNRAK-[A-Z0-9]{27}\b'

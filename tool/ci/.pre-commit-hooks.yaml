@@ -1,0 +1,15 @@
+# Repo-side hook definition. Consumers add to their .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/Lercas/prowl
+#       rev: v0.1.0
+#       hooks:
+#         - id: prowl
+#
+- id: prowl
+  name: Prowl secret scan
+  description: Scan staged files for leaked secrets before commit
+  entry: prowl scan --fail-on high
+  language: golang
+  pass_filenames: true   # pre-commit appends staged file paths -> scans only those (fast)
+  require_serial: false

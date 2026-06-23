@@ -1,0 +1,25 @@
+id: mollie-live-api-key
+info:
+  name: Mollie Live API Key
+  author: prowl
+  severity: critical
+  description: Mollie live mode API key (live_) used to create payments on a live account.
+  reference:
+    - https://docs.mollie.com/reference/authentication
+  tags: mollie,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - live_
+    condition: or
+  - type: regex
+    regex:
+      - '\blive_[A-Za-z0-9]{30}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\blive_[A-Za-z0-9]{30}\b'

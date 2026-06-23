@@ -1,0 +1,25 @@
+id: slack-bot-token
+info:
+  name: Slack Bot Token
+  author: prowl
+  severity: high
+  description: Slack bot user OAuth token (xoxb-) used by apps to call the Slack Web API.
+  reference:
+    - https://api.slack.com/authentication/token-types
+  tags: slack,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - xoxb-
+    condition: or
+  - type: regex
+    regex:
+      - '\bxoxb-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,32}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bxoxb-[0-9]{10,13}-[0-9]{10,13}-[A-Za-z0-9]{24,32}\b'

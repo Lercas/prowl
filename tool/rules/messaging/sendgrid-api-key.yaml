@@ -1,0 +1,25 @@
+id: sendgrid-api-key
+info:
+  name: SendGrid API Key
+  author: prowl
+  severity: high
+  description: Twilio SendGrid API key (SG. prefix with base64url id and secret segments).
+  reference:
+    - https://docs.sendgrid.com/api-reference/api-keys
+  tags: sendgrid,twilio,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - SG.
+    condition: or
+  - type: regex
+    regex:
+      - '\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b'

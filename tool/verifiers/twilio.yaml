@@ -1,0 +1,21 @@
+id: twilio
+info:
+  name: Twilio
+  reference: https://www.twilio.com/docs/usage/api/account#fetch-an-account-resource
+match: [twilio]
+# Routing relies on the `twilio` keyword (and the detector's type), NOT a bare 2-char "AC" substring:
+# "AC" substring-matches countless non-Twilio values (backup, cache, machine, facebook_token…), which
+# would route a live non-Twilio secret Basic-auth to api.twilio.com under --verify. The Account SID
+# (AC…) is still pulled from the finding's surrounding context via `extract` and used to build the
+# request URL + Basic credentials; the detected secret is the 32-hex auth token. Basic auth
+# (SID:token) against the account fetch endpoint is read-only.
+extract:
+  account_sid: 'AC[0-9a-fA-F]{32}'
+requests:
+  - method: GET
+    url: https://api.twilio.com/2010-04-01/Accounts/{{account_sid}}.json
+    headers:
+      Authorization: "Basic {{base64(account_sid:secret)}}"
+    matchers:
+      - type: status
+        status: [200]

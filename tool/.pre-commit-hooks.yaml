@@ -1,0 +1,29 @@
+# Prowl pre-commit hooks. Add to your .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/Lercas/prowl
+#       rev: v0.1.0          # pin a released tag
+#       hooks:
+#         - id: prowl        # builds from source (needs Go); fast on subsequent runs
+#         # - id: prowl-docker # no Go needed; uses the published image
+#
+# Both scan the staged files pre-commit passes in and fail the commit on a high-severity finding.
+# Use 'prowl scan --fail-on …' args or a .prowl.yaml / .gitleaks.toml in the repo to tune.
+
+- id: prowl
+  name: prowl secret scan
+  description: Scan staged changes for leaked secrets (regex + checksum + entropy + ML cascade).
+  entry: prowl scan --fail-on high
+  language: golang
+  pass_filenames: true
+  types: [text]
+  require_serial: true
+
+- id: prowl-docker
+  name: prowl secret scan (docker)
+  description: Same scan via the published image — no Go toolchain required.
+  entry: ghcr.io/lercas/prowl scan --fail-on high
+  language: docker_image
+  pass_filenames: true
+  types: [text]
+  require_serial: true

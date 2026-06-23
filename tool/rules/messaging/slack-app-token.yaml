@@ -1,0 +1,25 @@
+id: slack-app-token
+info:
+  name: Slack App-Level Token
+  author: prowl
+  severity: high
+  description: Slack app-level token (xapp-) used for Socket Mode and app-scoped APIs.
+  reference:
+    - https://api.slack.com/authentication/token-types
+  tags: slack,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - xapp-
+    condition: or
+  - type: regex
+    regex:
+      - '\bxapp-[0-9]-[A-Z0-9]{9,12}-[0-9]{10,13}-[a-f0-9]{64}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bxapp-[0-9]-[A-Z0-9]{9,12}-[0-9]{10,13}-[a-f0-9]{64}\b'

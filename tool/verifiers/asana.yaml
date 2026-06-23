@@ -1,0 +1,13 @@
+id: asana
+info:
+  name: Asana API
+  reference: https://developers.asana.com/reference/getuser
+match: [asana]
+requests:
+  - method: GET
+    url: https://app.asana.com/api/1.0/users/me
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

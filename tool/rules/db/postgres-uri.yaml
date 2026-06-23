@@ -1,0 +1,25 @@
+id: postgres-connection-uri
+info:
+  name: PostgreSQL Connection URI with Password
+  author: prowl
+  severity: critical
+  description: PostgreSQL/Postgres connection URI embedding a user:password credential.
+  reference:
+    - https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+  tags: postgres,postgresql,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'postgres'
+      - 'postgresql'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:postgres|postgresql)://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:postgres|postgresql)://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

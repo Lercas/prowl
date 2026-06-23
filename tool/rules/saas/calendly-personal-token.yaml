@@ -1,0 +1,28 @@
+id: calendly-personal-token
+info:
+  name: Calendly Personal Access Token
+  author: prowl
+  severity: high
+  description: Calendly personal access token (a long JWT) assigned in a calendly context.
+  reference:
+    - https://developer.calendly.com/api-docs/b3A6NTkxNDA4-get-access-token
+    - https://developer.calendly.com/how-to-authenticate-with-personal-access-tokens
+  tags: calendly,scheduling,saas,credentials
+category: saas
+matchers-condition: and
+matchers:
+  # A Calendly PAT is a generic JWT (eyJ...), so require a calendly keyword nearby to avoid flooding on every JWT.
+  - type: word
+    words:
+      - calendly
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)calendly[\w"'' .:=,/_-]{0,40}(eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)calendly[\w"'' .:=,/_-]{0,40}(eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})'
+    group: 1

@@ -1,0 +1,14 @@
+id: groq
+info:
+  name: Groq
+  author: prowl
+  reference: https://console.groq.com/docs/api-reference#models-list
+match: [groq, gsk_]
+requests:
+  - method: GET
+    url: https://api.groq.com/openai/v1/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

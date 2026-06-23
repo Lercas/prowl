@@ -1,0 +1,13 @@
+id: vercel
+info:
+  name: Vercel API
+  reference: https://vercel.com/docs/rest-api/reference/endpoints/user/get-the-user
+match: [vercel]
+requests:
+  - method: GET
+    url: https://api.vercel.com/v2/user
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

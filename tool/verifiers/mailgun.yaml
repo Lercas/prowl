@@ -1,0 +1,13 @@
+id: mailgun
+info:
+  name: Mailgun
+  reference: https://documentation.mailgun.com/
+match: [mailgun]
+requests:
+  - method: GET
+    url: https://api.mailgun.net/v3/domains
+    headers:
+      Authorization: "Basic {{base64(api:secret)}}"
+    matchers:
+      - type: status
+        status: [200]

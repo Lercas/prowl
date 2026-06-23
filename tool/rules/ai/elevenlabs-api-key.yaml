@@ -1,0 +1,26 @@
+id: elevenlabs-api-key
+info:
+  name: ElevenLabs API Key
+  author: prowl
+  severity: high
+  description: ElevenLabs API key (sk_ followed by 48 hex chars) granting access to the ElevenLabs API.
+  reference:
+    - https://elevenlabs.io/docs/api-reference/authentication
+  tags: elevenlabs,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sk_
+    condition: or
+  - type: regex
+    regex:
+      - '\bsk_[a-f0-9]{48}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bsk_[a-f0-9]{48}\b'
+    group: 0

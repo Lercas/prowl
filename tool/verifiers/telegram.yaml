@@ -1,0 +1,12 @@
+id: telegram
+info:
+  name: Telegram bot token
+  reference: https://core.telegram.org/bots/api#getme
+match: [telegram]
+requests:
+  - method: GET
+    url: https://api.telegram.org/bot{{secret}}/getMe
+    matchers:
+      - type: word
+        part: body
+        words: ['"ok":true']

@@ -1,0 +1,27 @@
+id: azure-storage-connection-string
+info:
+  name: Azure Storage Connection String
+  author: prowl
+  severity: critical
+  description: Full Azure Storage connection string containing AccountName and AccountKey.
+  reference:
+    - https://learn.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string
+  tags: azure,microsoft,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - DefaultEndpointsProtocol
+      - AccountKey
+    condition: and
+  - type: regex
+    regex:
+      - '(?i)DefaultEndpointsProtocol=https?;AccountName=[a-z0-9]{3,24};AccountKey=[A-Za-z0-9/+]{86}=='
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)DefaultEndpointsProtocol=https?;AccountName=[a-z0-9]{3,24};AccountKey=[A-Za-z0-9/+]{86}=='
+    group: 0

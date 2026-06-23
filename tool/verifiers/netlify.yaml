@@ -1,0 +1,13 @@
+id: netlify
+info:
+  name: Netlify API
+  reference: https://docs.netlify.com/api/get-started/#get-current-user
+match: [netlify]
+requests:
+  - method: GET
+    url: https://api.netlify.com/api/v1/user
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

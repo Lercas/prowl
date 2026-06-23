@@ -1,0 +1,26 @@
+id: vultr-api-key
+info:
+  name: Vultr API Key
+  author: prowl
+  severity: high
+  description: Vultr API key (36-char base32 value in a vultr context).
+  reference:
+    - https://docs.vultr.com/vultr-api
+  tags: vultr,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - vultr
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)vultr[a-z0-9_\-]{0,16}(?:api[_\-]?key|token)?["'' :=]{1,5}["'']?([A-Z2-7]{36})["'']?'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)vultr[a-z0-9_\-]{0,16}(?:api[_\-]?key|token)?["'' :=]{1,5}["'']?([A-Z2-7]{36})["'']?'
+    group: 1

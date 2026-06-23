@@ -1,0 +1,26 @@
+id: perplexity-api-key
+info:
+  name: Perplexity API Key
+  author: prowl
+  severity: high
+  description: Perplexity API key (pplx-) granting access to the Perplexity (Sonar) API.
+  reference:
+    - https://docs.perplexity.ai/guides/getting-started
+  tags: perplexity,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pplx-
+    condition: or
+  - type: regex
+    regex:
+      - '\bpplx-[A-Za-z0-9]{48}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bpplx-[A-Za-z0-9]{48}\b'
+    group: 0

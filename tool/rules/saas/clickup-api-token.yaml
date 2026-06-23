@@ -1,0 +1,26 @@
+id: clickup-api-token
+info:
+  name: ClickUp Personal API Token
+  author: prowl
+  severity: high
+  description: ClickUp personal API token (pk_<userid>_<32 chars>) for the ClickUp v2 REST API.
+  reference:
+    - https://developer.clickup.com/docs/authentication
+  tags: clickup,productivity,saas,credentials
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pk_
+    condition: or
+  - type: regex
+    regex:
+      - '\bpk_\d+_[A-Z0-9]{32}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(pk_\d+_[A-Z0-9]{32})\b'
+    group: 1

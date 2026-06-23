@@ -1,0 +1,14 @@
+id: assemblyai
+info:
+  name: AssemblyAI
+  author: prowl
+  reference: https://www.assemblyai.com/docs/api-reference/transcripts/list
+match: [assemblyai]
+requests:
+  - method: GET
+    url: https://api.assemblyai.com/v2/transcript?limit=1
+    headers:
+      Authorization: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

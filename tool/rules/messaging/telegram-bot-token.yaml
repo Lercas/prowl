@@ -1,0 +1,30 @@
+id: telegram-bot-token
+info:
+  name: Telegram Bot Token
+  author: prowl
+  severity: high
+  description: Telegram Bot API token (numeric bot id and 35-char secret) issued by BotFather.
+  reference:
+    - https://core.telegram.org/bots/api#authorizing-your-bot
+  tags: telegram,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - telegram
+      - bot
+      - api.telegram.org
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:telegram|api\.telegram\.org/bot)[A-Za-z0-9_/]*["'' :=]{0,5}["'']?([0-9]{8,10}:[A-Za-z0-9_-]{35})\b'
+      - '\b[0-9]{8,10}:[A-Za-z0-9_-]{35}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:telegram|api\.telegram\.org/bot)[A-Za-z0-9_/]*["'' :=]{0,5}["'']?([0-9]{8,10}:[A-Za-z0-9_-]{35})\b'
+      - '\b[0-9]{8,10}:[A-Za-z0-9_-]{35}\b'
+    group: 1

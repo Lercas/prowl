@@ -1,0 +1,26 @@
+id: adyen-api-key
+info:
+  name: Adyen API Key
+  author: prowl
+  severity: critical
+  description: Adyen web service API key (AQE...) used to authenticate payment requests.
+  reference:
+    - https://docs.adyen.com/development-resources/api-credentials/
+  tags: adyen,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AQE
+      - adyen
+    condition: or
+  - type: regex
+    regex:
+      - '\bAQE[0-9a-zA-Z]{43}[0-9A-Za-z+/]{2}[A-Za-z0-9=]{2}[0-9A-Za-z+/]{6}[0-9a-zA-Z=]{18}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bAQE[0-9a-zA-Z]{43}[0-9A-Za-z+/]{2}[A-Za-z0-9=]{2}[0-9A-Za-z+/]{6}[0-9a-zA-Z=]{18}\b'

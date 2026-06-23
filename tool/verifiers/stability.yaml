@@ -1,0 +1,19 @@
+id: stability
+info:
+  name: Stability AI
+  author: prowl
+  reference: https://platform.stability.ai/docs/api-reference#tag/User/operation/userAccount
+match: [stability]
+requests:
+  - method: GET
+    url: https://api.stability.ai/v1/user/account
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"email"', '"id"']
+        condition: or

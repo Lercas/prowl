@@ -1,0 +1,27 @@
+id: gcp-api-key
+info:
+  name: Google Cloud / Firebase API Key
+  author: prowl
+  severity: high
+  description: Google API key (AIza-prefixed 39-char token used by GCP, Maps, Firebase).
+  reference:
+    - https://cloud.google.com/docs/authentication/api-keys
+  tags: gcp,google,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AIza
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated AIza key isn't missed; value in group 1.
+      - '\b(AIza[0-9A-Za-z\-_]{35})(?:[^0-9A-Za-z\-_]|$)'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(AIza[0-9A-Za-z\-_]{35})(?:[^0-9A-Za-z\-_]|$)'
+    group: 1
