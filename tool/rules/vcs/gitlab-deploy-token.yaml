@@ -1,0 +1,28 @@
+id: gitlab-deploy-token
+info:
+  name: GitLab Deploy Token
+  author: prowl
+  severity: high
+  description: GitLab deploy token (gldt- prefix) granting read access to repositories, registry, or packages.
+  reference:
+    - https://docs.gitlab.com/ee/user/project/deploy_tokens/
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - gldt-
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(gldt-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(gldt-[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

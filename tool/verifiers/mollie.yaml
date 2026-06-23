@@ -1,0 +1,15 @@
+id: mollie
+info:
+  name: Mollie
+  author: prowl
+  reference: https://docs.mollie.com/reference/authentication
+match: [mollie]
+requests:
+  - method: GET
+    url: https://api.mollie.com/v2/methods
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,24 @@
+id: clickhouse-connection-uri
+info:
+  name: ClickHouse Connection URI with Password
+  author: prowl
+  severity: high
+  description: ClickHouse connection URI (clickhouse://, clickhouses:// or tcp://...:9000) embedding a user:password credential.
+  reference:
+    - https://clickhouse.com/docs/en/integrations/sql-clients/cli
+  tags: clickhouse,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'clickhouse'
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)clickhouses?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)clickhouses?://[^:@\s/]+:([^@\s/]{4,})@[^\s/]+'
+    group: 1

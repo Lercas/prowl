@@ -1,0 +1,8 @@
+/prowl
+*.prof
+*.sarif
+.prowl-baseline.json
+# transient fleet-agent file-writes
+corpus_*/
+carriers*/
+qsharp_corpus/

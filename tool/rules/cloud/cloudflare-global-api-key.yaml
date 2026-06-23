@@ -1,0 +1,28 @@
+id: cloudflare-global-api-key
+info:
+  name: Cloudflare Global API Key
+  author: prowl
+  severity: critical
+  description: Cloudflare legacy Global API Key (37-char hex value in a cloudflare context).
+  reference:
+    - https://developers.cloudflare.com/fundamentals/api/get-started/keys/
+  tags: cloudflare,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - cloudflare
+      - x-auth
+      - key
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:cloudflare|cf|x-auth)[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([0-9a-f]{37})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:cloudflare|cf|x-auth)[_\-]?(?:api[_\-]?)?key["'' :=]{1,5}["'']?([0-9a-f]{37})["'']?'
+    group: 1

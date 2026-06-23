@@ -1,0 +1,14 @@
+id: replicate
+info:
+  name: Replicate
+  author: prowl
+  reference: https://replicate.com/docs/reference/http#account.get
+match: [replicate, r8_]
+requests:
+  - method: GET
+    url: https://api.replicate.com/v1/account
+    headers:
+      Authorization: "Token {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

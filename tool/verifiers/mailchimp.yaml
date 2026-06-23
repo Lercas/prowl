@@ -1,0 +1,19 @@
+id: mailchimp
+info:
+  name: Mailchimp
+  reference: https://mailchimp.com/developer/marketing/api/root/
+match: [mailchimp, "-us"]
+# The data-center suffix of the key IS the API host (e.g. -us21 -> us21.api.mailchimp.com). The
+# engine's extract uses whole-match (FindString), so this regex deliberately matches only the
+# `us<dc>` token, which it builds into the host. The detected secret (the full key) is sent via
+# basic auth (any:key) against the read-only API root endpoint.
+extract:
+  dc: '\bus[0-9]{1,2}\b'
+requests:
+  - method: GET
+    url: https://{{dc}}.api.mailchimp.com/3.0/
+    headers:
+      Authorization: "Basic {{base64(any:secret)}}"
+    matchers:
+      - type: status
+        status: [200]

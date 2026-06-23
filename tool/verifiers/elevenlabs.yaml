@@ -1,0 +1,19 @@
+id: elevenlabs
+info:
+  name: ElevenLabs
+  author: prowl
+  reference: https://elevenlabs.io/docs/api-reference/user/get
+match: [elevenlabs]
+requests:
+  - method: GET
+    url: https://api.elevenlabs.io/v1/user
+    headers:
+      xi-api-key: "{{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"subscription"', '"user_id"']
+        condition: or

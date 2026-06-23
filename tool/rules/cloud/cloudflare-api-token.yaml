@@ -1,0 +1,29 @@
+id: cloudflare-api-token
+info:
+  name: Cloudflare API Token
+  author: prowl
+  severity: high
+  description: Cloudflare scoped API token (40-char base62 value in a cloudflare context).
+  reference:
+    - https://developers.cloudflare.com/fundamentals/api/get-started/create-token/
+  tags: cloudflare,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  # OR of "cloudflare"/"cf", NOT AND — they never co-occur in one token line (an AND made the
+  # rule dead). One is always present when the regex matches, so this stays a sound pre-filter.
+  - type: word
+    words:
+      - cloudflare
+      - cf
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:cloudflare|cf)[_\-]?api[_\-]?token["'' :=]{1,5}["'']?([A-Za-z0-9_\-]{40})(?:[^A-Za-z0-9_\-]|$)'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:cloudflare|cf)[_\-]?api[_\-]?token["'' :=]{1,5}["'']?([A-Za-z0-9_\-]{40})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

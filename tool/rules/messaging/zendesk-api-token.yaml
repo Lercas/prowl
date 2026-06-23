@@ -1,0 +1,26 @@
+id: zendesk-api-token
+info:
+  name: Zendesk API Token
+  author: prowl
+  severity: high
+  description: Zendesk API token (40-char base62 value) assigned in a zendesk context.
+  reference:
+    - https://developer.zendesk.com/api-reference/introduction/security-and-auth/
+  tags: zendesk,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - zendesk
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)zendesk[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9]{40})["'']?'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)zendesk[_\-]?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([A-Za-z0-9]{40})["'']?'
+    group: 1

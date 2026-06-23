@@ -1,0 +1,28 @@
+id: datadog-app-key
+info:
+  name: Datadog Application Key
+  author: prowl
+  severity: high
+  description: Datadog application key (40 hex chars) assigned in a datadog context.
+  reference:
+    - https://docs.datadoghq.com/account_management/api-app-keys/
+  tags: datadog,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - datadog
+      - dd_app_key
+      - DD-APPLICATION-KEY
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:datadog|dd)[_\-]?(?:application|app)[_\-]?key["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:datadog|dd)[_\-]?(?:application|app)[_\-]?key["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+    group: 1

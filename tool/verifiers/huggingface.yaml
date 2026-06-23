@@ -1,0 +1,19 @@
+id: huggingface
+info:
+  name: HuggingFace
+  author: prowl
+  reference: https://huggingface.co/docs/hub/api#get-apiwhoami-v2
+match: [huggingface, hf_, api_org_]
+requests:
+  - method: GET
+    url: https://huggingface.co/api/whoami-v2
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"name"', '"type"']
+        condition: or
+    matchers-condition: and

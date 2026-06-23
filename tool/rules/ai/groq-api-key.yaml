@@ -1,0 +1,26 @@
+id: groq-api-key
+info:
+  name: Groq API Key
+  author: prowl
+  severity: high
+  description: Groq Cloud API key (gsk_) granting access to the Groq inference API.
+  reference:
+    - https://console.groq.com/docs/quickstart
+  tags: groq,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - gsk_
+    condition: or
+  - type: regex
+    regex:
+      - '\bgsk_[A-Za-z0-9]{52}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bgsk_[A-Za-z0-9]{52}\b'
+    group: 0

@@ -1,0 +1,27 @@
+id: loops-api-key
+info:
+  name: Loops API Key
+  author: prowl
+  severity: high
+  description: Loops.so transactional email API key (32-hex token) used as a bearer credential for the Loops API.
+  reference:
+    - https://loops.so/docs/api-reference/api-key
+  tags: loops,messaging,email,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  # The Loops key is a prefix-less 32-hex string, so require a Loops reference nearby or it floods on every md5/hex blob.
+  - type: word
+    words:
+      - loops
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)loops[\w"'' .:=,/_-]{0,40}\b([0-9a-f]{32})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)loops[\w"'' .:=,/_-]{0,40}\b([0-9a-f]{32})\b'
+    group: 1

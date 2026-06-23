@@ -1,0 +1,28 @@
+id: mailgun-api-key
+info:
+  name: Mailgun API Key
+  author: prowl
+  severity: high
+  description: Mailgun private API key (key- prefixed hex, or the key-...-... signing form).
+  reference:
+    - https://documentation.mailgun.com/docs/mailgun/api-reference/authentication/
+  tags: mailgun,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - key-
+      - mailgun
+    condition: or
+  - type: regex
+    regex:
+      - '\bkey-[a-f0-9]{32}\b'
+      - '\b[a-f0-9]{32}-[a-f0-9]{8}-[a-f0-9]{8}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bkey-[a-f0-9]{32}\b'
+      - '\b[a-f0-9]{32}-[a-f0-9]{8}-[a-f0-9]{8}\b'

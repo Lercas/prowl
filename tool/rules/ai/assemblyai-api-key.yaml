@@ -1,0 +1,26 @@
+id: assemblyai-api-key
+info:
+  name: AssemblyAI API Key
+  author: prowl
+  severity: high
+  description: AssemblyAI API key (32 hex chars) detected next to an assemblyai context anchor.
+  reference:
+    - https://www.assemblyai.com/docs/api-reference/overview
+  tags: assemblyai,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - assemblyai
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)assemblyai[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([a-f0-9]{32})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)assemblyai[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([a-f0-9]{32})\b'
+    group: 1

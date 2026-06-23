@@ -1,0 +1,26 @@
+id: circleci-personal-token
+info:
+  name: CircleCI Personal API Token
+  author: prowl
+  severity: high
+  description: CircleCI personal API token (40-char hex in a circleci context) for the CircleCI API.
+  reference:
+    - https://circleci.com/docs/managing-api-tokens/
+  tags: circleci,ci,credentials,token
+category: ci
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - circle
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)circle[_\-]?(?:ci[_\-]?)?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)circle[_\-]?(?:ci[_\-]?)?(?:api[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{40})["'']?'
+    group: 1

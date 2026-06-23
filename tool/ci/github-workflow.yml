@@ -1,0 +1,31 @@
+# Copy to .github/workflows/secret-scan.yml
+name: secret-scan
+on: [push, pull_request]
+
+jobs:
+  prowl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # required to upload SARIF to the Security tab
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # full history if you later scan commits
+
+      # Option A — packaged action (Docker)
+      # - uses: sugar/prowl@v1
+      #   with: { path: '.', fail-on: high, output: prowl.sarif }
+
+      # Option B — build from source (no published action needed)
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.24' }
+      - run: go install github.com/Lercas/prowl/cmd/prowl@latest
+      - name: scan
+        run: prowl scan . --format sarif --output prowl.sarif --fail-on high
+        continue-on-error: true   # let SARIF upload run even on findings; gate via the next step
+
+      - uses: github/codeql-action/upload-sarif@v3
+        with: { sarif_file: prowl.sarif }
+
+      - name: enforce gate
+        run: prowl scan . --fail-on high   # non-zero exit fails the job

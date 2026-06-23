@@ -1,0 +1,25 @@
+id: brevo-api-key
+info:
+  name: Brevo (Sendinblue) API Key
+  author: prowl
+  severity: high
+  description: Brevo/Sendinblue transactional API key (xkeysib- prefix, 64 hex + 16 alnum suffix) for the v3 REST API.
+  reference:
+    - https://developers.brevo.com/docs/getting-started
+  tags: brevo,sendinblue,messaging,email,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - xkeysib-
+    condition: or
+  - type: regex
+    regex:
+      - '\bxkeysib-[0-9a-f]{64}-[A-Za-z0-9]{16}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bxkeysib-[0-9a-f]{64}-[A-Za-z0-9]{16}\b'

@@ -1,0 +1,30 @@
+id: aws-session-token
+info:
+  name: AWS Session Token
+  author: prowl
+  severity: high
+  description: Amazon AWS temporary session token (long FQoG.../IQoJ...-style STS token).
+  reference:
+    - https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html
+  tags: aws,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - aws_session_token
+      - SessionToken
+      - FQoG
+      - IQoJ
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:aws_session_token|x-amz-security-token|sessiontoken)["'' :=]{1,5}["'']?((?:FQoG|IQoJ|FwoG)[A-Za-z0-9/+=]{100,})["'']?'
+      - '\b(?:FQoG|IQoJ|FwoG)[A-Za-z0-9/+=]{120,}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(?:FQoG|IQoJ|FwoG)[A-Za-z0-9/+=]{120,}'
+    group: 0

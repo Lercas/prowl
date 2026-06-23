@@ -1,0 +1,26 @@
+id: discord-webhook-url
+info:
+  name: Discord Webhook URL
+  author: prowl
+  severity: medium
+  description: Discord webhook URL that allows posting messages into a channel without auth.
+  reference:
+    - https://discord.com/developers/docs/resources/webhook
+  tags: discord,messaging,webhook,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - discord
+      - /api/webhooks/
+    condition: or
+  - type: regex
+    regex:
+      - 'https://discord(?:app)?\.com/api/webhooks/[0-9]{17,20}/[A-Za-z0-9_-]{60,80}'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - 'https://discord(?:app)?\.com/api/webhooks/[0-9]{17,20}/[A-Za-z0-9_-]{60,80}'

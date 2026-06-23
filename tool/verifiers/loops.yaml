@@ -1,0 +1,13 @@
+id: loops
+info:
+  name: Loops
+  reference: https://loops.so/docs/api-reference/api-key
+match: [loops]
+requests:
+  - method: GET
+    url: https://app.loops.so/api/v1/api-key
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

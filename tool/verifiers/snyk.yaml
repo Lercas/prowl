@@ -1,0 +1,15 @@
+id: snyk
+info:
+  name: Snyk
+  author: prowl
+  reference: https://snyk.docs.apiary.io/#reference/users/my-user-details/get-my-details
+match: [snyk]
+requests:
+  - method: GET
+    url: https://api.snyk.io/v1/user/me
+    headers:
+      Authorization: "token {{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

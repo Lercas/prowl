@@ -1,0 +1,26 @@
+id: linear-api-key
+info:
+  name: Linear API Key
+  author: prowl
+  severity: high
+  description: Linear personal API key (lin_api_) granting access to the Linear GraphQL API.
+  reference:
+    - https://developers.linear.app/docs/graphql/working-with-the-graphql-api#personal-api-keys
+  tags: linear,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - lin_api_
+    condition: or
+  - type: regex
+    regex:
+      - '\blin_api_[A-Za-z0-9]{40}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\blin_api_[A-Za-z0-9]{40}\b'
+    group: 0

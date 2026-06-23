@@ -1,0 +1,53 @@
+id: paypal-braintree-access-token
+info:
+  name: PayPal / Braintree Access Token
+  author: prowl
+  severity: critical
+  description: Braintree production access token (access_token$production$...) granting gateway access.
+  reference:
+    - https://developer.paypal.com/braintree/docs/guides/authorization/access-token
+  tags: paypal,braintree,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - access_token$production$
+    condition: or
+  - type: regex
+    regex:
+      - '\baccess_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\baccess_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32}\b'
+---
+id: paypal-client-secret
+info:
+  name: PayPal Client ID / Secret Assignment
+  author: prowl
+  severity: high
+  description: PayPal REST API client secret assigned in config or environment.
+  reference:
+    - https://developer.paypal.com/api/rest/authentication/
+  tags: paypal,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - paypal
+      - client_secret
+    condition: and
+  - type: regex
+    regex:
+      - '(?i)paypal[_\-]?(?:client[_\-]?)?secret["'']?\s*[:=]\s*["'']?([A-Za-z0-9_\-]{32,})'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)paypal[_\-]?(?:client[_\-]?)?secret["'']?\s*[:=]\s*["'']?([A-Za-z0-9_\-]{32,})'
+    group: 1

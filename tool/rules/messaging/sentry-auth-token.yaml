@@ -1,0 +1,29 @@
+id: sentry-auth-token
+info:
+  name: Sentry Auth Token
+  author: prowl
+  severity: high
+  description: Sentry auth/internal token (sntrys_, sntryu_ or 64-char hex) for the Sentry API.
+  reference:
+    - https://docs.sentry.io/account/auth-tokens/
+  tags: sentry,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - sntrys_
+      - sntryu_
+      - sentry
+    condition: or
+  - type: regex
+    regex:
+      - '\bsntry[su]_[A-Za-z0-9+/=_-]{40,}\b'
+      - '(?i)sentry[_\-]?(?:auth[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{64})["'']?'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bsntry[su]_[A-Za-z0-9+/=_-]{40,}\b'
+      - '(?i)sentry[_\-]?(?:auth[_\-]?)?token["'' :=]{1,5}["'']?([a-f0-9]{64})["'']?'

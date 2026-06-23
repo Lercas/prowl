@@ -1,0 +1,14 @@
+id: postmark
+info:
+  name: Postmark
+  reference: https://postmarkapp.com/developer/api/server-api#get-the-current-server
+match: [postmark]
+requests:
+  - method: GET
+    url: https://api.postmarkapp.com/server
+    headers:
+      Accept: "application/json"
+      X-Postmark-Server-Token: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,29 @@
+id: airtable-personal-access-token
+info:
+  name: Airtable Personal Access Token
+  author: prowl
+  severity: high
+  description: Airtable personal access token (pat…) or legacy API key (key…) for the Airtable API.
+  reference:
+    - https://airtable.com/developers/web/guides/personal-access-tokens
+  tags: airtable,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pat
+      - key
+    condition: or
+  - type: regex
+    regex:
+      - '\bpat[A-Za-z0-9]{14}\.[a-f0-9]{64}\b'
+      - '\bkey[a-z0-9]{14}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bpat[A-Za-z0-9]{14}\.[a-f0-9]{64}\b'
+      - '\bkey[a-z0-9]{14}\b'
+    group: 0

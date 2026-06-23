@@ -1,0 +1,36 @@
+id: contentful
+info:
+  name: Contentful Content Management API
+  author: prowl
+  reference: https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens
+# A CMA personal access token (CFPAT-) is validated by listing the spaces it can
+# reach. The host is fixed and token-only — no space/site id needed. A valid
+# token returns 200 with a spaces collection ("sys":"Array"); an invalid one
+# returns 401 with id "AccessTokenInvalid". EU-residency orgs answer on
+# api.eu.contentful.com, so both hosts are probed and a 200 from either is live.
+match: [contentful, CFPAT-]
+requests:
+  - method: GET
+    url: https://api.contentful.com/spaces
+    headers:
+      Authorization: "Bearer {{secret}}"
+      User-Agent: prowl-verify
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"sys"']
+  - method: GET
+    url: https://api.eu.contentful.com/spaces
+    headers:
+      Authorization: "Bearer {{secret}}"
+      User-Agent: prowl-verify
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"sys"']

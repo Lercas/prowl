@@ -1,0 +1,13 @@
+id: sparkpost
+info:
+  name: SparkPost
+  reference: https://developers.sparkpost.com/api/account/
+match: [sparkpost]
+requests:
+  - method: GET
+    url: https://api.sparkpost.com/api/v1/account
+    headers:
+      Authorization: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

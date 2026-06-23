@@ -1,0 +1,17 @@
+id: cloudflare
+info:
+  name: Cloudflare API token
+  reference: https://developers.cloudflare.com/api/operations/user-api-tokens-verify-token
+match: [cloudflare]
+requests:
+  - method: GET
+    url: https://api.cloudflare.com/client/v4/user/tokens/verify
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"status":"active"']
+    matchers-condition: and

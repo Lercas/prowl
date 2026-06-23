@@ -1,0 +1,27 @@
+id: pypi-api-token
+info:
+  name: PyPI API Token
+  author: prowl
+  severity: high
+  description: PyPI upload API token (pypi-AgEI… macaroon) granting package publish rights.
+  reference:
+    - https://pypi.org/help/#apitoken
+    - https://docs.pypi.org/api/upload/
+  tags: pypi,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pypi-AgEI
+    condition: or
+  - type: regex
+    regex:
+      - '\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{60,1000}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{60,1000}'
+    group: 0

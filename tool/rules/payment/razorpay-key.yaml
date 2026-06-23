@@ -1,0 +1,52 @@
+id: razorpay-key-id
+info:
+  name: Razorpay Live Key ID
+  author: prowl
+  severity: high
+  description: Razorpay live mode key identifier (rzp_live_); pairs with a secret for API auth.
+  reference:
+    - https://razorpay.com/docs/api/authentication/
+  tags: razorpay,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - rzp_live_
+    condition: or
+  - type: regex
+    regex:
+      - '\brzp_live_[0-9A-Za-z]{14}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\brzp_live_[0-9A-Za-z]{14}\b'
+---
+id: razorpay-key-secret
+info:
+  name: Razorpay Key Secret
+  author: prowl
+  severity: critical
+  description: Razorpay API key secret assigned alongside a live key id.
+  reference:
+    - https://razorpay.com/docs/api/authentication/
+  tags: razorpay,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - razorpay
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)razorpay[_\-]?(?:key[_\-]?)?secret["'']?\s*[:=]\s*["'']?([0-9A-Za-z]{24})\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '(?i)razorpay[_\-]?(?:key[_\-]?)?secret["'']?\s*[:=]\s*["'']?([0-9A-Za-z]{24})\b'
+    group: 1

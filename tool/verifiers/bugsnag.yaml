@@ -1,0 +1,17 @@
+id: bugsnag
+info:
+  name: Bugsnag
+  author: prowl
+  reference: https://developer.smartbear.com/bugsnag/docs/data-access-authentication
+# Data Access API personal auth token. Header is literally "token <value>"
+# (not "Bearer"), and the v2 API must be requested via X-Version: 2.
+match: [bugsnag]
+requests:
+  - method: GET
+    url: https://api.bugsnag.com/user/organizations
+    headers:
+      Authorization: "token {{secret}}"
+      X-Version: "2"
+    matchers:
+      - type: status
+        status: [200]

@@ -1,0 +1,26 @@
+id: figma-personal-access-token
+info:
+  name: Figma Personal Access Token
+  author: prowl
+  severity: high
+  description: Figma personal access token (figd_) granting access to the Figma REST API.
+  reference:
+    - https://www.figma.com/developers/api#access-tokens
+  tags: figma,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - figd_
+    condition: or
+  - type: regex
+    regex:
+      - '\bfigd_[A-Za-z0-9_-]{40}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bfigd_[A-Za-z0-9_-]{40}\b'
+    group: 0

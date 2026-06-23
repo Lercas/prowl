@@ -1,0 +1,26 @@
+id: firebase-fcm-server-key
+info:
+  name: Firebase Cloud Messaging Server Key
+  author: prowl
+  severity: high
+  description: Firebase Cloud Messaging (FCM) legacy server key (AAAA…) able to send push notifications.
+  reference:
+    - https://firebase.google.com/docs/cloud-messaging/migrate-v1
+  tags: firebase,messaging,credentials,token
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'AAAA'
+    condition: or
+  - type: regex
+    regex:
+      - '\bAAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bAAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}\b'
+    group: 0

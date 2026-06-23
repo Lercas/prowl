@@ -1,0 +1,15 @@
+id: github
+info:
+  name: GitHub
+  author: prowl
+  reference: https://docs.github.com/en/rest/users/users#get-the-authenticated-user
+match: [github, ghp_, gho_, ghs_, ghu_, ghr_]
+requests:
+  - method: GET
+    url: https://api.github.com/user
+    headers:
+      Authorization: "token {{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

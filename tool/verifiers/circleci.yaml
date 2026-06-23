@@ -1,0 +1,15 @@
+id: circleci
+info:
+  name: CircleCI
+  author: prowl
+  reference: https://circleci.com/docs/api/v2/index.html#operation/getCurrentUser
+match: [circleci]
+requests:
+  - method: GET
+    url: https://circleci.com/api/v2/me
+    headers:
+      Circle-Token: "{{secret}}"
+      User-Agent: prowl-verify
+    matchers:
+      - type: status
+        status: [200]

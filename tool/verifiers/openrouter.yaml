@@ -1,0 +1,18 @@
+id: openrouter
+info:
+  name: OpenRouter
+  author: prowl
+  reference: https://openrouter.ai/docs/api/api-reference/api-keys/get-current-key
+match: [openrouter, sk-or-v1-]
+requests:
+  - method: GET
+    url: https://openrouter.ai/api/v1/key
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"data"']

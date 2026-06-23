@@ -1,0 +1,23 @@
+id: launchdarkly
+info:
+  name: LaunchDarkly
+  author: prowl
+  reference: https://launchdarkly.com/docs/api/other/get-caller-identity
+# Personal/service access token (api-…). The Authorization header carries the
+# RAW token with NO "Bearer" prefix. caller-identity is an identity-echo
+# endpoint that needs no special scope. Commercial host only — EU
+# (app.eu.launchdarkly.com) and Federal (app.launchdarkly.us) tokens live on
+# different hosts and are not covered here.
+match: [launchdarkly, api-]
+requests:
+  - method: GET
+    url: https://app.launchdarkly.com/api/v2/caller-identity
+    headers:
+      Authorization: "{{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"accountId"']

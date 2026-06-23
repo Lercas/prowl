@@ -1,0 +1,21 @@
+id: aws
+info:
+  name: AWS (STS GetCallerIdentity)
+  reference: https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html
+match: [aws, akia, asia]
+extract:
+  aws_access_key_id: '(?:AKIA|ASIA)[0-9A-Z]{16}'
+  aws_secret_access_key: '[A-Za-z0-9/+]{40}'
+sign: awsv4
+sign_params:
+  service: sts
+  region: us-east-1
+requests:
+  - method: POST
+    url: https://sts.amazonaws.com/
+    headers:
+      Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+    body: "Action=GetCallerIdentity&Version=2011-06-15"
+    matchers:
+      - type: status
+        status: [200]

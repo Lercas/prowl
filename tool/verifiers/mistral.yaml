@@ -1,0 +1,14 @@
+id: mistral
+info:
+  name: Mistral AI
+  author: prowl
+  reference: https://docs.mistral.ai/api/#tag/models/operation/list_models_v1_models_get
+match: [mistral]
+requests:
+  - method: GET
+    url: https://api.mistral.ai/v1/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

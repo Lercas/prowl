@@ -1,0 +1,26 @@
+id: aws-mws-auth-token
+info:
+  name: Amazon MWS Auth Token
+  author: prowl
+  severity: high
+  description: Amazon Marketplace Web Service (MWS) authentication token (amzn.mws.<uuid>).
+  reference:
+    - https://developer-docs.amazon.com/sp-api/docs/migrating-from-amazon-mws
+  tags: aws,amazon,cloud,credentials
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - amzn.mws
+    condition: or
+  - type: regex
+    regex:
+      - '\bamzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bamzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'
+    group: 0

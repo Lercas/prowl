@@ -1,0 +1,27 @@
+id: hubspot-private-app-token
+info:
+  name: HubSpot Private App Token
+  author: prowl
+  severity: high
+  description: HubSpot private-app access token (pat-<region>-<uuid>) granting CRM API access.
+  reference:
+    - https://developers.hubspot.com/docs/apps/legacy-apps/private-apps/overview
+  tags: hubspot,crm,saas,credentials
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - pat-na
+      - pat-eu
+    condition: or
+  - type: regex
+    regex:
+      - '\bpat-(?:na|eu)\d?-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(pat-(?:na|eu)\d?-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b'
+    group: 1

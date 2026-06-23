@@ -1,0 +1,26 @@
+id: mistral-api-key
+info:
+  name: Mistral AI API Key
+  author: prowl
+  severity: high
+  description: Mistral AI API key (32-char token) detected next to a mistral context anchor.
+  reference:
+    - https://docs.mistral.ai/getting-started/quickstarts/studio/activate-and-generate-api-key/
+  tags: mistral,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - mistral
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)mistral[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)mistral[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})\b'
+    group: 1

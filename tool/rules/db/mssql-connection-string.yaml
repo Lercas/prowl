@@ -1,0 +1,25 @@
+id: mssql-ado-connection-string
+info:
+  name: SQL Server / ADO.NET Connection String with Password
+  author: prowl
+  severity: critical
+  description: Microsoft SQL Server / ADO.NET style connection string with a Server= host and inline Password= value.
+  reference:
+    - https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/connection-string-syntax
+  tags: mssql,sqlserver,db,connection-string,credentials
+category: db
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - 'Server='
+      - 'Password='
+    condition: and
+  - type: regex
+    regex:
+      - '(?i)Server=[^;\s]+;[^\n]*?Password=([^;\s"'']{4,})'
+extractors:
+  - type: regex
+    regex:
+      - '(?i)Server=[^;\s]+;[^\n]*?Password=([^;\s"'']{4,})'
+    group: 1

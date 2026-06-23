@@ -1,0 +1,26 @@
+id: cloudflare-origin-ca-key
+info:
+  name: Cloudflare Origin CA Key
+  author: prowl
+  severity: high
+  description: Cloudflare Origin CA service key (v1.0- prefixed, hex.base64 payload).
+  reference:
+    - https://developers.cloudflare.com/ssl/origin-configuration/origin-ca/
+  tags: cloudflare,cloud,credentials,pki
+category: cloud
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - v1.0-
+    condition: or
+  - type: regex
+    regex:
+      - '\bv1\.0-[0-9a-f]{24}-[0-9a-zA-Z]{146}\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\bv1\.0-[0-9a-f]{24}-[0-9a-zA-Z]{146}\b'
+    group: 0

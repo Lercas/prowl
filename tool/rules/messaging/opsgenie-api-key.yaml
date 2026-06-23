@@ -1,0 +1,27 @@
+id: opsgenie-api-key
+info:
+  name: Opsgenie API Key
+  author: prowl
+  severity: high
+  description: Atlassian Opsgenie API key (UUID) used with GenieKey authentication.
+  reference:
+    - https://support.atlassian.com/opsgenie/docs/api-key-management/
+  tags: opsgenie,atlassian,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - opsgenie
+      - GenieKey
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)(?:opsgenie|geniekey)["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:opsgenie|geniekey)["'' :=]{1,5}["'']?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})["'']?'
+    group: 1

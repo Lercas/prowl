@@ -1,0 +1,103 @@
+id: shopify-access-token
+info:
+  name: Shopify Access Token
+  author: prowl
+  severity: critical
+  description: Shopify app access token (shpat_) granting Admin API access to a store.
+  reference:
+    - https://shopify.dev/docs/apps/auth/oauth/getting-started
+  tags: shopify,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - shpat_
+    condition: or
+  - type: regex
+    regex:
+      - '\bshpat_[a-fA-F0-9]{32}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bshpat_[a-fA-F0-9]{32}\b'
+---
+id: shopify-custom-app-token
+info:
+  name: Shopify Custom App Access Token
+  author: prowl
+  severity: critical
+  description: Shopify custom app access token (shpca_) for Admin API access.
+  reference:
+    - https://shopify.dev/docs/apps/auth/oauth/getting-started
+  tags: shopify,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - shpca_
+    condition: or
+  - type: regex
+    regex:
+      - '\bshpca_[a-fA-F0-9]{32}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bshpca_[a-fA-F0-9]{32}\b'
+---
+id: shopify-private-app-token
+info:
+  name: Shopify Private App Access Token
+  author: prowl
+  severity: critical
+  description: Shopify private app access token (shppa_) for Admin API access.
+  reference:
+    - https://shopify.dev/docs/apps/auth/oauth/getting-started
+  tags: shopify,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - shppa_
+    condition: or
+  - type: regex
+    regex:
+      - '\bshppa_[a-fA-F0-9]{32}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bshppa_[a-fA-F0-9]{32}\b'
+---
+id: shopify-shared-secret
+info:
+  name: Shopify Shared Secret
+  author: prowl
+  severity: critical
+  description: Shopify app shared secret (shpss_) used to verify webhook HMAC signatures.
+  reference:
+    - https://shopify.dev/docs/apps/webhooks/configuration/https
+  tags: shopify,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - shpss_
+    condition: or
+  - type: regex
+    regex:
+      - '\bshpss_[a-fA-F0-9]{32}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bshpss_[a-fA-F0-9]{32}\b'

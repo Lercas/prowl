@@ -1,0 +1,28 @@
+id: gitlab-runner-registration-token
+info:
+  name: GitLab Runner Registration Token
+  author: prowl
+  severity: high
+  description: GitLab runner registration token (legacy GR1348941 prefix) used to register CI runners.
+  reference:
+    - https://docs.gitlab.com/runner/register/
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - GR1348941
+    condition: or
+  - type: regex
+    regex:
+      # Non-\b trailing boundary so a dash-terminated token isn't dropped; value in group 1.
+      - '\b(GR1348941[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\b(GR1348941[A-Za-z0-9_\-]{20})(?:[^A-Za-z0-9_\-]|$)'
+    group: 1

@@ -1,0 +1,13 @@
+id: yandex-apikey
+info:
+  name: Yandex Cloud API key
+  reference: https://yandex.cloud/docs/iam/concepts/authorization/api-key
+match: [yandex, "aqvn", "aje"]
+requests:
+  - method: GET
+    url: https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds
+    headers:
+      Authorization: "Api-Key {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

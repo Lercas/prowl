@@ -1,0 +1,15 @@
+id: paystack
+info:
+  name: Paystack
+  author: prowl
+  reference: https://paystack.com/docs/api/authentication/
+match: [paystack]
+requests:
+  - method: GET
+    url: https://api.paystack.co/transaction
+    headers:
+      Authorization: "Bearer {{secret}}"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

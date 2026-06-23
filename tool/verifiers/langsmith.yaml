@@ -1,0 +1,14 @@
+id: langsmith
+info:
+  name: LangSmith
+  author: prowl
+  reference: https://api.smith.langchain.com/redoc#tag/api-key/operation/list_api_keys_api_v1_api_key_get
+match: [langsmith, lsv2_, ls__]
+requests:
+  - method: GET
+    url: https://api.smith.langchain.com/api/v1/api-key
+    headers:
+      X-API-Key: "{{secret}}"
+    matchers:
+      - type: status
+        status: [200]

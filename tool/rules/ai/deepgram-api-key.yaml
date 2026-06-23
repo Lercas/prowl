@@ -1,0 +1,30 @@
+id: deepgram-api-key
+info:
+  name: Deepgram API Key
+  author: prowl
+  severity: high
+  description: Deepgram API key (40-char base36, [0-9a-z]) for the speech-to-text / voice API.
+  reference:
+    - https://developers.deepgram.com/docs/authenticating
+  tags: deepgram,ai,voice,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - deepgram
+    condition: or
+  # Keys are 40-char base36 ([0-9a-z], may contain g-z), NOT hex — the wider charset + deepgram anchor
+  # excludes 40-hex git SHAs and avoids FP-flooding.
+  - type: regex
+    regex:
+      - '(?i)deepgram[a-z0-9_\-]{0,24}["'']?\s*[:=]\s*["'']?([0-9a-z]{40})\b'
+      - '(?i)(?:authorization|token)["'' :=]+(?:token\s+)?([0-9a-z]{40})\b[\w"'' .:=,/-]{0,40}deepgram'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '(?i)deepgram[a-z0-9_\-]{0,24}["'']?\s*[:=]\s*["'']?([0-9a-z]{40})\b'
+      - '(?i)(?:authorization|token)["'' :=]+(?:token\s+)?([0-9a-z]{40})\b'
+    group: 1

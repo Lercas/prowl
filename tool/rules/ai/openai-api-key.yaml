@@ -1,0 +1,58 @@
+id: openai-api-key
+info:
+  name: OpenAI API Key
+  author: prowl
+  severity: high
+  description: OpenAI API key (sk-/sk-proj-/sk-svcacct-/sk-admin-) carrying the T3BlbkFJ marker.
+  reference:
+    - https://platform.openai.com/docs/api-reference/authentication
+    - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+  tags: openai,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - T3BlbkFJ
+    condition: or
+  - type: regex
+    regex:
+      # proj/svcacct/admin form: suffix includes '-'/'_', so a non-\b trailing boundary catches
+      # dash-terminated tokens (value in group 1). The bare sk-…T3BlbkFJ… form ends in word chars, so \b is fine.
+      - '\b(sk-(?:proj|svcacct|admin|service)-[A-Za-z0-9_\-]{20,150}T3BlbkFJ[A-Za-z0-9_\-]{20,150})(?:[^A-Za-z0-9_\-]|$)'
+      - '\b(sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '\b(sk-(?:proj|svcacct|admin|service)-[A-Za-z0-9_\-]{20,150}T3BlbkFJ[A-Za-z0-9_\-]{20,150})(?:[^A-Za-z0-9_\-]|$)'
+      - '\b(sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20})\b'
+    group: 1
+---
+id: openai-organization-id
+info:
+  name: OpenAI Organization ID
+  author: prowl
+  severity: low
+  description: OpenAI organization identifier (org-) used alongside an API key to scope requests.
+  reference:
+    - https://platform.openai.com/docs/api-reference/authentication
+  tags: openai,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - org-
+    condition: or
+  - type: regex
+    regex:
+      - '\borg-[A-Za-z0-9]{24}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\borg-[A-Za-z0-9]{24}\b'
+    group: 0

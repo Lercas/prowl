@@ -1,0 +1,26 @@
+id: contentful-cma-token
+info:
+  name: Contentful Content Management API Token
+  author: prowl
+  severity: high
+  description: Contentful personal access token (CFPAT-) for the Content Management API.
+  reference:
+    - https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens
+  tags: contentful,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - CFPAT-
+    condition: or
+  - type: regex
+    regex:
+      - '\bCFPAT-[A-Za-z0-9_-]{43}\b'
+  - type: entropy
+    min: 3.3
+extractors:
+  - type: regex
+    regex:
+      - '\bCFPAT-[A-Za-z0-9_-]{43}\b'
+    group: 0

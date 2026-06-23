@@ -1,0 +1,28 @@
+id: twitter-bearer-token
+info:
+  name: Twitter / X Bearer Token
+  author: prowl
+  severity: high
+  description: Twitter/X API v2 app-only bearer token (AAAAAAAAAA prefix) for OAuth2.
+  reference:
+    - https://developer.x.com/en/docs/authentication/oauth-2-0/bearer-tokens
+  tags: twitter,x,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - AAAAAAAAAA
+    condition: or
+  # Require Twitter/X or auth context: the AAAA… prefix is just base64 of leading zero bytes and
+  # appears all over SVG/.resx/notebook output, so the bare prefix alone floods FPs.
+  - type: regex
+    regex:
+      - '(?i)(?:bearer|twitter|x[_-]?api)[\w"'' .:=,/-]{0,40}AAAAAAAAAA[A-Za-z0-9%]{50,120}'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)(?:bearer|twitter|x[_-]?api)[\w"'' .:=,/-]{0,40}(AAAAAAAAAA[A-Za-z0-9%]{50,120})'
+    group: 1

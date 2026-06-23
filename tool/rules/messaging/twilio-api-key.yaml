@@ -1,0 +1,26 @@
+id: twilio-api-key
+info:
+  name: Twilio API Key SID
+  author: prowl
+  severity: high
+  description: Twilio API key SID (SK followed by 32 hex chars) used with an API key secret.
+  reference:
+    - https://www.twilio.com/docs/usage/api/keys
+  tags: twilio,messaging,credentials
+category: messaging
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - SK
+      - twilio
+    condition: or
+  - type: regex
+    regex:
+      - '\bSK[a-f0-9]{32}\b'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bSK[a-f0-9]{32}\b'

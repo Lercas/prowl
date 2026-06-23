@@ -1,0 +1,13 @@
+id: linode
+info:
+  name: Linode API
+  reference: https://www.linode.com/docs/api/profile/#profile-view
+match: [linode]
+requests:
+  - method: GET
+    url: https://api.linode.com/v4/profile
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers:
+      - type: status
+        status: [200]

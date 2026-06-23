@@ -1,0 +1,29 @@
+id: sentry-dsn
+info:
+  name: Sentry DSN
+  author: prowl
+  severity: medium
+  description: Sentry DSN embedding the public (and optionally secret) ingest key.
+  reference:
+    - https://docs.sentry.io/product/sentry-basics/concepts/dsn-explainer/
+  tags: sentry,observability,credentials
+category: observability
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - ingest.sentry.io
+      - sentry
+      - ingest
+    condition: or
+  - type: regex
+    regex:
+      - 'https://[a-f0-9]{32}(?::[a-f0-9]{32})?@[a-z0-9.-]*ingest\.[a-z0-9.-]*sentry\.io/[0-9]+'
+      - 'https://[a-f0-9]{32}(?::[a-f0-9]{32})?@[a-z0-9.-]+/[0-9]+'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - 'https://[a-f0-9]{32}(?::[a-f0-9]{32})?@[a-z0-9.-]*ingest\.[a-z0-9.-]*sentry\.io/[0-9]+'
+      - 'https://[a-f0-9]{32}(?::[a-f0-9]{32})?@[a-z0-9.-]+/[0-9]+'

@@ -1,0 +1,27 @@
+id: github-fine-grained-pat
+info:
+  name: GitHub Fine-Grained Personal Access Token
+  author: prowl
+  severity: high
+  description: GitHub fine-grained personal access token (github_pat_) with per-repository scopes.
+  reference:
+    - https://github.blog/2022-10-18-introducing-fine-grained-personal-access-tokens-for-github/
+    - https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+  tags: github,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - github_pat_
+    condition: or
+  - type: regex
+    regex:
+      - '\bgithub_pat_[A-Za-z0-9_]{82}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bgithub_pat_[A-Za-z0-9_]{82}\b'
+    group: 0

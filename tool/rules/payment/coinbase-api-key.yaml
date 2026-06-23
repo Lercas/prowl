@@ -1,0 +1,26 @@
+id: coinbase-api-key
+info:
+  name: Coinbase API Key Assignment
+  author: prowl
+  severity: high
+  description: Coinbase / Coinbase Commerce API key assigned in config or environment.
+  reference:
+    - https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/api-key-authentication
+  tags: coinbase,payment,credentials
+category: payment
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - coinbase
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)coinbase[_\-]?(?:api[_\-]?)?(?:key|secret)["'']?\s*[:=]\s*["'']?([0-9A-Za-z]{32,64})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)coinbase[_\-]?(?:api[_\-]?)?(?:key|secret)["'']?\s*[:=]\s*["'']?([0-9A-Za-z]{32,64})\b'
+    group: 1

@@ -1,0 +1,29 @@
+id: gitlab-pipeline-trigger-token
+info:
+  name: GitLab Pipeline Trigger Token
+  author: prowl
+  severity: high
+  description: GitLab pipeline trigger token (glptt- prefix, or 40-char hex in a trigger context) used to start pipelines via the API.
+  reference:
+    - https://docs.gitlab.com/ee/ci/triggers/
+    - https://docs.gitlab.com/ee/security/token_overview.html
+  tags: gitlab,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - glptt-
+      - trigger
+    condition: or
+  - type: regex
+    regex:
+      - '\bglptt-[0-9a-f]{40}\b'
+      - '(?i)(?:trigger[_-]?token|pipeline[_-]?trigger)["'' :=]{1,5}["'']?([0-9a-f]{40})["'']?'
+  - type: entropy
+    min: 3.0
+extractors:
+  - type: regex
+    regex:
+      - '\bglptt-[0-9a-f]{40}\b'
+    group: 0

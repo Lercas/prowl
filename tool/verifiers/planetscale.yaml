@@ -1,0 +1,34 @@
+id: planetscale
+info:
+  name: PlanetScale Service Token
+  author: prowl
+  reference: https://planetscale.com/docs/concepts/service-tokens
+# PlanetScale's API authenticates with a service token *pair*: the 12-char token id
+# and the pscale_tkn_ secret, joined by a colon in the Authorization header WITHOUT a
+# scheme (per the docs: "Both the ID and token are required in the Authorization header
+# without a scheme"). The id is pulled from the surrounding context; the secret is the
+# detected pscale_tkn_ value. Host is fixed and the endpoint is read-only (list orgs the
+# token can access). 200 => live; a bad id/token => 401/403.
+#
+# REQUIRES CO-LOCATED TOKEN ID: this verifier can only confirm a key when the paired 12-char
+# token_id is present in the finding's surrounding context (it forms half of the Authorization
+# header). When the id is absent the request is sent with an empty id and the API returns 404,
+# so the finding is reported false-dead (unverified) even if the pscale_tkn_ secret is live.
+# The logic below is correct whenever the id IS co-located; nothing to fix in the request itself.
+match: [planetscale, pscale_tkn_]
+extract:
+  token_id: '\b[a-z0-9]{12}\b'
+requests:
+  - method: GET
+    url: https://api.planetscale.com/v1/organizations
+    headers:
+      Authorization: "{{token_id}}:{{secret}}"
+      Accept: "application/json"
+      User-Agent: prowl-verify
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"data"']

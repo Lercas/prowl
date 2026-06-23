@@ -1,0 +1,15 @@
+id: deepgram
+info:
+  name: Deepgram
+  author: prowl
+  reference: https://developers.deepgram.com/reference/get-projects
+match: [deepgram]
+requests:
+  - method: GET
+    url: https://api.deepgram.com/v1/projects
+    headers:
+      Authorization: "Token {{secret}}"
+      Accept: application/json
+    matchers:
+      - type: status
+        status: [200]

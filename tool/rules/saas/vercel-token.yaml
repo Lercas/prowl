@@ -1,0 +1,26 @@
+id: vercel-access-token
+info:
+  name: Vercel Access Token
+  author: prowl
+  severity: high
+  description: Vercel access token (24-char base62 value in a vercel context) for the Vercel API.
+  reference:
+    - https://vercel.com/docs/rest-api#authentication
+  tags: vercel,saas,credentials,token
+category: saas
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - vercel
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)vercel[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{24})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)vercel[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{24})\b'
+    group: 1

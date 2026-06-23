@@ -1,0 +1,27 @@
+id: github-oauth-access-token
+info:
+  name: GitHub OAuth Access Token
+  author: prowl
+  severity: high
+  description: GitHub OAuth access token (gho_) issued to an OAuth app on a user's behalf.
+  reference:
+    - https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
+    - https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
+  tags: github,vcs,credentials,token
+category: vcs
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - gho_
+    condition: or
+  - type: regex
+    regex:
+      - '\bgho_[A-Za-z0-9]{36}\b'
+  - type: entropy
+    min: 3.2
+extractors:
+  - type: regex
+    regex:
+      - '\bgho_[A-Za-z0-9]{36}\b'
+    group: 0

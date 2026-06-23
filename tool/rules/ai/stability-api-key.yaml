@@ -1,0 +1,26 @@
+id: stability-api-key
+info:
+  name: Stability AI API Key
+  author: prowl
+  severity: high
+  description: Stability AI API key (sk- token) detected next to a stability context anchor.
+  reference:
+    - https://platform.stability.ai/docs/getting-started/authentication
+  tags: stability,ai,credentials,token
+category: ai
+matchers-condition: and
+matchers:
+  - type: word
+    words:
+      - stability
+    condition: or
+  - type: regex
+    regex:
+      - '(?i)stability[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?(sk-[A-Za-z0-9]{48,64})\b'
+  - type: entropy
+    min: 3.5
+extractors:
+  - type: regex
+    regex:
+      - '(?i)stability[a-z0-9_\-]{0,20}["'']?\s*[:=]\s*["'']?(sk-[A-Za-z0-9]{48,64})\b'
+    group: 1
