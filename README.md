@@ -108,6 +108,8 @@ prowl bucket s3://my-logs/2026/          # download & scan an S3 / GCS prefix (u
 kubectl get secret x -o yaml | prowl scan -   # scan piped input from stdin
 
 prowl domain https://example.com --authorized   # HTML, JS bundles, source maps, __NEXT_DATA__
+ATLASSIAN_EMAIL=... ATLASSIAN_API_TOKEN=... prowl jira https://acme.atlassian.net   # every issue version (Cloud/Server/DC)
+ATLASSIAN_PAT=... prowl confluence https://wiki.acme.com    # every page version, from the first
 prowl serve                        # stateless HTTP worker: POST /scan (cascade + rule templates; no in-process ML/verify)
 ```
 
@@ -146,6 +148,7 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 - **A container image** - `prowl image <ref>`, pull & scan every layer + the image config, no daemon. [docs](wiki/Container-Scanning.md)
 - **An S3 / GCS prefix** - `prowl bucket <s3://...|gs://...>`, download via your aws/gcloud CLI & scan. [docs](wiki/Bucket-Scanning.md)
 - **A live domain** - `prowl domain <host> --authorized`, HTML + inline state blobs + referenced JS & source maps. [docs](wiki/Domain-Scanning.md)
+- **Jira & Confluence** - `prowl jira <url>` / `prowl confluence <url>`, every issue/page version from the first (Cloud/Server/DC). [docs](wiki/Jira-Confluence-Scanning.md)
 
 ## Why Prowl
 

@@ -36,6 +36,7 @@ $ prowl scan .
 - [Container Scanning](Container-Scanning.md) — pull & scan an OCI/Docker image
 - [Cloud Storage Scanning](Bucket-Scanning.md) — download & scan an S3 / GCS prefix
 - [Domain Scanning](Domain-Scanning.md) — `prowl domain`, authorized web recon
+- [Jira & Confluence Scanning](Jira-Confluence-Scanning.md) — every issue/page version, Cloud & Server/DC
 - [Live Verification](Live-Verification.md) — `--verify`, confirming a secret is live
 
 ### Detection

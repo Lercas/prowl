@@ -114,18 +114,30 @@ var lockfileNoiseTypes = map[string]bool{
 var commentPrefixes = []string{"//", "#", "/*", "* ", "--", "<!--", ";"}
 
 // adjustSeverity demotes low-evidence matches in example/test paths or comments. Checksum matches
-// are never demoted; generic ones drop to "low", structured ones drop one step.
-func adjustSeverity(sev string, m detect.Match, li *lineIndex, path string) string {
+// are never demoted; generic ones drop to "low", structured ones drop one step. pathIsFile is false
+// for Jira/Confluence (and other non-file sources) whose Path is an issue key / page TITLE, not a
+// filesystem path — applying the example/test-path heuristic there would wrongly demote a real secret
+// on a page that merely happens to be titled e.g. "Examples".
+func adjustSeverity(sev string, m detect.Match, li *lineIndex, path string, pathIsFile bool) string {
 	if m.Stage == "L1-checksum" {
 		return sev // checksum is proof regardless of location
 	}
-	if !li.isComment(m.Start) && !isExamplePath(path) {
+	if !li.isComment(m.Start) && !(pathIsFile && isExamplePath(path)) {
 		return sev
 	}
 	if taxonomy.GenericLast[m.Type] {
 		return "low"
 	}
 	return demoteOne(sev)
+}
+
+// pathIsFilesystem reports whether an item's Path is a real filesystem path (so the example/lockfile
+// heuristics apply) vs an opaque locator like a Jira key or Confluence page title. It allow-lists the
+// filesystem labels — "code", "file" (docs: .md/.rst/.txt/.adoc, per source.sourceForPath), and the
+// empty default — so an unknown/new non-file source defaults to FALSE (no demotion), erring toward a
+// false positive rather than demoting/hiding a real secret.
+func pathIsFilesystem(source string) bool {
+	return source == "" || source == "code" || source == "file"
 }
 
 // lineIndex precomputes every line-start offset once, so per-match position lookups (line/col, pragma,
@@ -300,6 +312,8 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
 	dedup := map[string]int{} // value+line key -> index in out, avoids cascade/template double-reporting
 	li := newLineIndex(it.Text)
+	pathIsFile := pathIsFilesystem(it.Source)
+	itemURL, _ := it.Meta["url"].(string)
 	for i, m := range ms {
 		if i&1023 == 0 && ctx.Err() != nil { // let --timeout / Ctrl-C abort mid-file, not only between files
 
@@ -313,18 +327,18 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 		}
 		// in a lockfile a generic entropy/api-key hit is almost always a package integrity hash; drop
 		// only that noise (lockfileNoiseTypes), keeping typed secrets and credential-bearing generics
-		if isLockfile(it.Path) && lockfileNoiseTypes[m.Type] {
+		if pathIsFile && isLockfile(it.Path) && lockfileNoiseTypes[m.Type] {
 			continue
 		}
 		line, col := li.cols(m.Start)
-		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, it.Path)
+		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, it.Path, pathIsFile)
 		dedup[fmt.Sprintf("%d:%s", line, m.Value)] = len(out) // index of the finding appended next
 		ver, why := applyVerify(ctx, vset, m.Type, m.Value, it.Text)
 		out = append(out, model.Finding{
 			Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
-			Redacted: model.Redact(m.Value), Stage: m.Stage,
+			Redacted: model.Redact(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			Verified:    ver, Rationale: why,
 		})
@@ -382,9 +396,9 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			ver, why := applyVerify(ctx, vset, h.RuleID, h.Value, it.Text)
 			f := model.Finding{
 				Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
-				Severity: ruleSeverity(sev, h, li, it.Path),
+				Severity: ruleSeverity(sev, h, li, it.Path, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
-				Redacted: model.Redact(h.Value), Stage: "rule",
+				Redacted: model.Redact(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				Verified:    ver, Rationale: why,
 			}
@@ -576,8 +590,9 @@ func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context str
 }
 
 // ruleSeverity demotes a template hit in an example/test path or comment (same policy as the cascade).
-func ruleSeverity(sev string, h rules.Hit, li *lineIndex, path string) string {
-	if !li.isComment(h.Start) && !isExamplePath(path) {
+// pathIsFile is false for non-file sources (Jira/Confluence) whose Path is a key/title, not a path.
+func ruleSeverity(sev string, h rules.Hit, li *lineIndex, path string, pathIsFile bool) string {
+	if !li.isComment(h.Start) && !(pathIsFile && isExamplePath(path)) {
 		return sev
 	}
 	return demoteOne(sev)

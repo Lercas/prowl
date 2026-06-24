@@ -268,3 +268,45 @@ func TestRestoreMissingLive(t *testing.T) {
 		t.Errorf("restore must not duplicate a surviving live finding, got %d", len(got))
 	}
 }
+
+// round-7 regression: parseCommon preserves the --key=value token, so the bare-flag readers must be
+// equals-aware (a plain contains() would miss --current-only=true / --authorized=true).
+func TestHasFlagEqualsForm(t *testing.T) {
+	if !hasFlag([]string{"host", "--current-only=true"}, "--current-only") {
+		t.Error("--current-only=true not matched")
+	}
+	if !hasFlag([]string{"--authorized"}, "--authorized") {
+		t.Error("bare --authorized not matched")
+	}
+	if hasFlag([]string{"--currently-broken"}, "--current-only") {
+		t.Error("a different flag wrongly matched")
+	}
+	// ultra-audit regression: --current-only=false must be HONORED (false), else the entire history
+	// walk is silently disabled (T30 defeated); likewise --authorized=false must not authorize.
+	if hasFlag([]string{"--current-only=false"}, "--current-only") {
+		t.Error("--current-only=false must be false (would silently disable history)")
+	}
+	if hasFlag([]string{"--current-only=0"}, "--current-only") {
+		t.Error("--current-only=0 must be false")
+	}
+	if hasFlag([]string{"--authorized=false"}, "--authorized") {
+		t.Error("--authorized=false must NOT authorize")
+	}
+	if !hasFlag([]string{"--current-only=true"}, "--current-only") {
+		t.Error("--current-only=true must be true")
+	}
+	// verify-round regression: yes/no/on/off must be honored (ParseBool alone rejects them, which would
+	// silently treat --current-only=no as set), and an unparseable value defaults to the SAFE direction.
+	if hasFlag([]string{"--current-only=no"}, "--current-only") {
+		t.Error("--current-only=no must be false")
+	}
+	if hasFlag([]string{"--current-only=off"}, "--current-only") {
+		t.Error("--current-only=off must be false")
+	}
+	if !hasFlag([]string{"--current-only=yes"}, "--current-only") {
+		t.Error("--current-only=yes must be true")
+	}
+	if hasFlag([]string{"--current-only=banana"}, "--current-only") {
+		t.Error("unparseable value must default false (safe: scan more)")
+	}
+}

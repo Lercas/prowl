@@ -47,6 +47,8 @@ USAGE:
   prowl image <ref>           pull & scan a container image — every layer's files + config (env/labels/history)
   prowl bucket <s3://|gs://>   download & scan a cloud storage prefix (via the aws / gcloud CLI)
   prowl domain <domain>       scan a domain: HTML + __NEXT_DATA__/state blobs + referenced JS + maps
+  prowl jira <base-url>       scan a Jira instance (Cloud/Server/DC) across every issue version from the first
+  prowl confluence <base-url> scan a Confluence instance (Cloud/Server/DC) across every page version
   prowl serve [--addr :8080]  run as a stateless HTTP scan worker (horizontally scalable)
   prowl lsp                   run as a Language Server (in-editor secret highlighting)
   prowl doctor                self-diagnose the install (taxonomy/checksums/detection/config/git)
@@ -166,6 +168,10 @@ func main() {
 		os.Exit(cmdBucket(args[1:]))
 	case "domain":
 		os.Exit(cmdDomain(args[1:]))
+	case "jira":
+		os.Exit(cmdJira(args[1:]))
+	case "confluence":
+		os.Exit(cmdConfluence(args[1:]))
 	case "serve":
 		os.Exit(cmdServe(args[1:]))
 	case "config":
@@ -774,7 +780,10 @@ func parseCommon(args []string) (commonFlags, []string) {
 				os.Exit(2)
 			}
 		case strings.HasPrefix(a, "--"):
-			rest = append(rest, a) // command-specific flags handled by caller
+			// Preserve the ORIGINAL token (incl. the --key=value form) — a command-specific flag's
+			// inline value must survive for the caller's flagVal/multiFlag/stripValueFlags (which all
+			// understand --key=value). Appending the stripped name dropped `=value` silently.
+			rest = append(rest, args[i])
 		default:
 			rest = append(rest, a)
 		}
@@ -1471,7 +1480,7 @@ func cmdDomain(args []string) int {
 		fmt.Fprintln(os.Stderr, "usage: prowl domain <domain> [--authorized] [--recon]")
 		return 2
 	}
-	opts := domain.Options{Recon: contains(rest, "--recon"), Authorized: contains(rest, "--authorized"), MaxAssets: 300}
+	opts := domain.Options{Recon: hasFlag(rest, "--recon"), Authorized: hasFlag(rest, "--authorized"), MaxAssets: 300}
 	if v := flagVal(rest, "--max-assets"); v != "" {
 		opts.MaxAssets = mustInt("--max-assets", v, 1)
 	}
@@ -1524,19 +1533,12 @@ func cmdServe(args []string) int {
 	// Default to loopback: the server is unauthenticated, so the operator must opt into network
 	// exposure with an explicit --addr 0.0.0.0:PORT (behind auth/a proxy).
 	addr, maxConc := "127.0.0.1:8080", 0
-	for i := 0; i < len(rest); i++ {
-		switch rest[i] {
-		case "--addr":
-			if i+1 < len(rest) {
-				addr = rest[i+1]
-				i++
-			}
-		case "--max-concurrent":
-			if i+1 < len(rest) {
-				maxConc = mustInt("--max-concurrent", rest[i+1], 0)
-				i++
-			}
-		}
+	// flagVal understands both "--addr X" and "--addr=X" (the exact-match loop missed the = form).
+	if v := flagVal(rest, "--addr"); v != "" {
+		addr = v
+	}
+	if v := flagVal(rest, "--max-concurrent"); v != "" {
+		maxConc = mustInt("--max-concurrent", v, 0)
 	}
 	// serve runs the cascade + rule templates only (no ML or live-verification) — warn rather than
 	// silently ignore --ml/--ml-url so results aren't mistaken for ML-filtered.
@@ -1923,6 +1925,42 @@ func matchesAny(s string, subs []string) bool {
 		if sub != "" && strings.Contains(s, sub) {
 			return true
 		}
+	}
+	return false
+}
+
+// hasFlag reports whether a presence (boolean) flag is set. It matches the bare "--flag" AND the
+// "--flag=VALUE" form (parseCommon preserves the inline-value token), and — crucially — it HONORS the
+// value: "--flag=false"/"=0"/"=no" yield false, so a user being explicit about NOT wanting current-only
+// (or NOT being authorized) is not silently flipped to true. A non-boolean value (or bare flag) is
+// treated as set, matching presence semantics.
+func hasFlag(ss []string, name string) bool {
+	eq := name + "="
+	for _, s := range ss {
+		if s == name {
+			return true
+		}
+		if v, ok := strings.CutPrefix(s, eq); ok {
+			return parseBoolFlag(v)
+		}
+	}
+	return false
+}
+
+// parseBoolFlag interprets a --flag=VALUE boolean. It accepts the strconv.ParseBool forms PLUS the
+// common yes/no/on/off words (ParseBool rejects those, and silently treating "--current-only=no" as set
+// would disable the history walk). An unparseable value returns false — the safe direction for every
+// flag read this way (--current-only/--recon -> scan MORE; --authorized -> stay unauthorized) — rather
+// than treating a typo as set.
+func parseBoolFlag(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "1", "t", "true", "y", "yes", "on":
+		return true
+	case "0", "f", "false", "n", "no", "off", "":
+		return false
+	}
+	if b, err := strconv.ParseBool(v); err == nil {
+		return b
 	}
 	return false
 }

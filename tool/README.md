@@ -30,6 +30,11 @@ prowl scan --history                           # все блобы git-исто�
 prowl domain acme.com --authorized             # HTML + __NEXT_DATA__/state + referenced JS + maps
 prowl domain acme.com --authorized --recon     # + поддомены (crt.sh) + wayback
 
+# Jira / Confluence (многоверсионно - каждая версия issue/страницы с самой первой)
+prowl jira https://acme.atlassian.net          # Cloud (env: ATLASSIAN_EMAIL + ATLASSIAN_API_TOKEN)
+prowl jira https://jira.acme.com --project OPS  # Server/DC (env: ATLASSIAN_PAT), один проект
+prowl confluence https://wiki.acme.com --current-only  # только текущая версия (быстро, без истории)
+
 # Редактор (LSP - подсветка секретов на лету)
 prowl lsp                                       # запускается как Language Server (stdio)
 

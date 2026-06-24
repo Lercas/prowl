@@ -145,12 +145,18 @@ func writePretty(w io.Writer, fs []model.Finding, color bool) error {
 				loc = fmt.Sprintf("%d:%d", f.Line, f.Col)
 			}
 			tag := confidenceTag(f, color)
+			// A Jira/Confluence finding carries a direct browse/page URL — show it so the secret is
+			// locatable (its Path is a key/title and Line is an offset into a synthetic blob).
+			locator := ""
+			if f.URL != "" {
+				locator = "  " + paint(color, cDim, sanitizeTerminal(f.URL))
+			}
 			// The redacted value can carry attacker bytes — strip them before painting. f.Type is from
 			// prowl's own rule set, so it needs no sanitizing.
-			fmt.Fprintf(w, "    %s  %-*s  %s  %s%s\n",
+			fmt.Fprintf(w, "    %s  %-*s  %s  %s%s%s\n",
 				badge, maxType, f.Type,
 				paint(color, cDim, fmt.Sprintf("%-7s", loc)),
-				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag)
+				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag, locator)
 		}
 		fmt.Fprintln(w)
 	}
@@ -260,7 +266,7 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 			},
 			"locations": []map[string]any{{
 				"physicalLocation": map[string]any{
-					"artifactLocation": map[string]any{"uri": f.Path},
+					"artifactLocation": map[string]any{"uri": sarifURI(f)},
 					// SARIF 2.1.0 requires startLine/startColumn >= 1; a Line/Col-0 hit is clamped
 					// (see sarifPos) so it doesn't fail schema validation.
 					"region": map[string]any{"startLine": sarifPos(f.Line), "startColumn": sarifPos(f.Col)},
@@ -361,6 +367,15 @@ func sarifPos(n int) int {
 		return 1
 	}
 	return n
+}
+
+// sarifURI is the artifactLocation uri: a finding's direct URL when it has one (Jira/Confluence),
+// else its Path (a code finding's file path — a valid relative URI).
+func sarifURI(f model.Finding) string {
+	if f.URL != "" {
+		return f.URL
+	}
+	return f.Path
 }
 
 // safeConfidence clamps a confidence to [0,1] and maps NaN to 0. A non-finite value (e.g. from a buggy

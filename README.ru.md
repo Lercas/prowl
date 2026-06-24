@@ -82,6 +82,8 @@ prowl bucket s3://my-logs/2026/          # скачать и просканир�
 kubectl get secret x -o yaml | prowl scan -   # сканировать ввод из stdin
 
 prowl domain https://example.com --authorized   # HTML, JS-бандлы, source maps, __NEXT_DATA__
+ATLASSIAN_EMAIL=... ATLASSIAN_API_TOKEN=... prowl jira https://acme.atlassian.net   # каждая версия issue (Cloud/Server/DC)
+ATLASSIAN_PAT=... prowl confluence https://wiki.acme.com    # каждая версия страницы, с самой первой
 prowl serve                        # stateless HTTP-воркер: POST /scan
 ```
 

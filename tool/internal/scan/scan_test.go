@@ -53,6 +53,52 @@ func TestRunSeverityPragmaAllow(t *testing.T) {
 	}
 }
 
+// a real secret on a Jira/Confluence page whose TITLE merely contains "example" must NOT be demoted
+// (its Path is a title, not a file path), and the finding must carry the browse/page URL from Meta.
+func TestSourceAwareExamplePathAndURL(t *testing.T) {
+	det := detector(t)
+	const key = `AKIANAFGYOEYPXU1DSYP`
+	fs := Run(context.Background(), feed(
+		model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "examples/x.py"},
+		model.Item{Text: `AWS="` + key + `"`, Source: "jira", Path: "Examples@v3", Meta: map[string]any{"url": "https://x/browse/E-1"}},
+	), det, nil, nil, 2, nil, nil)
+	var code, jira model.Finding
+	for _, f := range fs {
+		switch f.Source {
+		case "code":
+			code = f
+		case "jira":
+			jira = f
+		}
+	}
+	if code.Severity == "high" {
+		t.Errorf("code finding under examples/ should be demoted, got %q", code.Severity)
+	}
+	if jira.Severity != "high" {
+		t.Errorf("jira finding (title contains 'example', NOT a file path) must not be demoted, got %q", jira.Severity)
+	}
+	if jira.URL != "https://x/browse/E-1" {
+		t.Errorf("jira finding URL not threaded from Meta, got %q", jira.URL)
+	}
+}
+
+// round-7 regression: source "file" (.md/.rst/.txt/.adoc docs, per sourceForPath) is a real
+// filesystem path and MUST keep the example/test-path demotion — a fake key in examples/setup.md
+// must not be reported at full severity.
+func TestFileSourceStillDemoted(t *testing.T) {
+	det := detector(t)
+	const key = `AKIANAFGYOEYPXU1DSYP`
+	fs := Run(context.Background(), feed(
+		model.Item{Text: `AWS="` + key + `"`, Source: "file", Path: "examples/setup.md"},
+	), det, nil, nil, 1, nil, nil)
+	if len(fs) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(fs))
+	}
+	if fs[0].Severity == "high" { // examples/ path -> aws (cloud high) must be demoted
+		t.Fatalf("secret in examples/setup.md (Source=file) not demoted, got %q", fs[0].Severity)
+	}
+}
+
 func TestRunAllowFunc(t *testing.T) {
 	det := detector(t)
 	allow := func(value, path string) bool { return value == "AKIANAFGYOEYPXU1DSYP" }

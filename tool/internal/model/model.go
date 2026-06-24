@@ -28,8 +28,11 @@ type Finding struct {
 	Col        int     `json:"col"`
 	Redacted   string  `json:"redacted"`
 	Stage      string  `json:"stage"`
-	Verified   *bool   `json:"verified,omitempty"`
-	Rationale  string  `json:"rationale,omitempty"`
+	// URL, when set, is a direct locator for the finding (a Jira browse URL, a Confluence page URL).
+	// Code findings leave it empty and use Path:Line. Omitted from JSON when empty.
+	URL       string `json:"url,omitempty"`
+	Verified  *bool  `json:"verified,omitempty"`
+	Rationale string `json:"rationale,omitempty"`
 	// Fingerprint is a stable per-secret identity (sha256 over type|path|RAW value), set once at
 	// scan time before redaction. Baselining keys on this so two distinct secrets that share their
 	// first/last 4 chars (e.g. all AWS keys start AKIA) don't collide to one fingerprint.

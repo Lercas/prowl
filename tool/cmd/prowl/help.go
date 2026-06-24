@@ -17,6 +17,8 @@ var commands = []cmdInfo{
 	{"image", "pull & scan a container image", imageHelp},
 	{"bucket", "download & scan a cloud storage prefix", bucketHelp},
 	{"domain", "scan a live site (HTML + state blobs + JS)", domainHelp},
+	{"jira", "scan Jira across every issue version (Cloud/Server/DC)", ""},
+	{"confluence", "scan Confluence across every page version", ""},
 	{"serve", "run as a stateless HTTP scan worker", serveHelp},
 	{"lsp", "run as a Language Server (in-editor highlighting)", ""},
 	{"doctor", "self-diagnose the install", ""},
@@ -250,6 +252,7 @@ var knownFlags = map[string]bool{
 	"--min-confidence": true, "--min-severity": true, "--disable": true, "--exclude-repo": true,
 	"--branch": true, "--depth": true, "--concurrency": true, "--max-per-file": true,
 	"--ml": true, "--ml-model": true, "--ml-url": true, "--ml-threshold": true,
+	"--base-url": true, "--current-only": true, "--max-items": true, "--project": true, "--space": true, "--field": true,
 }
 
 func allFlagNames() []string {
