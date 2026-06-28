@@ -34,6 +34,7 @@ $ prowl scan .
 - [Repository Scanning](Repository-Scanning.md) — clone & scan a remote repo by URL
 - [Org-Wide Scanning](Org-Scanning.md) — clone & scan every repo in an org/group/workspace
 - [Container Scanning](Container-Scanning.md) — pull & scan an OCI/Docker image
+- [Mobile App Scanning](Mobile-Scanning.md) — `prowl mobile`, unpack & scan an Android APK / iOS IPA
 - [Cloud Storage Scanning](Bucket-Scanning.md) — download & scan an S3 / GCS prefix
 - [Domain Scanning](Domain-Scanning.md) — `prowl domain`, authorized web recon
 - [Jira & Confluence Scanning](Jira-Confluence-Scanning.md) — every issue/page version, Cloud & Server/DC
@@ -48,6 +49,7 @@ $ prowl scan .
 ### Integrate
 - [CI/CD Integration](CI-CD-Integration.md) — exit codes, SARIF, baselines, pre-commit
 - [Server Mode](Server-Mode.md) — `prowl serve`, the HTTP scan API
+- [MCP Server](MCP-Server.md) — `prowl mcp`, drive scans as tools from an AI agent
 - [Editor Integration (LSP)](Editor-Integration-LSP.md) — in-editor highlighting
 
 ### Reference

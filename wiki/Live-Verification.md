@@ -53,6 +53,22 @@ For each finding, prowl selects a verifier by matching the detector type id **or
 
 Verifiers target read-only identity/validate endpoints only (`/user`, `/account`, `whoami`, `validate`) — never anything that mutates state. Results are cached by value, so each distinct secret is checked exactly once even if it appears many times.
 
+## Blast radius — what the key unlocks
+
+Confirming a secret is *live* answers "is it real?"; it does not answer "how bad is it?" A live key that unlocks a dozen Google products is a different incident from one scoped to a single read-only endpoint. With `--verify`, a verifier can go beyond live/dead and report **what the credential actually unlocks** — its blast radius.
+
+A verifier declares one or more **capability probes**: extra read-only requests that each name a concrete capability the key grants. prowl runs them after the key is confirmed live, and folds the ones that succeed into the finding's rationale. So instead of a bare `verified live`, the rationale reads e.g.:
+
+```text
+verified live: Google API key — unlocks: Firebase Identity Toolkit, Maps Geocoding
+```
+
+This is purely additive: the probes are the same kind of read-only requests as the base verification (no state is mutated), they run through the same SSRF-guarded client, and a probe that fails or errors simply isn't listed — it never downgrades a confirmed-live finding to dead.
+
+### The shipped `google-api-key` verifier
+
+prowl ships a `google-api-key` verifier that demonstrates the model. A bare Google API key (`AIza…`) carries no scope in its shape, so live/dead alone is uninformative — the question is *which* Google APIs it has been left enabled for. The verifier probes a set of read-only Google endpoints — **Identity Toolkit** (Firebase auth), **Gemini** (Generative Language), and **Maps** (Geocoding) — and reports each one the key successfully reaches as an unlocked capability, turning a generic "live Google key" into an actionable blast-radius summary.
+
 ## Trust and safety model
 
 Verification makes outbound requests carrying real secrets, so the safety properties matter:
@@ -103,7 +119,7 @@ In `--format json`, findings gain `verified` (a tri-state: `true`, `false`, or a
 }
 ```
 
-A rejected credential reads `"verified": false, "rationale": "provider rejected the credential (stripe)"`; an inconclusive one omits `verified` and reads e.g. `"rationale": "verification inconclusive: timeout"`.
+A rejected credential reads `"verified": false, "rationale": "provider rejected the credential (stripe)"`; an inconclusive one omits `verified` and reads e.g. `"rationale": "verification inconclusive: timeout"`. When a verifier ran [capability probes](#blast-radius--what-the-key-unlocks), the `rationale` names what the key unlocks — e.g. `"verified live: Google API key — unlocks: Firebase Identity Toolkit, Maps Geocoding"`.
 
 ## See also
 

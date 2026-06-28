@@ -103,14 +103,18 @@ prowl scan . --format sarif -o out.sarif    # for code scanning / CI
 
 prowl repo https://github.com/org/repo   # clone a remote repo (GitHub/GitLab/Bitbucket) and scan it
 GITHUB_TOKEN=... prowl org github:my-org   # scan every repo in an org/group/workspace
+GITHUB_TOKEN=... prowl org github:my-user --gists   # scan a github user's public gists instead of repos
 prowl image alpine:latest                # pull & scan a container image (every layer + config)
 prowl bucket s3://my-logs/2026/          # download & scan an S3 / GCS prefix (uses your aws/gcloud CLI)
+prowl mobile app.apk                     # unpack & scan an Android APK / iOS IPA (resources + binary strings)
 kubectl get secret x -o yaml | prowl scan -   # scan piped input from stdin
 
 prowl domain https://example.com --authorized   # HTML, JS bundles, source maps, __NEXT_DATA__
+prowl domain --authorized --targets hosts.txt   # scan a newline-delimited host list with a worker pool
 ATLASSIAN_EMAIL=... ATLASSIAN_API_TOKEN=... prowl jira https://acme.atlassian.net   # every issue version (Cloud/Server/DC)
 ATLASSIAN_PAT=... prowl confluence https://wiki.acme.com    # every page version, from the first
 prowl serve                        # stateless HTTP worker: POST /scan (cascade + rule templates; no in-process ML/verify)
+prowl mcp                          # Model Context Protocol server over stdio: AI agents drive scans as tools
 ```
 
 First run installs the rule and verifier libraries; after that they load automatically:
@@ -130,9 +134,10 @@ prowl scan . --min-severity high      # only high+ findings
 prowl scan . --min-confidence 0.7     # drop weak, low-confidence guesses
 prowl scan . --disable generic_high_entropy   # silence one noisy detector type
 prowl scan . --no-dedupe              # show every occurrence (default: one per file)
+prowl scan . --show-secrets           # print the FULL unredacted value + line context (authorized triage)
 ```
 
-The same secret found repeatedly in one file is reported once by default; `--no-dedupe` shows them all. [docs](wiki/Scanning-Files.md#cutting-noise)
+The same secret found repeatedly in one file is reported once by default; `--no-dedupe` shows them all. `--show-secrets` unmasks the full value and the surrounding line for authorized triage, feeding the ML feedback flywheel. [docs](wiki/Scanning-Files.md#cutting-noise)
 
 Full reference for every command, flag, and feature is in the [wiki](wiki/README.md).
 
@@ -147,8 +152,10 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 - **A whole org / group / workspace** - `prowl org <platform>:<name>`, every repo at once. [docs](wiki/Org-Scanning.md)
 - **A container image** - `prowl image <ref>`, pull & scan every layer + the image config, no daemon. [docs](wiki/Container-Scanning.md)
 - **An S3 / GCS prefix** - `prowl bucket <s3://...|gs://...>`, download via your aws/gcloud CLI & scan. [docs](wiki/Bucket-Scanning.md)
+- **A mobile app** - `prowl mobile <app.apk|app.ipa|path|https-url>`, unpack the APK/IPA and scan resources, JSON/plist/XML, and printable strings inside binary entries. [docs](wiki/Mobile-Scanning.md)
 - **A live domain** - `prowl domain <host> --authorized`, HTML + inline state blobs + referenced JS & source maps. [docs](wiki/Domain-Scanning.md)
 - **Jira & Confluence** - `prowl jira <url>` / `prowl confluence <url>`, every issue/page version from the first (Cloud/Server/DC). [docs](wiki/Jira-Confluence-Scanning.md)
+- **As an MCP server** - `prowl mcp`, expose scans as Model Context Protocol tools so AI agents drive them. [docs](wiki/MCP-Server.md)
 
 ## Why Prowl
 
@@ -161,13 +168,22 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 - **Verifies live.** `--verify` calls the provider's own read-only identity endpoint (AWS, GitHub,
   Stripe, GCP, Yandex Cloud, and so on) and reports which secrets are actually live. This is the
   strongest possible false-positive filter.
+- **Verified blast radius.** A verifier can declare capability probes, so a live finding reports *what*
+  the key unlocks, not just live/dead - e.g. "verified live: Google API key - unlocks: Firebase Identity
+  Toolkit, Maps Geocoding". Ships a google-api-key verifier (probes Identity Toolkit / Gemini / Maps).
+- **Fewer false positives.** The generic detectors (`generic_high_entropy`, `generic_password`,
+  `generic_api_key`, `basic_auth_header`) now drop code module-paths, minified-JS fragments, license-key
+  shapes, `\uXXXX` unicode strings, hash digests, and URL-parsing regexes while keeping real secrets; the
+  `--ml` stage scores dense minified bundles, and the private-key detector requires an actual key body (a
+  bare PEM header no longer fires).
 - **Rules live outside the binary.** 159 YAML rule files you can edit, disable, or
   extend, and your existing **gitleaks** `.toml` and **trufflehog** `.yaml` rulesets drop in
   unchanged.
 - **Fast.** ~310 MB/s single-threaded, zero-allocation hot path, scales linearly across cores. An
   Aho-Corasick pre-filter means a 159-rule library costs almost nothing.
 - **Built for pipelines.** CLI, pre-commit, GitHub Action, SARIF output, exit-code gating, an LSP
-  mode for editor highlighting, and a `serve` mode for horizontal scaling.
+  mode for editor highlighting, a `serve` mode for horizontal scaling, and an `mcp` mode that exposes
+  scans as Model Context Protocol tools for AI agents.
 
 ## Benchmark
 

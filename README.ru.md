@@ -77,14 +77,18 @@ prowl scan . --format sarif -o out.sarif    # для code scanning / CI
 
 prowl repo https://github.com/org/repo   # клонировать удалённый репозиторий (GitHub/GitLab/Bitbucket) и просканировать
 GITHUB_TOKEN=... prowl org github:my-org   # просканировать каждый репозиторий в орге/группе/воркспейсе
+GITHUB_TOKEN=... prowl org github:my-user --gists   # просканировать публичные gist'ы пользователя GitHub, а не репозитории
 prowl image alpine:latest                # стянуть и просканировать образ контейнера (каждый слой + конфиг)
 prowl bucket s3://my-logs/2026/          # скачать и просканировать префикс S3 / GCS (через ваш CLI aws/gcloud)
 kubectl get secret x -o yaml | prowl scan -   # сканировать ввод из stdin
 
 prowl domain https://example.com --authorized   # HTML, JS-бандлы, source maps, __NEXT_DATA__
+prowl domain --targets hosts.txt --authorized   # просканировать список хостов (по строке на хост) с пулом воркеров
+prowl mobile app.apk                     # распаковать и просканировать Android APK / iOS IPA (включая строки в бинарниках)
 ATLASSIAN_EMAIL=... ATLASSIAN_API_TOKEN=... prowl jira https://acme.atlassian.net   # каждая версия issue (Cloud/Server/DC)
 ATLASSIAN_PAT=... prowl confluence https://wiki.acme.com    # каждая версия страницы, с самой первой
 prowl serve                        # stateless HTTP-воркер: POST /scan
+prowl mcp                          # запуститься как MCP-сервер по stdio, чтобы AI-агенты управляли сканами
 ```
 
 Первый запуск устанавливает библиотеки правил и верификаторов; дальше они загружаются автоматически:
@@ -104,9 +108,12 @@ prowl scan . --min-severity high      # только находки high и вы
 prowl scan . --min-confidence 0.7     # отбросить слабые находки с низкой уверенностью
 prowl scan . --disable generic_high_entropy   # заглушить один шумный тип детектора
 prowl scan . --no-dedupe              # показать каждое вхождение (по умолчанию - одно на файл)
+prowl scan . --show-secrets           # вывести ПОЛНОЕ незамаскированное значение + контекст строки (для авторизованной триажи)
 ```
 
 Один и тот же секрет, встретившийся в файле несколько раз, по умолчанию выводится один раз; `--no-dedupe` показывает их все. [док](wiki/Scanning-Files.md#cutting-noise)
+
+`--show-secrets` печатает полное незамаскированное значение и окружающий контекст строки для авторизованной триажи - и питает ML feedback/flywheel.
 
 Полный справочник по всем командам, флагам и фичам - в [вики](wiki/README.md).
 
@@ -122,6 +129,27 @@ prowl scan . --no-dedupe              # показать каждое вхожд
 - **Образ контейнера** - `prowl image <ref>`, стянуть и просканировать каждый слой + конфиг образа, без демона. [док](wiki/Container-Scanning.md)
 - **Префикс S3 / GCS** - `prowl bucket <s3://...|gs://...>`, скачать через ваш CLI aws/gcloud и просканировать. [док](wiki/Bucket-Scanning.md)
 - **Живой домен** - `prowl domain <host> --authorized`, HTML + встроенные state-блобы + связанные JS и source maps. [док](wiki/Domain-Scanning.md)
+- **Мобильное приложение** - `prowl mobile <app.apk|app.ipa|путь|https-url>`, распаковать и просканировать Android APK / iOS IPA: ресурсы, JSON, plist, XML - как есть, бинарники - проходом по печатным строкам. [док](wiki/Mobile-Scanning.md)
+
+## Сканирование мобильных приложений
+
+`prowl mobile <app.apk | app.ipa | путь | https-url>` распаковывает и сканирует Android APK или iOS
+IPA. APK/IPA - это ZIP: обходится каждая запись. Ресурсы / JSON / plist / XML (в том числе ценные
+`google-services.json` / `GoogleService-Info.plist`, где утекают Google API-ключи и project id)
+сканируются как есть; бинарные записи (`.dex`, `resources.arsc`, `.so`, Mach-O) проходятся
+чисто-Go-проходом по печатным строкам (8-битный ASCII + UTF-16LE), так что ключи, запечённые в
+таблицах строк, всплывают. Флаги: `--no-strings`, `--min-run N`, плюс все флаги сканирования
+(`--ml`, `--verify`, `--format`, `--max-size`, …). Чистый Go, Android SDK не нужен. Цель-URL
+скачивается через клиент с защитой от SSRF во временный каталог.
+
+## MCP-сервер
+
+`prowl mcp` запускает Prowl как сервер Model Context Protocol по stdio (JSON-RPC, разделённый
+переводами строк), чтобы AI-агенты (Claude Code/Desktop, любой MCP-клиент) управляли сканами как
+инструментами. Инструменты: `prowl_scan` (путь), `prowl_domain` (цель + обязательно `authorized:true`),
+`prowl_mobile` (путь к apk/ipa), `prowl_repo` (git-URL) - каждый возвращает JSON-конверт находок.
+Регистрация: `claude mcp add prowl -- prowl mcp`. Полное руководство для агентов - в
+[`AGENTS.md`](AGENTS.md) в корне репозитория.
 
 ## Почему Prowl
 
@@ -129,11 +157,21 @@ prowl scan . --no-dedupe              # показать каждое вхожд
   контекстная модель, затем глубокий энкодер) с фильтрацией примеров/плейсхолдеров, отбраковкой
   хешей и уверенностью по каждой находке. На бенчмарке ниже один каскад даёт высшую точность среди
   всех инструментов; ML-этапы немного уступают её ради лучшей полноты и лидирующего F1.
+- **Меньше ложных срабатываний.** Generic-детекторы (`generic_high_entropy`, `generic_password`,
+  `generic_api_key`, `basic_auth_header`) теперь отбрасывают пути модулей кода, фрагменты
+  минифицированного JS, формы лицензионных ключей, `\uXXXX`-юникод-строки, хеш-дайджесты и regex для
+  разбора URL - сохраняя настоящие секреты (пароли в кавычках, DSN с бэкслешами, ключи без цифр).
+  In-process ML-этап (`--ml`) теперь также скорит плотные минифицированные бандлы. Детектор приватных
+  ключей требует тела ключа (одинокий PEM-заголовок больше не срабатывает).
 - **Находит то, что не по силам regex.** Пароли в немецком/французском/русском тексте, токены без
   фиксированного префикса, секреты, спрятанные внутри base64-блобов и JS source maps.
 - **Проверяет вживую.** `--verify` обращается к собственному read-only эндпоинту идентификации
   провайдера (AWS, GitHub, Stripe, GCP, Yandex Cloud и так далее) и сообщает, какие секреты реально
   живы. Это сильнейший из возможных фильтров ложных срабатываний.
+- **Радиус поражения.** С `--verify` живая находка теперь сообщает, что именно открывает ключ, а не
+  просто «жив/мёртв»: верификатор может объявить пробы «capability», и обоснование находки читается,
+  например, «verified live: Google API key - unlocks: Firebase Identity Toolkit, Maps Geocoding».
+  Поставляется верификатор `google-api-key` (пробит Identity Toolkit / Gemini / Maps).
 - **Правила живут вне бинарника.** 159 YAML-шаблонов, которые можно править, отключать
   или расширять, а ваши существующие наборы правил **gitleaks** `.toml` и **trufflehog** `.yaml`
   подключаются без изменений.
