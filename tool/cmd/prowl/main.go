@@ -45,12 +45,14 @@ USAGE:
   prowl repo <git-url>        clone & scan a remote repo (GitHub/GitLab/Bitbucket/any git URL)
   prowl org <platform>:<name> clone & scan every repo in a GitHub org / GitLab group / Bitbucket workspace
   prowl image <ref>           pull & scan a container image — every layer's files + config (env/labels/history)
+  prowl mobile <apk|ipa|url>   unpack & scan an Android/iOS app (resources + dex/arsc/.so strings)
   prowl bucket <s3://|gs://>   download & scan a cloud storage prefix (via the aws / gcloud CLI)
   prowl domain <domain>       scan a domain: HTML + __NEXT_DATA__/state blobs + referenced JS + maps
   prowl jira <base-url>       scan a Jira instance (Cloud/Server/DC) across every issue version from the first
   prowl confluence <base-url> scan a Confluence instance (Cloud/Server/DC) across every page version
   prowl serve [--addr :8080]  run as a stateless HTTP scan worker (horizontally scalable)
   prowl lsp                   run as a Language Server (in-editor secret highlighting)
+  prowl mcp                   run as an MCP server (AI agents call scans as tools)
   prowl doctor                self-diagnose the install (taxonomy/checksums/detection/config/git)
   prowl detectors             list detector types
   prowl rules export -o FILE  write the built-in rules to an editable file (rules live outside the binary)
@@ -164,6 +166,8 @@ func main() {
 		os.Exit(cmdOrg(args[1:]))
 	case "image":
 		os.Exit(cmdImage(args[1:]))
+	case "mobile":
+		os.Exit(cmdMobile(args[1:]))
 	case "bucket":
 		os.Exit(cmdBucket(args[1:]))
 	case "domain":
@@ -189,6 +193,8 @@ func main() {
 			fmt.Fprintln(os.Stderr, "lsp error:", err)
 			os.Exit(2)
 		}
+	case "mcp":
+		os.Exit(cmdMCP(args[1:]))
 	default:
 		dieUnknownCommand(cmd)
 	}
@@ -378,6 +384,7 @@ type commonFlags struct {
 	rulesDir                                 []string
 	tags, excludeTags, ruleSeverity          string
 	verify, verifiedOnly                     bool
+	showSecrets                              bool // --show-secrets: emit the full unredacted value
 	failOnVerified                           bool // gate (exit 1) only on a provider-confirmed-LIVE secret
 	verifiers                                []string
 	verifyTimeout                            time.Duration
@@ -551,6 +558,7 @@ func loadConfig(c *commonFlags) *config.Config {
 	detect.ApplyTuning(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)
 	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
 	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
+	scan.SetRevealSecrets(c.showSecrets)
 	if !c.mlThresholdSet && cfg.Performance.MLThreshold > 0 {
 		c.mlThreshold = cfg.Performance.MLThreshold
 	}
@@ -695,6 +703,8 @@ func parseCommon(args []string) (commonFlags, []string) {
 		case a == "--verified-only":
 			c.verify = true
 			c.verifiedOnly = true
+		case a == "--show-secrets":
+			c.showSecrets = true
 		case a == "--verifiers":
 			c.verifiers = append(c.verifiers, next())
 		case a == "--config":
@@ -1275,21 +1285,32 @@ func cmdOrg(args []string) int {
 	excludeRepo := splitCSV(flagVal(args, "--exclude-repo"))
 	c, rest := parseCommon(stripValueFlags(args, "--branch", "--depth", "--concurrency", "--exclude-repo"))
 	setupLogging(c)
-	if len(rest) == 0 {
-		fmt.Fprintln(os.Stderr, "usage: prowl org <github|gitlab|bitbucket>:<name> [--history] [--concurrency N] [--exclude-repo S,…] [scan flags]")
+	target := firstNonFlag(rest)
+	if target == "" {
+		fmt.Fprintln(os.Stderr, "usage: prowl org <github|gitlab|bitbucket>:<name> [--gists] [--history] [--concurrency N] [--exclude-repo S,…] [scan flags]")
 		fmt.Fprintln(os.Stderr, "  auth via GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN env (for private repos)")
 		return 2
 	}
+	gists := hasFlag(rest, "--gists")
 	ctx, stop := rootContext(c)
 	defer stop()
 	// Load config before listing so limits.org_max_pages bounds ListRepos. noAutoConfig is set first so
 	// a cloned repo's own untrusted .prowl.yaml can never apply — only an explicit --config.
 	c.noAutoConfig = true
 	cfg := loadConfig(&c)
-	logx.Info("listing repositories", "target", rest[0])
-	urls, err := forge.ListRepos(ctx, rest[0])
+	var (
+		urls []string
+		err  error
+	)
+	if gists {
+		logx.Info("listing gists", "target", target)
+		urls, err = forge.ListGists(ctx, target)
+	} else {
+		logx.Info("listing repositories", "target", target)
+		urls, err = forge.ListRepos(ctx, target)
+	}
 	if err != nil {
-		logx.Error("repository listing failed", "err", err)
+		logx.Error("listing failed", "err", err)
 		return 2
 	}
 	if len(excludeRepo) > 0 { // skip repos matching any --exclude-repo substring (e.g. a vendored fork)
@@ -1305,7 +1326,7 @@ func cmdOrg(args []string) int {
 		urls = kept
 	}
 	if len(urls) == 0 {
-		logx.Warn("no repositories found", "target", rest[0])
+		logx.Warn("nothing to scan", "target", target, "gists", gists)
 		return 0
 	}
 
@@ -1476,44 +1497,103 @@ func cmdDomain(args []string) int {
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
-	if len(rest) == 0 {
-		fmt.Fprintln(os.Stderr, "usage: prowl domain <domain> [--authorized] [--recon]")
-		return 2
-	}
 	opts := domain.Options{Recon: hasFlag(rest, "--recon"), Authorized: hasFlag(rest, "--authorized"), MaxAssets: 300}
 	if v := flagVal(rest, "--max-assets"); v != "" {
 		opts.MaxAssets = mustInt("--max-assets", v, 1)
 	}
-	// strip --max-assets (and its value) first, else `domain --max-assets 300 host` takes "300" as the target
-	target := firstNonFlag(stripValueFlags(rest, "--max-assets"))
-	if !opts.Authorized {
-		fmt.Fprintln(os.Stderr, "refusing: pass --authorized to confirm you are authorized to scan "+target+
-			" (the scan fetches the domain's published pages/JS).")
+	if opts.Timeout == 0 {
+		opts.Timeout = 12 * time.Second
+	}
+
+	var targets []string
+	if f := flagVal(rest, "--targets"); f != "" {
+		ts, err := readTargetList(f)
+		if err != nil {
+			logx.Error("could not read --targets file", "path", f, "err", err)
+			return 2
+		}
+		targets = ts
+	} else if t := firstNonFlag(stripValueFlags(rest, "--max-assets", "--targets")); t != "" {
+		targets = []string{t}
+	}
+	if len(targets) == 0 {
+		fmt.Fprintln(os.Stderr, "usage: prowl domain <host> [--targets file] [--authorized] [--recon]")
 		return 2
 	}
+	if !opts.Authorized {
+		fmt.Fprintln(os.Stderr, "refusing: pass --authorized to confirm you are authorized to scan these hosts "+
+			"(the scan fetches each host's published pages/JS).")
+		return 2
+	}
+
 	cfg := loadConfig(&c)
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
-	if opts.Timeout == 0 {
-		opts.Timeout = 12 * time.Second
-	}
-	ctx, stop := rootContext(c)
-	defer stop()
-	start := time.Now()
-	logx.Info("scanning domain", "target", target, "recon", opts.Recon)
-	items, reached := domain.Discover(ctx, target, opts)
 	eng := loadEngine(c)
 	vset, verr := loadVerifySet(c)
 	if verr != nil {
 		logx.Error("verify setup failed", "err", verr)
 		return 2
 	}
-	findings := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, c.mlScorer())
-	if !reached.Load() && ctx.Err() == nil { // an unreachable/typo'd host must error, not exit-0 "clean"
-		logx.Error("domain not reachable — nothing was scanned", "target", target)
+
+	ctx, stop := rootContext(c)
+	defer stop()
+	start := time.Now()
+
+	// Hosts run across a bounded pool — a subdomain sweep is mostly dead hosts whose connect-timeout
+	// dominates wall time, so they must time out concurrently, not one after another. Each host's own
+	// asset fetches stay internally concurrent; the pool fans across DISTINCT hosts (no single host is
+	// hammered). One host == one worker, so the positional single-target path is unchanged.
+	var (
+		mu         sync.Mutex
+		findings   []model.Finding
+		reachedAny bool
+		wg         sync.WaitGroup
+		jobs       = make(chan string)
+	)
+	hostWorkers := 8
+	if hostWorkers > len(targets) {
+		hostWorkers = len(targets)
+	}
+	for w := 0; w < hostWorkers; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for target := range jobs {
+				if ctx.Err() != nil {
+					return
+				}
+				logx.Info("scanning domain", "target", target, "recon", opts.Recon)
+				items, reached := domain.Discover(ctx, target, opts)
+				fs := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, c.mlScorer())
+				if !reached.Load() { // a dead/typo'd host is skipped, not a whole-run abort
+					logx.Warn("host not reachable — skipped", "target", target)
+					continue
+				}
+				mu.Lock()
+				reachedAny = true
+				findings = append(findings, fs...)
+				mu.Unlock()
+			}
+		}()
+	}
+	for _, t := range targets {
+		select {
+		case jobs <- t:
+		case <-ctx.Done():
+		}
+		if ctx.Err() != nil {
+			break
+		}
+	}
+	close(jobs)
+	wg.Wait()
+
+	if !reachedAny && ctx.Err() == nil { // every host unreachable must error, not exit-0 "clean"
+		logx.Error("no host was reachable — nothing was scanned")
 		return 2
 	}
 	if c.verifiedOnly {
@@ -1525,6 +1605,24 @@ func cmdDomain(args []string) int {
 	summarize(findings, time.Since(start))
 	writeReport(c, findings)
 	return failClosedIfIncomplete(ctx, gate(findings, c.failOn, c.failOnVerified))
+}
+
+func readTargetList(path string) ([]string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	seen := map[string]bool{}
+	var out []string
+	for _, line := range strings.Split(string(data), "\n") {
+		t := strings.TrimSpace(line)
+		if t == "" || strings.HasPrefix(t, "#") || seen[t] {
+			continue
+		}
+		seen[t] = true
+		out = append(out, t)
+	}
+	return out, nil
 }
 
 func cmdServe(args []string) int {

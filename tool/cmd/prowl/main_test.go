@@ -11,6 +11,26 @@ import (
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
+func TestReadTargetList(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "hosts.txt")
+	if err := os.WriteFile(p, []byte("a.com\n# comment\n\n  b.com  \na.com\nc.com\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := readTargetList(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"a.com", "b.com", "c.com"}
+	if len(got) != len(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	}
+}
+
 // TestWriteReportFileSurfacesError proves writeReportFile returns (rather than swallows) a failure to
 // write the --output file, so a truncated-empty file can't pass as a successful run.
 func TestWriteReportFileSurfacesError(t *testing.T) {

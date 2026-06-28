@@ -38,6 +38,9 @@ type Result struct {
 	Status   Status
 	Verifier string
 	Note     string
+	// Access is the blast radius: the capability labels of the probes that succeeded (what the live
+	// key actually unlocks), for verifiers whose requests carry a `capability`.
+	Access []string
 }
 
 // Matcher is a conditional check on a response: status code, a word in the body/headers, or a regex.
@@ -61,6 +64,9 @@ type Request struct {
 	Body              string            `yaml:"body"`
 	MatchersCondition string            `yaml:"matchers-condition"` // and (default) | or
 	Matchers          []Matcher         `yaml:"matchers"`
+	// Capability labels what this probe proves the key can do (e.g. "Maps Geocoding"). When set, the
+	// verifier runs every request and reports each passing label as the finding's blast radius.
+	Capability string `yaml:"capability"`
 }
 
 // Verifier is one declarative provider check. The secret is live if any request's matchers pass.
@@ -231,16 +237,39 @@ func (s *Set) run(ctx context.Context, v *Verifier, value, context string) Resul
 			vars[name] = m
 		}
 	}
+	hasCaps := false
+	for i := range v.Requests {
+		if v.Requests[i].Capability != "" {
+			hasCaps = true
+			break
+		}
+	}
 	var lastErr error
+	var access []string
+	verified := false
 	for i := range v.Requests {
 		ok, err := s.probe(ctx, v, &v.Requests[i], vars)
 		if err != nil {
 			lastErr = err
 			continue
 		}
-		if ok {
-			return Result{Status: Verified, Verifier: v.ID, Note: v.Info.Name}
+		if !ok {
+			continue
 		}
+		verified = true
+		if c := v.Requests[i].Capability; c != "" {
+			access = append(access, c)
+		}
+		if !hasCaps {
+			break // single-probe verifier: no blast radius to map, stop at the first pass
+		}
+	}
+	if verified {
+		note := v.Info.Name
+		if len(access) > 0 {
+			note += " — unlocks: " + strings.Join(access, ", ")
+		}
+		return Result{Status: Verified, Verifier: v.ID, Note: note, Access: access}
 	}
 	if lastErr != nil {
 		// Never surface lastErr.Error(): a *url.Error embeds the full request URL, which carries

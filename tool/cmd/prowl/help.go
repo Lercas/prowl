@@ -15,12 +15,14 @@ var commands = []cmdInfo{
 	{"repo", "clone & scan a remote git repository", repoHelp},
 	{"org", "clone & scan every repo in an org/group/workspace", orgHelp},
 	{"image", "pull & scan a container image", imageHelp},
+	{"mobile", "unpack & scan an APK/IPA for secrets", mobileHelp},
 	{"bucket", "download & scan a cloud storage prefix", bucketHelp},
 	{"domain", "scan a live site (HTML + state blobs + JS)", domainHelp},
 	{"jira", "scan Jira across every issue version (Cloud/Server/DC)", ""},
 	{"confluence", "scan Confluence across every page version", ""},
 	{"serve", "run as a stateless HTTP scan worker", serveHelp},
 	{"lsp", "run as a Language Server (in-editor highlighting)", ""},
+	{"mcp", "run as an MCP server (AI agents call scans as tools)", mcpHelp},
 	{"doctor", "self-diagnose the install", ""},
 	{"detectors", "list built-in detector types", ""},
 	{"rules", "manage detection rule templates", rulesHelp},
@@ -36,6 +38,7 @@ const scanHelp = `prowl scan [path...] — scan files/dirs for secrets (default:
   --tags / --exclude-tags / --rule-severity   filter which templates run
   --verify                    confirm findings are LIVE via the provider
   --verified-only             report ONLY provider-confirmed-live secrets
+  --show-secrets              print the FULL unredacted value (authorized triage; all formats)
   --fail-on LEVEL             exit 1 if any finding >= info|low|medium|high|critical
   --fail-on-verified          exit 1 ONLY on a provider-confirmed-LIVE secret (needs --verify; a
                               near-zero-FP CI gate); also bumps live findings to critical
@@ -85,6 +88,7 @@ const orgHelp = `prowl org <platform>:<name> — clone & scan every repo in an o
   github:<org-or-user>      every repo in a GitHub org or user account
   gitlab:<group>            every project in a GitLab group (subgroups included)
   bitbucket:<workspace>     every repo in a Bitbucket workspace
+  --gists            scan a github:<user>'s public gists instead of their repos
   --history          scan each repo's full blob history (default: the working tree)
   --concurrency N    repos scanned in parallel (default: min(4, number of repos))
   --exclude-repo S,… skip repos whose clone URL contains any of these substrings (e.g. a vendored fork)
@@ -121,6 +125,27 @@ Examples:
   prowl image ghcr.io/org/app:1.4 --fail-on high
   prowl image myregistry.io/team/api@sha256:abc… --verify --format json`
 
+const mobileHelp = `prowl mobile <app.apk | app.ipa | path | https://…> — unpack & scan a mobile app
+
+  <target>           a local .apk/.ipa, any local path to one, or an https URL to download
+  --no-strings       skip the printable-strings pass over binary entries (raw text/JSON/plist only)
+  --min-run N        min printable-run length for the strings pass (default 5; lower = noisier)
+  + all scan flags   --verify, --fail-on, --format, --rules-dir, --tags, --max-size, --ml, …
+
+An APK/IPA is a ZIP. Every entry is walked: resources, JSON, plist, and XML (incl. the high-value
+google-services.json / GoogleService-Info.plist, where Google API keys and project ids commonly leak)
+are scanned raw; binary entries (.dex, resources.arsc, .so, Mach-O) get a printable-strings pass (8-bit
+ASCII + UTF-16LE) so keys baked into string tables surface — exactly where pattern-only file scanners
+miss them. Binary-strings dumps are noisy; --ml is strongly advised, and --max-per-file caps per-entry
+generics. The archive's own .prowl.yaml (if any) is ignored, so it cannot suppress its own findings.
+
+Pure-Go: no Android SDK or external tooling is required.
+
+Examples:
+  prowl mobile app.apk --ml --fail-on high
+  prowl mobile app.ipa --format json -o findings.json
+  prowl mobile https://example.com/build/app.apk --ml --max-per-file 30`
+
 const bucketHelp = `prowl bucket <s3://bucket/prefix | gs://bucket/prefix> — scan a cloud storage prefix
 
   s3://bucket/prefix    an Amazon S3 bucket/prefix (downloaded with the AWS CLI)
@@ -138,16 +163,18 @@ Examples:
 
 const domainHelp = `prowl domain <host> --authorized — scan a live site
 
-  --authorized     REQUIRED: confirm you are authorized to scan this host
+  --authorized     REQUIRED: confirm you are authorized to scan these hosts
+  --targets FILE   scan every host listed in FILE (one per line, # comments ok)
   --recon          deep sweep: subdomains (crt.sh) + wayback history
-  --max-assets N   cap fetched assets (default 300)
+  --max-assets N   cap fetched assets per host (default 300)
 
-Scans the host's HTML, inline state blobs (__NEXT_DATA__, __NUXT__, window.env, …),
+Scans each host's HTML, inline state blobs (__NEXT_DATA__, __NUXT__, window.env, …),
 and the JavaScript bundles + source-maps it references. No subdomain enumeration unless --recon.
 
 Examples:
   prowl domain example.com --authorized
-  prowl domain example.com --authorized --recon --format json`
+  prowl domain example.com --authorized --recon --format json
+  prowl domain --targets hosts.txt --authorized --verify --verified-only`
 
 const serveHelp = `prowl serve [--addr :8080] — run as a stateless HTTP scan worker
 
@@ -156,6 +183,15 @@ behind a load balancer / k8s HPA).
 
 Example:
   prowl serve --addr :8080`
+
+const mcpHelp = `prowl mcp — run as a Model Context Protocol server over stdio
+
+AI agents (Claude Code/Desktop, any MCP client) drive scans as tools. Newline-delimited JSON-RPC on
+stdin/stdout. Tools: prowl_scan (path), prowl_domain (target+authorized), prowl_mobile (apk/ipa),
+prowl_repo (git url). Each returns the JSON findings envelope.
+
+Register with Claude Code:
+  claude mcp add prowl -- prowl mcp`
 
 const rulesHelp = `prowl rules <cmd> — manage detection rule templates (they live outside the binary)
 
@@ -240,7 +276,7 @@ func dieUnknownCommand(cmd string) {
 var knownFlags = map[string]bool{
 	"--format": true, "--fail-on": true, "--fail-on-verified": true, "--exclude": true, "--taxonomy": true, "--rules": true,
 	"--rules-only": true, "--rules-dir": true, "--tags": true, "--exclude-tags": true,
-	"--rule-severity": true, "--verify": true, "--verified-only": true, "--verifiers": true,
+	"--rule-severity": true, "--verify": true, "--verified-only": true, "--verifiers": true, "--show-secrets": true,
 	"--config": true, "--output": true, "-o": true, "--staged": true, "--history": true,
 	"--since": true, "--baseline": true, "--write-baseline": true, "--max-size": true,
 	"--workers": true, "--timeout": true, "--silence": true, "--silent": true, "-s": true,
@@ -253,6 +289,8 @@ var knownFlags = map[string]bool{
 	"--branch": true, "--depth": true, "--concurrency": true, "--max-per-file": true,
 	"--ml": true, "--ml-model": true, "--ml-url": true, "--ml-threshold": true,
 	"--base-url": true, "--current-only": true, "--max-items": true, "--project": true, "--space": true, "--field": true,
+	"--targets": true, "--gists": true,
+	"--no-strings": true, "--min-run": true,
 }
 
 func allFlagNames() []string {

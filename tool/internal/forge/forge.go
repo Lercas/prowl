@@ -53,6 +53,40 @@ func ListRepos(ctx context.Context, target string) ([]string, error) {
 	}
 }
 
+// ListGists returns the clone URLs of every public gist of a github:<user> target. Gists are
+// user-scoped (orgs have none) and clone from git_pull_url, not clone_url.
+func ListGists(ctx context.Context, target string) ([]string, error) {
+	platform, name, ok := strings.Cut(target, ":")
+	if !ok || name == "" || platform != "github" {
+		return nil, fmt.Errorf("--gists supports a github:<user> target, got %q", target)
+	}
+	token, host := os.Getenv("GITHUB_TOKEN"), envOr("GITHUB_API", "https://api.github.com")
+	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(token)}
+	var urls []string
+	for page := 1; page <= maxPages; page++ {
+		u := fmt.Sprintf("%s/users/%s/gists?per_page=100&page=%d", host, url.PathEscape(name), page)
+		var gists []struct {
+			GitPullURL string `json:"git_pull_url"`
+		}
+		status, err := getJSON(ctx, u, hdr, &gists)
+		if err != nil {
+			return urls, err
+		}
+		if status != http.StatusOK {
+			return urls, fmt.Errorf("github gists API returned %d for %q (set GITHUB_TOKEN for rate limits)", status, name)
+		}
+		for _, g := range gists {
+			if g.GitPullURL != "" {
+				urls = append(urls, g.GitPullURL)
+			}
+		}
+		if len(gists) < 100 {
+			break
+		}
+	}
+	return urls, nil
+}
+
 func githubRepos(ctx context.Context, name string) ([]string, error) {
 	token, host := os.Getenv("GITHUB_TOKEN"), envOr("GITHUB_API", "https://api.github.com")
 	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(token)}

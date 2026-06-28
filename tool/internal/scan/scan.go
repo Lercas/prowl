@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/logx"
@@ -22,6 +23,21 @@ import (
 
 // allowPragmas are inline line-level suppression markers (detect-secrets / gitleaks compatible).
 var allowPragmas = []string{"prowl:allow", "pragma: allowlist secret", "gitleaks:allow", "noqa: secret"}
+
+// revealSecrets makes a finding's Redacted field hold the FULL unredacted value (--show-secrets).
+// Off by default, so the raw value never leaves the process unless explicitly requested. Set once
+// before Run.
+var revealSecrets atomic.Bool
+
+// SetRevealSecrets toggles whether findings carry the unredacted secret value (--show-secrets).
+func SetRevealSecrets(v bool) { revealSecrets.Store(v) }
+
+func redactValue(raw string) string {
+	if revealSecrets.Load() {
+		return raw
+	}
+	return model.Redact(raw)
+}
 
 var categorySeverity = map[string]string{
 	"pki": "critical", "payment": "critical", "db": "critical",
@@ -338,9 +354,10 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
-			Redacted: model.Redact(m.Value), Stage: m.Stage, URL: itemURL,
+			Redacted: redactValue(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			Verified:    ver, Rationale: why,
+			Context: revealContext(it, m.Start),
 		})
 		if ml != nil {
 			reqs = append(reqs, recordFor(m.Value, it, m.Start))
@@ -398,9 +415,10 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 				Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, it.Path, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
-				Redacted: model.Redact(h.Value), Stage: "rule", URL: itemURL,
+				Redacted: redactValue(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				Verified:    ver, Rationale: why,
+				Context: revealContext(it, h.Start),
 			}
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
@@ -422,10 +440,9 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			}
 		}
 	}
-	// Score with the ML stage, skipping items that flood with candidates (a data file the per-file cap
-	// already handles — scoring hundreds of values would just time out the sidecar). The truncation
-	// marker is appended AFTER ML so it is never scored.
-	if ml != nil && len(out) > 0 && len(out) <= mlMaxItemFindings {
+	// The per-item cap bounds a network sidecar; the in-process model scores dense bundles too (where ML
+	// earns its keep). The truncation marker is appended AFTER ML so it is never scored.
+	if ml != nil && len(out) > 0 && (ml.Local() || len(out) <= mlMaxItemFindings) {
 		out = mlFilter(ctx, ml, out, reqs)
 	}
 	// Surface the global match cap in the machine output: when either producer hit maxMatches a secret
@@ -471,6 +488,17 @@ func recordFor(value string, it model.Item, start int) mlscore.Record {
 			Source: it.Source,
 		},
 	}
+}
+
+// revealContext returns the finding's ML context (same line/name recordFor feeds the model) when
+// --show-secrets is on, so the JSON carries faithful feedback features. nil otherwise: the line holds
+// the raw secret.
+func revealContext(it model.Item, start int) *model.FindingContext {
+	if !revealSecrets.Load() {
+		return nil
+	}
+	line := lineText(it.Text, start)
+	return &model.FindingContext{Name: leadingName(line), Line: line}
 }
 
 // lineText returns the (length-capped) source line containing byte offset start.
@@ -578,6 +606,9 @@ func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context str
 	switch r.Status {
 	case verify.Verified:
 		t := true
+		if r.Note != "" {
+			return &t, "verified live: " + r.Note // carries the blast radius (unlocks: …) when mapped
+		}
 		return &t, "verified live via " + r.Verifier
 	case verify.Invalid:
 		f := false

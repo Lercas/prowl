@@ -99,6 +99,22 @@ func TestFileSourceStillDemoted(t *testing.T) {
 	}
 }
 
+func TestRevealSecrets(t *testing.T) {
+	det := detector(t)
+	const key = `AKIANAFGYOEYPXU1DSYP`
+	item := func() model.Item { return model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "a.py"} }
+
+	SetRevealSecrets(false)
+	if fs := Run(context.Background(), feed(item()), det, nil, nil, 1, nil, nil); len(fs) != 1 || fs[0].Redacted == key {
+		t.Fatalf("default must redact, got %+v", fs)
+	}
+	SetRevealSecrets(true)
+	defer SetRevealSecrets(false)
+	if fs := Run(context.Background(), feed(item()), det, nil, nil, 1, nil, nil); len(fs) != 1 || fs[0].Redacted != key {
+		t.Fatalf("--show-secrets must put the raw value in Redacted, got %+v", fs)
+	}
+}
+
 func TestRunAllowFunc(t *testing.T) {
 	det := detector(t)
 	allow := func(value, path string) bool { return value == "AKIANAFGYOEYPXU1DSYP" }

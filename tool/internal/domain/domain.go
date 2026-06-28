@@ -46,8 +46,12 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 		b := newBudget(opts.MaxAssets)
 		client := newClient(opts.Timeout)
 
+		bodyDedup := &contentSeen{seen: map[uint64]bool{}}
 		var assetURLs []string
 		emit := func(base, htmlText string) bool {
+			if !bodyDedup.firstTime(htmlText) {
+				return true // catch-all duplicate
+			}
 			if b.take() && !sendItem(ctx, ch, model.Item{Text: htmlText, Source: "code", Path: base}) {
 				return false
 			}
@@ -89,7 +93,7 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 		// fetch & scan the referenced JS bundles / source-maps / json
 		assetURLs = withSourceMaps(dedup(assetURLs))
 		logx.Info("page assets referenced", "host", apex, "count", len(assetURLs))
-		fetchAll(ctx, ch, client, assetURLs, "code", b, 8)
+		fetchAll(ctx, ch, client, assetURLs, "code", b, 8, bodyDedup)
 
 		// optional deep recon: subdomains + wayback history + path probes
 		if opts.Recon && ctx.Err() == nil {
@@ -97,21 +101,43 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 			logx.Info("recon: subdomains via crt.sh", "count", len(subs))
 			wb := waybackAssets(ctx, apex, 120)
 			logx.Info("recon: historical assets via wayback", "count", len(wb))
-			fetchAll(ctx, ch, client, wb, "code", b, 6)
+			fetchAll(ctx, ch, client, wb, "code", b, 6, bodyDedup)
 			var paths []string
 			for _, s := range capStrings(subs, 30) {
 				for _, p := range commonPaths {
 					paths = append(paths, "https://"+s+p)
 				}
 			}
-			fetchAll(ctx, ch, client, paths, "code", b, 8)
+			fetchAll(ctx, ch, client, paths, "code", b, 8, bodyDedup)
 		}
 		logx.Info("domain scan complete", "fetched", b.used())
 	}()
 	return ch, reached
 }
 
-func fetchAll(ctx context.Context, ch chan<- model.Item, c *http.Client, urls []string, source string, b *budget, conc int) {
+// contentSeen scans each byte-identical body once: a catch-all server returns the same index.html for
+// every probed path (/.env, /.git/config, …), else each secret is reported once per path.
+type contentSeen struct {
+	mu   sync.Mutex
+	seen map[uint64]bool
+}
+
+func (s *contentSeen) firstTime(text string) bool {
+	const off, prime = uint64(1469598103934665603), uint64(1099511628211)
+	h := off
+	for i := 0; i < len(text); i++ {
+		h = (h ^ uint64(text[i])) * prime
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.seen[h] {
+		return false
+	}
+	s.seen[h] = true
+	return true
+}
+
+func fetchAll(ctx context.Context, ch chan<- model.Item, c *http.Client, urls []string, source string, b *budget, conc int, bodyDedup *contentSeen) {
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, conc)
 	for _, u := range urls {
@@ -126,7 +152,7 @@ func fetchAll(ctx context.Context, ch chan<- model.Item, c *http.Client, urls []
 			if !b.take() {
 				return
 			}
-			if txt, ok := getText(ctx, c, u); ok && len(txt) > 0 {
+			if txt, ok := getText(ctx, c, u); ok && len(txt) > 0 && bodyDedup.firstTime(txt) {
 				sendItem(ctx, ch, model.Item{Text: txt, Source: source, Path: u})
 			}
 		}(u)

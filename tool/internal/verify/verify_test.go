@@ -75,6 +75,36 @@ func TestDataDrivenVerify(t *testing.T) {
 	}
 }
 
+func TestBlastRadius(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/a" || r.URL.Path == "/b" {
+			w.WriteHeader(200)
+			return
+		}
+		w.WriteHeader(404)
+	}))
+	defer srv.Close()
+	body := "id: blast\nmatch: [blasttoken]\nrequests:\n" +
+		"  - {method: GET, url: " + srv.URL + "/a, capability: cap A, matchers: [{type: status, status: [200]}]}\n" +
+		"  - {method: GET, url: " + srv.URL + "/b, capability: cap B, matchers: [{type: status, status: [200]}]}\n" +
+		"  - {method: GET, url: " + srv.URL + "/c, capability: cap C, matchers: [{type: status, status: [200]}]}\n"
+	p := filepath.Join(t.TempDir(), "blast.yaml")
+	if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	set, err := Load(2*time.Second, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := set.Verify(context.Background(), "blasttoken", "KEY", "", false)
+	if r.Status != Verified {
+		t.Fatalf("status = %s, want verified", r.Status)
+	}
+	if got := strings.Join(r.Access, ","); got != "cap A,cap B" {
+		t.Errorf("access = %q, want the two reachable capabilities", got)
+	}
+}
+
 func TestInterpolateBase64(t *testing.T) {
 	v := map[string]string{"secret": "sk_live_abc"}
 	if got := interpolate("Basic {{base64(secret:)}}", v); got != "Basic c2tfbGl2ZV9hYmM6" {

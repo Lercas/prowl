@@ -10,6 +10,23 @@ import (
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
+func TestBBSummary(t *testing.T) {
+	tru, fls := true, false
+	if s := bbSummary([]model.Finding{{Verified: nil, Severity: "high"}}, false); s != "" {
+		t.Errorf("unverified-only must suppress the BB line, got %q", s)
+	}
+	s := bbSummary([]model.Finding{
+		{Verified: &fls, Severity: "high", Type: "x"},
+		{Verified: &tru, Severity: "critical", Type: "aws_access_key_id"},
+		{Verified: nil, Severity: "low", Type: "y"},
+	}, false)
+	for _, want := range []string{"1 LIVE", "critical aws_access_key_id", "1 dead", "1 unverified"} {
+		if !strings.Contains(s, want) {
+			t.Errorf("BB summary %q missing %q", s, want)
+		}
+	}
+}
+
 var sample = []model.Finding{
 	{Detector: "aws_access_key_id", Type: "aws_access_key_id", Severity: "critical",
 		Path: "a.py", Line: 3, Col: 5, Redacted: "AKIA****1234", Confidence: 0.99, Stage: "L1-checksum"},

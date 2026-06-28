@@ -64,6 +64,8 @@ func New(url string, threshold float64) *Client {
 // Threshold is the drop cutoff the caller applies to scores.
 func (c *Client) Threshold() float64 { return c.threshold }
 
+func (c *Client) Local() bool { return false }
+
 // Health reports whether the sidecar answers /health, with a short timeout (used as a startup probe
 // so a misconfigured --ml-url fails fast and loudly instead of silently scoring nothing).
 func (c *Client) Health(ctx context.Context) error {

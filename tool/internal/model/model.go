@@ -26,8 +26,9 @@ type Finding struct {
 	Path       string  `json:"path"`
 	Line       int     `json:"line"`
 	Col        int     `json:"col"`
-	Redacted   string  `json:"redacted"`
-	Stage      string  `json:"stage"`
+	// Redacted is the masked secret by default; with --show-secrets it holds the FULL unredacted value.
+	Redacted string `json:"redacted"`
+	Stage    string `json:"stage"`
 	// URL, when set, is a direct locator for the finding (a Jira browse URL, a Confluence page URL).
 	// Code findings leave it empty and use Path:Line. Omitted from JSON when empty.
 	URL       string `json:"url,omitempty"`
@@ -37,6 +38,16 @@ type Finding struct {
 	// scan time before redaction. Baselining keys on this so two distinct secrets that share their
 	// first/last 4 chars (e.g. all AWS keys start AKIA) don't collide to one fingerprint.
 	Fingerprint string `json:"fingerprint,omitempty"`
+	// Context is the ML feature context (surrounding line + leading name). Emitted only under
+	// --show-secrets, since the line holds the raw secret; it lets the flywheel train on the exact
+	// features the scan scored, instead of a context-stripped value.
+	Context *FindingContext `json:"context,omitempty"`
+}
+
+// FindingContext mirrors mlscore.Context's value-dependent fields (path/source are already on Finding).
+type FindingContext struct {
+	Name string `json:"name,omitempty"`
+	Line string `json:"line,omitempty"`
 }
 
 // ComputeFingerprint derives a finding's stable identity from the FULL raw secret value (not the

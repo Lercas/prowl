@@ -1,0 +1,28 @@
+id: google-api-key
+info:
+  name: Google API key
+  reference: https://cloud.google.com/docs/authentication/api-keys
+match: [google-gemini-api-key, google-api-key, gemini]
+requests:
+  - method: POST
+    url: https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key={{secret}}
+    headers:
+      Content-Type: application/json
+    body: '{"identifier":"prowl-verify-probe@example.com","continueUri":"http://localhost"}'
+    capability: Firebase Identity Toolkit (auth / account enumeration)
+    matchers:
+      - type: status
+        status: [200]
+  - method: GET
+    url: https://generativelanguage.googleapis.com/v1beta/models?key={{secret}}
+    capability: Gemini Generative Language API
+    matchers:
+      - type: status
+        status: [200]
+  - method: GET
+    url: https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre&key={{secret}}
+    capability: Maps Geocoding (billable)
+    matchers:
+      - type: word
+        part: body
+        words: ['"status" : "OK"', '"status": "OK"']

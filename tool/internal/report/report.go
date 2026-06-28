@@ -172,7 +172,41 @@ func writePretty(w io.Writer, fs []model.Finding, color bool) error {
 		paint(color, cBold, fmt.Sprintf("%d findings", len(fs))),
 		strings.Join(parts, paint(color, cDim, " · ")),
 		paint(color, cDim, fmt.Sprintf("in %d file%s", len(files), plural(len(files)))))
+	if line := bbSummary(fs, color); line != "" {
+		fmt.Fprintln(w, line)
+	}
 	return nil
+}
+
+// bbSummary is the one-line live/dead/unverified verdict appended after a verification run; empty when
+// no finding was verified, so non-`--verify` output is unchanged.
+func bbSummary(fs []model.Finding, color bool) string {
+	live, dead, unverified := 0, 0, 0
+	var top model.Finding
+	for _, f := range fs {
+		switch {
+		case f.Verified == nil:
+			unverified++
+		case *f.Verified:
+			live++
+			if top.Verified == nil || model.SeverityOrder[f.Severity] > model.SeverityOrder[top.Severity] {
+				top = f
+			}
+		default:
+			dead++
+		}
+	}
+	if live == 0 && dead == 0 {
+		return ""
+	}
+	liveCol := "\x1b[32m"
+	head := fmt.Sprintf("%d LIVE", live)
+	if live > 0 {
+		liveCol = "\x1b[31m"
+		head += fmt.Sprintf(" (%s %s)", top.Severity, sanitizeTerminal(top.Type))
+	}
+	return "  " + paint(color, cBold, "BB: ") + paint(color, liveCol, head) +
+		paint(color, cDim, fmt.Sprintf("; %d dead; %d unverified", dead, unverified))
 }
 
 // displayRedaction is the masked value shown in a pretty row. For a PEM private-key finding (whose

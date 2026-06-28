@@ -16,6 +16,7 @@ import (
 type Scorer interface {
 	Score(ctx context.Context, recs []Record) ([]Result, error)
 	Threshold() float64
+	Local() bool // in-process scoring (no sidecar cap needed)
 }
 
 // Embedded runs the dumped HGB model in-process via internal/mlmodel + internal/mlfeatures. No
@@ -74,10 +75,15 @@ func externalModelPath() string {
 
 func (e *Embedded) Threshold() float64 { return e.threshold }
 
+func (e *Embedded) Local() bool { return true }
+
 // Score returns one Result per record (same order), computing features + model probability inline.
-func (e *Embedded) Score(_ context.Context, recs []Record) ([]Result, error) {
+func (e *Embedded) Score(ctx context.Context, recs []Record) ([]Result, error) {
 	out := make([]Result, len(recs))
 	for i, r := range recs {
+		if i&1023 == 0 && ctx.Err() != nil { // a flood of candidates is scored uncapped; stay cancellable
+			return nil, ctx.Err()
+		}
 		f := mlfeatures.Extract(r.Value, mlfeatures.Context{
 			Name: r.Context.Name, Line: r.Context.Line, Path: r.Context.Path, Source: r.Context.Source,
 		})

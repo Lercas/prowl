@@ -33,6 +33,24 @@ func stubForge(t *testing.T, routes map[string]string) *httptest.Server {
 	return srv
 }
 
+func TestListGists(t *testing.T) {
+	srv := stubForge(t, map[string]string{
+		"/users/octocat/gists": `[{"git_pull_url":"https://gist.github.com/aaa.git","clone_url":"https://x/wrong"},{"git_pull_url":"https://gist.github.com/bbb.git"}]`,
+	})
+	t.Setenv("GITHUB_API", srv.URL)
+	t.Setenv("GITHUB_TOKEN", "")
+	urls, err := ListGists(context.Background(), "github:octocat")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(urls) != 2 || urls[0] != "https://gist.github.com/aaa.git" {
+		t.Fatalf("expected gist git_pull_urls, got %v", urls)
+	}
+	if _, err := ListGists(context.Background(), "gitlab:x"); err == nil {
+		t.Error("expected error for a non-github target")
+	}
+}
+
 func TestGitlabReposFallback(t *testing.T) {
 	const groupProj = `[{"http_url_to_repo":"https://gitlab.com/grp/a.git"}]`
 	const userProj = `[{"http_url_to_repo":"https://gitlab.com/usr/b.git"}]`
