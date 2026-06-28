@@ -290,6 +290,9 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				if IsKnownNonSecretBlob(text, r[0]) {
 					continue
 				}
+				if looksLikeCodePath(val) || (reRecaptchaSiteKey.MatchString(val) && hasRecaptchaCue(text, r[0])) {
+					continue
+				}
 				if !HasSecretNameContext(text, r[0]) { // require a secret-like name nearby
 					continue
 				}
@@ -321,11 +324,11 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 			// connection URI whose password segment is an unresolved variable ref is not a literal
 			// secret; judge on the credential segment since the reported value is the whole URI
 			if (st.ID == "db_connection_string" || st.ID == "basic_auth_header") &&
-				ConnURICredentialIsPlaceholder(val) {
+				(ConnURICredentialIsPlaceholder(val) || looksLikeRegexAuthority(val)) {
 				continue
 			}
 			// generic_api_key captures whatever follows the cue, often an instructional placeholder
-			if st.ID == "generic_api_key" && IsPlaceholderAPIKey(val) {
+			if st.ID == "generic_api_key" && (IsPlaceholderAPIKey(val) || isLicenseKeyShape(val)) {
 				continue
 			}
 			// drop the jwt.io demo token and doc fixtures; real tokens still fire
@@ -337,7 +340,7 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				// contain brackets, so the looksLikeIdentifier / bracket-balance heuristics apply only to
 				// UNQUOTED values, where `bytes)` / `get_auth_from_url(proxy)` really are swept-up code.
 				quoted := vs > 0 && (text[vs-1] == '"' || text[vs-1] == '\'' || text[vs-1] == '`')
-				if isVersionOrNumber(val) || (!quoted && looksLikeIdentifier(val)) {
+				if isVersionOrNumber(val) || hasJSOperator(val) || looksLikeUnicodeEscaped(val) || (!quoted && (looksLikeJSCode(val) || looksLikeIdentifier(val))) {
 					continue
 				}
 				// Look back for a pass/pwd/pw cue, bounded to pwdCueLookback bytes: on a pathological single

@@ -261,6 +261,93 @@ func looksLikeIdentifier(v string) bool {
 	return reSnakeWord.MatchString(v) || reCamelWord.MatchString(v)
 }
 
+// looksLikeCodePath reports whether v is a slash path of letters only. The no-digit rule keeps a real
+// base64/AWS secret (always digit-bearing) from ever matching.
+func looksLikeCodePath(v string) bool {
+	slash := false
+	for i := 0; i < len(v); i++ {
+		switch c := v[i]; {
+		case c == '/':
+			slash = true
+		case c >= 'A' && c <= 'Z', c >= 'a' && c <= 'z', c == '_', c == '$':
+		default:
+			return false
+		}
+	}
+	return slash
+}
+
+var reJSMember = regexp.MustCompile(`^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+$`) // a.b.c member access
+
+// jsOperators never occur in a real password, so they veto a value whether quoted or not.
+var jsOperators = []string{"===", "!==", "=>"}
+
+func hasJSOperator(v string) bool {
+	for _, t := range jsOperators {
+		if strings.Contains(v, t) {
+			return true
+		}
+	}
+	return false
+}
+
+// jsKeywords and a member-access chain also occur as base words inside real passwords (myFunction2024!,
+// my.secret.token), so looksLikeJSCode is applied to UNQUOTED values only — a quoted literal is the
+// common leak form and must be kept.
+var jsKeywords = []string{"arguments", "function", "typeof", "prototype", "undefined"}
+
+func looksLikeJSCode(v string) bool {
+	for _, t := range jsKeywords {
+		if strings.Contains(v, t) {
+			return true
+		}
+	}
+	return reJSMember.MatchString(v)
+}
+
+// reLicenseKey matches a product key (2UQ52-GH3P8-…); no provider key uses equal-length dash groups.
+var reLicenseKey = regexp.MustCompile(`^[A-Z0-9]{5}(?:-[A-Z0-9]{5}){3,}$`)
+
+func isLicenseKeyShape(v string) bool { return reLicenseKey.MatchString(v) }
+
+var reUnicodeEsc = regexp.MustCompile(`\\u[0-9a-fA-F]{4}`)
+
+// looksLikeUnicodeEscaped reports whether v is a \uXXXX-escaped JS string (minified i18n), not a secret.
+func looksLikeUnicodeEscaped(v string) bool {
+	m := reUnicodeEsc.FindAllStringIndex(v, -1)
+	if len(m) < 3 {
+		return false
+	}
+	covered := 0
+	for _, x := range m {
+		covered += x[1] - x[0]
+	}
+	return covered*5 >= len(v)*4 // escapes dominate the value
+}
+
+var reRecaptchaSiteKey = regexp.MustCompile(`^6L[0-9A-Za-z_-]{38}$`) // public reCAPTCHA client key
+
+var recaptchaCues = []string{"recaptcha", "sitekey", "site_key", "site-key"}
+
+// hasRecaptchaCue reports whether the line names the value as a reCAPTCHA key, so a coincidental 40-char
+// 6L-prefixed secret without that cue is not dropped on shape alone.
+func hasRecaptchaCue(text string, start int) bool {
+	before := lineBefore(text, start)
+	for _, c := range recaptchaCues {
+		if strings.Contains(before, c) {
+			return true
+		}
+	}
+	return false
+}
+
+// looksLikeRegexAuthority reports whether a //user:pass@ match is really a URL-parsing regex (a group or
+// negated class) — these litter compiled native libs and dex string pools. A lone backslash is NOT a
+// signal: a real DSN password may contain one.
+func looksLikeRegexAuthority(v string) bool {
+	return strings.Contains(v, "(?") || strings.Contains(v, "[^")
+}
+
 // isVersionOrNumber rejects version strings / numbers captured as a password (e.g. password=3.6.18).
 func isVersionOrNumber(v string) bool {
 	for i := 0; i < len(v); i++ {

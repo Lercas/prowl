@@ -602,3 +602,56 @@ func TestAhoCorasickMatchesContains(t *testing.T) {
 		}
 	}
 }
+
+// TestScanRecallRegressions guards the false-positive filters against dropping REAL secrets — the cases
+// the feature review flagged: quoted passwords embedding a JS base-word, a DSN password with a
+// backslash, a digit-free mixed-case key, and a 6L-prefixed key with no reCAPTCHA cue.
+func TestScanRecallRegressions(t *testing.T) {
+	d := newDetector(t)
+	has := func(text, typ string) bool {
+		for _, m := range d.Scan(text) {
+			if m.Type == typ {
+				return true
+			}
+		}
+		return false
+	}
+	cases := []struct{ text, typ, why string }{
+		{`password = "myFunction2024SecretValue"`, "generic_password", "quoted password with a 'function' substring"},
+		{`url = "postgres://user:p\ssw0rd@dbhost:5432/app"`, "db_connection_string", "DSN password with a backslash"},
+		{`secret_key = "ThisIsARealSessionKeyValueABCdefGHIjkl"`, "generic_high_entropy", "digit-free mixed-case key"},
+		{`auth_token = "6LZxq8sTUVWmnopQRSdefGHIjklABC012345tuvw"`, "generic_high_entropy", "6L key with no reCAPTCHA cue"},
+	}
+	for _, c := range cases {
+		if !has(c.text, c.typ) {
+			t.Errorf("recall regression: %s was wrongly dropped (expected %s)", c.why, c.typ)
+		}
+	}
+}
+
+// TestPrivateKeyPEMBody guards that the body-requiring regex still fires on real key blocks (including
+// PGP / legacy-encrypted with armor headers) while a bare header string does not.
+func TestPrivateKeyPEMBody(t *testing.T) {
+	d := newDetector(t)
+	has := func(text string) bool {
+		for _, m := range d.Scan(text) {
+			if m.Type == "private_key_pem" {
+				return true
+			}
+		}
+		return false
+	}
+	reals := []string{
+		"-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1cdQ7vXyZ9mNbVc3hJkLpOiUyTrEwQaSdFgHjKl\n-----END RSA PRIVATE KEY-----",
+		"-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG v2\n\nlQOYBF8tABCDEFghijklmnopqrstuvwx\n-----END PGP PRIVATE KEY BLOCK-----",
+		"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,0123456789ABCDEF\n\nMIIEpAIBAAKCAQEA1cd\n-----END RSA PRIVATE KEY-----",
+	}
+	for _, k := range reals {
+		if !has(k) {
+			t.Errorf("real private key block not detected: %.45q", k)
+		}
+	}
+	if has(`ph = "Begins with -----BEGIN RSA PRIVATE KEY-----"`) {
+		t.Error("bare PEM header string wrongly fired private_key_pem")
+	}
+}
