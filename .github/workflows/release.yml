@@ -40,7 +40,8 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: prowl-*
-          generate_release_notes: true
+          # only one matrix job generates notes, else each of the 5 appends its own changelog
+          generate_release_notes: ${{ matrix.goos == 'linux' && matrix.goarch == 'amd64' }}
 
   docker:
     runs-on: ubuntu-latest
