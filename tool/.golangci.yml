@@ -1,0 +1,18 @@
+# Security-tool linters: catch the bug classes a secret scanner must not ship itself.
+# First CI run may surface pre-existing issues to triage; tune excludes as needed.
+run:
+  timeout: 5m
+linters:
+  enable:
+    - gosec        # security issues (this tool probes HTTP + has an SSRF guard)
+    - bodyclose    # unclosed HTTP response bodies (the verifiers + image puller)
+    - errcheck     # unchecked errors
+    - ineffassign  # ineffectual assignments
+    - misspell
+    - unconvert
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters: [gosec, errcheck, bodyclose]
+    - linters: [gosec]
+      text: "G404"  # math/rand is fine where used (non-crypto)

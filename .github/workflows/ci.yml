@@ -4,13 +4,12 @@ on:
   push:
   pull_request:
 
-defaults:
-  run:
-    working-directory: tool
-
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tool
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -23,18 +22,54 @@ jobs:
         run: go vet ./...
       - name: build
         run: go build ./...
-      - name: test (race)
-        run: go test -race ./...
+      - name: test (race + coverage)
+        run: go test -race -coverprofile=/tmp/cover.out ./...
+      - name: coverage summary
+        run: go tool cover -func=/tmp/cover.out | tail -1
       - name: e2e
         run: bash test/e2e.sh
-      - name: rules & verifiers valid
+      - name: rules & verifiers valid + manifest fresh
         run: |
           go build -o /tmp/prowl ./cmd/prowl
           /tmp/prowl rules validate rules/
           /tmp/prowl verifiers validate verifiers/
+          /tmp/prowl rules manifest rules/
+          /tmp/prowl verifiers manifest verifiers/
+          git diff --exit-code rules/MANIFEST.sha256 verifiers/MANIFEST.sha256 \
+            || { echo "MANIFEST.sha256 stale — run 'prowl rules manifest rules' (and verifiers) and commit"; exit 1; }
+
+  lint:
+    runs-on: ubuntu-latest
+    # soft-start: reports gosec/bodyclose/errcheck findings without blocking; flip continue-on-error off
+    # once the first pass is triaged so it becomes a hard gate.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: tool/go.sum
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: tool
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: ruff (real-error classes)
+        run: |
+          pip install ruff
+          ruff check --select E9,F821,F811,F823,F706 .  # respects .gitignore -> only tracked Python
 
   fuzz-smoke:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tool
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
