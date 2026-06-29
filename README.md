@@ -104,7 +104,7 @@ prowl scan . --format sarif -o out.sarif    # for code scanning / CI
 prowl repo https://github.com/org/repo   # clone a remote repo (GitHub/GitLab/Bitbucket) and scan it
 GITHUB_TOKEN=... prowl org github:my-org   # scan every repo in an org/group/workspace
 GITHUB_TOKEN=... prowl org github:my-user --gists   # scan a github user's public gists instead of repos
-prowl image alpine:latest                # pull & scan a container image (every layer + config)
+prowl image alpine:latest                # scan a container image - every layer + config (also a local tarball / oci-dir / stdin)
 prowl bucket s3://my-logs/2026/          # download & scan an S3 / GCS prefix (uses your aws/gcloud CLI)
 prowl mobile app.apk                     # unpack & scan an Android APK / iOS IPA (resources + binary strings)
 kubectl get secret x -o yaml | prowl scan -   # scan piped input from stdin
@@ -150,7 +150,7 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 - **Git** - staged files (`--staged`), a diff (`--since <rev>`), or every blob in history (`--history`). [docs](wiki/Scanning-Files.md)
 - **A remote repo** - `prowl repo <git-url>`, clone & scan any GitHub/GitLab/Bitbucket/self-hosted URL. [docs](wiki/Repository-Scanning.md)
 - **A whole org / group / workspace** - `prowl org <platform>:<name>`, every repo at once. [docs](wiki/Org-Scanning.md)
-- **A container image** - `prowl image <ref>`, pull & scan every layer + the image config, no daemon. [docs](wiki/Container-Scanning.md)
+- **A container image** - `prowl image <ref | tarball | oci-dir | ->`, scan every layer + the image config (no daemon), and flag whether each leak survives into the final flattened image. [docs](wiki/Container-Scanning.md)
 - **An S3 / GCS prefix** - `prowl bucket <s3://...|gs://...>`, download via your aws/gcloud CLI & scan. [docs](wiki/Bucket-Scanning.md)
 - **A mobile app** - `prowl mobile <app.apk|app.ipa|path|https-url>`, unpack the APK/IPA and scan resources, JSON/plist/XML, and printable strings inside binary entries. [docs](wiki/Mobile-Scanning.md)
 - **A live domain** - `prowl domain <host> --authorized`, HTML + inline state blobs + referenced JS & source maps. [docs](wiki/Domain-Scanning.md)

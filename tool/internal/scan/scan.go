@@ -129,6 +129,22 @@ var lockfileNoiseTypes = map[string]bool{
 
 var commentPrefixes = []string{"//", "#", "/*", "* ", "--", "<!--", ";"}
 
+// imageFileName strips an image finding's "label|layerN:" / "label|image:" prefix so path heuristics see
+// the real in-image file path, not the user's image arg. Non-image paths pass through unchanged.
+func imageFileName(p string) string {
+	bar := strings.Index(p, "|layer")
+	if bar < 0 {
+		if bar = strings.Index(p, "|image:"); bar < 0 {
+			return p
+		}
+	}
+	rest := p[bar+1:] // "layerN:..." or "image:..."
+	if i := strings.IndexByte(rest, ':'); i >= 0 {
+		return rest[i+1:]
+	}
+	return p
+}
+
 // adjustSeverity demotes low-evidence matches in example/test paths or comments. Checksum matches
 // are never demoted; generic ones drop to "low", structured ones drop one step. pathIsFile is false
 // for Jira/Confluence (and other non-file sources) whose Path is an issue key / page TITLE, not a
@@ -330,6 +346,8 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 	li := newLineIndex(it.Text)
 	pathIsFile := pathIsFilesystem(it.Source)
 	itemURL, _ := it.Meta["url"].(string)
+	itemInstr, _ := it.Meta["instruction"].(string) // image: the Dockerfile step that built the layer
+	examplePath := imageFileName(it.Path)           // strip the image label/layer prefix so the arg can't trip isExamplePath
 	for i, m := range ms {
 		if i&1023 == 0 && ctx.Err() != nil { // let --timeout / Ctrl-C abort mid-file, not only between files
 
@@ -343,11 +361,11 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 		}
 		// in a lockfile a generic entropy/api-key hit is almost always a package integrity hash; drop
 		// only that noise (lockfileNoiseTypes), keeping typed secrets and credential-bearing generics
-		if pathIsFile && isLockfile(it.Path) && lockfileNoiseTypes[m.Type] {
+		if pathIsFile && isLockfile(examplePath) && lockfileNoiseTypes[m.Type] {
 			continue
 		}
 		line, col := li.cols(m.Start)
-		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, it.Path, pathIsFile)
+		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
 		dedup[fmt.Sprintf("%d:%s", line, m.Value)] = len(out) // index of the finding appended next
 		ver, why := applyVerify(ctx, vset, m.Type, m.Value, it.Text)
 		out = append(out, model.Finding{
@@ -356,7 +374,7 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
 			Redacted: redactValue(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
-			Verified:    ver, Rationale: why,
+			Verified:    ver, Rationale: why, Instruction: itemInstr,
 			Context: revealContext(it, m.Start),
 		})
 		if ml != nil {
@@ -413,11 +431,11 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			ver, why := applyVerify(ctx, vset, h.RuleID, h.Value, it.Text)
 			f := model.Finding{
 				Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
-				Severity: ruleSeverity(sev, h, li, it.Path, pathIsFile),
+				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
 				Redacted: redactValue(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
-				Verified:    ver, Rationale: why,
+				Verified:    ver, Rationale: why, Instruction: itemInstr,
 				Context: revealContext(it, h.Start),
 			}
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a

@@ -94,8 +94,10 @@ Color is automatic: ANSI styling turns on only when stdout is a TTY. It is suppr
 | `verified` | bool | present only under `--verify`; `true` = provider-confirmed live, `false` = rejected. Omitted when verification was not attempted or inconclusive |
 | `rationale` | string | present only when set, e.g. `verified live via aws-sts`; omitted otherwise |
 | `fingerprint` | string | sha256 over `type\|path\|raw-value`, a stable identity used for [baselining](Configuration.md) |
+| `in_final_image` | bool | **`prowl image` only.** `true` = the secret survives into the flattened image a `docker pull` deploys; `false` = a later layer whiteouted/overwrote it (recoverable from history only); omitted = unknown. See [Container Scanning](Container-Scanning.md). |
+| `instruction` | string | **`prowl image` only.** The Dockerfile build instruction (`CreatedBy`) that produced the layer, mapping a leak back to the line that introduced it. |
 
-`verified`, `rationale`, and `fingerprint` are `omitempty`: they are absent from the object when empty. A scan without `--verify` therefore carries no `verified` or `rationale` key.
+`verified`, `rationale`, `fingerprint`, `in_final_image`, and `instruction` are `omitempty`: they are absent from the object when empty. A scan without `--verify` therefore carries no `verified` or `rationale` key, and a non-image scan carries no `in_final_image`/`instruction`.
 
 On a clean scan `findings` is always the empty array `[]`, never `null`, so consumers can iterate it unconditionally (`jq '.findings[]'`, a `for` loop) without a nil check:
 

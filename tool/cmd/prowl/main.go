@@ -392,6 +392,7 @@ type commonFlags struct {
 	maxSize                                  int64
 	workers                                  int
 	timeout                                  time.Duration
+	imageInput                               string // force the image source kind: ref|tar|oci-dir|stdin (empty = auto)
 }
 
 func isTTY(f *os.File) bool {
@@ -678,6 +679,8 @@ func parseCommon(args []string) (commonFlags, []string) {
 			c.failOnVerified = true
 		case a == "--exclude":
 			c.exclude = append(c.exclude, next())
+		case a == "--image-input":
+			c.imageInput = next()
 		case a == "--taxonomy":
 			c.taxonomy = next()
 		case a == "--rules":
@@ -1021,7 +1024,7 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 // runScan executes the scan pipeline over an already-built item stream, composing collectFindings
 // (scan -> findings) and reportFindings (findings -> report + exit code). Shared by scan/repo/image;
 // org drives the two halves separately so it can collect per-repo on a worker pool.
-func runScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, items <-chan model.Item, dedupe bool) int {
+func runScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, items <-chan model.Item, dedupe bool, finalize ...func([]model.Finding) []model.Finding) int {
 	start := time.Now()
 	eng := loadEngine(c)
 	vset, err := loadVerifySet(c)
@@ -1030,6 +1033,9 @@ func runScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect
 		return 2
 	}
 	findings := collectFindings(ctx, c, cfg, det, eng, vset, items, dedupe)
+	for _, fz := range finalize { // image scans pass a final-FS marker; other sources pass nothing
+		findings = fz(findings)
+	}
 	code := reportFindings(c, findings, time.Since(start))
 	return failClosedIfIncomplete(ctx, code)
 }

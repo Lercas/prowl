@@ -42,6 +42,11 @@ type Finding struct {
 	// --show-secrets, since the line holds the raw secret; it lets the flywheel train on the exact
 	// features the scan scored, instead of a context-stripped value.
 	Context *FindingContext `json:"context,omitempty"`
+	// InFinalImage (image scans only): true if the file survives to the flattened/deployed image, false
+	// if only in a historical/overwritten/whiteout-deleted layer, nil = unknown or not an image scan.
+	InFinalImage *bool `json:"in_final_image,omitempty"`
+	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
+	Instruction string `json:"instruction,omitempty"`
 }
 
 // FindingContext mirrors mlscore.Context's value-dependent fields (path/source are already on Finding).

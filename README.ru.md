@@ -78,7 +78,7 @@ prowl scan . --format sarif -o out.sarif    # для code scanning / CI
 prowl repo https://github.com/org/repo   # клонировать удалённый репозиторий (GitHub/GitLab/Bitbucket) и просканировать
 GITHUB_TOKEN=... prowl org github:my-org   # просканировать каждый репозиторий в орге/группе/воркспейсе
 GITHUB_TOKEN=... prowl org github:my-user --gists   # просканировать публичные gist'ы пользователя GitHub, а не репозитории
-prowl image alpine:latest                # стянуть и просканировать образ контейнера (каждый слой + конфиг)
+prowl image alpine:latest                # просканировать образ - каждый слой + конфиг (также локальный tarball / oci-dir / stdin)
 prowl bucket s3://my-logs/2026/          # скачать и просканировать префикс S3 / GCS (через ваш CLI aws/gcloud)
 kubectl get secret x -o yaml | prowl scan -   # сканировать ввод из stdin
 
@@ -126,7 +126,7 @@ prowl scan . --show-secrets           # вывести ПОЛНОЕ незама
 - **Git** - файлы в индексе (`--staged`), дифф (`--since <rev>`) или каждый блоб в истории (`--history`). [док](wiki/Scanning-Files.md)
 - **Удалённый репозиторий** - `prowl repo <git-url>`, клонировать и просканировать любой URL GitHub/GitLab/Bitbucket/self-hosted. [док](wiki/Repository-Scanning.md)
 - **Целый орг / группа / воркспейс** - `prowl org <platform>:<name>`, все репозитории сразу. [док](wiki/Org-Scanning.md)
-- **Образ контейнера** - `prowl image <ref>`, стянуть и просканировать каждый слой + конфиг образа, без демона. [док](wiki/Container-Scanning.md)
+- **Образ контейнера** - `prowl image <ref | tarball | oci-dir | ->`, просканировать каждый слой + конфиг образа (без демона) и пометить, доживает ли каждая утечка до финального образа. [док](wiki/Container-Scanning.md)
 - **Префикс S3 / GCS** - `prowl bucket <s3://...|gs://...>`, скачать через ваш CLI aws/gcloud и просканировать. [док](wiki/Bucket-Scanning.md)
 - **Живой домен** - `prowl domain <host> --authorized`, HTML + встроенные state-блобы + связанные JS и source maps. [док](wiki/Domain-Scanning.md)
 - **Мобильное приложение** - `prowl mobile <app.apk|app.ipa|путь|https-url>`, распаковать и просканировать Android APK / iOS IPA: ресурсы, JSON, plist, XML - как есть, бинарники - проходом по печатным строкам. [док](wiki/Mobile-Scanning.md)

@@ -53,7 +53,7 @@ func TestImageLayerExcludeGlob(t *testing.T) {
 	ch := make(chan model.Item, 8)
 	go func() {
 		defer close(ch)
-		emitLayer(context.Background(), ch, 0, layer, 1<<20, []string{"*.lock"}, &imageBudget{})
+		emitLayer(context.Background(), ch, "", 0, layer, 1<<20, []string{"*.lock"}, &imageBudget{}, newFinalIndex(), "")
 	}()
 
 	got := map[string]bool{}

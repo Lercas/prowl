@@ -107,23 +107,31 @@ Examples:
   prowl org gitlab:mygroup --history --format json
   prowl org bitbucket:myteam --verify --verified-only`
 
-const imageHelp = `prowl image <ref> — pull a container image and scan it for secrets
+const imageHelp = `prowl image <ref|tarball|oci-dir|-> ... — scan container image(s) for secrets
 
-  <ref>              any OCI/Docker reference: alpine:latest, ghcr.io/org/app:1.2, repo@sha256:…
-  + all scan flags   --verify, --fail-on, --format, --rules-dir, --tags, --baseline, --max-size, …
+  <ref>              a registry reference: alpine:latest, ghcr.io/org/app:1.2, repo@sha256:…
+  <file>.tar         a local docker-save / OCI tarball (no registry, no network)
+  <dir>/             a local OCI image-layout directory
+  -                  a tar stream on stdin: docker save app | prowl image -
+  multiple args      scan several images into one report
+  --image-input K    force the source kind (ref|tar|oci-dir|stdin) when auto-detect guesses wrong
+  + all scan flags   --verify, --fail-on, --format, --baseline, --max-size, --show-secrets, …
 
-Scans EVERY layer's files, not just the flattened final filesystem — so a secret that was COPYed in
-one layer and deleted (RM) in a later one is still caught from the earlier layer where it persists.
-The image config is scanned too: env vars, labels, and build-history RUN commands are prime secret
-locations. The same file across layers is reported once (deduped by content fingerprint).
+Scans EVERY layer plus the config (env, labels, entrypoint, cmd, healthcheck, and each build-history
+instruction) — a secret COPYed then RM'd in a later layer is still caught from the earlier one. Each
+finding records (in --format json):
+  in_final_image     true = survives to the deployed image; false = only in a deleted/overwritten/
+                     whiteouted layer (recoverable but not running)
+  instruction        the Dockerfile step (RUN/COPY/…) that introduced the layer
 
-Public images need no credentials; private registries authenticate via your Docker login
-(~/.docker/config.json / the default keychain). Nothing is written to disk — layers stream in memory.
+Only remote refs touch the network (SSRF-guarded); local sources dial nothing. Private registries use
+your Docker login (~/.docker/config.json). Layers stream in memory; only the scan output is written.
 
 Examples:
   prowl image alpine:latest
   prowl image ghcr.io/org/app:1.4 --fail-on high
-  prowl image myregistry.io/team/api@sha256:abc… --verify --format json`
+  docker save myapp:dev | prowl image - --verify --format json
+  prowl image ./app.tar ./db.tar --show-secrets`
 
 const mobileHelp = `prowl mobile <app.apk | app.ipa | path | https://…> — unpack & scan a mobile app
 
@@ -284,7 +292,7 @@ var knownFlags = map[string]bool{
 	"--log-format": true, "--log-level": true, "--help": true, "-h": true,
 	"--authorized": true, "--recon": true, "--max-assets": true, "--addr": true,
 	"--max-concurrent": true, "--source": true, "--check": true, "--allow-unsigned": true,
-	"--dedupe": true, "--no-dedupe": true,
+	"--dedupe": true, "--no-dedupe": true, "--image-input": true,
 	"--min-confidence": true, "--min-severity": true, "--disable": true, "--exclude-repo": true,
 	"--branch": true, "--depth": true, "--concurrency": true, "--max-per-file": true,
 	"--ml": true, "--ml-model": true, "--ml-url": true, "--ml-threshold": true,
