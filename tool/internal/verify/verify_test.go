@@ -75,6 +75,22 @@ func TestDataDrivenVerify(t *testing.T) {
 	}
 }
 
+// A 429/503 must yield Errored (inconclusive), never Invalid — else provider throttling marks a LIVE key dead.
+func TestRateLimitedIsInconclusive(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Retry-After", "1")
+		w.WriteHeader(http.StatusTooManyRequests)
+	}))
+	defer srv.Close()
+	set, err := Load(3*time.Second, writeVerifier(t, srv.URL))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r := set.Verify(context.Background(), "mocktoken", "LIVEKEY", "", false); r.Status != Errored {
+		t.Errorf("429: got %q, want errored — a throttled live key must not be marked invalid", r.Status)
+	}
+}
+
 func TestBlastRadius(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/a" || r.URL.Path == "/b" {

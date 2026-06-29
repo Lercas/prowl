@@ -50,6 +50,7 @@ For each finding, prowl selects a verifier by matching the detector type id **or
 - The provider **accepts** it (e.g. `200` from `https://api.github.com/user`) → **live**.
 - The provider **rejects** it (e.g. `401`) → **dead** (revoked or fake).
 - The request **errors** (timeout, DNS, blocked) → **inconclusive**; the finding is kept and left unverified.
+- The provider **rate-limits** the check (`429` / `503`) → **inconclusive**, never *dead*. prowl honors `Retry-After` for one bounded retry, then leaves the finding unverified rather than mislabel a throttled key as revoked. Re-run to resolve any left inconclusive.
 
 Verifiers target read-only identity/validate endpoints only (`/user`, `/account`, `whoami`, `validate`) — never anything that mutates state. Results are cached by value, so each distinct secret is checked exactly once even if it appears many times.
 

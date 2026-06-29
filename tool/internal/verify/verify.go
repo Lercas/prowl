@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -297,6 +298,9 @@ func classifyErr(err error) string {
 	if errors.Is(err, safehttp.ErrCrossHostRedirect) {
 		return "cross-host redirect blocked"
 	}
+	if errors.Is(err, errRateLimited) {
+		return "rate-limited"
+	}
 	if errors.Is(err, errBadInterpolation) {
 		return "invalid request"
 	}
@@ -344,6 +348,13 @@ func classifyErr(err error) string {
 // errBadInterpolation is returned when an interpolated secret reshapes the request (e.g. embeds
 // CR/LF or other control characters) or yields an unparseable URL. It carries no secret.
 var errBadInterpolation = errors.New("interpolated value contains invalid characters")
+var errRateLimited = errors.New("rate limited")
+
+const (
+	verifyRateLimitRetries = 1                      // bounded retries on a 429/503 before giving up as inconclusive
+	verifyMaxBackoff       = 5 * time.Second        // upper clamp on a honored Retry-After
+	verifyDefaultBackoff   = 250 * time.Millisecond // when Retry-After is absent/zero, don't park the full max
+)
 
 // hasControlChars reports whether s contains any control character (CR, LF, NUL, DEL, …) other than
 // tab — runes that could split the request or smuggle extra headers from a URL/header value.
@@ -398,21 +409,74 @@ func (s *Set) probe(ctx context.Context, v *Verifier, r *Request, vars map[strin
 			return false, err
 		}
 	}
-	if s.sem != nil { // acquire a slot but stay cancellable while waiting
-		select {
-		case s.sem <- struct{}{}:
-			defer func() { <-s.sem }()
-		case <-ctx.Done():
-			return false, ctx.Err()
+	for attempt := 0; ; attempt++ {
+		if s.sem != nil { // bound concurrent provider calls — re-acquired each attempt, never held across a backoff
+			select {
+			case s.sem <- struct{}{}:
+			case <-ctx.Done():
+				return false, ctx.Err()
+			}
+		}
+		resp, err := s.client.Do(req)
+		if err != nil {
+			if s.sem != nil {
+				<-s.sem
+			}
+			return false, err
+		}
+		// A 429/503 is throttling, not a verdict — a LIVE key must never be marked Invalid (dead) because the
+		// provider rate-limited us. Honor Retry-After for one bounded retry, then report it as Errored.
+		if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode == http.StatusServiceUnavailable {
+			wait := retryAfter(resp)
+			resp.Body.Close()
+			if s.sem != nil {
+				<-s.sem // release before the backoff sleep so a throttled probe never parks a slot while idle
+			}
+			if attempt < verifyRateLimitRetries {
+				switch { // absent/zero -> short default (don't park the full max); huge date -> clamp down
+				case wait <= 0:
+					wait = verifyDefaultBackoff
+				case wait > verifyMaxBackoff:
+					wait = verifyMaxBackoff
+				}
+				select {
+				case <-time.After(wait):
+				case <-ctx.Done():
+					return false, ctx.Err()
+				}
+				if req.GetBody != nil { // rewind the body for the retry
+					if b, e := req.GetBody(); e == nil {
+						req.Body = b
+					}
+				}
+				continue
+			}
+			return false, errRateLimited
+		}
+		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<16))
+		resp.Body.Close()
+		if s.sem != nil {
+			<-s.sem
+		}
+		return matchResponse(r, resp, respBody), nil
+	}
+}
+
+// retryAfter parses a Retry-After header (delta-seconds or HTTP-date) into a non-negative duration; 0 if absent.
+func retryAfter(resp *http.Response) time.Duration {
+	h := strings.TrimSpace(resp.Header.Get("Retry-After"))
+	if h == "" {
+		return -1 // absent: caller picks a short default backoff, not the max
+	}
+	if secs, err := strconv.Atoi(h); err == nil && secs >= 0 {
+		return time.Duration(secs) * time.Second
+	}
+	if t, err := http.ParseTime(h); err == nil {
+		if d := time.Until(t); d > 0 {
+			return d
 		}
 	}
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<16))
-	return matchResponse(r, resp, respBody), nil
+	return -1
 }
 
 func matchResponse(r *Request, resp *http.Response, body []byte) bool {
