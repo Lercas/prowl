@@ -2,7 +2,7 @@ id: google-api-key
 info:
   name: Google API key
   reference: https://cloud.google.com/docs/authentication/api-keys
-match: [google-gemini-api-key, google-api-key, gemini]
+match: [google-gemini-api-key, google-api-key, gemini, gcp_api_key, AIza]
 requests:
   - method: POST
     url: https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key={{secret}}

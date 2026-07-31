@@ -2,9 +2,11 @@ package source
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"bytes"
 	"context"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -71,8 +73,8 @@ func TestImageLayerExcludeGlob(t *testing.T) {
 	}
 }
 
-// TestGitHistoryExcludeAndSkipExt: --history must honour --exclude and skipExt — a committed file
-// matching the exclude glob (or a binary extension) is not yielded, while an ordinary source file is.
+// TestGitHistoryExcludeAndArchives: --history honours --exclude, keeps unsupported binary extensions
+// skipped, and expands supported archives instead of dropping them solely by extension.
 func TestGitHistoryExcludeAndSkipExt(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not available")
@@ -91,7 +93,14 @@ func TestGitHistoryExcludeAndSkipExt(t *testing.T) {
 	run("config", "user.name", "t")
 	write(t, filepath.Join(dir, "keep.py"), `K = "keepme"`)
 	write(t, filepath.Join(dir, "deps.lock"), `LOCKED = "secret"`)
-	write(t, filepath.Join(dir, "blob.jar"), `JARRED = "secret"`) // skipExt extension
+	var jar bytes.Buffer
+	zw := zip.NewWriter(&jar)
+	jw, _ := zw.Create("inside.txt")
+	_, _ = io.WriteString(jw, `JARRED = "secret"`)
+	_ = zw.Close()
+	if err := os.WriteFile(filepath.Join(dir, "blob.jar"), jar.Bytes(), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	run("add", "-A")
 	run("commit", "-qm", "one")
 
@@ -102,8 +111,8 @@ func TestGitHistoryExcludeAndSkipExt(t *testing.T) {
 	if got["deps.lock"] {
 		t.Error("deps.lock should be excluded by --exclude '*.lock' in history scan")
 	}
-	if got["blob.jar"] {
-		t.Error(".jar should be skipped via skipExt in history scan (mirrors working-tree scan)")
+	if !got["inside.txt"] {
+		t.Error(".jar should be expanded in history scan and emit its text member")
 	}
 }
 

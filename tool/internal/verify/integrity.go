@@ -124,7 +124,8 @@ func GenerateManifest(dir string) (int, error) {
 		}
 		fmt.Fprintf(&b, "%s  %s\n", sum, rel)
 	}
-	if err := os.WriteFile(filepath.Join(dir, ManifestName), []byte(b.String()), 0o644); err != nil {
+	// The manifest contains public checksums and must remain readable by non-owner scanner processes.
+	if err := os.WriteFile(filepath.Join(dir, ManifestName), []byte(b.String()), 0o644); err != nil { //nolint:gosec
 		return 0, err
 	}
 	return len(rels), nil

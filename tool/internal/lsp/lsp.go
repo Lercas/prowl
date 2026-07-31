@@ -225,7 +225,7 @@ func installedRulesDir() string {
 		}
 	}
 	dir := filepath.Join(home, "rules")
-	if info, err := os.Stat(dir); err == nil && info.IsDir() {
+	if info, err := os.Stat(dir); err == nil && info.IsDir() { //nolint:gosec // Path comes from the operator's local config environment.
 		return dir
 	}
 	return ""
@@ -521,12 +521,19 @@ type safeWriter struct {
 func newSafeWriter(w *bufio.Writer) *safeWriter { return &safeWriter{w: w} }
 
 func (s *safeWriter) send(v any) {
-	b, _ := json.Marshal(v)
+	b, err := json.Marshal(v)
+	if err != nil {
+		return
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	fmt.Fprintf(s.w, "Content-Length: %d\r\n\r\n", len(b))
-	s.w.Write(b)
-	s.w.Flush()
+	if _, err := fmt.Fprintf(s.w, "Content-Length: %d\r\n\r\n", len(b)); err != nil {
+		return
+	}
+	if _, err := s.w.Write(b); err != nil {
+		return
+	}
+	_ = s.w.Flush()
 }
 
 func respond(w *safeWriter, id json.RawMessage, result any) {
@@ -544,7 +551,9 @@ func openParams(p json.RawMessage) (string, string) {
 			Text string `json:"text"`
 		} `json:"textDocument"`
 	}
-	json.Unmarshal(p, &v)
+	if err := json.Unmarshal(p, &v); err != nil {
+		return "", ""
+	}
 	return v.TextDocument.URI, v.TextDocument.Text
 }
 
@@ -557,7 +566,9 @@ func changeParams(p json.RawMessage) (string, string) {
 			Text string `json:"text"`
 		} `json:"contentChanges"`
 	}
-	json.Unmarshal(p, &v)
+	if err := json.Unmarshal(p, &v); err != nil {
+		return "", ""
+	}
 	text := ""
 	if len(v.ContentChanges) > 0 {
 		text = v.ContentChanges[len(v.ContentChanges)-1].Text
@@ -572,7 +583,9 @@ func closeParams(p json.RawMessage) string {
 			URI string `json:"uri"`
 		} `json:"textDocument"`
 	}
-	json.Unmarshal(p, &v)
+	if err := json.Unmarshal(p, &v); err != nil {
+		return ""
+	}
 	return v.TextDocument.URI
 }
 
@@ -585,7 +598,9 @@ func saveParams(p json.RawMessage) (uri, text string, hasText bool) {
 		} `json:"textDocument"`
 		Text *string `json:"text"`
 	}
-	json.Unmarshal(p, &v)
+	if err := json.Unmarshal(p, &v); err != nil {
+		return "", "", false
+	}
 	if v.Text != nil {
 		return v.TextDocument.URI, *v.Text, true
 	}

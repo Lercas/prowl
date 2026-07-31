@@ -11,13 +11,15 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
-	{"scan", "scan files, dirs, git, or stdin for secrets", scanHelp},
+	{"scan", "scan files, dirs, archives, documents, mail, git, or stdin for secrets", scanHelp},
 	{"repo", "clone & scan a remote git repository", repoHelp},
 	{"org", "clone & scan every repo in an org/group/workspace", orgHelp},
+	{"cicd", "scan GitHub Actions / GitLab CI logs and artifacts", cicdHelp},
 	{"image", "pull & scan a container image", imageHelp},
 	{"mobile", "unpack & scan an APK/IPA for secrets", mobileHelp},
 	{"bucket", "download & scan a cloud storage prefix", bucketHelp},
 	{"domain", "scan a live site (HTML + state blobs + JS)", domainHelp},
+	{"hermes-audit", "audit authorized Hermes dashboards and exact-IP passive inventory", hermesAuditHelp},
 	{"jira", "scan Jira across every issue version (Cloud/Server/DC)", ""},
 	{"confluence", "scan Confluence across every page version", ""},
 	{"serve", "run as a stateless HTTP scan worker", serveHelp},
@@ -32,7 +34,7 @@ var commands = []cmdInfo{
 	{"help", "show help for a command", ""},
 }
 
-const scanHelp = `prowl scan [path...] — scan files/dirs for secrets (default: .)
+const scanHelp = `prowl scan [path...] — scan files/dirs/archives/docs/mail for secrets (default: .)
 
   --rules-dir DIR              run nuclei-style rule templates from DIR
   --tags / --exclude-tags / --rule-severity   filter which templates run
@@ -55,12 +57,27 @@ const scanHelp = `prowl scan [path...] — scan files/dirs for secrets (default:
   --ml-model FILE             load that model file instead of the embedded one (implies --ml); else
                               $PROWL_HOME/model_binary.json is auto-used, else the embedded model
   --ml-url URL                same, but via an external sidecar (src/serve.py) instead of the embed
+  --ocr                       OCR PNG/JPEG/WebP and image-only PDF pages through a local
+                              OpenAI-compatible endpoint (default: 127.0.0.1:8080)
+  --ocr-model MODEL           model name (default: mlx-community/Qwen3.6-27B-4bit)
+  --ocr-url URL               endpoint; non-loopback needs --ocr-allow-remote and HTTPS
+  --ocr-allow-remote          explicitly allow documents to leave the local machine
+  --ocr-all-pages             OCR every PDF page, not only pages without a text layer
+  --ocr-max-pages N           maximum OCR pages per PDF (default 20)
+  --ocr-timeout DUR           timeout for each OCR request (default 2m)
   -                           scan stdin (also auto-read when input is piped and no path is given)
+
+ZIP/JAR, TAR/TAR.GZ/TGZ/GZIP, and DOCX/XLSX/PPTX inputs are recursively expanded in memory.
+EML/EMLX/MBOX mail bodies and MIME attachments are decoded; attached archives are expanded too.
+PDF text-layer pages and document metadata are extracted in memory; --ocr renders image-only pages
+with Poppler's pdftocairo. OCR errors fail closed instead of returning a misleading clean result.
+--max-size bounds both a compressed filesystem input and each emitted archive member.
 
 Examples:
   prowl scan .
   prowl scan src --rules-dir rules/ --tags aws,stripe
   prowl scan . --verify --verified-only --format sarif -o report.sarif
+  prowl scan screenshots/ contract.pdf --ocr
   prowl scan --staged --fail-on high            # pre-commit / CI gate
   kubectl get secret x -o yaml | prowl scan -   # scan piped input (stdin)
 
@@ -106,6 +123,29 @@ Examples:
   GITHUB_TOKEN=ghp_… prowl org github:Lercas --fail-on high
   prowl org gitlab:mygroup --history --format json
   prowl org bitbucket:myteam --verify --verified-only`
+
+const cicdHelp = `prowl cicd <github:owner/repo | gitlab:group/project> — scan CI logs and artifacts
+
+  --max-runs N          recent completed runs/pipelines to scan (default 20)
+  --max-artifacts N     cap downloaded artifacts across the scan (default 100)
+  --max-download SIZE   cap each compressed log/artifact download (default 100MB)
+  --branch REF          restrict runs/pipelines to one branch or ref
+  --logs-only           scan logs/traces but not artifacts
+  --artifacts-only      scan artifacts but not logs/traces
+  + all scan flags      --verify, --fail-on, --format, --rules-dir, --max-size, --timeout, …
+
+Authentication is read from the environment only:
+  GITHUB_TOKEN          GitHub Actions read access (GITHUB_API overrides the API host)
+  GITLAB_TOKEN          GitLab pipeline/job read access (GITLAB_API overrides the API host)
+
+Prowl streams text from logs and recursively opens ZIP artifacts in memory. Downloads, archive
+entries, nesting depth, and expanded size are bounded. Cross-origin artifact redirects are followed
+only after all forge credentials have been stripped. Output stays redacted unless --show-secrets is
+explicitly selected.
+
+Examples:
+  GITHUB_TOKEN=… prowl cicd github:Lercas/prowl --max-runs 10 --fail-on high
+  GITLAB_TOKEN=… prowl cicd gitlab:group/project --branch main --artifacts-only --format json`
 
 const imageHelp = `prowl image <ref|tarball|oci-dir|-> ... — scan container image(s) for secrets
 
@@ -184,6 +224,33 @@ Examples:
   prowl domain example.com --authorized --recon --format json
   prowl domain --targets hosts.txt --authorized --verify --verified-only`
 
+const hermesAuditHelp = `prowl hermes-audit [IP ...] --authorized — audit Hermes dashboards
+
+  --authorized          REQUIRED: attest that every IP belongs to your inventory or engagement
+  --targets FILE        newline-delimited literal IPs / IP:port values
+  --provider NAME,...   exact-IP passive lookups: censys,shodan,fofa,zoomeye,leakix
+  --active=false        skip the live status/schema check and root dashboard fallback
+  --passive=false       skip provider exact-IP lookups
+  --max-retries N       bounded API retries after 429/5xx (default 2, max 5)
+  --concurrency N       target concurrency (default 2, capped at 8)
+  -o, --output FILE     write the redacted JSON report with mode 0600
+
+The active check tries HTTPS/HTTP on standard ports for a bare IP, then Hermes' native 9119 port.
+When /api/status is absent it reads only the public root and up to 12 same-origin static assets;
+secret-looking values are scanned in memory and emitted only as redacted findings. If Hermes'
+public SPA shell exposes its own session-token marker, Prowl may use that marker only to request
+masked /api/env, credential-pool, and custom-endpoint metadata (credential names, provider/source,
+and presence booleans), so configured DEEPSEEK_API_KEY and similar names are not silently missed. It never requests
+/api/env/reveal, cookies, Authorization, sessions, or chat data. Provider payloads and banners
+are discarded after extracting only a Hermes marker and ports. API credentials are read from
+environment variables, never argv. Rate limits are honored; there is no Tor/proxy rotation or
+global search mode.
+
+Examples:
+  prowl hermes-audit 203.0.113.10 --authorized
+  prowl hermes-audit --targets hermes-public-ips.txt --authorized --provider censys,shodan
+  PROWL_ALLOW_PRIVATE_IPS=1 prowl hermes-audit 10.0.0.12:9119 --authorized --passive=false`
+
 const serveHelp = `prowl serve [--addr :8080] — run as a stateless HTTP scan worker
 
 POST /scan and /scan/batch, GET /healthz and /metrics. One horizontal scaling unit (N replicas
@@ -201,6 +268,7 @@ prowl_repo (git url). Each returns the JSON findings envelope.
 Register with Claude Code:
   claude mcp add prowl -- prowl mcp`
 
+//nolint:gosec // The help text contains a documentation-only synthetic Stripe key.
 const rulesHelp = `prowl rules <cmd> — manage detection rule templates (they live outside the binary)
 
   list     [DIR]                      rules grouped by category, with severity and tags
@@ -296,7 +364,10 @@ var knownFlags = map[string]bool{
 	"--min-confidence": true, "--min-severity": true, "--disable": true, "--exclude-repo": true,
 	"--branch": true, "--depth": true, "--concurrency": true, "--max-per-file": true,
 	"--ml": true, "--ml-model": true, "--ml-url": true, "--ml-threshold": true,
+	"--ocr": true, "--ocr-url": true, "--ocr-model": true, "--ocr-allow-remote": true,
+	"--ocr-all-pages": true, "--ocr-max-pages": true, "--ocr-timeout": true,
 	"--base-url": true, "--current-only": true, "--max-items": true, "--project": true, "--space": true, "--field": true,
+	"--max-runs": true, "--max-artifacts": true, "--max-download": true, "--logs-only": true, "--artifacts-only": true,
 	"--targets": true, "--gists": true,
 	"--no-strings": true, "--min-run": true,
 }

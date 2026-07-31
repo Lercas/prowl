@@ -31,8 +31,10 @@ $ prowl scan .
 
 ### Scanning
 - [Scanning Files](Scanning-Files.md) — `prowl scan`, git modes, every flag
+- [OCR Scanning](OCR-Scanning.md) — local VLM OCR for images and image-only PDF pages
 - [Repository Scanning](Repository-Scanning.md) — clone & scan a remote repo by URL
 - [Org-Wide Scanning](Org-Scanning.md) — clone & scan every repo in an org/group/workspace
+- [CI Artifact Scanning](CI-Artifact-Scanning.md) — GitHub Actions / GitLab CI logs and artifacts
 - [Container Scanning](Container-Scanning.md) — pull & scan an OCI/Docker image
 - [Mobile App Scanning](Mobile-Scanning.md) — `prowl mobile`, unpack & scan an Android APK / iOS IPA
 - [Cloud Storage Scanning](Bucket-Scanning.md) — download & scan an S3 / GCS prefix
@@ -43,7 +45,7 @@ $ prowl scan .
 ### Detection
 - [Rules](Rules.md) — the nuclei-style template library and authoring loop
 - [Verifiers](Verifiers.md) — data-driven live-credential verifiers
-- [Architecture](Architecture.md) — the three-stage detection cascade
+- [Architecture](Architecture.md) — the runtime candidate/filter/verification pipeline
 - [Data Flywheel](Data-Flywheel.md) — the self-improving ML false-positive filter and its retrain loop
 
 ### Integrate

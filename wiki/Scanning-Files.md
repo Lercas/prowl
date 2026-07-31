@@ -16,14 +16,86 @@ By default `scan` walks the filesystem. Three flags switch the input to git inst
 
 ## What gets scanned
 
-The filesystem walk yields text files only. It automatically skips:
+The filesystem walk yields text content. Supported archives, Office/PDF documents, and mail exports
+are opened in memory and their text members are emitted as virtual paths such as
+`bundle.zip!/config/prod.env`, `runbook.pdf!/page-0001.txt`, or
+`incident.mbox!/message-000002.eml!/body.txt`.
+It automatically skips:
 
 - Noise directories: `.git`, `node_modules`, `vendor`, `dist`, `build`, `.venv`, `__pycache__`, `target`, `.idea`, `.terraform`.
-- Binary file extensions (images, archives, fonts, compiled objects, `.wasm`, `.exe`, ...) and any file whose first bytes look binary.
+- Unsupported binary file extensions (images, fonts, compiled objects, `.wasm`, `.exe`, `.7z`,
+  `.bz2`, ...) and any ordinary file whose first bytes look binary.
 - Empty files and files larger than `--max-size`.
 - Symlinks — they are never followed, so a link pointing outside the scanned root cannot escape scope.
 
 Once the libraries are installed, `scan` auto-loads the rule templates from `~/.prowl/rules`; `--verify` auto-loads verifiers from `~/.prowl/verifiers`. No `--rules-dir` / `--verifiers` flags are needed for the default library.
+
+## Archives and Office documents
+
+`scan`, `--staged`, `--since`, `--history`, and the CI source share one recursive extractor:
+
+- ZIP and JAR;
+- TAR, TAR.GZ, TGZ, and single-stream GZIP;
+- DOCX, XLSX, and PPTX (their ZIP/XML containers).
+
+Nested archives are followed for up to three archive layers. They are never extracted onto disk.
+Symlink entries and paths containing `..` are ignored. Entry count and cumulative expanded bytes are
+bounded, and `--max-size` applies to the compressed filesystem/blob input and to each emitted member.
+Use `--exclude '*.zip'` to skip an archive entirely, or an inner-path glob such as
+`--exclude '**/fixtures/**'` to filter members.
+
+Office XML is converted to visible character data before scanning. Adjacent Word/Excel/PowerPoint
+text runs are joined, so a token split across multiple XML nodes is still detected.
+
+```bash
+prowl scan release.zip
+prowl scan backup.tar.gz --exclude '**/vendor/**'
+prowl scan incident-runbook.docx --format json
+prowl scan --history                    # archives in old git blobs are expanded too
+```
+
+## PDF text layers
+
+PDF documents are parsed in memory. Prowl emits document metadata as `metadata.txt` and each
+non-empty text-layer page as a virtual `page-NNNN.txt`, then runs the normal detection cascade over
+those values. This also applies to PDFs inside archives, Git history, CI artifacts, Office-adjacent
+bundles, and mail attachments.
+
+Page count, per-page extracted text, cumulative extracted text, input size, and recursive embedded
+payload depth are bounded. Parser failures are recovered and reported as an incomplete extraction
+instead of terminating the scan.
+
+Without `--ocr`, this is native text-layer extraction only. With `--ocr`, Prowl renders pages without
+extractable text through Poppler and sends the bounded PNG to a local OpenAI-compatible VLM endpoint.
+`--ocr-all-pages` also processes pages that already have a text layer. Encrypted PDFs without a
+password and unsupported or malformed PDF variants are skipped with a warning.
+
+```bash
+prowl scan incident-report.pdf
+prowl scan scanned-contract.pdf --ocr
+prowl scan export.zip --exclude '**/sample-pdfs/**'
+```
+
+See [OCR Scanning](OCR-Scanning.md) for model choice, local setup, limits, and the remote-endpoint
+safety gate.
+
+## Mail exports and attachments
+
+EML, Apple EMLX, and Unix MBOX files are parsed as mail containers. Prowl scans decoded message and
+MIME-part headers, text/HTML bodies, nested `message/rfc822` forwards, and attachments. Base64 and
+quoted-printable transfer encodings are decoded, while declared legacy text charsets such as
+Windows-1251 are converted to UTF-8. An attached ZIP/TAR/GZIP, Office document, or another mail export
+continues through the same recursive source pipeline.
+
+MIME depth, part count, individual decoded size, cumulative decoded size, and the shared embedded
+payload depth are bounded. Attachment filenames are reduced to safe basenames, and no attachment is
+written to disk.
+
+```bash
+prowl scan suspicious.eml
+prowl scan support-export.mbox --exclude '**/marketing/**'
+prowl scan ~/Library/Mail/export.emlx --format json
+```
 
 ## Core flags
 

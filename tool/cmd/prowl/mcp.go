@@ -37,8 +37,10 @@ func mcpTools() []mcpTool {
 	return []mcpTool{
 		{Name: "prowl_scan", Description: "Scan a local file or directory for secrets. Returns the JSON findings envelope.",
 			InputSchema: map[string]any{"type": "object", "required": []string{"path"}, "properties": map[string]any{
-				"path": strProp("file or directory to scan"), "verify": boolProp("live-validate found secrets (L3)"),
-				"ml": boolProp("apply the ML false-positive filter (L2)"), "show_secrets": boolProp("return full unredacted values (authorized triage)")}}},
+				"path": strProp("file or directory to scan"), "verify": boolProp("live-validate found secrets after detection"),
+				"ml":           boolProp("apply the ML false-positive filter (L2)"),
+				"ocr":          boolProp("OCR images and image-only PDF pages using the configured local endpoint"),
+				"show_secrets": boolProp("return full unredacted values (authorized triage)")}}},
 		{Name: "prowl_domain", Description: "Scan a domain's public web surface (HTML, JS bundles, source maps) for secrets. Network access.",
 			InputSchema: map[string]any{"type": "object", "required": []string{"target", "authorized"}, "properties": map[string]any{
 				"target": strProp("domain, e.g. example.com"), "authorized": boolProp("attest the target is in your authorized scope (required)"),
@@ -48,7 +50,12 @@ func mcpTools() []mcpTool {
 				"path": strProp("path to a .apk or .ipa file"), "ml": boolProp("apply the ML false-positive filter (recommended for binary dumps)")}}},
 		{Name: "prowl_repo", Description: "Clone a git repository and scan its working tree and history for secrets.",
 			InputSchema: map[string]any{"type": "object", "required": []string{"url"}, "properties": map[string]any{
-				"url": strProp("git clone URL"), "verify": boolProp("live-validate found secrets")}}},
+				"url": strProp("git clone URL"), "verify": boolProp("live-validate found secrets"),
+				"ocr": boolProp("OCR images and image-only PDF pages using the configured local endpoint")}}},
+		{Name: "prowl_cicd", Description: "Scan recent GitHub Actions or GitLab CI logs and artifacts. Uses GITHUB_TOKEN/GITLAB_TOKEN from the server environment.",
+			InputSchema: map[string]any{"type": "object", "required": []string{"target"}, "properties": map[string]any{
+				"target": strProp("github:owner/repo or gitlab:group/project"),
+				"verify": boolProp("live-validate found secrets"), "ml": boolProp("apply the ML false-positive filter (L2)")}}},
 	}
 }
 
@@ -94,7 +101,10 @@ func mcpCall(w *bufio.Writer, req mcpRequest) {
 		Name string         `json:"name"`
 		Args map[string]any `json:"arguments"`
 	}
-	json.Unmarshal(req.Params, &p)
+	if err := json.Unmarshal(req.Params, &p); err != nil {
+		mcpToolResult(w, req.ID, "invalid tool arguments: "+err.Error(), true)
+		return
+	}
 	argv, err := mcpArgv(p.Name, p.Args)
 	if err != nil {
 		mcpToolResult(w, req.ID, err.Error(), true)
@@ -135,6 +145,9 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		}
 		if b("ml") {
 			argv = append(argv, "--ml")
+		}
+		if b("ocr") {
+			argv = append(argv, "--ocr")
 		}
 		if b("show_secrets") {
 			argv = append(argv, "--show-secrets")
@@ -181,6 +194,24 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("verify") {
 			argv = append(argv, "--verify")
 		}
+		if b("ocr") {
+			argv = append(argv, "--ocr")
+		}
+		return append(argv, "--format", "json"), nil
+	case "prowl_cicd":
+		if s("target") == "" {
+			return nil, fmt.Errorf("target is required")
+		}
+		if err := notDashLed("target", s("target")); err != nil {
+			return nil, err
+		}
+		argv := []string{"cicd", s("target")}
+		if b("verify") {
+			argv = append(argv, "--verify")
+		}
+		if b("ml") {
+			argv = append(argv, "--ml")
+		}
 		return append(argv, "--format", "json"), nil
 	}
 	return nil, fmt.Errorf("unknown tool: %s", name)
@@ -224,6 +255,8 @@ func writeMCP(w *bufio.Writer, msg map[string]any) {
 	if err != nil {
 		return
 	}
-	w.Write(b)
-	w.WriteByte('\n')
+	if _, err := w.Write(b); err != nil {
+		return
+	}
+	_ = w.WriteByte('\n')
 }

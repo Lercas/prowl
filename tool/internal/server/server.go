@@ -365,7 +365,7 @@ func Serve(ctx context.Context, addr string, s *Server) error {
 		WriteTimeout: 120 * time.Second,
 		IdleTimeout:  120 * time.Second, // close idle keep-alive conns so they don't pin resources
 	}
-	go func() {
+	go func() { //nolint:gosec // Shutdown must outlive the already-cancelled parent context.
 		<-ctx.Done()
 		logx.Info("shutting down, draining in-flight requests")
 		sctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

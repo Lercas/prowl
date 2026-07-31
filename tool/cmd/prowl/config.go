@@ -18,7 +18,7 @@ func cmdConfig(args []string) int {
 	if len(args) > 1 {
 		path = args[1]
 	}
-	raw, ioErr := os.ReadFile(path)
+	raw, ioErr := os.ReadFile(path) //nolint:gosec // The operator explicitly selected the config path.
 	if ioErr != nil {
 		fmt.Fprintf(os.Stderr, "config: %v\n", ioErr)
 		return 2

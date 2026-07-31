@@ -465,7 +465,7 @@ func MarkFinalImage(findings []model.Finding, indexes []*FinalIndex) []model.Fin
 		for _, fi := range indexes {
 			if final, known := fi.inFinal(label, idx, clean); known {
 				v := final
-				findings[i].InFinalImage = &v
+				findings[i].InFinalImage = &v //nolint:gosec // i comes from ranging over findings.
 				break
 			}
 		}

@@ -6,7 +6,11 @@ Prowl's answer is a **data flywheel**. A trained model makes the "is this actual
 
 ## The problem: noise drowns signal
 
-Prowl's deterministic core is a three-stage cascade plus a nuclei-style template library — see [Architecture](Architecture.md) and [Rules](Rules.md). It is precise on structured tokens (an `AKIA…`, a `ghp_…` with a valid CRC32, a JWT that decodes). But every scanner also needs a generic safety net for the long tail of secrets that carry no fixed prefix, and Prowl's is two shape-only detectors: `generic_high_entropy` and `generic_password` (the two types `taxonomy.GenericLast` marks as generic, and the two `scan.isGenericType` lets a specific template supersede).
+Prowl's deterministic L1 candidate detector works alongside a nuclei-style template library — see
+[Architecture](Architecture.md) and [Rules](Rules.md). It is precise on structured tokens (an `AKIA…`,
+a `ghp_…` with a valid CRC32, a JWT that decodes). But every scanner also needs a generic safety net
+for the long tail of secrets that carry no fixed prefix, and Prowl's is two shape-only detectors:
+`generic_high_entropy` and `generic_password`.
 
 Those two detectors are where the noise lives. Run Prowl across 10,000 recently-created public GitHub repositories and the generic net catches the world: base64 blobs in game-level data, hash columns in CSVs, minified bundles, embedding dumps, digest lists — high-entropy strings that are *data*, not *credentials*. On that 10k benchmark the raw run produced roughly **118,931 findings, about 96.7% of them noise from just those two generic detectors firing on data files.** The real leaks were in there; they were buried.
 
@@ -26,7 +30,13 @@ Each fix is correct and worth keeping. But hand-fixing does not scale. Every new
 
 ### The unplugged model
 
-The project already had the tool for contextual judgment, sitting unused: a trained sklearn `HistGradientBoostingClassifier` that scores "does this fragment contain a leaked credential" over **44 features** (`internal/mlfeatures.FeatureNames`, mirroring `src/features/extract.py`). The features are not just entropy — they are entropy *variants* (Shannon, normalized, base64-alphabet, hex-alphabet, bigram, compression ratio), character-class statistics, format flags (is-UUID, is-hex, is-JWT, is-PEM, is-DSN, known-prefix, hash-like length), placeholder flags, and crucially **context**: does the variable name or line contain a secret keyword, is it an assignment, is it inside quotes, is it in a URL, is it a comment, what is the source type. That context is the precision signal a regex can't see. The classifier was wired in as an opt-in L2 stage.
+The project already had the tool for contextual judgment, sitting unused: a trained sklearn
+`HistGradientBoostingClassifier` that scores "does this fragment contain a leaked credential" over
+**49 features** (`internal/mlfeatures.FeatureNames`, mirrored by the private trainer). The features are
+not just entropy — they are entropy *variants* (Shannon, normalized, base64-alphabet, hex-alphabet,
+bigram, compression ratio), character-class statistics, format flags, placeholder flags, and context.
+That context is the precision signal a regex can't see. The classifier was wired in as an opt-in L2
+candidate filter.
 
 ### The reality-check
 
@@ -93,8 +103,10 @@ The L2 stage is opt-in and merely a precision filter (`scan.mlFilter`):
 
 - `--ml` runs the embedded/external model in-process; `--ml-url URL` calls an optional localhost sidecar (`src/serve.py`) instead. The two are interchangeable behind one `mlscore.Scorer` interface.
 - Both **drop** a candidate the model judges not-a-secret — score below `--ml-threshold` (default **0.3**) — **except** a checksum-proven hit, which is never dropped.
-- It **fails open**: any scoring error keeps every finding. The ML stage can only remove noise; it can never be the reason a scan misses a leak because a model failed to load or a sidecar was down.
-- It **skips data-file floods**: an item that produces more than 200 candidates is left to the per-file cap (`scan.capGenericPerFile`, default 30 generic findings per file), since scoring hundreds of values from one artifact adds nothing the cap doesn't already handle.
+- A sidecar scoring error **fails open** and keeps every finding. An explicitly requested embedded model
+  that cannot load fails command preflight instead of silently running without ML.
+- The remote sidecar is capped on dense items to bound request size. The in-process model scores dense
+  bundles locally, where ML earns its keep without a network payload.
 
 `--ml-threshold` is the precision/recall knob: lower it to keep more borderline findings, raise it to cut more aggressively. On a real data-heavy repository, the in-process model alone took a scan from **11,138 to 10,646 findings** with no sidecar.
 
@@ -117,7 +129,7 @@ On the same 10,000 repositories, the layered system moved the numbers it was bui
 
 ## See also
 
-- [Architecture](Architecture.md) — the detection cascade the flywheel filters
+- [Architecture](Architecture.md) — the runtime candidate/filter/verification pipeline
 - [Rules](Rules.md) — the hand-authored templates and where context fails them
 - [CI/CD Integration](CI-CD-Integration.md) — baselines and allowlists, the source of confirmed false positives
 - [Configuration](Configuration.md) — flags, environment variables, `$PROWL_HOME`

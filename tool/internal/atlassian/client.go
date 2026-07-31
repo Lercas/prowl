@@ -168,7 +168,10 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 			if wait > 90*time.Second {
 				wait = 90 * time.Second
 			}
-			io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+			if _, err := io.Copy(io.Discard, io.LimitReader(resp.Body, 4096)); err != nil {
+				resp.Body.Close()
+				return fmt.Errorf("drain rate-limit response: %w", err)
+			}
 			resp.Body.Close()
 			if attempt >= c.maxRetry {
 				return &reqError{Status: resp.StatusCode, URL: full, Body: "rate limited; retries exhausted"}
@@ -191,7 +194,10 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 		}
 
 		if out == nil {
-			io.Copy(io.Discard, resp.Body)
+			if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+				resp.Body.Close()
+				return fmt.Errorf("drain %s response: %w", safehttp.RedactURL(full), err)
+			}
 			resp.Body.Close()
 			return nil
 		}

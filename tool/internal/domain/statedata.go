@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"html"
 	"regexp"
@@ -63,7 +63,7 @@ func ExtractStateBlobs(htmlText, sourceURL string) []model.Item {
 			return
 		}
 		decoded := decodeEscapes(content)
-		h := sha1.Sum([]byte(decoded))
+		h := sha256.Sum256([]byte(decoded))
 		key := hex.EncodeToString(h[:8])
 		if seen[key] {
 			return

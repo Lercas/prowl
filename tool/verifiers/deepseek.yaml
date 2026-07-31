@@ -1,0 +1,20 @@
+id: deepseek
+info:
+  name: DeepSeek
+  author: prowl
+  reference: https://api-docs.deepseek.com/api/list-models
+match: [deepseek, deepseek-api-key, deepseek_api_key]
+requests:
+  # DeepSeek documents GET /models as a read-only bearer-authenticated endpoint.
+  - method: GET
+    url: https://api.deepseek.com/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: regex
+        part: body
+        regex:
+          - '"object"\s*:\s*"list"'

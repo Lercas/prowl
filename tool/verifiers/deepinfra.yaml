@@ -1,0 +1,19 @@
+id: deepinfra
+info:
+  name: DeepInfra
+  author: prowl
+  reference: https://docs.deepinfra.com/api-reference/account/me
+match: [deepinfra, deepinfra-api-key]
+requests:
+  # /v1/me is a read-only account identity endpoint; unlike inference it does not incur model cost.
+  - method: GET
+    url: https://api.deepinfra.com/v1/me
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"uid"']

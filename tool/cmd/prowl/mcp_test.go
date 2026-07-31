@@ -6,8 +6,10 @@ import (
 )
 
 func TestMCPArgv(t *testing.T) {
-	argv, err := mcpArgv("prowl_scan", map[string]any{"path": "/x", "verify": true, "ml": true})
-	if err != nil || strings.Join(argv, " ") != "scan /x --verify --ml --format json" {
+	argv, err := mcpArgv("prowl_scan", map[string]any{
+		"path": "/x", "verify": true, "ml": true, "ocr": true,
+	})
+	if err != nil || strings.Join(argv, " ") != "scan /x --verify --ml --ocr --format json" {
 		t.Errorf("scan argv = %v, err=%v", argv, err)
 	}
 	// domain MUST refuse without an authorized attestation
@@ -30,5 +32,31 @@ func TestMCPArgv(t *testing.T) {
 	}
 	if _, err := mcpArgv("nope", map[string]any{}); err == nil {
 		t.Error("unknown tool must error")
+	}
+}
+
+func TestMCPArgvRepoOCR(t *testing.T) {
+	argv, err := mcpArgv("prowl_repo", map[string]any{"url": "https://example.com/acme/repo.git", "ocr": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(argv, " "); got != "repo https://example.com/acme/repo.git --ocr --format json" {
+		t.Fatalf("argv = %q", got)
+	}
+}
+
+func TestMCPArgvCICD(t *testing.T) {
+	argv, err := mcpArgv("prowl_cicd", map[string]any{
+		"target": "github:acme/app", "verify": true, "ml": true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := strings.Join(argv, " ")
+	if got != "cicd github:acme/app --verify --ml --format json" {
+		t.Fatalf("argv = %q", got)
+	}
+	if _, err := mcpArgv("prowl_cicd", map[string]any{}); err == nil {
+		t.Fatal("missing CI target accepted")
 	}
 }

@@ -18,7 +18,7 @@ echo "==> building"; ( cd "$ROOT" && go build -o "$BIN" ./cmd/prowl ) 2>&1 | gre
 [ -x "$BIN" ] || { echo "build failed"; exit 1; }
 GHP="ghp_$(python3 -c "import random;random.seed(1);print(''.join(random.choice('abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789') for _ in range(36)))")"
 
-R="$(mktemp -d)"; trap 'rm -rf "$R"; [ -n "${MOCK:-}" ] && kill "$MOCK" 2>/dev/null; [ -n "${SRV:-}" ] && kill "$SRV" 2>/dev/null' EXIT
+R="$(mktemp -d)"; trap 'rm -rf "$R"; [ -n "${MOCK:-}" ] && kill "$MOCK" 2>/dev/null; [ -n "${OCRSRV:-}" ] && kill "$OCRSRV" 2>/dev/null; [ -n "${SRV:-}" ] && kill "$SRV" 2>/dev/null' EXIT
 export PROWL_HOME="$R/.prowl"   # isolate installed templates from the real home
 export PROWL_ALLOW_PRIVATE_IPS=1  # the verify mock runs on 127.0.0.1; let the SSRF guard reach it
 mkdir -p "$R/src" "$R/config" "$R/tests" "$R/docs" "$R/vf"
@@ -53,6 +53,65 @@ mkdir -p "$R/lockrepo/src"
 printf 'github.com/a/b v1.2.3 h1:vj9j2Cgf8Vt3vZh7M3DM6vL7c8jc7E0YQ8Ksa8yLU=\ngithub.com/c/d v0.4.0/go.mod h1:J7Y8YcW2NihsgmVoMwmyI2Eam5Voxch5oWtZ1bpc8=\n' > "$R/lockrepo/go.sum"
 echo '{"dependencies":{"x":{"k":"AKIA4MNQ2RST7UVWX9YZ"}}}' > "$R/lockrepo/package-lock.json"
 echo 'aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"' > "$R/lockrepo/src/real.py"
+python3 - "$R/release.zip" "$R/runbook.pdf" "$R/scanned.pdf" <<'PY'
+import io, sys, zipfile
+def make_pdf(text):
+    text = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    content = f"BT /F1 12 Tf 72 720 Td ({text}) Tj ET"
+    objects = [
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+        f"<< /Length {len(content)} >>\nstream\n{content}\nendstream",
+    ]
+    out = io.BytesIO()
+    out.write(b"%PDF-1.4\n")
+    offsets = [0]
+    for number, obj in enumerate(objects, 1):
+        offsets.append(out.tell())
+        out.write(f"{number} 0 obj\n{obj}\nendobj\n".encode())
+    xref = out.tell()
+    out.write(f"xref\n0 {len(objects)+1}\n0000000000 65535 f \n".encode())
+    for offset in offsets[1:]:
+        out.write(f"{offset:010d} 00000 n \n".encode())
+    out.write(f"trailer\n<< /Size {len(objects)+1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    return out.getvalue()
+pdf = make_pdf('aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"')
+with open(sys.argv[2], "wb") as f:
+    f.write(pdf)
+with open(sys.argv[3], "wb") as f:
+    f.write(make_pdf(""))
+with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_DEFLATED) as z:
+    z.writestr("dist/archived.env", 'aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"')
+    z.writestr("dist/embedded.pdf", pdf)
+PY
+python3 - "$R/deployment.eml" "$R/incident.mbox" <<'PY'
+import base64, io, sys, zipfile
+attachment = io.BytesIO()
+with zipfile.ZipFile(attachment, "w", zipfile.ZIP_DEFLATED) as z:
+    z.writestr("attached/prod.env", 'aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"')
+encoded = base64.b64encode(attachment.getvalue()).decode()
+with open(sys.argv[1], "w", newline="") as f:
+    f.write(
+        "From: deploy@example.com\r\nMIME-Version: 1.0\r\n"
+        "Content-Type: multipart/mixed; boundary=prowl\r\n\r\n"
+        "--prowl\r\nContent-Type: text/plain\r\n\r\nclean\r\n"
+        "--prowl\r\nContent-Type: application/zip; name=bundle.zip\r\n"
+        "Content-Disposition: attachment; filename=bundle.zip\r\n"
+        "Content-Transfer-Encoding: base64\r\n\r\n"
+        + encoded + "\r\n--prowl--\r\n"
+    )
+body = base64.b64encode(b'password = "MailboxSecretPass123!"').decode()
+with open(sys.argv[2], "w", newline="") as f:
+    f.write(
+        "From localuser Sat Jan 01 00:00:00 2026\n"
+        "From: localuser@example.com\nContent-Type: text/plain\n\nclean\n"
+        "From ops@example.com Sat Jan 01 00:00:01 2026\n"
+        "From: ops@example.com\nContent-Type: text/plain\n"
+        "Content-Transfer-Encoding: base64\n\n" + body + "\n"
+    )
+PY
 
 echo "==> 1. core scan + types"
 rep   "$BIN scan $R"               "AKIA"               "finds aws key"
@@ -60,6 +119,43 @@ rep   "$BIN scan $R"               "stripe_secret_key"  "finds stripe key"
 rep   "$BIN scan $R"               "private_key"        "finds private key"
 rep   "$BIN scan $R"               "slack_webhook"      "finds slack webhook"
 rep   "$BIN scan $R"               "generic_password"   "finds password"
+rep   "$BIN scan $R/release.zip"   "archived.env"       "recursively scans ZIP members"
+rep   "$BIN scan $R/runbook.pdf"   "page-0001.txt"      "extracts PDF text layer"
+rep   "$BIN scan $R/release.zip"   "embedded.pdf!/page-0001.txt" "extracts PDF nested in ZIP"
+rep   "$BIN scan $R/deployment.eml" "attached/prod.env"  "decodes EML and recursively scans ZIP attachment"
+python3 - "$R/screenshot.png" <<'PY'
+import base64, sys
+open(sys.argv[1], "wb").write(base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+))
+PY
+python3 - <<'PY' &
+import http.server, json
+class H(http.server.BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", "0"))
+        body = json.loads(self.rfile.read(length))
+        valid = (
+            self.path == "/v1/chat/completions"
+            and self.headers.get("Authorization") == "Bearer local-e2e-token"
+            and body.get("model") == "test-ocr"
+        )
+        self.send_response(200 if valid else 400)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            "choices": [{"message": {"content": 'aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"'}}]
+        }).encode())
+    def log_message(self, *args): pass
+http.server.HTTPServer(("127.0.0.1", 8800), H).serve_forever()
+PY
+OCRSRV=$!; sleep 1
+rep   "PROWL_OCR_API_KEY=local-e2e-token $BIN scan $R/screenshot.png --ocr --ocr-model test-ocr --ocr-url http://127.0.0.1:8800/v1/chat/completions --format json" "screenshot.png!/ocr.txt" "OCR scans image through local endpoint"
+rep   "PROWL_OCR_API_KEY=local-e2e-token $BIN scan $R/scanned.pdf --ocr --ocr-model test-ocr --ocr-url http://127.0.0.1:8800/v1/chat/completions --format json" "scanned.pdf!/page-0001.ocr.txt" "OCR renders image-only PDF page"
+exits "$BIN scan $R/screenshot.png --ocr --ocr-url http://127.0.0.1:1/v1/chat/completions" 2 "OCR endpoint failure fails closed"
+exits "$BIN scan $R/screenshot.png --ocr-url https://example.com/v1/chat/completions" 2 "remote OCR needs explicit opt-in"
+kill "$OCRSRV" 2>/dev/null; OCRSRV=""
+rep   "$BIN scan $R/incident.mbox"  "message-000002.eml!/body.txt" "decodes base64 body in second MBOX message"
 norep "$BIN scan $R/src/legacy.py" "[" 	            "inline pragma suppresses the only finding"
 norep "$BIN scan $R/lockrepo"      "go.sum"             "go.sum hash noise dropped (not flooded as generic)"
 rep   "$BIN scan $R/lockrepo"      "package-lock.json"  "typed secret IN a lockfile still found (no blind skip)"
@@ -131,6 +227,8 @@ kill "$MOCK" 2>/dev/null; MOCK=""
 
 echo "==> 10. CLI UX"
 cli   "$BIN scan --help"   "Examples"        "per-command help"
+cli   "$BIN cicd --help"   "max-runs"        "CI source help"
+cli   "env -u GITHUB_TOKEN $BIN cicd github:acme/app" "requires GITHUB_TOKEN" "CI source requires env auth"
 cli   "$BIN help rules"    "validate"        "help <cmd>"
 cli   "$BIN scna"          "did you mean"    "did-you-mean (command typo)"
 cli   "$BIN scan . --verfy" "did you mean"   "did-you-mean (flag typo)"

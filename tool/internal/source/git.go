@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -193,7 +192,7 @@ func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, ca
 	// Mirror the filesystem scan's path filtering BEFORE requesting the body (skipExt + --exclude).
 	// Never writing the sha keeps the --batch stream framed, since there's no body to consume for a
 	// request we never sent. Without this, `prowl scan --history --exclude X` ignored the exclude.
-	if skipExt[strings.ToLower(filepath.Ext(path))] {
+	if skipByExtension(ctx, path) {
 		return true
 	}
 	for _, ex := range exclude {
@@ -231,13 +230,7 @@ func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, ca
 		logx.Warn("skipped: git blob exceeds max-size", "blob", sha, "path", path, "size", size, "limit", maxBytes)
 		return true
 	}
-	text, ok := scannableText(body)
-	if !ok {
-		logx.Debug("skipped: binary git blob", "blob", sha, "path", path)
-		return true
-	}
-	return send(ctx, ch, model.Item{Text: string(text), Source: sourceForPath(path), Path: path,
-		Meta: map[string]any{"blob": sha}})
+	return emitPayload(ctx, ch, path, body, maxBytes, exclude, map[string]any{"blob": sha})
 }
 
 // parseCatFileHeader parses a `git cat-file --batch` header line into (type, size). ok=false for a
@@ -277,13 +270,19 @@ func consumeBlob(br *bufio.Reader, size, maxBytes int64) ([]byte, error) {
 
 // FilesFromList yields Items for an explicit file list (used with GitChangedFiles).
 func FilesFromList(ctx context.Context, paths []string, maxBytes int64) <-chan model.Item {
+	return FilesFromListFiltered(ctx, paths, nil, maxBytes)
+}
+
+// FilesFromListFiltered is FilesFromList with the filesystem/archive path exclusions used by staged
+// and since scans. Keeping the unfiltered wrapper preserves the small source API for direct callers.
+func FilesFromListFiltered(ctx context.Context, paths, exclude []string, maxBytes int64) <-chan model.Item {
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
 		resilience.Guard(
 			func() {
 				for _, p := range paths {
-					if !emitFile(ctx, ch, p, maxBytes) {
+					if !emitFile(ctx, ch, p, maxBytes, exclude) {
 						return
 					}
 				}

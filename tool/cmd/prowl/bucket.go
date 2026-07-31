@@ -12,6 +12,9 @@ import (
 // scans it, then removes the download. The bucket is untrusted, so its own .prowl.yaml is ignored.
 func cmdBucket(args []string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "bucket"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if len(rest) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: prowl bucket <s3://bucket/prefix | gs://bucket/prefix> [scan flags]")
@@ -46,7 +49,11 @@ func cmdBucket(args []string) int {
 		return 2
 	}
 	if saved != "" {
-		defer os.Chdir(saved)
+		defer func() {
+			if err := os.Chdir(saved); err != nil {
+				logx.Error("cannot restore working directory", "path", saved, "err", err)
+			}
+		}()
 	}
 	c.noAutoConfig = true // a downloaded bucket is untrusted — ignore any .prowl.yaml it contains
 	return scanItems(ctx, c, []string{"."})

@@ -36,7 +36,8 @@ func New(patterns []string) *Matcher {
 			c := p[i]
 			if nodes[cur].next[c] < 0 {
 				nodes = append(nodes, newBuildNode())
-				nodes[cur].next[c] = int32(len(nodes) - 1)
+				// The process would exhaust addressable memory long before the automaton reached MaxInt32 nodes.
+				nodes[cur].next[c] = int32(len(nodes) - 1) //nolint:gosec
 			}
 			cur = nodes[cur].next[c]
 		}

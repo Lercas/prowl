@@ -21,6 +21,9 @@ func cmdConfluence(args []string) int { return cmdAtlassian(args, "confluence") 
 // cascade as every other source. It mirrors cmdDomain: detect/connect, stream items, scan, gate.
 func cmdAtlassian(args []string, product string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, product); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if code := c.mlPreflight(); code != 0 {
 		return code

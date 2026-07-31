@@ -2,7 +2,11 @@ package source
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,6 +14,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/ocr"
 )
 
 func write(t *testing.T, path, content string) {
@@ -55,6 +60,46 @@ func TestFilesystemWalkFiltering(t *testing.T) {
 		if _, ok := got[skip]; ok {
 			t.Errorf("%s should have been skipped (dir/ext/binary/size/exclude)", skip)
 		}
+	}
+}
+
+func TestFilesystemOCRImage(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		if body["model"] != "test-model" {
+			t.Errorf("model = %v", body["model"])
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"aws_access_key_id = \"AKIA4MNQ2RST7UVWX9YZ\""}}]}`))
+	}))
+	defer server.Close()
+
+	engine, err := ocr.New(ocr.Config{URL: server.URL, Model: "test-model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	png, err := base64.StdEncoding.DecodeString(
+		"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "screenshot.png"), png, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ctx := WithOCR(context.Background(), engine)
+	got := drain(Filesystem(ctx, []string{dir}, nil, 1<<20))
+	item, ok := got["ocr.txt"]
+	if !ok || !strings.Contains(item.Text, "AKIA4MNQ2RST7UVWX9YZ") ||
+		!strings.HasSuffix(item.Path, "screenshot.png!/ocr.txt") {
+		t.Fatalf("OCR item = %+v, all = %+v", item, got)
+	}
+	if stats := engine.Stats(); stats.Calls != 1 || stats.Failures != 0 {
+		t.Fatalf("OCR stats = %+v", stats)
 	}
 }
 
@@ -201,7 +246,7 @@ func utf32BOM(s string, le bool) []byte {
 		out = append(out, 0x00, 0x00, 0xFE, 0xFF)
 	}
 	buf := make([]byte, 4)
-	for _, r := range []rune(s) {
+	for _, r := range s {
 		if le {
 			binary.LittleEndian.PutUint32(buf, uint32(r))
 		} else {

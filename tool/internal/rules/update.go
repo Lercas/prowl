@@ -127,7 +127,8 @@ func Update(o UpdateOpts) (*UpdateResult, error) {
 		return nil, err
 	}
 	raw, _ := json.MarshalIndent(res.Manifest, "", "  ")
-	if err := os.WriteFile(filepath.Join(o.Target, ManifestName), raw, 0o644); err != nil {
+	// The manifest contains public provenance metadata, not credentials.
+	if err := os.WriteFile(filepath.Join(o.Target, ManifestName), raw, 0o644); err != nil { //nolint:gosec
 		return nil, err
 	}
 	return res, nil
@@ -279,18 +280,26 @@ func dirExists(p string) bool {
 // hashTree returns relpath->sha256 for every .yaml/.yml under dir (excluding the manifest).
 func hashTree(dir string) (map[string]string, error) {
 	out := map[string]string{}
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = root.Close() }()
+	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
 		if ext := strings.ToLower(filepath.Ext(path)); ext != ".yaml" && ext != ".yml" {
 			return nil
 		}
-		raw, err := os.ReadFile(path)
+		rel, err := filepath.Rel(dir, path)
 		if err != nil {
 			return err
 		}
-		rel, _ := filepath.Rel(dir, path)
+		raw, err := root.ReadFile(rel)
+		if err != nil {
+			return err
+		}
 		sum := sha256.Sum256(raw)
 		out[filepath.ToSlash(rel)] = hex.EncodeToString(sum[:])
 		return nil
@@ -376,7 +385,12 @@ func syncDir(src, dst string) error {
 // never the manifest, never root itself.
 func mirrorDelete(root string, kept map[string]bool) error {
 	var emptyCandidates []string // subdirs to try pruning, recorded so we can delete deepest-first
-	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+	rootFS, err := os.OpenRoot(root)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = rootFS.Close() }()
+	err = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -400,8 +414,12 @@ func mirrorDelete(root string, kept map[string]bool) error {
 		if !managedFile(path) || kept[path] {
 			return nil
 		}
-		// Lstat re-confirms this is a regular file (not a symlink raced into place) before unlinking.
-		fi, lerr := os.Lstat(path)
+		rel, rerr := filepath.Rel(root, path)
+		if rerr != nil {
+			return rerr
+		}
+		// Root-scoped Lstat/Remove keep the operation inside root even if a component is raced.
+		fi, lerr := rootFS.Lstat(rel)
 		if lerr != nil {
 			if os.IsNotExist(lerr) {
 				return nil
@@ -411,7 +429,7 @@ func mirrorDelete(root string, kept map[string]bool) error {
 		if fi.Mode()&os.ModeSymlink != 0 {
 			return nil
 		}
-		return os.Remove(path)
+		return rootFS.Remove(rel)
 	})
 	if err != nil {
 		return err
@@ -423,7 +441,10 @@ func mirrorDelete(root string, kept map[string]bool) error {
 		if derr != nil || len(entries) != 0 {
 			continue // non-empty (e.g. still holds files) or unreadable — leave it
 		}
-		_ = os.Remove(dir) // best-effort: a failed prune is harmless (an empty dir loads nothing)
+		rel, rerr := filepath.Rel(root, dir)
+		if rerr == nil {
+			_ = rootFS.Remove(rel) // best-effort: a failed prune is harmless (an empty dir loads nothing)
+		}
 	}
 	return nil
 }

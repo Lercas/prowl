@@ -40,17 +40,15 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    # soft-start: reports gosec/bodyclose/errcheck findings without blocking; flip continue-on-error off
-    # once the first pass is triaged so it becomes a hard gate.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
           cache-dependency-path: tool/go.sum
-      - uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v9
         with:
+          version: v2.12.2
           working-directory: tool
 
   python:

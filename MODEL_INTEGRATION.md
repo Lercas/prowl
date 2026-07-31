@@ -6,14 +6,16 @@ transformer. This guide documents the three integration surfaces and their exact
 
 ## The model stack (what you're integrating)
 
-Prowl scores a candidate string (plus optional context) through a cascade:
+The scanner first produces candidates with L1, then sends those candidates to at most one configured
+L2 scorer (`--ml`, `--ml-model`, or `--ml-url`). The research encoder is a separate integration
+surface; the shipped scanner does not automatically union its output with L1/L2.
 
 | Stage | What it is | Where it lives |
 |-------|------------|----------------|
 | **L1** | regex / checksum / entropy rules (deterministic) | the Go scanner (`internal/detect`) |
 | **L2** | a gradient-boosted binary classifier (`HistGradientBoosting`) over **49 numeric features** - "secret vs. not-secret" | `model_binary.json`, embedded in the binary (`tool/internal/mlmodel/`) |
 | **type** | a multiclass classifier that labels the provider/type | the (private) training repo / the sidecar |
-| **stage-3 encoder** | an experimental multilingual transformer | Hugging Face: [`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder) |
+| **research encoder** | an experimental multilingual transformer | Hugging Face: [`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder) |
 
 The Python training/serving code is not part of the public scanner repo. The three public integration
 surfaces are: the **HTTP `/score` contract** (A), the embedded **`model_binary.json`** L2 classifier (B),
@@ -117,7 +119,7 @@ live in the scanner and the private training code). It answers "does this look l
 
 ---
 
-## C) The stage-3 encoder from Hugging Face
+## C) The research encoder from Hugging Face
 
 The heavier, experimental multilingual model is published standalone:
 - **Model:** [`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder) - a

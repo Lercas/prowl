@@ -1,0 +1,19 @@
+id: perplexity
+info:
+  name: Perplexity
+  author: prowl
+  reference: https://docs.perplexity.ai/api-reference/async-sonar-get
+match: [perplexity, perplexity-api-key, pplx-]
+requests:
+  # The authenticated async-list endpoint is read-only and avoids billable inference.
+  - method: GET
+    url: https://api.perplexity.ai/v1/async/sonar
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: word
+        part: body
+        words: ['"requests"']

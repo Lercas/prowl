@@ -15,6 +15,9 @@ import (
 // plus the config. --image-input forces the source kind when auto-detect would guess wrong.
 func cmdImage(args []string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "image"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if code := c.mlPreflight(); code != 0 {
 		return code

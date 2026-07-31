@@ -71,13 +71,16 @@ func builtinDetector() (*detect.Detector, *taxonomy.Taxonomy) {
 	return detect.New(tax), tax
 }
 
-// loadRulesForQuery loads the rule library for show/test (working dir, else installed).
-func loadRulesForQuery() *rules.Engine {
-	dir := "rules"
-	if !dirExists(dir) {
-		dir = installedRulesDir()
+// loadRulesForQuery loads explicit template paths, or the working/installed library by default.
+func loadRulesForQuery(paths ...string) *rules.Engine {
+	if len(paths) == 0 {
+		dir := "rules"
+		if !dirExists(dir) {
+			dir = installedRulesDir()
+		}
+		paths = []string{dir}
 	}
-	eng, _ := rules.Load(dir)
+	eng, _ := rules.Load(paths...)
 	return eng
 }
 
@@ -355,7 +358,7 @@ func resolveTestInput(arg string) (text, label string, err error) {
 		return string(b), " from stdin", nil
 	case strings.HasPrefix(arg, "@"):
 		path := arg[1:]
-		b, e := os.ReadFile(path)
+		b, e := os.ReadFile(path) //nolint:gosec // @FILE is an explicit local CLI input.
 		if e != nil {
 			return "", "", fmt.Errorf("reading %s: %w", path, e)
 		}

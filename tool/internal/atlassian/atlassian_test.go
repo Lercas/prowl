@@ -701,7 +701,8 @@ func jiraServerMock() *httptest.Server {
 	})
 	mux.HandleFunc("/rest/api/2/search", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("_p") == "" && r.Method != "POST" {
-			// guard: Server/DC search must be POST
+			http.Error(w, "Server/DC search must use POST", http.StatusMethodNotAllowed)
+			return
 		}
 		w.Write([]byte(`{"startAt":0,"maxResults":50,"total":1,"issues":[{"id":"1","key":"OPS-1","fields":{"summary":"ticket","description":"now clean wiki text"}}]}`))
 	})

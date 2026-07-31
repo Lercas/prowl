@@ -32,7 +32,7 @@ type Check struct {
 
 // validGithubToken is a synthetic token whose trailing CRC32 is valid under the standard
 // (digits-first) base62 alphabet, used to exercise the checksum path end-to-end.
-const validGithubToken = "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"
+const validGithubToken = "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" //nolint:gosec // Synthetic checksum fixture.
 
 var detectionCases = []struct{ name, payload, want string }{
 	{"aws access key", `AWS = "AKIANAFGYOEYPXU1DSYP"`, "aws_access_key_id"},

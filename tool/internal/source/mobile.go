@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"path"
 	"path/filepath"
 	"strings"
@@ -121,7 +122,10 @@ func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, a
 		if f.FileInfo().IsDir() {
 			continue
 		}
-		usize := int64(f.UncompressedSize64)
+		usize := int64(math.MaxInt64)
+		if f.UncompressedSize64 <= math.MaxInt64 {
+			usize = int64(f.UncompressedSize64)
+		}
 		// Charge a bounded value (a lying/oversized header can't blow the budget arithmetic) BEFORE the
 		// per-entry filtering below, so a bomb of tiny skipped entries still trips the entry cap.
 		charge := usize

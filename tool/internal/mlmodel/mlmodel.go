@@ -118,6 +118,9 @@ func parse(data []byte) (*Model, error) {
 			len(t.Right) != n || len(t.Value) != n || len(t.MissingLeft) != n {
 			return nil, fmt.Errorf("mlmodel: tree %d has ragged node arrays", ti)
 		}
+		if int64(total)+int64(n) > int64(1<<31-1) {
+			return nil, fmt.Errorf("mlmodel: flattened model exceeds int32 node limit")
+		}
 		total += n
 	}
 
@@ -140,7 +143,7 @@ func parse(data []byte) (*Model, error) {
 		t := &rm.Trees[ti]
 		m.treeStart[ti] = base
 		for i := range t.IsLeaf {
-			g := base + int32(i)
+			g := base + int32(i) //nolint:gosec // The total-node bound above proves this fits int32.
 			if fi := t.FeatureIdx[i]; fi >= 0 && fi < NumFeatures {
 				m.featIdx[g] = int32(fi)
 			} else if t.IsLeaf[i] == 0 {
@@ -159,15 +162,15 @@ func parse(data []byte) (*Model, error) {
 				if l < 0 || l >= len(t.IsLeaf) || r < 0 || r >= len(t.IsLeaf) {
 					return nil, fmt.Errorf("mlmodel: tree %d node %d child index out of range", ti, i)
 				}
-				m.left[g] = base + int32(l)
-				m.right[g] = base + int32(r)
+				m.left[g] = base + int32(l)  //nolint:gosec // Tree-local child is bounded by total nodes.
+				m.right[g] = base + int32(r) //nolint:gosec // Tree-local child is bounded by total nodes.
 			}
 			if t.MissingLeft[i] != 0 {
 				f |= flagMissingLeft
 			}
 			m.flags[g] = f
 		}
-		base += int32(len(t.IsLeaf))
+		base += int32(len(t.IsLeaf)) //nolint:gosec // The total-node bound above proves this fits int32.
 	}
 
 	return m, nil

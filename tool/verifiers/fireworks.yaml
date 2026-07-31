@@ -1,0 +1,21 @@
+id: fireworks
+info:
+  name: Fireworks AI
+  author: prowl
+  reference: https://docs.fireworks.ai/api-reference/introduction
+match: [fireworks, fireworks-api-key, fw_]
+requests:
+  # Fireworks exposes the OpenAI-compatible model catalog under /inference/v1.
+  # This is a read-only request and does not submit inference or create resources.
+  - method: GET
+    url: https://api.fireworks.ai/inference/v1/models
+    headers:
+      Authorization: "Bearer {{secret}}"
+    matchers-condition: and
+    matchers:
+      - type: status
+        status: [200]
+      - type: regex
+        part: body
+        regex:
+          - '"object"\s*:\s*"list"'

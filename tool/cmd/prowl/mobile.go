@@ -22,6 +22,9 @@ import (
 // get a printable-strings pass so embedded keys surface. Pure-Go, no SDK required.
 func cmdMobile(args []string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "mobile"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if code := c.mlPreflight(); code != 0 {
 		return code

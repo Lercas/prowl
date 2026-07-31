@@ -97,7 +97,11 @@ limits:                         # операционные лимиты (0/"" = 
 ## Реализовано
 - **Каскад L0+L1**: regex по таксономии + **checksum** (GitHub CRC32, JWT) + entropy-гейт +
   **отсев example/placeholder** + **base64-размаскировка** (секреты внутри base64-блобов).
-- **Источники**: filesystem (concurrent), **git** (staged/since/history), **domain** (HTML +
+- **Источники**: filesystem (concurrent; recursive ZIP/JAR/TAR/GZIP + DOCX/XLSX/PPTX +
+  PDF text layer + EML/EMLX/MBOX с декодированием MIME-вложений; опциональный локальный
+  `--ocr` для PNG/JPEG/WebP и страниц PDF без текстового слоя),
+  **git** (staged/since/history, включая архивы), **CI/CD** (GitHub Actions /
+  GitLab CI logs + рекурсивно распакованные ZIP-артефакты), **domain** (HTML +
   `__NEXT_DATA__`/`__NUXT__`/`__INITIAL_STATE__`/... state-блобы с декодом escape'ов + referenced JS +
   source-maps; опц. crt.sh+wayback), **mobile** (APK/IPA как ZIP: ресурсы/JSON/plist/XML - в т.ч.
   `google-services.json`/`GoogleService-Info.plist` с Google API-ключами + project id - сканируются сырыми;
@@ -106,8 +110,9 @@ limits:                         # операционные лимиты (0/"" = 
   **LSP** (didOpen/didChange дают diagnostics).
 - **MCP-сервер** (`prowl mcp`): Model Context Protocol по stdio (построчный JSON-RPC) - AI-агенты
   (Claude Code/Desktop, любой MCP-клиент) драйвят сканы как инструменты. Tools: `prowl_scan` (path),
-  `prowl_domain` (target + обязательный `authorized:true`), `prowl_mobile` (apk/ipa), `prowl_repo` (git url) -
-  каждый возвращает JSON-конверт находок. Полный гайд для агентов - `AGENTS.md` в корне репо.
+  `prowl_domain` (target + обязательный `authorized:true`), `prowl_mobile` (apk/ipa), `prowl_repo`
+  (git url), `prowl_cicd` (GitHub/GitLab target) - каждый возвращает JSON-конверт находок. Полный
+  гайд для агентов - `AGENTS.md` в корне репо.
 - **Post**: baseline-подавление, inline-pragma, allowlist (path/value/regex), dedup перекрытий.
 - **L2 ML-фильтр** (`--ml`): встроенная sklearn HistGradientBoosting-модель (`model_binary.json`, go:embed,
   49 фич) отсеивает ложные срабатывания generic-детекторов. Переобучена на реальных hard-negatives с гейтом
@@ -124,8 +129,8 @@ limits:                         # операционные лимиты (0/"" = 
 - **Вывод**: pretty / JSON / **SARIF 2.1** / **DefectDojo**; severity по категории; **redaction**; exit-gate; `--output` в файл.
 - **Конфиг**: `.prowl.yaml` (exclude/disable/custom/allowlist/output/performance). Self-contained бинарь.
 
-## Дальше (L3 энкодер)
-L2 (GBM) уже в продакшене (см. выше). Следующий слой - стейдж-3 трансформер-энкодер
-([`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder)) как опциональный
-тяжёлый L2 через sidecar - для generic-секретов в многоязычной прозе. См. `MODEL_INTEGRATION.md`.
-Также: верификация (liveness), Hyperscan (cgo), больше источников (S3/Docker/Slack), tree-sitter-контекст.
+## Экспериментальный энкодер
+L2 (HGB) уже работает как фильтр кандидатов. Опубликованный трансформер-энкодер
+([`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder)) — отдельная
+research/integration-модель, которую можно подключить через собственный sidecar scorer; бинарник не
+запускает её автоматически как третий этап. Точный контракт описан в `MODEL_INTEGRATION.md`.

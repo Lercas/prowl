@@ -87,6 +87,22 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 			}
 			continue
 		}
+		info, statErr := os.Stat(root)
+		if statErr != nil {
+			logx.Debug("skipped: stat error", "path", root, "err", statErr)
+			continue
+		}
+		if !info.IsDir() {
+			if !emitFile(ctx, ch, root, maxBytes, exclude) {
+				return
+			}
+			continue
+		}
+		rootFS, openErr := os.OpenRoot(root)
+		if openErr != nil {
+			logx.Debug("skipped: cannot open scan root", "path", root, "err", openErr)
+			continue
+		}
 		_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return nil
@@ -108,7 +124,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 			if d.Type()&fs.ModeSymlink != 0 {
 				return nil
 			}
-			if skipExt[strings.ToLower(filepath.Ext(path))] {
+			if skipByExtension(ctx, path) {
 				return nil
 			}
 			for _, ex := range exclude {
@@ -124,29 +140,30 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				logx.Warn("skipped: file exceeds max-size", "path", path, "size", info.Size(), "limit", maxBytes)
 				return nil
 			}
-			data, err := os.ReadFile(path)
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				logx.Debug("skipped: cannot resolve path under root", "path", path, "err", err)
+				return nil
+			}
+			data, err := rootFS.ReadFile(rel)
 			if err != nil {
 				logx.Debug("skipped: file read error", "path", path, "err", err)
 				return nil
 			}
-			text, ok := scannableText(data)
-			if !ok {
-				logx.Debug("skipped: binary file", "path", path)
-				return nil
-			}
-			if !send(ctx, ch, model.Item{Text: string(text), Source: sourceForPath(path), Path: path}) {
+			if !emitPayload(ctx, ch, path, data, maxBytes, exclude, nil) {
 				return filepath.SkipAll
 			}
 			return nil
 		})
+		_ = rootFS.Close()
 	}
 }
 
 // emitFile reads one explicitly-listed file (a FilesFromList entry) and emits it as an Item. A symlink
 // among them is followed (Stat, not Lstat) since the user chose the path; this differs from the fs walk,
 // which refuses links discovered by descent. A broken symlink fails Stat and is skipped with a Debug log.
-func emitFile(ctx context.Context, ch chan<- model.Item, path string, maxBytes int64) bool {
-	return emitListedTarget(ctx, ch, path, path, maxBytes)
+func emitFile(ctx context.Context, ch chan<- model.Item, path string, maxBytes int64, exclude []string) bool {
+	return emitListedTarget(ctx, ch, path, path, maxBytes, exclude)
 }
 
 // emitSymlinkRoot follows an explicitly-named symlink ROOT and emits its target, honouring the same
@@ -157,14 +174,19 @@ func emitSymlinkRoot(ctx context.Context, ch chan<- model.Item, path string, exc
 			return true
 		}
 	}
-	return emitListedTarget(ctx, ch, path, path, maxBytes)
+	return emitListedTarget(ctx, ch, path, path, maxBytes, exclude)
 }
 
 // emitListedTarget is the shared read/scan/emit path for an explicitly-chosen target. It follows
 // symlinks (Stat), applies the binary-extension / size / encoding filters, and emits under reportPath.
 // Returns false only when the consumer stopped.
-func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPath string, maxBytes int64) bool {
-	if skipExt[strings.ToLower(filepath.Ext(path))] {
+func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPath string, maxBytes int64, exclude []string) bool {
+	for _, pattern := range exclude {
+		if config.PathMatch(pattern, reportPath) {
+			return true
+		}
+	}
+	if skipByExtension(ctx, path) {
 		return true
 	}
 	// Stat (follows symlinks) so an explicitly-listed link is resolved to its target's regular file.
@@ -185,12 +207,7 @@ func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPat
 		logx.Debug("skipped: file read error", "path", path, "err", err)
 		return true
 	}
-	text, ok := scannableText(data)
-	if !ok {
-		logx.Debug("skipped: binary file", "path", path)
-		return true
-	}
-	return send(ctx, ch, model.Item{Text: string(text), Source: sourceForPath(reportPath), Path: reportPath})
+	return emitPayload(ctx, ch, reportPath, data, maxBytes, exclude, nil)
 }
 
 // docMagic are leading magic bytes of document/asset formats that slip the NUL check but embed base64
@@ -236,6 +253,13 @@ func scannableText(b []byte) (text []byte, ok bool) {
 		return nil, false
 	}
 	return b, true
+}
+
+// ScannableText normalizes a source payload into UTF-8 text and rejects binary data. Source
+// adapters that already hold content in memory (CI artifacts, SaaS APIs) use the same decision as
+// the filesystem walker instead of maintaining subtly different binary/encoding heuristics.
+func ScannableText(b []byte) ([]byte, bool) {
+	return scannableText(b)
 }
 
 // finalizeDecoded applies the binary check to already-transcoded UTF-8 text, so a file that decoded to
@@ -301,9 +325,11 @@ func decodeUTF32BOM(b []byte) ([]byte, bool) {
 	out := make([]byte, 0, (len(body)/4)*utf8.UTFMax)
 	for i := 0; i+3 < len(body); i += 4 {
 		cp := order.Uint32(body[i : i+4])
-		r := rune(cp)
+		r := rune(utf8.RuneError)
 		if cp > 0x10FFFF || (cp >= 0xD800 && cp <= 0xDFFF) {
-			r = utf8.RuneError
+			// Keep the replacement rune initialized above.
+		} else {
+			r = rune(cp)
 		}
 		out = utf8.AppendRune(out, r)
 	}
@@ -350,6 +376,11 @@ func decodeUTF16NoBOM(b []byte) ([]byte, bool) {
 }
 
 func sourceForPath(path string) string {
+	lower := strings.ToLower(path)
+	if strings.Contains(lower, ".docx!/") || strings.Contains(lower, ".xlsx!/") ||
+		strings.Contains(lower, ".pptx!/") {
+		return "file"
+	}
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md", ".rst", ".txt", ".adoc":
 		// A filesystem doc is just a "file" in the user-facing Finding.Source; no detection logic

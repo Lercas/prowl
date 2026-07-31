@@ -2,7 +2,7 @@
 package post
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // Required for compatibility with legacy baseline fingerprints.
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -23,7 +23,7 @@ func Fingerprint(f model.Finding) string {
 	if f.Fingerprint != "" {
 		return f.Fingerprint
 	}
-	h := sha1.Sum([]byte(f.Type + "|" + f.Path + "|" + f.Redacted))
+	h := sha1.Sum([]byte(f.Type + "|" + f.Path + "|" + f.Redacted)) //nolint:gosec // Compatibility identifier, not cryptography.
 	return hex.EncodeToString(h[:])
 }
 

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Lercas/prowl/tool/internal/model"
 )
@@ -112,6 +113,16 @@ matchers:
 `
 	if err := os.WriteFile(filepath.Join(dir, name+".yaml"), []byte(tmpl), 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestRulesTestLoadsExplicitRuleFile(t *testing.T) {
+	dir := t.TempDir()
+	writeTemplate(t, dir, "custom-rule")
+	path := filepath.Join(dir, "custom-rule.yaml")
+
+	if code := cmdRules([]string{"test", "custom-rule_abcdefgh", "--rules", path}); code != 0 {
+		t.Fatalf("rules test with an explicit --rules file returned %d, want 0", code)
 	}
 }
 
@@ -264,10 +275,44 @@ func TestRedactURLPasswordWithAt(t *testing.T) {
 // TestFailOnVerifiedIsKnownFlag guards the half-wired regression where --fail-on-verified was parsed in
 // the switch but missing from knownFlags, so checkUnknownFlags rejected it (exit 2) before it ever ran.
 func TestFailOnVerifiedIsKnownFlag(t *testing.T) {
-	for _, f := range []string{"--fail-on-verified", "--fail-on", "--verify", "--ml", "--ml-threshold"} {
+	for _, f := range []string{
+		"--fail-on-verified", "--fail-on", "--verify", "--ml", "--ml-threshold",
+		"--ocr", "--ocr-url", "--ocr-model", "--ocr-allow-remote", "--ocr-all-pages",
+		"--ocr-max-pages", "--ocr-timeout",
+	} {
 		if !knownFlags[f] {
 			t.Errorf("%s is handled by parseCommon but missing from knownFlags — checkUnknownFlags will reject it", f)
 		}
+	}
+}
+
+func TestParseOCRFlags(t *testing.T) {
+	c, rest := parseCommon([]string{
+		"scan.png", "--ocr-url", "https://ocr.example/v1/chat/completions",
+		"--ocr-model", "local-model", "--ocr-allow-remote", "--ocr-all-pages",
+		"--ocr-max-pages", "7", "--ocr-timeout", "45s",
+	})
+	if len(rest) != 1 || rest[0] != "scan.png" || !c.ocrEnabled || !c.ocrAllowRemote ||
+		!c.ocrAllPages || c.ocrMaxPages != 7 || c.ocrTimeout != 45*time.Second ||
+		c.ocrModel != "local-model" {
+		t.Fatalf("common flags = %+v rest = %v", c, rest)
+	}
+	if _, err := setupOCR(commonFlags{
+		ocrEnabled: true,
+		ocrURL:     "https://ocr.example/v1/chat/completions",
+	}); err == nil {
+		t.Fatal("remote OCR must require explicit --ocr-allow-remote")
+	}
+	engine, err := setupOCR(commonFlags{ocrEnabled: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine.Skip(1, "coverage limit")
+	if code := finalizeOCR(engine, 0); code != 2 {
+		t.Fatalf("incomplete OCR exit = %d, want 2", code)
+	}
+	if code := rejectUnsupportedOCR(commonFlags{ocrEnabled: true}, "mobile"); code != 2 {
+		t.Fatalf("unsupported OCR exit = %d, want 2", code)
 	}
 }
 

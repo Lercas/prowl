@@ -193,16 +193,21 @@ Every environment variable Prowl honors, what it does, and its default.
 | `PROWL_HOME` | install dir for rules/verifiers. Overrides the two paths below | unset → `~/.prowl` |
 | `XDG_CONFIG_HOME` | when `PROWL_HOME` is unset, the install dir is `$XDG_CONFIG_HOME/prowl` | unset → `~/.prowl` |
 | `PROWL_ALLOW_PRIVATE_IPS` | if set (non-empty), opts out of the SSRF guard so `--verify` and `prowl domain` may connect to private / loopback / link-local IPs — for internal verifiers and self-hosted targets | unset (guard on) |
-| `GITHUB_TOKEN` | auth for `prowl org` against GitHub — required to list private repos and to raise the API rate limit | unset (public, unauthenticated) |
-| `GITLAB_TOKEN` | auth for `prowl org` against GitLab — required for private groups/projects | unset (public, unauthenticated) |
+| `PROWL_OCR_API_KEY` | optional bearer token for the `--ocr-url` endpoint; kept out of argv and logs | unset |
+| `GITHUB_TOKEN` | auth for `prowl org`; required by `prowl cicd github:…` to read Actions runs, logs, and artifacts | unset (`org` is public-only; `cicd` refuses) |
+| `GITLAB_TOKEN` | auth for `prowl org`; required by `prowl cicd gitlab:…` to read pipelines, traces, and artifacts | unset (`org` is public-only; `cicd` refuses) |
 | `BITBUCKET_TOKEN` | auth for `prowl org` against Bitbucket — required for private workspaces | unset (public, unauthenticated) |
-| `GITHUB_API` | override the GitHub API host for `prowl org` — point at GitHub Enterprise | `https://api.github.com` |
-| `GITLAB_API` | override the GitLab API host for `prowl org` — point at a self-hosted GitLab | `https://gitlab.com/api/v4` |
+| `GITHUB_API` | override the GitHub API host for `prowl org` and `prowl cicd` — point at GitHub Enterprise | `https://api.github.com` |
+| `GITLAB_API` | override the GitLab API host for `prowl org` and `prowl cicd` — point at a self-hosted GitLab | `https://gitlab.com/api/v4` |
 | `NO_COLOR` | if set (any value), disables ANSI colour in the report and the logs — identical to `--no-color` | unset (colour when stdout is a TTY) |
 
 Resolution order for the install dir is `PROWL_HOME` → `$XDG_CONFIG_HOME/prowl` → `~/.prowl`. Installed rules go in `<home>/rules`, verifiers in `<home>/verifiers`.
 
-The `org` tokens and API hosts only affect repository listing — `prowl org` reads `GITHUB_TOKEN` / `GITLAB_TOKEN` / `BITBUCKET_TOKEN` to enumerate repos, then the per-repo `git clone` uses your normal git credentials (ssh keys / credential helper). See [Org Scanning](Org-Scanning.md). `PROWL_ALLOW_PRIVATE_IPS` is the documented opt-out for the [Security Model](Security-Model.md) SSRF guard; set it only when you trust the verifier endpoints / domain targets, as it relaxes the guard for the whole process.
+`prowl org` uses the forge tokens only for repository listing, then `git clone` uses your normal git
+credentials. `prowl cicd` uses the GitHub/GitLab token for read-only CI API requests and deliberately
+strips it before following a signed artifact redirect to object storage. See [Org Scanning](Org-Scanning.md)
+and [CI Artifact Scanning](CI-Artifact-Scanning.md). `PROWL_ALLOW_PRIVATE_IPS` is the documented opt-out
+for the [Security Model](Security-Model.md) SSRF guard; set it only for a trusted self-hosted target.
 
 ## Flags
 

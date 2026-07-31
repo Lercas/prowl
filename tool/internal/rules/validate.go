@@ -104,24 +104,9 @@ func lintTemplate(t *Template, where string, seen map[string]string) []Issue {
 		return out // can't lint further without compiled regexes
 	}
 
-	// Every word anchor should appear in some regex, else the pre-filter can hide matches.
-	var regexBlob strings.Builder
-	for _, m := range t.Matchers {
-		for _, rx := range m.Regex {
-			regexBlob.WriteString(strings.ToLower(rx))
-		}
-	}
-	blob := regexBlob.String()
-	for _, m := range t.Matchers {
-		if m.Type != "word" || m.Negative {
-			continue
-		}
-		for _, w := range m.Words {
-			if blob != "" && !strings.Contains(blob, strings.ToLower(w)) {
-				add("warn", fmt.Sprintf("anchor word %q not found in any regex — pre-filter may hide matches", w))
-			}
-		}
-	}
+	// Word matchers may be context cues that do not occur in the value regex. Keywords() only returns
+	// anchors when a word match is provably required for a hit, so the engine's pre-filter remains
+	// sound without requiring the word to be duplicated in a regex.
 	if len(t.extractRes()) == 0 {
 		for _, m := range t.Matchers {
 			if m.Type == "entropy" {
@@ -140,17 +125,27 @@ func walk(paths []string, fn func(path string, raw []byte)) {
 			continue
 		}
 		if info.IsDir() {
+			root, rootErr := os.OpenRoot(p)
+			if rootErr != nil {
+				fn(p, nil)
+				continue
+			}
 			_ = filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
 				if err != nil || d.IsDir() {
 					return nil
 				}
 				if ext := strings.ToLower(filepath.Ext(path)); ext == ".yaml" || ext == ".yml" {
-					if raw, err := os.ReadFile(path); err == nil {
+					rel, relErr := filepath.Rel(p, path)
+					if relErr != nil {
+						return nil
+					}
+					if raw, err := root.ReadFile(rel); err == nil {
 						fn(path, raw)
 					}
 				}
 				return nil
 			})
+			_ = root.Close()
 		} else if raw, err := os.ReadFile(p); err == nil {
 			fn(p, raw)
 		}

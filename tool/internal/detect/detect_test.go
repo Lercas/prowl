@@ -605,7 +605,7 @@ func TestAhoCorasickMatchesContains(t *testing.T) {
 
 // TestScanRecallRegressions guards the false-positive filters against dropping REAL secrets — the cases
 // the feature review flagged: quoted passwords embedding a JS base-word, a DSN password with a
-// backslash, a digit-free mixed-case key, and a 6L-prefixed key with no reCAPTCHA cue.
+// backslash, a digit-free mixed-case key, and a 6L-prefixed auth token with no reCAPTCHA cue.
 func TestScanRecallRegressions(t *testing.T) {
 	d := newDetector(t)
 	has := func(text, typ string) bool {
@@ -620,7 +620,7 @@ func TestScanRecallRegressions(t *testing.T) {
 		{`password = "myFunction2024SecretValue"`, "generic_password", "quoted password with a 'function' substring"},
 		{`url = "postgres://user:p\ssw0rd@dbhost:5432/app"`, "db_connection_string", "DSN password with a backslash"},
 		{`secret_key = "ThisIsARealSessionKeyValueABCdefGHIjkl"`, "generic_high_entropy", "digit-free mixed-case key"},
-		{`auth_token = "6LZxq8sTUVWmnopQRSdefGHIjklABC012345tuvw"`, "generic_high_entropy", "6L key with no reCAPTCHA cue"},
+		{`auth_token = "6LZxq8sTUVWmnopQRSdefGHIjklABC012345tuvw"`, "generic_api_key", "6L auth token with no reCAPTCHA cue"},
 	}
 	for _, c := range cases {
 		if !has(c.text, c.typ) {

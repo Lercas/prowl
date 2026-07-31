@@ -35,7 +35,7 @@ func writeImageTarball(t *testing.T, files map[string]string) string {
 		tw.Write([]byte(body))
 	}
 	tw.Close()
-	layer, err := tarball.LayerFromReader(&buf)
+	layer, err := tarball.LayerFromReader(&buf) //nolint:staticcheck // Test helper keeps compatibility with the dependency's stable reader API.
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestImageTarballMultiImage(t *testing.T) {
 		}
 		tw.Write([]byte(body))
 		tw.Close()
-		layer, err := tarball.LayerFromReader(&buf)
+		layer, err := tarball.LayerFromReader(&buf) //nolint:staticcheck // Test helper keeps compatibility with the dependency's stable reader API.
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -24,6 +24,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/lsp"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/ocr"
 	"github.com/Lercas/prowl/tool/internal/post"
 	"github.com/Lercas/prowl/tool/internal/report"
 	"github.com/Lercas/prowl/tool/internal/rules"
@@ -39,15 +40,17 @@ import (
 const usage = `prowl — fast, configurable secret scanner
 
 USAGE:
-  prowl scan [path...]        scan files/dirs (default: .); use '-' to scan stdin
+  prowl scan [path...]        scan files/dirs/archives/docs/mail (default: .); use '-' to scan stdin
   prowl compare [path...]     show how many detector candidates Prowl's ML suppresses as noise
                               (auto-loads .gitleaks.toml, so it scores your gitleaks rules' findings)
   prowl repo <git-url>        clone & scan a remote repo (GitHub/GitLab/Bitbucket/any git URL)
   prowl org <platform>:<name> clone & scan every repo in a GitHub org / GitLab group / Bitbucket workspace
+  prowl cicd <platform>:<repo> scan recent GitHub Actions / GitLab CI logs and artifacts
   prowl image <ref>           pull & scan a container image — every layer's files + config (env/labels/history)
   prowl mobile <apk|ipa|url>   unpack & scan an Android/iOS app (resources + dex/arsc/.so strings)
   prowl bucket <s3://|gs://>   download & scan a cloud storage prefix (via the aws / gcloud CLI)
   prowl domain <domain>       scan a domain: HTML + __NEXT_DATA__/state blobs + referenced JS + maps
+  prowl hermes-audit [ip...]  audit authorized Hermes dashboards and exact-IP passive inventory
   prowl jira <base-url>       scan a Jira instance (Cloud/Server/DC) across every issue version from the first
   prowl confluence <base-url> scan a Confluence instance (Cloud/Server/DC) across every page version
   prowl serve [--addr :8080]  run as a stateless HTTP scan worker (horizontally scalable)
@@ -68,7 +71,8 @@ USAGE:
   Once installed (rules/verifiers update), 'scan' auto-loads ~/.prowl/rules and '--verify' uses
   ~/.prowl/verifiers — no --rules-dir/--verifiers flags needed. PROWL_HOME overrides the dir.
 
-  env: PROWL_HOME (install dir) · GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN (org auth) ·
+  env: PROWL_HOME (install dir) · GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN (forge/CI auth) ·
+       PROWL_OCR_API_KEY (optional OCR endpoint token; never pass it in argv) ·
        PROWL_ALLOW_PRIVATE_IPS=1 (let --verify/domain reach internal/loopback IPs) · NO_COLOR
 
   scan also supports: --staged (git staged files) | --since <rev> (git diff) | --history (all blobs)
@@ -98,6 +102,13 @@ scan flags:
   --verify                    confirm findings are LIVE via the provider (data-driven verifiers/)
   --verified-only             report ONLY provider-confirmed-live secrets (strongest FP filter)
   --verifiers DIR             (repeatable) verifier YAML dir (default ./verifiers)
+  --ocr                       OCR images + image-only PDF pages via local OpenAI-compatible VLM
+  --ocr-model MODEL           default mlx-community/Qwen3.6-27B-4bit
+  --ocr-url URL               default http://127.0.0.1:8080/v1/chat/completions
+  --ocr-allow-remote          explicit opt-in for a non-loopback HTTPS endpoint
+  --ocr-all-pages             OCR every PDF page (default: only pages without a text layer)
+  --ocr-max-pages N           per-PDF OCR page cap (default 20)
+  --ocr-timeout DUR           per-request timeout (default 2m)
 
 output / logging:
   -s, --silence               no output at all — CI mode, exit code is the only signal
@@ -164,6 +175,8 @@ func main() {
 		os.Exit(cmdRepo(args[1:]))
 	case "org":
 		os.Exit(cmdOrg(args[1:]))
+	case "cicd":
+		os.Exit(cmdCICD(args[1:]))
 	case "image":
 		os.Exit(cmdImage(args[1:]))
 	case "mobile":
@@ -172,6 +185,8 @@ func main() {
 		os.Exit(cmdBucket(args[1:]))
 	case "domain":
 		os.Exit(cmdDomain(args[1:]))
+	case "hermes-audit":
+		os.Exit(cmdHermesAudit(args[1:]))
 	case "jira":
 		os.Exit(cmdJira(args[1:]))
 	case "confluence":
@@ -393,6 +408,11 @@ type commonFlags struct {
 	workers                                  int
 	timeout                                  time.Duration
 	imageInput                               string // force the image source kind: ref|tar|oci-dir|stdin (empty = auto)
+	ocrEnabled                               bool
+	ocrURL, ocrModel                         string
+	ocrAllowRemote, ocrAllPages              bool
+	ocrMaxPages                              int
+	ocrTimeout                               time.Duration
 }
 
 func isTTY(f *os.File) bool {
@@ -444,7 +464,10 @@ func writeReport(c commonFlags, findings []model.Finding) {
 		return // --silence suppresses the human report; an explicit --format json/sarif still writes for CI
 	}
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout)
-	report.Write(os.Stdout, findings, c.format, color)
+	if err := report.Write(os.Stdout, findings, c.format, color); err != nil {
+		logx.Error("cannot write report to stdout", "err", err)
+		os.Exit(2)
+	}
 }
 
 // writeReportFile writes the report to path, returning any error. It opens with O_NOFOLLOW so a
@@ -642,7 +665,10 @@ func redactURL(raw string) string { return safehttp.RedactURL(raw) }
 
 func parseCommon(args []string) (commonFlags, []string) {
 	checkUnknownFlags(args)
-	c := commonFlags{format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: 0.3}
+	c := commonFlags{
+		format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: 0.3,
+		ocrMaxPages: 20, ocrTimeout: 2 * time.Minute,
+	}
 	var rest []string
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -781,6 +807,32 @@ func parseCommon(args []string) (commonFlags, []string) {
 			}
 			c.mlThreshold = f
 			c.mlThresholdSet = true
+		case a == "--ocr":
+			c.ocrEnabled = true
+		case a == "--ocr-url":
+			c.ocrURL = strings.TrimRight(next(), "/")
+			c.ocrEnabled = true
+		case a == "--ocr-model":
+			c.ocrModel = next()
+			c.ocrEnabled = true
+		case a == "--ocr-allow-remote":
+			c.ocrAllowRemote = true
+			c.ocrEnabled = true
+		case a == "--ocr-all-pages":
+			c.ocrAllPages = true
+			c.ocrEnabled = true
+		case a == "--ocr-max-pages":
+			c.ocrMaxPages = mustInt("--ocr-max-pages", next(), 1)
+			c.ocrEnabled = true
+		case a == "--ocr-timeout":
+			v := next()
+			d, err := time.ParseDuration(v)
+			if err != nil || d <= 0 {
+				fmt.Fprintf(os.Stderr, "--ocr-timeout needs a positive Go duration (e.g. 30s, 2m), got %q\n", v)
+				os.Exit(2)
+			}
+			c.ocrTimeout = d
+			c.ocrEnabled = true
 		case a == "--no-color":
 			c.noColor = true
 		case a == "--log-format":
@@ -819,6 +871,10 @@ func cmdScan(args []string) int {
 // reports how many findings the model suppresses as not-a-secret.
 func cmdCompare(args []string) int {
 	c, rest := parseCommon(args)
+	if c.ocrEnabled {
+		fmt.Fprintln(os.Stderr, "compare does not support --ocr: it would OCR every image twice")
+		return 2
+	}
 	ctx, stop := rootContext(c)
 	defer stop()
 	cfg := loadConfig(&c)
@@ -836,7 +892,7 @@ func cmdCompare(args []string) int {
 			if ferr != nil {
 				logx.Error("git error", "err", ferr)
 			}
-			return source.FilesFromList(ctx, files, c.maxSize)
+			return source.FilesFromListFiltered(ctx, files, c.exclude, c.maxSize)
 		}
 		roots := rest
 		if len(roots) == 0 {
@@ -968,6 +1024,17 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 	}
 	cfg := loadConfig(&c)
 	setupLogging(c)
+	ocrEngine, err := setupOCR(c)
+	if err != nil {
+		logx.Error("OCR setup failed", "err", err)
+		return 2
+	}
+	if ocrEngine != nil {
+		ctx = source.WithOCR(ctx, ocrEngine)
+		logx.Info("OCR enabled", "model", firstNonEmpty(c.ocrModel, ocr.DefaultModel),
+			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
+			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
+	}
 	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
@@ -993,7 +1060,7 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 			logx.Info("no changed files to scan")
 			return 0
 		}
-		items = source.FilesFromList(ctx, files, c.maxSize)
+		items = source.FilesFromListFiltered(ctx, files, c.exclude, c.maxSize)
 	case c.history:
 		if !source.IsGitRepo("") { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
 			logx.Error("--history needs a git repository, but this is not one")
@@ -1018,7 +1085,55 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 		items = source.Filesystem(ctx, roots, c.exclude, c.maxSize)
 	}
 
-	return runScan(ctx, c, cfg, det, items, c.dedupe)
+	code := runScan(ctx, c, cfg, det, items, c.dedupe)
+	return finalizeOCR(ocrEngine, code)
+}
+
+func setupOCR(c commonFlags) (*ocr.Engine, error) {
+	if !c.ocrEnabled {
+		return nil, nil
+	}
+	return ocr.New(ocr.Config{
+		URL:         c.ocrURL,
+		Model:       c.ocrModel,
+		APIKey:      os.Getenv("PROWL_OCR_API_KEY"),
+		AllowRemote: c.ocrAllowRemote,
+		AllPDFPages: c.ocrAllPages,
+		MaxPDFPages: c.ocrMaxPages,
+		Timeout:     c.ocrTimeout,
+	})
+}
+
+func rejectUnsupportedOCR(c commonFlags, command string) int {
+	if !c.ocrEnabled {
+		return 0
+	}
+	fmt.Fprintf(os.Stderr, "%s does not support --ocr; use scan, repo, or org\n", command)
+	return 2
+}
+
+func finalizeOCR(engine *ocr.Engine, code int) int {
+	if engine == nil {
+		return code
+	}
+	stats := engine.Stats()
+	logx.Info("OCR complete", "calls", stats.Calls, "empty", stats.Empty,
+		"failures", stats.Failures, "skipped", stats.Skipped)
+	if stats.Failures > 0 || stats.Skipped > 0 {
+		logx.Error("OCR coverage incomplete — failing closed", "failures", stats.Failures,
+			"skipped", stats.Skipped)
+		return 2
+	}
+	return code
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 // runScan executes the scan pipeline over an already-built item stream, composing collectFindings
@@ -1272,7 +1387,11 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 		return 2
 	}
 	if saved != "" {
-		defer os.Chdir(saved)
+		defer func() {
+			if err := os.Chdir(saved); err != nil {
+				logx.Error("cannot restore working directory", "path", saved, "err", err)
+			}
+		}()
 	}
 	c.noAutoConfig = true // ignore the cloned repo's own .prowl.yaml (only an explicit --config is trusted)
 	return scanItems(ctx, c, []string{"."})
@@ -1304,10 +1423,18 @@ func cmdOrg(args []string) int {
 	// a cloned repo's own untrusted .prowl.yaml can never apply — only an explicit --config.
 	c.noAutoConfig = true
 	cfg := loadConfig(&c)
-	var (
-		urls []string
-		err  error
-	)
+	ocrEngine, err := setupOCR(c)
+	if err != nil {
+		logx.Error("OCR setup failed", "err", err)
+		return 2
+	}
+	if ocrEngine != nil {
+		ctx = source.WithOCR(ctx, ocrEngine)
+		logx.Info("OCR enabled", "model", firstNonEmpty(c.ocrModel, ocr.DefaultModel),
+			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
+			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
+	}
+	var urls []string
 	if gists {
 		logx.Info("listing gists", "target", target)
 		urls, err = forge.ListGists(ctx, target)
@@ -1414,7 +1541,8 @@ func cmdOrg(args []string) int {
 		return 2
 	}
 	// A timeout/interrupt mid-sweep leaves repos unscanned — fail closed rather than gate over partial.
-	return failClosedIfIncomplete(ctx, reportFindings(c, all, time.Since(start)))
+	code := failClosedIfIncomplete(ctx, reportFindings(c, all, time.Since(start)))
+	return finalizeOCR(ocrEngine, code)
 }
 
 // orgPerRepoTimeout bounds a single repo's clone (the smaller of a sane default and the run budget) so
@@ -1499,6 +1627,9 @@ func stripValueFlags(args []string, names ...string) []string {
 
 func cmdDomain(args []string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "domain"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if code := c.mlPreflight(); code != 0 {
 		return code
@@ -1633,6 +1764,9 @@ func readTargetList(path string) ([]string, error) {
 
 func cmdServe(args []string) int {
 	c, rest := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "serve"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	// Default to loopback: the server is unauthenticated, so the operator must opt into network
 	// exposure with an explicit --addr 0.0.0.0:PORT (behind auth/a proxy).
@@ -1669,6 +1803,9 @@ func cmdServe(args []string) int {
 
 func cmdDoctor(args []string) int {
 	c, _ := parseCommon(args)
+	if code := rejectUnsupportedOCR(c, "doctor"); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	cfg := loadConfig(&c)
 	det, tax, err := loadDetector(c, cfg)
@@ -1770,6 +1907,7 @@ func cmdRules(args []string) int {
 	if len(dirs) == 0 {
 		dirs = []string{"rules"}
 	}
+	templatePaths := append(append([]string{}, dirs...), ruleFiles...)
 
 	switch sub {
 	case "export":
@@ -1778,7 +1916,8 @@ func cmdRules(args []string) int {
 			os.Stdout.Write(data)
 			return 0
 		}
-		if err := os.WriteFile(out, data, 0o644); err != nil {
+		// Exported taxonomy contains public detector definitions, not credentials.
+		if err := os.WriteFile(out, data, 0o644); err != nil { //nolint:gosec
 			fmt.Fprintln(os.Stderr, "error:", err)
 			return 2
 		}
@@ -1786,7 +1925,7 @@ func cmdRules(args []string) int {
 		return 0
 
 	case "list":
-		eng, _ := rules.Load(dirs...)
+		eng, _ := rules.Load(templatePaths...)
 		if eng == nil || eng.Len() == 0 {
 			fmt.Fprintln(os.Stderr, "no rule templates found; run 'prowl rules update'")
 			return 0
@@ -1800,14 +1939,14 @@ func cmdRules(args []string) int {
 			fmt.Fprintln(os.Stderr, "usage: prowl rules show <rule-id>   (see 'prowl rules list')")
 			return 2
 		}
-		return renderRuleShow(loadRulesForQuery(), userPos[0])
+		return renderRuleShow(loadRulesForQuery(ruleFiles...), userPos[0])
 
 	case "test":
 		if len(userPos) == 0 {
 			fmt.Fprintln(os.Stderr, "usage: prowl rules test <text>   (which rules fire on this string)")
 			return 2
 		}
-		return renderRulesTest(loadRulesForQuery(), strings.Join(userPos, " "))
+		return renderRulesTest(loadRulesForQuery(ruleFiles...), strings.Join(userPos, " "))
 
 	case "search":
 		if len(userPos) == 0 {
@@ -1817,7 +1956,7 @@ func cmdRules(args []string) int {
 		return renderRulesSearch(strings.Join(userPos, " "))
 
 	case "validate":
-		issues := rules.ValidateDir(dirs...)
+		issues := rules.ValidateDir(templatePaths...)
 		nerr, nwarn := 0, 0
 		for _, is := range issues {
 			loc := is.Path
@@ -1831,7 +1970,7 @@ func cmdRules(args []string) int {
 				nwarn++
 			}
 		}
-		eng, _ := rules.Load(dirs...)
+		eng, _ := rules.Load(templatePaths...)
 		fmt.Fprintf(os.Stderr, "\n%d templates, %d error(s), %d warning(s)\n", eng.Len(), nerr, nwarn)
 		if nerr > 0 {
 			return 1
@@ -1845,7 +1984,7 @@ func cmdRules(args []string) int {
 		return rulesManifestCmd(dirs[0], len(userPos) > 0)
 
 	case "stats":
-		eng, _ := rules.Load(dirs...)
+		eng, _ := rules.Load(templatePaths...)
 		renderRulesStats(eng)
 		return 0
 
@@ -1935,23 +2074,6 @@ func orDash(s string) string {
 		return "-"
 	}
 	return s
-}
-
-func printCounts(title string, m map[string]int) {
-	type kv struct {
-		k string
-		v int
-	}
-	var xs []kv
-	for k, v := range m {
-		xs = append(xs, kv{k, v})
-	}
-	sort.Slice(xs, func(i, j int) bool { return xs[i].v > xs[j].v })
-	fmt.Printf("  %s:", title)
-	for _, x := range xs {
-		fmt.Printf(" %s=%d", x.k, x.v)
-	}
-	fmt.Println()
 }
 
 // restoreMissingLive re-adds (by fingerprint) any confirmed-live finding that baseline/.gitleaksignore
@@ -2065,15 +2187,6 @@ func parseBoolFlag(v string) bool {
 	}
 	if b, err := strconv.ParseBool(v); err == nil {
 		return b
-	}
-	return false
-}
-
-func contains(ss []string, v string) bool {
-	for _, s := range ss {
-		if s == v {
-			return true
-		}
 	}
 	return false
 }

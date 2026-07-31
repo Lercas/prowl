@@ -100,10 +100,12 @@ prowl scan . --staged              # only what's staged (pre-commit)
 prowl scan . --since HEAD~50       # only the last 50 commits' diffs
 prowl scan . --verify              # confirm each hit against the provider's API
 prowl scan . --format sarif -o out.sarif    # for code scanning / CI
+prowl scan release-bundle.tar.gz            # recursively scan ZIP/TAR/GZIP and Office documents
 
 prowl repo https://github.com/org/repo   # clone a remote repo (GitHub/GitLab/Bitbucket) and scan it
 GITHUB_TOKEN=... prowl org github:my-org   # scan every repo in an org/group/workspace
 GITHUB_TOKEN=... prowl org github:my-user --gists   # scan a github user's public gists instead of repos
+GITHUB_TOKEN=... prowl cicd github:org/repo   # scan recent Actions logs + ZIP artifacts
 prowl image alpine:latest                # scan a container image - every layer + config (also a local tarball / oci-dir / stdin)
 prowl bucket s3://my-logs/2026/          # download & scan an S3 / GCS prefix (uses your aws/gcloud CLI)
 prowl mobile app.apk                     # unpack & scan an Android APK / iOS IPA (resources + binary strings)
@@ -145,11 +147,15 @@ Full reference for every command, flag, and feature is in the [wiki](wiki/README
 
 One scanner, many sources - every one runs the same detection cascade and the same flags:
 
-- **A directory or files** - `prowl scan [path...]`, the filesystem walk. [docs](wiki/Scanning-Files.md)
+- **A directory, files, archives, documents, or mail exports** - `prowl scan [path...]`;
+  ZIP/JAR/TAR/GZIP, DOCX/XLSX/PPTX, PDF text layers, and EML/EMLX/MBOX with MIME attachments are
+  decoded recursively in memory. Optional local `--ocr` covers PNG/JPEG/WebP and image-only PDF
+  pages. [docs](wiki/Scanning-Files.md) · [OCR setup](wiki/OCR-Scanning.md)
 - **stdin** - `prowl scan -`, pipe logs, command output, or a rendered manifest straight in. [docs](wiki/Scanning-Files.md)
 - **Git** - staged files (`--staged`), a diff (`--since <rev>`), or every blob in history (`--history`). [docs](wiki/Scanning-Files.md)
 - **A remote repo** - `prowl repo <git-url>`, clone & scan any GitHub/GitLab/Bitbucket/self-hosted URL. [docs](wiki/Repository-Scanning.md)
 - **A whole org / group / workspace** - `prowl org <platform>:<name>`, every repo at once. [docs](wiki/Org-Scanning.md)
+- **CI logs and artifacts** - `prowl cicd <github:owner/repo|gitlab:group/project>`, recent Actions/pipelines, traces, and recursively unpacked ZIP artifacts. [docs](wiki/CI-Artifact-Scanning.md)
 - **A container image** - `prowl image <ref | tarball | oci-dir | ->`, scan every layer + the image config (no daemon), and flag whether each leak survives into the final flattened image. [docs](wiki/Container-Scanning.md)
 - **An S3 / GCS prefix** - `prowl bucket <s3://...|gs://...>`, download via your aws/gcloud CLI & scan. [docs](wiki/Bucket-Scanning.md)
 - **A mobile app** - `prowl mobile <app.apk|app.ipa|path|https-url>`, unpack the APK/IPA and scan resources, JSON/plist/XML, and printable strings inside binary entries. [docs](wiki/Mobile-Scanning.md)
@@ -159,10 +165,9 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 
 ## Why Prowl
 
-- **Precision first.** A three-stage cascade (regex + checksum + entropy, then a context model, then
-  a deep encoder) with example/placeholder filtering, hash rejection, and per-finding confidence. On
-  the benchmark below the cascade alone has the highest precision of any tool; the ML stages trade a
-  little of it for the top recall and the leading F1.
+- **Precision first.** Deterministic candidate detection (regex + checksum + entropy) feeds an optional
+  embedded HGB/sidecar false-positive filter, followed by optional provider verification. Example and
+  placeholder filtering, hash rejection, and per-finding confidence remain active without ML.
 - **Finds what regex can't.** Passwords in German/French/Russian prose, tokens with no fixed prefix,
   secrets hidden inside base64 blobs and JS source maps.
 - **Verifies live.** `--verify` calls the provider's own read-only identity endpoint (AWS, GitHub,
@@ -260,25 +265,26 @@ you want them upstreamed).
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/architecture-dark.svg">
-    <img src="assets/architecture.svg" width="800" alt="Prowl's three-stage cascade: regex/checksum/entropy, then a text model, then an encoder, combined by union">
+    <img src="assets/architecture.svg" width="800" alt="Prowl runtime pipeline: deterministic candidate detection, optional ML filtering, then optional live verification">
   </picture>
 </p>
 
-- **Stage 1, cascade (Go).** Per-type regexes anchored by a literal keyword, gated by an
+- **L1, candidate detection (Go).** Per-type regexes anchored by a literal keyword, gated by an
   Aho-Corasick pre-filter, then checksum (Luhn, GitHub CRC, JWT structure), Shannon entropy, and
   line-context cues. Filters out examples, placeholders, hashes, and public-key material. This stage
   ships in the binary and needs nothing else.
-- **Stage 2, text model.** A character + word TF-IDF logistic regression for generic and
-  multilingual passwords the regexes don't anchor.
-- **Stage 3, encoder.** A fine-tuned multilingual transformer
-  ([on Hugging Face](#model--data)) for the free-form and in-code tail. Optional; the cascade runs
-  without it.
+- **L2, optional ML filter.** `--ml` scores L1/rule candidates with the embedded
+  `HistGradientBoosting` model over 49 value/context features; `--ml-url` delegates the same scoring
+  contract to a sidecar. Candidates below the threshold are dropped, while checksum-proven findings
+  are exempt. L2 improves precision but does not generate new candidates.
+- **Optional live verification.** `--verify` runs after detection/filtering and checks supported
+  credentials against read-only provider endpoints, producing live/dead/inconclusive state.
 
-The three are combined as a union: anything any stage is confident about becomes a finding,
-de-duplicated by position.
+The published multilingual encoder remains an experimental research/integration model. It can back a
+custom scorer, but it is not an automatic third runtime stage in the shipped binary.
 
-**Running the ML stages.** Stage 1 (the cascade) ships in every binary and needs nothing. The ML
-stages do not run by default. The in-process model (`--ml`) is compiled in only on a **cgo build**;
+**Running ML.** L1 ships in every binary and needs nothing. L2 does not run by default. The in-process
+model (`--ml`) is available only in a **cgo build**;
 the static release binaries (Homebrew/Docker/Releases, `CGO_ENABLED=0`) refuse `--ml` and tell you to
 use `--ml-url` or build from source. To run the ML stage without a cgo build, host the model as a
 sidecar and pass `--ml-url`. In short: a released binary runs the cascade by default (ML via
@@ -319,10 +325,10 @@ prowl rules validate ./team-rules
 
 ## Model & data
 
-The benchmark corpus and the stage-3 encoder are published to Hugging Face:
+The benchmark corpus and experimental encoder are published to Hugging Face:
 
 - **Model:** [`Podric/prowl-secret-encoder`](https://huggingface.co/Podric/prowl-secret-encoder),
-  the multilingual transformer behind stage 3.
+  a standalone multilingual transformer for research and custom scorer integrations.
 - **Dataset:** [`Podric/prowl-secrets-corpus`](https://huggingface.co/datasets/Podric/prowl-secrets-corpus),
   503k labeled records (code, tickets, logs, prose) with full provenance.
 
