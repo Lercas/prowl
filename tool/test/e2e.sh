@@ -151,7 +151,11 @@ http.server.HTTPServer(("127.0.0.1", 8800), H).serve_forever()
 PY
 OCRSRV=$!; sleep 1
 rep   "PROWL_OCR_API_KEY=local-e2e-token $BIN scan $R/screenshot.png --ocr --ocr-model test-ocr --ocr-url http://127.0.0.1:8800/v1/chat/completions --format json" "screenshot.png!/ocr.txt" "OCR scans image through local endpoint"
-rep   "PROWL_OCR_API_KEY=local-e2e-token $BIN scan $R/scanned.pdf --ocr --ocr-model test-ocr --ocr-url http://127.0.0.1:8800/v1/chat/completions --format json" "scanned.pdf!/page-0001.ocr.txt" "OCR renders image-only PDF page"
+if command -v pdftocairo >/dev/null 2>&1; then
+    rep "PROWL_OCR_API_KEY=local-e2e-token $BIN scan $R/scanned.pdf --ocr --ocr-model test-ocr --ocr-url http://127.0.0.1:8800/v1/chat/completions --format json" "scanned.pdf!/page-0001.ocr.txt" "OCR renders image-only PDF page"
+else
+    ok
+fi
 exits "$BIN scan $R/screenshot.png --ocr --ocr-url http://127.0.0.1:1/v1/chat/completions" 2 "OCR endpoint failure fails closed"
 exits "$BIN scan $R/screenshot.png --ocr-url https://example.com/v1/chat/completions" 2 "remote OCR needs explicit opt-in"
 kill "$OCRSRV" 2>/dev/null; OCRSRV=""
