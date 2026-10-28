@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Lercas/prowl/tool/internal/model"
 	"io"
 	"os"
 	"os/exec"
@@ -16,6 +15,7 @@ import (
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/checkedio"
+	"github.com/Lercas/prowl/tool/internal/model"
 )
 
 const mcpProtocolVersion = "2025-06-18"
@@ -93,6 +93,9 @@ func mcpTools() []mcpTool {
 		props["bundled"] = boolProp("использовать встроенные rules/verifiers релиза, сохранив текущий identity key")
 		props["reconstruct"] = boolProp("статическое восстановление JS/TS")
 		props["semantic"] = boolProp("обнаружение кандидатов локальной моделью")
+		if _, supportsVerify := props["verify"]; supportsVerify {
+			props["verified_only"] = boolProp("проверить секреты у провайдеров и оставить только подтверждённые находки")
+		}
 		result[i].OutputSchema = map[string]any{"type": "object", "required": []string{"findings", "complete", "schema_version"}, "properties": map[string]any{"findings": map[string]any{"type": "array", "items": map[string]any{"type": "object"}}, "complete": map[string]any{"type": "boolean"}, "schema_version": map[string]any{"type": "string"}}}
 	}
 	return result
@@ -172,6 +175,10 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 			}
 		}
 		if req.Method == "notifications/cancelled" {
+			if len(req.ID) != 0 {
+				reply(func() { mcpError(w, req.ID, -32600, "cancellation must be a notification") })
+				continue
+			}
 			var p struct {
 				ID json.RawMessage `json:"requestId"`
 			}
@@ -341,8 +348,19 @@ func mcpCallContext(ctx context.Context, w *mcpWriter, req mcpRequest, runners .
 		Name string         `json:"name"`
 		Args map[string]any `json:"arguments"`
 	}
-	if err := json.Unmarshal(req.Params, &p); err != nil {
-		mcpToolResult(w, req.ID, "Недопустимые аргументы инструмента", true)
+	if err := json.Unmarshal(req.Params, &p); err != nil || p.Name == "" {
+		mcpError(w, req.ID, -32602, "invalid tool call parameters")
+		return
+	}
+	known := false
+	for _, tool := range mcpTools() {
+		if tool.Name == p.Name {
+			known = true
+			break
+		}
+	}
+	if !known {
+		mcpError(w, req.ID, -32602, "unknown tool")
 		return
 	}
 	argv, err := mcpArgv(p.Name, p.Args)
@@ -355,8 +373,18 @@ func mcpCallContext(ctx context.Context, w *mcpWriter, req mcpRequest, runners .
 		runner = runners[0]
 	}
 	out, runErr := runner(ctx, argv)
+	if errors.Is(runErr, errMCPOutputLimit) {
+		mcpToolResult(w, req.ID, "Отчёт превышает лимит MCP (32 МиБ)", true)
+		return
+	}
 	if strings.TrimSpace(out) == "" && runErr != nil {
-		mcpToolResult(w, req.ID, "Скан завершился ошибкой", true)
+		message := "Скан не запустился или завершился без отчёта; проверьте путь, настройки и доступ к источнику"
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			message = "Превышен лимит времени сканирования (5 минут)"
+		} else if errors.Is(ctx.Err(), context.Canceled) {
+			message = "Сканирование отменено"
+		}
+		mcpToolResult(w, req.ID, message, true)
 		return
 	}
 	var result model.ScanResult
@@ -367,7 +395,7 @@ func mcpCallContext(ctx context.Context, w *mcpWriter, req mcpRequest, runners .
 	failed := !result.Complete
 	if runErr != nil {
 		var exit *exec.ExitError
-		if !errors.As(runErr, &exit) || exit.ExitCode() != 1 {
+		if !errors.As(runErr, &exit) || exit.ExitCode() != 1 || len(result.Findings) == 0 {
 			failed = true
 		}
 	}
@@ -440,19 +468,23 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 				argv = append(argv, "--"+k)
 			}
 		}
+		if v, _ := a["verified_only"].(bool); v {
+			argv = append(argv, "--verified-only")
+		}
 		return append(argv, "--format", "json")
 	}
 	s := func(k string) string { v, _ := a[k].(string); return strings.TrimSpace(v) }
+	path := func() string { v, _ := a["path"].(string); return v }
 	b := func(k string) bool { v, _ := a[k].(bool); return v }
 	switch name {
 	case "prowl_scan":
-		if s("path") == "" {
+		if path() == "" {
 			return nil, fmt.Errorf("path is required")
 		}
-		if err := notDashLed("path", s("path")); err != nil {
+		if err := notDashLed("path", path()); err != nil {
 			return nil, err
 		}
-		argv := []string{"scan", s("path")}
+		argv := []string{"scan", path()}
 		if b("verify") {
 			argv = append(argv, "--verify")
 		}
@@ -485,13 +517,13 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		}
 		return appendFlags(argv), nil
 	case "prowl_mobile":
-		if s("path") == "" {
+		if path() == "" {
 			return nil, fmt.Errorf("path is required")
 		}
-		if err := notDashLed("path", s("path")); err != nil {
+		if err := notDashLed("path", path()); err != nil {
 			return nil, err
 		}
-		argv := []string{"mobile", s("path")}
+		argv := []string{"mobile", path()}
 		if b("ml") {
 			argv = append(argv, "--ml")
 		}
@@ -544,18 +576,25 @@ func runSelfContext(parent context.Context, argv []string) (string, error) {
 	output := &boundedMCPOutput{cancel: cancel}
 	cmd.Stdout = output
 	err = cmd.Run()
+	if output.exceeded {
+		return "", errMCPOutputLimit
+	}
 	return output.String(), err
 }
 
 type boundedMCPOutput struct {
 	bytes.Buffer
-	cancel context.CancelFunc
+	cancel   context.CancelFunc
+	exceeded bool
 }
+
+var errMCPOutputLimit = errors.New("MCP output budget exceeded")
 
 func (w *boundedMCPOutput) Write(p []byte) (int, error) {
 	if len(p)+w.Len() > 32<<20 {
+		w.exceeded = true
 		w.cancel()
-		return 0, errors.New("MCP output budget exceeded")
+		return 0, errMCPOutputLimit
 	}
 	return w.Buffer.Write(p)
 }
