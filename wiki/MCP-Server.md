@@ -2,6 +2,8 @@
 
 `prowl mcp` runs Prowl as a **Model Context Protocol server over stdio**, so an AI agent — Claude Code, Claude Desktop, or any MCP client — can drive scans as tools. It speaks newline-delimited JSON-RPC on stdin/stdout; there is no port to open and no network listener. Each tool call runs a scan and returns the same JSON findings envelope the CLI produces.
 
+Сервер поддерживает MCP `2026-07-28`: клиенты могут использовать `server/discover` и передавать версию и возможности в `_meta` каждого запроса. Для существующих клиентов сохранён `initialize` с версиями `2025-06-18`, `2025-03-26` и `2024-11-05`.
+
 ```sh
 prowl mcp
 ```

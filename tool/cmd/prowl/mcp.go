@@ -19,13 +19,15 @@ import (
 )
 
 const mcpProtocolVersion = "2025-06-18"
+const mcpModernVersion = "2026-07-28"
 const maxMCPMessageBytes = 16 << 20
 
 var errMCPOutput = errors.New("mcp: не удалось записать сообщение")
 
 type mcpWriter struct {
 	*bufio.Writer
-	err error
+	err    error
+	modern bool
 }
 
 func newMCPWriter(output io.Writer) *mcpWriter {
@@ -177,18 +179,23 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 				active.Lock()
 				key, _ := mcpIDKey(p.ID)
 				cancel := calls[key]
-				active.Unlock()
 				if cancel != nil {
 					cancel()
 				}
+				active.Unlock()
 			}
 			continue
 		}
 		if len(req.ID) == 0 || string(req.ID) == "null" {
 			continue
 		}
+		modern, protocolErr := mcpModernRequest(req)
+		if protocolErr != nil {
+			reply(func() { writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(req.ID), "error": protocolErr}) })
+			continue
+		}
 		if req.Method != "tools/call" {
-			reply(func() { handleMCP(line, w) })
+			reply(func() { w.modern = modern; handleMCP(line, w); w.modern = false })
 			continue
 		}
 		key, _ := mcpIDKey(req.ID)
@@ -204,7 +211,9 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 		default:
 			active.Unlock()
 			reply(func() {
+				w.modern = modern
 				mcpToolResult(w, req.ID, "Достигнут лимит одновременных сканов", true)
+				w.modern = false
 			})
 			continue
 		}
@@ -218,9 +227,14 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 			defer func() { <-slots; active.Lock(); delete(calls, key); active.Unlock() }()
 			var buffer bytes.Buffer
 			bw := newMCPWriter(&buffer)
+			bw.modern = modern
 			mcpCallContext(ctx, bw, req, runner)
 			_ = bw.flush()
-			reply(func() { _, _ = w.Write(buffer.Bytes()) })
+			active.Lock()
+			if !modern || ctx.Err() != context.Canceled {
+				reply(func() { _, _ = w.Write(buffer.Bytes()) })
+			}
+			active.Unlock()
 		}(req, key)
 	}
 	// EOF ends the session, so outstanding work cannot outlive its client.
@@ -243,6 +257,32 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 		return 2
 	}
 	return 0
+}
+
+// Modern requests carry their own version and capabilities; requests without
+// the modern envelope retain the existing initialization-based behavior.
+func mcpModernRequest(req mcpRequest) (bool, map[string]any) {
+	var p struct {
+		Meta map[string]json.RawMessage `json:"_meta"`
+	}
+	_ = json.Unmarshal(req.Params, &p)
+	versionRaw, hasVersion := p.Meta["io.modelcontextprotocol/protocolVersion"]
+	modern := hasVersion || req.Method == "server/discover"
+	if !modern {
+		return false, nil
+	}
+	var requested string
+	if !hasVersion || json.Unmarshal(versionRaw, &requested) != nil || requested == "" {
+		return true, map[string]any{"code": -32602, "message": "missing or invalid protocol version"}
+	}
+	if requested != mcpModernVersion {
+		return true, map[string]any{"code": -32022, "message": "Unsupported protocol version", "data": map[string]any{"requested": requested, "supported": []string{mcpModernVersion, mcpProtocolVersion, "2025-03-26", "2024-11-05"}}}
+	}
+	var capabilities map[string]json.RawMessage
+	if json.Unmarshal(p.Meta["io.modelcontextprotocol/clientCapabilities"], &capabilities) != nil || capabilities == nil {
+		return true, map[string]any{"code": -32602, "message": "missing or invalid client capabilities"}
+	}
+	return true, nil
 }
 
 func mcpIDKey(raw json.RawMessage) (string, bool) {
@@ -270,6 +310,8 @@ func handleMCP(line string, w *mcpWriter) {
 		return // JSON-RPC 2.0: a server MUST NOT reply to (or act on) a notification
 	}
 	switch req.Method {
+	case "server/discover":
+		mcpReply(w, req.ID, map[string]any{"supportedVersions": []string{mcpModernVersion, mcpProtocolVersion, "2025-03-26", "2024-11-05"}, "capabilities": map[string]any{"tools": map[string]any{}}})
 	case "initialize":
 		protocol := mcpProtocolVersion
 		var p struct {
@@ -519,6 +561,12 @@ func (w *boundedMCPOutput) Write(p []byte) (int, error) {
 }
 
 func mcpReply(w *mcpWriter, id json.RawMessage, result any) {
+	if w.modern {
+		if fields, ok := result.(map[string]any); ok {
+			fields["resultType"] = "complete"
+			fields["_meta"] = map[string]any{"io.modelcontextprotocol/serverInfo": map[string]any{"name": "prowl", "version": version}}
+		}
+	}
 	writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(id), "result": result})
 }
 
