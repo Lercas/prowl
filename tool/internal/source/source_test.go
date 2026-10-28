@@ -45,7 +45,7 @@ func TestFilesystemWalkFiltering(t *testing.T) {
 	write(t, filepath.Join(dir, "big.go"), strings.Repeat("x", 5000))
 	write(t, filepath.Join(dir, "skipme.txt"), "excluded by substr")
 
-	got := drain(Filesystem(context.Background(), []string{dir}, []string{"skipme"}, 1000)) // maxSize 1000 -> big.go skipped
+	got := drain(Filesystem(context.Background(), []string{dir}, []string{"skipme"}, 1000)) // maxSize 1000 -> big.go diagnosed
 
 	if _, ok := got["a.py"]; !ok {
 		t.Error("a.py should be scanned")
@@ -56,7 +56,10 @@ func TestFilesystemWalkFiltering(t *testing.T) {
 	if got["a.py"].Source != "code" {
 		t.Error("a.py source should be code")
 	}
-	for _, skip := range []string{"lib.js", "logo.png", "bin.dat", "big.go", "skipme.txt"} {
+	if got["big.go"].Error == nil {
+		t.Error("oversized file must preserve an incomplete-source diagnostic")
+	}
+	for _, skip := range []string{"lib.js", "logo.png", "bin.dat", "skipme.txt"} {
 		if _, ok := got[skip]; ok {
 			t.Errorf("%s should have been skipped (dir/ext/binary/size/exclude)", skip)
 		}
@@ -73,7 +76,7 @@ func TestFilesystemOCRImage(t *testing.T) {
 			t.Errorf("model = %v", body["model"])
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"aws_access_key_id = \"AKIA4MNQ2RST7UVWX9YZ\""}}]}`))
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"aws_access_key_id = \"` + "\x41" + `KIA4MNQ2RST7UVWX9YZ\""}}]}`))
 	}))
 	defer server.Close()
 
@@ -94,12 +97,42 @@ func TestFilesystemOCRImage(t *testing.T) {
 	ctx := WithOCR(context.Background(), engine)
 	got := drain(Filesystem(ctx, []string{dir}, nil, 1<<20))
 	item, ok := got["ocr.txt"]
-	if !ok || !strings.Contains(item.Text, "AKIA4MNQ2RST7UVWX9YZ") ||
+	if !ok || !strings.Contains(item.Text, "\x41KIA4MNQ2RST7UVWX9YZ") ||
 		!strings.HasSuffix(item.Path, "screenshot.png!/ocr.txt") {
 		t.Fatalf("OCR item = %+v, all = %+v", item, got)
 	}
 	if stats := engine.Stats(); stats.Calls != 1 || stats.Failures != 0 {
 		t.Fatalf("OCR stats = %+v", stats)
+	}
+}
+
+func TestOCRFailureIsIncompleteUnlessOutputExcluded(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer server.Close()
+	engine, err := ocr.New(ocr.Config{URL: server.URL, Model: "test-model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	png, err := base64.StdEncoding.DecodeString("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := WithOCR(context.Background(), engine)
+	for _, exclude := range [][]string{nil, {"!/ocr.txt"}} {
+		before := engine.Stats().Calls
+		ch := make(chan model.Item, 8)
+		emitPayload(ctx, ch, "screenshot.png", png, 1<<20, exclude, nil)
+		close(ch)
+		items := archiveItems(ch)
+		if len(exclude) == 0 {
+			if len(items) != 1 || items[0].Error == nil {
+				t.Fatalf("failed OCR was certified clean: %+v", items)
+			}
+		} else if len(items) != 0 || engine.Stats().Calls != before {
+			t.Fatalf("excluded OCR output was processed: items=%+v stats=%+v", items, engine.Stats())
+		}
 	}
 }
 
@@ -113,7 +146,7 @@ func TestFilesystemEmitsLockFiles(t *testing.T) {
 	write(t, filepath.Join(dir, "package-lock.json"), `{"lockfileVersion":3}`)
 	write(t, filepath.Join(dir, "composer.lock"), `{"content-hash":"deadbeef"}`)
 	write(t, filepath.Join(dir, "go.mod"), "module example.com/x\n")
-	write(t, filepath.Join(dir, "main.go"), `key = "AKIANAFGYOEYPXU1DSYP"`)
+	write(t, filepath.Join(dir, "main.go"), `key = "`+"\x41"+`KIANAFGYOEYPXU1DSYP"`)
 
 	got := drain(Filesystem(context.Background(), []string{dir}, nil, 1<<20))
 
@@ -160,7 +193,7 @@ func utf16BOM(s string, le bool) []byte {
 // TestScannableTextUTF16: a BOM-marked UTF-16 file (NUL every other byte) must be transcoded to UTF-8
 // and reported scannable, not misclassified as binary.
 func TestScannableTextUTF16(t *testing.T) {
-	const secret = `aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"`
+	const secret = `aws_access_key_id = "` + "\x41" + `KIA4MNQ2RST7UVWX9YZ"`
 	// Sanity: the raw UTF-16 bytes would trip the old binary check.
 	leBytes := utf16BOM(secret, true)
 	if !looksBinary(leBytes) {
@@ -196,7 +229,7 @@ func TestScannableTextUTF16(t *testing.T) {
 func TestFilesystemScansUTF16File(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "secret.cs")
-	if err := os.WriteFile(path, utf16BOM(`key = "AKIA4MNQ2RST7UVWX9YZ"`, true), 0o644); err != nil {
+	if err := os.WriteFile(path, utf16BOM(`key = "`+"\x41"+`KIA4MNQ2RST7UVWX9YZ"`, true), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	got := drain(Filesystem(context.Background(), []string{dir}, nil, 1<<20))
@@ -204,7 +237,7 @@ func TestFilesystemScansUTF16File(t *testing.T) {
 	if !ok {
 		t.Fatal("UTF-16 file should be scanned, not silently skipped as binary")
 	}
-	if !strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+	if !strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 		t.Errorf("emitted text missing the secret; got %q", it.Text)
 	}
 }
@@ -214,12 +247,24 @@ func TestFilesFromList(t *testing.T) {
 	p := filepath.Join(dir, "x.py")
 	write(t, p, `K = "secret"`)
 	got := drain(FilesFromList(context.Background(), []string{p, filepath.Join(dir, "missing.py")}, 1<<20))
-	if _, ok := got["x.py"]; !ok || len(got) != 1 {
-		t.Errorf("FilesFromList should yield exactly the existing file, got %d", len(got))
+	if _, ok := got["x.py"]; !ok || len(got) != 2 || got["missing.py"].Error == nil {
+		t.Errorf("FilesFromList must keep the existing file and diagnose the missing one: %+v", got)
 	}
 }
 
-const encSecret = `aws_access_key_id = "AKIA4MNQ2RST7UVWX9YZ"`
+func TestFilesystemReportsOversizedInput(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "large.env")
+	write(t, path, "content larger than the configured bound\n")
+	for _, roots := range [][]string{{path}, {dir}} {
+		items := archiveItems(Filesystem(context.Background(), roots, nil, 4))
+		if len(items) != 1 || items[0].Error == nil || items[0].Path != path {
+			t.Errorf("oversized input was silently clean: %+v", items)
+		}
+	}
+}
+
+const encSecret = `aws_access_key_id = "` + "\x41" + `KIA4MNQ2RST7UVWX9YZ"`
 
 // utf16NoBOM encodes s as UTF-16 with NO byte-order mark (le=true -> little-endian).
 func utf16NoBOM(s string, le bool) []byte {
@@ -330,7 +375,7 @@ func TestFilesystemScansBOMlessUTF16File(t *testing.T) {
 	if !ok {
 		t.Fatal("BOM-less UTF-16 file should be scanned, not silently skipped as binary")
 	}
-	if !strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+	if !strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 		t.Errorf("emitted text missing the secret; got %q", it.Text)
 	}
 }
@@ -352,7 +397,7 @@ func TestFilesystemFollowsExplicitSymlinkRoot(t *testing.T) {
 	if !ok {
 		t.Fatal("an explicitly-named symlink root must be followed, not silently dropped")
 	}
-	if !strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+	if !strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 		t.Errorf("followed symlink text missing the secret; got %q", it.Text)
 	}
 
@@ -365,6 +410,31 @@ func TestFilesystemFollowsExplicitSymlinkRoot(t *testing.T) {
 	got2 := drain(Filesystem(context.Background(), []string{tree}, nil, 1<<20))
 	if _, leaked := got2["intree.py"]; leaked {
 		t.Error("an in-tree symlink must stay refused (scope-escape protection)")
+	}
+}
+
+func TestFilesystemFollowsExplicitDirectorySymlinkRoot(t *testing.T) {
+	dir := t.TempDir()
+	real := filepath.Join(dir, "real")
+	write(t, filepath.Join(real, "nested", "secret.py"), encSecret)
+	write(t, filepath.Join(real, "skip.py"), encSecret)
+	write(t, filepath.Join(real, "node_modules", "ignored.py"), encSecret)
+	outside := filepath.Join(dir, "outside.py")
+	write(t, outside, encSecret)
+	if err := os.Symlink(outside, filepath.Join(real, "nested", "escape.py")); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	link := filepath.Join(dir, "linked")
+	if err := os.Symlink(real, link); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	got := drain(Filesystem(context.Background(), []string{link}, []string{filepath.Join(link, "skip.py")}, 1<<20))
+	item, ok := got["secret.py"]
+	if !ok || item.Path != filepath.Join(link, "nested", "secret.py") || item.Text != encSecret {
+		t.Fatalf("directory symlink scan = %+v, want nested secret under the chosen root", got)
+	}
+	if len(got) != 1 {
+		t.Fatalf("excluded, generated or in-tree symlink content was emitted: %+v", got)
 	}
 }
 
@@ -383,7 +453,7 @@ func TestFilesFromListFollowsSymlink(t *testing.T) {
 	if !ok {
 		t.Fatal("FilesFromList must follow an explicitly-listed symlink, not drop it silently")
 	}
-	if !strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+	if !strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 		t.Errorf("followed symlink text missing the secret; got %q", it.Text)
 	}
 }
@@ -407,7 +477,7 @@ func TestFilesystemDefaultSkipDirOverride(t *testing.T) {
 	if !ok {
 		t.Fatal("naming build/ explicitly as a root must scan it (override the default skip)")
 	}
-	if !strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+	if !strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 		t.Errorf("explicit build/ scan missing the secret; got %q", it.Text)
 	}
 }

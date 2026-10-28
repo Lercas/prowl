@@ -16,7 +16,10 @@ func TestBaselineRoundTrip(t *testing.T) {
 	if err := WriteBaseline(bl, known); err != nil {
 		t.Fatal(err)
 	}
-	b := LoadBaseline(bl)
+	b, err := LoadBaseline(bl)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if got := b.Suppress(known); len(got) != 0 {
 		t.Errorf("known findings not suppressed: %d remain", len(got))
@@ -40,5 +43,15 @@ func TestEmptyBaselineNoOp(t *testing.T) {
 	fs := []model.Finding{{Type: "x", Path: "p", Redacted: "r"}}
 	if got := (&Baseline{}).Suppress(fs); len(got) != 1 {
 		t.Error("empty baseline should suppress nothing")
+	}
+}
+
+func TestBaselineCannotSuppressIncompleteDiagnostics(t *testing.T) {
+	for _, kind := range []string{"source_error", "results_truncated", "response_truncated", "item_too_large"} {
+		f := model.Finding{Type: kind, Path: "a.env"}
+		b := &Baseline{fps: map[string]bool{Fingerprint(f): true}}
+		if got := b.Suppress([]model.Finding{f}); len(got) != 1 {
+			t.Errorf("baseline hid %q diagnostic", kind)
+		}
 	}
 }

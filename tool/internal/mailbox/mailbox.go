@@ -47,6 +47,7 @@ type Stats struct {
 	Parts    int
 	Emitted  int
 	Skipped  int
+	Limited  int // entities omitted due to size/depth limits
 }
 
 type walker struct {
@@ -55,6 +56,7 @@ type walker struct {
 	stats     Stats
 	emit      func(Part) error
 	sequence  int
+	skip      func(string) bool
 }
 
 // BoundedLimits derives conservative mail limits from the scan's per-file cap.
@@ -88,6 +90,11 @@ func MaybeMessage(name string) bool {
 // Walk decodes an EML/EMLX message or MBOX export and emits its headers, bodies, and attachments.
 // recognized=false means the path is not a supported mail export.
 func Walk(root string, raw []byte, limits Limits, emit func(Part) error) (stats Stats, recognized bool, err error) {
+	return WalkFiltered(root, raw, limits, nil, emit)
+}
+
+// WalkFiltered excludes MIME entities before decoding their body and excludes emitted headers.
+func WalkFiltered(root string, raw []byte, limits Limits, skip func(string) bool, emit func(Part) error) (stats Stats, recognized bool, err error) {
 	if !MaybeMessage(root) {
 		return stats, false, nil
 	}
@@ -100,6 +107,7 @@ func Walk(root string, raw []byte, limits Limits, emit func(Part) error) (stats 
 		// normalizeLimits guarantees a positive int64 total before this conversion.
 		remaining: uint64(limits.MaxTotal), //nolint:gosec
 		emit:      emit,
+		skip:      skip,
 	}
 	switch {
 	case strings.HasSuffix(strings.ToLower(root), ".mbox"):
@@ -150,6 +158,7 @@ func (w *walker) walkMBOX(root string, raw []byte) error {
 func (w *walker) walkMessage(root string, raw []byte, depth int) error {
 	if depth >= w.limits.MaxDepth {
 		w.stats.Skipped++
+		w.stats.Limited++
 		return nil
 	}
 	message, err := mail.ReadMessage(bytes.NewReader(raw))
@@ -167,11 +176,22 @@ func (w *walker) walkMessage(root string, raw []byte, depth int) error {
 }
 
 func (w *walker) walkEntity(root string, header textproto.MIMEHeader, body io.Reader, depth int, messageRoot bool) error {
-	if depth >= w.limits.MaxDepth {
+	mediaType, params := parseMediaType(header.Get("Content-Type"))
+	payloadPath := root
+	if mediaType == "message/rfc822" {
+		payloadPath += "!/message.eml"
+	} else if messageRoot && !strings.HasPrefix(mediaType, "multipart/") {
+		payloadPath += "!/body" + extensionForMediaType(mediaType)
+	}
+	if w.skip != nil && w.skip(payloadPath) {
 		w.stats.Skipped++
 		return nil
 	}
-	mediaType, params := parseMediaType(header.Get("Content-Type"))
+	if depth >= w.limits.MaxDepth {
+		w.stats.Skipped++
+		w.stats.Limited++
+		return nil
+	}
 	if strings.HasPrefix(mediaType, "multipart/") {
 		boundary := params["boundary"]
 		if boundary == "" {
@@ -263,11 +283,16 @@ func extensionForMediaType(mediaType string) string {
 }
 
 func (w *walker) output(name string, data []byte) error {
+	if w.skip != nil && w.skip(name) {
+		w.stats.Skipped++
+		return nil
+	}
 	if len(bytes.TrimSpace(data)) == 0 {
 		return nil
 	}
 	if int64(len(data)) > w.limits.MaxPart {
 		w.stats.Skipped++
+		w.stats.Limited++
 		return nil
 	}
 	if uint64(len(data)) > w.remaining {

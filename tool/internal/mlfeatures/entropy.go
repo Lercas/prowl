@@ -31,15 +31,19 @@ func shannonEntropy(s string) float64 {
 		return 0.0
 	}
 	counts := map[rune]int{}
+	var order []rune
 	n := 0
 	for _, r := range s {
+		if counts[r] == 0 {
+			order = append(order, r)
+		}
 		counts[r]++
 		n++
 	}
 	h := 0.0
 	fn := float64(n)
-	for _, c := range counts {
-		p := float64(c) / fn
+	for _, r := range order {
+		p := float64(counts[r]) / fn
 		h -= p * math.Log2(p)
 	}
 	return h
@@ -66,9 +70,13 @@ func alphabetEntropy(s string, alphabet map[rune]struct{}) float64 {
 		return 0.0
 	}
 	counts := map[rune]int{}
+	var order []rune
 	n := 0
 	for _, r := range s {
 		if _, ok := alphabet[r]; ok {
+			if counts[r] == 0 {
+				order = append(order, r)
+			}
 			counts[r]++
 			n++
 		}
@@ -78,8 +86,8 @@ func alphabetEntropy(s string, alphabet map[rune]struct{}) float64 {
 	}
 	h := 0.0
 	fn := float64(n)
-	for _, c := range counts {
-		p := float64(c) / fn
+	for _, r := range order {
+		p := float64(counts[r]) / fn
 		h -= p * math.Log2(p)
 	}
 	return h
@@ -94,9 +102,13 @@ func bigramEntropy(s string) float64 {
 	}
 	// bigrams over consecutive runes; firsts over the first rune of each bigram.
 	bigrams := map[[2]rune]int{}
+	var order [][2]rune
 	firsts := map[rune]int{}
 	for i := 0; i < len(rs)-1; i++ {
 		bg := [2]rune{rs[i], rs[i+1]}
+		if bigrams[bg] == 0 {
+			order = append(order, bg)
+		}
 		bigrams[bg]++
 		firsts[rs[i]]++
 	}
@@ -106,8 +118,8 @@ func bigramEntropy(s string) float64 {
 	}
 	ftotal := float64(total)
 	h := 0.0
-	for bg, c := range bigrams {
-		pBg := float64(c) / ftotal
+	for _, bg := range order {
+		pBg := float64(bigrams[bg]) / ftotal
 		pFirst := float64(firsts[bg[0]]) / ftotal
 		h -= pBg * math.Log2(pBg/pFirst)
 	}
@@ -117,7 +129,7 @@ func bigramEntropy(s string) float64 {
 // compressionRatio returns len(zlib(s)) / len(s) over UTF-8, mirroring
 // compression_ratio() (Python zlib.compress at level 6). The compressed length
 // comes from zlibCompressedLen: the cgo build (system zlib) is byte-exact; the
-// nocgo build (Go compress/zlib) only approximates Python. See zlib_nocgo.go.
+// nocgo build uses the same compressor in bounded WebAssembly.
 func compressionRatio(s string) float64 {
 	if s == "" {
 		return 0.0

@@ -16,11 +16,11 @@ matchers:
     condition: or
   - type: regex
     regex:
-      - '(?i)segment[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{32})\b'
+      - '(?i)(?:^|[^a-z0-9])segment(?:[_-]?(?:write[_-]?key|api[_-]?key|key))?["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})(?:[^A-Za-z0-9_-]|$)'
   - type: entropy
     min: 3.3
 extractors:
   - type: regex
     regex:
-      - '(?i)segment[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9]{32})\b'
+      - '(?i)(?:^|[^a-z0-9])segment(?:[_-]?(?:write[_-]?key|api[_-]?key|key))?["'']?\s*[:=]\s*["'']?([A-Za-z0-9]{32})(?:[^A-Za-z0-9_-]|$)'
     group: 1

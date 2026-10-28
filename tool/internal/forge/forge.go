@@ -6,13 +6,17 @@ package forge
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
@@ -62,120 +66,110 @@ func ListGists(ctx context.Context, target string) ([]string, error) {
 	}
 	token, host := os.Getenv("GITHUB_TOKEN"), envOr("GITHUB_API", "https://api.github.com")
 	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(token)}
-	var urls []string
-	for page := 1; page <= maxPages; page++ {
-		u := fmt.Sprintf("%s/users/%s/gists?per_page=100&page=%d", host, url.PathEscape(name), page)
-		var gists []struct {
-			GitPullURL string `json:"git_pull_url"`
-		}
-		status, err := getJSON(ctx, u, hdr, &gists)
-		if err != nil {
-			return urls, err
-		}
-		if status != http.StatusOK {
-			return urls, fmt.Errorf("github gists API returned %d for %q (set GITHUB_TOKEN for rate limits)", status, name)
-		}
-		for _, g := range gists {
-			if g.GitPullURL != "" {
-				urls = append(urls, g.GitPullURL)
-			}
-		}
-		if len(gists) < 100 {
-			break
-		}
+	u := fmt.Sprintf("%s/users/%s/gists?per_page=100&page=1", strings.TrimRight(host, "/"), url.PathEscape(name))
+	urls, status, err := listArrays(ctx, u, hdr, "git_pull_url")
+	if status != http.StatusOK {
+		err = errors.Join(err, fmt.Errorf("github gists API returned %d", status))
 	}
-	return urls, nil
+	return urls, err
 }
 
 func githubRepos(ctx context.Context, name string) ([]string, error) {
-	token, host := os.Getenv("GITHUB_TOKEN"), envOr("GITHUB_API", "https://api.github.com")
-	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(token)}
-	// An org first; fall back to a user account on 404.
-	urls, status, err := githubList(ctx, host, "orgs", name, hdr)
-	if status == http.StatusNotFound {
-		urls, status, err = githubList(ctx, host, "users", name, hdr)
-	}
-	if err != nil {
-		return nil, err
-	}
-	if status != http.StatusOK {
-		return nil, fmt.Errorf("github API returned %d for %q (set GITHUB_TOKEN for private repos / rate limits)", status, name)
-	}
-	return urls, nil
-}
-
-func githubList(ctx context.Context, host, kind, name string, hdr map[string]string) ([]string, int, error) {
-	var urls []string
-	for page := 1; page <= maxPages; page++ {
-		// No "type" param: GitHub defaults to all repos for an org and owner-only for a user, which is
-		// what we want (type=all on a user would wrongly include repos they merely collaborate on).
-		u := fmt.Sprintf("%s/%s/%s/repos?per_page=100&page=%d", host, kind, url.PathEscape(name), page)
-		var repos []struct {
-			CloneURL string `json:"clone_url"`
-		}
-		status, err := getJSON(ctx, u, hdr, &repos)
-		if err != nil || status != http.StatusOK {
-			return urls, status, err
-		}
-		for _, r := range repos {
-			if r.CloneURL != "" {
-				urls = append(urls, r.CloneURL)
-			}
-		}
-		if len(repos) < 100 {
-			return urls, http.StatusOK, nil
-		}
-	}
-	return urls, http.StatusOK, nil // hit the page cap; return what we have
+	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(os.Getenv("GITHUB_TOKEN"))}
+	return accountRepos(ctx, envOr("GITHUB_API", "https://api.github.com"), "orgs", name, "repos", "clone_url", hdr)
 }
 
 func gitlabRepos(ctx context.Context, name string) ([]string, error) {
-	token, host := os.Getenv("GITLAB_TOKEN"), envOr("GITLAB_API", "https://gitlab.com/api/v4")
-	hdr := map[string]string{"PRIVATE-TOKEN": token}
-	// A group first; fall back to a user account on 404 (a username is not a group).
-	urls, status, err := gitlabList(ctx, host, "groups", name, hdr)
-	if status == http.StatusNotFound {
-		urls, status, err = gitlabList(ctx, host, "users", name, hdr)
-	}
-	if err != nil {
-		return nil, err
-	}
-	if status != http.StatusOK {
-		return nil, fmt.Errorf("gitlab API returned %d for %q (set GITLAB_TOKEN for private groups)", status, name)
-	}
-	return urls, nil
+	hdr := map[string]string{"PRIVATE-TOKEN": os.Getenv("GITLAB_TOKEN")}
+	return accountRepos(ctx, envOr("GITLAB_API", "https://gitlab.com/api/v4"), "groups", name, "projects", "http_url_to_repo", hdr)
 }
 
-func gitlabList(ctx context.Context, host, kind, name string, hdr map[string]string) ([]string, int, error) {
+func accountRepos(ctx context.Context, host, kind, name, resource, field string, hdr map[string]string) ([]string, error) {
+	endpoint := func(kind string) string {
+		query := "per_page=100&page=1"
+		if resource == "projects" {
+			query += "&include_subgroups=true"
+		}
+		return fmt.Sprintf("%s/%s/%s/%s?%s", strings.TrimRight(host, "/"), kind, url.PathEscape(name), resource, query)
+	}
+	urls, status, err := listArrays(ctx, endpoint(kind), hdr, field)
+	// Fallback only when the FIRST endpoint is absent, never after partial pagination.
+	if status == http.StatusNotFound && err == nil {
+		urls, status, err = listArrays(ctx, endpoint("users"), hdr, field)
+	}
+	if status != http.StatusOK {
+		err = errors.Join(err, fmt.Errorf("repository API returned %d for %q", status, name))
+	}
+	return urls, err
+}
+
+func listArrays(ctx context.Context, first string, hdr map[string]string, field string) ([]string, int, error) {
+	next := first
+	seen := map[string]bool{}
+	repos := map[string]bool{}
 	var urls []string
-	for page := 1; page <= maxPages; page++ {
-		// include_subgroups is a groups-only param; GitLab ignores unknown query params on /users, so
-		// the same URL shape works for both endpoints (it just has no effect when listing a user).
-		u := fmt.Sprintf("%s/%s/%s/projects?per_page=100&include_subgroups=true&page=%d", host, kind, url.PathEscape(name), page)
-		var projs []struct {
-			HTTPURL string `json:"http_url_to_repo"`
+	var problems error
+	for page := 0; next != "" && page < maxPages; page++ {
+		if seen[next] {
+			return urls, 200, errors.Join(problems, errors.New("repository pagination cycle"))
 		}
-		status, err := getJSON(ctx, u, hdr, &projs)
-		if err != nil || status != http.StatusOK {
-			return urls, status, err
+		seen[next] = true
+		var entries []map[string]json.RawMessage
+		status, headers, err := getJSON(ctx, next, hdr, &entries)
+		if err != nil || status != 200 {
+			if page > 0 && err == nil {
+				err = fmt.Errorf("repository pagination returned %d", status)
+			}
+			return urls, status, errors.Join(problems, err)
 		}
-		for _, p := range projs {
-			if p.HTTPURL != "" {
-				urls = append(urls, p.HTTPURL)
+		if entries == nil {
+			return urls, status, errors.Join(problems, errors.New("repository API must return an array"))
+		}
+		for _, entry := range entries {
+			var clone string
+			if err := json.Unmarshal(entry[field], &clone); err != nil || clone == "" {
+				problems = errors.New("one or more repository entries have no clone URL")
+				continue
+			}
+			if !repos[clone] {
+				urls = append(urls, clone)
+				repos[clone] = true
 			}
 		}
-		if len(projs) < 100 {
-			return urls, http.StatusOK, nil
+		continuation, err := nextPage(headers, next)
+		if err != nil {
+			return urls, status, errors.Join(problems, err)
 		}
+		if continuation != "" {
+			continuation, err = checkedPageURL(first, next, continuation)
+			if err != nil {
+				return urls, status, errors.Join(problems, err)
+			}
+		}
+		next = continuation
 	}
-	return urls, http.StatusOK, nil // hit the page cap; return what we have
+	if next != "" {
+		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", maxPages))
+	}
+	return urls, 200, problems
 }
 
 func bitbucketRepos(ctx context.Context, name string) ([]string, error) {
-	hdr := map[string]string{"Authorization": bearer(os.Getenv("BITBUCKET_TOKEN"))}
-	next := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s?pagelen=100", url.PathEscape(name))
+	first := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s?pagelen=100", url.PathEscape(name))
+	return bitbucketList(ctx, first, map[string]string{"Authorization": bearer(os.Getenv("BITBUCKET_TOKEN"))})
+}
+
+func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]string, error) {
+	next := first
+	seen := map[string]bool{}
+	repos := map[string]bool{}
 	var urls []string
-	for page := 0; next != "" && page < maxPages; page++ {
+	var problems error
+	for n := 0; next != "" && n < maxPages; n++ {
+		if seen[next] {
+			return urls, errors.Join(problems, errors.New("repository pagination cycle"))
+		}
+		seen[next] = true
 		var page struct {
 			Values []struct {
 				Links struct {
@@ -184,29 +178,113 @@ func bitbucketRepos(ctx context.Context, name string) ([]string, error) {
 			} `json:"values"`
 			Next string `json:"next"`
 		}
-		status, err := getJSON(ctx, next, hdr, &page)
-		if err != nil {
-			return nil, err
+		status, _, err := getJSON(ctx, next, hdr, &page)
+		if status != 200 {
+			err = errors.Join(err, fmt.Errorf("bitbucket API returned %d", status))
 		}
-		if status != http.StatusOK {
-			return nil, fmt.Errorf("bitbucket API returned %d for %q (set BITBUCKET_TOKEN for private workspaces)", status, name)
+		if err != nil {
+			return urls, errors.Join(problems, err)
+		}
+		if page.Values == nil {
+			return urls, errors.Join(problems, errors.New("bitbucket API has no repository array"))
 		}
 		for _, v := range page.Values {
+			found := false
 			for _, cl := range v.Links.Clone {
-				if cl.Name == "https" {
-					urls = append(urls, cl.Href)
+				if cl.Name == "https" && cl.Href != "" {
+					found = true
+					if !repos[cl.Href] {
+						urls = append(urls, cl.Href)
+						repos[cl.Href] = true
+					}
 				}
+			}
+			if !found {
+				problems = errors.New("one or more bitbucket entries have no HTTPS clone URL")
 			}
 		}
 		next = page.Next
+		if next != "" {
+			next, err = checkedPageURL(first, first, next)
+			if err != nil {
+				return urls, errors.Join(problems, err)
+			}
+		}
 	}
-	return urls, nil
+	if next != "" {
+		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", maxPages))
+	}
+	return urls, problems
 }
 
-func getJSON(ctx context.Context, u string, hdr map[string]string, out any) (int, error) {
+// API-provided continuations are new requests, so redirect guards alone cannot protect credentials.
+func checkedPageURL(first, current, next string) (string, error) {
+	root, err := url.Parse(first)
+	if err != nil {
+		return "", err
+	}
+	base, err := url.Parse(current)
+	if err != nil {
+		return "", err
+	}
+	ref, err := url.Parse(next)
+	if err != nil {
+		return "", err
+	}
+	u := base.ResolveReference(ref)
+	if u.User != nil || u.Fragment != "" || !strings.EqualFold(u.Scheme, root.Scheme) || !strings.EqualFold(u.Host, root.Host) || u.EscapedPath() != root.EscapedPath() {
+		return "", errors.New("repository pagination left the original API endpoint")
+	}
+	return u.String(), nil
+}
+
+func nextPage(headers http.Header, current string) (string, error) {
+	var next string
+	for _, line := range headers.Values("Link") {
+		for _, part := range strings.Split(line, ",") {
+			part = strings.TrimSpace(part)
+			end := strings.IndexByte(part, '>')
+			if !strings.HasPrefix(part, "<") || end < 0 {
+				return "", errors.New("malformed repository pagination Link")
+			}
+			_, params, err := mime.ParseMediaType("link" + strings.TrimSpace(part[end+1:]))
+			if err != nil {
+				return "", errors.New("malformed repository pagination Link")
+			}
+			for _, rel := range strings.Fields(params["rel"]) {
+				if rel == "next" {
+					if next != "" {
+						return "", errors.New("multiple next-page links")
+					}
+					next = part[1:end]
+				}
+			}
+		}
+	}
+	if next != "" {
+		return next, nil
+	}
+	if page := headers.Get("X-Next-Page"); page != "" {
+		n, err := strconv.Atoi(page)
+		if err != nil || n < 1 {
+			return "", errors.New("invalid next-page index")
+		}
+		u, err := url.Parse(current)
+		if err != nil {
+			return "", err
+		}
+		q := u.Query()
+		q.Set("page", page)
+		u.RawQuery = q.Encode()
+		return u.String(), nil
+	}
+	return "", nil
+}
+
+func getJSON(ctx context.Context, u string, hdr map[string]string, out any) (int, http.Header, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	for k, v := range hdr {
 		if v != "" {
@@ -215,15 +293,26 @@ func getJSON(ctx context.Context, u string, hdr map[string]string, out any) (int
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
-		if err := json.NewDecoder(io.LimitReader(resp.Body, 32<<20)).Decode(out); err != nil {
-			return resp.StatusCode, fmt.Errorf("decode %s: %w", u, err)
+		const limit = 32 << 20
+		body, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
+		if err == nil && len(body) > limit {
+			err = errors.New("repository API response exceeds 32 MiB")
+		}
+		if err == nil && !utf8.Valid(body) {
+			err = errors.New("repository API response is not UTF-8")
+		}
+		if err == nil {
+			err = json.Unmarshal(body, out)
+		}
+		if err != nil {
+			return resp.StatusCode, resp.Header, fmt.Errorf("decode repository API: %w", err)
 		}
 	}
-	return resp.StatusCode, nil
+	return resp.StatusCode, resp.Header, nil
 }
 
 func bearer(token string) string {

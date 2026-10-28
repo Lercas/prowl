@@ -79,14 +79,11 @@ This lists the built-in taxonomy only. Rule templates installed by `prowl rules 
 
 ### "No secrets found, but I expected some"
 
-Most often the rule library is not installed. A fresh binary ships the built-in taxonomy (run `prowl doctor` — `taxonomy` should report dozens of detectors), but the full nuclei-style rule set lives outside the binary and is fetched on first use:
-
-```sh
-prowl rules update          # fetch + validate + install ~/.prowl/rules
-prowl version               # shows binary + installed rule/verifier versions
-```
-
-`prowl version` reporting `rules: not installed` confirms this is the cause.
+В 1.4.0 taxonomy и полный bundled-набор доступны без установки. `prowl version`
+показывает bundled или installed provenance; `prowl selftest --ml` проверяет
+runtime на синтетических входах. Сначала проверьте полноту через
+`prowl scan PATH --strict --format json`: размер, ошибки чтения, budgets и
+сбои дополнительных этапов отражаются в `diagnostics`.
 
 Second, check for a kill-switch config. A `.prowl.yaml` in the scanned tree can disable detectors or add an allowlist that suppresses your finding. Prowl warns when an auto-discovered config suppresses detection:
 

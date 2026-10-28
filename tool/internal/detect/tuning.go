@@ -8,11 +8,6 @@ var (
 	maxScanMatches            = 50000 // DoS backstop: stop collecting after this many raw matches per Scan
 )
 
-// pwdCueLookback bounds how far back collect() scans for a generic_password assignment cue. A real
-// `name = value` cue sits in the immediate prefix, so this fixed window keeps per-match cost O(1)
-// instead of O(line length) on a single long line.
-const pwdCueLookback = 256
-
 // ApplyTuning overrides the detection thresholds; a zero/negative argument keeps the current default.
 // Call once at startup before scanning (the values are read by concurrent scan workers).
 func ApplyTuning(genericEntropy, placeholderMaxEntropy float64, maxMatches int) {

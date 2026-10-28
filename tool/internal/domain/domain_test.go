@@ -6,16 +6,19 @@ import (
 	"testing"
 )
 
-func TestNormalizeDomain(t *testing.T) {
+func TestParseTargetKeepsSelectedAuthority(t *testing.T) {
 	cases := map[string]string{
-		"https://www.Acme.com/path?q=1": "acme.com",
+		"https://www.Acme.com/path?q=1": "www.acme.com",
 		"http://acme.com":               "acme.com",
 		"acme.com":                      "acme.com",
-		"WWW.acme.com:8080":             "acme.com",
+		"WWW.acme.com:8080":             "www.acme.com",
+		"[::1]:8080":                    "::1",
+		"::1":                           "::1",
+		"https://[2001:db8::1]:8443/a":  "2001:db8::1",
 	}
 	for in, want := range cases {
-		if got := normalizeDomain(in); got != want {
-			t.Errorf("normalizeDomain(%q) = %q, want %q", in, got, want)
+		if got, err := ParseTarget(in); err != nil || got.Host != want {
+			t.Errorf("ParseTarget(%q) = %v error=%v, want host %q", in, got, err, want)
 		}
 	}
 }
@@ -27,7 +30,10 @@ func TestExtractAssetsSameSiteOnly(t *testing.T) {
 <link href="https://acme.com/style.css.map"/>
 <script src="https://googletagmanager.com/gtag.js"></script>
 <script src="data:text/js,evil"></script>`
-	got := extractAssets(html, "https://acme.com")
+	got, err := extractAssets(html, "https://acme.com")
+	if err != nil {
+		t.Fatal(err)
+	}
 	hostOK := true
 	for _, u := range got {
 		if strings.Contains(u, "googletagmanager") {

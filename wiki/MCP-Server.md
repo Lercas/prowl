@@ -8,6 +8,12 @@ prowl mcp
 
 Where [Server Mode](Server-Mode.md) exposes an HTTP API for content you push at it, `prowl mcp` exposes the *commands* (scan a path, a domain, a mobile app, a repo, or CI artifacts) as agent-callable tools over a single stdio pipe.
 
+В 1.4.0 каждый вызов возвращает текст и `structuredContent` с `outputSchema`.
+Все пять инструментов поддерживают булевы `strict`, `reconstruct`, `semantic`.
+Лимит два одновременных скана; отмена прекращает дочерний процесс, а `ping`
+остаётся доступен. Неполный результат помечается `isError: true`.
+[Контракт и лимиты](Release-1.4.0.md#mcp-и-поставка).
+
 ## Registration
 
 Register Prowl once with your MCP client and it stays available across sessions:

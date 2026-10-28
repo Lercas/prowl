@@ -3,6 +3,7 @@ package source
 import (
 	"archive/tar"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -15,9 +16,8 @@ import (
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/crane"
-	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/google/go-containerregistry/pkg/v1/layout"
+	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
 
 	"github.com/Lercas/prowl/tool/internal/config"
@@ -69,11 +69,18 @@ func (b *imageBudget) addEntry(bodyBytes int64) bool {
 		b.err = fmt.Errorf("image extraction aborted: exceeded the %d-entry cap (possible decompression bomb)", maxImageEntries)
 		return false
 	}
-	b.totalBytes += bodyBytes
-	if b.totalBytes > maxImageTotalBytes {
-		b.err = fmt.Errorf("image extraction aborted: extracted bytes exceeded the %d-byte cap (reached %d; possible decompression bomb)", maxImageTotalBytes, b.totalBytes)
+	return b.addBytes(bodyBytes)
+}
+
+func (b *imageBudget) addBytes(bodyBytes int64) bool {
+	if b.err != nil {
 		return false
 	}
+	if bodyBytes < 0 || bodyBytes > maxImageTotalBytes-b.totalBytes {
+		b.err = fmt.Errorf("image extraction aborted: extracted bytes exceeded the %d-byte cap (possible decompression bomb)", maxImageTotalBytes)
+		return false
+	}
+	b.totalBytes += bodyBytes
 	return true
 }
 
@@ -85,6 +92,11 @@ func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, tim
 	if err != nil {
 		return nil, nil, err
 	}
+	model.CoverageFrom(ctx).RegisterScope("image", arg, struct {
+		Kind     ImageInput
+		MaxBytes int64
+		Exclude  []string
+	}{kind, maxBytes, exclude})
 	fi := newFinalIndex() // read only after ch drains
 	ch := make(chan model.Item, 128)
 	go func() {
@@ -104,16 +116,23 @@ func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, tim
 			}
 			label := imageLabel(arg, i, len(imgs)) // prefix so findings from distinct images never collide
 			img := img
+			imageCtx := ctx
+			if digest, err := img.Digest(); err == nil {
+				imageCtx = model.WithProvenance(ctx, map[string]any{"digest": digest.String()})
+			}
 			resilience.Guard(
-				func() { emitImage(ctx, ch, img, label, maxBytes, exclude, budget, fi) },
+				func() { emitImage(imageCtx, ch, img, label, maxBytes, exclude, budget, fi) },
 				// a recovered panic cut the layer walk short — mark aborted so the scan fails closed (exit 2),
 				// never certifies the image clean (mirrors the budget-abort and ctx-cancel paths).
 				func(r any) {
 					fi.markAborted()
-					logx.Warn("recovered image-scan panic — results incomplete", "err", r)
+					model.Note(ctx, "image_processing_failed", label, true)
+					logx.Warn("recovered image-scan panic — results incomplete")
+					imageSourceError(ctx, ch, fi, label, errors.New("image reader failed"))
 				},
 			)
 			if budget.err != nil { // a decompression-bomb abort is global — stop the whole batch
+				model.Note(ctx, "image_budget_limit", label, true)
 				fi.markAborted() // partial flatten map: every verdict becomes unknown
 				logx.Error("image scan stopped", "err", budget.err)
 				return
@@ -141,11 +160,11 @@ func resolveImages(ctx context.Context, arg string, kind ImageInput, timeout tim
 	}
 	switch kind {
 	case ImageStdin:
-		return loadStdin()
+		return loadStdin(ctx)
 	case ImageTar:
 		return loadTarball(arg)
 	case ImageOCIDir:
-		return loadOCILayout(arg)
+		return loadOCILayout(ctx, arg)
 	default: // ImageRef
 		return pullRemote(ctx, arg, timeout)
 	}
@@ -195,44 +214,38 @@ func loadTarball(p string) ([]v1.Image, func(), error) {
 }
 
 // imagesFromTar loads every image a docker-save tarball lists in its manifest, so a MULTI-image save is
-// not silently rejected the way tarball.ImageFromPath(.,nil) is. Falls back to the single-image read.
+// not silently rejected the way tarball.ImageFromPath(.,nil) is. Unreadable descriptors retain their slots.
 func imagesFromTar(opener tarball.Opener, label string) ([]v1.Image, error) {
-	m, err := tarball.LoadManifest(opener)
-	if err != nil || len(m) <= 1 {
-		img, ferr := tarball.Image(opener, nil)
-		if ferr != nil {
-			return nil, fmt.Errorf("load image tarball %q: %w", label, ferr)
-		}
-		return []v1.Image{img}, nil
+	m, err := readImageManifest(opener)
+	if err != nil {
+		return nil, fmt.Errorf("load image tarball %q: %w", label, err)
 	}
 	var imgs []v1.Image
-	for _, d := range m {
-		var tag *name.Tag
-		if len(d.RepoTags) > 0 {
-			if t, terr := name.NewTag(d.RepoTags[0]); terr == nil {
-				tag = &t
-			}
+	for i, d := range m {
+		selected, ierr := descriptorOpener(opener, d)
+		var img v1.Image
+		if ierr == nil {
+			img, ierr = tarball.Image(selected, nil)
 		}
-		img, ierr := tarball.Image(opener, tag)
 		if ierr != nil {
-			logx.Warn("skip unloadable image in tarball", "tags", d.RepoTags, "err", ierr)
-			continue
+			// Preserve descriptor position and readable sibling images in the source stream.
+			img = unreadableImage{Image: empty.Image, err: fmt.Errorf("image descriptor %d: %w", i, ierr)}
 		}
 		imgs = append(imgs, img)
 	}
 	if len(imgs) == 0 {
-		return nil, fmt.Errorf("tarball %q contains no loadable images", label)
+		return nil, fmt.Errorf("tarball %q contains no image descriptors", label)
 	}
 	return imgs, nil
 }
 
 // loadOCILayout reads a local OCI image-layout dir, flattening its index to every contained image.
-func loadOCILayout(dir string) ([]v1.Image, func(), error) {
-	idx, err := layout.ImageIndexFromPath(dir)
+func loadOCILayout(ctx context.Context, dir string) ([]v1.Image, func(), error) {
+	idx, err := readLocalOCIIndex(ctx, dir)
 	if err != nil {
 		return nil, nil, fmt.Errorf("load OCI layout %q: %w", dir, err)
 	}
-	imgs, err := flattenIndex(idx)
+	imgs, err := flattenIndexContext(ctx, idx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("read OCI layout %q: %w", dir, err)
 	}
@@ -243,14 +256,23 @@ func loadOCILayout(dir string) ([]v1.Image, func(), error) {
 }
 
 // loadStdin spools stdin to a seekable temp file, capped so a gz-huge bomb is rejected before any read.
-func loadStdin() ([]v1.Image, func(), error) {
+func loadStdin(ctx context.Context) ([]v1.Image, func(), error) {
+	return loadImageStdin(ctx, os.Stdin)
+}
+
+func loadImageStdin(ctx context.Context, input io.ReadCloser) ([]v1.Image, func(), error) {
+	stopClose := closeInputOnCancel(ctx, input)
+	defer stopClose()
 	f, err := os.CreateTemp("", "prowl-image-*.tar")
 	if err != nil {
 		return nil, nil, fmt.Errorf("spool stdin: %w", err)
 	}
 	tmp := f.Name()
-	n, cerr := io.Copy(f, io.LimitReader(os.Stdin, maxImageTotalBytes+1))
+	n, cerr := io.Copy(f, io.LimitReader(input, maxImageTotalBytes+1))
 	closeErr := f.Close()
+	if ctx.Err() != nil {
+		cerr = ctx.Err()
+	}
 	if cerr != nil || closeErr != nil {
 		os.Remove(tmp)
 		return nil, nil, fmt.Errorf("spool stdin: %w", cmp(cerr, closeErr))
@@ -275,63 +297,27 @@ func cmp(a, b error) error {
 	return b
 }
 
-// flattenIndex collects every image manifest, descending nested (multi-arch) indexes and skipping
-// non-images. A visited-digest set + depth bound stop a crafted self-referential index from recursing
-// forever (a Go stack overflow recover() cannot catch).
-func flattenIndex(idx v1.ImageIndex) ([]v1.Image, error) {
-	return flattenIndexInto(idx, map[v1.Hash]bool{}, 0)
-}
-
-func flattenIndexInto(idx v1.ImageIndex, seen map[v1.Hash]bool, depth int) ([]v1.Image, error) {
-	if depth > 32 {
-		return nil, fmt.Errorf("OCI index nested too deeply (possible cycle)")
-	}
-	mf, err := idx.IndexManifest()
-	if err != nil {
-		return nil, err
-	}
-	var out []v1.Image
-	for _, desc := range mf.Manifests {
-		switch {
-		case desc.MediaType.IsIndex():
-			if seen[desc.Digest] { // already descended this index — cycle, skip
-				continue
-			}
-			seen[desc.Digest] = true
-			child, err := idx.ImageIndex(desc.Digest)
-			if err != nil {
-				return nil, err
-			}
-			imgs, err := flattenIndexInto(child, seen, depth+1)
-			if err != nil {
-				return nil, err
-			}
-			out = append(out, imgs...)
-		case desc.MediaType.IsImage():
-			img, err := idx.Image(desc.Digest)
-			if err != nil {
-				return nil, err
-			}
-			out = append(out, img)
-		}
-	}
-	return out, nil
-}
-
 // FinalIndex maps (image label, clean path) to the highest layer owning the path after OCI whiteouts, so
 // a finding's layer can be told from the final flattened image. Built during the sequential walk; read
 // only after the Items channel drains. aborted/degraded force "unknown" so a partial map never downgrades.
 type FinalIndex struct {
 	mu        sync.Mutex
-	owner     map[string]int
+	owner     map[string]finalEntry
+	nextEntry int
 	labels    map[string]bool // image labels this index has folded (a foreign label reads as unknown)
 	sweepWork map[string]int  // per-label cumulative cost of opaque/dir subtree sweeps (DoS guard)
 	aborted   bool            // the anti-bomb budget tripped mid-walk (global to the invocation)
 	degraded  map[string]bool // per-label: one image's blowup must not poison a sibling arch's attribution
 }
 
+type finalEntry struct {
+	layer, serial int
+	kind          byte
+	repeated      bool
+}
+
 func newFinalIndex() *FinalIndex {
-	return &FinalIndex{owner: map[string]int{}, labels: map[string]bool{},
+	return &FinalIndex{owner: map[string]finalEntry{}, labels: map[string]bool{},
 		sweepWork: map[string]int{}, degraded: map[string]bool{}}
 }
 
@@ -349,11 +335,17 @@ func finalKey(label, clean string) string { return label + "\x00" + clean }
 // non-emitted file still shadows lower layers. Honors OCI whiteouts. Concurrency-safe (a cancelled scan
 // can read via inFinal while this still writes).
 func (fi *FinalIndex) apply(label string, idx int, name string) {
+	fi.applyType(label, idx, name, tar.TypeReg)
+}
+
+func (fi *FinalIndex) applyType(label string, idx int, name string, entryType byte) int {
 	fi.mu.Lock()
 	defer fi.mu.Unlock()
 	if fi.degraded[label] {
-		return
+		return 0
 	}
+	fi.nextEntry++
+	serial := fi.nextEntry
 	fi.labels[label] = true
 	clean := path.Clean("/" + name)
 	base := path.Base(clean)
@@ -363,18 +355,25 @@ func (fi *FinalIndex) apply(label string, idx int, name string) {
 	case strings.HasPrefix(base, ".wh."): // plain whiteout of dir/<name> — file OR whole dir subtree
 		t := strings.TrimPrefix(base, ".wh.")
 		if t == "" { // malformed ".wh." with no target — ignore, else it would sweep the whole parent dir
-			return
+			return serial
 		}
 		target := path.Join(path.Dir(clean), t)
-		delete(fi.owner, finalKey(label, target))
+		key := finalKey(label, target)
+		if owner, exists := fi.owner[key]; exists && owner.layer < idx {
+			delete(fi.owner, key)
+		}
 		fi.sweepSubtree(label, target, idx)
 	default:
-		if len(fi.owner) >= finalIndexMaxPaths {
+		key := finalKey(label, clean)
+		if _, exists := fi.owner[key]; !exists && len(fi.owner) >= finalIndexMaxPaths {
 			fi.markDegraded(label, "too many paths")
-			return
+			return 0
 		}
-		fi.owner[finalKey(label, clean)] = idx // last-writer-wins
+		previous, exists := fi.owner[key]
+		repeated := exists && previous.layer == idx && (previous.repeated || previous.kind != tar.TypeDir || entryType != tar.TypeDir)
+		fi.owner[key] = finalEntry{layer: idx, serial: serial, kind: entryType, repeated: repeated}
 	}
+	return serial
 }
 
 // markDegraded gives up flatten tracking (in_final_image becomes unknown) and warns once. Caller holds mu.
@@ -399,7 +398,7 @@ func (fi *FinalIndex) sweepSubtree(label, dir string, maxIdx int) {
 	}
 	keyPrefix := finalKey(label, prefix)
 	for k, li := range fi.owner {
-		if li < maxIdx && strings.HasPrefix(k, keyPrefix) {
+		if li.layer < maxIdx && strings.HasPrefix(k, keyPrefix) {
 			delete(fi.owner, k)
 		}
 	}
@@ -423,6 +422,10 @@ func (fi *FinalIndex) Aborted() bool {
 // key means a later layer whiteouted it = not in final (known false), not "unknown" — but only if this
 // index actually folded that label. A foreign label / aborted / degraded index is genuinely unknown.
 func (fi *FinalIndex) inFinal(label string, idx int, clean string) (bool, bool) {
+	return fi.inFinalEntry(label, idx, clean, 0)
+}
+
+func (fi *FinalIndex) inFinalEntry(label string, idx int, clean string, serial int) (bool, bool) {
 	if fi == nil {
 		return false, false
 	}
@@ -432,7 +435,24 @@ func (fi *FinalIndex) inFinal(label string, idx int, clean string) (bool, bool) 
 		return false, false
 	}
 	li, ok := fi.owner[finalKey(label, clean)]
-	return ok && li == idx, true
+	if ok && li.layer == idx {
+		if serial == 0 && li.repeated {
+			return false, false
+		}
+		if serial != 0 && li.serial != serial {
+			return false, true // a later entry in the same layer overwrote this occurrence
+		}
+		for parent := path.Dir(clean); parent != "/" && parent != "."; parent = path.Dir(parent) {
+			key := finalKey(label, parent)
+			if owner, exists := fi.owner[key]; exists && owner.layer >= idx && owner.kind != tar.TypeDir {
+				if owner.layer > idx && (owner.kind == tar.TypeReg || owner.kind == 0) {
+					return false, true // a higher-layer regular file replaced this path's directory
+				}
+				return false, false // link resolution or same-layer file/directory conflict is unknown
+			}
+		}
+	}
+	return ok && li.layer == idx, true
 }
 
 // buildInstructions maps each non-empty layer (1:1 with img.Layers()) to its Dockerfile instruction.
@@ -456,14 +476,18 @@ func buildInstructions(cfg *v1.ConfigFile, nLayers int) []string {
 // MarkFinalImage sets InFinalImage on each image finding by matching its Path against the flatten
 // indexes. Config findings and unknown verdicts stay nil (never downgraded).
 func MarkFinalImage(findings []model.Finding, indexes []*FinalIndex) []model.Finding {
-	for i := range findings {
-		label, idx, name, ok := parseLayerPath(findings[i].Path)
+	for i, finding := range findings {
+		label, idx, name, ok := parseLayerPath(finding.Path)
 		if !ok {
+			continue
+		}
+		findings[i].InFinalImage = nil
+		if model.IsIncompleteFinding(finding) {
 			continue
 		}
 		clean := path.Clean("/" + name)
 		for _, fi := range indexes {
-			if final, known := fi.inFinal(label, idx, clean); known {
+			if final, known := fi.inFinalEntry(label, idx, clean, finding.ImageEntry); known {
 				v := final
 				findings[i].InFinalImage = &v //nolint:gosec // i comes from ranging over findings.
 				break
@@ -498,7 +522,7 @@ func parseLayerPath(p string) (label string, idx int, name string, ok bool) {
 // imageLabel builds the per-image Path prefix; multi-image inputs (multi-arch index / multi-tag tar) get
 // a #idx suffix so findings stay distinct.
 func imageLabel(arg string, i, n int) string {
-	l := strings.ReplaceAll(arg, "|", "_")
+	l := strings.NewReplacer("%", "%25", "|", "%7C", "#", "%23").Replace(arg)
 	if n > 1 {
 		l = fmt.Sprintf("%s#%d", l, i)
 	}
@@ -508,17 +532,21 @@ func imageLabel(arg string, i, n int) string {
 // emitImage emits the image config then walks every layer's tar in order, charging the shared anti-bomb
 // budget and folding each layer into the flatten index fi.
 func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label string, maxBytes int64, exclude []string, budget *imageBudget, fi *FinalIndex) {
-	if !emitConfig(ctx, ch, img, label, maxBytes, budget) {
+	if !emitConfig(ctx, ch, img, label, maxBytes, exclude, budget, fi) {
 		return
 	}
 	layers, err := img.Layers()
 	if err != nil {
+		model.Note(ctx, "image_layers_failed", label, true)
 		logx.Error("cannot read image layers", "err", err)
+		imageSourceError(ctx, ch, fi, label, err)
 		return
 	}
 	if len(layers) > maxImageLayers { // reject an absurd layer count before reading any layer
+		model.Note(ctx, "image_layer_limit", label, true)
 		logx.Error("image extraction aborted: too many layers (possible decompression bomb)",
 			"layers", len(layers), "limit", maxImageLayers)
+		imageSourceError(ctx, ch, fi, label, fmt.Errorf("image exceeds the %d-layer cap", maxImageLayers))
 		return
 	}
 	cfg, _ := img.ConfigFile()
@@ -531,7 +559,11 @@ func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label st
 		if i < len(instructions) {
 			ins = instructions[i]
 		}
-		if !emitLayer(ctx, ch, label, i, layer, maxBytes, exclude, budget, fi, ins) {
+		layerCtx := ctx
+		if digest, err := layer.Digest(); err == nil {
+			layerCtx = model.WithProvenance(ctx, map[string]any{"layer_digest": digest.String()})
+		}
+		if !emitLayer(layerCtx, ch, label, i, layer, maxBytes, exclude, budget, fi, ins) {
 			return // ctx-cancel or budget abort; Image() logs budget.err
 		}
 	}
@@ -539,23 +571,33 @@ func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label st
 
 // emitConfig emits every secret-bearing config field plus each build-history instruction as its own Item
 // (the prime non-filesystem secret locations). Returns false if the consumer asked to stop.
-func emitConfig(ctx context.Context, ch chan<- model.Item, img v1.Image, label string, maxBytes int64, budget *imageBudget) bool {
+func emitConfig(ctx context.Context, ch chan<- model.Item, img v1.Image, label string, maxBytes int64, exclude []string, budget *imageBudget, fi *FinalIndex) bool {
 	cfg, err := img.ConfigFile()
 	if err != nil || cfg == nil {
+		model.Note(ctx, "image_config_failed", label, true)
 		if err != nil {
 			logx.Warn("cannot read image config", "err", err)
 		}
-		return true
+		if err == nil {
+			err = errors.New("image config is missing")
+		}
+		return imageSourceError(ctx, ch, fi, label+"|image:config", err)
 	}
 	c := cfg.Config
 	emit := func(name, text string) bool {
-		if text == "" || int64(len(text)) > maxBytes { // skip empty / oversized (a crafted multi-MB Env)
+		reportPath := label + "|image:config/" + name
+		if text == "" || excludedSourcePath(reportPath, exclude) {
 			return true
 		}
+		if int64(len(text)) > maxBytes {
+			model.Note(ctx, "max_size", reportPath, true)
+			return imageSourceError(ctx, ch, fi, reportPath, errSourceTooLarge)
+		}
 		if !budget.addEntry(int64(len(text))) { // charge config against the same anti-bomb budget as layers
+			imageSourceError(ctx, ch, fi, reportPath, budget.err)
 			return false
 		}
-		return send(ctx, ch, model.Item{Text: text, Source: "code", Path: label + "|image:config/" + name})
+		return send(ctx, ch, model.Item{Text: text, Source: "code", Path: reportPath})
 	}
 	if !emit("env", strings.Join(c.Env, "\n")) || !emit("labels", joinLabels(c.Labels)) ||
 		!emit("entrypoint", strings.Join(c.Entrypoint, " ")) || !emit("cmd", strings.Join(c.Cmd, " ")) ||
@@ -568,13 +610,7 @@ func emitConfig(ctx context.Context, ch chan<- model.Item, img v1.Image, label s
 	}
 	for n, h := range cfg.History { // each instruction separately keeps per-step provenance + fingerprints
 		cb := cleanInstruction(h.CreatedBy)
-		if cb == "" || int64(len(cb)) > maxBytes {
-			continue
-		}
-		if !budget.addEntry(int64(len(cb))) {
-			return false
-		}
-		if !send(ctx, ch, model.Item{Text: cb, Source: "code", Path: fmt.Sprintf("%s|image:config/history/%d", label, n)}) {
+		if !emit(fmt.Sprintf("history/%d", n), cb) {
 			return false
 		}
 	}
@@ -615,12 +651,18 @@ func joinLabels(m map[string]string) string {
 // when the consumer asked to stop OR the cumulative extraction budget (b) was blown — the caller
 // inspects b.err to tell the two apart.
 func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int, layer v1.Layer, maxBytes int64, exclude []string, b *imageBudget, fi *FinalIndex, instruction string) bool {
+	layerPath := fmt.Sprintf("%s|layer%d:", label, idx)
 	rc, err := layer.Uncompressed()
 	if err != nil {
+		model.Note(ctx, "image_layer_failed", label, true)
 		logx.Warn("cannot read layer", "layer", idx, "err", err)
-		return true
+		return imageSourceError(ctx, ch, fi, layerPath, err)
 	}
-	defer rc.Close()
+	defer func() {
+		if err := rc.Close(); err != nil && ctx.Err() == nil {
+			imageSourceError(ctx, ch, fi, layerPath, err)
+		}
+	}()
 	tr := tar.NewReader(rc)
 	for {
 		if ctx.Err() != nil {
@@ -628,11 +670,21 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 		}
 		hdr, err := tr.Next()
 		if err == io.EOF {
+			// TAR end markers can precede a compressed stream's checksum or corrupt trailer.
+			n, err := io.Copy(io.Discard, io.LimitReader(rc, maxImageTotalBytes-b.totalBytes+1))
+			if err != nil {
+				return imageSourceError(ctx, ch, fi, layerPath, err)
+			}
+			if !b.addBytes(n) {
+				imageSourceError(ctx, ch, fi, layerPath, b.err)
+				return false
+			}
 			return true
 		}
 		if err != nil {
+			model.Note(ctx, "image_layer_corrupt", label, true)
 			logx.Warn("corrupt layer tar", "layer", idx, "err", err)
-			return true
+			return imageSourceError(ctx, ch, fi, layerPath, err)
 		}
 		// Charge every header against the budget BEFORE per-entry filtering: a bomb of millions of empty
 		// entries each `continue`s below but together exhausts CPU. addEntry also charges the declared
@@ -642,10 +694,11 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 			charge = 0
 		}
 		if !b.addEntry(charge) {
+			imageSourceError(ctx, ch, fi, layerPath, b.err)
 			return false // budget blown (b.err set); abort the whole image scan
 		}
-		fi.apply(label, idx, hdr.Name) // fold EVERY header (incl. whiteouts) before per-entry filtering
-		if hdr.Typeflag != tar.TypeReg || hdr.Size <= 0 || hdr.Size > maxBytes {
+		entryID := fi.applyType(label, idx, hdr.Name, hdr.Typeflag) // fold every header before filtering
+		if (hdr.Typeflag != tar.TypeReg && hdr.Typeflag != 0) || hdr.Size <= 0 {
 			continue
 		}
 		if skipExt[strings.ToLower(filepath.Ext(hdr.Name))] {
@@ -663,22 +716,29 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 		if excluded {
 			continue
 		}
-		content := make([]byte, hdr.Size)
-		n, err := io.ReadFull(tr, content)
-		if err != nil && err != io.ErrUnexpectedEOF {
-			logx.Debug("layer file read error", "layer", idx, "path", hdr.Name, "err", err)
+		reportPath := layerPath + hdr.Name
+		if hdr.Size > maxBytes {
+			model.Note(ctx, "max_size", reportPath, true)
+			if !imageSourceError(ctx, ch, fi, reportPath, errSourceTooLarge) {
+				return false
+			}
 			continue
 		}
-		content = content[:n]
+		content, err := readSourceBytes(tr, maxBytes)
+		if err != nil {
+			model.Note(ctx, "image_read_failed", reportPath, true)
+			return imageSourceError(ctx, ch, fi, reportPath, err)
+		}
 		text, ok := scannableText(content)
 		if !ok {
 			logx.Debug("skipped: binary layer file", "layer", idx, "path", hdr.Name)
 			continue
 		}
 		it := model.Item{
-			Text:   string(text),
-			Source: "code",
-			Path:   fmt.Sprintf("%s|layer%d:%s", label, idx, hdr.Name),
+			Text:       string(text),
+			Source:     "code",
+			Path:       reportPath,
+			ImageEntry: entryID,
 		}
 		if instruction != "" {
 			it.Meta = map[string]any{"instruction": instruction}
@@ -687,4 +747,9 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 			return false
 		}
 	}
+}
+
+func imageSourceError(ctx context.Context, ch chan<- model.Item, fi *FinalIndex, reportPath string, err error) bool {
+	fi.markAborted()
+	return emitSourceError(ctx, ch, reportPath, err)
 }

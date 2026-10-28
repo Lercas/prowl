@@ -74,7 +74,7 @@ func TestPredictRejectsWrongLength(t *testing.T) {
 func TestParity(t *testing.T) {
 	const tol = 1e-6
 
-	m, err := Load()
+	m, err := LoadFile("model_binary.json")
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
@@ -104,10 +104,9 @@ func TestParity(t *testing.T) {
 }
 
 // cyclicModelJSON builds a minimal, otherwise-valid model_binary.json whose one
-// tree contains a cycle: node 0 (internal) routes to node 1 (internal) which
-// routes back to node 0. parse accepts it (child indices are in range and the
-// arrays aren't ragged), so the cycle only bites at Predict time — exactly the
-// crafted/corrupt-model case the bound defends against.
+// tree contains a cycle: node 0 routes to node 1, which routes back to node 0.
+// Child indices are in range and arrays aren't ragged; both the loader's graph
+// check and the runtime walk must reject this cycle.
 func cyclicModelJSON(t *testing.T) []byte {
 	t.Helper()
 	names := make([]string, NumFeatures)
@@ -141,10 +140,12 @@ func cyclicModelJSON(t *testing.T) []byte {
 // We run Predict on a watchdog goroutine and fail if it doesn't return promptly —
 // before the fix this test would hit the timeout (the walk never reaches a leaf).
 func TestPredictCyclicModelTerminates(t *testing.T) {
-	m, err := parse(cyclicModelJSON(t))
-	if err != nil {
-		t.Fatalf("parse cyclic model (must pass parse, fail at predict): %v", err)
+	if _, err := parse(cyclicModelJSON(t)); !errors.Is(err, ErrCyclicModel) {
+		t.Fatalf("load cyclic model: got %v, want ErrCyclicModel", err)
 	}
+	// Construct an internally corrupt model to keep the inference-time guard covered as well.
+	m := &Model{treeStart: []int32{0}, featIdx: []int32{0, 0}, thresh: []float64{0.5, 0.5},
+		left: []int32{1, 0}, right: []int32{1, 0}, value: []float64{0, 0}, flags: []uint8{0, 0}}
 
 	type res struct {
 		p   float64

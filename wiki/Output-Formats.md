@@ -1,14 +1,26 @@
 # Output Formats
 
-Prowl renders findings in three formats, selected with `--format`:
+Prowl поддерживает четыре формата отчёта, которые выбираются через `--format`:
 
 | Value | Purpose |
 |-------|---------|
 | `pretty` (default) | Human-readable terminal report, findings grouped by file |
-| `json` | Machine-readable findings array with the full per-finding record |
+| `json` | Объект с `findings`, `count` и признаком неполного сканирования `truncated` |
 | `sarif` | SARIF 2.1.0 for the GitHub / GitLab code-scanning tabs |
+| `defectdojo` / `dojo` | JSON для DefectDojo Generic Findings Import |
 
 Every scanning command (`prowl scan`, `prowl domain`) accepts `--format`. By default the report goes to stdout; `-o`/`--output FILE` writes it to a file instead (and a file is never colorized).
+
+Неизвестный формат даёт ошибку и код `2`. Файлы отчётов заменяются атомарно в открытом
+родительском каталоге и на Unix получают права `0600`, включая отчёты с `--show-secrets`. Ошибка
+форматирования, записи, синхронизации или закрытия сохраняет старый файл и даёт код `2`;
+частичный временный файл очищается. Ссылки и специальные файлы в месте назначения запрещены;
+другие жёсткие ссылки на прежний файл сохраняют свои байты. Корректная ссылка на родительский
+каталог допустима. Baseline и экспорт встроенного taxonomy используют такой же способ записи
+с правами `0644` на Unix, Hermes JSON — с `0600` на Unix.
+
+Ошибка stdout также завершает вывод с отказом. Сканирующие команды на Unix обрабатывают
+`SIGPIPE`, чтобы закрытый канал отчёта не обходил очистку скачанных данных.
 
 ```sh
 prowl scan .                                  # pretty, to the terminal
@@ -60,6 +72,8 @@ The trailing tag is conditional, in priority order:
 - With `--verify`, a confirmed-live secret is tagged `live` (bold red) and a provider-rejected one `dead` (dim). This is the strongest false-positive signal Prowl emits — see [Live Verification](Live-Verification.md).
 - A **checksum-verified** hit — one whose value passed a structural checksum (stage `L1-checksum`: GitHub CRC, JWT structure, Luhn, etc.; confidence ~`0.99`) — is tagged `✓ checksum` (green). It marks a hit as structurally proven, not a regex guess, without printing a near-meaningless `99%`.
 - Without verification or a checksum, a finding whose confidence is below `0.7` shows that confidence as a percentage (e.g. `60%`).
+- В 1.4.0 отрицательный ответ verifier показывается как `отклонён`;
+  он не подтверждает отзыв ключа. Сводка называется `Проверка`.
 - High-confidence regex matches (`0.7`–`0.98`) carry no tag — a bare row already means a confident match.
 
 ### Private-key redaction
@@ -77,7 +91,20 @@ Color is automatic: ANSI styling turns on only when stdout is a TTY. It is suppr
 
 ## json
 
-`--format json` emits one object with a `findings` array, a `count`, and a `truncated` flag (`true` when the per-file generic cap from `--max-per-file` dropped findings, otherwise `false`). Findings are sorted by severity (highest first), then path, then line. The fields are the [`model.Finding`](Architecture.md) record:
+Версия 1.4.0 добавляет `schema_version`, `complete`, `completion_reason`,
+`scope`, `filtered`, `secrets_revealed`, `stats` и `diagnostics`. Пустой findings
+подтверждает отсутствие находок только в полном скане. HMAC-поля и
+`occurrences` позволяют сопоставить источники и сохранить координаты дублей;
+`verification`, `ml_score`, `evidence`, `provenance` дают отдельные основания
+решений. [Полный контракт и изменения совместимости](Release-1.4.0.md#json-и-коды-завершения).
+
+
+`--format json` возвращает envelope с `findings`, `count` и `complete`.
+Пропуски из-за лимита generic-кандидатов делают `complete: false` и добавляют
+диагностику; `truncated` отражает маркеры усечения результатов или ответа.
+Лимит кандидатов остаётся видимым после фильтрации и объединения пересечений.
+Находки отсортированы по severity, path и line. Поля описаны в
+[`model.Finding`](Architecture.md):
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -88,14 +115,14 @@ Color is automatic: ANSI styling turns on only when stdout is a TTY. It is suppr
 | `source` | string | origin class of the content: `code` for source code, `file` for a plain text/prose file (e.g. `.md`, `.txt`), plus `jira` \| `slack` \| `log` for the respective connectors. A plain `.md`/`.txt` file now reports `file` (an internal ML bucket label is no longer leaked here). |
 | `path` | string | file path (or asset URL for `prowl domain`) |
 | `line` | number | 1-based line |
-| `col` | number | 1-based column |
+| `col` | number | 1-based byte column in the scanned UTF-8 text |
 | `redacted` | string | the masked value (first 4 + `*` + last 4); the raw secret never appears |
 | `stage` | string | which cascade stage produced it, e.g. `L1-regex`, `L1-checksum`, `L1-context-pw`, `L1-entropy`, `L1-base64`, `rule` |
 | `verified` | bool | present only under `--verify`; `true` = provider-confirmed live, `false` = rejected. Omitted when verification was not attempted or inconclusive |
 | `rationale` | string | present only when set, e.g. `verified live via aws-sts`; omitted otherwise |
 | `fingerprint` | string | sha256 over `type\|path\|raw-value`, a stable identity used for [baselining](Configuration.md) |
 | `in_final_image` | bool | **`prowl image` only.** `true` = the secret survives into the flattened image a `docker pull` deploys; `false` = a later layer whiteouted/overwrote it (recoverable from history only); omitted = unknown. See [Container Scanning](Container-Scanning.md). |
-| `instruction` | string | **`prowl image` only.** The Dockerfile build instruction (`CreatedBy`) that produced the layer, mapping a leak back to the line that introduced it. |
+| `instruction` | string | **`prowl image` only.** Только с `--show-secrets`: Dockerfile build instruction (`CreatedBy`), поскольку она может содержать другие секреты. Инструкция, которая создала слой, mapping a leak back to the line that introduced it. |
 
 `verified`, `rationale`, `fingerprint`, `in_final_image`, and `instruction` are `omitempty`: they are absent from the object when empty. A scan without `--verify` therefore carries no `verified` or `rationale` key, and a non-image scan carries no `in_final_image`/`instruction`.
 
@@ -150,6 +177,25 @@ The `fingerprint` is computed over the FULL raw value before redaction, so two d
 
 `--format sarif` emits SARIF 2.1.0, the format the GitHub and GitLab Security tabs ingest. The run carries one `rule` per distinct secret type and one `result` per finding. Severity maps to a SARIF level: critical/high → `error`, medium → `warning`, low/info → `note`. Each result's message records the type, severity, confidence, stage, and redacted value; its location carries the file URI plus `startLine`/`startColumn`.
 
+SARIF явно указывает `columnKind: "utf16CodeUnits"`. `startColumn` считается с единицы
+в кодовых единицах UTF-16: символы вне BMP, в том числе emoji, занимают две позиции.
+Координата вычисляется по снимку текста при обнаружении находки, поэтому сохраняется
+для архивов, истории Git и других источников, которые нельзя повторно открыть по пути
+из отчёта. Общий индекс ограничивает стоимость преобразования на длинных строках.
+В JSON и pretty поле `col` по-прежнему обозначает байтовый столбец UTF-8.
+Чистый SARIF-отчёт содержит пустые массивы `rules` и `results`.
+
+В `artifactLocation.uri` специальные символы файловых имён экранируются: `#` и `?`
+остаются частью имени, а буквальное `%20` не превращается в пробел. Локальное имя,
+похожее на `https://...`, также остаётся файловым путём. Веб-источники и облачные
+объекты передают URI отдельно от отображаемого пути; настоящие URL сохраняют
+query и fragment, а ключи S3/GS кодируются как буквальные имена объектов.
+Это внутренние метаданные: поля `path` и `fingerprint` в JSON сохраняют прежний смысл.
+
+При сканировании файлового пути с `..` URI сохраняется на этапе чтения после
+системного разрешения симлинков. Отчёт не упрощает такой путь лексически:
+`alias/../prod.env` и `prod.env` могут обозначать разные файлы.
+
 Two fields make the results rank and de-duplicate correctly in code-scanning UIs:
 
 - **`security-severity`** — a `0`–`10` CVSS-style score on each rule's `defaultConfiguration.properties` (critical `9.0`, high `8.0`, medium `5.0`, low `3.0`, info `2.0`). GitHub and GitLab use it to sort and filter alerts, so a critical leak ranks above a high one instead of all hits landing at the same level.
@@ -166,6 +212,7 @@ prowl scan . --format sarif -o results.sarif
   "version": "2.1.0",
   "runs": [
     {
+      "columnKind": "utf16CodeUnits",
       "tool": {
         "driver": {
           "name": "prowl",

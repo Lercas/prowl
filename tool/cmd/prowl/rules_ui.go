@@ -8,11 +8,13 @@ import (
 	"strings"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 func rulesColor() bool { return os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout) }
@@ -71,17 +73,30 @@ func builtinDetector() (*detect.Detector, *taxonomy.Taxonomy) {
 	return detect.New(tax), tax
 }
 
-// loadRulesForQuery loads explicit template paths, or the working/installed library by default.
-func loadRulesForQuery(paths ...string) *rules.Engine {
-	if len(paths) == 0 {
-		dir := "rules"
-		if !dirExists(dir) {
-			dir = installedRulesDir()
-		}
-		paths = []string{dir}
+func defaultQueryRulePaths() ([]string, error) {
+	dir, err := localfile.FirstDirectory("rules", installedRulesDir())
+	if err != nil {
+		return nil, err
 	}
-	eng, _ := rules.Load(paths...)
-	return eng
+	if dir != "" {
+		return []string{dir}, nil
+	}
+	return nil, nil
+}
+
+// loadRulesForQuery loads explicit template paths, or the working/installed library by default.
+func loadRulesForQuery(paths ...string) (*rules.Engine, error) {
+	if len(paths) == 0 {
+		var err error
+		paths, err = defaultQueryRulePaths()
+		if err != nil {
+			return nil, err
+		}
+		if len(paths) == 0 {
+			return rules.LoadEmbedded(bundledrules.Files)
+		}
+	}
+	return rules.Load(paths...)
 }
 
 // renderRulesList prints templates grouped by category, severity-coloured, with tags.
@@ -210,7 +225,7 @@ func showTemplate(color bool, t *rules.Template) {
 	}
 	cond := t.MatchersCondition
 	if cond == "" {
-		cond = "or"
+		cond = "and"
 	}
 	fmt.Printf("  match (%s):\n", cond)
 	for _, m := range t.Matchers {
@@ -492,7 +507,7 @@ func templateDiag(t *rules.Template, text, lower string) (int, string) {
 
 // renderRulesSearch searches the whole library (built-in types + templates) for term in the id, tags,
 // name, or description (case-insensitive) and prints matches grouped by category. Returns 1 if none.
-func renderRulesSearch(term string) int {
+func renderRulesSearch(term string, eng *rules.Engine) int {
 	color := rulesColor()
 	q := strings.ToLower(strings.TrimSpace(term))
 	if q == "" {
@@ -533,7 +548,7 @@ func renderRulesSearch(term string) int {
 	}
 
 	// External templates.
-	if eng := loadRulesForQuery(); eng != nil {
+	if eng != nil {
 		for _, t := range eng.Templates() {
 			tags := t.TagList()
 			hay := strings.ToLower(strings.Join([]string{t.ID, t.Info.Name, t.Info.Description, t.Category, strings.Join(tags, " ")}, " "))

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"unicode/utf8"
 	"unsafe"
 
 	"github.com/Lercas/prowl/tool/internal/ahocorasick"
@@ -52,6 +53,10 @@ type Match struct {
 	ChecksumValid bool
 	Category      string
 	Stage         string
+	DecodedText   string // internal decoded context, never serialized as evidence
+	DecodedStart  int
+	DecodeSpans   []Base64Span // Each decoding layer mapped to original source bytes.
+	Transform     string
 }
 
 // compiledType pairs a secret type with its keyword pre-filter.
@@ -147,6 +152,42 @@ func (d *Detector) Scan(text string) []Match {
 
 // ScanCtx is Scan with a context that collect's match-building loops check.
 func (d *Detector) ScanCtx(ctx context.Context, text string) []Match {
+	return d.ScanWithOptions(ctx, text, ScanOptions{})
+}
+
+// ScanOptions selects source grammar without changing the configured taxonomy or match budget.
+type ScanOptions struct {
+	BarePasswordLiterals bool // .env/YAML/INI/shell permit unquoted scalar credentials
+	PasswordScalars      map[int]PasswordScalar
+	YAML                 bool
+}
+
+// PasswordScalar carries a parser-established value and its original source end.
+type PasswordScalar struct {
+	Value string
+	End   int
+	Name  string // Nonempty only for a parser-established credential binding.
+}
+
+// ScanWithOptions keeps source grammar explicit; decoding and unknown sources use conservative defaults.
+func (d *Detector) ScanWithOptions(ctx context.Context, text string, opts ScanOptions) []Match {
+	return d.ScanWithStatus(ctx, text, opts).Matches
+}
+
+type ScanResult struct {
+	Matches          []Match
+	Base64Limited    bool
+	CandidateLimited bool
+}
+
+// ScanCtxWithStatus reports all candidate and decoding limits.
+func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match, bool) {
+	r := d.ScanWithStatus(ctx, text, ScanOptions{})
+	return r.Matches, r.Base64Limited || r.CandidateLimited
+}
+
+// ScanWithStatus exposes decoding limits so callers cannot report a bounded partial scan as clean.
+func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOptions) ScanResult {
 	lb := d.lowerPool.Get().(*[]byte)
 	lower := lowerScratch(lb, text)
 	pp := d.presentPool.Get().(*[]bool)
@@ -165,27 +206,25 @@ func (d *Detector) ScanCtx(ctx context.Context, text string) []Match {
 	}
 	// The cap is global to one Scan and applied AFTER the confidence-first sort, so high-confidence
 	// findings survive truncation rather than the 0.55 entropy net filling the budget first. Each producer
-	// (collect/contextualPassword) bounds its own output, unmaskBase64 runs over those bounded candidates,
-	// then dedupeOverlapsCap sorts confidence-first and truncates last.
-	all := d.collect(ctx, text, present, sig)
-	collectCapped := len(all) >= maxScanMatches // collect() already warned if IT filled the cap
+	// Candidate and decoding budgets remain independent.
+	all, collectCapped := d.collectWithOptions(ctx, text, present, sig, opts)
 	// contextualPassword honors the remaining budget internally (one match per cue line)
 	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
 	all = append(all, cp...)
+	candidateCapped := collectCapped || len(all) >= maxScanMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
-	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
-	// confidence in the sort below, not be starved by a cap full of 0.55 generic noise.
-	b64 := d.unmaskBase64(ctx, all)
+	b64, limited := d.unmaskBase64(ctx, text)
 	all = append(all, b64...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
+	truncated = truncated || candidateCapped
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
 		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
 			"cap", maxScanMatches)
 	}
-	return kept
+	return ScanResult{Matches: kept, Base64Limited: limited, CandidateLimited: truncated}
 }
 
 // acAndStructure fuses the Aho-Corasick keyword pass and the structural byte-scan into one loop.
@@ -196,6 +235,8 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 	var cur int32
 	n := len(lower)
 	b64start, digitRun, tokStart, tokDots := -1, 0, -1, 0
+	urlStart, urlSpecific := -1, false
+	decodeStart, decodeAlphabet := -1, byte(0)
 	for i := 0; i < n; i++ {
 		c := lower[i]
 		cur = next[cur<<8|int32(c)]
@@ -212,6 +253,33 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 				sig.b64runs = append(sig.b64runs, [2]int{b64start, i})
 			}
 			b64start = -1
+		}
+		if alnum || c == '-' || c == '_' {
+			if urlStart < 0 {
+				urlStart = i
+			}
+			urlSpecific = urlSpecific || c == '-' || c == '_'
+		} else {
+			if urlStart >= 0 && i-urlStart >= 32 && urlSpecific {
+				sig.b64urlruns = append(sig.b64urlruns, [2]int{urlStart, i})
+			}
+			urlStart, urlSpecific = -1, false
+		}
+		if alnum || c == '+' || c == '/' || c == '-' || c == '_' {
+			if decodeStart < 0 {
+				decodeStart = i
+			}
+			if c == '+' || c == '/' {
+				decodeAlphabet |= 1
+			}
+			if c == '-' || c == '_' {
+				decodeAlphabet |= 2
+			}
+		} else {
+			if decodeStart >= 0 && i-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+				sig.b64decodeRuns = append(sig.b64decodeRuns, [2]int{decodeStart, i})
+			}
+			decodeStart, decodeAlphabet = -1, 0
 		}
 		if c >= '0' && c <= '9' {
 			digitRun++
@@ -238,6 +306,12 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 	if b64start >= 0 && n-b64start >= 32 {
 		sig.b64runs = append(sig.b64runs, [2]int{b64start, n})
 	}
+	if urlStart >= 0 && n-urlStart >= 32 && urlSpecific {
+		sig.b64urlruns = append(sig.b64urlruns, [2]int{urlStart, n})
+	}
+	if decodeStart >= 0 && n-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+		sig.b64decodeRuns = append(sig.b64decodeRuns, [2]int{decodeStart, n})
+	}
 	if tokStart >= 0 && n-tokStart >= 50 && tokDots >= 2 {
 		sig.dottedToken = true
 	}
@@ -262,8 +336,38 @@ func extractSpan(ix []int, extract int) (start, end int) {
 
 // collect runs the regex/checksum/entropy rules over text, skipping a type's regex when the keyword
 // pre-filter finds none of its keywords present.
-func (d *Detector) collect(ctx context.Context, text string, present []bool, sig structSignals) []Match {
+func (d *Detector) collect(ctx context.Context, text string, present []bool, sig structSignals) ([]Match, bool) {
+	return d.collectWithOptions(ctx, text, present, sig, ScanOptions{})
+}
+
+func (d *Detector) collectWithOptions(ctx context.Context, text string, present []bool, sig structSignals, opts ScanOptions) ([]Match, bool) {
 	var all []Match
+	capped := false
+	// Parser-established bindings do not depend on a lexical reader understanding escaped quotes,
+	// newlines or the first character of a canonical value. Respect the configured taxonomy.
+	for _, ct := range d.types {
+		if ct.st.ID != "generic_password" {
+			continue
+		}
+		starts := make([]int, 0, len(opts.PasswordScalars))
+		for start, scalar := range opts.PasswordScalars {
+			if scalar.Name != "" {
+				starts = append(starts, start)
+			}
+		}
+		sort.Ints(starts)
+		for _, start := range starts {
+			if ctx.Err() != nil || len(all) >= maxScanMatches {
+				break
+			}
+			scalar := opts.PasswordScalars[start]
+			if start < 0 || scalar.End > len(text) || scalar.End < start || len(scalar.Value) > 4096 || utf8.RuneCountInString(scalar.Value) < 6 ||
+				!ct.st.RE.MatchString("\""+scalar.Name+"\": \"V\"") || IsCanonicalPasswordPlaceholder(scalar.Value) || IsEncodedPasswordHash(scalar.Value) || strings.HasPrefix(scalar.Value, "data:") {
+				continue
+			}
+			all = append(all, Match{Type: ct.st.ID, Value: scalar.Value, Start: start, End: scalar.End, Confidence: .6, Category: ct.st.Category, Stage: "L1-regex"})
+		}
+	}
 	for _, ct := range d.types {
 		// ctx/cap checks bound the match-building loops only; the core O(n) AC + structure scans aren't
 		// ctx-interruptible, so a single file is bounded by --max-size and --timeout bounds the whole run.
@@ -309,7 +413,13 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 			continue
 		}
 		// cap the per-type FindAll so a pathological file can't build a huge slice up front (it isn't ctx-interruptible)
-		for n, ix := range st.RE.FindAllStringSubmatchIndex(text, maxScanMatches+1) {
+		indices := st.RE.FindAllStringSubmatchIndex(text, maxScanMatches+1)
+		if len(indices) > maxScanMatches {
+			// Filters can discard every extracted candidate, but the bounded regex walk may still
+			// have omitted a later real secret. Keep that uncertainty separate from accepted hits.
+			capped = true
+		}
+		for n, ix := range indices {
 			if n&4095 == 0 && ctx.Err() != nil {
 				break
 			}
@@ -317,8 +427,56 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				break
 			}
 			vs, ve := extractSpan(ix, st.Extract)
+			if scalar, ok := opts.PasswordScalars[vs]; ok && scalar.Name != "" && st.ID == "generic_password" {
+				continue // The complete parser-established value was nominated above.
+			}
+			// A capped generic regex must not mint an identity for a prefix of a longer credential.
+			// The entropy producer can still report its full adjacent run when supported.
+			if st.ID == "generic_api_key" && ve < len(text) {
+				c := text[ve]
+				if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == '-' {
+					continue
+				}
+			}
+			quoted := vs > 0 && strings.ContainsRune("\"'`", rune(text[vs-1]))
+			literalPassword := st.ID == "generic_password" && BindingName(text, vs) != "" && (quoted || opts.BarePasswordLiterals)
+			if literalPassword && opts.YAML && !quoted && vs < len(text) && strings.ContainsRune("*&!|>{[#", rune(text[vs])) {
+				continue // collections, references, tags, block indicators and comments are not scalars
+			}
+			if literalPassword {
+				var complete bool
+				ve, complete = literalPasswordEnd(text, vs)
+				if !complete {
+					continue
+				}
+			} else if st.ID == "generic_password" {
+				// Unknown/code sources retain the former single-token grammar. Quoted literals may
+				// start with whitespace or punctuation and are instead read as complete scalars above.
+				ve = vs
+				for count := 0; ve < len(text) && count < 64; count++ {
+					r, size := utf8.DecodeRuneInString(text[ve:])
+					if strings.ContainsRune("\"' \t\v\f\r\n,;", r) {
+						break
+					}
+					ve += size
+				}
+			}
 			val := text[vs:ve]
-			if IsExampleOrPlaceholder(val) {
+			transform := ""
+			if literalPassword {
+				if scalar, ok := opts.PasswordScalars[vs]; ok && scalar.End >= vs && scalar.End <= len(text) && len(scalar.Value) <= 4096 {
+					ve, val = scalar.End, scalar.Value
+					transform = "yaml-scalar"
+				}
+			}
+			if st.ID == "generic_password" && utf8.RuneCountInString(val) < 6 {
+				continue
+			}
+			placeholder := IsExampleOrPlaceholder(val)
+			if literalPassword {
+				placeholder = IsLiteralPasswordPlaceholder(val)
+			}
+			if placeholder {
 				continue
 			}
 			// connection URI whose password segment is an unresolved variable ref is not a literal
@@ -339,22 +497,14 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				// A quoted value (`password = "Winter(2024"`) is the common leak form and may legitimately
 				// contain brackets, so the looksLikeIdentifier / bracket-balance heuristics apply only to
 				// UNQUOTED values, where `bytes)` / `get_auth_from_url(proxy)` really are swept-up code.
-				quoted := vs > 0 && (text[vs-1] == '"' || text[vs-1] == '\'' || text[vs-1] == '`')
-				if isVersionOrNumber(val) || hasJSOperator(val) || looksLikeUnicodeEscaped(val) || (!quoted && (looksLikeJSCode(val) || looksLikeIdentifier(val))) {
+				primitive := !quoted && (val == "string" || val == "String" || val == "boolean" || val == "Boolean" || val == "number" || val == "Number" || val == "object" || val == "Object")
+				codeShape := !literalPassword && (primitive || isVersionOrNumber(val) || hasJSOperator(val) || looksLikeUnicodeEscaped(val) || (!quoted && (looksLikeJSCode(val) || looksLikeIdentifier(val))))
+				if codeShape || IsEncodedPasswordHash(passwordLiteral(text, vs, ve)) || strings.HasPrefix(val, "data:") {
 					continue
 				}
-				// Look back for a pass/pwd/pw cue, bounded to pwdCueLookback bytes: on a pathological single
-				// long line an unbounded line-prefix scan+lowercase is O(vs) per match (O(N^2)). The cue sits
-				// in the immediate `name =` prefix, and the window never crosses a newline.
-				lo := vs - pwdCueLookback
-				if lo < 0 {
-					lo = 0
-				}
-				if nl := strings.LastIndexByte(text[lo:vs], '\n'); nl >= 0 {
-					lo += nl + 1
-				}
-				before := strings.ToLower(text[lo:vs])
-				explicit := strings.Contains(before, "pass") || strings.Contains(before, "pwd") || strings.Contains(before, "pw")
+				// An explicit credential assignment is sufficient even for a weak lowercase password in
+				// any supported language. The bounded adjacent binding also supports multiline JSON.
+				explicit := BindingName(text, vs) != ""
 				if !explicit && !looksLikePassword(val) {
 					continue
 				}
@@ -362,15 +512,16 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 			checked, valid := checksumValid(st.ID, val)
 			conf, stage := 0.9, "L1-regex"
 			switch {
+			case st.ID == "jwt":
+				if !JWTStructuralOK(val) {
+					continue
+				}
+				stage = "L1-structure" // Parsing is evidence of shape, not checksum/signature proof.
 			case checked && valid:
 				conf, stage = 0.99, "L1-checksum"
 			case checked && !valid:
-				// Checksum failed. For a structural type (jwt) that proves it isn't one — drop it. For a
-				// prefix-defined token (github ghp_/…) a failed CRC doesn't prove fake (our CRC is
+				// For a prefix-defined token (github ghp_/…) a failed CRC doesn't prove fake (our CRC is
 				// best-effort), so gate on entropy and report at reduced confidence instead of dropping.
-				if st.ID == "jwt" {
-					continue
-				}
 				if ShannonEntropy(val) < 3.2 {
 					continue
 				}
@@ -392,56 +543,90 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				conf = 0.6
 			}
 			all = append(all, Match{Type: st.ID, Value: val, Start: vs, End: ve,
-				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage})
+				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage, Transform: transform})
 		}
 	}
-	if len(all) >= maxScanMatches {
+	capped = capped || len(all) >= maxScanMatches
+	if capped {
 		// surface that the dense input was truncated (a secret past the cap is dropped)
 		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
 			"cap", maxScanMatches)
 	}
-	return all
+	return all, capped
 }
 
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.
 // Confidence-first ordering lets a precise token (checksum-valid github_pat_classic, 0.99) win over a
 // wider low-confidence run (generic_high_entropy, 0.55) that contains it, even when the run starts earlier.
 //
-// Candidates are processed in confidence order and `out` is kept sorted by Start. Since kept spans are
-// disjoint, a new candidate can only overlap the first kept span at/after it or its predecessor, both
-// found by binary search — making the pass O(n log n) instead of O(n^2). Truncating at `cap` therefore
-// retains the highest-confidence findings. A negative cap means no cap; the bool reports truncation.
+// A compressed prefix-max tree answers whether any kept span starting before m.End ends after
+// m.Start. Append-only output avoids linear insertion shifts on mixed-confidence dense inputs.
+// Sorting and overlap checks are O(n log n). Different decoded values may share one outer span.
+// A negative cap means no cap; the bool reports truncation.
 func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 	sort.Slice(ms, func(i, j int) bool {
 		if ms[i].Confidence != ms[j].Confidence {
 			return ms[i].Confidence > ms[j].Confidence
+		}
+		// A contextual guess must not replace an equally confident exact regex/checksum span with
+		// a larger token containing its assignment name. This priority precedes position for all types.
+		if ci, cj := ms[i].Stage == "L1-context-pw", ms[j].Stage == "L1-context-pw"; ci != cj {
+			return !ci
 		}
 		if ms[i].Start != ms[j].Start {
 			return ms[i].Start < ms[j].Start
 		}
 		return ms[i].End > ms[j].End // on ties prefer the wider span
 	})
-	out := make([]Match, 0, len(ms)) // kept spans, maintained sorted by Start
+	starts := make([]int, len(ms))
+	for i, m := range ms {
+		starts[i] = m.Start
+	}
+	sort.Ints(starts)
+	unique := starts[:0]
+	for _, start := range starts {
+		if len(unique) == 0 || unique[len(unique)-1] != start {
+			unique = append(unique, start)
+		}
+	}
+	maxEnd := make([]int, len(unique)+1)
+	rawMaxEnd := make([]int, len(unique)+1)
+	out := make([]Match, 0, len(ms))
+	type decodedKey struct {
+		start, end int
+		value      string
+	}
+	decodedValues := map[decodedKey]bool{}
 	for _, m := range ms {
 		if cap >= 0 && len(out) >= cap {
 			// budget reached: remaining candidates are <= the confidence already kept, so drop the tail
 			truncated = true
 			break
 		}
-		// first kept span with Start >= m.Start
-		i := sort.Search(len(out), func(k int) bool { return out[k].Start >= m.Start })
-		overlap := false
-		if i < len(out) && out[i].Start < m.End { // kept span starting in [m.Start, m.End)
-			overlap = true
-		} else if i > 0 && m.Start < out[i-1].End { // predecessor extends past m.Start
-			overlap = true
+		latestEnd := 0
+		rawLatestEnd := 0
+		for i := sort.SearchInts(unique, m.End); i > 0; i -= i & -i {
+			latestEnd = max(latestEnd, maxEnd[i])
+			rawLatestEnd = max(rawLatestEnd, rawMaxEnd[i])
 		}
-		if overlap {
+		decoded := strings.HasPrefix(m.Stage, "L1-base64")
+		if decoded {
+			key := decodedKey{m.Start, m.End, m.Value}
+			if rawLatestEnd > m.Start || decodedValues[key] {
+				continue
+			}
+			decodedValues[key] = true
+		} else if latestEnd > m.Start {
 			continue
 		}
-		out = append(out, Match{}) // grow
-		copy(out[i+1:], out[i:])   // shift to keep Start order
-		out[i] = m                 // insert at sorted position
+		for i := sort.SearchInts(unique, m.Start) + 1; i < len(maxEnd); i += i & -i {
+			maxEnd[i] = max(maxEnd[i], m.End)
+			if !decoded {
+				rawMaxEnd[i] = max(rawMaxEnd[i], m.End)
+			}
+		}
+		out = append(out, m)
 	}
-	return out, truncated // out is already in positional (Start) order
+	sort.SliceStable(out, func(i, j int) bool { return out[i].Start < out[j].Start })
+	return out, truncated
 }

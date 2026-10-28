@@ -2,14 +2,15 @@
 #
 #   repos:
 #     - repo: https://github.com/Lercas/prowl
-#       rev: v0.1.0
+#       rev: v1.4.0          # pin the release when published
 #       hooks:
 #         - id: prowl
 #
 - id: prowl
   name: Prowl secret scan
-  description: Scan staged files for leaked secrets before commit
-  entry: prowl scan --fail-on high
-  language: golang
-  pass_filenames: true   # pre-commit appends staged file paths -> scans only those (fast)
-  require_serial: false
+  description: Проверяет staged blobs, встроенные правила и полноту скана.
+  entry: scripts/precommit-prowl
+  language: script
+  pass_filenames: false
+  always_run: true
+  require_serial: true

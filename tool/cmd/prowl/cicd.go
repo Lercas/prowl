@@ -84,12 +84,28 @@ func cmdCICD(args []string) int {
 	// Remote CI content cannot provide a trusted .prowl.yaml. Only an explicitly selected --config
 	// may affect this scan.
 	c.noAutoConfig = true
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
+
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, verr := loadVerifySet(c)
+	if verr != nil {
+		logx.Error("verify setup failed", "err", verr)
+		return 2
+	}
+
 	ctx, stop := rootContext(c)
 	defer stop()
 	items, done, err := cicd.Collect(ctx, target, cicd.Options{
@@ -108,7 +124,7 @@ func cmdCICD(args []string) int {
 		return 2
 	}
 
-	code := runScan(ctx, c, cfg, det, items, c.dedupe)
+	code := runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
 	result := <-done
 	logx.Info("CI collection complete", "target", target, "runs", result.Runs, "artifacts",
 		result.Artifacts, "items", result.Items, "skipped", result.Skipped, "failures", result.Failures)
@@ -120,9 +136,7 @@ func cmdCICD(args []string) int {
 	if result.Failures > 0 {
 		logx.Error("CI collection was incomplete — failing closed; partial findings were still reported",
 			"failures", result.Failures, "last_error", result.LastError)
-		if code == 0 {
-			return 2
-		}
+		return 2
 	}
 	return code
 }

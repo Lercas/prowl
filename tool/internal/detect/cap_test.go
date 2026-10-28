@@ -2,6 +2,7 @@ package detect
 
 import (
 	"encoding/base64"
+	"math/rand"
 	"strings"
 	"testing"
 	"time"
@@ -42,7 +43,7 @@ func TestNormalScanUnchangedUnderCap(t *testing.T) {
 
 	const src = `# config
 db_password = "S3cr3tP4ssw0rd!"
-api_key = "AKIANAFGYOEYPXU1DSYP"
+api_key = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"
 note = "nothing secret on this line"
 `
 	ApplyTuning(3.5, 4.2, 50000) // default cap (effectively unbounded for this tiny input)
@@ -74,7 +75,7 @@ note = "nothing secret on this line"
 func TestBase64SurvivesCapTruncation(t *testing.T) {
 	defer ApplyTuning(3.5, 4.2, 50000)
 	d := newDetector(t)
-	blob := base64.StdEncoding.EncodeToString([]byte("AWS_ACCESS_KEY_ID=AKIANAFGYOEYPXU1DSYP"))
+	blob := base64.StdEncoding.EncodeToString([]byte("AWS_ACCESS_KEY_ID=\x41KIANAFGYOEYPXU1DSYP"))
 	// The base64 blob is itself a high-entropy candidate (collected early). It is followed by far more
 	// generic_high_entropy noise lines than the cap, so under the OLD ordering collect() filled the cap,
 	// the remaining budget went to 0, and unmaskBase64 was skipped -> the AWS key was lost (exit 0).
@@ -121,5 +122,64 @@ func TestSingleLongLineBoundedTime(t *testing.T) {
 	// slowdown of `go test -race` on a slow CI runner while still catching the O(N^2) DoS (20-45s here).
 	if dur := time.Since(start); dur > 15*time.Second {
 		t.Fatalf("single 512KB line scan took %v (O(N^2) time DoS regression; expected O(N), well under 15s)", dur)
+	}
+}
+
+func TestMixedConfidenceDedupeAvoidsInsertionShifts(t *testing.T) {
+	const count = 50000
+	ms := make([]Match, count)
+	for i := range ms {
+		// High-confidence spans appear after all low-confidence spans in source order. Processing
+		// confidence first previously shifted most of the output for every later low-confidence hit.
+		confidence := .55
+		if i >= count/2 {
+			confidence = .99
+		}
+		ms[i] = Match{Start: i * 10, End: i*10 + 8, Confidence: confidence}
+	}
+	started := time.Now()
+	kept, truncated := dedupeOverlapsCap(ms, count+1)
+	if len(kept) != count || truncated {
+		t.Fatal("mixed-confidence disjoint source spans were lost")
+	}
+	for i, m := range kept {
+		if m.Start != i*10 || m.End != i*10+8 {
+			t.Fatal("deduplication changed source order or spans")
+		}
+	}
+	if time.Since(started) > 5*time.Second {
+		t.Fatal("mixed-confidence deduplication still incurs quadratic insertion cost")
+	}
+}
+
+func TestDedupeConfidenceDominanceAcrossDenseOverlaps(t *testing.T) {
+	rng := rand.New(rand.NewSource(1403)) // deterministic synthetic source intervals
+	for range 12 {
+		ms := make([]Match, 3000)
+		for i := range ms {
+			start := rng.Intn(5000)
+			ms[i] = Match{Start: start, End: start + 1 + rng.Intn(100), Confidence: []float64{.55, .6, .9, .99}[rng.Intn(4)]}
+		}
+		kept, truncated := dedupeOverlapsCap(ms, -1)
+		if truncated || len(kept) == 0 {
+			t.Fatal("uncapped overlap resolution lost all evidence")
+		}
+		for i, m := range kept {
+			if i > 0 && kept[i-1].End > m.Start {
+				t.Fatal("literal source intervals still overlap")
+			}
+		}
+		for _, m := range ms {
+			dominated := false
+			for _, winner := range kept {
+				if winner.Start < m.End && m.Start < winner.End && winner.Confidence >= m.Confidence {
+					dominated = true
+					break
+				}
+			}
+			if !dominated {
+				t.Fatal("a discarded interval has no overlapping winner with equal/higher confidence")
+			}
+		}
 	}
 }

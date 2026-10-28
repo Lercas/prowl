@@ -3,12 +3,58 @@ package report
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"math"
 	"strings"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/model"
 )
+
+type failingReportWriter struct {
+	remaining int
+	err       error
+}
+
+func (w *failingReportWriter) Write(p []byte) (int, error) {
+	if len(p) <= w.remaining {
+		w.remaining -= len(p)
+		return len(p), nil
+	}
+	n := w.remaining
+	w.remaining = 0
+	return n, w.err
+}
+
+func TestPrettyPropagatesWriteFailure(t *testing.T) {
+	failure := errors.New("report destination failed")
+	for _, findings := range [][]model.Finding{nil, sample} {
+		for _, budget := range []int{0, 12} {
+			for _, writerErr := range []error{failure, nil} {
+				w := &failingReportWriter{remaining: budget, err: writerErr}
+				want := writerErr
+				if want == nil {
+					want = io.ErrShortWrite
+				}
+				if err := Write(w, findings, "pretty", false); !errors.Is(err, want) {
+					t.Errorf("Write(budget=%d, findings=%d) = %v, want %v", budget, len(findings), err, want)
+				}
+			}
+		}
+	}
+}
+
+func TestPrettySanitizesImportedType(t *testing.T) {
+	var out bytes.Buffer
+	findings := []model.Finding{{Type: "rule\x1b[2J\x00id", Severity: "high", Path: "a.txt", Line: 1, Redacted: "****"}}
+	if err := Write(&out, findings, "pretty", false); err != nil {
+		t.Fatal(err)
+	}
+	if strings.ContainsAny(out.String(), "\x1b\x00") || !strings.Contains(out.String(), "rule[2Jid") {
+		t.Fatalf("unsafe imported type in report: %q", out.String())
+	}
+}
 
 func TestBBSummary(t *testing.T) {
 	tru, fls := true, false
@@ -20,7 +66,7 @@ func TestBBSummary(t *testing.T) {
 		{Verified: &tru, Severity: "critical", Type: "aws_access_key_id"},
 		{Verified: nil, Severity: "low", Type: "y"},
 	}, false)
-	for _, want := range []string{"1 LIVE", "critical aws_access_key_id", "1 dead", "1 unverified"} {
+	for _, want := range []string{"1 LIVE", "critical aws_access_key_id", "1 отклонено", "1 не проверено"} {
 		if !strings.Contains(s, want) {
 			t.Errorf("BB summary %q missing %q", s, want)
 		}
@@ -32,6 +78,55 @@ var sample = []model.Finding{
 		Path: "a.py", Line: 3, Col: 5, Redacted: "AKIA****1234", Confidence: 0.99, Stage: "L1-checksum"},
 	{Detector: "generic_password", Type: "generic_password", Severity: "medium",
 		Path: "b.py", Line: 9, Col: 1, Redacted: "****", Confidence: 0.6, Stage: "L1-regex"},
+}
+
+func TestPrettyDistinguishesEmptyFilteredAndIncomplete(t *testing.T) {
+	for _, state := range []string{"empty", "scanned", "filtered", "incomplete"} {
+		t.Run(state, func(t *testing.T) {
+			c := model.NewCoverage()
+			want := "Нет объектов для проверки"
+			switch state {
+			case "scanned":
+				c.Processed(10)
+				want = "Кандидатов не найдено"
+			case "filtered":
+				c.Processed(10)
+				c.Filtered()
+				want = "Находок после фильтров и подавлений нет"
+			case "incomplete":
+				c.Note("max_size", "large.log", true)
+				want = "max_size: large.log"
+			}
+			var b bytes.Buffer
+			if err := WriteWithCoverage(&b, nil, "pretty", false, c); err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(b.String(), want) {
+				t.Fatalf("missing %q: %s", want, b.String())
+			}
+			if state != "scanned" && strings.Contains(b.String(), "Кандидатов не найдено") {
+				t.Fatal("empty/filtered/incomplete result presented as clean")
+			}
+		})
+	}
+}
+
+func TestPrettySanitizesImportedTypeAndBoundsDiagnostics(t *testing.T) {
+	c := model.NewCoverage()
+	for i := 0; i < 12; i++ {
+		c.Note("failure\x1b", "input\x1b", true)
+	}
+	var b bytes.Buffer
+	fs := []model.Finding{{Type: "external\x1b[31m", Severity: "high", Path: "file", Redacted: "****"}}
+	if err := WriteWithCoverage(&b, fs, "pretty", false, c); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(b.String(), "\x1b") || strings.Count(b.String(), "  failure") != 5 {
+		t.Fatal("untrusted terminal bytes or unbounded diagnostics")
+	}
+	if !strings.Contains(b.String(), "Кандидаты не подтверждены провайдером") {
+		t.Fatal("unverified candidates lack an explanation")
+	}
 }
 
 func TestSARIFValid(t *testing.T) {
@@ -60,6 +155,26 @@ func TestSARIFValid(t *testing.T) {
 	}
 }
 
+func TestSARIFCleanRunHasArrays(t *testing.T) {
+	for _, fs := range [][]model.Finding{nil, {}} {
+		var buf bytes.Buffer
+		if err := Write(&buf, fs, "sarif", false); err != nil {
+			t.Fatal(err)
+		}
+		var doc map[string]any
+		if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
+			t.Fatal(err)
+		}
+		run := doc["runs"].([]any)[0].(map[string]any)
+		driver := run["tool"].(map[string]any)["driver"].(map[string]any)
+		for name, value := range map[string]any{"rules": driver["rules"], "results": run["results"]} {
+			if array, ok := value.([]any); !ok || len(array) != 0 {
+				t.Errorf("clean run %s must be an empty array, got %v", name, value)
+			}
+		}
+	}
+}
+
 func TestJSONCount(t *testing.T) {
 	var buf bytes.Buffer
 	Write(&buf, sample, "json", false)
@@ -72,6 +187,21 @@ func TestJSONCount(t *testing.T) {
 	}
 	if doc.Count != 2 || len(doc.Findings) != 2 {
 		t.Errorf("count=%d findings=%d", doc.Count, len(doc.Findings))
+	}
+}
+
+func TestUTF16MetadataDoesNotChangeJSONColumn(t *testing.T) {
+	var buf bytes.Buffer
+	fs := []model.Finding{{Type: "owned", Severity: "high", Line: 2, Col: 15, UTF16Col: 9}}
+	if err := Write(&buf, fs, "json", false); err != nil {
+		t.Fatal(err)
+	}
+	var doc struct{ Findings []map[string]any }
+	if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc.Findings[0]["col"] != float64(15) || strings.Contains(strings.ToLower(buf.String()), "utf16") {
+		t.Fatal("internal SARIF coordinates changed the public JSON finding")
 	}
 }
 
@@ -135,7 +265,7 @@ func TestPrettyContainsTypeAndRedaction(t *testing.T) {
 	if !strings.Contains(out, "aws_access_key_id") || !strings.Contains(out, "AKIA****1234") {
 		t.Error("pretty output missing type/redaction")
 	}
-	if strings.Contains(out, "AKIANAFGYOEYPXU1DSYP") {
+	if strings.Contains(out, "\x41KIANAFGYOEYPXU1DSYP") {
 		t.Error("pretty output leaked a raw secret")
 	}
 }
@@ -275,7 +405,7 @@ func TestJSONControlCharPathParses(t *testing.T) {
 // never the raw secret.
 func TestDefectDojoValid(t *testing.T) {
 	verified := true
-	const rawSecret = "AKIANAFGYOEYPXU1DSYP" // the real value behind the "AKIA****1234" redaction
+	const rawSecret = "\x41KIANAFGYOEYPXU1DSYP" // the real value behind the "AKIA****1234" redaction
 	fs := []model.Finding{
 		{Detector: "aws_access_key_id", Type: "aws_access_key_id", Severity: "high",
 			Path: "a.py", Line: 3, Col: 5, Redacted: "AKIA****1234", Confidence: 0.99, Stage: "L1-checksum",

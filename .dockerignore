@@ -1,0 +1,10 @@
+.git
+.hook-bin
+**/__pycache__
+**/*.pyc
+**/*.test
+**/*.prof
+tool/prowl
+tool/corpus_*
+tool/carriers*
+tool/.env.prod

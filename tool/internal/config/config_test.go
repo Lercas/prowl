@@ -394,7 +394,10 @@ func TestDiscoverNoConfig(t *testing.T) {
 	cwd, _ := os.Getwd()
 	defer os.Chdir(cwd)
 	os.Chdir(dir)
-	c := Discover() // no file -> empty config, all types enabled, nothing allowlisted
+	c, err := Discover() // no file -> empty config, all types enabled, nothing allowlisted
+	if err != nil {
+		t.Fatal(err)
+	}
 	if c == nil || !c.TypeEnabled("aws_access_key_id") || c.Allowed("x", "y") {
 		t.Error("empty Discover() behaved unexpectedly")
 	}

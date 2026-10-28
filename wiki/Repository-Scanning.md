@@ -53,6 +53,12 @@ Use the default mode for a quick "is there anything live in the current tree" pa
 
 No prowl-specific credential configuration exists; if `git clone <url>` works in your shell, `prowl repo <url>` works.
 
+В сообщениях и путях отчёта userinfo (`user:token@`) заменяется на `***@`;
+`@` в пути, query и fragment не меняет адрес источника. Ошибка клонирования сообщает
+стадию или код завершения Git. Его stdout/stderr не включается в сообщение ошибки:
+credential helper и сервер могут вывести пароль отдельно от URL. Сбой сохраняет
+`source_error`, `truncated: true` и код `2`; создание или обновление baseline блокируется.
+
 ## Transport security
 
 The clone is transport-hardened so a hostile URL cannot turn a scan into command execution:

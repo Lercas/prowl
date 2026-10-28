@@ -109,9 +109,13 @@ The Go reference inference is `tool/internal/mlmodel` (`Load` / `Predict`); the 
 `prowl scan --ml-model path/to/model_binary.json` or `~/.prowl/model_binary.json` if you want the scanner
 to use an externally-trained model.
 
-**Caveat - `compression_ratio` parity:** one of the 49 features uses zlib. A cgo build matches the
-Python trainer's zlib byte-for-byte; a pure-Go (nocgo) build differs by a few bytes on that single
-feature, shifting the score slightly. Match the trainer's zlib if you reimplement the feature extractor.
+**Паритет `compression_ratio` в 1.4.0:** native-сборка использует системную zlib,
+статическая сборка использует закреплённый zlib 1.3.2 в WASM с лимитом памяти.
+Обе проходят обязательный fixture всех 49 признаков и прогнозов модели.
+Порядок суммирования энтропии фиксирован. При сравнении с порогом дерева
+абсолютная разница до `1e-12` включительно считается равенством (левая ветка);
+это устраняет различия округления между архитектурами. Python evaluator
+использует то же правило. [Воспроизводимость и ограничения](wiki/Release-1.4.0.md#ml).
 
 This path gives you the **L2 binary classifier only** - not the L1 rules or the type classifier (those
 live in the scanner and the private training code). It answers "does this look like a real secret?", not

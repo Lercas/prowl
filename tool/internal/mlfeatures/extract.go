@@ -149,10 +149,18 @@ func boolf(b bool) float64 {
 
 // Extract returns the 49 features for one candidate (value + optional context)
 // in FeatureNames order. It is an exact port of extract_features().
-func Extract(value string, ctx Context) []float64 {
+func Extract(value string, ctx Context) []float64 { return extract(value, ctx, false) }
+
+// ExtractPortable removes the platform-dependent compression feature.
+func ExtractPortable(value string, ctx Context) []float64 { return extract(value, ctx, true) }
+func extract(value string, ctx Context, portable bool) []float64 {
 	s := value
 
 	out := make([]float64, 0, len(FeatureNames))
+	compression := 0.0
+	if !portable {
+		compression = compressionRatio(s)
+	}
 
 	// string-intrinsic (9)
 	out = append(out,
@@ -163,7 +171,7 @@ func Extract(value string, ctx Context) []float64 {
 		alphabetEntropy(s, base64Alphabet), // base64_entropy
 		alphabetEntropy(s, hexAlphabet),    // hex_entropy
 		bigramEntropy(s),                   // bigram_entropy
-		compressionRatio(s),                // compression_ratio
+		compression,                        // compression_ratio
 		charDiversity(s),                   // char_diversity
 	)
 

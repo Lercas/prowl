@@ -16,6 +16,7 @@ type githubRuns struct {
 		Name       string `json:"name"`
 		HTMLURL    string `json:"html_url"`
 		HeadBranch string `json:"head_branch"`
+		HeadSHA    string `json:"head_sha"`
 	} `json:"workflow_runs"`
 }
 
@@ -52,6 +53,7 @@ func (c *collector) collectGitHub(ctx context.Context, out chan<- model.Item, re
 				return
 			}
 			result.Runs++
+			runCtx := model.WithProvenance(ctx, map[string]any{"run_id": strconv.FormatInt(run.ID, 10), "commit": run.HeadSHA})
 			label := runLabel(run.Name, run.ID)
 			prefix := "github:" + repo + "/actions/" + label
 			if c.opts.IncludeLogs {
@@ -59,12 +61,12 @@ func (c *collector) collectGitHub(ctx context.Context, out chan<- model.Item, re
 				raw, err := c.download(ctx, rawURL)
 				if err != nil {
 					c.fail(result, fmt.Errorf("run %d logs: %w", run.ID, err))
-				} else if err := c.emitPayload(ctx, out, prefix+"/logs", run.HTMLURL, raw, result); err != nil {
+				} else if err := c.emitPayload(runCtx, out, prefix+"/logs", run.HTMLURL, raw, result); err != nil {
 					c.fail(result, fmt.Errorf("run %d logs: %w", run.ID, err))
 				}
 			}
 			if c.opts.IncludeArtifacts && result.Artifacts < c.opts.MaxArtifacts {
-				c.collectGitHubArtifacts(ctx, out, result, basePath, prefix, run.ID, run.HTMLURL)
+				c.collectGitHubArtifacts(runCtx, out, result, basePath, prefix, run.ID, run.HTMLURL)
 			}
 		}
 		if len(payload.Runs) < 100 {
@@ -101,7 +103,8 @@ func (c *collector) collectGitHubArtifacts(ctx context.Context, out chan<- model
 				continue
 			}
 			artifactPath := prefix + "/artifacts/" + runLabel(artifact.Name, artifact.ID)
-			if err := c.emitPayload(ctx, out, artifactPath, runURL, raw, result); err != nil {
+			artifactCtx := model.WithProvenance(ctx, map[string]any{"artifact_id": strconv.FormatInt(artifact.ID, 10)})
+			if err := c.emitPayload(artifactCtx, out, artifactPath, runURL, raw, result); err != nil {
 				c.fail(result, fmt.Errorf("artifact %d: %w", artifact.ID, err))
 			}
 		}

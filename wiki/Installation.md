@@ -1,12 +1,12 @@
 # Installation
 
-Prowl is a single static Go binary with no runtime dependencies. Pick whichever install method fits your environment, then run the one-time library setup.
+Prowl is a single static Go binary with no runtime dependencies. В 1.4.0 правила, верификаторы и ML уже встроены; дополнительная установка библиотек не требуется.
 
 ```bash
 # Go toolchain (recommended)
 go install github.com/Lercas/prowl/tool/cmd/prowl@latest
 
-# install the rule + verifier libraries (writes to ~/.prowl)
+# необязательно: обновить внешние библиотеки (writes to ~/.prowl)
 prowl rules update
 prowl verifiers update
 
@@ -35,17 +35,17 @@ docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl scan /src
 Any scan flag works the same way inside the container:
 
 ```bash
-docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl \
-  scan /src --format sarif -o /src/prowl.sarif --fail-on high
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" ghcr.io/lercas/prowl \
+  scan /src --strict --format sarif -o /src/prowl.sarif --fail-on high
 ```
 
 ### Prebuilt binary
 
-Download the archive for your OS/arch from the [releases page](https://github.com/Lercas/prowl/releases), extract it, and put `prowl` somewhere on your `PATH`.
+В canonical release 1.4.0 скачайте `prowl-OS-ARCH` (Windows: `.exe`) со [страницы releases](https://github.com/Lercas/prowl/releases), проверьте `checksums.txt` и поместите бинарник в PATH.
 
 ```bash
-tar -xzf prowl_*.tar.gz
-sudo install prowl /usr/local/bin/
+chmod +x prowl-linux-amd64
+sudo install prowl-linux-amd64 /usr/local/bin/prowl
 prowl version
 ```
 
@@ -63,16 +63,18 @@ make build      # -> ./prowl
 make install
 ```
 
-## First-run setup
+## Обновление библиотек
 
-The detection rules and live-credential verifiers are versioned independently of the binary and live outside it. Install them once:
+В 1.4.0 первый скан и `--ml` работают автономно. Встроенные библиотеки
+проверяются по manifest. Отдельная установка нужна для обновления или своих
+наборов правил; установленный набор имеет приоритет перед встроенным:
 
 ```bash
 prowl rules update        # detection rule templates -> ~/.prowl/rules
 prowl verifiers update    # live-credential verifiers  -> ~/.prowl/verifiers
 ```
 
-Both pull from the template library at `github.com/Lercas/prowl-templates`. If the remote is unreachable, each command falls back to the snapshot bundled alongside the binary, so setup also works offline. Pass `--check` to preview what an update would change without installing, or `--source <dir|git-url>` to install from an alternate location.
+Both pull from the template library at `github.com/Lercas/prowl-templates`. Для обычного скана сеть не нужна. Offline fallback самой команды update требует набора файлов рядом с бинарником; встроенный scan не зависит от успеха update. Pass `--check` to preview what an update would change without installing, or `--source <dir|git-url>` to install from an alternate location.
 
 Once installed, `scan` auto-loads `~/.prowl/rules` and `--verify` auto-loads `~/.prowl/verifiers` — no `--rules-dir` / `--verifiers` flags required.
 

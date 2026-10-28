@@ -4,6 +4,7 @@ package lsp
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,21 +12,26 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
 
+	"github.com/Lercas/prowl/tool/internal/checkedio"
 	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/forge"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/resilience"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 // maxMessageBytes caps a single JSON-RPC frame so a hostile Content-Length (negative -> makeslice
@@ -52,41 +58,64 @@ type engine struct {
 // Serve runs the LSP loop on stdin/stdout until the client exits, building the same detector + rule
 // engine + allowlist a workspace `prowl scan` would so in-editor diagnostics match the CLI.
 func Serve() error {
-	e, err := build()
+	return ServeWithBundled(false)
+}
+
+// ServeWithBundled selects the release's embedded rules without changing workspace identity/config.
+func ServeWithBundled(bundled bool) error {
+	e, err := buildWithBundled(bundled)
 	if err != nil {
 		return err
 	}
-	r := bufio.NewReader(os.Stdin)
+	return serve(os.Stdin, os.Stdout, e)
+}
+
+func serve(input io.Reader, output io.Writer, e *engine) (resultErr error) {
+	r := bufio.NewReader(input)
 	// Serialize writes so the read loop and debounce scan goroutines don't interleave frame bytes.
-	sw := newSafeWriter(bufio.NewWriter(os.Stdout))
+	sw := newSafeWriter(bufio.NewWriter(checkedio.NewWriter(output)))
+	if closer, ok := input.(io.Closer); ok {
+		// A background publication can fail while the read loop is idle. Closing the owned
+		// input stream wakes that read so the transport error can terminate the session.
+		sw.onFailure = func() { _ = closer.Close() }
+	}
 	// The debouncer runs scans off the read loop so the loop stays responsive during a scan.
 	d := newDebouncer(e, sw, debounceWindow)
-	defer d.stop()
+	defer func() {
+		d.stop()
+		// A publication already holding the lifecycle lock can fail while EOF/exit cleanup
+		// waits for it. Its final output failure must not be replaced by a successful return.
+		if err := sw.Err(); err != nil {
+			resultErr = err
+		}
+	}()
+	s := &session{w: sw, e: e, d: d}
 	for {
+		if err := sw.Err(); err != nil {
+			return err
+		}
 		body, err := readMessage(r)
+		if outputErr := sw.Err(); outputErr != nil {
+			return outputErr
+		}
 		if err != nil {
 			if errors.Is(err, errBadFrame) {
-				logx.Warn("lsp: skipping malformed frame", "err", err)
-				continue // hostile/garbled header — keep serving rather than disconnect
+				logx.Warn("lsp: skipping invalid frame content type")
+				respondError(sw, nil, parseError)
+				continue // A unique bounded Content-Length was consumed; the next boundary is known.
 			}
-			return nil // client closed
+			if errors.Is(err, io.EOF) {
+				return nil // clean EOF between frames
+			}
+			return err
 		}
-		var msg struct {
-			ID     json.RawMessage `json:"id"`
-			Method string          `json:"method"`
-			Params json.RawMessage `json:"params"`
+		exit, err := s.handle(body)
+		if outputErr := sw.Err(); outputErr != nil {
+			return outputErr
 		}
-		if json.Unmarshal(body, &msg) != nil {
-			continue
+		if exit {
+			return err
 		}
-		if msg.Method == "exit" {
-			return nil
-		}
-		// Guard each dispatch so a panic in scanning/diagnostics can't take down the loop.
-		resilience.Guard(
-			func() { dispatch(sw, e, d, msg.Method, msg.ID, msg.Params) },
-			func(rec any) { logx.Warn("lsp: recovered handler panic", "method", msg.Method, "err", rec) },
-		)
 	}
 }
 
@@ -94,31 +123,64 @@ func Serve() error {
 // would: auto-discovered .prowl.yaml, its enable/disable/custom/tuning, and ~/.prowl/rules
 // templates — so editor findings line up with the CLI.
 func build() (*engine, error) {
-	cfg := config.Discover() // honor the workspace's own .prowl.yaml (same trust model as `prowl scan`)
+	return buildWithBundled(false)
+}
+
+func buildWithBundled(bundled bool) (*engine, error) {
+	cfg, err := config.Discover()
+	if err != nil {
+		return nil, err
+	}
 	tax, err := taxonomy.LoadDefault()
 	if err != nil {
 		return nil, err
 	}
+	if err := taxonomy.RequireComplete(tax); err != nil {
+		return nil, err
+	}
+	name, err := taxonomy.DiscoverGitleaks()
+	if err != nil {
+		return nil, err
+	}
+	if name != "" {
+		ext, al, err := taxonomy.LoadAny(name)
+		if err != nil {
+			return nil, err
+		}
+		if err := taxonomy.RequireComplete(ext); err != nil {
+			return nil, fmt.Errorf("rules %q: %w", name, err)
+		}
+		tax.Types = append(tax.Types, ext.Types...)
+		if al != nil {
+			cfg.MergeAllowlist(al.Regexes, al.Paths, al.StopWords)
+		}
+		logx.Info("lsp: auto-loaded gitleaks config", "file", name, "rules", len(ext.Types))
+	}
 	// An in-workspace .prowl.yaml is attacker-controlled; warn loudly if it suppresses detection so a
 	// malicious config can't silently blind the editor (the LSP takes no flags, so every config is in-repo).
 	warnInRepoSuppression(cfg, tax)
-	applyConfig(tax, cfg) // disable/enable + custom detectors, exactly as loadDetector does
-	applyTuning(cfg)      // detection thresholds + operational limits, exactly as loadConfig does
+	if err := applyConfig(tax, cfg); err != nil {
+		return nil, err
+	} // Same policy validation as the CLI.
+	applyTuning(cfg) // detection thresholds + operational limits, exactly as loadConfig does
 	maxBytes := defaultMaxScanBytes
 	if cfg.Performance.MaxSize > 0 { // CLI --max-size parity: a .prowl.yaml can raise/lower the cap
 		maxBytes = int(cfg.Performance.MaxSize)
 	}
 	e := &engine{det: detect.New(tax), allow: cfg.Allowed, maxBytes: maxBytes}
-	if dir := installedRulesDir(); dir != "" {
-		eng, err := rules.Load(dir)
-		if err != nil {
-			logx.Warn("lsp: some rule templates failed to load", "dir", dir, "err", err)
-		}
-		if eng != nil && eng.Len() > 0 {
-			e.eng = eng
-			logx.Info("lsp: loaded rule templates", "count", eng.Len(), "dir", dir)
-		}
+	dir, err := installedRulesDir()
+	if err != nil {
+		return nil, err
 	}
+	if dir != "" && !bundled {
+		e.eng, err = rules.Load(dir)
+	} else {
+		e.eng, err = rules.LoadEmbedded(bundledrules.Files)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("lsp: selected rule templates failed to load: %w", err)
+	}
+	logx.Info("lsp: loaded rule templates", "count", e.eng.Len())
 	return e, nil
 }
 
@@ -177,9 +239,9 @@ func applyTuning(cfg *config.Config) {
 
 // applyConfig filters the taxonomy by the config's enable/disable lists and appends its custom
 // detectors — the same transformation the CLI applies, so both build an identical detector.
-func applyConfig(tax *taxonomy.Taxonomy, cfg *config.Config) {
+func applyConfig(tax *taxonomy.Taxonomy, cfg *config.Config) error {
 	if cfg == nil {
-		return
+		return nil
 	}
 	kept := tax.Types[:0]
 	for _, t := range tax.Types {
@@ -193,8 +255,7 @@ func applyConfig(tax *taxonomy.Taxonomy, cfg *config.Config) {
 		// bare regexp.Compile would let a packed bounded-repetition bomb OOM-kill the editor on open).
 		re, err := saferegex.Compile(cr.Regex)
 		if err != nil {
-			logx.Warn("lsp: custom rule has bad regex (skipped)", "id", cr.ID, "err", err)
-			continue
+			return fmt.Errorf("lsp: custom rule %q has invalid regex: %w", cr.ID, err)
 		}
 		cat := cr.Category
 		if cat == "" {
@@ -205,11 +266,12 @@ func applyConfig(tax *taxonomy.Taxonomy, cfg *config.Config) {
 			Detection: taxonomy.Detection{Regex: cr.Regex}, RE: re,
 		})
 	}
+	return nil
 }
 
 // installedRulesDir returns the installed template dir (~/.prowl/rules, or PROWL_HOME/XDG override)
-// if it exists, else "" — the same templates a flagless `prowl scan` auto-loads.
-func installedRulesDir() string {
+// if it exists, else "". A broken installed path is fatal, as it is for a flagless CLI scan.
+func installedRulesDir() (string, error) {
 	var home string
 	switch {
 	case os.Getenv("PROWL_HOME") != "":
@@ -224,11 +286,7 @@ func installedRulesDir() string {
 			home = filepath.Join(h, ".prowl")
 		}
 	}
-	dir := filepath.Join(home, "rules")
-	if info, err := os.Stat(dir); err == nil && info.IsDir() { //nolint:gosec // Path comes from the operator's local config environment.
-		return dir
-	}
-	return ""
+	return localfile.FirstDirectory(filepath.Join(home, "rules"))
 }
 
 // dispatch handles a single decoded request/notification. Control and lifecycle messages run
@@ -238,30 +296,34 @@ func dispatch(w *safeWriter, e *engine, d *debouncer, method string, id, params 
 	switch method {
 	case "initialize":
 		respond(w, id, map[string]any{
-			"capabilities": map[string]any{"textDocumentSync": 1}, // 1 = full sync
-			"serverInfo":   map[string]any{"name": "prowl", "version": "0.1.0"},
+			"capabilities": map[string]any{"textDocumentSync": map[string]any{
+				"openClose": true,
+				"change":    1, // Full document sync.
+				"save":      map[string]any{"includeText": true},
+			}},
+			"serverInfo": map[string]any{"name": "prowl", "version": "0.1.0"},
 		})
 	case "textDocument/didOpen":
 		// Single event, possibly a large file — publish immediately (the size cap still bounds work).
-		uri, text := openParams(params)
-		d.cancel(uri) // drop any pending change scan; the open text is now authoritative
-		publish(w, e, uri, text)
+		if update, ok := openParams(params); ok {
+			d.open(update)
+		}
 	case "textDocument/didChange":
 		// Keystrokes: debounce so we scan the final text once, not N times for N keystrokes.
-		uri, text := changeParams(params)
-		d.schedule(uri, text)
+		if update, ok := changeParams(params); ok {
+			d.change(update)
+		}
 	case "textDocument/didSave":
 		// A full-text save re-scans promptly; the saved text supersedes any in-flight change scan.
 		uri, text, hasText := saveParams(params)
 		if hasText {
-			d.cancel(uri)
-			publish(w, e, uri, text)
+			d.save(uri, text)
 		}
 	case "textDocument/didClose":
 		// Drop any pending scan and clear markers (an empty set) so a closed file shows no stale diagnostics.
-		uri := closeParams(params)
-		d.cancel(uri)
-		notify(w, "textDocument/publishDiagnostics", map[string]any{"uri": uri, "diagnostics": []map[string]any{}})
+		if uri, ok := closeParams(params); ok {
+			d.closeDocument(uri)
+		}
 	case "shutdown":
 		respond(w, id, nil)
 	}
@@ -274,20 +336,78 @@ type debouncer struct {
 	w      *safeWriter
 	window time.Duration
 
-	mu      sync.Mutex
-	timers  map[string]*time.Timer // pending per-doc scan, keyed by URI
-	pending map[string]string      // latest text awaiting scan, keyed by URI
-	wg      sync.WaitGroup         // tracks in-flight scan goroutines (so stop() can drain them)
+	mu        sync.Mutex
+	documents map[string]*documentScan // pointer identity binds callbacks/results to one revision
+	opened    map[string]int32         // latest client version in the current open/close lifetime
+	stopped   bool
+	wg        sync.WaitGroup // admission under mu prevents Add racing with stop's Wait
+}
+
+type documentScan struct {
+	timer *time.Timer
+	text  string // cleared when the scan starts or is superseded
 }
 
 func newDebouncer(e *engine, w *safeWriter, window time.Duration) *debouncer {
 	return &debouncer{
-		e:       e,
-		w:       w,
-		window:  window,
-		timers:  make(map[string]*time.Timer),
-		pending: make(map[string]string),
+		e:         e,
+		w:         w,
+		window:    window,
+		documents: make(map[string]*documentScan),
+		opened:    make(map[string]int32),
 	}
+}
+
+// open starts one client-owned lifetime. A duplicate open cannot replace its current snapshot.
+func (d *debouncer) open(update documentUpdate) {
+	d.mu.Lock()
+	_, exists := d.opened[update.uri]
+	if d.stopped || exists {
+		d.mu.Unlock()
+		return
+	}
+	d.opened[update.uri] = update.version
+	revision := d.immediateLocked(update.uri)
+	d.mu.Unlock()
+	d.scan(update.uri, revision, update.text)
+}
+
+// change admits strictly newer versions only. An empty change list advances the version without
+// cancelling work for the unchanged text; malformed changes never reach this admission boundary.
+func (d *debouncer) change(update documentUpdate) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	version, exists := d.opened[update.uri]
+	if d.stopped || !exists || update.version <= version {
+		return
+	}
+	d.opened[update.uri] = update.version
+	if update.hasText {
+		d.scheduleLocked(update.uri, update.text)
+	}
+}
+
+// Save notifications have no version; within an open lifetime their full text is authoritative.
+func (d *debouncer) save(uri, text string) {
+	d.mu.Lock()
+	_, exists := d.opened[uri]
+	if d.stopped || !exists {
+		d.mu.Unlock()
+		return
+	}
+	revision := d.immediateLocked(uri)
+	d.mu.Unlock()
+	d.scan(uri, revision, text)
+}
+
+func (d *debouncer) closeDocument(uri string) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	_, exists := d.opened[uri]
+	if d.stopped || !exists {
+		return
+	}
+	d.closeLocked(uri)
 }
 
 // schedule records the latest text for uri and (re)arms the debounce timer. Repeated calls within the
@@ -295,108 +415,184 @@ func newDebouncer(e *engine, w *safeWriter, window time.Duration) *debouncer {
 func (d *debouncer) schedule(uri, text string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.pending[uri] = text
-	if t, ok := d.timers[uri]; ok {
-		t.Reset(d.window)
+	if d.stopped {
 		return
 	}
-	d.timers[uri] = time.AfterFunc(d.window, func() { d.fire(uri) })
+	d.scheduleLocked(uri, text)
 }
 
-// fire scans the latest pending text for uri and publishes. It runs in the timer goroutine (off the
-// read loop). Guarded so a scan panic can't crash the process.
-func (d *debouncer) fire(uri string) {
+func (d *debouncer) scheduleLocked(uri, text string) {
+	d.invalidateLocked(uri)
+	revision := &documentScan{text: text}
+	d.documents[uri] = revision
+	// Reset cannot retract an expired AfterFunc callback already waiting for mu.
+	revision.timer = time.AfterFunc(d.window, func() { d.fire(uri, revision) })
+}
+
+// fire admits only the revision whose timer fired, even if an older callback is still running.
+func (d *debouncer) fire(uri string, revision *documentScan) {
 	d.mu.Lock()
-	text, ok := d.pending[uri]
-	delete(d.pending, uri)
-	delete(d.timers, uri)
-	if !ok { // cancelled between the timer firing and acquiring the lock
+	if d.stopped || revision == nil || d.documents[uri] != revision || revision.timer == nil {
 		d.mu.Unlock()
 		return
 	}
+	text := revision.text
+	revision.text = ""
+	revision.timer = nil
 	d.wg.Add(1)
 	d.mu.Unlock()
+	d.scan(uri, revision, text)
+}
+
+// immediate supersedes pending and in-flight work before scanning an open/save snapshot.
+func (d *debouncer) immediate(uri, text string) {
+	d.mu.Lock()
+	if d.stopped {
+		d.mu.Unlock()
+		return
+	}
+	revision := d.immediateLocked(uri)
+	d.mu.Unlock()
+	d.scan(uri, revision, text)
+}
+
+func (d *debouncer) immediateLocked(uri string) *documentScan {
+	d.invalidateLocked(uri)
+	revision := &documentScan{}
+	d.documents[uri] = revision
+	d.wg.Add(1)
+	return revision
+}
+
+func (d *debouncer) scan(uri string, revision *documentScan, text string) {
 	defer d.wg.Done()
 	resilience.Guard(
-		func() { publish(d.w, d.e, uri, text) },
-		func(rec any) { logx.Warn("lsp: recovered scan panic", "uri", uri, "err", rec) },
+		func() {
+			diags := scanDiagnostics(d.e, uri, text)
+			d.mu.Lock()
+			defer d.mu.Unlock()
+			if !d.stopped && d.documents[uri] == revision {
+				// Publication and invalidation share mu: no newer event can slip between check and write.
+				notify(d.w, "textDocument/publishDiagnostics", map[string]any{"uri": uri, "diagnostics": diags})
+			}
+		},
+		func(any) { logx.Warn("lsp: diagnostics could not be published") },
 	)
 }
 
-// cancel drops any pending debounced scan for uri (e.g. on close, or when a save/open supersedes it).
-func (d *debouncer) cancel(uri string) {
+// close invalidates all work for uri before clearing its diagnostics.
+func (d *debouncer) close(uri string) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if t, ok := d.timers[uri]; ok {
-		t.Stop()
-		delete(d.timers, uri)
+	if d.stopped {
+		return
 	}
-	delete(d.pending, uri)
+	d.closeLocked(uri)
 }
 
-// stop halts all pending timers and waits for any in-flight scan to finish. Called on Serve exit.
-func (d *debouncer) stop() {
-	d.mu.Lock()
-	for uri, t := range d.timers {
-		t.Stop()
-		delete(d.timers, uri)
+func (d *debouncer) closeLocked(uri string) {
+	delete(d.opened, uri)
+	d.invalidateLocked(uri)
+	notify(d.w, "textDocument/publishDiagnostics", map[string]any{"uri": uri, "diagnostics": []map[string]any{}})
+}
+
+func (d *debouncer) invalidateLocked(uri string) {
+	if revision := d.documents[uri]; revision != nil {
+		if revision.timer != nil {
+			revision.timer.Stop()
+		}
+		revision.text = ""
+		delete(d.documents, uri)
 	}
-	d.pending = make(map[string]string)
+}
+
+// halt rejects new work and suppresses pending/in-flight publications before shutdown is acknowledged.
+func (d *debouncer) halt() {
+	d.mu.Lock()
+	d.stopped = true
+	clear(d.opened)
+	for uri := range d.documents {
+		d.invalidateLocked(uri)
+	}
 	d.mu.Unlock()
+}
+
+// stop also waits for scans already admitted; shutdown itself must not wait for exit or client input.
+func (d *debouncer) stop() {
+	d.halt()
 	d.wg.Wait()
 }
 
-// scanDiagnostics scans text with the same detector + rule engine + allowlist the CLI uses and
-// returns a diagnostic per surviving finding. Allowlisted findings are suppressed as scan.Run does,
-// and a document over the size cap is skipped (--max-size parity).
-func scanDiagnostics(e *engine, uri, text string) []map[string]any {
-	diags := []map[string]any{}
-	if e.maxBytes > 0 && len(text) > e.maxBytes {
-		logx.Info("lsp: document over size cap, skipping scan", "uri", uri, "bytes", len(text), "cap", e.maxBytes)
-		return diags // matches the CLI skipping a file above --max-size
-	}
-	path := uriToPath(uri) // allowlist path-substring matching needs a filesystem path, not a file:// URI
-	for _, m := range e.det.Scan(text) {
-		if e.allow != nil && e.allow(m.Value, path) {
-			continue
-		}
-		sl, sc := offsetPos(text, m.Start)
-		el, ec := offsetPos(text, m.End)
-		diags = append(diags, map[string]any{
-			"range": map[string]any{
-				"start": map[string]any{"line": sl, "character": sc},
-				"end":   map[string]any{"line": el, "character": ec},
-			},
-			"severity": lspSeverity(m.Category, m.Confidence),
-			"source":   "prowl",
-			"message":  fmt.Sprintf("possible secret: %s (conf %.2f, %s)", m.Type, m.Confidence, m.Stage),
-		})
-	}
-	if e.eng != nil { // installed ~/.prowl/rules templates, same as a flagless CLI scan
-		for _, h := range e.eng.Match(text) {
-			if e.allow != nil && e.allow(h.Value, path) {
-				continue
-			}
-			sl, sc := offsetPos(text, h.Start)
-			el, ec := offsetPos(text, h.End)
-			diags = append(diags, map[string]any{
-				"range": map[string]any{
-					"start": map[string]any{"line": sl, "character": sc},
-					"end":   map[string]any{"line": el, "character": ec},
-				},
-				"severity": ruleLSPSeverity(h.Severity, h.Category),
-				"source":   "prowl",
-				"message":  fmt.Sprintf("possible secret: %s (rule)", h.RuleID),
-			})
-		}
-	}
+// scanDiagnostics converts incomplete work into a resource-scoped warning instead of a clean result.
+func scanDiagnostics(e *engine, uri, text string) (diags []map[string]any) {
+	resilience.Guard(
+		func() { diags = collectDiagnostics(e, uri, text) },
+		func(any) {
+			// Panic payloads can contain the candidate that was being processed.
+			logx.Warn("lsp: scan failed; results are incomplete")
+			diags = []map[string]any{incompleteDiagnostic("scan_failed", "Проверка не завершена из-за внутренней ошибки.")}
+		},
+	)
 	return diags
 }
 
-// publish scans text and emits a publishDiagnostics notification for uri.
-func publish(w *safeWriter, e *engine, uri, text string) {
-	diags := scanDiagnostics(e, uri, text)
-	notify(w, "textDocument/publishDiagnostics", map[string]any{"uri": uri, "diagnostics": diags})
+func incompleteDiagnostic(code, message string) map[string]any {
+	return map[string]any{
+		"range": map[string]any{
+			"start": map[string]any{"line": 0, "character": 0},
+			"end":   map[string]any{"line": 0, "character": 0},
+		},
+		"severity": 2, "source": "prowl", "code": code, "message": message,
+	}
+}
+
+// collectDiagnostics shares one candidate budget across both producers. Reaching a limit is
+// reported independently of allowlisting and overlap deduplication, as it is in scan.Findings.
+func collectDiagnostics(e *engine, uri, text string) []map[string]any {
+	diags := []map[string]any{}
+	if e.maxBytes > 0 && len(text) > e.maxBytes {
+		return []map[string]any{incompleteDiagnostic("document_too_large",
+			fmt.Sprintf("Документ не проверен: размер %d байт превышает лимит %d байт.", len(text), e.maxBytes))}
+	}
+	path := uriToPath(uri) // allowlist path-substring matching needs a filesystem path, not a file:// URI
+	// Share final suppression and collision handling with CLI. No verifier or ML is attached here,
+	// so typing a document cannot make provider calls or send its contents to a sidecar.
+	coverage := model.NewCoverage()
+	findings := scan.Findings(model.WithCoverage(context.Background(), coverage), e.det, e.eng, nil, model.Item{Path: path, Text: text, Source: "code"}, e.allow, nil)
+	offsets := make([]int, 0, len(findings)*2)
+	for _, f := range findings {
+		offsets = append(offsets, f.ByteStart, f.ByteEnd)
+	}
+	positions := offsetPositions(text, offsets)
+	for _, f := range findings {
+		if model.IsIncompleteFinding(f) {
+			diags = append(diags, incompleteDiagnostic(f.Type, "Проверка неполная: "+f.Rationale))
+			continue
+		}
+		if f.ByteEnd <= f.ByteStart {
+			continue // truncation markers have no literal source span
+		}
+		start, end := positions[f.ByteStart], positions[f.ByteEnd]
+		diags = append(diags, map[string]any{
+			"range": map[string]any{
+				"start": map[string]any{"line": start[0], "character": start[1]},
+				"end":   map[string]any{"line": end[0], "character": end[1]},
+			},
+			"severity": ruleLSPSeverity(f.Severity, ""),
+			"source":   "prowl",
+			"message":  fmt.Sprintf("possible secret: %s (conf %.2f, %s)", f.Type, f.Confidence, f.Stage),
+		})
+	}
+	if complete, _, _ := coverage.Snapshot(); !complete {
+		hasIncomplete := false
+		for _, f := range findings {
+			hasIncomplete = hasIncomplete || model.IsIncompleteFinding(f)
+		}
+		if !hasIncomplete {
+			diags = append(diags, incompleteDiagnostic("scan_incomplete", "Проверка неполная: достигнут лимит или произошла ошибка."))
+		}
+	}
+	return diags
 }
 
 // uriToPath converts a file:// URI to a filesystem path (handling percent-encoding) so allowlist
@@ -452,9 +648,12 @@ func offsetPos(text string, off int) (int, int) {
 	line, col := 0, 0
 	for i := 0; i < off; {
 		r, size := utf8.DecodeRuneInString(text[i:])
-		if r == '\n' {
+		if r == '\n' || r == '\r' {
 			line++
 			col = 0
+			if r == '\r' && i+1 < len(text) && text[i+1] == '\n' {
+				i++
+			}
 			i++
 			continue
 		}
@@ -468,72 +667,87 @@ func offsetPos(text string, off int) (int, int) {
 	return line, col
 }
 
-// errBadFrame signals a malformed Content-Length header; the caller skips the frame
-// instead of treating it as a client disconnect.
-var errBadFrame = errors.New("lsp: malformed message frame")
-
-// readMessage reads one Content-Length-framed JSON-RPC message, rejecting a negative or oversized
-// length so a hostile frame can't panic make() or trigger a multi-GB allocation. A bad frame is
-// rejected without draining its claimed byte count (that would swallow following frames up to EOF);
-// instead the next ReadString resyncs by matching Content-Length anywhere in a header line, so the
-// server keeps answering requests after a malformed frame instead of going silent.
-func readMessage(r *bufio.Reader) ([]byte, error) {
-	length := -1
-	for {
-		line, err := r.ReadString('\n')
-		if err != nil {
-			return nil, err
-		}
-		line = strings.TrimRight(line, "\r\n")
-		if line == "" {
-			break
-		}
-		// Resync-tolerant: accept a Content-Length token even with prior-frame garbage glued to the front.
-		low := strings.ToLower(line)
-		if i := strings.Index(low, "content-length:"); i >= 0 {
-			n, err := strconv.Atoi(strings.TrimSpace(line[i+len("content-length:"):]))
-			if err != nil {
-				length = -1 // unparseable -> reject below
-				continue
+// offsetPositions converts a document's diagnostic endpoints in one forward UTF-8 pass. Calling
+// offsetPos for each match would repeatedly scan a minified document from byte zero.
+func offsetPositions(text string, offsets []int) map[int][2]int {
+	sort.Ints(offsets)
+	positions := make(map[int][2]int, len(offsets))
+	i, line, col := 0, 0, 0
+	for _, off := range offsets {
+		bounded := min(max(off, 0), len(text))
+		for i < bounded {
+			r, size := utf8.DecodeRuneInString(text[i:])
+			if r == '\n' || r == '\r' {
+				line++
+				col = 0
+				if r == '\r' && i+1 < len(text) && text[i+1] == '\n' {
+					size = 2
+				}
+			} else if r > 0xffff {
+				col += 2
+			} else {
+				col++
 			}
-			length = n
+			i += size
 		}
+		positions[off] = [2]int{line, col}
 	}
-	if length < 0 || length > maxMessageBytes {
-		// Don't drain the claimed count (it would consume the next valid frame); the next ReadString
-		// resyncs on the following frame's Content-Length, matched as a substring above.
-		return nil, fmt.Errorf("%w: content-length=%d (cap %d)", errBadFrame, length, maxMessageBytes)
-	}
-	buf := make([]byte, length)
-	if _, err := io.ReadFull(r, buf); err != nil {
-		return nil, err
-	}
-	return buf, nil
+	return positions
 }
 
 // safeWriter serializes JSON-RPC frame writes so concurrent publishers don't interleave bytes and
 // desync the client.
 type safeWriter struct {
-	mu sync.Mutex
-	w  *bufio.Writer
+	mu        sync.Mutex
+	w         *bufio.Writer
+	err       error
+	onFailure func() // immutable after the session starts; called once outside mu
 }
+
+var errOutput = errors.New("lsp: не удалось записать сообщение")
 
 func newSafeWriter(w *bufio.Writer) *safeWriter { return &safeWriter{w: w} }
 
 func (s *safeWriter) send(v any) {
+	s.mu.Lock()
+	failed := false
+	defer func() {
+		if recover() != nil {
+			s.err, failed = errOutput, true
+		}
+		callback := s.onFailure
+		s.mu.Unlock()
+		if failed && callback != nil {
+			callback()
+		}
+	}()
+	if s.err != nil {
+		return
+	}
+	if s.writeLocked(v) != nil {
+		// Writer/encoder errors can contain input data. Keep the public failure static.
+		s.err, failed = errOutput, true
+	}
+}
+
+func (s *safeWriter) writeLocked(v any) error {
 	b, err := json.Marshal(v)
 	if err != nil {
-		return
+		return err
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	if _, err := fmt.Fprintf(s.w, "Content-Length: %d\r\n\r\n", len(b)); err != nil {
-		return
+		return err
 	}
 	if _, err := s.w.Write(b); err != nil {
-		return
+		return err
 	}
-	_ = s.w.Flush()
+	return s.w.Flush()
+}
+
+func (s *safeWriter) Err() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.err
 }
 
 func respond(w *safeWriter, id json.RawMessage, result any) {
@@ -542,67 +756,4 @@ func respond(w *safeWriter, id json.RawMessage, result any) {
 
 func notify(w *safeWriter, method string, params any) {
 	w.send(map[string]any{"jsonrpc": "2.0", "method": method, "params": params})
-}
-
-func openParams(p json.RawMessage) (string, string) {
-	var v struct {
-		TextDocument struct {
-			URI  string `json:"uri"`
-			Text string `json:"text"`
-		} `json:"textDocument"`
-	}
-	if err := json.Unmarshal(p, &v); err != nil {
-		return "", ""
-	}
-	return v.TextDocument.URI, v.TextDocument.Text
-}
-
-func changeParams(p json.RawMessage) (string, string) {
-	var v struct {
-		TextDocument struct {
-			URI string `json:"uri"`
-		} `json:"textDocument"`
-		ContentChanges []struct {
-			Text string `json:"text"`
-		} `json:"contentChanges"`
-	}
-	if err := json.Unmarshal(p, &v); err != nil {
-		return "", ""
-	}
-	text := ""
-	if len(v.ContentChanges) > 0 {
-		text = v.ContentChanges[len(v.ContentChanges)-1].Text
-	}
-	return v.TextDocument.URI, text
-}
-
-// closeParams extracts the URI of a didClose notification (used to clear its diagnostics).
-func closeParams(p json.RawMessage) string {
-	var v struct {
-		TextDocument struct {
-			URI string `json:"uri"`
-		} `json:"textDocument"`
-	}
-	if err := json.Unmarshal(p, &v); err != nil {
-		return ""
-	}
-	return v.TextDocument.URI
-}
-
-// saveParams extracts the URI and optional full text of a didSave notification. hasText is false
-// when the client omitted the text, in which case the caller keeps the existing diagnostics.
-func saveParams(p json.RawMessage) (uri, text string, hasText bool) {
-	var v struct {
-		TextDocument struct {
-			URI string `json:"uri"`
-		} `json:"textDocument"`
-		Text *string `json:"text"`
-	}
-	if err := json.Unmarshal(p, &v); err != nil {
-		return "", "", false
-	}
-	if v.Text != nil {
-		return v.TextDocument.URI, *v.Text, true
-	}
-	return v.TextDocument.URI, "", false
 }

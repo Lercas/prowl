@@ -1,0 +1,424 @@
+{
+  "release": "1.4.0",
+  "schema": "1.4",
+  "detection_policy": "noise-3",
+  "timestamp_utc": "2026-10-02T15:54:30.319555+00:00",
+  "baseline": {
+    "commit": "64ffa86",
+    "binary_sha256": "b1ee770f8e4322ef390ea51db0c5537c4f947e948db55c18616b79e80bf43e43"
+  },
+  "source": {
+    "checkout": "/Users/sugar/dev/prowl-1.4.0",
+    "branch": "feat/1.4.0",
+    "manifest": "/tmp/prowl-1.4.0-encoding-20261002/qualified/source-manifest.json",
+    "manifest_sha256": "20edd22da825524e6536246ef028ed578161c0b4cdedde3a757fc4eb4cfaa28d",
+    "files": 564,
+    "excluded_self_referential_protocol": "wiki/evidence/1.4.0-encoding-validation-20261002.json"
+  },
+  "artifacts_root": "/tmp/prowl-1.4.0-encoding-20261002/qualified",
+  "artifacts": {
+    "prowl-140-qualified-action-selftest.json": {
+      "sha256": "958116d3aa462e19bf971a950f899acb39c825b5a7d29b96e6d944848c17600d",
+      "bytes": 542
+    },
+    "prowl-140-qualified-amd64-deep-noise-default.json": {
+      "sha256": "f0b39e861c0fa4bd523084eacb58d4817cc314055f5f6d6bfe789a2d65e1458e",
+      "bytes": 97346
+    },
+    "prowl-140-qualified-amd64-deep-noise-default.stderr": {
+      "sha256": "ee86775ee1c952a6741f0306e2a2e0a6e11ad9883f3d80ba838cb61f99fa5efc",
+      "bytes": 115
+    },
+    "prowl-140-qualified-amd64-deep-noise-ml.json": {
+      "sha256": "7e4c6d67f6c158ff6f65f66ee2794f8039805dd69c33351daa3142184a7115af",
+      "bytes": 103789
+    },
+    "prowl-140-qualified-amd64-deep-noise-ml.stderr": {
+      "sha256": "c4a204c354a3f2e8f86f02cb7baf197add3c83fa43351c691c967913183cfda9",
+      "bytes": 115
+    },
+    "prowl-140-qualified-amd64-encoding-default.json": {
+      "sha256": "0ac0fdbf505d6ea9d34dbd662dab58e692de1499c47f7582bede5d16b7253d63",
+      "bytes": 252670
+    },
+    "prowl-140-qualified-amd64-encoding-default.stderr": {
+      "sha256": "90e1831d1cd7d9b31bd48aa6e9f45dd18851cb5aae41ee1b6cd531b7b37da4f9",
+      "bytes": 118
+    },
+    "prowl-140-qualified-amd64-encoding-ml.json": {
+      "sha256": "1f1222209e1f7f3138d79693048dd494fd2dba8ad8f9009c5511d41cd85e5e2a",
+      "bytes": 266065
+    },
+    "prowl-140-qualified-amd64-encoding-ml.stderr": {
+      "sha256": "0d4b41c5b76ae670a1f533c6a5b6756d5e3281085c8ba934bec22c4f10e36953",
+      "bytes": 118
+    },
+    "prowl-140-qualified-amd64-noise-default.json": {
+      "sha256": "cefc7516eff6f970b3d5a29c4b3f6911a99957a3f6e33599f10542185f8e1044",
+      "bytes": 87146
+    },
+    "prowl-140-qualified-amd64-noise-default.stderr": {
+      "sha256": "1ac2f79f164ef70bdf93cbbb76259e712d65df6ca0e84eb1c6e685548013a736",
+      "bytes": 116
+    },
+    "prowl-140-qualified-amd64-noise-ml.json": {
+      "sha256": "290966df7a0e27b504fa75209c9ab75d997183f350ccd27259cce6bcf9ae4fad",
+      "bytes": 92299
+    },
+    "prowl-140-qualified-amd64-noise-ml.stderr": {
+      "sha256": "a9802770556332aee366ba93126e6f7219d625c6d49955424bec8846c4c88c8d",
+      "bytes": 116
+    },
+    "prowl-140-qualified-amd64-selftest.json": {
+      "sha256": "958116d3aa462e19bf971a950f899acb39c825b5a7d29b96e6d944848c17600d",
+      "bytes": 542
+    },
+    "prowl-140-qualified-arm64-deep-noise-default.json": {
+      "sha256": "f0b39e861c0fa4bd523084eacb58d4817cc314055f5f6d6bfe789a2d65e1458e",
+      "bytes": 97346
+    },
+    "prowl-140-qualified-arm64-deep-noise-default.stderr": {
+      "sha256": "6eeed23c72f5e242483f834be32a864b995b653a31265e48cbe1765d383294c5",
+      "bytes": 114
+    },
+    "prowl-140-qualified-arm64-deep-noise-ml.json": {
+      "sha256": "17c0d6f8506fba1ef1a312403a559159185eced5f625da08c9fd907a3145f4ce",
+      "bytes": 103792
+    },
+    "prowl-140-qualified-arm64-deep-noise-ml.stderr": {
+      "sha256": "ba2e2fecfa4e31342f8883f3e48af637362745913a6d2b6d583136c978f0264e",
+      "bytes": 114
+    },
+    "prowl-140-qualified-arm64-encoding-default.json": {
+      "sha256": "b76a711e8b19ee0e3c4861b8b3963e36a26280ca9394355dd9e7646109ee5d91",
+      "bytes": 252670
+    },
+    "prowl-140-qualified-arm64-encoding-default.stderr": {
+      "sha256": "379a678a7f384d19a93bcd75943fb3d8ead9cce2cf927e4880f080fa3d630690",
+      "bytes": 118
+    },
+    "prowl-140-qualified-arm64-encoding-ml.json": {
+      "sha256": "899fcea4a7facafb646c8fe5f0f30d6f837e523bdfb7e1b4d6214bcf8285d336",
+      "bytes": 266065
+    },
+    "prowl-140-qualified-arm64-encoding-ml.stderr": {
+      "sha256": "ececfc347a2321c8256958dcf5e3318ae46d54c0af971e628215d4ac30787fbf",
+      "bytes": 117
+    },
+    "prowl-140-qualified-arm64-noise-default.json": {
+      "sha256": "cefc7516eff6f970b3d5a29c4b3f6911a99957a3f6e33599f10542185f8e1044",
+      "bytes": 87146
+    },
+    "prowl-140-qualified-arm64-noise-default.stderr": {
+      "sha256": "2ada5e53e6ad4aad26f157755c1ee40cb95bcb7ccdab8b63fd29fcd984eff665",
+      "bytes": 116
+    },
+    "prowl-140-qualified-arm64-noise-ml.json": {
+      "sha256": "ff4614567eeef561c15730514c6b1820601530fd8156e93fdd41780e0fb3e24a",
+      "bytes": 92299
+    },
+    "prowl-140-qualified-arm64-noise-ml.stderr": {
+      "sha256": "d49f306c7328f8fa47eeb7f9804d23ea49b05ed43825e2caab688a5cbac932aa",
+      "bytes": 116
+    },
+    "prowl-140-qualified-arm64-selftest.json": {
+      "sha256": "958116d3aa462e19bf971a950f899acb39c825b5a7d29b96e6d944848c17600d",
+      "bytes": 542
+    },
+    "prowl-darwin-amd64": {
+      "sha256": "7c7cd1e3c8c5a9b9a7ba0ddf9abbdb489252a68544be066d4ed826748cefcdf4",
+      "bytes": 15754512
+    },
+    "prowl-darwin-arm64": {
+      "sha256": "a7968bbbbc9deade135a89e8237c9dc18669df2be820254af1b6857dc6227d62",
+      "bytes": 14918258
+    },
+    "prowl-linux-amd64": {
+      "sha256": "e463e501e98a93d592530732b9e15c519319a39b69b85521e4cff015d5df7986",
+      "bytes": 15433912
+    },
+    "prowl-linux-arm64": {
+      "sha256": "6be2f7fe000ee7458c5b4560ede16890923984d6ccccfcbd56da9df6e181b224",
+      "bytes": 14614712
+    },
+    "prowl-windows-amd64.exe": {
+      "sha256": "539a1f953c52e850567e95b796c0191159f185eb4171162b4d770535dd15b142",
+      "bytes": 15872000
+    },
+    "scan-amd64.test": {
+      "sha256": "db04876f1cdf0d4b7a7a14be3eda9e223314480ec967e70a5b1e1b2c9dca41b1"
+    }
+  },
+  "native_toolchain": "go version go1.27.1 darwin/arm64",
+  "static_toolchain": "go version go1.25.14 linux/arm64",
+  "checks": {
+    "native_race_suite": "passed",
+    "static_cgo0_full_suite": "passed",
+    "vet": "passed",
+    "lint_issues": 0,
+    "e2e_passed": 80,
+    "e2e_failed": 0,
+    "release_with_hook": 7,
+    "boundaries": 9,
+    "fuzz_inputs": 1187935,
+    "fuzz_duration_seconds": 15,
+    "representation_found": 18,
+    "representation_unsupported_reported": 0,
+    "policy_comparable": false,
+    "same_identity_scope": true,
+    "policy_compare_exit": 2
+  },
+  "prior_corpora": [
+    {
+      "fixture": "noise",
+      "truth_counts": {
+        "negative": 254,
+        "positive": 146,
+        "ambiguous": 2
+      },
+      "fixture_sha256": "d14e90016d17cc64340843bd0652dba016f407ab1f0b9f279c357963a8f8ae36",
+      "runs": [
+        {
+          "ml": false,
+          "positive_found": 146,
+          "missing": 0,
+          "wrong_types": 0,
+          "false_positive_cases": 0
+        },
+        {
+          "ml": true,
+          "positive_found": 146,
+          "missing": 0,
+          "wrong_types": 0,
+          "false_positive_cases": 0
+        }
+      ]
+    },
+    {
+      "fixture": "deep-noise",
+      "truth_counts": {
+        "positive": 162,
+        "negative": 80
+      },
+      "fixture_sha256": "1f99b40dba62bc9f40345e542064b5fbe4196d4725c23b9aeeef0ec8a8356727",
+      "runs": [
+        {
+          "ml": false,
+          "positive_found": 162,
+          "missing": 0,
+          "wrong_types": 0,
+          "false_positive_cases": 0
+        },
+        {
+          "ml": true,
+          "positive_found": 162,
+          "missing": 0,
+          "wrong_types": 0,
+          "false_positive_cases": 0
+        }
+      ]
+    }
+  ],
+  "encoding_corpus": {
+    "cases": 360,
+    "expected_credentials": 348,
+    "negative_cases": 108,
+    "truth_sha256": "b8736fa7c9c46db9351122c08ff223c1612acb45d2061115c96d260c6212ccde",
+    "seed": 2602101403,
+    "runs": [
+      {
+        "label": "before",
+        "ml": false,
+        "found": 12,
+        "missing": 336,
+        "negative_cases_with_findings": 24,
+        "wrong_spans": 0,
+        "binary_sha256": "b1ee770f8e4322ef390ea51db0c5537c4f947e948db55c18616b79e80bf43e43"
+      },
+      {
+        "label": "before",
+        "ml": true,
+        "found": 12,
+        "missing": 336,
+        "negative_cases_with_findings": 24,
+        "wrong_spans": 0,
+        "binary_sha256": "b1ee770f8e4322ef390ea51db0c5537c4f947e948db55c18616b79e80bf43e43"
+      },
+      {
+        "label": "after",
+        "ml": false,
+        "found": 348,
+        "missing": 0,
+        "negative_cases_with_findings": 0,
+        "wrong_spans": 0,
+        "binary_sha256": "a7968bbbbc9deade135a89e8237c9dc18669df2be820254af1b6857dc6227d62"
+      },
+      {
+        "label": "after",
+        "ml": true,
+        "found": 348,
+        "missing": 0,
+        "negative_cases_with_findings": 0,
+        "wrong_spans": 0,
+        "binary_sha256": "a7968bbbbc9deade135a89e8237c9dc18669df2be820254af1b6857dc6227d62"
+      }
+    ],
+    "identity_and_occurrences": true,
+    "strict_limit_exit": 2
+  },
+  "combined_controls": {
+    "cases": 1004,
+    "expected_credentials": 656,
+    "negative_cases": 442,
+    "ambiguous_cases": 2,
+    "modes": [
+      "default",
+      "ml"
+    ],
+    "expected_found": 656,
+    "false_positive_cases": 0
+  },
+  "containers": {
+    "images": {
+      "arm64": {
+        "id": "sha256:86759214ec8f9b8b415fccc5f2e68942a6f87d7d0a67b7d26c30b4ddb7a9f7f6",
+        "architecture": "arm64",
+        "user": "65532:65532",
+        "binary_sha256": "6be2f7fe000ee7458c5b4560ede16890923984d6ccccfcbd56da9df6e181b224",
+        "offline_selftest": true
+      },
+      "amd64": {
+        "id": "sha256:7e363f687647621832af47bf52bd5c77d6a33b8e01058505d806db3aa17b8e1c",
+        "architecture": "amd64",
+        "user": "65532:65532",
+        "binary_sha256": "e463e501e98a93d592530732b9e15c519319a39b69b85521e4cff015d5df7986",
+        "offline_selftest": true
+      },
+      "action": {
+        "id": "sha256:0c8b5443ece6a1460d76ee3cdbe3ad11e807a079b6b1918192a28be486ee11b2",
+        "architecture": "arm64",
+        "user": "",
+        "binary_sha256": "6be2f7fe000ee7458c5b4560ede16890923984d6ccccfcbd56da9df6e181b224",
+        "offline_selftest": true,
+        "sarif_results": 348
+      }
+    },
+    "runs": [
+      {
+        "case": "prowl-140-qualified-arm64-noise-default",
+        "positive_credentials": 146,
+        "negative_cases": 254,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-arm64-noise-ml",
+        "positive_credentials": 146,
+        "negative_cases": 254,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-arm64-deep-noise-default",
+        "positive_credentials": 162,
+        "negative_cases": 80,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-arm64-deep-noise-ml",
+        "positive_credentials": 162,
+        "negative_cases": 80,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-arm64-encoding-default",
+        "positive_credentials": 348,
+        "negative_cases": 108,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-arm64-encoding-ml",
+        "positive_credentials": 348,
+        "negative_cases": 108,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-noise-default",
+        "positive_credentials": 146,
+        "negative_cases": 254,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-noise-ml",
+        "positive_credentials": 146,
+        "negative_cases": 254,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-deep-noise-default",
+        "positive_credentials": 162,
+        "negative_cases": 80,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-deep-noise-ml",
+        "positive_credentials": 162,
+        "negative_cases": 80,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-encoding-default",
+        "positive_credentials": 348,
+        "negative_cases": 108,
+        "complete": true
+      },
+      {
+        "case": "prowl-140-qualified-amd64-encoding-ml",
+        "positive_credentials": 348,
+        "negative_cases": 108,
+        "complete": true
+      }
+    ],
+    "compiled_amd64_pipeline_tests": true
+  },
+  "runtime_boundaries": {
+    "darwin_arm64": "native CLI acceptance",
+    "linux_arm64": "non-root offline runtime",
+    "linux_amd64": "non-root offline runtime under emulation and compiled pipeline tests",
+    "darwin_amd64": "compiled; native runtime pending CI",
+    "windows_amd64": "compiled; native runtime pending CI",
+    "docker_action": "offline selftest and SARIF 348 results"
+  },
+  "evidence_files_sha256": {
+    "race.log": "49011f35e1c5b060b93574130d41f0abe0c5b4322a1811c0637ffb41184ed8b4",
+    "static-tests.log": "6b49ff646320d6d20a2b2ed659181b2978531b6089acf52e4f10f1e0c3edbc6c",
+    "lint.log": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+    "fuzz.log": "b6041c09ad0b24f33bd9bf15d4592ae9c17883f839b6373f536b7af02b60b641",
+    "e2e.log": "024d7ebc22a436ea5f428c5d8f305342a8be10a589bafda20fc5a44981ea6dc9",
+    "amd64-pipeline-tests.log": "c26de83abdc9496cd1301470918ec39ecca1cf389ef0ae1c6504da1800d1c431",
+    "encoding/encoding.json": "8c9742c567ea16369294bea8e89778ff60f8e18e7fa3426ddc150902b4f40784",
+    "noise/noise.json": "c25d250e51d02a08ad4ecd78fe8eba66395948518f5d16fd965bc898eda7a09c",
+    "deep-noise/noise.json": "8fd35e6b679581293022438cb6647b2701d668c91230160377a8a44c55d008c5",
+    "release-hook/acceptance.json": "9ee66024033e6d181af8b31504ec4530718e28143fb1f7f587fb520c6d02756c",
+    "boundaries/boundaries.json": "25ad77456db8fef841b29c3cbf6998376ad555d90f76752c6056cd3a9bbbedef",
+    "representation/benchmark.json": "ee320e522bc06fba0db64197382dccd55a94071de8c70f2f97b1f534712bfdd4",
+    "container-validation.json": "dddb89d2d3f313be214e954f127373e0ccfbe3b73f2667602d5b08d6912f2bd1",
+    "action.sarif": "48eb3db1c95ac00618f692b3a137b772e3413b26fb1ec2bceada8b275db169bf",
+    "policy-before.json": "fc284fdf63dc7dd7968d094eff72f47aa553307e6bacbb7bab3d0d113be1192a",
+    "policy-after.json": "b82b7e1205e39864e6c3eea8e7df293acb210de1b1945f01716d121d714bf481",
+    "policy-comparison.json": "e2e31cf08da5ab80f994f20d1b1696e165ac6ac86f8731dbb8c6bf0284693211"
+  },
+  "known_limits": [
+    "One Base64 layer; maximal single-line runs only",
+    "YAML adapter normalizes supported single-line password scalars, not all typed values",
+    "YAML anchors, aliases, block scalars and explicit tags are not reconstructed",
+    "Higher-confidence raw typed finding can suppress overlapping decoded spans",
+    "Budgets mark machine reports incomplete; generic candidates are not LIVE",
+    "Own synthetic controls do not establish independent market precision or recall"
+  ],
+  "installed_system": {
+    "binary": "v1.0.2",
+    "rules_version": "1.0.0",
+    "verifiers_version": "1.0.0",
+    "not_upgraded": true
+  },
+  "boundary": "Local owned synthetic controls. External provider verification disabled; verification tests use owned loopback mocks. No publication, push, deploy or installation. Containers and input files retained."
+}

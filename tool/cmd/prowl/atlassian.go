@@ -10,7 +10,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/atlassian"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
-	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
 func cmdJira(args []string) int       { return cmdAtlassian(args, "jira") }
@@ -64,16 +63,28 @@ func cmdAtlassian(args []string, product string) int {
 		opts.MaxItems = mustInt("--max-items", v, 1)
 	}
 
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
-	eng := loadEngine(c)
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
 	vset, verr := loadVerifySet(c)
 	if verr != nil {
 		logx.Error("verify setup failed", "err", verr)
+		return 2
+	}
+	if _, err := c.mlScorer(); err != nil {
+		logx.Error("ML setup failed", "err", err)
 		return 2
 	}
 
@@ -86,7 +97,7 @@ func cmdAtlassian(args []string, product string) int {
 		logx.Error("could not connect to "+product, "err", derr)
 		return 2
 	}
-	logx.Info("connected", "deployment", dep.String(), "base", dep.BaseURL, "history", !opts.CurrentOnly)
+	logx.Info("connected", "deployment", dep.String(), "history", !opts.CurrentOnly)
 
 	// Count emitted items so a scan that reaches NOTHING (credentials scoped to nothing, every project
 	// 403, a typo'd --project, a genuinely empty instance) fails loud rather than exiting 0 "clean".
@@ -107,8 +118,13 @@ func cmdAtlassian(args []string, product string) int {
 		}
 	}()
 
-	findings := scan.Run(ctx, counted, det, eng, vset, c.workers, cfg.Allowed, c.mlScorer())
+	findings := collectFindings(ctx, c, cfg, det, eng, vset, counted, c.dedupe)
+	if ctx.Err() != nil {
+		model.Note(ctx, "cancelled", "", true)
+	}
 	if itemCount.Load() == 0 && ctx.Err() == nil {
+		model.Note(ctx, "atlassian_empty_collection", base, true)
+		_ = writeReport(c, findings)
 		logx.Error("scanned 0 items — check credentials, the account's project/space access, and any --project/--space filter", "product", product)
 		return 2
 	}
@@ -121,7 +137,7 @@ func cmdAtlassian(args []string, product string) int {
 	// reportFindings (not the bare gate) so --baseline / --write-baseline / --min-severity /
 	// --min-confidence / --disable and the in-repo baseline/.gitleaksignore pickup all apply, exactly
 	// as for scan/repo/org/image/bucket.
-	return failClosedIfIncomplete(ctx, reportFindings(c, findings, time.Since(start)))
+	return reportScan(ctx, c, findings, time.Since(start))
 }
 
 // atlassianAuthFromEnv reads credentials from the environment. ATLASSIAN_API_LOGIN /

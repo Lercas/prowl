@@ -47,6 +47,10 @@ prowl serve [--addr :8080] [--max-concurrent N]
 
 The worker uses the same detection engine, taxonomy, external rules, and config (`.prowl.yaml` allowlist) as the CLI — see [Configuration](Configuration.md). The detector and allowlist are loaded once at startup; the worker is safe for concurrent use.
 
+HTTP-сканер выполняет L1 и шаблоны без live-верификации. Флаги `--verify`,
+`--verified-only` и `--fail-on-verified` для `serve` отклоняются с кодом `2`
+до открытия порта. Для проверки ключей используйте `scan --verify`.
+
 On `SIGINT`/`SIGTERM` the server stops accepting new connections and drains in-flight requests within a 10s deadline before exiting.
 
 ## API
@@ -74,7 +78,7 @@ Each `Finding` carries `detector`, `type`, `confidence`, `severity`, `source`, `
 ```sh
 curl -s localhost:8080/scan \
   -H 'content-type: application/json' \
-  -d '{"source":"slack","path":"#deploys","content":"token: xoxb-123456789012-abcdefghijklmnop"}' | jq
+  -d '{"source":"slack","path":"#deploys","content":"token: x''oxb-123456789012-abcdefghijklmnop"}' | jq
 ```
 
 ### `POST /scan/batch`

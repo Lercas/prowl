@@ -1,0 +1,250 @@
+{
+  "version": "1.4.0",
+  "revision": "eb7704ed34711b19859b94917c956da3f2a5aae3",
+  "detection_policy": "noise-10",
+  "toolchain": "go1.25.14 darwin/arm64",
+  "binary_sha256": "efa2196cf54433ea4a014f21c4f254393a003a3244cd8529a7f699feb86e16c1",
+  "corpora": [
+    {
+      "name": "noise",
+      "scenarios": 402,
+      "expected_credentials": 146,
+      "negative_scenarios": 254,
+      "ambiguous_scenarios": 2,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "noise/noise.json"
+    },
+    {
+      "name": "deep",
+      "scenarios": 242,
+      "expected_credentials": 162,
+      "negative_scenarios": 80,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "deep/noise.json"
+    },
+    {
+      "name": "json-literals",
+      "scenarios": 324,
+      "expected_credentials": 252,
+      "negative_scenarios": 108,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "json-literals/json-literals.json"
+    },
+    {
+      "name": "toml-literals",
+      "scenarios": 384,
+      "expected_credentials": 264,
+      "negative_scenarios": 132,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "toml-literals/toml-literals.json"
+    },
+    {
+      "name": "yaml-literals",
+      "scenarios": 648,
+      "expected_credentials": 588,
+      "negative_scenarios": 168,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "yaml-literals/yaml-literals.json"
+    },
+    {
+      "name": "encoding",
+      "scenarios": 780,
+      "expected_credentials": 1068,
+      "negative_scenarios": 96,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "encoding/encoding.json"
+    },
+    {
+      "name": "password-roles",
+      "scenarios": 1104,
+      "expected_credentials": 624,
+      "negative_scenarios": 480,
+      "ambiguous_scenarios": 0,
+      "modes": [
+        "default",
+        "embedded ML"
+      ],
+      "all_expected_found": true,
+      "negative_scenarios_with_findings": 0,
+      "evidence": "password-roles/runs/noise.json"
+    }
+  ],
+  "source_receipt": {
+    "revision": "eb7704ed34711b19859b94917c956da3f2a5aae3",
+    "clean": true,
+    "embedded_vcs_metadata": false,
+    "boundary": "Revision checked against the clean source checkout; this Go 1.25 build omits embedded VCS fields."
+  },
+  "totals": {
+    "scenarios": 3884,
+    "expected_credentials": 3104,
+    "negative_scenarios": 1318,
+    "ambiguous_scenarios": 2,
+    "all_expected_found": true,
+    "negative_scenarios_with_findings": 0
+  },
+  "interfaces": [
+    {
+      "name": "interfaces",
+      "checks": 24,
+      "passed": true,
+      "evidence": "interfaces/interfaces.json"
+    },
+    {
+      "name": "consumer",
+      "checks": 8,
+      "passed": true,
+      "evidence": "consumer/acceptance.json"
+    },
+    {
+      "name": "pipeline",
+      "checks": 51,
+      "passed": true,
+      "evidence": "pipeline/pipeline-evidence.json"
+    },
+    {
+      "name": "boundaries",
+      "checks": 9,
+      "passed": true,
+      "evidence": "boundaries/boundaries.json"
+    }
+  ],
+  "e2e": {
+    "passed": 80,
+    "failed": 0
+  },
+  "race": {
+    "passed": true,
+    "command": "GOTOOLCHAIN=go1.25.14 go test -race -p 2 ./... -count=1"
+  },
+  "vet": {
+    "passed": true
+  },
+  "lint": {
+    "issues": 0
+  },
+  "http_unicode_fuzz": {
+    "passed": true,
+    "log": "fuzz-http-unicode.log"
+  },
+  "artifacts": [
+    {
+      "name": "prowl-darwin-amd64",
+      "sha256": "bf7044c92607b85f4649787ecb22fe97df88eef74b063f2c6df81b18c5641378",
+      "bytes": 15916992,
+      "runtime_status": "compile_only",
+      "release_matrix": "canonical"
+    },
+    {
+      "name": "prowl-darwin-arm64",
+      "sha256": "efa2196cf54433ea4a014f21c4f254393a003a3244cd8529a7f699feb86e16c1",
+      "bytes": 15069634,
+      "runtime_status": "validated_native",
+      "release_matrix": "canonical"
+    },
+    {
+      "name": "prowl-linux-amd64",
+      "sha256": "5ddd353c5b6685262b5d4dea460861186c1a93d32a361bc3cc155c42048b069f",
+      "bytes": 15593656,
+      "runtime_status": "compile_only",
+      "release_matrix": "canonical"
+    },
+    {
+      "name": "prowl-linux-arm64",
+      "sha256": "579c6a3ea516d0dd3a6d54c10e2089e8ed8745863cfa14becc68e0086af01d16",
+      "bytes": 14745784,
+      "runtime_status": "compile_only",
+      "release_matrix": "canonical"
+    },
+    {
+      "name": "prowl-windows-amd64.exe",
+      "sha256": "2f16c3cbc40798355220150246eff2c22dee4ea572228628f53b3008e083a360",
+      "bytes": 16035840,
+      "runtime_status": "compile_only",
+      "release_matrix": "canonical"
+    },
+    {
+      "name": "prowl-windows-arm64.exe",
+      "sha256": "428edc6e104f234b7b0fd85a5e8bb0cddb18faab363bff8a7f44bdd9a48f3ae0",
+      "bytes": 14905344,
+      "runtime_status": "compile_only",
+      "release_matrix": "optional"
+    }
+  ],
+  "docker": {
+    "status": "not_qualified",
+    "reason": "Docker API timed out; user requested leaving Docker unchanged. Current images/runtime were not qualified. Earlier source builds are checkpoint evidence only."
+  },
+  "boundaries": [
+    "Owned synthetic data and loopback mocks; no live provider or external target scans.",
+    "No independent real-world accuracy or market dominance proof.",
+    "Windows/macOS Intel compile only; Linux current artifacts need runtime qualification.",
+    "No push, tag, publication, deploy, global install or removal.",
+    "Earlier timing-test failures retained; causal concurrency passed 10 race runs. Long-line threshold unchanged."
+  ],
+  "archive_qa": {
+    "passed": true,
+    "checksums_verified": 38,
+    "native_selftest_ml": true,
+    "native_fixture_scan": true,
+    "archive_sha256": "7b18d8cc414e2a9357f579531f051eeef99cb00932f30fd3b07c9f717d3575cb",
+    "artifact_dir": "/Users/sugar/dev/prowl-1.4.0-artifacts/eb7704e",
+    "scope": "Archive extracted into a new owned directory; no provider requests or global install."
+  },
+  "artifact": {
+    "path": "/Users/sugar/dev/prowl-1.4.0-artifacts/eb7704e/prowl-1.4.0-candidate-eb7704e.tar.gz",
+    "sha256": "7b18d8cc414e2a9357f579531f051eeef99cb00932f30fd3b07c9f717d3575cb",
+    "bytes": 37614324
+  },
+  "additional_controls": {
+    "causal_concurrency_race_repeats": 10,
+    "long_line_isolated_race_repeats": 3,
+    "long_line_isolated_seconds": [
+      6.07,
+      6.14,
+      6.13
+    ],
+    "long_line_limit_seconds": 15,
+    "earlier_failed_race_logs": [
+      "/tmp/prowl-1.4.0-fivehour-20261002/release-de53168/race.log",
+      "/tmp/prowl-1.4.0-fivehour-20261002/release-go125-de53168/race.log"
+    ],
+    "failed_gate_resolution": "Wall-time pool test replaced with causal barrier; long-line threshold unchanged; complete Go 1.25 race qualified with -p 2."
+  },
+  "lifecycle_boundary": "Owned install/update/doctor/identity controls; local --check created no target. No global install, remote update, crash-atomicity or customer acceptance claim."
+}

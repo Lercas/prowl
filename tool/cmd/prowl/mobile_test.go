@@ -6,6 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +19,7 @@ import (
 )
 
 const (
-	mobAWSKey  = "AKIA4MNQ2RST7UVWX9YZ"
+	mobAWSKey  = "\x41KIA4MNQ2RST7UVWX9YZ"
 	mobAizaKey = "AIzaSyEXAMPLEplaceholder"
 )
 
@@ -92,6 +95,70 @@ func TestCmdMobileLocalAPK(t *testing.T) {
 func TestCmdMobileMissingFile(t *testing.T) {
 	if code := cmdMobile([]string{filepath.Join(t.TempDir(), "no-such.apk")}); code != 2 {
 		t.Fatalf("exit = %d, want 2 for a missing file", code)
+	}
+}
+
+func TestMobileIncompleteScanBlocksBaseline(t *testing.T) {
+	apk := writeAPK(t, map[string][]byte{
+		"prod.env":  []byte("AWS = \"" + mobAWSKey + "\""),
+		"large.txt": bytes.Repeat([]byte("x"), 600),
+	})
+	t.Setenv("PROWL_HOME", t.TempDir())
+	for _, baseline := range []bool{false, true} {
+		out := filepath.Join(t.TempDir(), "report.json")
+		baselinePath := filepath.Join(t.TempDir(), "baseline.json")
+		args := []string{apk, "--max-size", "512", "--format", "json", "--output", out, "--silence", "--fail-on", "high"}
+		if baseline {
+			args = append(args, "--write-baseline", baselinePath)
+		}
+		if code := cmdMobile(args); code != 2 {
+			t.Fatalf("baseline=%v: incomplete mobile scan returned %d", baseline, code)
+		}
+		if baseline {
+			if _, err := os.Stat(baselinePath); !os.IsNotExist(err) {
+				t.Fatalf("baseline created from incomplete extraction: %v", err)
+			}
+			continue
+		}
+		raw, err := os.ReadFile(out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var report struct {
+			Truncated bool
+			Findings  []json.RawMessage
+		}
+		if err := json.Unmarshal(raw, &report); err != nil || !report.Truncated || len(report.Findings) < 2 {
+			t.Fatalf("mobile partial findings or marker missing: %s err=%v", raw, err)
+		}
+	}
+}
+
+func TestMobileDownloadRejectsOversizeInsteadOfClipping(t *testing.T) {
+	safehttp.AllowPrivate.Store(true)
+	t.Cleanup(func() { safehttp.AllowPrivate.Store(false) })
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("123456789"))
+	}))
+	defer api.Close()
+	for _, maxBytes := range []int64{2, 3} {
+		path, err := downloadToTemp(context.Background(), api.URL+"/app.apk", t.TempDir(), maxBytes, time.Second)
+		if maxBytes == 2 {
+			if err == nil || path != "" {
+				t.Fatal("oversized download silently clipped")
+			}
+		} else {
+			if err != nil {
+				t.Fatal(err)
+			}
+			raw, err := os.ReadFile(path)
+			if err != nil || string(raw) != "123456789" {
+				t.Fatalf("under-limit download changed: %q err=%v", raw, err)
+			}
+		}
+	}
+	if got := mobileDownloadLimit(math.MaxInt64); got != math.MaxInt64-1 {
+		t.Fatalf("large download limit overflowed: %d", got)
 	}
 }
 

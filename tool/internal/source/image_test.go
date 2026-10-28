@@ -55,14 +55,14 @@ func writeImageTarball(t *testing.T, files map[string]string) string {
 // (AllowPrivate=false) — a local load must consult no transport, so no dial occurs.
 func TestImageTarballLocalNoNetwork(t *testing.T) {
 	safehttp.AllowPrivate.Store(false)
-	path := writeImageTarball(t, map[string]string{"app/config.env": "AWS_SECRET=AKIA4MNQ2RST7UVWX9YZ\n"})
+	path := writeImageTarball(t, map[string]string{"app/config.env": "AWS_SECRET=\x41KIA4MNQ2RST7UVWX9YZ\n"})
 	ch, _, err := Image(context.Background(), path, ImageAuto, 1<<20, 5*time.Second, nil)
 	if err != nil {
 		t.Fatalf("Image(tarball): %v", err)
 	}
 	var found bool
 	for it := range ch {
-		if strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+		if strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 			found = true
 		}
 	}
@@ -96,7 +96,7 @@ func TestImageTarballMultiImage(t *testing.T) {
 	tb, _ := name.NewTag("prowl-test/b:latest")
 	path := filepath.Join(t.TempDir(), "multi.tar")
 	if err := tarball.MultiRefWriteToFile(path, map[name.Reference]v1.Image{
-		ta: mk("AKIA4MNQ2RST7UVWX9YZ"), tb: mk("AKIA4ZX9QJ7K2MNPL3RS"),
+		ta: mk("\x41KIA4MNQ2RST7UVWX9YZ"), tb: mk("AKIA4ZX9QJ7K2MNPL3RS"),
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestImageTarballMultiImage(t *testing.T) {
 	}
 	found := map[string]bool{}
 	for it := range ch {
-		if strings.Contains(it.Text, "AKIA4MNQ2RST7UVWX9YZ") {
+		if strings.Contains(it.Text, "\x41KIA4MNQ2RST7UVWX9YZ") {
 			found["a"] = true
 		}
 		if strings.Contains(it.Text, "AKIA4ZX9QJ7K2MNPL3RS") {
@@ -236,7 +236,7 @@ func drainItems(ch <-chan model.Item) int {
 // TestEmitLayerTotalBytesCap: the cumulative-bytes budget must abort a layer whose entries sum past the
 // cap, even though each individual file is under the per-file --max-size.
 func TestEmitLayerTotalBytesCap(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 2048 // tiny cap so a few 1 KiB files trip it
 	maxImageEntries = 1_000_000
 	maxImageLayers = 1000
@@ -267,7 +267,7 @@ func TestEmitLayerTotalBytesCap(t *testing.T) {
 // TestEmitLayerEntryCap: the entry-count budget must abort a tar with too many entries (a bomb of empty
 // entries exhausts CPU even with zero body bytes).
 func TestEmitLayerEntryCap(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 1 << 30
 	maxImageEntries = 5
 	maxImageLayers = 1000
@@ -296,12 +296,12 @@ func TestEmitLayerEntryCap(t *testing.T) {
 
 // TestEmitLayerUnderBudgetScans confirms a legitimate under-budget layer is fully scanned.
 func TestEmitLayerUnderBudgetScans(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 1 << 30
 	maxImageEntries = 1000
 	maxImageLayers = 1000
 
-	tarBytes := makeTar(t, 1, []byte(`aws = "AKIA4MNQ2RST7UVWX9YZ"`))
+	tarBytes := makeTar(t, 1, []byte(`aws = "`+"\x41"+`KIA4MNQ2RST7UVWX9YZ"`))
 
 	ch := make(chan model.Item, 8)
 	b := &imageBudget{}

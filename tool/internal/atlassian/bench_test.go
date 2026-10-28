@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -35,6 +36,10 @@ func timeCollect(base string, opts Options) time.Duration {
 // is dominated by latency (the real-world bottleneck the worker pool targets). It serves `n` issues
 // and implements the BULK changelog endpoint, so history costs one round-trip per jiraBatchSize issues.
 func latencyJiraMock(n int, lat time.Duration) *httptest.Server {
+	return jiraMockWithBulkGate(n, lat, nil)
+}
+
+func jiraMockWithBulkGate(n int, lat time.Duration, gate func(context.Context)) *httptest.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/rest/api/2/serverInfo", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"deploymentType":"Cloud"}`))
@@ -55,6 +60,9 @@ func latencyJiraMock(n int, lat time.Duration) *httptest.Server {
 		w.Write([]byte(b.String()))
 	})
 	mux.HandleFunc("/rest/api/3/changelog/bulkfetch", func(w http.ResponseWriter, r *http.Request) {
+		if gate != nil {
+			gate(r.Context())
+		}
 		time.Sleep(lat) // ONE latency-bound round-trip per batch of issues — the win over per-issue
 		var body struct {
 			IssueIdsOrKeys []string `json:"issueIdsOrKeys"`
@@ -88,22 +96,42 @@ func BenchmarkParallelSpeedup(b *testing.B) {
 	}
 }
 
-// TestParallelSpeedupReal asserts the worker pool delivers a real wall-time speedup: with 8 batches of
-// latency-bound bulk-history fetches, 8 workers must be markedly faster than 1. A loose 2x bound
-// (theoretical ~8x) keeps it robust against CI scheduling jitter.
-func TestParallelSpeedupReal(t *testing.T) {
-	if testing.Short() {
-		t.Skip("timing test")
-	}
+// All eight handlers must enter before any may respond. A serialized or collapsed pool fails
+// directly, without comparing wall-time ratios distorted by race instrumentation/host contention.
+func TestParallelBulkRequestsConcurrent(t *testing.T) {
 	const n = 400
-	lat := 10 * time.Millisecond
-	srv := latencyJiraMock(n, lat)
+	entered := make(chan struct{}, 8)
+	unblock := make(chan struct{})
+	var once sync.Once
+	release := func() { once.Do(func() { close(unblock) }) }
+	srv := jiraMockWithBulkGate(n, 0, func(ctx context.Context) {
+		entered <- struct{}{}
+		select {
+		case <-unblock:
+		case <-ctx.Done():
+		}
+	})
 	defer srv.Close()
+	defer release()
+	done := make(chan int, 1)
+	go func() { done <- drainCollect(srv.URL, Options{Workers: 8}) }()
+	timeout := time.NewTimer(10 * time.Second)
+	defer timeout.Stop()
+	for i := 0; i < 8; i++ {
+		select {
+		case <-entered:
+		case <-timeout.C:
+			t.Fatalf("only %d/8 bulk requests entered while responses were blocked", i)
+		}
+	}
+	release()
 
-	seq := timeCollect(srv.URL, Options{Workers: 1})
-	par := timeCollect(srv.URL, Options{Workers: 8})
-	t.Logf("sequential(1 worker)=%v  parallel(8 workers)=%v  speedup=%.1fx", seq, par, float64(seq)/float64(par))
-	if par >= seq/2 {
-		t.Fatalf("worker pool gave no real speedup: 1-worker=%v 8-worker=%v (want 8-worker < 1-worker/2)", seq, par)
+	select {
+	case count := <-done:
+		if count != 2*n {
+			t.Fatalf("parallel collection lost current/history items: got %d want %d", count, 2*n)
+		}
+	case <-timeout.C:
+		t.Fatal("parallel collection did not finish after releasing responses")
 	}
 }

@@ -2,6 +2,10 @@ package atlassian
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -21,16 +25,22 @@ func jiraAPIVer(dep Deployment) string {
 	return "2" // Server/DC: v2 only, bodies are wiki-markup strings.
 }
 
+func jiraBrowseURL(dep Deployment, key string) string {
+	return dep.BaseURL + "/browse/" + url.PathEscape(key)
+}
+
 // --- response shapes -------------------------------------------------------
 
 type jiraProjectPage struct {
-	StartAt    int  `json:"startAt"`
-	MaxResults int  `json:"maxResults"`
-	Total      int  `json:"total"`
-	IsLast     bool `json:"isLast"`
-	Values     []struct {
-		Key string `json:"key"`
-	} `json:"values"`
+	StartAt    int           `json:"startAt"`
+	MaxResults int           `json:"maxResults"`
+	Total      int           `json:"total"`
+	IsLast     bool          `json:"isLast"`
+	Values     []jiraProject `json:"values"`
+}
+
+type jiraProject struct {
+	Key string `json:"key"`
 }
 
 type jiraIssue struct {
@@ -86,7 +96,7 @@ type jiraChangelogPage struct {
 }
 
 func (p jiraChangelogPage) entries() []jiraHistory {
-	if len(p.Values) > 0 {
+	if p.Values != nil {
 		return p.Values
 	}
 	return p.Histories
@@ -96,12 +106,12 @@ func (p jiraChangelogPage) entries() []jiraHistory {
 
 // walkJira drives the whole Jira scan: projects -> issues (oldest first) -> current content + full
 // changelog history. Each scannable unit is handed to emit as a model.Item. It returns the first
-// fatal error (auth/enumeration); per-issue errors are logged and skipped so one bad issue does not
-// abort the run.
+// fatal error (auth/enumeration); individual source errors are emitted as diagnostics so one bad
+// issue does not abort the remaining work or silently certify complete coverage.
 func walkJira(ctx context.Context, c *Client, dep Deployment, opts Options, emit func(model.Item)) error {
 	keys, err := jiraProjects(ctx, c, dep, opts.Projects)
 	if err != nil {
-		return err
+		emit(sourceFailure("jira", "projects", "project listing failed"))
 	}
 	logx.Info("jira: scanning projects", "count", len(keys), "deployment", dep.String(),
 		"history", !opts.CurrentOnly, "workers", workerCount(opts))
@@ -130,7 +140,7 @@ func walkJira(ctx context.Context, c *Client, dep Deployment, opts Options, emit
 					}
 				})
 				if err != nil {
-					logx.Warn("jira: project enumeration stopped early", "project", pk, "err", err)
+					emit(sourceFailure("jira", pk, "project enumeration failed"))
 				}
 			}
 			if len(hbatch) > 0 {
@@ -165,7 +175,7 @@ func jiraDoJob(ctx context.Context, c *Client, dep Deployment, opts Options, j j
 	jiraScanComments(ctx, c, dep, iss, emit)
 	if !opts.CurrentOnly && !dep.Cloud() { // Server/DC has no bulk endpoint -> per-issue history here
 		if err := jiraScanHistory(ctx, c, dep, iss.Key, emit); err != nil {
-			logx.Warn("jira: changelog fetch failed", "issue", iss.Key, "err", err)
+			emit(sourceFailure("jira", iss.Key, "changelog fetch failed"))
 		}
 	}
 }
@@ -191,13 +201,24 @@ func jiraBulkHistory(ctx context.Context, c *Client, dep Deployment, batch []jir
 			idToKey[iss.ID] = iss.Key
 		}
 	}
-	if len(ids) == 0 {
-		return
+	// De-duplicate history emitted before an interrupted bulk fetch and its full fallback.
+	originalEmit := emit
+	emitted := map[[32]byte]bool{}
+	emit = func(it model.Item) {
+		if it.Error == nil {
+			identity := sha256.Sum256([]byte(it.Path + "\x00" + it.Text))
+			if emitted[identity] {
+				return
+			}
+			emitted[identity] = true
+		}
+		originalEmit(it)
 	}
+	var walk cursorWalk
 	seen := make(map[string]bool, len(ids))
 	errored := false
 	token := ""
-	for pages := 0; ; pages++ {
+	for len(ids) > 0 {
 		if ctx.Err() != nil {
 			return
 		}
@@ -207,13 +228,8 @@ func jiraBulkHistory(ctx context.Context, c *Client, dep Deployment, batch []jir
 		}
 		var page jiraBulkHistoryPage
 		if err := c.post(ctx, "/rest/api/3/changelog/bulkfetch", nil, body, &page); err != nil {
-			// Any failure — endpoint gone (404/405 on an older Cloud) or transient (5xx/network) on the
-			// first OR a later page — stops pagination; the post-loop fallback then fetches the UNSEEN
-			// issues per-issue. Issues already emitted from earlier pages are in `seen`, so they are NOT
-			// re-fetched (no double-emit), and issues that only appear on dropped later pages are not lost.
-			if s := statusOf(err); s != 404 && s != 405 {
-				logx.Warn("jira: bulk changelog failed", "err", err)
-			}
+			// A later page can contain more history for an issue already seen. Refetch the
+			// entire batch on interruption, including those issues, rather than only unseen IDs.
 			errored = true
 			break
 		}
@@ -227,26 +243,29 @@ func jiraBulkHistory(ctx context.Context, c *Client, dep Deployment, batch []jir
 				jiraEmitHistory(dep, key, h, emit)
 			}
 		}
-		if page.NextPageToken == "" || page.NextPageToken == token || pages >= maxPages {
+		if walk.advance(page.NextPageToken) != nil {
+			errored = true
+			break
+		}
+		if page.NextPageToken == "" {
 			break
 		}
 		token = page.NextPageToken
 	}
-	// Per-issue fallback for issues NOT emitted by the bulk response. On an ERROR, fetch every unseen
-	// issue (its history was genuinely not retrieved). On a CLEAN run, only fall back when a MINORITY are
-	// missing — a large omission means the endpoint simply does not return no-history issues (correct to
-	// skip), and falling back on all of them would defeat the batch.
 	var missing []jiraIssue
 	for _, iss := range batch {
-		if iss.ID != "" && !seen[iss.ID] {
+		if errored || iss.ID == "" || !seen[iss.ID] {
 			missing = append(missing, iss)
 		}
 	}
-	if len(missing) > 0 && (errored || len(missing)*2 <= len(ids)) {
-		for _, iss := range missing {
-			if e := jiraScanHistory(ctx, c, dep, iss.Key, emit); e != nil {
-				logx.Warn("jira: changelog fetch failed", "issue", iss.Key, "err", e)
-			}
+	for _, iss := range missing {
+		// A clean bulk response omits issues without history; retain the existing minority
+		// fallback, but always fetch issues whose ID was missing from search.
+		if !errored && iss.ID != "" && len(missing)*2 > len(ids) {
+			continue
+		}
+		if e := jiraScanHistory(ctx, c, dep, iss.Key, emit); e != nil {
+			emit(sourceFailure("jira", iss.Key, "changelog fallback failed"))
 		}
 	}
 }
@@ -257,9 +276,7 @@ func jiraProjects(ctx context.Context, c *Client, dep Deployment, filter []strin
 	}
 	v := jiraAPIVer(dep)
 	if !dep.Cloud() {
-		var projects []struct {
-			Key string `json:"key"`
-		}
+		var projects []jiraProject
 		if err := c.get(ctx, "/rest/api/"+v+"/project", nil, &projects); err != nil {
 			return nil, err
 		}
@@ -287,7 +304,13 @@ func jiraProjects(ctx context.Context, c *Client, dep Deployment, filter []strin
 				keys = append(keys, p.Key)
 			}
 		}
-		if page.IsLast || len(page.Values) == 0 {
+		if page.IsLast {
+			break
+		}
+		if len(page.Values) == 0 {
+			if page.Total > startAt {
+				return keys, fmt.Errorf("project listing ended before total")
+			}
 			break
 		}
 		step := page.MaxResults
@@ -295,8 +318,11 @@ func jiraProjects(ctx context.Context, c *Client, dep Deployment, filter []strin
 			step = len(page.Values)
 		}
 		startAt += step
-		if (page.Total > 0 && startAt >= page.Total) || pages >= maxPages {
+		if page.Total > 0 && startAt >= page.Total {
 			break
+		}
+		if pages+1 >= maxPages {
+			return keys, fmt.Errorf("project page budget exhausted")
 		}
 	}
 	return keys, nil
@@ -321,7 +347,8 @@ func jiraEnumProject(ctx context.Context, c *Client, dep Deployment, projectKey 
 	if dep.Cloud() {
 		// Cloud: GET /search/jql, cursor pagination (no total/startAt), fields REQUIRED (T7/T8).
 		token := ""
-		for pages := 0; ; pages++ {
+		var walk cursorWalk
+		for {
 			if err := ctx.Err(); err != nil {
 				return err
 			}
@@ -338,10 +365,16 @@ func jiraEnumProject(ctx context.Context, c *Client, dep Deployment, projectKey 
 			}
 			// Terminate ONLY on no cursor or isLast — an empty page that still carries a
 			// nextPageToken is legitimate (results still materializing, or a fully permission-
-			// filtered page), so len(issues)==0 must NOT stop the walk. The token==token guard stops a
-			// repeated cursor; the pages cap stops a server that streams distinct empty cursors forever
+			// filtered page), so len(issues)==0 must NOT stop the walk. The cursor walk detects cycles;
+			// the pages cap stops a server that streams distinct empty cursors forever
 			// (the item budget can't, since it only fires inside emit and an empty page emits nothing).
-			if page.NextPageToken == "" || page.IsLast || page.NextPageToken == token || pages >= maxPages {
+			if page.IsLast {
+				return nil
+			}
+			if err := walk.advance(page.NextPageToken); err != nil {
+				return err
+			}
+			if page.NextPageToken == "" {
 				return nil
 			}
 			token = page.NextPageToken
@@ -370,15 +403,17 @@ func jiraEnumProject(ctx context.Context, c *Client, dep Deployment, projectKey 
 		}
 		got := len(page.Issues)
 		if got == 0 {
+			if page.Total > startAt {
+				return fmt.Errorf("issue listing ended before total")
+			}
 			return nil
 		}
 		startAt += got
 		if page.Total > 0 && startAt >= page.Total {
 			return nil
 		}
-		if pages >= maxPages {
-			logx.Warn("jira: search page cap reached — some issues not enumerated", "project", projectKey)
-			return nil
+		if pages+1 >= maxPages {
+			return fmt.Errorf("issue page budget exhausted")
 		}
 	}
 }
@@ -402,7 +437,7 @@ func jiraEmitCurrent(dep Deployment, scanFields []string, iss jiraIssue, emit fu
 		Path:   iss.Key,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     dep.BaseURL + "/browse/" + iss.Key,
+			"url":     jiraBrowseURL(dep, iss.Key),
 			"version": "current",
 		},
 	})
@@ -423,27 +458,71 @@ type jiraCommentPage struct {
 // otherwise an old comment that holds a secret is silently missed. Each comment is its own item so
 // one chatty issue can't fill the per-item match cap and so the path attributes the finding.
 func jiraScanComments(ctx context.Context, c *Client, dep Deployment, iss jiraIssue, emit func(model.Item)) {
-	cm, _ := iss.Fields["comment"].(map[string]any)
-	var inline []any
-	total := 0
-	if cm != nil {
-		if arr, ok := cm["comments"].([]any); ok {
-			inline = arr
+	// Retain inline comments before fetching additional pages, but do not count them twice
+	// when the dedicated endpoint returns the same comment again.
+	originalEmit := emit
+	seen := map[[32]byte]bool{}
+	emit = func(it model.Item) {
+		if it.Error == nil {
+			identity := sha256.Sum256([]byte(it.Path + "\x00" + it.Text))
+			if seen[identity] {
+				return
+			}
+			seen[identity] = true
 		}
-		if t, ok := cm["total"].(float64); ok {
-			total = int(t)
-		}
+		originalEmit(it)
 	}
-	if total > len(inline) { // search truncated the comments — page the dedicated endpoint for all
+	value, present := iss.Fields["comment"]
+	if !present {
+		return
+	}
+	cm, object := value.(map[string]any)
+	inline, array := cm["comments"].([]any)
+	total, validTotal := jiraCount(cm["total"])
+	if !object || !array || !validTotal || total < len(inline) {
+		// The inline wrapper cannot prove completeness. The dedicated endpoint can recover
+		// all comments, including when an oversized/fractional count would otherwise skip it.
 		jiraFetchAllComments(ctx, c, dep, iss.Key, emit)
 		return
 	}
 	for _, cAny := range inline {
-		if cMap, ok := cAny.(map[string]any); ok {
-			id, _ := cMap["id"].(string)
-			jiraEmitComment(dep, iss.Key, id, cMap["body"], emit)
+		cMap, ok := cAny.(map[string]any)
+		if !ok || !jiraCommentBody(cMap["body"]) {
+			jiraFetchAllComments(ctx, c, dep, iss.Key, emit)
+			return
 		}
+		id, _ := cMap["id"].(string)
+		jiraEmitComment(dep, iss.Key, id, cMap["body"], emit)
 	}
+	if total > len(inline) {
+		jiraFetchAllComments(ctx, c, dep, iss.Key, emit)
+	}
+}
+
+func jiraCommentBody(value any) bool {
+	switch value.(type) {
+	case string, map[string]any, []any:
+		return true
+	default:
+		return false
+	}
+}
+
+func jiraCount(value any) (int, bool) {
+	var text string
+	switch n := value.(type) {
+	case json.Number:
+		text = string(n)
+	case float64: // Retain support for callers constructing issue values directly.
+		if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n || n >= 1<<53 {
+			return 0, false
+		}
+		text = strconv.FormatFloat(n, 'f', 0, 64)
+	default:
+		return 0, false
+	}
+	n, err := strconv.Atoi(text)
+	return n, err == nil && n >= 0
 }
 
 func jiraFetchAllComments(ctx context.Context, c *Client, dep Deployment, key string, emit func(model.Item)) {
@@ -457,7 +536,7 @@ func jiraFetchAllComments(ctx context.Context, c *Client, dep Deployment, key st
 		params := url.Values{"startAt": {strconv.Itoa(startAt)}, "maxResults": {"100"}}
 		var page jiraCommentPage
 		if err := c.get(ctx, path, params, &page); err != nil {
-			logx.Warn("jira: comment fetch failed", "issue", key, "err", err)
+			emit(sourceFailure("jira", key+"#comments", "comment fetch failed"))
 			return
 		}
 		for _, cm := range page.Comments {
@@ -465,10 +544,17 @@ func jiraFetchAllComments(ctx context.Context, c *Client, dep Deployment, key st
 		}
 		got := len(page.Comments)
 		if got == 0 {
+			if page.Total > startAt {
+				emit(sourceFailure("jira", key+"#comments", "comment listing ended before total"))
+			}
 			return
 		}
 		startAt += got
-		if (page.Total > 0 && startAt >= page.Total) || pages >= maxPages {
+		if page.Total > 0 && startAt >= page.Total {
+			return
+		}
+		if pages+1 >= maxPages {
+			emit(sourceFailure("jira", key+"#comments", "comment page budget exhausted"))
 			return
 		}
 	}
@@ -483,18 +569,18 @@ func jiraEmitComment(dep Deployment, key, commentID string, body any, emit func(
 	// secret value don't collapse to one Fingerprint (type|path|value) — which a --baseline / SARIF /
 	// DefectDojo dedupe would otherwise treat as one, hiding the second comment's leak.
 	path, version := key, "comment"
-	url := dep.BaseURL + "/browse/" + key
+	link := jiraBrowseURL(dep, key)
 	if commentID != "" {
 		path = key + "#comment-" + commentID
 		version = "comment-" + commentID
-		url += "?focusedCommentId=" + commentID
+		link += "?focusedCommentId=" + url.QueryEscape(commentID)
 	}
 	emit(model.Item{
 		Source: "jira",
 		Path:   path,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     url,
+			"url":     link,
 			"version": version,
 		},
 	})
@@ -517,7 +603,7 @@ func jiraScanHistory(ctx context.Context, c *Client, dep Deployment, key string,
 		err := c.get(ctx, path, params, &page)
 		if err != nil {
 			// Old Server/DC (<8.6) lacks the dedicated endpoint: fall back to the embedded,
-			// capped changelog on the issue itself (best effort; logs the truncation risk).
+			// capped changelog on the issue itself (report any missing history as incomplete).
 			if statusOf(err) == 404 {
 				return jiraScanHistoryEmbedded(ctx, c, dep, key, emit)
 			}
@@ -529,16 +615,21 @@ func jiraScanHistory(ctx context.Context, c *Client, dep Deployment, key string,
 		}
 		// Terminate on isLast, an empty page, or the server's total; a SHORT page is not terminal (a
 		// thinned page would drop older history). The pages cap backstops a server that ignores startAt.
-		if page.IsLast || len(entries) == 0 {
+		if page.IsLast {
+			return nil
+		}
+		if len(entries) == 0 {
+			if page.Total > startAt {
+				return fmt.Errorf("changelog ended before total")
+			}
 			return nil
 		}
 		startAt += len(entries)
 		if page.Total > 0 && startAt >= page.Total {
 			return nil
 		}
-		if pages >= maxPages {
-			logx.Warn("jira: changelog page cap reached — oldest history not enumerated", "issue", key)
-			return nil
+		if pages+1 >= maxPages {
+			return fmt.Errorf("changelog page budget exhausted")
 		}
 	}
 }
@@ -546,21 +637,22 @@ func jiraScanHistory(ctx context.Context, c *Client, dep Deployment, key string,
 func jiraScanHistoryEmbedded(ctx context.Context, c *Client, dep Deployment, key string, emit func(model.Item)) error {
 	v := jiraAPIVer(dep)
 	params := url.Values{"expand": {"changelog"}, "fields": {"summary"}}
-	var iss struct {
-		Changelog jiraChangelogPage `json:"changelog"`
-	}
+	var iss jiraEmbeddedHistory
 	if err := c.get(ctx, "/rest/api/"+v+"/issue/"+url.PathEscape(key), params, &iss); err != nil {
 		return err
 	}
 	got := len(iss.Changelog.Histories)
 	if iss.Changelog.Total > got {
-		logx.Warn("jira: changelog truncated by the embedded API cap — older versions not scanned",
-			"issue", key, "scanned", got, "total", iss.Changelog.Total)
+		emit(sourceFailure("jira", key+"#history", "embedded changelog truncated"))
 	}
 	for _, h := range iss.Changelog.Histories {
 		jiraEmitHistory(dep, key, h, emit)
 	}
 	return nil
+}
+
+type jiraEmbeddedHistory struct {
+	Changelog jiraChangelogPage `json:"changelog"`
 }
 
 func jiraEmitHistory(dep Deployment, key string, h jiraHistory, emit func(model.Item)) {
@@ -585,7 +677,7 @@ func jiraEmitHistory(dep Deployment, key string, h jiraHistory, emit func(model.
 		Path:   key + "@" + h.Created,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     dep.BaseURL + "/browse/" + key,
+			"url":     jiraBrowseURL(dep, key),
 			"version": "history",
 			"author":  h.Author.label(),
 			"updated": h.Created,

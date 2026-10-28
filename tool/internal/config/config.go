@@ -2,6 +2,8 @@
 package config
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"gopkg.in/yaml.v3"
 )
@@ -23,22 +26,7 @@ const MaxConfigSize = 8 << 20 // 8 MiB
 // readCapped reads path but refuses a file larger than MaxConfigSize. Stat rejects up front; a
 // bounded io.LimitReader guards against a file that grows between Stat and read.
 func readCapped(path string) ([]byte, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	if fi, err := f.Stat(); err == nil && fi.Size() > MaxConfigSize {
-		return nil, fmt.Errorf("config %s too large (%d bytes > %d limit)", path, fi.Size(), MaxConfigSize)
-	}
-	raw, err := io.ReadAll(io.LimitReader(f, MaxConfigSize+1))
-	if err != nil {
-		return nil, err
-	}
-	if int64(len(raw)) > MaxConfigSize {
-		return nil, fmt.Errorf("config %s too large (> %d limit)", path, MaxConfigSize)
-	}
-	return raw, nil
+	return localfile.ReadRegular(path, MaxConfigSize)
 }
 
 // knownCategories mirrors scan.categorySeverity (custom-rule Category -> severity); an unknown
@@ -67,8 +55,8 @@ var pathProbes = []string{
 // insensitive contains-match) that is a substring of every one is effectively match-all.
 var valueProbes = []string{
 	"AKIA4ZX9QJ7K2MNPL3RS", "xKq3pNvR8sT2wYbZ7mGfH4jLcD6aE1uViO9rW5nQ",
-	"sk_live_4eC39HqLyjWDarjtT1zdp7dc", "ghp_16C7e42F292c6912E7710c838347Ae178B4a",
-	"glpat-aB3dE7fGhIjK9LmNoPqR", "0123456789",
+	"\x73k_live_4eC39HqLyjWDarjtT1zdp7dc", "\x67hp_16C7e42F292c6912E7710c838347Ae178B4a",
+	"\x67lpat-aB3dE7fGhIjK9LmNoPqR", "0123456789",
 }
 
 // matchAllPathEntry reports whether an allowlist.paths entry is effectively match-all (it would
@@ -160,6 +148,9 @@ func matchesEverything(rx *regexp.Regexp) bool {
 // empty if healthy. It is the cheap subset of Validate that callers run on every Load.
 func (c *Config) Issues() []string {
 	var out []string
+	if err := mlThresholdError(c.Performance.MLThreshold); err != nil {
+		out = append(out, err.Error())
+	}
 	for _, cr := range c.Detectors.Custom {
 		// saferegex so a regex-bomb custom rule is reported as bad rather than OOMing validation.
 		if _, err := saferegex.Compile(cr.Regex); err != nil {
@@ -369,16 +360,21 @@ type Config struct {
 
 var defaultNames = []string{".prowl.yaml", ".prowl.yml", "prowl.yaml"}
 
-// Discover looks for a config file in the current directory; returns nil if none.
-func Discover() *Config {
-	for _, n := range defaultNames {
-		if _, err := os.Stat(n); err == nil {
-			if c, err := Load(n); err == nil {
-				return c
-			}
-		}
+// Discover selects the first config in the current directory. A selected file's errors are fatal;
+// only the absence of every candidate yields defaults.
+func Discover() (*Config, error) {
+	name, err := localfile.FirstExisting(defaultNames...)
+	if err != nil {
+		return nil, err
 	}
-	return &Config{}
+	if name == "" {
+		return &Config{}, nil
+	}
+	cfg, err := Load(name)
+	if err != nil {
+		return nil, fmt.Errorf("config %s: %w", name, err)
+	}
+	return cfg, nil
 }
 
 func Load(path string) (*Config, error) {
@@ -386,12 +382,54 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Config{}
-	if err := yaml.Unmarshal(raw, c); err != nil {
+	return loadBytes(path, raw)
+}
+
+// ValidateFile reads one bounded regular-file snapshot for both loading and validation. Read
+// failures remain errors; parse or policy failures become validation problems without a second read.
+func ValidateFile(path string) ([]string, error) {
+	raw, err := readCapped(path)
+	if err != nil {
 		return nil, err
 	}
-	// Reject a match-everything custom detector up front — the one config error fatal enough to refuse
-	// to load (other problems are reported non-fatally via Issues/Validate).
+	cfg, err := loadBytes(path, raw)
+	if err != nil {
+		return append([]string{err.Error()}, (&Config{}).ValidateBytes(raw)...), nil
+	}
+	return cfg.Validate(), nil
+}
+
+func mlThresholdError(threshold float64) error {
+	// This range check also rejects NaN and both infinities. Zero retains the documented default.
+	if !(threshold >= 0 && threshold <= 1) {
+		return errors.New("performance.ml_threshold must be a finite number in 0..1")
+	}
+	return nil
+}
+
+func loadBytes(path string, raw []byte) (*Config, error) {
+	c := &Config{}
+	dec := yaml.NewDecoder(bytes.NewReader(raw))
+	if err := dec.Decode(c); err != nil && !errors.Is(err, io.EOF) {
+		return nil, err
+	}
+	// A config is one document. Consume the stream so another policy or malformed suffix cannot
+	// be silently ignored; empty trailing documents are harmless and remain accepted.
+	for {
+		var extra yaml.Node
+		if err := dec.Decode(&extra); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		if len(extra.Content) > 0 && extra.Content[0].Tag != "!!null" {
+			return nil, fmt.Errorf("config %s must contain one YAML document", path)
+		}
+	}
+	if err := mlThresholdError(c.Performance.MLThreshold); err != nil {
+		return nil, err
+	}
+	// Reject match-everything custom detectors before applying any configuration.
 	for _, cr := range c.Detectors.Custom {
 		if matchEverythingRe(cr.Regex) {
 			return nil, fmt.Errorf("custom rule %q: regex %q matches everything (empty or .*-equivalent); refusing to load (it would flag every line as a critical finding)", cr.ID, cr.Regex)

@@ -1,0 +1,40 @@
+{
+  "feature_contract": "portable-v2",
+  "seed": 13,
+  "corpus_sha256": "f358f7c474ffa4e389f6ffa3d87468abcc7a9241e14beea9a36ff25e9dbd8939",
+  "split_sizes": {
+    "train": 378783,
+    "validation": 63167,
+    "test": 63165
+  },
+  "groups": 94199,
+  "split_policy": "transitive-template-value-groups-class-balanced-packing",
+  "metrics": {
+    "validation": {
+      "n": 63167,
+      "positives": 27230,
+      "pr_auc": 0.8907479795780371,
+      "precision_05": 0.4751911415765884,
+      "recall_05": 0.9928755049577672,
+      "legacy_1_3_comparison": {
+        "pr_auc": 0.9985635108868521,
+        "precision_05": 0.9692423644259412,
+        "recall_05": 0.9917737789203085,
+        "limitation": "legacy training may overlap this corpus; only v2 split has verified group separation"
+      }
+    },
+    "test": {
+      "n": 63165,
+      "positives": 27229,
+      "pr_auc": 0.891327179156752,
+      "precision_05": 0.49926114743802874,
+      "recall_05": 0.9926548900069778,
+      "legacy_1_3_comparison": {
+        "pr_auc": 0.9979530066222908,
+        "precision_05": 0.9544136370066487,
+        "recall_05": 0.9911124169084432,
+        "limitation": "legacy training may overlap this corpus; only v2 split has verified group separation"
+      }
+    }
+  }
+}

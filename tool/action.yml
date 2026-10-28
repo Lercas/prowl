@@ -23,10 +23,13 @@ inputs:
     default: 'prowl.sarif'
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'Dockerfile.action'
   args:
     - 'scan'
     - ${{ inputs.path }}
+    - '--strict'
+    - '--bundled'
+    - '--reconstruct'
     - '--format'
     - ${{ inputs.format }}
     - '--fail-on'

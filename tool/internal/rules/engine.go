@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -20,6 +18,7 @@ import (
 // Aho-Corasick keyword index is built lazily on first Match.
 type Engine struct {
 	templates []*Template
+	bundled   bool
 
 	index   sync.Once
 	ac      *ahocorasick.Matcher
@@ -41,13 +40,13 @@ func Load(paths ...string) (*Engine, error) {
 	e := &Engine{}
 	var errs []string
 	seen := map[string]string{} // rule id -> first path it was defined in, for duplicate detection
-	add := func(path string) {
-		raw, err := readTemplateFile(path)
+	add := func(path string, raw []byte, err error) {
 		if err != nil {
 			errs = append(errs, err.Error())
 			return
 		}
 		dec := yaml.NewDecoder(bytes.NewReader(raw))
+		dec.KnownFields(true)
 		for {
 			var t Template
 			if err := dec.Decode(&t); err != nil {
@@ -79,26 +78,7 @@ func Load(paths ...string) (*Engine, error) {
 			e.templates = append(e.templates, &t)
 		}
 	}
-	for _, p := range paths {
-		info, err := os.Stat(p)
-		if err != nil {
-			errs = append(errs, err.Error())
-			continue
-		}
-		if info.IsDir() {
-			_ = filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() {
-					return nil
-				}
-				if ext := strings.ToLower(filepath.Ext(path)); ext == ".yaml" || ext == ".yml" {
-					add(path)
-				}
-				return nil
-			})
-		} else {
-			add(p)
-		}
-	}
+	walk(paths, add)
 	if len(errs) > 0 {
 		return e, fmt.Errorf("%d template error(s):\n  %s", len(errs), strings.Join(errs, "\n  "))
 	}
@@ -108,14 +88,34 @@ func Load(paths ...string) (*Engine, error) {
 // readTemplateFile reads a template file, rejecting one over MaxTemplateSize so a giant file can't be
 // loaded and parsed.
 func readTemplateFile(path string) ([]byte, error) {
-	info, err := os.Stat(path)
+	f, err := os.OpenFile(path, os.O_RDONLY|oNonBlock, 0)
 	if err != nil {
 		return nil, err
+	}
+	return readRuleFile(f, path)
+}
+
+// readRuleFile enforces the limit on actual bytes and rejects pipes/devices before any read.
+func readRuleFile(f *os.File, path string) (raw []byte, err error) {
+	defer func() { err = errors.Join(err, f.Close()) }()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s: template must be a regular file", path)
 	}
 	if info.Size() > MaxTemplateSize {
 		return nil, fmt.Errorf("%s: template file too large (%d bytes > %d limit)", path, info.Size(), MaxTemplateSize)
 	}
-	return os.ReadFile(path)
+	raw, err = io.ReadAll(io.LimitReader(f, MaxTemplateSize+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(raw) > MaxTemplateSize {
+		return nil, fmt.Errorf("%s: template file too large (> %d limit)", path, MaxTemplateSize)
+	}
+	return raw, nil
 }
 
 // FilterOpts selects which templates run via include/exclude by tag, severity, and id.
@@ -153,6 +153,12 @@ func (e *Engine) Filter(o FilterOpts) *Engine {
 		kept = append(kept, t)
 	}
 	e.templates = kept
+	// Filter is a construction/sequential operation; invalidate indices from any earlier Match.
+	e.index = sync.Once{}
+	e.ac = nil
+	e.kwTpls = nil
+	e.always = nil
+	e.present = sync.Pool{}
 	return e
 }
 
@@ -235,7 +241,8 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 		// slice past the cap; matchN stops its FindAll walk early.
 		th, ttrunc := t.matchN(text, lower, limit-len(hits))
 		hits = append(hits, th...)
-		if ttrunc || len(hits) >= limit {
+		truncated = truncated || ttrunc
+		if len(hits) >= limit {
 			truncated = true
 			if len(hits) > limit {
 				hits = hits[:limit]
@@ -263,3 +270,5 @@ func anyShared(a, b []string) bool {
 	}
 	return false
 }
+
+func (e *Engine) Bundled() bool { return e.bundled }

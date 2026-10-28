@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,8 +18,130 @@ import (
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
 
+func TestMobileIncompleteExtractionIsReported(t *testing.T) {
+	for _, capKind := range []string{"size", "total", "count"} {
+		t.Run(capKind, func(t *testing.T) {
+			t.Cleanup(restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes))
+			opts := defaultOpts()
+			switch capKind {
+			case "size":
+				opts.MaxBytes = 4
+			case "total":
+				maxMobileTotalBytes = 4
+			case "count":
+				maxMobileEntries = 1
+			}
+			apk := makeAPK(t, map[string][]byte{"a.txt": []byte("large content"), "b.txt": []byte("large content")})
+			ch, err := Extract(context.Background(), apk, opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+			found := false
+			for _, it := range drainTexts(ch) {
+				found = found || it.Error != nil
+			}
+			if !found {
+				t.Fatal("limited extraction was certified clean")
+			}
+		})
+	}
+}
+
+func TestMobileCRCFailureIsReported(t *testing.T) {
+	var raw bytes.Buffer
+	zw := zip.NewWriter(&raw)
+	w, err := zw.CreateHeader(&zip.FileHeader{Name: "config.txt", Method: zip.Store})
+	if err != nil {
+		t.Fatal(err)
+	}
+	const original = "original content"
+	if _, err := io.WriteString(w, original); err != nil {
+		t.Fatal(err)
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	data := raw.Bytes()
+	data[bytes.Index(data, []byte(original))] = 'X'
+	p := filepath.Join(t.TempDir(), "corrupt.apk")
+	if err := os.WriteFile(p, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	ch, err := Extract(context.Background(), p, defaultOpts())
+	if err != nil {
+		t.Fatal(err)
+	}
+	items := drainTexts(ch)
+	if len(items) != 1 || items[0].Error == nil {
+		t.Fatalf("CRC failure was hidden: %+v", items)
+	}
+}
+
+func TestMobileStringsKeepLongRuns(t *testing.T) {
+	text := strings.Repeat(" ", 4200) + "AWS = \"" + awsKey + "\""
+	for _, utf16 := range []bool{false, true} {
+		body := []byte(text)
+		if utf16 {
+			body = nil
+			for _, c := range []byte(text) {
+				body = append(body, c, 0)
+			}
+		}
+		apk := makeAPK(t, map[string][]byte{"classes.dex": body})
+		ch, err := Extract(context.Background(), apk, defaultOpts())
+		if err != nil {
+			t.Fatal(err)
+		}
+		items := drainTexts(ch)
+		if len(items) != 1 || !strings.Contains(items[0].Text, awsKey) {
+			t.Fatalf("utf16=%v: long string silently clipped: paths=%v", utf16, paths(items))
+		}
+	}
+}
+
+func TestMobileBudgetCannotOverflow(t *testing.T) {
+	b := mobileBudget{totalBytes: 1}
+	if b.addEntry(math.MaxInt64) || b.err == nil {
+		t.Fatal("budget overflow bypassed the extraction cap")
+	}
+}
+
+func TestMobileExclusionsDoNotSpendBodyBudget(t *testing.T) {
+	t.Cleanup(restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes))
+	maxMobileTotalBytes = 100
+	maxMobileEntryBytes = 64
+	opts := defaultOpts()
+	opts.Exclude = []string{"large.txt"}
+	apk := makeAPK(t, map[string][]byte{
+		"large.txt": bytes.Repeat([]byte("x"), 1000),
+		"icon.png":  bytes.Repeat([]byte("x"), 1000),
+		"prod.env":  []byte("AWS = \"" + awsKey + "\""),
+	})
+	ch, err := Extract(context.Background(), apk, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	items := drainTexts(ch)
+	if len(items) != 1 || items[0].Error != nil || !strings.Contains(items[0].Text, awsKey) {
+		t.Fatalf("excluded or asset body spent scan budget: %+v", items)
+	}
+}
+
+func TestNoStringsAlsoSkipsMisExtensionedBinary(t *testing.T) {
+	apk := makeAPK(t, map[string][]byte{"config.json": append([]byte{0}, []byte(awsKey)...)})
+	opts := defaultOpts()
+	opts.Strings = false
+	ch, err := Extract(context.Background(), apk, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if items := drainTexts(ch); len(items) != 0 {
+		t.Fatalf("strings pass ran despite --no-strings: %+v", items)
+	}
+}
+
 const (
-	awsKey = "AKIA4MNQ2RST7UVWX9YZ" // AWS access-key-id shape (image_test uses the same)
+	awsKey = "\x41KIA4MNQ2RST7UVWX9YZ" // AWS access-key-id shape (image_test uses the same)
 )
 
 // makeAPK builds an in-memory ZIP (== APK/IPA) from name->body, writes it to a temp .apk, and returns
@@ -226,7 +350,7 @@ func TestNoStrings(t *testing.T) {
 
 // TestEntryCapAbort: a zip with more entries than the shrunk entry cap aborts and records b.err.
 func TestEntryCapAbort(t *testing.T) {
-	defer restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes)
+	t.Cleanup(restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes))
 	maxMobileEntries = 5
 	maxMobileTotalBytes = 1 << 30
 
@@ -244,7 +368,7 @@ func TestEntryCapAbort(t *testing.T) {
 	ch := make(chan model.Item, 256)
 	go func() {
 		defer close(ch)
-		emitMobile(context.Background(), ch, zr, "app.apk", defaultOpts())
+		emitMobile(context.Background(), ch, &zr.Reader, "app.apk", defaultOpts())
 	}()
 	got := len(drainTexts(ch))
 	if got > maxMobileEntries {
@@ -254,7 +378,7 @@ func TestEntryCapAbort(t *testing.T) {
 
 // TestTotalBytesCapAbort: ten 1 KiB entries blow a 2 KiB total-bytes cap; the walk stops early.
 func TestTotalBytesCapAbort(t *testing.T) {
-	defer restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes)
+	t.Cleanup(restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes))
 	maxMobileTotalBytes = 2048
 	maxMobileEntries = 1_000_000
 
@@ -272,7 +396,7 @@ func TestTotalBytesCapAbort(t *testing.T) {
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
-		emitMobile(context.Background(), ch, zr, "app.apk", defaultOpts())
+		emitMobile(context.Background(), ch, &zr.Reader, "app.apk", defaultOpts())
 	}()
 	got := int64(len(drainTexts(ch)))
 	if got*1024 > maxMobileTotalBytes+1024 {
@@ -282,7 +406,7 @@ func TestTotalBytesCapAbort(t *testing.T) {
 
 // TestBudgetAddEntry checks the cap arithmetic directly.
 func TestBudgetAddEntry(t *testing.T) {
-	defer restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes)
+	t.Cleanup(restoreMobileCaps(maxMobileTotalBytes, maxMobileEntries, maxMobileEntryBytes))
 	maxMobileEntries = 3
 	maxMobileTotalBytes = 1 << 30
 	b := &mobileBudget{}

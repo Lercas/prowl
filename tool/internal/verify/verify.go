@@ -5,7 +5,11 @@ package verify
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -14,6 +18,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -28,9 +33,9 @@ type Status string
 
 const (
 	Verified    Status = "verified"    // provider confirmed the credential is live
-	Invalid     Status = "invalid"     // provider rejected it — likely revoked/fake
+	Invalid     Status = "invalid"     // provider rejected this request; revocation is not proven
 	Unsupported Status = "unsupported" // no verifier matches this type
-	Errored     Status = "error"       // network/timeout — inconclusive
+	Errored     Status = "error"       // transport or provider response is inconclusive
 	Skipped     Status = "skipped"     // example/placeholder — not attempted
 )
 
@@ -93,8 +98,15 @@ type Verifier struct {
 type Set struct {
 	client    *http.Client
 	verifiers []*Verifier
-	cache     sync.Map      // value -> Result
+	cache     sync.Map      // verificationKey -> *cachedVerification (in-flight or definitive result)
 	sem       chan struct{} // bounds concurrent provider calls
+}
+
+// PolicyID identifies the exact verifier definitions without exporting request contents.
+func (s *Set) PolicyID() string {
+	b, _ := json.Marshal(s.verifiers)
+	h := sha256.Sum256(b)
+	return hex.EncodeToString(h[:])
 }
 
 // DefaultConcurrency bounds simultaneous verification HTTP calls. concurrency holds the active value,
@@ -189,6 +201,12 @@ func valueMatchOK(anchor, value string) bool {
 // wrong provider. A genuine short provider value-prefix (sk_live_, re_, …) still routes.
 func (s *Set) find(typeID, value string) *Verifier {
 	lt, lv := strings.ToLower(typeID), strings.ToLower(value)
+	// Natural-language and semantic candidates have no established provider identity.
+	// Entropy candidates retain the existing fallback for an explicit token prefix.
+	generic := strings.HasPrefix(lt, "generic_") || strings.HasPrefix(lt, "generic-")
+	if generic && lt != "generic_high_entropy" {
+		return nil
+	}
 	var best *Verifier
 	bestScore := 0
 	for _, v := range s.verifiers {
@@ -200,9 +218,9 @@ func (s *Set) find(typeID, value string) *Verifier {
 			}
 			score := 0
 			switch {
-			case strings.Contains(lt, lm) && typeMatchOK(lm, lid):
+			case !generic && strings.Contains(lt, lm) && typeMatchOK(lm, lid):
 				score = 1000 + len(lm) // TYPE match is authoritative; longer = more specific
-			case strings.Contains(lv, lm) && valueMatchOK(lm, lv):
+			case strings.Contains(lv, lm) && valueMatchOK(lm, lv) && (!generic || strings.HasPrefix(lv, lm)):
 				score = len(lm) // value-only fallback, never beats a type match
 			}
 			if score > bestScore {
@@ -213,31 +231,106 @@ func (s *Set) find(typeID, value string) *Verifier {
 	return best
 }
 
-// Verify confirms a secret is live by running its verifier's requests. context is the surrounding
-// text, from which a verifier may extract secondary values. Examples are skipped; results cached.
+// verificationKey identifies the selected probe and all credentials it will actually use.
+// Hash variables so the cache does not retain plaintext secrets or surrounding source documents.
+type verificationKey struct {
+	verifier  *Verifier
+	variables [sha256.Size]byte
+}
+
+type cachedVerification struct {
+	done   chan struct{}
+	result Result
+}
+
+func makeVerificationKey(v *Verifier, vars map[string]string) verificationKey {
+	names := make([]string, 0, len(vars))
+	for name := range vars {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	h := sha256.New()
+	var length [8]byte
+	for _, name := range names {
+		for _, part := range []string{name, vars[name]} {
+			binary.BigEndian.PutUint64(length[:], uint64(len(part)))
+			_, _ = h.Write(length[:])
+			_, _ = io.WriteString(h, part)
+		}
+	}
+	key := verificationKey{verifier: v}
+	copy(key.variables[:], h.Sum(nil))
+	return key
+}
+
+func copyResult(r Result) Result { r.Access = append([]string(nil), r.Access...); return r }
+
+// Verify scopes cached verdicts to the selected verifier and extracted credentials. Concurrent
+// duplicates share one probe; canceled callers can leave without canceling another caller's probe.
+// Inconclusive errors are removed so a later attempt can recover from transient provider failures.
 func (s *Set) Verify(ctx context.Context, typeID, value, context string, isExample bool) Result {
 	if isExample {
 		return Result{Status: Skipped}
 	}
-	if r, ok := s.cache.Load(value); ok {
-		return r.(Result)
+	if err := ctx.Err(); err != nil {
+		return Result{Status: Errored, Note: classifyErr(err)}
 	}
 	v := s.find(typeID, value)
 	if v == nil {
 		return Result{Status: Unsupported}
 	}
-	res := s.run(ctx, v, value, context)
-	s.cache.Store(value, res)
-	return res
-}
-
-func (s *Set) run(ctx context.Context, v *Verifier, value, context string) Result {
+	names := make([]string, 0, len(v.extractRes))
+	for name := range v.extractRes {
+		names = append(names, name)
+	}
+	sort.Strings(names)
 	vars := map[string]string{"secret": value}
-	for name, re := range v.extractRes {
-		if m := re.FindString(context); m != "" {
-			vars[name] = m
+	for _, name := range names {
+		matches := v.extractRes[name].FindAllString(context, 1025)
+		if len(matches) > 1024 {
+			return Result{Status: Errored, Verifier: v.ID, Note: "companion extraction limit"}
+		}
+		companion := ""
+		for _, match := range matches {
+			if match == "" {
+				continue
+			}
+			if companion != "" && match != companion {
+				return Result{Status: Errored, Verifier: v.ID, Note: "ambiguous companion context"}
+			}
+			companion = match
+		}
+		vars[name] = companion
+	}
+	key := makeVerificationKey(v, vars)
+	pending := &cachedVerification{done: make(chan struct{}), result: Result{Status: Errored, Verifier: v.ID, Note: "request failed"}}
+	actual, loaded := s.cache.LoadOrStore(key, pending)
+	if loaded {
+		cached := actual.(*cachedVerification)
+		select {
+		case <-cached.done:
+			if err := ctx.Err(); err != nil {
+				return Result{Status: Errored, Verifier: v.ID, Note: classifyErr(err)}
+			}
+			return copyResult(cached.result)
+		case <-ctx.Done():
+			return Result{Status: Errored, Verifier: v.ID, Note: classifyErr(ctx.Err())}
 		}
 	}
+	defer func() {
+		if pending.result.Status != Verified && pending.result.Status != Invalid {
+			s.cache.Delete(key)
+		}
+		close(pending.done)
+	}()
+	pending.result = s.run(ctx, v, vars)
+	if err := ctx.Err(); err != nil {
+		pending.result = Result{Status: Errored, Verifier: v.ID, Note: classifyErr(err)}
+	}
+	return copyResult(pending.result)
+}
+
+func (s *Set) run(ctx context.Context, v *Verifier, vars map[string]string) Result {
 	hasCaps := false
 	for i := range v.Requests {
 		if v.Requests[i].Capability != "" {
@@ -301,6 +394,18 @@ func classifyErr(err error) string {
 	if errors.Is(err, errRateLimited) {
 		return "rate-limited"
 	}
+	if errors.Is(err, errProviderResponse) {
+		return "provider response inconclusive"
+	}
+	if errors.Is(err, errProviderUnavailable) {
+		return "provider unavailable"
+	}
+	if errors.Is(err, errResponseTooLarge) {
+		return "response too large"
+	}
+	if errors.Is(err, errIncompleteResponse) {
+		return "incomplete response"
+	}
 	if errors.Is(err, errBadInterpolation) {
 		return "invalid request"
 	}
@@ -349,6 +454,12 @@ func classifyErr(err error) string {
 // CR/LF or other control characters) or yields an unparseable URL. It carries no secret.
 var errBadInterpolation = errors.New("interpolated value contains invalid characters")
 var errRateLimited = errors.New("rate limited")
+var errProviderResponse = errors.New("provider response inconclusive")
+var errProviderUnavailable = errors.New("provider unavailable")
+var errResponseTooLarge = errors.New("provider response exceeds limit")
+var errIncompleteResponse = errors.New("provider response is incomplete")
+
+const maxResponseBytes = 1 << 16
 
 const (
 	verifyRateLimitRetries = 1                      // bounded retries on a 429/503 before giving up as inconclusive
@@ -375,14 +486,20 @@ func (s *Set) probe(ctx context.Context, v *Verifier, r *Request, vars map[strin
 	if method == "" {
 		method = http.MethodGet
 	}
-	bodyStr := interpolate(r.Body, vars)
+	bodyStr, err := expandTemplate(r.Body, vars)
+	if err != nil {
+		return false, err
+	}
 	var body io.Reader
 	if bodyStr != "" {
 		body = strings.NewReader(bodyStr)
 	}
 	// Reject control chars in interpolated URL/header positions (request splitting / header
 	// smuggling) and confirm the final URL still parses before sending.
-	rawURL := interpolate(r.URL, vars)
+	rawURL, err := expandTemplate(r.URL, vars)
+	if err != nil {
+		return false, err
+	}
 	if hasControlChars(rawURL) {
 		return false, errBadInterpolation
 	}
@@ -394,7 +511,10 @@ func (s *Set) probe(ctx context.Context, v *Verifier, r *Request, vars map[strin
 		return false, err
 	}
 	for k, vv := range r.Headers {
-		hv := interpolate(vv, vars)
+		hv, err := expandTemplate(vv, vars)
+		if err != nil {
+			return false, err
+		}
 		if hasControlChars(hv) {
 			return false, errBadInterpolation
 		}
@@ -453,12 +573,31 @@ func (s *Set) probe(ctx context.Context, v *Verifier, r *Request, vars map[strin
 			}
 			return false, errRateLimited
 		}
-		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<16))
-		resp.Body.Close()
+		if resp.StatusCode >= 500 {
+			_ = resp.Body.Close()
+			if s.sem != nil {
+				<-s.sem
+			}
+			return false, errProviderUnavailable
+		}
+		respBody, readErr := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+		closeErr := resp.Body.Close()
 		if s.sem != nil {
 			<-s.sem
 		}
-		return matchResponse(r, resp, respBody), nil
+		if readErr != nil || closeErr != nil {
+			return false, errors.Join(errIncompleteResponse, readErr, closeErr)
+		}
+		if len(respBody) > maxResponseBytes {
+			return false, errResponseTooLarge
+		}
+		if matchResponse(r, resp, respBody) {
+			return true, nil
+		}
+		if resp.StatusCode == http.StatusUnauthorized {
+			return false, nil
+		}
+		return false, errProviderResponse
 	}
 }
 
@@ -468,7 +607,10 @@ func retryAfter(resp *http.Response) time.Duration {
 	if h == "" {
 		return -1 // absent: caller picks a short default backoff, not the max
 	}
-	if secs, err := strconv.Atoi(h); err == nil && secs >= 0 {
+	if secs, err := strconv.ParseUint(h, 10, 64); err == nil || errors.Is(err, strconv.ErrRange) {
+		if secs >= uint64(verifyMaxBackoff/time.Second) {
+			return verifyMaxBackoff
+		}
 		return time.Duration(secs) * time.Second
 	}
 	if t, err := http.ParseTime(h); err == nil {

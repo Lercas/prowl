@@ -10,25 +10,41 @@
 package mlmodel
 
 import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
-	"os"
+	"strings"
+
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 )
 
 // NumFeatures is the fixed feature-vector length Predict expects, matching
 // len(feature_names) in the dumped model.
 const NumFeatures = 49
 
+// These limits bound external model reads, decoding and flattening. The bundled export uses
+// approximately 1.2 MB, 400 trees and 24,400 nodes; larger valid retrains remain supported.
+const (
+	maxModelBytes = 16 << 20
+	maxModelTrees = 4096
+	maxModelNodes = 250_000
+)
+
 // embedded holds the model baked into the binary (default build) or nil (lean
 // -tags noml_embed build); declared in mlmodel_embed.go / mlmodel_noembed.go.
 
 // rawModel mirrors the on-disk JSON layout, used only while loading.
 type rawModel struct {
-	Baseline     float64   `json:"baseline"`
-	FeatureNames []string  `json:"feature_names"`
-	Trees        []rawTree `json:"trees"`
+	FeatureContract string    `json:"feature_contract,omitempty"`
+	Baseline        *float64  `json:"baseline"`
+	FeatureNames    []string  `json:"feature_names"`
+	Trees           []rawTree `json:"trees"`
 }
 
 // rawTree is one tree as parallel slices over a flat node array (index 0 = root).
@@ -42,10 +58,38 @@ type rawTree struct {
 	IsLeaf      []int     `json:"is_leaf"`
 }
 
+// UnmarshalJSON refuses null numeric array elements, which encoding/json otherwise turns into
+// zero. The ordinary numeric-array decoder rejects all other nonnumeric entries. Unknown metadata
+// may contain null; only the seven inference arrays have this non-null contract.
+func (t *rawTree) UnmarshalJSON(raw []byte) error {
+	if bytes.Contains(raw, []byte("null")) {
+		fields, err := jsonstrict.Object(raw, false)
+		if err != nil {
+			return err
+		}
+		for key, value := range fields {
+			for _, name := range []string{"feature_idx", "threshold", "left", "right", "value", "missing_left", "is_leaf"} {
+				if strings.EqualFold(key, name) && bytes.Contains(value, []byte("null")) {
+					return errors.New("mlmodel: numeric node arrays must not contain null")
+				}
+			}
+		}
+	}
+	type plainTree rawTree
+	var parsed plainTree
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return err
+	}
+	*t = rawTree(parsed)
+	return nil
+}
+
 // Model is the parsed, inference-ready classifier. All trees are flattened into
 // contiguous slices indexed by a global node id, so Predict walks cache-friendly
 // arrays and allocates nothing.
 type Model struct {
+	digest       string
+	contract     string
 	baseline     float64
 	featureNames []string
 
@@ -84,7 +128,7 @@ func Load() (*Model, error) {
 // LoadFile parses a dumped model_binary.json from disk, so the model can ship
 // beside the binary and be refreshed without a rebuild.
 func LoadFile(path string) (*Model, error) {
-	data, err := os.ReadFile(path)
+	data, err := localfile.ReadRegular(path, maxModelBytes)
 	if err != nil {
 		return nil, fmt.Errorf("mlmodel: read %s: %w", path, err)
 	}
@@ -94,15 +138,27 @@ func LoadFile(path string) (*Model, error) {
 // parse turns the dumped JSON into an inference-ready Model. It is expensive
 // (~1MB JSON + flattening 400 trees), so callers should cache the result (see Default).
 func parse(data []byte) (*Model, error) {
+	if len(data) > maxModelBytes {
+		return nil, fmt.Errorf("mlmodel: model exceeds the %d-byte limit", maxModelBytes)
+	}
 	var rm rawModel
-	if err := json.Unmarshal(data, &rm); err != nil {
+	if err := jsonstrict.UnmarshalContext(context.Background(), data, &rm); err != nil {
 		return nil, fmt.Errorf("mlmodel: parse model: %w", err)
+	}
+	if rm.Baseline == nil {
+		return nil, errors.New("mlmodel: model requires a numeric baseline")
 	}
 	if got := len(rm.FeatureNames); got != NumFeatures {
 		return nil, fmt.Errorf("mlmodel: model has %d feature names, want %d", got, NumFeatures)
 	}
+	if rm.FeatureContract != "" && rm.FeatureContract != "legacy-v1" && rm.FeatureContract != "portable-v2" {
+		return nil, fmt.Errorf("mlmodel: unknown feature contract")
+	}
 	if len(rm.Trees) == 0 {
 		return nil, fmt.Errorf("mlmodel: model has no trees")
+	}
+	if len(rm.Trees) > maxModelTrees {
+		return nil, fmt.Errorf("mlmodel: model exceeds the %d-tree limit", maxModelTrees)
 	}
 
 	// First pass: count nodes so the flat slices are allocated exactly once.
@@ -118,14 +174,18 @@ func parse(data []byte) (*Model, error) {
 			len(t.Right) != n || len(t.Value) != n || len(t.MissingLeft) != n {
 			return nil, fmt.Errorf("mlmodel: tree %d has ragged node arrays", ti)
 		}
-		if int64(total)+int64(n) > int64(1<<31-1) {
-			return nil, fmt.Errorf("mlmodel: flattened model exceeds int32 node limit")
+		if n > maxModelNodes-total {
+			return nil, fmt.Errorf("mlmodel: model exceeds the %d-node limit", maxModelNodes)
 		}
 		total += n
+		if err := validateTree(t); err != nil {
+			return nil, fmt.Errorf("mlmodel: tree %d: %w", ti, err)
+		}
 	}
 
 	m := &Model{
-		baseline:     rm.Baseline,
+		contract:     rm.FeatureContract,
+		baseline:     *rm.Baseline,
 		featureNames: rm.FeatureNames,
 		treeStart:    make([]int32, len(rm.Trees)),
 		featIdx:      make([]int32, total),
@@ -135,6 +195,8 @@ func parse(data []byte) (*Model, error) {
 		value:        make([]float64, total),
 		flags:        make([]uint8, total),
 	}
+	hash := sha256.Sum256(data)
+	m.digest = hex.EncodeToString(hash[:])
 
 	// Second pass: flatten. Child indices in the dump are tree-local, so add the
 	// tree's base offset to make them global node ids.
@@ -144,6 +206,9 @@ func parse(data []byte) (*Model, error) {
 		m.treeStart[ti] = base
 		for i := range t.IsLeaf {
 			g := base + int32(i) //nolint:gosec // The total-node bound above proves this fits int32.
+			if rm.FeatureContract == "portable-v2" && t.IsLeaf[i] == 0 && t.FeatureIdx[i] == 7 {
+				return nil, fmt.Errorf("mlmodel: portable model depends on legacy compression")
+			}
 			if fi := t.FeatureIdx[i]; fi >= 0 && fi < NumFeatures {
 				m.featIdx[g] = int32(fi)
 			} else if t.IsLeaf[i] == 0 {
@@ -175,14 +240,14 @@ func parse(data []byte) (*Model, error) {
 
 	return m, nil
 }
+func (m *Model) Digest() string { return m.digest }
 
 // FeatureNames returns the model's ordered feature names so callers can assert
 // their extractor matches. The slice is shared; do not mutate it.
 func (m *Model) FeatureNames() []string { return m.featureNames }
 
-// ErrCyclicModel is returned by Predict when a tree walk exceeds the node-count
-// bound, meaning a child index points back at an ancestor (a cycle a crafted or
-// corrupt model can encode). The bounded walk fails closed instead of hanging.
+// ErrCyclicModel is returned when loading a cyclic tree or when an internally corrupt model's
+// inference walk exceeds the node-count bound. The bounded walk fails closed instead of hanging.
 var ErrCyclicModel = errors.New("mlmodel: cyclic tree (child index revisits an ancestor) — model is malformed")
 
 // Predict returns the L2 probability for one feature vector: logistic(baseline +
@@ -224,8 +289,9 @@ func (m *Model) predict(x []float64) (float64, error) {
 			}
 			steps++
 			xv := x[featIdx[i]]
-			// Go left if xv <= threshold; for NaN (xv != xv) follow missing_left.
-			if xv <= thresh[i] || (xv != xv && flags[i]&flagMissingLeft != 0) {
+			// Treat sub-picounit differences as equality so libm rounding cannot
+			// send identical feature inputs down different architecture-specific branches.
+			if splitLeft(xv, thresh[i]) || (xv != xv && flags[i]&flagMissingLeft != 0) {
 				i = left[i]
 			} else {
 				i = right[i]
@@ -235,3 +301,11 @@ func (m *Model) predict(x []float64) (float64, error) {
 	}
 	return 1.0 / (1.0 + math.Exp(-sum)), nil
 }
+
+// splitLeft defines the release's numeric comparison contract. It deliberately
+// uses an absolute tolerance: integer/count splits must not gain a scaled margin.
+func splitLeft(value, threshold float64) bool {
+	return value <= threshold || math.Abs(value-threshold) <= 1e-12
+}
+
+func (m *Model) Portable() bool { return m.contract == "portable-v2" }

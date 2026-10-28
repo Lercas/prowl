@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"regexp"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -15,11 +15,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/resilience"
 )
-
-// renameStatusToken matches a git `--name-status -z` rename/copy status field ("R100", "C074"). It is
-// a defensive forward-guard: `--name-only -z` (what GitChangedFiles requests) never emits such a token.
-// Anchored + score-digits so a real filename like "README" isn't misclassified as a status token.
-var renameStatusToken = regexp.MustCompile(`^[RC][0-9]+$`)
 
 // checkRev rejects an option-shaped revision (leading "-") that `git diff` would parse as a flag —
 // e.g. "--output=/tmp/pwned" would write the diff to an attacker-chosen file. Callers also place a
@@ -41,16 +36,22 @@ func IsGitRepo(dir string) bool {
 }
 
 // GitChangedFiles lists files to scan from git: mode="staged" -> staged-for-commit; mode="since" with
-// rev -> files changed since rev. Includes Added/Copied/Modified AND Renamed (R) entries (deletes
-// excluded); renames must be included, else a secret added in `git mv x y && git add -A` slips a
-// --diff-filter=ACM gate. For a rename the NEW path (the file that exists) is scanned, never the old.
+// rev -> files changed since rev. Paths are repository-relative regardless of cwd or diff.relative.
+// Includes additions, copies, modifications, renames, type changes and unresolved conflicts; deletes
+// are excluded. For a rename only the new path is selected. Unresolved staged entries fail in the
+// index reader instead of being omitted from the scan.
 func GitChangedFiles(ctx context.Context, mode, rev string) ([]string, error) {
+	return GitChangedFilesIn(ctx, "", mode, rev)
+}
+
+// GitChangedFilesIn selects a repository explicitly without changing the process working directory.
+func GitChangedFilesIn(ctx context.Context, dir, mode, rev string) ([]string, error) {
 	var args []string
 	switch mode {
 	case "staged":
 		// -z: raw NUL-terminated paths. Without it git C-quotes non-ASCII names (café.txt ->
 		// "caf\303\251.txt"), which os.Lstat can't find, so the file is silently dropped from the gate.
-		args = []string{"diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"}
+		args = []string{"diff", "--cached", "--name-only", "--diff-filter=ACMRTU", "--no-relative", "-z"}
 	case "since":
 		// rev is user-controlled: reject an option-shaped rev (the real guard; "--" alone wouldn't stop
 		// "--output=" since git parses options before operands), then terminate operands with "--".
@@ -58,33 +59,27 @@ func GitChangedFiles(ctx context.Context, mode, rev string) ([]string, error) {
 			return nil, err
 		}
 		// -z, same reason as "staged": raw NUL-separated paths, not git's C-quoted form.
-		args = []string{"diff", rev, "--name-only", "--diff-filter=ACMR", "-z", "--"}
+		args = []string{"diff", rev, "--name-only", "--diff-filter=ACMRTU", "--no-relative", "-z", "--"}
 	default:
 		return nil, nil
 	}
-	out, err := exec.CommandContext(ctx, "git", args...).Output()
+	out, err := gitCmd(ctx, dir, args...).Output()
 	if err != nil {
 		return nil, err
 	}
 	// Split on NUL and keep bytes verbatim (a path may contain spaces, so do NOT TrimSpace); only drop
-	// empty segments. `--name-only -z` already yields the new path for a rename; the rename-token branch
-	// below is a forward-guard for a `--name-status`-style triple ("R<score>\0<old>\0<new>\0").
+	// empty segments. Every field in --name-only output is a path, even names such as R100.
 	fields := strings.Split(string(out), "\x00")
 	var files []string
-	for i := 0; i < len(fields); i++ {
-		p := fields[i]
+	seen := map[string]bool{}
+	for _, p := range fields {
 		if p == "" {
 			continue
 		}
-		if renameStatusToken.MatchString(p) && i+2 < len(fields) {
-			// "R<score>\0<old>\0<new>" — take the NEW path (fields[i+2]); skip the score + old path.
-			if newPath := fields[i+2]; newPath != "" {
-				files = append(files, newPath)
-			}
-			i += 2
-			continue
+		if !seen[p] {
+			files = append(files, p)
+			seen[p] = true
 		}
-		files = append(files, p)
 	}
 	return files, nil
 }
@@ -94,12 +89,30 @@ func GitChangedFiles(ctx context.Context, mode, rev string) ([]string, error) {
 // than maxBytes before it lands in RAM. dir selects the repository (like `git -C dir`; empty = current
 // dir), so a cloned checkout can be scanned without chdir-ing the process (lets `org` parallelise).
 func GitHistoryBlobs(ctx context.Context, dir string, exclude []string, maxBytes int64) <-chan model.Item {
+	actual := dir
+	if actual == "" {
+		actual = "."
+	}
+	actual, _ = filepath.Abs(actual)
+	model.CoverageFrom(ctx).RegisterScope("git-history", actual, struct {
+		Exclude  []string
+		MaxBytes int64
+	}{exclude, maxBytes})
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
 		resilience.Guard(
-			func() { streamHistoryBlobs(ctx, ch, dir, exclude, maxBytes) },
-			func(r any) { logx.Warn("recovered git-history panic", "err", r) },
+			func() {
+				if err := streamHistoryBlobs(ctx, ch, dir, exclude, maxBytes); err != nil {
+					model.Note(ctx, "git_history_incomplete", dir, true)
+					send(ctx, ch, model.Item{Source: "code", Error: err})
+				}
+			},
+			func(r any) {
+				model.Note(ctx, "git_history_incomplete", dir, true)
+				logx.Warn("recovered git-history panic")
+				send(ctx, ch, model.Item{Source: "code", Error: fmt.Errorf("git history reader failed")})
+			},
 		)
 	}()
 	return ch
@@ -112,44 +125,57 @@ func gitCmd(ctx context.Context, dir string, args ...string) *exec.Cmd {
 	return cmd
 }
 
-func streamHistoryBlobs(ctx context.Context, ch chan<- model.Item, dir string, exclude []string, maxBytes int64) {
-	revList := gitCmd(ctx, dir, "rev-list", "--objects", "--all")
+func streamHistoryBlobs(ctx context.Context, ch chan<- model.Item, dir string, exclude []string, maxBytes int64) (err error) {
+	processCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	revList := gitCmd(processCtx, dir, "rev-list", "--objects", "--all")
 	revOut, err := revList.StdoutPipe()
 	if err != nil {
-		logx.Warn("git rev-list pipe failed", "err", err)
-		return
+		return fmt.Errorf("git rev-list pipe: %w", err)
 	}
 	if err := revList.Start(); err != nil {
-		logx.Warn("git rev-list start failed", "err", err)
-		return
+		_ = revOut.Close()
+		return fmt.Errorf("git rev-list start: %w", err)
 	}
 	// Reap rev-list and surface a non-zero exit (e.g. run outside a git repo): otherwise a failed scan
 	// yields zero blobs and exits 0, indistinguishable from a clean repo. ctx-cancellation kills are expected.
 	defer func() {
-		if werr := revList.Wait(); werr != nil && ctx.Err() == nil {
-			logx.Warn("git rev-list failed (history scan may be incomplete)", "err", werr)
+		_ = revOut.Close()
+		if err != nil {
+			cancel() // an early abort can leave rev-list blocked on its unread output pipe
+		}
+		if werr := revList.Wait(); werr != nil && err == nil {
+			err = fmt.Errorf("git rev-list: %w", werr)
 		}
 	}()
 
 	// Single long-lived cat-file process fed sha-per-line on stdin, emitting framed blob bodies.
-	cat := gitCmd(ctx, dir, "cat-file", "--batch")
+	cat := gitCmd(processCtx, dir, "cat-file", "--batch")
 	catIn, err := cat.StdinPipe()
 	if err != nil {
-		logx.Warn("git cat-file stdin pipe failed", "err", err)
-		return
+		return fmt.Errorf("git cat-file stdin pipe: %w", err)
 	}
 	catOut, err := cat.StdoutPipe()
 	if err != nil {
-		logx.Warn("git cat-file stdout pipe failed", "err", err)
-		return
+		_ = catIn.Close()
+		return fmt.Errorf("git cat-file stdout pipe: %w", err)
 	}
 	if err := cat.Start(); err != nil {
-		logx.Warn("git cat-file start failed", "err", err)
-		return
+		_ = catIn.Close()
+		_ = catOut.Close()
+		return fmt.Errorf("git cat-file start: %w", err)
 	}
 	defer func() {
+		if recover() != nil {
+			err = fmt.Errorf("git history reader failed")
+		}
 		_ = catIn.Close()
-		_ = cat.Wait()
+		if err != nil {
+			cancel()
+		}
+		if werr := cat.Wait(); werr != nil && err == nil {
+			err = fmt.Errorf("git cat-file: %w", werr)
+		}
 	}()
 
 	br := bufio.NewReader(catOut)
@@ -158,7 +184,7 @@ func streamHistoryBlobs(ctx context.Context, ch chan<- model.Item, dir string, e
 	rr := bufio.NewReader(revOut)
 	for {
 		if ctx.Err() != nil {
-			return
+			return ctx.Err()
 		}
 		// A partial final line (no trailing '\n') is still valid, so process it before the error.
 		line, rlErr := rr.ReadString('\n')
@@ -166,14 +192,14 @@ func streamHistoryBlobs(ctx context.Context, ch chan<- model.Item, dir string, e
 			// processBlob returns false on an unrecoverable error (write/read failure, stream desync,
 			// ctx done) — once --batch is mis-framed we can't realign, so stop the whole scan.
 			if !processBlob(ctx, ch, br, catIn, line, exclude, maxBytes) {
-				return
+				return fmt.Errorf("git history object read failed")
 			}
 		}
 		if rlErr != nil {
 			if rlErr != io.EOF {
-				logx.Warn("git rev-list read error", "err", rlErr)
+				return fmt.Errorf("git rev-list read: %w", rlErr)
 			}
-			return
+			return nil
 		}
 	}
 }
@@ -181,9 +207,10 @@ func streamHistoryBlobs(ctx context.Context, ch chan<- model.Item, dir string, e
 // processBlob frames the one rev-list line `raw` ("<sha> <path>") against the long-lived cat-file
 // --batch stream: it writes the sha, reads the header, and consumes the framed body. It returns
 // false only when the stream/context is unrecoverable (caller must stop); a per-blob skip
-// (non-blob, oversize, missing object) returns true so scanning continues.
+// (non-blob, oversize) returns true so scanning continues. Missing objects abort the incomplete stream.
 func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, catIn io.Writer, raw string, exclude []string, maxBytes int64) bool {
-	parts := strings.SplitN(strings.TrimSpace(raw), " ", 2)
+	// Remove only the framing newline: whitespace is valid filename data.
+	parts := strings.SplitN(strings.TrimSuffix(raw, "\n"), " ", 2)
 	if len(parts) < 2 || parts[1] == "" {
 		return true // only blobs carry a path on the rev-list line; skip trees/commits/tags
 	}
@@ -202,24 +229,28 @@ func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, ca
 	}
 
 	if _, err := io.WriteString(catIn, sha+"\n"); err != nil {
+		model.Note(ctx, "git_history_incomplete", "", true)
 		logx.Warn("git cat-file write failed", "err", err)
 		return false
 	}
 	// Header line: "<sha> <type> <size>\n", or "<sha> missing\n".
 	header, err := br.ReadString('\n')
 	if err != nil {
+		model.Note(ctx, "git_history_incomplete", "", true)
 		logx.Warn("git cat-file read header failed", "err", err)
 		return false
 	}
 	typ, size, ok := parseCatFileHeader(header)
 	if !ok {
-		return true // missing/ambiguous object: nothing framed to consume
+		logx.Warn("git cat-file returned a missing or malformed object header", "blob", sha, "path", path)
+		return false // completeness and framing cannot be guaranteed
 	}
 
 	// Read the declared body + trailing newline, skipping an oversize blob without buffering it. A read
 	// error here means the --batch stream is desynced and can't be realigned, so propagate it as fatal.
 	body, readErr := consumeBlob(br, size, maxBytes)
 	if readErr != nil {
+		model.Note(ctx, "git_history_incomplete", "", true)
 		logx.Warn("git cat-file blob read failed (stream desync)", "blob", sha, "path", path, "err", readErr)
 		return false
 	}
@@ -227,8 +258,9 @@ func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, ca
 		return true
 	}
 	if size > maxBytes {
+		model.Note(ctx, "git_history_incomplete", "", true)
 		logx.Warn("skipped: git blob exceeds max-size", "blob", sha, "path", path, "size", size, "limit", maxBytes)
-		return true
+		return send(ctx, ch, model.Item{Source: "code", Path: path, Error: fmt.Errorf("git history blob exceeds max-size")})
 	}
 	return emitPayload(ctx, ch, path, body, maxBytes, exclude, map[string]any{"blob": sha})
 }
@@ -262,8 +294,12 @@ func consumeBlob(br *bufio.Reader, size, maxBytes int64) ([]byte, error) {
 	} else if _, err := io.CopyN(io.Discard, br, size); err != nil {
 		return nil, err
 	}
-	if _, err := br.Discard(1); err != nil { // trailing '\n'
+	terminator, err := br.ReadByte()
+	if err != nil {
 		return body, err
+	}
+	if terminator != '\n' {
+		return nil, fmt.Errorf("invalid git cat-file frame terminator")
 	}
 	return body, nil
 }

@@ -1,0 +1,18 @@
+- id: prowl
+  name: "Prowl: проверка Git index"
+  description: Проверяет staged blobs, включая partial staging, и полноту скана.
+  entry: scripts/precommit-prowl
+  language: script
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  stages: [pre-commit]
+
+- id: prowl-docker
+  name: "Prowl: проверка Git index в Docker"
+  entry: ghcr.io/lercas/prowl:v1.4.0 scan --staged --strict --bundled --reconstruct --fail-on high
+  language: docker_image
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  stages: [pre-commit]

@@ -2,16 +2,42 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/Lercas/prowl/tool/internal/model"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/Lercas/prowl/tool/internal/checkedio"
 )
 
-const mcpProtocolVersion = "2024-11-05"
+const mcpProtocolVersion = "2025-06-18"
+const maxMCPMessageBytes = 16 << 20
+
+var errMCPOutput = errors.New("mcp: не удалось записать сообщение")
+
+type mcpWriter struct {
+	*bufio.Writer
+	err error
+}
+
+func newMCPWriter(output io.Writer) *mcpWriter {
+	return &mcpWriter{Writer: bufio.NewWriter(checkedio.NewWriter(output))}
+}
+
+func (w *mcpWriter) flush() error {
+	if w.err == nil && w.Flush() != nil {
+		w.err = errMCPOutput
+	}
+	return w.err
+}
 
 type mcpRequest struct {
 	JSONRPC string          `json:"jsonrpc"`
@@ -21,9 +47,10 @@ type mcpRequest struct {
 }
 
 type mcpTool struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	InputSchema map[string]any `json:"inputSchema"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	InputSchema  map[string]any `json:"inputSchema"`
+	OutputSchema map[string]any `json:"outputSchema,omitempty"`
 }
 
 func strProp(desc string) map[string]any {
@@ -34,7 +61,7 @@ func boolProp(desc string) map[string]any {
 }
 
 func mcpTools() []mcpTool {
-	return []mcpTool{
+	result := []mcpTool{
 		{Name: "prowl_scan", Description: "Scan a local file or directory for secrets. Returns the JSON findings envelope.",
 			InputSchema: map[string]any{"type": "object", "required": []string{"path"}, "properties": map[string]any{
 				"path": strProp("file or directory to scan"), "verify": boolProp("live-validate found secrets after detection"),
@@ -57,22 +84,184 @@ func mcpTools() []mcpTool {
 				"target": strProp("github:owner/repo or gitlab:group/project"),
 				"verify": boolProp("live-validate found secrets"), "ml": boolProp("apply the ML false-positive filter (L2)")}}},
 	}
+	for i := range result {
+		result[i].InputSchema["additionalProperties"] = false
+		props := result[i].InputSchema["properties"].(map[string]any)
+		props["strict"] = boolProp("ошибка при неполном скане")
+		props["bundled"] = boolProp("использовать встроенные rules/verifiers релиза, сохранив текущий identity key")
+		props["reconstruct"] = boolProp("статическое восстановление JS/TS")
+		props["semantic"] = boolProp("обнаружение кандидатов локальной моделью")
+		result[i].OutputSchema = map[string]any{"type": "object", "required": []string{"findings", "complete", "schema_version"}, "properties": map[string]any{"findings": map[string]any{"type": "array", "items": map[string]any{"type": "object"}}, "complete": map[string]any{"type": "boolean"}, "schema_version": map[string]any{"type": "string"}}}
+	}
+	return result
+
 }
 
 func cmdMCP(args []string) int {
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Buffer(make([]byte, 0, 64*1024), 16*1024*1024) // cap one JSON-RPC line at 16 MiB
-	w := bufio.NewWriter(os.Stdout)
-	for sc.Scan() {
-		if s := strings.TrimSpace(sc.Text()); s != "" {
-			handleMCP(s, w)
-			w.Flush()
-		}
+	if len(args) > 0 {
+		fmt.Fprintln(os.Stderr, "MCP не принимает scan flags при startup; передайте bundled/strict/ml/verify в аргументах tool call")
+		return 2
 	}
-	return 0 // stdin closed by the client
+	return serveMCP(os.Stdin, os.Stdout)
 }
 
-func handleMCP(line string, w *bufio.Writer) {
+type scanRunner func(context.Context, []string) (string, error)
+
+func serveMCP(input io.Reader, output io.Writer, stderr ...io.Writer) int {
+	target := io.Writer(os.Stderr)
+	if len(stderr) > 0 {
+		target = stderr[0]
+	}
+	return serveMCPWithRunnerAndErrors(input, output, target, runSelfContext)
+}
+func serveMCPWithRunner(input io.Reader, output io.Writer, runner scanRunner) int {
+	return serveMCPWithRunnerAndErrors(input, output, os.Stderr, runner)
+}
+func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runner scanRunner) int {
+	sc := bufio.NewScanner(input)
+	sc.Buffer(make([]byte, 0, 64*1024), maxMCPMessageBytes+1)
+	w := newMCPWriter(output)
+	var writes sync.Mutex
+	var active sync.Mutex
+	var closeInput sync.Once
+	calls := map[string]context.CancelFunc{}
+	slots := make(chan struct{}, 2)
+	var wg sync.WaitGroup
+	reply := func(fn func()) {
+		writes.Lock()
+		if w.err == nil {
+			fn()
+			_ = w.flush()
+		}
+		failed := w.err != nil
+		writes.Unlock()
+		if failed {
+			closeInput.Do(func() {
+				if closer, ok := input.(io.Closer); ok {
+					_ = closer.Close()
+				}
+			})
+		}
+	}
+	outputFailed := func() bool { writes.Lock(); defer writes.Unlock(); return w.err != nil }
+	inputTooLarge := false
+	for !outputFailed() && sc.Scan() {
+		if len(sc.Bytes()) > maxMCPMessageBytes {
+			inputTooLarge = true
+			break
+		}
+		line := strings.TrimSpace(sc.Text())
+		if line == "" {
+			continue
+		}
+		var req mcpRequest
+		if json.Unmarshal([]byte(line), &req) != nil {
+			reply(func() { mcpError(w, nil, -32700, "parse error") })
+			continue
+		}
+		if req.JSONRPC != "2.0" {
+			reply(func() { mcpError(w, req.ID, -32600, "invalid request") })
+			continue
+		}
+		if len(req.ID) > 0 && string(req.ID) != "null" {
+			if _, valid := mcpIDKey(req.ID); !valid {
+				reply(func() { mcpError(w, nil, -32600, "invalid request id") })
+				continue
+			}
+		}
+		if req.Method == "notifications/cancelled" {
+			var p struct {
+				ID json.RawMessage `json:"requestId"`
+			}
+			if json.Unmarshal(req.Params, &p) == nil {
+				active.Lock()
+				key, _ := mcpIDKey(p.ID)
+				cancel := calls[key]
+				active.Unlock()
+				if cancel != nil {
+					cancel()
+				}
+			}
+			continue
+		}
+		if len(req.ID) == 0 || string(req.ID) == "null" {
+			continue
+		}
+		if req.Method != "tools/call" {
+			reply(func() { handleMCP(line, w) })
+			continue
+		}
+		key, _ := mcpIDKey(req.ID)
+		active.Lock()
+		_, duplicate := calls[key]
+		if duplicate {
+			active.Unlock()
+			reply(func() { mcpError(w, req.ID, -32600, "duplicate active request id") })
+			continue
+		}
+		select {
+		case slots <- struct{}{}:
+		default:
+			active.Unlock()
+			reply(func() {
+				mcpToolResult(w, req.ID, "Достигнут лимит одновременных сканов", true)
+			})
+			continue
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		calls[key] = cancel
+		active.Unlock()
+		wg.Add(1)
+		go func(req mcpRequest, key string) {
+			defer wg.Done()
+			defer cancel()
+			defer func() { <-slots; active.Lock(); delete(calls, key); active.Unlock() }()
+			var buffer bytes.Buffer
+			bw := newMCPWriter(&buffer)
+			mcpCallContext(ctx, bw, req, runner)
+			_ = bw.flush()
+			reply(func() { _, _ = w.Write(buffer.Bytes()) })
+		}(req, key)
+	}
+	// EOF ends the session, so outstanding work cannot outlive its client.
+	active.Lock()
+	for _, cancel := range calls {
+		cancel()
+	}
+	active.Unlock()
+	wg.Wait()
+	if outputFailed() {
+		fmt.Fprintln(stderr, errMCPOutput)
+		return 2
+	}
+	if inputTooLarge {
+		fmt.Fprintln(stderr, "mcp: превышен лимит входного сообщения")
+		return 2
+	}
+	if sc.Err() != nil {
+		fmt.Fprintln(stderr, "mcp: не удалось прочитать входной поток")
+		return 2
+	}
+	return 0
+}
+
+func mcpIDKey(raw json.RawMessage) (string, bool) {
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 || bytes.Equal(raw, []byte("null")) {
+		return "", false
+	}
+	var s string
+	if json.Unmarshal(raw, &s) == nil {
+		return "s:" + s, true
+	}
+	var n json.Number
+	if json.Unmarshal(raw, &n) == nil && n.String() != "" && !strings.ContainsAny(n.String(), ".eE") {
+		return "n:" + n.String(), true
+	}
+	return "", false
+}
+
+func handleMCP(line string, w *mcpWriter) {
 	var req mcpRequest
 	if json.Unmarshal([]byte(line), &req) != nil {
 		return
@@ -82,7 +271,15 @@ func handleMCP(line string, w *bufio.Writer) {
 	}
 	switch req.Method {
 	case "initialize":
-		mcpReply(w, req.ID, map[string]any{"protocolVersion": mcpProtocolVersion,
+		protocol := mcpProtocolVersion
+		var p struct {
+			Protocol string `json:"protocolVersion"`
+		}
+		_ = json.Unmarshal(req.Params, &p)
+		if p.Protocol == "2024-11-05" || p.Protocol == "2025-03-26" {
+			protocol = p.Protocol
+		}
+		mcpReply(w, req.ID, map[string]any{"protocolVersion": protocol,
 			"capabilities": map[string]any{"tools": map[string]any{}},
 			"serverInfo":   map[string]any{"name": "prowl", "version": version}})
 	case "tools/list":
@@ -96,13 +293,14 @@ func handleMCP(line string, w *bufio.Writer) {
 	}
 }
 
-func mcpCall(w *bufio.Writer, req mcpRequest) {
+func mcpCall(w *mcpWriter, req mcpRequest) { mcpCallContext(context.Background(), w, req) }
+func mcpCallContext(ctx context.Context, w *mcpWriter, req mcpRequest, runners ...scanRunner) {
 	var p struct {
 		Name string         `json:"name"`
 		Args map[string]any `json:"arguments"`
 	}
 	if err := json.Unmarshal(req.Params, &p); err != nil {
-		mcpToolResult(w, req.ID, "invalid tool arguments: "+err.Error(), true)
+		mcpToolResult(w, req.ID, "Недопустимые аргументы инструмента", true)
 		return
 	}
 	argv, err := mcpArgv(p.Name, p.Args)
@@ -110,12 +308,52 @@ func mcpCall(w *bufio.Writer, req mcpRequest) {
 		mcpToolResult(w, req.ID, err.Error(), true)
 		return
 	}
-	out, runErr := runSelf(argv)
+	runner := scanRunner(runSelfContext)
+	if len(runners) > 0 {
+		runner = runners[0]
+	}
+	out, runErr := runner(ctx, argv)
 	if strings.TrimSpace(out) == "" && runErr != nil {
-		mcpToolResult(w, req.ID, "scan failed: "+runErr.Error(), true)
+		mcpToolResult(w, req.ID, "Скан завершился ошибкой", true)
 		return
 	}
-	mcpToolResult(w, req.ID, out, false)
+	var result model.ScanResult
+	if json.Unmarshal([]byte(out), &result) != nil || result.SchemaVersion != "1.4" || result.Findings == nil || result.Count != len(result.Findings) {
+		mcpToolResult(w, req.ID, "Недопустимый ответ сканера", true)
+		return
+	}
+	failed := !result.Complete
+	if runErr != nil {
+		var exit *exec.ExitError
+		if !errors.As(runErr, &exit) || exit.ExitCode() != 1 {
+			failed = true
+		}
+	}
+	mcpReply(w, req.ID, map[string]any{"content": []any{map[string]any{"type": "text", "text": out}}, "structuredContent": result, "isError": failed})
+}
+
+// mcpRunResult preserves partial JSON while distinguishing findings (exit 1) from scan failures.
+func mcpRunResult(out string, runErr error) (string, bool) {
+	if strings.TrimSpace(out) == "" {
+		if runErr != nil {
+			return "scan failed: " + runErr.Error(), true
+		}
+		return "scan produced no result", true
+	}
+	var envelope struct {
+		Findings  []json.RawMessage `json:"findings"`
+		Truncated bool              `json:"truncated"`
+	}
+	if err := json.Unmarshal([]byte(out), &envelope); err != nil || envelope.Findings == nil {
+		return "scan returned an invalid JSON findings envelope", true
+	}
+	if runErr != nil {
+		var exitErr *exec.ExitError
+		if !errors.As(runErr, &exitErr) || exitErr.ExitCode() != 1 || len(envelope.Findings) == 0 {
+			return out, true
+		}
+	}
+	return out, envelope.Truncated
 }
 
 // notDashLed rejects a positional value that starts with '-', which the prowl parser would otherwise
@@ -129,6 +367,39 @@ func notDashLed(kind, v string) error {
 
 // mcpArgv maps a tool call to the prowl CLI argv it shells out to (reusing the tested CLI behavior).
 func mcpArgv(name string, a map[string]any) ([]string, error) {
+	var schema map[string]any
+	for _, tool := range mcpTools() {
+		if tool.Name == name {
+			schema = tool.InputSchema
+			break
+		}
+	}
+	if schema == nil {
+		return nil, fmt.Errorf("unknown tool")
+	}
+	props := schema["properties"].(map[string]any)
+	for k, v := range a {
+		prop, ok := props[k]
+		if !ok {
+			return nil, fmt.Errorf("unknown argument: %s", k)
+		}
+		typ := prop.(map[string]any)["type"]
+		if typ == "boolean" {
+			if _, ok := v.(bool); !ok {
+				return nil, fmt.Errorf("%s must be boolean", k)
+			}
+		} else if _, ok := v.(string); !ok {
+			return nil, fmt.Errorf("%s must be string", k)
+		}
+	}
+	appendFlags := func(argv []string) []string {
+		for _, k := range []string{"strict", "reconstruct", "semantic", "bundled"} {
+			if v, _ := a[k].(bool); v {
+				argv = append(argv, "--"+k)
+			}
+		}
+		return append(argv, "--format", "json")
+	}
 	s := func(k string) string { v, _ := a[k].(string); return strings.TrimSpace(v) }
 	b := func(k string) bool { v, _ := a[k].(bool); return v }
 	switch name {
@@ -152,7 +423,7 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("show_secrets") {
 			argv = append(argv, "--show-secrets")
 		}
-		return append(argv, "--format", "json"), nil
+		return appendFlags(argv), nil
 	case "prowl_domain":
 		if s("target") == "" {
 			return nil, fmt.Errorf("target is required")
@@ -170,7 +441,7 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("verify") {
 			argv = append(argv, "--verify")
 		}
-		return append(argv, "--format", "json"), nil
+		return appendFlags(argv), nil
 	case "prowl_mobile":
 		if s("path") == "" {
 			return nil, fmt.Errorf("path is required")
@@ -182,7 +453,7 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("ml") {
 			argv = append(argv, "--ml")
 		}
-		return append(argv, "--format", "json"), nil
+		return appendFlags(argv), nil
 	case "prowl_repo":
 		if s("url") == "" {
 			return nil, fmt.Errorf("url is required")
@@ -197,7 +468,7 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("ocr") {
 			argv = append(argv, "--ocr")
 		}
-		return append(argv, "--format", "json"), nil
+		return appendFlags(argv), nil
 	case "prowl_cicd":
 		if s("target") == "" {
 			return nil, fmt.Errorf("target is required")
@@ -212,34 +483,50 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		if b("ml") {
 			argv = append(argv, "--ml")
 		}
-		return append(argv, "--format", "json"), nil
+		return appendFlags(argv), nil
 	}
 	return nil, fmt.Errorf("unknown tool: %s", name)
 }
 
 // runSelf invokes this same binary with argv, returning its stdout (the JSON findings). A non-zero exit
 // from a findings-found run is normal, so the output is returned regardless; err carries a real failure.
-func runSelf(argv []string) (string, error) {
+func runSelfContext(parent context.Context, argv []string) (string, error) {
 	self, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	ctx, cancel := context.WithTimeout(parent, 5*time.Minute)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, self, argv...)
-	out, err := cmd.Output()
-	return string(out), err
+	cmd.WaitDelay = 2 * time.Second
+	output := &boundedMCPOutput{cancel: cancel}
+	cmd.Stdout = output
+	err = cmd.Run()
+	return output.String(), err
 }
 
-func mcpReply(w *bufio.Writer, id json.RawMessage, result any) {
+type boundedMCPOutput struct {
+	bytes.Buffer
+	cancel context.CancelFunc
+}
+
+func (w *boundedMCPOutput) Write(p []byte) (int, error) {
+	if len(p)+w.Len() > 32<<20 {
+		w.cancel()
+		return 0, errors.New("MCP output budget exceeded")
+	}
+	return w.Buffer.Write(p)
+}
+
+func mcpReply(w *mcpWriter, id json.RawMessage, result any) {
 	writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(id), "result": result})
 }
 
-func mcpError(w *bufio.Writer, id json.RawMessage, code int, msg string) {
+func mcpError(w *mcpWriter, id json.RawMessage, code int, msg string) {
 	writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(id), "error": map[string]any{"code": code, "message": msg}})
 }
 
-func mcpToolResult(w *bufio.Writer, id json.RawMessage, text string, isError bool) {
+func mcpToolResult(w *mcpWriter, id json.RawMessage, text string, isError bool) {
 	mcpReply(w, id, map[string]any{"content": []any{map[string]any{"type": "text", "text": text}}, "isError": isError})
 }
 
@@ -250,13 +537,20 @@ func rawID(id json.RawMessage) any {
 	return id
 }
 
-func writeMCP(w *bufio.Writer, msg map[string]any) {
+func writeMCP(w *mcpWriter, msg map[string]any) {
+	if w.err != nil {
+		return
+	}
 	b, err := json.Marshal(msg)
 	if err != nil {
+		w.err = errMCPOutput
 		return
 	}
 	if _, err := w.Write(b); err != nil {
+		w.err = errMCPOutput
 		return
 	}
-	_ = w.WriteByte('\n')
+	if w.WriteByte('\n') != nil {
+		w.err = errMCPOutput
+	}
 }

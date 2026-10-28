@@ -97,6 +97,12 @@ func Collect(ctx context.Context, rawTarget string, opts Options) (<-chan model.
 		},
 		direct: safehttp.Client(45 * time.Second),
 	}
+	model.CoverageFrom(ctx).RegisterScope("cicd", rawTarget, struct {
+		Branch                string
+		MaxRuns, MaxArtifacts int
+		MaxItem               int64
+		Logs, Artifacts       bool
+	}{opts.Branch, opts.MaxRuns, opts.MaxArtifacts, opts.MaxItem, opts.IncludeLogs, opts.IncludeArtifacts})
 	items := make(chan model.Item, 32)
 	done := make(chan Result, 1)
 	go func() {
@@ -107,6 +113,19 @@ func Collect(ctx context.Context, rawTarget string, opts Options) (<-chan model.
 			c.collectGitHub(ctx, items, &result)
 		case "gitlab":
 			c.collectGitLab(ctx, items, &result)
+		}
+		if result.Failures > 0 {
+			model.Note(ctx, "ci_collection_failed", rawTarget, true)
+			select {
+			case items <- model.Item{Source: "ci", Path: rawTarget, Error: result.LastError}:
+			case <-ctx.Done():
+			}
+		}
+		if result.Skipped > 0 {
+			model.Note(ctx, "ci_collection_skipped", rawTarget, true)
+		}
+		if result.Items == 0 {
+			model.Note(ctx, "ci_empty", rawTarget, true)
 		}
 		done <- result
 		close(done)
@@ -283,6 +302,9 @@ func (c *collector) emitPayload(ctx context.Context, out chan<- model.Item, pref
 	})
 	result.Skipped += stats.Skipped
 	if recognized {
+		if err == nil && stats.Limited > 0 {
+			return fmt.Errorf("artifact content omitted at extraction limits")
+		}
 		return err
 	}
 	return c.emitFile(ctx, out, prefix, itemURL, raw, result)
@@ -291,7 +313,7 @@ func (c *collector) emitPayload(ctx context.Context, out chan<- model.Item, pref
 func (c *collector) emitFile(ctx context.Context, out chan<- model.Item, itemPath, itemURL string, raw []byte, result *Result) error {
 	if int64(len(raw)) > c.opts.MaxItem {
 		result.Skipped++
-		return nil
+		return fmt.Errorf("CI item exceeds --max-size (%d bytes)", c.opts.MaxItem)
 	}
 	text, ok := source.ScannableText(raw)
 	if !ok || len(text) == 0 {
@@ -304,6 +326,7 @@ func (c *collector) emitFile(ctx context.Context, out chan<- model.Item, itemPat
 		Path:   itemPath,
 		Meta:   map[string]any{"url": itemURL},
 	}
+	model.AttachProvenance(ctx, &item)
 	select {
 	case out <- item:
 		result.Items++
