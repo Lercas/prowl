@@ -74,7 +74,7 @@ jobs:
             --output-dir "$RUNNER_TEMP/prowl-pipeline-evidence-$RUNNER_OS"
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         working-directory: tool
@@ -91,7 +91,7 @@ jobs:
       - name: build
         run: go build ./...
       - name: test (race + coverage)
-        run: go test -race -coverprofile=/tmp/cover.out ./...
+        run: go test -p 2 -race -coverprofile=/tmp/cover.out ./...
       - name: coverage summary
         run: go tool cover -func=/tmp/cover.out | tail -1
       - name: static build and feature parity
