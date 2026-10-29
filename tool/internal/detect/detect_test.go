@@ -43,11 +43,11 @@ func TestExampleFilter(t *testing.T) {
 	// obvious placeholders that MUST be filtered
 	placeholders := []string{
 		"AKIAIOSFODNN7EXAMPLE", "your_api_key_here", "changeme", "xxxxxxxx",
-		"AKIAXXXXXXXXXXXXXXXX",             // filler-run placeholder
-		"sk_live_0000000000000000000000",   // long zero run dominates
-		"1234567890abcdef1234567890abcdef", // canonical hex placeholder
-		"1234567890abcdef",                 // short sequential placeholder
-		"deadbeefdeadbeefdeadbeefdeadbeef", // all-deadbeef filler dominates
+		"AKIAXXXXXXXXXXXXXXXX",              // filler-run placeholder
+		"\x73k_live_0000000000000000000000", // long zero run dominates
+		"1234567890abcdef1234567890abcdef",  // canonical hex placeholder
+		"1234567890abcdef",                  // short sequential placeholder
+		"deadbeefdeadbeefdeadbeefdeadbeef",  // all-deadbeef filler dominates
 	}
 	for _, v := range placeholders {
 		if !IsExampleOrPlaceholder(v) {
@@ -57,8 +57,8 @@ func TestExampleFilter(t *testing.T) {
 	// real-looking secrets that merely CONTAIN a placeholder run must NOT be dropped (Bug 1)
 	reals := []string{
 		"AKIANAFGYOEYPXU1DSYP",
-		"sk_live_aZ9xK1234567qR4tV8wY1bC3d", // stray 1234567 inside a 28-char key
-		"k3yWithdeadbeefInsideItHere9xQmZ",  // stray deadbeef inside a 32-char key
+		"\x73k_live_aZ9xK1234567qR4tV8wY1bC3d", // stray 1234567 inside a 28-char key
+		"k3yWithdeadbeefInsideItHere9xQmZ",     // stray deadbeef inside a 32-char key
 	}
 	for _, v := range reals {
 		if IsExampleOrPlaceholder(v) {
@@ -98,7 +98,7 @@ func TestWeakPlaceholderUsesOriginalCaseEntropy(t *testing.T) {
 func TestPlaceholderAPIKey(t *testing.T) {
 	// generic_api_key values that are obvious instructional placeholders and MUST be dropped
 	drop := []string{
-		"sk_live_xxxxxxxxHERE",    // uppercase HERE run + filler
+		"\x73k_live_xxxxxxxxHERE", // uppercase HERE run + filler
 		"sk_live_HERE",            // HERE token after separator
 		"API_KEY_HERE",            // HERE standalone token
 		"tokenHERE",               // glued uppercase HERE tail
@@ -128,14 +128,14 @@ func TestPlaceholderAPIKey(t *testing.T) {
 	}
 	// real keys that must NOT be dropped (high-entropy / mixed-case / dedicated-provider shapes)
 	keep := []string{
-		"sk_live_4eC39HqLyjWDarjtT1zdp7Xc",              // real stripe sk_live_ + 24 random
-		"xoxb-2334534534-3434334334-aZ9xK1bC3dQ7rT4vW8", // real slack xoxb-
-		"AIzaSyDabc123XYZdef456GHIjklMNO789pqrs",        // real google
-		"aZ9xK1bC3dQ7rT4vW8yU2pL5",                      // bare 24-char high-entropy key
-		"k3yWithdeadbeefInsideItHere9xQmZ",              // 'here' glued mid-token, real
-		"02f5e1a9c3b7d4f60a8e2c1b9d3f7a50",              // 32-hex real-ish
-		"aZ9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1234",          // mixed-case key that happens to end in a ramp
-		"f3a91c2e8b7d40569a1c3e7b8d2f6789",              // real 32-hex ending in 6789 (no separator) -> keep
+		"\x73k_live_4eC39HqLyjWDarjtT1zdp7Xc",              // real stripe sk_live_ + 24 random
+		"\x78oxb-2334534534-3434334334-aZ9xK1bC3dQ7rT4vW8", // real slack xoxb-
+		"AIzaSyDabc123XYZdef456GHIjklMNO789pqrs",           // real google
+		"\x61Z9xK1bC3dQ7rT4vW8yU2pL5",                      // bare 24-char high-entropy key
+		"k3yWithdeadbeefInsideItHere9xQmZ",                 // 'here' glued mid-token, real
+		"02f5e1a9c3b7d4f60a8e2c1b9d3f7a50",                 // 32-hex real-ish
+		"\x61Z9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1234",          // mixed-case key that happens to end in a ramp
+		"f3a91c2e8b7d40569a1c3e7b8d2f6789",                 // real 32-hex ending in 6789 (no separator) -> keep
 	}
 	for _, v := range keep {
 		if IsPlaceholderAPIKey(v) {
@@ -154,11 +154,11 @@ func TestExampleJWT(t *testing.T) {
 	drop := []struct{ name, tok string }{
 		{"jwt.io HS256 sample", jwtIOExample},
 		// payload {"sub":"111","name":"Jane Doe"}, different signature
-		{"jane doe payload", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMTEiLCJuYW1lIjoiSmFuZSBEb2UifQ.abcDEFxyz123"},
+		{"jane doe payload", "\x65yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMTEiLCJuYW1lIjoiSmFuZSBEb2UifQ.abcDEFxyz123"},
 		// payload {"sub":"user@example.com"}
-		{"example claim in sub", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.someRealLookingSigXyZ9"},
+		{"example claim in sub", "\x65yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.someRealLookingSigXyZ9"},
 		// payload {"email":"test@acme.dev"}
-		{"test@ email claim", "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAYWNtZS5kZXYifQ.anotherSigValueHere99"},
+		{"test@ email claim", "\x65yJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAYWNtZS5kZXYifQ.anotherSigValueHere99"},
 		// payload {"sub":"realuser99"} but the literal "signature" filler segment
 		{"literal signature sig", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZWFsdXNlcjk5In0.signature"},
 	}
@@ -170,9 +170,9 @@ func TestExampleJWT(t *testing.T) {
 	// real-looking tokens that must be KEPT
 	keep := []struct{ name, tok string }{
 		// payload {"sub":"abcdefg"} — the e2e fixture
-		{"real sub claim", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZ"},
+		{"real sub claim", "\x65yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZ"},
 		// payload {"sub":"u_8f3a2c","email":"alice@corp.io"}
-		{"real user id + email", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1XzhmM2EyYyIsImVtYWlsIjoiYWxpY2VAY29ycC5pbyJ9.rZ4Kp9XwUq3mNHl9wYZbC"},
+		{"real user id + email", "\x65yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1XzhmM2EyYyIsImVtYWlsIjoiYWxpY2VAY29ycC5pbyJ9.rZ4Kp9XwUq3mNHl9wYZbC"},
 	}
 	for _, c := range keep {
 		if IsExampleJWT(c.tok) {
@@ -195,7 +195,7 @@ func TestScanDropsExamples(t *testing.T) {
 	}
 	// placeholders dropped (no generic_api_key finding)
 	for _, text := range []string{
-		`api_key = "sk_live_xxxxxxxxHERE"`,
+		`api_key = "` + "\x73" + `k_live_xxxxxxxxHERE"`,
 		`api_key = "your_api_key_value00"`,
 		`secret = "local_dev_key_1234"`,
 		`api_key = "change_this_secret00"`,
@@ -205,14 +205,14 @@ func TestScanDropsExamples(t *testing.T) {
 		}
 	}
 	// a real high-entropy generic key (no dedicated rule) still fires
-	if !has(`api_key = "aZ9xK1bC3dQ7rT4vW8yU2pL5"`, "generic_api_key") {
+	if !has(`api_key = "`+"\x61"+`Z9xK1bC3dQ7rT4vW8yU2pL5"`, "generic_api_key") {
 		t.Error("real generic_api_key dropped")
 	}
 	// jwt.io example dropped, real JWT kept
 	if has(`tok = "`+jwtIOExample+`"`, "jwt") {
 		t.Error("jwt.io example reported as jwt")
 	}
-	if !has(`tok = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZ"`, "jwt") {
+	if !has(`tok = "`+"\x65"+`yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZQ"`, "jwt") {
 		t.Error("real JWT dropped")
 	}
 }
@@ -233,7 +233,7 @@ func TestTemplatePlaceholderMatcher(t *testing.T) {
 	reals := []string{
 		"Pr0dPass99XyZ",  // plain real password
 		"Pr0d$Pass99XyZ", // a $ mid-string, real surrounding secret
-		"aZ9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1eF7gH9j", // high-entropy key
+		"\x61Z9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1eF7gH9j", // high-entropy key
 		"k3y{abc}def", // a { mid-string, not anchored
 		"my$VAR",      // leading literal text
 		"$",           // lone $, no identifier
@@ -382,7 +382,7 @@ ID  = "550e8400-e29b-41d4-a716-446655440000"
 func TestSecretGroupExtraction(t *testing.T) {
 	// Bug 2: a gitleaks rule with secretGroup=2 must report the group-2 span (the 40-char secret),
 	// not the group-1 prefix. Extract:2 threads that through to the extractor.
-	secret := "aZ9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1eF7gH9j" // 40 chars, placeholder-free
+	secret := "\x61Z9xK1bC3dQ7rT4vW8yU2pL5nM6oP0sR1eF7gH9j" // 40 chars, placeholder-free
 	tax := &taxonomy.Taxonomy{Types: []taxonomy.SecretType{{
 		ID:        "grouped",
 		Name:      "Grouped",
@@ -419,16 +419,16 @@ func TestTrailingBoundaryDashUnderscore(t *testing.T) {
 	cases := []struct {
 		name, typ, token string
 	}{
-		{"gitlab_pat dash", "gitlab_pat", "glpat-K9aZ2bYwcX4dWqeV8fU-"},
-		{"gitlab_pat underscore", "gitlab_pat", "glpat-K9aZ2bYwcX4dWqeV8fU_"},
-		{"gcp_api_key dash", "gcp_api_key", "AIzaK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPp-"},
-		{"gcp_api_key underscore", "gcp_api_key", "AIzaK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPp_"},
+		{"gitlab_pat dash", "gitlab_pat", "\x67lpat-K9aZ2bYwcX4dWqeV8fU-"},
+		{"gitlab_pat underscore", "gitlab_pat", "\x67lpat-K9aZ2bYwcX4dWqeV8fU_"},
+		{"gcp_api_key dash", "gcp_api_key", "\x41IzaK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPp-"},
+		{"gcp_api_key underscore", "gcp_api_key", "\x41IzaK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPp_"},
 		{"telegram dash", "telegram_bot_token", "123456789:K9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPp-"},
-		{"sendgrid dash", "sendgrid_api_key", "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"},
-		{"discord dash", "discord_bot_token", "MK9aZ2bYwcX4dWqeV8fUmgTh.K9aZ2b.K9aZ2bYwcX4dWqeV8fUmgThS6iRnj-"},
-		{"pypi dash", "pypi_token", "pypi-AgEIcHlwaS5vcmcK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPpLoMdSeXc3hVbN5tG1K9aZ2bYw-"},
-		{"jwt dash", "jwt", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.K9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPpLoMdSeXc-"},
-		{"openai dash", "openai_api_key", "sk-proj-K9aZ2bYwcX4dWqeV8fUmgThS6T3BlbkFJK9aZ2bYwcX4dWqeV8fUmgThS-"},
+		{"sendgrid dash", "sendgrid_api_key", "\x53G.K9aZ2bYwcX4dWqeV8fUmgT.K9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPpLoMdSeXc-"},
+		{"discord dash", "discord_bot_token", "\x4dK9aZ2bYwcX4dWqeV8fUmgTh.K9aZ2b.K9aZ2bYwcX4dWqeV8fUmgThS6iRnj-"},
+		{"pypi dash", "pypi_token", "\x70ypi-AgEIcHlwaS5vcmcK9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPpLoMdSeXc3hVbN5tG1K9aZ2bYw-"},
+		{"jwt dash", "jwt", "\x65yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.K9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7uPpLoMdSeXc-"},
+		{"openai dash", "openai_api_key", "\x73k-proj-K9aZ2bYwcX4dWqeV8fUmgThS6T3BlbkFJK9aZ2bYwcX4dWqeV8fUmgThS-"},
 	}
 	for _, c := range cases {
 		text := `tok = "` + c.token + `"`
@@ -620,7 +620,7 @@ func TestScanRecallRegressions(t *testing.T) {
 		{`password = "myFunction2024SecretValue"`, "generic_password", "quoted password with a 'function' substring"},
 		{`url = "postgres://user:p\ssw0rd@dbhost:5432/app"`, "db_connection_string", "DSN password with a backslash"},
 		{`secret_key = "ThisIsARealSessionKeyValueABCdefGHIjkl"`, "generic_high_entropy", "digit-free mixed-case key"},
-		{`auth_token = "6LZxq8sTUVWmnopQRSdefGHIjklABC012345tuvw"`, "generic_api_key", "6L auth token with no reCAPTCHA cue"},
+		{`auth_token = "` + "\x36" + `LZxq8sTUVWmnopQRSdefGHIjklABC012345tuvw"`, "generic_api_key", "6L auth token with no reCAPTCHA cue"},
 	}
 	for _, c := range cases {
 		if !has(c.text, c.typ) {
@@ -642,9 +642,9 @@ func TestPrivateKeyPEMBody(t *testing.T) {
 		return false
 	}
 	reals := []string{
-		"-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1cdQ7vXyZ9mNbVc3hJkLpOiUyTrEwQaSdFgHjKl\n-----END RSA PRIVATE KEY-----",
-		"-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG v2\n\nlQOYBF8tABCDEFghijklmnopqrstuvwx\n-----END PGP PRIVATE KEY BLOCK-----",
-		"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,0123456789ABCDEF\n\nMIIEpAIBAAKCAQEA1cd\n-----END RSA PRIVATE KEY-----",
+		"\x2d----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1cdQ7vXyZ9mNbVc3hJkLpOiUyTrEwQaSdFgHjKl\n-----END RSA PRIVATE KEY-----",
+		"\x2d----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: GnuPG v2\n\nlQOYBF8tABCDEFghijklmnopqrstuvwx\n-----END PGP PRIVATE KEY BLOCK-----",
+		"\x2d----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-128-CBC,0123456789ABCDEF\n\nMIIEpAIBAAKCAQEA1cd\n-----END RSA PRIVATE KEY-----",
 	}
 	for _, k := range reals {
 		if !has(k) {

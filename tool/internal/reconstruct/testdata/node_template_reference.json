@@ -1,0 +1,78 @@
+{
+  "seed": 1400,
+  "reference": "v22.15.1",
+  "rows": [
+    {
+      "code": "const prefix='AKIA';const key=`\\x24{prefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\x24{prefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\x24{prefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\u0024{prefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\u0024{prefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\u0024{prefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`$\\u007bprefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`$\\u007bprefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`$\\u007bprefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\${prefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\${prefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\${prefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "${prefix}NAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`${prefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`${prefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`${prefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\\\${prefix}NAFGYOEYPXU1DSYP`;key;",
+      "value": "\\AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\\\${prefix}\\x4eAFGYOEYPXU1DSYP`;key;",
+      "value": "\\AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const prefix='AKIA';const key=`\\\\${prefix}\\u004eAFGYOEYPXU1DSYP`;key;",
+      "value": "\\AKIANAFGYOEYPXU1DSYP"
+    }
+  ]
+}

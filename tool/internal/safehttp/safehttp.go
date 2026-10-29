@@ -18,7 +18,8 @@ import (
 
 // RedactURL strips embedded credentials (user:token@) from a URL so it can't leak into a log or
 // error. It splits on the last '@' within the authority, so a password containing '@' is fully
-// removed while an '@' in the path is untouched. A creds-less or non-URL string is returned as-is.
+// removed while an '@' in the path, query, or fragment is untouched. A creds-less or non-URL
+// string is returned as-is. Lexical boundaries also work for malformed userinfo that URL parsing rejects.
 func RedactURL(raw string) string {
 	i := strings.Index(raw, "://")
 	if i < 0 {
@@ -26,7 +27,7 @@ func RedactURL(raw string) string {
 	}
 	rest := raw[i+3:]
 	authEnd := len(rest)
-	if s := strings.IndexByte(rest, '/'); s >= 0 {
+	if s := strings.IndexAny(rest, "/?#"); s >= 0 {
 		authEnd = s
 	}
 	at := strings.LastIndexByte(rest[:authEnd], '@')

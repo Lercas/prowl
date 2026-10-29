@@ -1,0 +1,8 @@
+#!/bin/sh
+# Build in the hook checkout, execute in the consumer's original repository.
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+hook_repo=$(CDPATH= cd -- "$script_dir/.." && pwd)
+mkdir -p "$hook_repo/.hook-bin"
+go -C "$hook_repo/tool" build -trimpath -o "$hook_repo/.hook-bin/prowl" ./cmd/prowl
+exec "$hook_repo/.hook-bin/prowl" scan --staged --strict --bundled --reconstruct --fail-on high "$@"

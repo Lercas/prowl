@@ -1,0 +1,34 @@
+name: Prowl Secret Scan
+description: Проверка секретов с диагностикой полноты и SARIF-отчётом.
+author: sugar
+branding:
+  icon: eye
+  color: purple
+inputs:
+  path:
+    description: Путь для проверки
+    default: '.'
+  format:
+    description: pretty, json или sarif
+    default: sarif
+  fail-on:
+    description: Минимальная серьёзность для кода 1
+    default: high
+  output:
+    description: Файл отчёта
+    default: prowl.sarif
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - scan
+    - ${{ inputs.path }}
+    - --strict
+    - --bundled
+    - --reconstruct
+    - --format
+    - ${{ inputs.format }}
+    - --fail-on
+    - ${{ inputs.fail-on }}
+    - --output
+    - ${{ inputs.output }}

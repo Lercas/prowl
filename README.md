@@ -29,9 +29,10 @@ keys, passwords in prose) with a line, a column, and a confidence. The goal is
 
 Most scanners force a choice. Regex tools (gitleaks, trufflehog) are precise on structured tokens
 but miss anything without a fixed prefix; ML/semantic tools (deepsecrets) read free-form prose but
-collapse on structured keys. Prowl runs both as one cascade - regex/checksum precision on structured
-tokens, an ML stage for the multilingual prose that prefix tools miss, and optional live verification
-on top. It does not claim the lowest false-positive count of every tool (a tuned prefix scanner like
+collapse on structured keys. Prowl first detects candidates with rules, checksums, and context;
+optional `--ml` filters those candidates and does not add findings missed by the first stage.
+Explicit `--semantic` can add candidates from prose; live verification is a separate opt-in.
+It does not claim the lowest false-positive count of every tool (a tuned prefix scanner like
 gitleaks can be quieter on pure code); it aims for the widest honest coverage at a usable precision.
 See [the benchmark](#benchmark) for the reproducible numbers and where each tool wins.
 
@@ -39,7 +40,7 @@ See [the benchmark](#benchmark) for the reproducible numbers and where each tool
 $ prowl scan .
 
   src/config/prod.ts
-    ✖ critical  aws_access_key_id      42:18   AKIA••••DSYP    live
+    ✖ critical  aws_access_key_id      42:18   AKIA••••DSYP
   .env.example
     ✖ high      github_pat             3:11    ghp_••••a1b2
   docs/onboarding.md
@@ -51,6 +52,16 @@ $ prowl scan .
 Findings are grouped by file (worst first), severity-coloured, with the secret masked. JSON
 (`--format json`), SARIF (`--format sarif`, for the GitHub/GitLab Security tab), and DefectDojo
 (`--format defectdojo`, Generic Findings Import for direct upload) are one flag away.
+
+## Demo
+
+[![Prowl terminal recording](assets/terminal-demo-plain/poster.png)](assets/terminal-demo-plain/prowl-terminal.mp4)
+
+[Watch the terminal recording (MP4)](assets/terminal-demo-plain/prowl-terminal.mp4).
+A continuous interactive shell session: scan a config, build log and ZIP, inspect
+masked findings and JSON, fail a CI gate, fix the files and rescan. Synthetic
+credentials; no ML or live verification.
+[Recording details and reproduction](assets/terminal-demo-plain/README.md).
 
 ## Install
 
@@ -67,12 +78,9 @@ docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl scan /src
 # binary - download from the GitHub Releases page (linux/macos/windows, amd64/arm64)
 ```
 
-> **ML support in released binaries.** The Homebrew, Docker, and GitHub Release binaries are built
-> static (`CGO_ENABLED=0`) and run the **cascade by default**. The in-process ML stage (`--ml`) needs
-> a cgo build - a static release binary **refuses `--ml`** and exits with a message pointing you to
-> `--ml-url` or a source build. To get ML, either run the model as a sidecar and pass `--ml-url`, or
-> build from source with cgo (`cd tool && make build`, which sets `CGO_ENABLED=1`). The cascade,
-> rule templates, and live `--verify` work in every build.
+> **1.4.0:** `--ml` works in static and native builds without Python or a sidecar.
+> Rules and verifiers are embedded in the binary and checked against a SHA-256 manifest.
+> [New features, commands, and limitations](wiki/Release-1.4.0.md).
 
 ### Pre-commit
 
@@ -82,7 +90,7 @@ Drop Prowl into [pre-commit](https://pre-commit.com) - the same place you'd wire
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/Lercas/prowl
-    rev: v1.0.0
+    rev: v1.4.0             # pin this tag after the release is published
     hooks:
       - id: prowl            # builds from source (needs Go), or:
       # - id: prowl-docker   # no Go toolchain, uses the published image
@@ -95,9 +103,29 @@ to see how many of your current findings Prowl's ML stage flags as noise before 
 ## Quick start
 
 ```sh
+prowl                              # current directory
+prowl ./src                        # local file, directory, archive, document, or mail
+cat build.log | prowl               # stdin, no temporary file
+prowl --ml ./src                    # local embedded ML filter
+prowl --ci ./src                    # exit 1 for high/critical; exit 2 for incomplete scans
+prowl --format json ./src           # JSON on stdout, logs on stderr
+cat config.json | prowl --stdin-name config.json  # structured JSON parsing
+prowl --help                       # short help; prowl help all lists all capabilities
+```
+
+`prowl scan` retains its existing interface. Shorthand accepts an existing local path
+or an explicit `./path`; URLs require a source command. `--ci` enables
+`--strict --fail-on high`; an explicit `--fail-on` overrides the threshold.
+Without a failure threshold, a successful ordinary scan returns 0 even with findings.
+The report distinguishes processed input, incomplete coverage, and suppressed results.
+Without `--verify`, findings are candidates and no provider requests are made.
+
+Other sources and modes:
+
+```sh
 prowl scan .                       # scan the working tree
-prowl scan . --staged              # only what's staged (pre-commit)
-prowl scan . --since HEAD~50       # only the last 50 commits' diffs
+prowl scan --staged                 # only what's staged (pre-commit)
+prowl scan --since HEAD~50          # working-tree diff against the revision
 prowl scan . --verify              # confirm each hit against the provider's API
 prowl scan . --format sarif -o out.sarif    # for code scanning / CI
 prowl scan release-bundle.tar.gz            # recursively scan ZIP/TAR/GZIP and Office documents
@@ -119,7 +147,8 @@ prowl serve                        # stateless HTTP worker: POST /scan (cascade 
 prowl mcp                          # Model Context Protocol server over stdio: AI agents drive scans as tools
 ```
 
-First run installs the rule and verifier libraries; after that they load automatically:
+Rules and verifiers are embedded in 1.4.0; the first scan needs no library download.
+Updates are optional for a separately installed template set:
 
 ```sh
 prowl rules update                 # fetch + validate + install ~/.prowl/rules
@@ -181,9 +210,8 @@ One scanner, many sources - every one runs the same detection cascade and the sa
   shapes, `\uXXXX` unicode strings, hash digests, and URL-parsing regexes while keeping real secrets; the
   `--ml` stage scores dense minified bundles, and the private-key detector requires an actual key body (a
   bare PEM header no longer fires).
-- **Rules live outside the binary.** 159 YAML rule files you can edit, disable, or
-  extend, and your existing **gitleaks** `.toml` and **trufflehog** `.yaml` rulesets drop in
-  unchanged.
+- **Built-in and extensible rules.** 159 YAML templates are available offline and can be edited, disabled,
+  or extended. Existing **gitleaks** `.toml` and **trufflehog** `.yaml` rule sets can be used unchanged.
 - **Fast.** ~310 MB/s single-threaded, zero-allocation hot path, scales linearly across cores. An
   Aho-Corasick pre-filter means a 159-rule library costs almost nothing.
 - **Built for pipelines.** CLI, pre-commit, GitHub Action, SARIF output, exit-code gating, an LSP
@@ -250,7 +278,7 @@ the box).
   providers they have no rule for (a coverage gap, not lower quality).
 - **On real clean code (B), gitleaks is the cleanest (4) and strongest tool overall here.** Prowl's
   zero-dependency cascade reports 18 (was 50 before this release tightened asset/expression FPs); its
-  **ML L2 filter (`--ml`, needs a cgo build or the sidecar) cuts that to 9** without losing any of the
+  **ML L2 filter (`--ml`) cuts that to 9** without losing any of the
   34 corpus positives - that's the "do we clean FPs with the ML?" answer: yes, half the remaining cascade
   noise, recall unchanged (the L2 was retrained on hard-negatives mined from real clean repos, gated on a
   held-out real-data split - not synthetic). Even so Prowl is ~2× gitleaks on real code. Prowl trades
@@ -283,12 +311,10 @@ you want them upstreamed).
 The published multilingual encoder remains an experimental research/integration model. It can back a
 custom scorer, but it is not an automatic third runtime stage in the shipped binary.
 
-**Running ML.** L1 ships in every binary and needs nothing. L2 does not run by default. The in-process
-model (`--ml`) is available only in a **cgo build**;
-the static release binaries (Homebrew/Docker/Releases, `CGO_ENABLED=0`) refuse `--ml` and tell you to
-use `--ml-url` or build from source. To run the ML stage without a cgo build, host the model as a
-sidecar and pass `--ml-url`. In short: a released binary runs the cascade by default (ML via
-`--ml-url`), and a source build with cgo runs `--ml` in-process.
+**ML in 1.4.0.** L2 is enabled with `--ml` in all distributed builds. The static binary calculates
+`compression_ratio` using an embedded, bounded zlib WASM module; native builds use the system zlib.
+Both implementations are checked against a required Python/Go fixture. `--ml-url` remains a separate
+sidecar mode; remote transmission requires `--ml-allow-remote` and HTTPS.
 
 ## Rules and verifiers
 
@@ -319,7 +345,7 @@ generate one with the prompts in `rules/PROMPT.md`.
 prowl scan . --rules gitleaks.toml --rules trufflehog.yaml   # bring your own
 prowl rules list --tags aws,stripe                # browse the library by category
 prowl rules show stripe-secret-key                # one rule's matchers + reference
-prowl rules test 'key = "sk_live_4eC39HqLyjWD..."'  # which rules fire on a sample
+prowl rules test 'key = "sk_''live_4eC39HqLyjWD..."'  # which rules fire on a sample
 prowl rules validate ./team-rules
 ```
 

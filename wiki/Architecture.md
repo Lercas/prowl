@@ -46,6 +46,13 @@ A checksum-validated finding is reported at the highest confidence (0.99) with s
 
 **Multilingual password context.** For passwords with no `=`/`:` anchor, Stage 1 scans any line carrying a credential cue — `pass`, `pwd`, plus non-English roots `kennwort`, `mot de passe`, `contrase`, `wachtwoord`, `пароль`, `salasana`, and more — for a plausible password token (length, mixed character classes, not a path/version/hash). These land as `generic_password`, stage `L1-context-pw`.
 
+Кандидат contextual-password должен иметь признак учётных данных вне собственного
+токена. Подстрока `pass` внутри одного слова не создаёт контекст сама по себе.
+При равной confidence точное regex/checksum-совпадение имеет приоритет над contextual
+догадкой: для `password=…` находка содержит значение, а не имя поля вместе со значением.
+Fingerprint также вычисляется по самому значению; baseline, созданный прежней версией
+для ошибочно расширенного токена, потребуется обновить после полного сканирования.
+
 Stage 1's hot path is allocation-free: it folds the keyword scan and the structural byte scan into a single loop, lowercases into a pooled buffer with a zero-copy view, and reuses a pooled keyword-presence bitset per block.
 
 ## L2 — optional ML candidate filter

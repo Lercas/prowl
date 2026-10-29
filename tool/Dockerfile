@@ -8,7 +8,10 @@ ARG VERSION=dev
 ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /prowl ./cmd/prowl
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM debian:bookworm-slim
+RUN --mount=type=cache,target=/var/lib/apt/lists --mount=type=cache,target=/var/cache/apt apt-get update && apt-get install --no-install-recommends -y git ca-certificates && git config --system --add safe.directory /src
+ENV PROWL_HOME=/tmp/prowl
+USER 65532:65532
 COPY --from=build /prowl /usr/local/bin/prowl
 ENTRYPOINT ["/usr/local/bin/prowl"]
 CMD ["scan", "."]

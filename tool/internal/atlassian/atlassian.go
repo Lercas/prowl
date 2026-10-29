@@ -2,18 +2,19 @@ package atlassian
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
 	"sync/atomic"
 	"time"
 
-	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
-	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
 // DefaultMaxItems bounds a single scan's emitted units (issue/page versions) so a pathological or
 // enormous instance cannot run unbounded. It is generous enough for large real instances; the cap
-// is announced loudly when hit (never a silent truncation) and is raised with --max-items.
+// is reported as an incomplete source when exceeded and is raised with --max-items.
 const DefaultMaxItems = 200000
 
 // Options tunes a Jira/Confluence scan.
@@ -25,6 +26,7 @@ type Options struct {
 	MaxItems    int           // cap on emitted items (0 -> DefaultMaxItems); a runaway backstop
 	Workers     int           // concurrency for per-item detail fetches (0 -> defaultWorkers)
 	Timeout     time.Duration // per-request timeout
+	HTTPClient  *http.Client  // optional caller-owned transport; nil uses SSRF-guarded HTTP
 }
 
 // Collect detects the deployment behind baseURL for the given product ("jira" | "confluence"),
@@ -42,6 +44,12 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		opts.MaxItems = DefaultMaxItems
 	}
 	c := NewClient(baseURL, auth, opts.Timeout)
+	if c.initErr != nil {
+		return nil, Deployment{}, c.initErr
+	}
+	if opts.HTTPClient != nil {
+		c.http = opts.HTTPClient
+	}
 
 	var (
 		dep Deployment
@@ -56,33 +64,46 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		return nil, Deployment{}, fmt.Errorf("unknown product %q (want jira|confluence)", product)
 	}
 	if err != nil {
-		// RedactURL strips any user:token@ that slipped into the base URL before it reaches the error.
-		return nil, dep, fmt.Errorf("detect %s at %s: %w", product, safehttp.RedactURL(baseURL), err)
+		return nil, dep, fmt.Errorf("detect %s: %w", product, err)
 	}
 
+	origin := "[atlassian]"
+	if parsed, err := url.Parse(baseURL); err == nil && parsed.Host != "" {
+		origin = parsed.Scheme + "://" + parsed.Host
+	}
+	model.CoverageFrom(ctx).RegisterScope(product, origin, struct {
+		BaseURL string
+		Options Options
+	}{baseURL, opts})
 	out := make(chan model.Item, 256)
 	walkCtx, cancel := context.WithCancel(ctx)
 	go func() {
 		defer close(out)
 		defer cancel()
-		// emit is called from many pool workers — the counter/flag are atomic. A small overrun past the
-		// cap is fine (workers may pass the check before the Add); the cancel() then stops every loop.
+		// Reserve each content slot atomically. Diagnostics do not consume the content budget.
 		var emitted atomic.Int64
-		var warned atomic.Bool
+		var capped atomic.Bool
 		max := int64(opts.MaxItems)
 		emit := func(it model.Item) {
-			if emitted.Load() >= max {
-				if warned.CompareAndSwap(false, true) {
-					logx.Warn("atlassian: item cap reached — scan truncated; raise --max-items to scan more",
-						"cap", opts.MaxItems, "product", product)
+			if it.Error != nil {
+				model.Note(ctx, "atlassian_coverage_incomplete", it.Path, true)
+			}
+			if it.Error == nil {
+				for {
+					n := emitted.Load()
+					if n >= max {
+						capped.Store(true)
+						cancel()
+						return
+					}
+					if emitted.CompareAndSwap(n, n+1) {
+						break
+					}
 				}
-				cancel() // unblock every paginating loop via its ctx.Err() check
-				return
 			}
 			select {
 			case out <- it:
-				emitted.Add(1)
-			case <-walkCtx.Done():
+			case <-ctx.Done():
 			}
 		}
 		var werr error
@@ -91,9 +112,56 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		} else {
 			werr = walkConfluence(walkCtx, c, dep, opts, emit)
 		}
-		if werr != nil && walkCtx.Err() == nil {
-			logx.Error(product+" scan error", "err", werr)
+		// Use the parent context: hitting our own budget cancels the walker, not the consumer.
+		var diagnostic model.Item
+		if capped.Load() {
+			model.Note(ctx, "atlassian_item_limit", baseURL, true)
+			diagnostic = sourceFailure(product, product, "item budget exhausted")
+		} else if werr != nil {
+			model.Note(ctx, "atlassian_collection_failed", baseURL, true)
+			diagnostic = sourceFailure(product, product, "enumeration failed")
+		}
+		if diagnostic.Error != nil {
+			select {
+			case out <- diagnostic:
+			case <-ctx.Done():
+			}
 		}
 	}()
 	return out, dep, nil
+}
+
+// sourceFailure keeps provider response bodies and credentials out of diagnostic logs.
+func sourceFailure(source, path, operation string) model.Item {
+	return model.Item{Source: source, Path: path, Error: errors.New(operation + "; results are incomplete")}
+}
+
+// cursorWalk detects cycles of any length, not only immediately repeated tokens.
+type cursorWalk struct {
+	seen  map[string]bool
+	pages int
+}
+
+func (w *cursorWalk) advance(next string) error {
+	if w.seen == nil {
+		w.seen = make(map[string]bool)
+	}
+	w.pages++
+	if next == "" {
+		return nil
+	}
+	if w.seen[next] {
+		return errors.New("pagination cursor repeated")
+	}
+	if w.pages >= maxPages {
+		return errors.New("pagination page budget exhausted")
+	}
+	w.seen[next] = true
+	return nil
+}
+
+// Unsupported optional status filters are tolerated only before any page has been collected.
+func unsupportedStatus(err error, first bool) bool {
+	s := statusOf(err)
+	return first && (s == 400 || s == 404 || s == 405)
 }

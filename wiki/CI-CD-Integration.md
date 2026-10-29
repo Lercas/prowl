@@ -4,7 +4,7 @@ Prowl is built to gate pipelines: a meaningful **exit code**, a `--fail-on` seve
 
 ```sh
 # fail the build if any finding is high or above
-prowl scan . --fail-on high
+prowl scan . --strict --fail-on high
 ```
 
 ## Exit codes
@@ -62,10 +62,10 @@ Auto-discovery: if you do **not** pass `--baseline` and a file named `.prowl-bas
 
 ## Pre-commit hooks with `--staged`
 
-`--staged` scans only the files staged in git (`git diff --cached`), which is exactly what a pre-commit hook wants — fast, and scoped to what is about to be committed. If nothing is staged, the scan exits `0` immediately.
+`--staged` в 1.4.0 читает immutable blobs из Git index, включая partial staging, which is exactly what a pre-commit hook wants — fast, and scoped to what is about to be committed. If nothing is staged, the scan exits `0` immediately.
 
 ```sh
-prowl scan --staged --fail-on high
+prowl scan --staged --strict --fail-on high
 ```
 
 `.git/hooks/pre-commit`:
@@ -73,7 +73,7 @@ prowl scan --staged --fail-on high
 ```sh
 #!/usr/bin/env sh
 # Block a commit that introduces a high-or-above secret.
-prowl scan --staged --fail-on high --silence
+prowl scan --staged --strict --fail-on high --silence
 status=$?
 if [ "$status" -ne 0 ]; then
   echo "prowl: secret detected in staged changes — commit blocked" >&2
@@ -88,7 +88,7 @@ Make it executable: `chmod +x .git/hooks/pre-commit`. To check the diff against 
 In CI you usually want the exit code to be the only signal. `-s`/`--silence` prints **no output at all** — no report, no summary — so the step's pass/fail is determined entirely by the exit code:
 
 ```sh
-prowl scan . --fail-on high --silence
+prowl scan . --strict --fail-on high --silence
 ```
 
 Note that `--silence` suppresses stdout reporting but **not** `-o`/`--output`: you can be silent on the console and still write a SARIF/JSON artifact to a file. Related logging flags: `-q`/`--quiet` (warnings+errors only, still prints the report), `-v`/`--verbose` (debug), and `--log-format json` for structured logs you can aggregate.
@@ -146,7 +146,7 @@ Nightly org-wide sweep. The token is read from the environment (never argv, neve
 GITHUB_TOKEN=$TOKEN prowl org github:my-org --fail-on high --format sarif -o org.sarif
 ```
 
-`org` with `--format sarif` **streams one SARIF document per repo** to `org.sarif` (it does not merge them into a single run) — consume it as a stream of per-repo reports, or use `--format pretty` for a per-repo header. Same for `--format json`.
+`org` выдаёт один агрегированный JSON/SARIF-документ по всем репозиториям. При частично неудачной collection используйте `--strict` и проверяйте `complete`.
 
 Scan a pull request's remote repo by URL. `repo` scans a **clone**, so diff against the PR's base with `--since` (there is no index to stage — `--staged` is for local pre-commit against `git diff --cached`, not a fresh checkout):
 

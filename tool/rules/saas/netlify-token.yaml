@@ -18,12 +18,12 @@ matchers:
   - type: regex
     regex:
       - '\bnfp_[A-Za-z0-9_]{36}\b'
-      - '(?i)netlify[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9_-]{40,46})\b'
+      - '(?i)(?:^|[^a-z0-9])netlify(?:[_-]?(?:access[_-]?token|api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([A-Za-z0-9_-]{40,46})(?:[^A-Za-z0-9_-]|$)'
   - type: entropy
     min: 3.5
 extractors:
   - type: regex
     regex:
       - '\bnfp_[A-Za-z0-9_]{36}\b'
-      - '(?i)netlify[a-z0-9_\- "'':=]{0,20}\b([A-Za-z0-9_-]{40,46})\b'
+      - '(?i)(?:^|[^a-z0-9])netlify(?:[_-]?(?:access[_-]?token|api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([A-Za-z0-9_-]{40,46})(?:[^A-Za-z0-9_-]|$)'
     group: 1

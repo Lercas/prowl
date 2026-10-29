@@ -33,9 +33,11 @@ var structuralPrefilter = map[string]func(structSignals) bool{
 
 // structSignals are the byte-level shapes the entropy/structural filters need.
 type structSignals struct {
-	digitColon  bool     // >=8 digits then ':' (telegram bot id)
-	dottedToken bool     // >=50-char [A-Za-z0-9_.-] run with >=2 dots (discord token)
-	b64runs     [][2]int // maximal [A-Za-z0-9+/] runs >= b64min (entropy candidates)
+	digitColon    bool     // >=8 digits then ':' (telegram bot id)
+	dottedToken   bool     // >=50-char [A-Za-z0-9_.-] run with >=2 dots (discord token)
+	b64runs       [][2]int // maximal [A-Za-z0-9+/] runs >= b64min (entropy candidates)
+	b64urlruns    [][2]int // maximal [A-Za-z0-9_-] runs >= b64min containing '-' or '_'
+	b64decodeRuns [][2]int // whole canonical standard/URL runs, including short typed blobs
 }
 
 // scanStructure computes every structural signal in one pass.
@@ -43,6 +45,8 @@ func scanStructure(text string, b64min int) structSignals {
 	var s structSignals
 	n := len(text)
 	b64start, digitRun, tokStart, tokDots := -1, 0, -1, 0
+	urlStart, urlSpecific := -1, false
+	decodeStart, decodeAlphabet := -1, byte(0)
 	for i := 0; i < n; i++ {
 		c := text[i]
 		alnum := c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9'
@@ -55,6 +59,33 @@ func scanStructure(text string, b64min int) structSignals {
 				s.b64runs = append(s.b64runs, [2]int{b64start, i})
 			}
 			b64start = -1
+		}
+		if alnum || c == '-' || c == '_' {
+			if urlStart < 0 {
+				urlStart = i
+			}
+			urlSpecific = urlSpecific || c == '-' || c == '_'
+		} else {
+			if urlStart >= 0 && i-urlStart >= b64min && urlSpecific {
+				s.b64urlruns = append(s.b64urlruns, [2]int{urlStart, i})
+			}
+			urlStart, urlSpecific = -1, false
+		}
+		if alnum || c == '+' || c == '/' || c == '-' || c == '_' {
+			if decodeStart < 0 {
+				decodeStart = i
+			}
+			if c == '+' || c == '/' {
+				decodeAlphabet |= 1
+			}
+			if c == '-' || c == '_' {
+				decodeAlphabet |= 2
+			}
+		} else {
+			if decodeStart >= 0 && i-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+				s.b64decodeRuns = append(s.b64decodeRuns, [2]int{decodeStart, i})
+			}
+			decodeStart, decodeAlphabet = -1, 0
 		}
 		if c >= '0' && c <= '9' {
 			digitRun++
@@ -80,6 +111,12 @@ func scanStructure(text string, b64min int) structSignals {
 	}
 	if b64start >= 0 && n-b64start >= b64min {
 		s.b64runs = append(s.b64runs, [2]int{b64start, n})
+	}
+	if urlStart >= 0 && n-urlStart >= b64min && urlSpecific {
+		s.b64urlruns = append(s.b64urlruns, [2]int{urlStart, n})
+	}
+	if decodeStart >= 0 && n-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+		s.b64decodeRuns = append(s.b64decodeRuns, [2]int{decodeStart, n})
 	}
 	if tokStart >= 0 && n-tokStart >= 50 && tokDots >= 2 {
 		s.dottedToken = true

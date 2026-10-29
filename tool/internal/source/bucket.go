@@ -2,8 +2,11 @@ package source
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
+	"math"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -25,6 +28,12 @@ var bucketSizePollInterval = 2 * time.Second
 // BucketBudget returns the disk budget for a bucket sync: the larger of DefaultBucketBudget and a
 // multiple of --max-size, so raising --max-size for big files also grants proportional headroom.
 func BucketBudget(maxSize int64) int64 {
+	if maxSize <= 0 {
+		return DefaultBucketBudget
+	}
+	if maxSize > math.MaxInt64/64 {
+		return math.MaxInt64
+	}
 	if scaled := maxSize * 64; scaled > DefaultBucketBudget {
 		return scaled
 	}
@@ -65,19 +74,16 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 		return fmt.Errorf("%s (%q) is required to scan this bucket but is not on PATH; install it and configure your cloud credentials", label, bin)
 	}
 	perAttempt := fetchTimeout(timeout)
-	// capErr, set once a sync blows the disk budget, is captured outside the retry closure so a retry
-	// short-circuits: re-downloading the same oversized tree would just hit the cap again (terminal).
-	var capErr error
 	err := resilience.Retry(ctx, 3, time.Second, 10*time.Second, func() error {
-		if capErr != nil {
-			return capErr // a prior attempt already blew the budget — don't re-download
+		if _, err := measureBucketDir(ctx, destDir, budget, true); err != nil {
+			return resilience.Permanent(err)
 		}
 		actx, cancel := context.WithTimeout(ctx, perAttempt)
 		defer cancel()
 
 		// Watch the destination size; on crossing the budget, cancel the CLI and record that the cap
 		// (not ctx/timeout) was the cause, since the killed process only surfaces "signal: killed".
-		capExceeded := make(chan int64, 1)
+		measureFailed := make(chan error, 1)
 		watchDone := make(chan struct{})
 		go func() {
 			defer close(watchDone)
@@ -88,12 +94,15 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 				case <-actx.Done():
 					return
 				case <-t.C:
-					if sz := dirSize(destDir); sz > budget {
+					if _, err := measureBucketDir(actx, destDir, budget, true); err != nil {
+						if actx.Err() != nil {
+							return
+						}
 						select {
-						case capExceeded <- sz:
+						case measureFailed <- err:
 						default:
 						}
-						cancel() // kill the CLI; the disk budget is blown
+						cancel() // stop downloading when the destination cannot be measured safely
 						return
 					}
 				}
@@ -101,13 +110,12 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 		}()
 
 		cmd := exec.CommandContext(actx, bin, args...)
-		out, err := cmd.CombinedOutput()
+		out, err := runOwnedCommand(cmd)
 		cancel()    // stop the watcher promptly
-		<-watchDone // and wait for it to exit before reading capExceeded
+		<-watchDone // and wait for it to exit before reading measureFailed
 		select {
-		case sz := <-capExceeded:
-			capErr = fmt.Errorf("bucket download aborted: exceeded the %d-byte size cap (reached %d bytes); scope the prefix narrower or raise --max-size", budget, sz)
-			return capErr
+		case err := <-measureFailed:
+			return resilience.Permanent(err)
 		default:
 		}
 		if err != nil {
@@ -117,31 +125,52 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 			if actx.Err() == context.DeadlineExceeded {
 				return fmt.Errorf("%s download timed out after %s", bin, perAttempt)
 			}
-			return fmt.Errorf("%s download failed: %v: %s", bin, err, strings.TrimSpace(string(out)))
+			return fmt.Errorf("%s download failed: %v: %s", bin, err, strings.TrimSpace(out))
 		}
 		// Post-run cap check: a sync that starts and finishes within one poll window never trips a tick,
-		// so re-measure the final size here. Terminal (capErr) like the poll path.
-		if sz := dirSize(destDir); sz > budget {
-			capErr = fmt.Errorf("bucket download aborted: exceeded the %d-byte size cap (reached %d bytes); scope the prefix narrower or raise --max-size", budget, sz)
-			return capErr
+		// so re-measure the final size here. Final traversal errors are terminal as well.
+		if _, err := measureBucketDir(ctx, destDir, budget, false); err != nil {
+			return resilience.Permanent(err)
 		}
 		return nil
 	})
 	return err
 }
 
-// dirSize returns the total bytes of regular files under dir (symlinks not followed). Walk errors are
-// ignored: an in-flight sync may momentarily list a vanished file, and the next poll re-measures.
-func dirSize(dir string) int64 {
+// measureBucketDir stops at the budget and propagates traversal errors. Only vanished paths may be
+// ignored during an active sync; its final measurement must succeed with the destination present.
+func measureBucketDir(ctx context.Context, dir string, budget int64, allowVanished bool) (int64, error) {
 	var total int64
-	_ = filepath.WalkDir(dir, func(_ string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if err != nil {
+			if allowVanished && os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+		if p == dir && !d.IsDir() {
+			return errors.New("bucket destination is not a directory")
+		}
+		if d.IsDir() {
 			return nil
 		}
-		if info, ierr := d.Info(); ierr == nil && info.Mode().IsRegular() {
+		info, err := d.Info()
+		if err != nil {
+			if allowVanished && os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+		if info.Mode().IsRegular() {
+			if info.Size() < 0 || info.Size() > budget-total {
+				return fmt.Errorf("bucket download aborted: exceeded the %d-byte size cap; scope the prefix narrower or raise --max-size", budget)
+			}
 			total += info.Size()
 		}
 		return nil
 	})
-	return total
+	return total, err
 }

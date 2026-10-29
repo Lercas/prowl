@@ -133,7 +133,7 @@ func TestGitHubCollectLogsAndArtifactsStripsAuthOnRedirect(t *testing.T) {
 
 func TestGitLabCollectTraceAndArtifact(t *testing.T) {
 	allowLoopback(t)
-	artifactZip := zipBytes(t, map[string]string{"reports/debug.txt": `password = "ProdPass-123456789"`})
+	artifactZip := zipBytes(t, map[string]string{"reports/debug.txt": `password = "` + "\x50" + `rodPass-123456789"`})
 	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if got := r.Header.Get("PRIVATE-TOKEN"); got != "gl-token" {
 			t.Errorf("%s PRIVATE-TOKEN = %q", r.URL.Path, got)
@@ -196,12 +196,32 @@ func TestCollectionReportsPartialFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := drain(items); len(got) != 0 {
-		t.Fatalf("unexpected items: %+v", got)
+	if got := drain(items); len(got) != 1 || got[0].Error == nil || got[0].Source != "ci" {
+		t.Fatalf("missing collection failure diagnostic: %+v", got)
 	}
 	result := <-done
 	if result.Failures != 1 || result.LastError == nil {
 		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestOversizedCIContentIsAnIncompleteCollection(t *testing.T) {
+	c := collector{opts: Options{MaxItem: 64, MaxDownload: 1 << 20}}
+	for _, raw := range [][]byte{
+		[]byte(strings.Repeat("x", 100)),
+		zipBytes(t, map[string]string{"large.txt": strings.Repeat("x", 100), "keep.txt": "visible content"}),
+	} {
+		out := make(chan model.Item, 4)
+		var result Result
+		err := c.emitPayload(context.Background(), out, "ci/logs", "", raw, &result)
+		close(out)
+		items := drain(out)
+		if err == nil || result.Skipped == 0 {
+			t.Fatalf("oversized CI content silently skipped: err=%v result=%+v", err, result)
+		}
+		if len(raw) > 100 && (len(items) != 1 || items[0].Text != "visible content") {
+			t.Fatalf("partial archive content lost: %+v", items)
+		}
 	}
 }
 

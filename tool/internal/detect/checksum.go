@@ -2,6 +2,7 @@ package detect
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"hash/crc32"
 	"regexp"
 	"strings"
@@ -52,7 +53,8 @@ func GithubChecksumOK(token string) bool {
 	return b62crc32(body, 6) == cs
 }
 
-// JWTStructuralOK checks 3 base64url segments whose header decodes to JSON with an "alg".
+// JWTStructuralOK checks a compact JWS header and claims object. This does not verify a signature,
+// authenticity, expiry, audience, issuer, authorization or provider liveness.
 func JWTStructuralOK(token string) bool {
 	if !strings.HasPrefix(token, "eyJ") {
 		return false
@@ -61,11 +63,25 @@ func JWTStructuralOK(token string) bool {
 	if len(parts) != 3 {
 		return false
 	}
-	dec, err := base64.RawURLEncoding.DecodeString(parts[0])
-	if err != nil {
+	var header, claims map[string]json.RawMessage
+	for i, target := range []*map[string]json.RawMessage{&header, &claims} {
+		dec, err := base64.RawURLEncoding.DecodeString(parts[i])
+		if err != nil || json.Unmarshal(dec, target) != nil || *target == nil {
+			return false
+		}
+	}
+	var alg string
+	if json.Unmarshal(header["alg"], &alg) != nil || alg == "" {
 		return false
 	}
-	return strings.Contains(string(dec), `"alg"`)
+	if alg == "none" {
+		return parts[2] == ""
+	}
+	if parts[2] == "" {
+		return false
+	}
+	_, err := base64.RawURLEncoding.DecodeString(parts[2])
+	return err == nil
 }
 
 // checksumValid dispatches per type id.
@@ -75,8 +91,6 @@ func checksumValid(typeID, value string) (checked, valid bool) {
 	// scheme GithubChecksumOK can't compute, so they're left unchecked and gated on entropy in collect().
 	case "github_pat_classic", "github_token_oauth":
 		return true, GithubChecksumOK(value)
-	case "jwt":
-		return true, JWTStructuralOK(value)
 	}
 	return false, false
 }

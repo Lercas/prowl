@@ -1,0 +1,680 @@
+{
+  "version": "1.4.0",
+  "date": "2026-10-02",
+  "branch": "feat/1.4.0",
+  "source_base": "f1f490f2e5bda65a4a824f3fc57256820a367c0e",
+  "source_code_manifest_sha256": "d759e5ad9ef3e7b251a0ece3329290a4e756706f8ef2ee14323afaa53f3ff377",
+  "source_manifest_file_count": 484,
+  "source_manifest_method": "SHA256 of canonical sorted relative-path to content-SHA256 JSON with trailing newline; cmd/internal/rules/verifiers/research/scripts/workflows and Go/build manifests, excluding Python cache; retained alongside binaries.",
+  "artifact_compiler": "go1.25.14 linux/arm64",
+  "CGO_ENABLED": 0,
+  "buildvcs": false,
+  "artifact_directory": "/tmp/prowl-1.4.0-20261002-validated",
+  "artifact_sha256": {
+    "prowl-darwin-amd64": "f1e6bf90cec847b7ec7c82173416f186a32cdb4b24a4831a818dc69e834918c2",
+    "prowl-darwin-arm64": "47dfbaf9afdcca6997422f72d5dca05ecb9b1c82e3b0a5edb4abd40ca737d8dc",
+    "prowl-linux-amd64": "6f58a016979cc320408bd0c3c9273f6bf4435da2ab8484deb8d87c1eed7450f1",
+    "prowl-linux-arm64": "c552e442b1eba2f882644c9e549c114a1bc52adc3aadd376f51ec4af4cafa579",
+    "prowl-windows-amd64.exe": "5f636ef83a1366833463d3b86976ef5f85d55a0a2dbd8a3f9f0638fe7c3b9191"
+  },
+  "checks": {
+    "native_full_race": "passed, macOS arm64 Go1.27.1",
+    "static_full_suite": "passed, Linux arm64 Go1.25.14",
+    "vet": "passed",
+    "golangci_lint": "0 issues",
+    "ruff_real_error_classes": "passed",
+    "git_diff_check": "passed",
+    "e2e": "80 passed, 0 failed; /tmp/prowl-1.4.0-e2e-20261002.log",
+    "empty_staged_sarif": "passed; empty results and executionSuccessful=true; /tmp/prowl-1.4.0-boundaries-final-20261002/empty-index.sarif",
+    "reconstruction_fuzz": {
+      "executions": 6012217,
+      "requested_seconds": 15,
+      "result": "passed"
+    },
+    "node_reference": {
+      "fixtures": {
+        "node_reference.json": {
+          "reference": "v22.15.1",
+          "cases": 261,
+          "sha256": "e81dc07e523b53674e5e54ad4c8bfff4ed04110f2a17f88a600f0be0f7df5e51"
+        },
+        "node_template_reference.json": {
+          "reference": "v22.15.1",
+          "cases": 18,
+          "sha256": "08b09f9a6f7056a207a67106d5cc5ba5d38580773a10e551bb79504ede1e25a7"
+        }
+      },
+      "total_cases": 279,
+      "native": "passed",
+      "linux_arm64": "passed",
+      "linux_amd64": "passed, network none; /tmp/prowl-1.4.0-packaging-20261002/node-parity-amd64.log"
+    },
+    "regression_tests": [
+      "Git blob framing terminator rejected",
+      "URL query/fragment virtual delimiter sanitization and idempotence",
+      "Cancelled HTTP worker scan cannot be complete",
+      "Archive cancellation between entries and before underlying reads",
+      "Node escaped template semantics and regex aggregate work budget",
+      "Graph links cap produces incomplete summary"
+    ]
+  },
+  "boundary_acceptance": {
+    "version": "1.4.0",
+    "cases": [
+      {
+        "case": "status_shaped_name",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "--staged"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/status_shaped_name",
+        "before": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 1,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 1
+        }
+      },
+      {
+        "case": "unmerged_index",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "--staged"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/unmerged_index",
+        "before": {
+          "exit": 0,
+          "complete": null,
+          "has_envelope": false,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      },
+      {
+        "case": "empty_index",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "--staged"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/empty_index",
+        "before": {
+          "exit": 0,
+          "complete": null,
+          "has_envelope": false,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      },
+      {
+        "case": "subdirectory",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "--staged"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/subdirectory/sub",
+        "before": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 1,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 1
+        }
+      },
+      {
+        "case": "archive_depth",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "nested.zip"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/archives",
+        "before": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      },
+      {
+        "case": "malformed_archive",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "corrupt.zip"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/archives",
+        "before": {
+          "exit": 1,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 1
+        },
+        "after": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 1
+        }
+      },
+      {
+        "case": "escaped_template",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "application.js",
+          "--reconstruct"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/expressions",
+        "before": {
+          "exit": 1,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 1
+        },
+        "after": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      },
+      {
+        "case": "regex_work_budget",
+        "command_arguments": [
+          "scan",
+          "--strict",
+          "--format",
+          "json",
+          "--fail-on",
+          "high",
+          "ambiguous.js",
+          "--reconstruct"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/expressions",
+        "before": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      },
+      {
+        "case": "correlation_link_cap",
+        "command_arguments": [
+          "correlate",
+          "before.json",
+          "after.json"
+        ],
+        "working_directory": "/private/tmp/prowl-1.4.0-boundaries-final-20261002/correlation",
+        "before": {
+          "exit": 0,
+          "complete": true,
+          "has_envelope": true,
+          "target_findings": 0
+        },
+        "after": {
+          "exit": 2,
+          "complete": false,
+          "has_envelope": true,
+          "target_findings": 0
+        }
+      }
+    ],
+    "binary_sha256": {
+      "before": "a800681bb5c86367259b98f29771505e7a4c49196afc11e5cbcd0bcd1729834d",
+      "after": "47dfbaf9afdcca6997422f72d5dca05ecb9b1c82e3b0a5edb4abd40ca737d8dc"
+    },
+    "boundary": "Own synthetic inputs. No network verification. Correlation identity IDs are simulated metadata, not real organization keys. Inputs and outputs retained.",
+    "inputs_retained": "/private/tmp/prowl-1.4.0-boundaries-final-20261002"
+  },
+  "release_acceptance": {
+    "candidate_version": "prowl 1.4.0",
+    "checks": [
+      {
+        "case": "partial_staging",
+        "new_detected": true,
+        "old_findings": 0
+      },
+      {
+        "case": "pre_commit_consumer_index",
+        "passed": true
+      },
+      {
+        "case": "split_js",
+        "new_detected": true,
+        "old_typed_detected": false
+      },
+      {
+        "case": "oversized_fail_closed",
+        "new_exit": 2,
+        "old_exit": 0
+      },
+      {
+        "case": "static_ml",
+        "new_exit": 0,
+        "old_exit": 2
+      },
+      {
+        "case": "absence_is_not_revocation",
+        "passed": true
+      },
+      {
+        "case": "offline_selftest_ml",
+        "passed": true
+      }
+    ],
+    "boundary": "local synthetic inputs; no provider calls or publication",
+    "inputs_retained": "/private/tmp/prowl-1.4.0-acceptance-20261002"
+  },
+  "packaging": {
+    "git_index_nonroot_container": "passed, both Linux architectures, staged R100 secret and clean working tree",
+    "github_docker_action_sarif_workspace_write": "passed",
+    "network": "none",
+    "inputs_retained": "/tmp/prowl-1.4.0-packaging-20261002",
+    "selftests": {
+      "prowl:1.4.0-20261002-arm64": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      },
+      "prowl:1.4.0-20261002-amd64": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      },
+      "prowl:1.4.0-20261002-action": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "versions": {
+      "prowl:1.4.0-20261002-arm64": "prowl 1.4.0",
+      "prowl:1.4.0-20261002-amd64": "prowl 1.4.0",
+      "prowl:1.4.0-20261002-action": "prowl 1.4.0"
+    },
+    "local_image_id_sha256": {
+      "prowl:1.4.0-20261002-arm64": "sha256:f11c07a5beaf56b1cba8d96da5cc702be32f5690f2467b66331dc3252d044a57",
+      "prowl:1.4.0-20261002-amd64": "sha256:4a07d86416ba6c45c5b039d739ff32edf05ad746002d9d265f23c40aa724692f",
+      "prowl:1.4.0-20261002-action": "sha256:27194f62f54a178c939c1d2d1f508ffa86993c2d7748fc3a33057f6394f56017"
+    },
+    "node_reference_linux_amd64": "279 cases passed"
+  },
+  "representation_benchmark": {
+    "seed": 1400,
+    "positive_cases": 18,
+    "unsupported_contexts": 6,
+    "fixture_sha256": {
+      "aws_arrow_shadow/app.js": "46716b914dbe7d4362dc3e8fa1f17443a824d0a833f45d84d74cfc857345d2f6",
+      "aws_atob/app.js": "84428033a8dd44326bf84e6754be12e8248a8a06395f982aabca2bcbec8c29e1",
+      "aws_atob_unpadded/app.js": "f6f15acc92f2f995c1797f67cf6e74de286b2b801c45019f12aa91c461a19053",
+      "aws_concat/app.js": "43d78de8c215cc50ea41f1fd20c9ddfdc095c7c257c03f5425d8eb0e29d32103",
+      "aws_constant_binding/app.js": "bcd59f36e54af9acba203103c7624cd85b45eadeb71aae0e273a9a6a28cf65cd",
+      "aws_escaped_literal/app.js": "e5202615a3c750ee3f6e7af4078a092b953dec4471dbbb369b741222c71eddf1",
+      "aws_join/app.js": "f97af8fcbb9df204c21a320514fab948a29fcae4a2f850eab4291ed2ead6d8b6",
+      "aws_plain/app.js": "73febf72c0e39aff0f005b79856fcb48f2e8c5cd8be63f8e4fcd42b7c85181f8",
+      "aws_regex_data/app.js": "b8bda4583e29f6b5f7b700e19aa5772eb60f52f6793759ca8ba7d860b632e771",
+      "aws_tagged_raw/app.js": "fe684993d8561cb32e1b15fdd107cc112edcb44ca58b0035343cc5d091318f51",
+      "aws_template/app.js": "ef6594fce381a1e13ed74d812e339804a45261a67dfd4bdbe2783c53be64ad7b",
+      "aws_uri_decode/app.js": "e6e1f61328719d9602e23f43679d349ca19afe6894ec04a50aba6aa16120acc4",
+      "stripe_arrow_shadow/app.js": "38d3a85c3beec30952aeffc703a9ea0fb1b59a65dc501b53bb646a9c2ec5469e",
+      "stripe_atob/app.js": "ce7d295e3ee4c8c03e2b7e9bd95abb2e42db3612807774cfd30040d4ede9c9d1",
+      "stripe_atob_unpadded/app.js": "7635142e065772ba4dd10b26b89753a7c70ff064025d448d4a72bddd872d711c",
+      "stripe_concat/app.js": "978213e799bebeaaea942c23a31d4822be29336bd089fd4ec62853bd714f36c8",
+      "stripe_constant_binding/app.js": "49b7ddbb602e6c702ae9e978782902431059e194912cee00a9e12e0c4b8dbd7e",
+      "stripe_escaped_literal/app.js": "dfd742d96aa7abdb2bf1e1ff2d2f3f9254956c69ec498e6e22569e8fcdfa9e05",
+      "stripe_join/app.js": "5fc2f0cb332da7f1bc2200260d10d8adc64ce4d86ea8ac9050015920e8528a1b",
+      "stripe_plain/app.js": "8968b2a9ed4b0b179c44a384fc984b1e2b716cd6580bd531a83ad813937eeeed",
+      "stripe_regex_data/app.js": "1a74a74804f1750b7a2b8a8c9ae42ed201ce8f53566aa5afff0ef3c5a0b4074b",
+      "stripe_tagged_raw/app.js": "a819d31a51060437cc256320cbe3eeded9c88f5e767d61db99d7b36832d0cd9e",
+      "stripe_template/app.js": "8b551b36edeb6c14b5659c2781b0dc8e06170183ac558c3b1fe36f5bac212477",
+      "stripe_uri_decode/app.js": "25ed5959fa8f3ae4c285ceab76e66707109c679a9d2b71b0d7b478097a414987"
+    },
+    "results": {
+      "prowl": {
+        "version": "prowl 1.4.0",
+        "binary_sha256": "47dfbaf9afdcca6997422f72d5dca05ecb9b1c82e3b0a5edb4abd40ca737d8dc",
+        "command": [
+          "/private/tmp/prowl-1.4.0-20261002-validated/prowl-darwin-arm64",
+          "scan",
+          "/private/tmp/prowl-1.4.0-benchmark-20261002/cases",
+          "--reconstruct",
+          "--strict",
+          "--show-secrets",
+          "--format",
+          "json"
+        ],
+        "exit": 0,
+        "one_run_wall_seconds": 0.5891725420078728,
+        "positive_cases_found": 18,
+        "unsupported_contexts_reported": 0,
+        "cases": {
+          "aws_plain": true,
+          "aws_concat": true,
+          "aws_constant_binding": true,
+          "aws_escaped_literal": true,
+          "aws_atob": true,
+          "aws_atob_unpadded": true,
+          "aws_uri_decode": true,
+          "aws_template": true,
+          "aws_join": true,
+          "aws_arrow_shadow": false,
+          "aws_regex_data": false,
+          "aws_tagged_raw": false,
+          "stripe_plain": true,
+          "stripe_concat": true,
+          "stripe_constant_binding": true,
+          "stripe_escaped_literal": true,
+          "stripe_atob": true,
+          "stripe_atob_unpadded": true,
+          "stripe_uri_decode": true,
+          "stripe_template": true,
+          "stripe_join": true,
+          "stripe_arrow_shadow": false,
+          "stripe_regex_data": false,
+          "stripe_tagged_raw": false
+        }
+      },
+      "gitleaks": {
+        "version": "8.30.1",
+        "binary_sha256": "f414bc2fb952be6c9072b75cb411e3368614ef4b16d48dbd9ad238034afd2302",
+        "command": [
+          "gitleaks",
+          "dir",
+          "/private/tmp/prowl-1.4.0-benchmark-20261002/cases",
+          "--no-banner",
+          "--no-color",
+          "--redact=0",
+          "--report-format",
+          "json",
+          "--report-path",
+          "/private/tmp/prowl-1.4.0-benchmark-20261002/gitleaks.json"
+        ],
+        "exit": 1,
+        "one_run_wall_seconds": 0.060698458008118905,
+        "positive_cases_found": 5,
+        "unsupported_contexts_reported": 0,
+        "cases": {
+          "aws_plain": true,
+          "aws_concat": false,
+          "aws_constant_binding": false,
+          "aws_escaped_literal": false,
+          "aws_atob": false,
+          "aws_atob_unpadded": false,
+          "aws_uri_decode": false,
+          "aws_template": false,
+          "aws_join": false,
+          "aws_arrow_shadow": false,
+          "aws_regex_data": false,
+          "aws_tagged_raw": false,
+          "stripe_plain": true,
+          "stripe_concat": false,
+          "stripe_constant_binding": false,
+          "stripe_escaped_literal": false,
+          "stripe_atob": true,
+          "stripe_atob_unpadded": true,
+          "stripe_uri_decode": true,
+          "stripe_template": false,
+          "stripe_join": false,
+          "stripe_arrow_shadow": false,
+          "stripe_regex_data": false,
+          "stripe_tagged_raw": false
+        }
+      },
+      "trufflehog": {
+        "version": "trufflehog 3.95.6",
+        "binary_sha256": "c096285759bc2a8fb5473316c5d87aa15155f5afa47ab7352daf42329bdae86a",
+        "command": [
+          "trufflehog",
+          "filesystem",
+          "--no-verification",
+          "--no-update",
+          "--json",
+          "/private/tmp/prowl-1.4.0-benchmark-20261002/cases"
+        ],
+        "exit": 0,
+        "one_run_wall_seconds": 1.005581416990026,
+        "positive_cases_found": 6,
+        "unsupported_contexts_reported": 0,
+        "cases": {
+          "aws_plain": true,
+          "aws_concat": false,
+          "aws_constant_binding": false,
+          "aws_escaped_literal": false,
+          "aws_atob": true,
+          "aws_atob_unpadded": true,
+          "aws_uri_decode": false,
+          "aws_template": false,
+          "aws_join": false,
+          "aws_arrow_shadow": false,
+          "aws_regex_data": false,
+          "aws_tagged_raw": false,
+          "stripe_plain": true,
+          "stripe_concat": false,
+          "stripe_constant_binding": false,
+          "stripe_escaped_literal": false,
+          "stripe_atob": true,
+          "stripe_atob_unpadded": true,
+          "stripe_uri_decode": false,
+          "stripe_template": false,
+          "stripe_join": false,
+          "stripe_arrow_shadow": false,
+          "stripe_regex_data": false,
+          "stripe_tagged_raw": false
+        }
+      }
+    },
+    "boundary": "Synthetic representation coverage, not a market precision/recall benchmark. No LIVE credentials. Verification and TruffleHog updates disabled. Default competitor decoding; no custom rules. Raw outputs retained locally."
+  },
+  "boundaries": [
+    "Own synthetic fixtures only; no live provider credentials or external target scans.",
+    "CLI before/after baseline is the prior f1f490f 1.4.0 candidate, not 1.3.0. Release acceptance separately uses 1.3.0.",
+    "Node programs are generated and trusted. Scanned programs are never executed.",
+    "Correlation fixtures use simulated identities. HMAC identity does not authenticate entire reports or prove causal propagation.",
+    "Author-generated representation coverage is not independent market precision/recall or a performance benchmark.",
+    "LLM quality is unmeasured; contract tests use loopback mocks.",
+    "Windows amd64/macOS amd64 are compiled; runtime execution awaits CI. Linux amd64 runs with Docker emulation on this arm64 host.",
+    "Cancellation is cooperative at documented checkpoints; no hard real-time deadline is claimed.",
+    "No push, tag, publication, deployment, production change or destructive cleanup was performed. Original dirty checkout preserved."
+  ]
+}

@@ -2,18 +2,31 @@ package domain
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/resilience"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
-// hostBreaker stops hammering a host that keeps failing (3 fails -> 30s open).
-var hostBreaker = resilience.NewBreaker(3, 30*time.Second)
+// textFetcher shares failure state only within one discovery operation.
+type textFetcher struct {
+	client  *http.Client
+	breaker *resilience.Breaker
+}
+
+func newTextFetcher(client *http.Client) *textFetcher {
+	return &textFetcher{client: client, breaker: resilience.NewBreaker(3, 30*time.Second)}
+}
 
 const userAgent = "prowl-secret-scanner/0.1 (authorized recon)"
 const maxBodyBytes = 4 << 20 // 4MB per asset
@@ -25,9 +38,19 @@ type budget struct {
 }
 
 func newBudget(max int) *budget { return &budget{max: max} }
-func (b *budget) take() bool    { return atomic.AddInt64(&b.n, 1) <= int64(b.max) }
-func (b *budget) done() bool    { return atomic.LoadInt64(&b.n) >= int64(b.max) }
-func (b *budget) used() int     { return int(atomic.LoadInt64(&b.n)) }
+func (b *budget) take() bool {
+	for {
+		n := atomic.LoadInt64(&b.n)
+		if n >= int64(b.max) {
+			return false
+		}
+		if atomic.CompareAndSwapInt64(&b.n, n, n+1) {
+			return true
+		}
+	}
+}
+func (b *budget) done() bool { return atomic.LoadInt64(&b.n) >= int64(b.max) }
+func (b *budget) used() int  { return int(atomic.LoadInt64(&b.n)) }
 
 func newClient(timeout time.Duration) *http.Client {
 	if timeout == 0 {
@@ -39,41 +62,99 @@ func newClient(timeout time.Duration) *http.Client {
 	return safehttp.Client(timeout)
 }
 
-// getText GETs a URL (ctx-cancellable) behind a per-host circuit breaker and bounded retries.
-func getText(ctx context.Context, c *http.Client, rawurl string) (string, bool) {
-	host := hostOf(rawurl)
-	if !hostBreaker.Allow(host) {
-		return "", false // breaker open: skip this host
+type fetchedText struct {
+	text    string
+	present bool
+	url     string // Address of the last accepted content response, including across retries.
+}
+
+func (f *textFetcher) getText(ctx context.Context, rawurl string) (string, bool, error) {
+	content, err := f.getDocument(ctx, rawurl)
+	return content.text, content.present, err
+}
+
+// getDocument GETs a URL (ctx-cancellable) behind a per-origin circuit breaker and bounded retries.
+// The presence flag distinguishes an HTTP response with unreadable content from a failed
+// alternative endpoint, including across retries. On failure, body is the bounded prefix of the
+// last content response, for scanning alongside an incomplete-source diagnostic.
+func (f *textFetcher) getDocument(ctx context.Context, rawurl string) (fetchedText, error) {
+	content := fetchedText{url: rawurl}
+	origin, err := originOf(rawurl)
+	if err != nil {
+		return content, err
 	}
-	var body string
-	err := resilience.Retry(ctx, 3, 300*time.Millisecond, 3*time.Second, func() error {
+	if !f.breaker.Allow(origin) {
+		model.Note(ctx, "web_circuit_open", rawurl, true)
+		return content, errors.New("origin circuit breaker is open")
+	}
+	var contentErr error
+	err = resilience.Retry(ctx, 3, 300*time.Millisecond, 3*time.Second, func() (attemptErr error) {
+		contentResponse := false
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawurl, nil)
 		if err != nil {
-			return err
+			return resilience.Permanent(err)
 		}
 		req.Header.Set("User-Agent", userAgent)
 		req.Header.Set("Accept", "*/*")
-		resp, err := c.Do(req)
+		resp, err := f.client.Do(req)
 		if err != nil {
 			return err
 		}
-		defer resp.Body.Close()
+		defer func() {
+			attemptErr = errors.Join(attemptErr, resp.Body.Close())
+			if contentResponse && attemptErr != nil {
+				contentErr = attemptErr
+			}
+		}()
 		if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
 			return errRetryable // retry rate-limit / server errors
 		}
-		if resp.StatusCode != http.StatusOK {
-			return nil // 4xx is definitive: don't retry, leave body empty
+		if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone {
+			if contentErr != nil {
+				return resilience.Permanent(errors.Join(errors.New("content unavailable after an incomplete response"), contentErr))
+			}
+			return nil // Expected absence for guessed source maps and recon paths.
 		}
-		b, err := io.ReadAll(io.LimitReader(resp.Body, maxBodyBytes))
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+			return resilience.Permanent(fmt.Errorf("HTTP status %d", resp.StatusCode))
+		}
+		content.present = true
+		contentResponse = true
+		content.url, err = responseContentURL(resp, rawurl, origin)
+		addressErr := resilience.Permanent(err)
+		b, err := io.ReadAll(io.LimitReader(resp.Body, maxBodyBytes+1))
+		// Preserve readable bytes even if a transport tail, close or byte cap fails. A later complete
+		// response replaces this prefix (including with an empty body), never a 404/error response.
+		content.text = string(b[:min(len(b), maxBodyBytes)])
 		if err != nil {
-			return err
+			return errors.Join(addressErr, err)
 		}
-		body = string(b)
-		return nil
+		if len(b) > maxBodyBytes {
+			model.Note(ctx, "web_body_limit", rawurl, true)
+			return errors.Join(addressErr, resilience.Permanent(fmt.Errorf("HTTP body exceeds %d bytes", maxBodyBytes)))
+		}
+		return addressErr
 	})
-	ok := err == nil && body != ""
-	hostBreaker.Record(host, err == nil)
-	return body, ok
+	f.breaker.Record(origin, err == nil)
+	if err != nil {
+		model.Note(ctx, "web_fetch_failed", rawurl, true)
+	}
+	return content, err
+}
+
+func responseContentURL(resp *http.Response, requested, origin string) (string, error) {
+	if resp.Request == nil || resp.Request.URL == nil {
+		return requested, nil // Owned transports may omit optional response metadata.
+	}
+	address := *resp.Request.URL
+	address.Fragment, address.RawFragment = "", ""
+	final := address.String()
+	finalOrigin, err := originOf(final)
+	if err != nil || finalOrigin != origin {
+		// Preserve readable content under its requested address, without adopting unsafe metadata.
+		return requested, errors.New("HTTP content response has an invalid or changed origin")
+	}
+	return final, nil
 }
 
 var errRetryable = &retryErr{}
@@ -82,9 +163,29 @@ type retryErr struct{}
 
 func (*retryErr) Error() string { return "retryable" }
 
-func hostOf(rawurl string) string {
-	if u, err := url.Parse(rawurl); err == nil {
-		return u.Hostname()
+func originOf(rawurl string) (string, error) {
+	u, err := url.Parse(rawurl)
+	if err != nil || u == nil {
+		return "", errors.New("invalid HTTP origin")
 	}
-	return rawurl
+	scheme := strings.ToLower(u.Scheme)
+	if scheme != "http" && scheme != "https" {
+		return "", errors.New("invalid HTTP origin")
+	}
+	// Reuse authority validation and IDNA/IP normalization without discarding the request path.
+	target, err := ParseTarget(rawurl)
+	if err != nil {
+		return "", errors.New("invalid HTTP origin")
+	}
+	port := u.Port()
+	if port == "" {
+		port = "80"
+		if scheme == "https" {
+			port = "443"
+		}
+	} else {
+		n, _ := strconv.Atoi(port) // ParseTarget already validated the range.
+		port = strconv.Itoa(n)
+	}
+	return scheme + "://" + net.JoinHostPort(target.Host, port), nil
 }

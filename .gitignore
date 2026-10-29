@@ -63,3 +63,6 @@ assets/concepts/
 /tests/
 /pyproject.toml
 /data/
+
+# Source-build pre-commit cache
+/.hook-bin/

@@ -1,22 +1,17 @@
-# GoReleaser config for prowl. Cut a release with:  git tag v0.1.0 && git push --tags
-# (the release workflow runs `goreleaser release`). Validate locally with `goreleaser check`.
+# Optional local packaging config. Canonical publishing: ../.github/workflows/release.yml.
+# Do not run a second release/publish path for the same version.
 version: 2
 project_name: prowl
 
 before:
   hooks:
-    - go mod tidy
+    - go test ./...
 
 builds:
   - id: prowl
     main: ./cmd/prowl
     binary: prowl
-    # CGO_ENABLED=0 keeps cross-compilation toolchain-free, so these static binaries run the full
-    # cascade + rule templates + live verification on every platform. The in-process --ml model is the
-    # ONE thing that needs cgo: its compression_ratio feature must use the system zlib to match the
-    # trained model byte-for-byte, so a nocgo binary REFUSES --ml (fail-closed, clear message) rather
-    # than score secrets differently from the validated model. For --ml, build from source with cgo
-    # (the default for `go install` / `make build`) or run the --ml-url sidecar.
+    # Static builds carry the validated model and bounded zlib WebAssembly module.
     env:
       - CGO_ENABLED=0
     flags:

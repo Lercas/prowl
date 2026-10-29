@@ -1,0 +1,94 @@
+{
+  "version": "1.4.0",
+  "date": "2026-10-01",
+  "source_base": "6112638",
+  "branch": "feat/1.4.0",
+  "source_code_manifest_sha256": "62b926a2b38c3bb0ededaaa7681709f106f1456dff49107ee483574795bea96a",
+  "artifact_compiler": "go1.25.14 linux/arm64",
+  "CGO_ENABLED": 0,
+  "buildvcs": false,
+  "artifact_directory": "/tmp/prowl-1.4.0-release-validated",
+  "artifact_sha256": {
+    "prowl-darwin-amd64": "756dae4c5117b919fd8718d1e5b33b88d5d341bf86b1e24253763c912e511fd8",
+    "prowl-darwin-arm64": "7287f7c092793df5e44c78a75a4aa33937a35bc701c5cf10bebeced3d6ce3391",
+    "prowl-linux-amd64": "10271b4ca72ad0a1b239373722a033cadeaa317be2b8c25155f78b3e38efd5e8",
+    "prowl-linux-arm64": "933a277d8ff255d86c3c3a1202e8f02d0725a19d6204d8d196aa975e969666cc",
+    "prowl-windows-amd64.exe": "153d09322927a655363ea97c9117f49598bd1c79ba6595a1d417cf5fecdf994f"
+  },
+  "local_image_config_sha256": {
+    "prowl:1.4.0-validated-arm64": "sha256:d3dd5115e33b695eca81114a1d572edaef745b813b19d2a4c1aaa19c2f8ffb27",
+    "prowl:1.4.0-validated-amd64": "sha256:5ec951c3e1061d02fe9dbc18d91c6b487fd7e48fb417cae1719244b3adc1f6cd",
+    "prowl:1.4.0-validated-action": "sha256:3c03bab3769b1864d1220b1d28d6e5e58d1a61a9265865ba63daf77a47454e31"
+  },
+  "checks": {
+    "native_full_race": "passed (macOS arm64, Go 1.27.1)",
+    "full_static_suite": "passed (macOS arm64 and Linux arm64 Go 1.25.14)",
+    "python_feature_and_prediction_parity": "256 rows, all 49 features; native/static and Linux amd64/arm64 Go 1.25.14 passed",
+    "numeric_boundary_reference_changes": "0 of 256 Python reference scores",
+    "vet": "passed",
+    "golangci_lint": "0 issues",
+    "actionlint": "v1.7.12 passed",
+    "ruff_real_error_classes": "passed",
+    "e2e": "80 passed, 0 failed",
+    "reconstruction_fuzz": "2172088 executions in final 15s run; passed",
+    "detector_fuzz": "167274 executions in 20s; passed",
+    "offline_container_selftest": "7/7 passed, Linux amd64 and arm64, network none",
+    "nonroot_container_git_index": "passed with staged secret and clean working tree",
+    "docker_action_sarif": "passed, report written in consumer workspace",
+    "bundled_templates": "159 rules and 84 verifiers, validated offline",
+    "wasm_reproduction": "sha256 11db326ce10fce1de7e514ac4c56916fdcec29b1a87ea534078694efa9a056b5 reproduced"
+  },
+  "acceptance": {
+    "candidate_version": "prowl 1.4.0",
+    "checks": [
+      {
+        "case": "partial_staging",
+        "new_detected": true,
+        "old_findings": 0
+      },
+      {
+        "case": "pre_commit_consumer_index",
+        "passed": true
+      },
+      {
+        "case": "split_js",
+        "new_detected": true,
+        "old_typed_detected": false
+      },
+      {
+        "case": "oversized_fail_closed",
+        "new_exit": 2,
+        "old_exit": 0
+      },
+      {
+        "case": "static_ml",
+        "new_exit": 0,
+        "old_exit": 2
+      },
+      {
+        "case": "absence_is_not_revocation",
+        "passed": true
+      },
+      {
+        "case": "offline_selftest_ml",
+        "passed": true
+      }
+    ],
+    "boundary": "local synthetic inputs; no provider calls or publication",
+    "inputs_retained": "/private/tmp/prowl-1.4.0-acceptance-20261001-final"
+  },
+  "packaging": {
+    "git_index_nonroot_container": "passed",
+    "github_docker_action_sarif_workspace_write": "passed",
+    "network": "none",
+    "inputs_retained": "/tmp/prowl-1.4.0-packaging-final"
+  },
+  "boundaries": [
+    "All acceptance inputs are synthetic. No live provider credentials were exercised.",
+    "Semantic source-span validation is tested with local mock endpoints. Real LLM precision/recall is not measured.",
+    "Windows amd64 and macOS amd64 binaries are compiled; runtime execution awaits CI.",
+    "The private research corpus is not an independent competitor benchmark.",
+    "No remote push, tag, GitHub release or GHCR publication was performed.",
+    "Temporary binaries and inputs are local artifacts; source and evidence are retained in the release branch."
+  ]
+}

@@ -1,0 +1,435 @@
+{
+  "objective": "Ещё глубже изучи, чтобы точно закрыть все проблемы 5 часов",
+  "version": "1.4.0",
+  "started_utc": "2026-10-02 19:24:05 UTC",
+  "requested_work_hours": 5,
+  "initial_revision": "3a89e2c",
+  "workspace": "/Users/sugar/dev/prowl-1.4.0",
+  "status": "completed_local_docker_deferred_by_user",
+  "requirements": [
+    {
+      "id": "structured_literals",
+      "requirement": "Canonical JSON/TOML/YAML values, keys, multiline strings, anchors/aliases, original byte spans and nonlossy Unicode",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/scan/toml_literals.go",
+        "tool/internal/scan/toml_literals_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/toml-noise6/toml-literals.json",
+        "tool/internal/scan/yaml_literals.go",
+        "tool/internal/scan/yaml_literals_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/yaml-noise7-release/yaml-literals.json"
+      ]
+    },
+    {
+      "id": "decoding",
+      "requirement": "Bounded nested Base64, shared work/depth budgets, evidence chain, typed-only controls and context isolation",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/detect/base64.go",
+        "tool/internal/detect/base64_test.go",
+        "tool/internal/scan/verification_pipeline_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/encoding-nested-final/encoding.json"
+      ]
+    },
+    {
+      "id": "password_precision",
+      "requirement": "Whole-value placeholders, multilingual cues, weak explicit passwords, interpolation vs literals, complete hashes and code references",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/scan/binding_precision_test.go",
+        "tool/internal/scan/literal_roles_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/password-noise9-qualified/runs/noise.json"
+      ]
+    },
+    {
+      "id": "rule_inventory",
+      "requirement": "All embedded rules/verifiers, filesystem parity, public metadata suppression, contextual bindings and held-out provider controls",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/rules/embedded_stream_test.go",
+        "tool/internal/rules/provider_noise_test.go",
+        "tool/internal/verify/ai_verifier_coverage_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/rules-inventory-validation.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/verifiers-inventory-validation.log"
+      ]
+    },
+    {
+      "id": "pipeline",
+      "requirement": "L1/L2/verification ordering, canonical identity, occurrences, allowlists, pragmas, cancellation and global producer caps",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/scan/pragmas_test.go",
+        "tool/internal/detect/jwt_structure_test.go",
+        "tool/internal/scan/semantic_pipeline_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/pipeline-noise6/pipeline-evidence.json"
+      ]
+    },
+    {
+      "id": "interfaces",
+      "requirement": "CLI/MCP/LSP/server output and capability parity, original ranges, redaction and strict coverage signals",
+      "status": "validated_local",
+      "evidence": [
+        "wiki/evidence/1.4.0-final-validation-20261002.json",
+        "tool/internal/server/unicode_test.go",
+        "scripts/check-interfaces-1.4.0.py"
+      ]
+    },
+    {
+      "id": "sources",
+      "requirement": "Git index/history, archives/documents/mail/mobile/images/buckets/CI-log intake, limits and source diagnostics",
+      "status": "validated_local",
+      "evidence": [
+        "tool/internal/source/deep_boundary_test.go",
+        "tool/internal/source/archive_test.go",
+        "tool/internal/source/image_test.go",
+        "tool/internal/source/bucket_test.go",
+        "tool/internal/source/mobile_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/source-lifecycle-race.jsonl",
+        "/tmp/prowl-1.4.0-fivehour-20261002/e2e-doctor-checkpoint.log"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "requirement": "Install/update/doctor/selftest, stale installed overlays, version/config compatibility and supported release artifacts",
+      "status": "validated_local",
+      "evidence": [
+        "wiki/evidence/1.4.0-final-validation-20261002.json",
+        "tool/cmd/prowl/doctor_templates_test.go",
+        "scripts/check-1.4.0.py"
+      ]
+    },
+    {
+      "id": "release_validation",
+      "requirement": "Full tests/race/vet/lint/fuzz, synthetic/held-out corpora, E2E, actual source Dockerfiles, offline Linux and portable runtime boundaries",
+      "status": "validated_local_docker_deferred_by_user",
+      "evidence": [
+        "wiki/evidence/1.4.0-final-validation-20261002.json",
+        "/Users/sugar/dev/prowl-1.4.0-artifacts/eb7704e/archive-qa.json"
+      ]
+    },
+    {
+      "id": "completion_audit",
+      "requirement": "Requirement-by-requirement final evidence; report unresolved/unsupported items without asserting that every possible defect is absent",
+      "status": "validated_local",
+      "evidence": [
+        "wiki/evidence/1.4.0-final-validation-20261002.json",
+        "wiki/Release-1.4.0.md"
+      ]
+    }
+  ],
+  "progress": [
+    {
+      "phase": "TOML canonical strings",
+      "state": "local native checkpoint validated; broader audit active",
+      "evidence": [
+        "tool/internal/scan/toml_literals.go",
+        "tool/internal/scan/toml_literals_test.go",
+        "/tmp/prowl-1.4.0-fivehour-20261002/toml-bom/toml-literals.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/noise6-race.log"
+      ],
+      "observations": [
+        "Literal trailing backslash must be preserved; basic strings decode escapes; multiline values follow pinned parser including CRLF preservation",
+        "Comments and dictionary-key credentials must survive normalization",
+        "Tables, dotted keys, arrays of tables and inline tables need distinct companion contexts"
+      ]
+    },
+    {
+      "phase": "noise-6 operator comments and evidence calibration",
+      "state": "local native checkpoint validated",
+      "binary": "/tmp/prowl-1.4.0-fivehour-noise6",
+      "binary_sha256": "33808ed6a801ebf109c1ea49d67cf50c725cde6b02c6fcab5aba27480b6c0275",
+      "evidence": [
+        "/tmp/prowl-1.4.0-fivehour-20261002/pipeline-noise6/pipeline-evidence.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/noise6-race.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/e2e-noise6.log"
+      ],
+      "regression_corpus": {
+        "scenarios": 1712,
+        "expected_credentials": 1172,
+        "negative_scenarios": 682,
+        "ambiguous_scenarios": 2,
+        "modes": [
+          "default",
+          "embedded ML"
+        ],
+        "expected_all_found": true,
+        "negative_scenarios_with_findings": 0
+      },
+      "checks": [
+        "go test -race ./...",
+        "go vet ./...",
+        "golangci-lint: 0 issues",
+        "E2E: 80/80 (retained owned fixtures)",
+        "TOML fuzz: 181492 inputs/15 seconds; prior checkpoint",
+        "CLI pipeline: 50 checks/27 scenarios; own loopback model",
+        "LSP original ranges; canonical identity and scoped verifier tests"
+      ],
+      "qualification_boundary": "Native macOS arm64 checkpoint only. Current-source Dockerfiles, final portable matrix, YAML/nested decoding and remaining requirements are not complete."
+    },
+    {
+      "phase": "noise-7 canonical YAML and uniform JSON companion context",
+      "state": "local native checkpoint validated; broader requirements remain active",
+      "binary": "/tmp/prowl-1.4.0-fivehour-noise7-release",
+      "binary_version": "prowl 1.4.0",
+      "binary_sha256": "24f44983760b0e256e7afd91b244e8c8981a314e54aedd433294697831bbeacc",
+      "evidence": [
+        "/tmp/prowl-1.4.0-fivehour-20261002/yaml-noise7-release/yaml-literals.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/pipeline-noise7-release/pipeline-evidence.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/yaml-final-race.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/yaml-final-fuzz.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/e2e-noise7-release.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/consumer-noise7-release/acceptance.json"
+      ],
+      "regression_corpus": {
+        "scenarios": 2348,
+        "expected_credentials": 1700,
+        "negative_scenarios": 850,
+        "ambiguous_scenarios": 2,
+        "modes": [
+          "default",
+          "embedded ML"
+        ],
+        "expected_all_found": true,
+        "negative_scenarios_with_findings": 0
+      },
+      "checks": [
+        "Full go test -race ./..., vet, lint 0 issues",
+        "E2E 80/80; native consumer 6/6 without rebuilding hook",
+        "YAML fuzz 17318 executions/20 seconds after 288 cached inputs; earlier run 320742",
+        "CLI pipeline 51 checks/28 scenarios, own loopback semantic mock",
+        "Own loopback verifier canonical JSON/TOML/YAML account A/B isolation, merge and binary alias",
+        "Alias presentation cannot survive ML as fabricated LIVE using a neighboring account",
+        "Cross-document/cycle/tag/duplicate/binary/expansion-budget incomplete controls"
+      ],
+      "qualification_boundary": "Native macOS arm64 checkpoint only; exact release-stamped binary. Final Docker/portable runtime matrix and remaining requirements are pending. All fixtures owned, no live provider credentials."
+    },
+    {
+      "phase": "noise-8 bounded nested Base64 and source proof paths",
+      "state": "local native checkpoint validated; broader audit active",
+      "binary": "/tmp/prowl-1.4.0-fivehour-nested-qualified",
+      "binary_version": "prowl 1.4.0",
+      "binary_sha256": "247da7ff6f4d274d5178b0acb3617706461ebed87329a3ebfed4209a78b317ec",
+      "evidence": [
+        "/tmp/prowl-1.4.0-fivehour-20261002/encoding-nested-final/encoding.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/yaml-nested-final/yaml-literals.json",
+        "/tmp/prowl-1.4.0-fivehour-20261002/nested-final-race.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/nested-fuzz.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/e2e-nested-final.log",
+        "/tmp/prowl-1.4.0-fivehour-20261002/consumer-nested-final/acceptance.json"
+      ],
+      "regression_corpus": {
+        "scenarios": 2780,
+        "expected_credentials": 2480,
+        "negative_scenarios": 838,
+        "ambiguous_scenarios": 2,
+        "modes": [
+          "default",
+          "embedded ML"
+        ],
+        "expected_all_found": true,
+        "negative_scenarios_with_findings": 0
+      },
+      "observations": [
+        "Encoded corpus 780 scenarios: before 348/1068, after 1068/1068; 0/96 negatives in both modes",
+        "Four layers share 8 MiB/output budgets; fifth-layer and size limits retain findings and strict exit 2",
+        "Repeated values retain source quanta, distinct occurrence IDs, default aggregation and LSP ranges",
+        "Own loopback account A/B contexts remain distinct through nested branches and shared YAML alias paths",
+        "Occurrence HMAC includes source proof paths, with no raw credentials or decoded context in evidence"
+      ],
+      "checks": [
+        "Full race, vet, lint 0 issues",
+        "Base64 fuzz 2651194 inputs/20 seconds",
+        "E2E 80/80; native consumer 6/6; CLI pipeline 51 checks/28 scenarios"
+      ],
+      "qualification_boundary": "Native macOS arm64 checkpoint only. Final current-source Docker/portable runtime matrix and remaining requirements are pending; no external provider or target scans."
+    }
+  ],
+  "final_qualification": {
+    "source_revision": "eb7704ed34711b19859b94917c956da3f2a5aae3",
+    "report": "wiki/evidence/1.4.0-final-validation-20261002.json",
+    "native_runtime": "macOS arm64 / Go 1.25.14",
+    "corpus_scenarios": 3884,
+    "expected_credentials": 3104,
+    "negative_scenarios": 1318,
+    "ambiguous_scenarios": 2,
+    "all_expected_found": true,
+    "negative_scenarios_with_findings": 0,
+    "modes": ["default", "embedded ML"],
+    "checks": {
+      "interfaces": 24,
+      "consumer_hook": 8,
+      "pipeline": 51,
+      "boundaries": 9,
+      "e2e": 80,
+      "race": "passed with -p 2; thresholds unchanged",
+      "vet": "passed",
+      "lint_issues": 0,
+      "archive_checksums_verified": 38
+    },
+    "canonical_targets_built": 5,
+    "optional_windows_arm64_built": true,
+    "docker": "User requested leaving Docker unchanged after Docker API timeout. Current Docker/Linux runtime qualification remains open.",
+    "artifact": "/Users/sugar/dev/prowl-1.4.0-artifacts/eb7704e/prowl-1.4.0-candidate-eb7704e.tar.gz",
+    "artifact_sha256": "7b18d8cc414e2a9357f579531f051eeef99cb00932f30fd3b07c9f717d3575cb"
+  },
+  "boundary": "Local owned project/fixtures. No live provider credentials, external target scans, push/deploy or global installation changes. Current Linux/Docker, Windows and macOS Intel runtime acceptance is not claimed. Finite synthetic controls do not prove market dominance or universal accuracy.",
+  "candidate_followups": [
+    {
+      "id": "semantic_normalization",
+      "status": "fixed_with_regression_evidence",
+      "source": "tool/internal/scan/json_literals.go: literalFindings",
+      "observation": "Semantic option is disabled for normalized inputs; verify whether the requested capability is silently skipped and preserve source evidence if enabled",
+      "phase": "noise-6"
+    },
+    {
+      "id": "pragma_strings",
+      "status": "fixed_with_regression_evidence",
+      "source": "tool/internal/scan/scan.go: lineIndex.hasPragma",
+      "observation": "Whole-line markers may suppress findings even when embedded in an ordinary credential/data string rather than an operator comment",
+      "phase": "noise-6"
+    },
+    {
+      "id": "long_credential_bindings",
+      "status": "fixed_with_regression_evidence",
+      "source": "tool/internal/scan/json_literals.go: literalBinding",
+      "observation": "Names longer than 256 bytes lose parser-established password nomination without an explicit incomplete diagnostic",
+      "phase": "noise-9"
+    },
+    {
+      "id": "checksum_comment_severity",
+      "status": "fixed_with_regression_evidence",
+      "source": "tool/internal/scan/scan.go: adjustSeverity",
+      "observation": "The raw L1-checksum exemption may fail for checksum-proven Base64 matches",
+      "phase": "noise-6"
+    },
+    {
+      "id": "jwt_structure_evidence",
+      "status": "fixed_with_regression_evidence",
+      "source": "tool/internal/detect/checksum.go",
+      "observation": "Check whether JWT syntax validation is presented as a cryptographic checksum proof",
+      "phase": "noise-6"
+    },
+    {
+      "id": "localization_password_labels",
+      "status": "fixed_with_regression_evidence",
+      "observation": "Generic password cues in JSON localization/form/error dictionaries may be literal labels rather than configured passwords; preserve real weak config values",
+      "phase": "noise-9"
+    },
+    {
+      "id": "invalid_literal_verification",
+      "status": "fixed_with_regression_evidence",
+      "observation": "Malformed/lossy structured input falls back to lexical scanning; verify that a truncated escape-containing token cannot be submitted as a canonical credential",
+      "phase": "noise-9"
+    },
+    {
+      "id": "structured_provider_namespaces",
+      "status": "fixed_with_regression_evidence",
+      "observation": "Provider namespace plus api_key/token field may lose typed binding context when only the leaf name is retained",
+      "phase": "noise-9"
+    },
+    {
+      "id": "json_unescaped_companion_context",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-7",
+      "source": "tool/internal/scan/json_literals.go: jsonLiterals admission condition",
+      "observation": "Ordinary JSON without escapes still uses lexical full-document verification context; compare accounts A/B on the own loopback verifier and consider a uniform adapter"
+    },
+    {
+      "id": "yaml_cross_document_alias",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-7",
+      "source": "gopkg.in/yaml.v3 v3.0.1 parser document/alias",
+      "observation": "Pinned Node decoder retains anchors across stream documents. Own probe accepted an alias from a preceding document; canonical adapter must enforce document membership"
+    },
+    {
+      "id": "semantic_l2_filtering",
+      "status": "contract_observed",
+      "source": "/tmp/prowl-1.4.0-fivehour-20261002/semantic-cli-probe",
+      "observation": "Canonical tulip-moon semantic candidate is emitted by default and dropped with embedded ML; filtered=true prevents absence proof. Real model quality is not measured by the loopback mock"
+    },
+    {
+      "id": "ambiguous_companion_cache",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-9",
+      "observation": "Conflicting extract values bypassed by cached LIVE first match; now rejected before cache/provider requests"
+    },
+    {
+      "id": "json_duplicate_null_companion",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-9",
+      "observation": "Duplicate null/object fields omitted by context inventory could borrow first canonical companion; preserve findings but block object verification"
+    },
+    {
+      "id": "json_bom_cr_editor_coordinates",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-9",
+      "observation": "UTF-8 BOM JSON and CR-only line/pragma/LSP ranges now retain source identity and positions"
+    },
+    {
+      "id": "assemblyai_entropy_typed_identity",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-9",
+      "observation": "Held-out synthetic 32-hex explicit provider bindings retained generic values but 14/48 lost typed identity at entropy 3.5; floor now 3.0"
+    },
+    {
+      "id": "doctor_selected_templates",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-10",
+      "observation": "Damaged selected rule/verifier sets could receive healthy doctor verdict; now loaded without requests and overlays disclosed"
+    },
+    {
+      "id": "lsp_real_embedded_startup",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-10",
+      "observation": "Flagless empty-home startup omitted 175 embedded templates; actual startup now loads bundle and rejects damaged overlays"
+    },
+    {
+      "id": "worker_startup_and_intake",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-10",
+      "observation": "Worker ignored requested stages/load failures and accepted null/duplicate/trailing intake; now rejects unsupported/ambiguous input"
+    },
+    {
+      "id": "toml_qualified_key_memory",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-10",
+      "observation": "262 KB input expanded to 1.71 GB RSS in pinned parser/group keys; pre-parser work guard reduced RSS to 42 MB with lexical findings retained"
+    },
+    {
+      "id": "bundled_template_selection",
+      "status": "fixed_with_regression_evidence",
+      "phase": "noise-10",
+      "observation": "Explicit release templates can be selected in CLI/MCP/LSP without changing installed sets or organization identity"
+    },
+    {
+      "id": "http_lossy_unicode_transport",
+      "status": "fixed_with_regression_evidence",
+      "phase": "final transport pass",
+      "observation": "Single surrogate/raw invalid UTF-8 previously produced HTTP 200 after silent normalization; bounded streaming validation now rejects it without changing valid Unicode"
+    },
+    {
+      "id": "hook_installed_overlay_and_compatibility",
+      "status": "fixed_with_regression_evidence",
+      "phase": "final integrations",
+      "observation": "All hook definitions read staged blobs with bundled rules, reconstruction and strict coverage; damaged installed sets remain untouched"
+    },
+    {
+      "id": "manifest_file_template_units",
+      "status": "fixed_with_regression_evidence",
+      "phase": "final metadata",
+      "observation": "Version/update explicitly report manifest files; 159 files contain 175 rule templates, and doctor loads the actual selected templates"
+    },
+    {
+      "id": "atlassian_wall_time_assertion",
+      "status": "fixed_with_regression_evidence",
+      "phase": "final race qualification",
+      "observation": "Flaky speedup ratio replaced by a barrier proving eight simultaneous bulk requests and preservation of all 800 current/history items; benchmark retained"
+    },
+    {
+      "id": "generic_password_minimum_length",
+      "status": "contract_observed",
+      "phase": "completion boundaries",
+      "observation": "Default generic_password starts at six Unicode code points; shorter values are outside the demonstrated policy guarantee"
+    }
+  ]
+}

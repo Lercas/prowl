@@ -56,16 +56,12 @@ func loadFixture(t *testing.T) []fixtureRow {
 
 const tol = 1e-9
 
-// compressionRatioIdx is the index of compression_ratio in FeatureNames. Under a
-// non-cgo build it is the single feature that cannot match Python exactly (Go's
-// pure-Go DEFLATE differs from C zlib); under cgo it matches like everything else.
+// compressionRatioIdx is the index of compression_ratio in FeatureNames.
+// Both native and portable builds use zlib-compatible compression.
 const compressionRatioIdx = 7
 
-// TestParity asserts Extract matches every fixture row's 44 features.
-//
-// Under the default cgo build every feature (including compression_ratio) must
-// match to ~1e-9. Under a !cgo build compression_ratio is allowed to diverge and
-// is checked separately by TestCompressionRatioDivergence.
+// TestParity checks all 49 features against the optional local research corpus.
+// Mandatory clean-checkout parity lives in mlmodel/release_parity_test.go.
 func TestParity(t *testing.T) {
 	rows := loadFixture(t)
 
@@ -84,9 +80,7 @@ func TestParity(t *testing.T) {
 			t.Fatalf("row %d: Extract returned %d features, want %d", i, len(got), len(FeatureNames))
 		}
 		for j := range FeatureNames {
-			if j == compressionRatioIdx && !builtWithCgo {
-				continue // checked by TestCompressionRatioDivergence
-			}
+
 			want := row.Features[j]
 			if diff := math.Abs(got[j] - want); diff > tol {
 				t.Errorf("row %d value=%q feature[%d]=%s: got %.17g want %.17g (delta %.3g)",
@@ -96,9 +90,7 @@ func TestParity(t *testing.T) {
 	}
 }
 
-// TestCompressionRatioDivergence quantifies how compression_ratio compares to
-// the Python fixture. With cgo it must match exactly (0 diverging rows). Without
-// cgo it documents (does not fail on) the expected Go-vs-zlib delta.
+// TestCompressionRatioDivergence requires compression parity in both builds.
 func TestCompressionRatioDivergence(t *testing.T) {
 	rows := loadFixture(t)
 	diverging := 0
@@ -123,8 +115,8 @@ func TestCompressionRatioDivergence(t *testing.T) {
 	}
 	t.Logf("compression_ratio: builtWithCgo=%v diverging=%d/%d maxDelta=%.6g (value=%q)",
 		builtWithCgo, diverging, len(rows), maxDelta, truncate(maxDeltaVal, 40))
-	if builtWithCgo && diverging != 0 {
-		t.Errorf("cgo build: compression_ratio diverges on %d rows (maxDelta=%.6g); want exact parity",
+	if diverging != 0 {
+		t.Errorf("compression_ratio diverges on %d rows (maxDelta=%.6g); want exact parity",
 			diverging, maxDelta)
 	}
 }

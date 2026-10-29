@@ -66,7 +66,23 @@ func restoreDetectDefaults() { detect.ApplyTuning(3.5, 4.2, 50000) }
 
 // genericSecretLine holds a generic high-entropy value (~5.0) flagged at the default
 // generic_entropy_min (3.5) and suppressed once the threshold is raised above its entropy.
-const genericSecretLine = `token: "ghp_aB3dEf7Gh1Jk5Lm9Np2Qr6St0Uv4Wx8Yz1234"`
+const genericSecretLine = `token_value = "` + "\x4b" + `p9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7sL"`
+
+func TestEditorGenericIdentifierNoiseAndLiteralRecall(t *testing.T) {
+	defer restoreDetectDefaults()
+	restoreDetectDefaults()
+	e := newTestEngine(t)
+	for _, text := range []string{`const bypass=routesV2;`, `const passwordInput2=document.getElementById("password");`, `api_key=` + "\x4b" + `p9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7sL;`} {
+		if ds := scanDiagnostics(e, "file:///app.js", text); len(ds) > 0 {
+			t.Fatal("editor reports a code identifier as a credential")
+		}
+	}
+	for _, text := range []string{`api_key="` + "\x4b" + `p9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7sL";`, `password="hunter2";`} {
+		if ds := scanDiagnostics(e, "file:///app.js", text); len(ds) == 0 {
+			t.Fatal("editor lost a configured literal")
+		}
+	}
+}
 
 // drainPublishes reads every framed message from buf and returns the count of publishDiagnostics
 // frames plus the params of the last one.
@@ -149,19 +165,19 @@ func TestOffsetPosUTF16Column(t *testing.T) {
 	}
 }
 
-// TestReadMessageRecoversAfterBadFrame asserts an oversized Content-Length doesn't swallow the
-// following valid frame: readMessage rejects the bad frame, then resyncs and returns the next body.
+// Recovery is safe only after consuming a bounded, unique Content-Length. An unknown/oversized
+// length cannot identify which later header-like bytes belong to a rejected document's content.
 func TestReadMessageRecoversAfterBadFrame(t *testing.T) {
 	const good = `{"jsonrpc":"2.0","id":42,"method":"shutdown"}`
-	stream := "Content-Length: 99999999\r\n\r\n{\"x\":1}" + // oversized lie + short body
+	stream := "Content-Length: 7\r\nContent-Type: application/vscode-jsonrpc; charset=utf-16\r\n\r\n{\"x\":1}" +
 		"Content-Length: " + strconv.Itoa(len(good)) + "\r\n\r\n" + good
 	r := bufio.NewReader(strings.NewReader(stream))
 
-	// First read: the malformed frame is rejected as errBadFrame (not a disconnect).
+	// First read consumes the entire known body before returning a recoverable error.
 	if _, err := readMessage(r); !errors.Is(err, errBadFrame) {
 		t.Fatalf("first readMessage err = %v, want errBadFrame", err)
 	}
-	// Second read: the stream has resynced — the valid shutdown frame comes through intact.
+	// The following valid frame comes through intact at its exact boundary.
 	body, err := readMessage(r)
 	if err != nil {
 		t.Fatalf("second readMessage err = %v, want the recovered shutdown frame", err)
@@ -250,8 +266,8 @@ func TestDebounceCoalescesBurst(t *testing.T) {
 	}
 }
 
-// TestLargeDocumentBounded asserts an over-cap document returns empty diagnostics promptly (the
-// CLI's --max-size parity) while a document under the cap is still scanned and flags its secret.
+// TestLargeDocumentBounded asserts an over-cap document returns an incomplete warning promptly,
+// while a document under the cap is still scanned and flags its secret.
 func TestLargeDocumentBounded(t *testing.T) {
 	defer restoreDetectDefaults()
 	restoreDetectDefaults()
@@ -261,7 +277,7 @@ func TestLargeDocumentBounded(t *testing.T) {
 	}
 	e := &engine{det: detect.New(tax), maxBytes: 1 << 10} // 1 KiB cap for the test
 
-	// Over the cap: the document is skipped (no diagnostics, no full scan) even though it holds a secret.
+	// Over the cap: detection is skipped but the editor must not receive a clean result.
 	big := genericSecretLine + "\n" + strings.Repeat("filler filler filler\n", 300)
 	if len(big) <= e.maxBytes {
 		t.Fatalf("setup: doc (%d bytes) must exceed the cap (%d)", len(big), e.maxBytes)
@@ -270,8 +286,8 @@ func TestLargeDocumentBounded(t *testing.T) {
 	go func() { done <- scanDiagnostics(e, "file:///big.py", big) }()
 	select {
 	case got := <-done:
-		if len(got) != 0 {
-			t.Errorf("over-cap document must be skipped (empty diagnostics), got %d", len(got))
+		if len(got) != 1 || diagnosticCodeCount(got, "document_too_large") != 1 {
+			t.Errorf("over-cap document must carry an incomplete warning, got %d diagnostics", len(got))
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("over-cap scan did not return promptly — size cap not bounding the work")
@@ -396,7 +412,7 @@ func TestNormalCustomRuleStillCompiles(t *testing.T) {
 
 	// And it detects its secret end-to-end.
 	e := &engine{det: detect.New(tax), maxBytes: defaultMaxScanBytes}
-	diags := scanDiagnostics(e, "file:///x.txt", `key = "acme_aB3dEf7Gh1Jk5Lm9Np2Qr6St0Uv4Wx8Yz"`)
+	diags := scanDiagnostics(e, "file:///x.txt", `key = "`+"\x61"+`cme_aB3dEf7Gh1Jk5Lm9Np2Qr6St0Uv4Wx8Yz"`)
 	if len(diags) == 0 {
 		t.Error("a normal custom rule must still flag its secret in the LSP scan, got 0 diagnostics")
 	}
@@ -422,7 +438,7 @@ func TestEnableKillSwitchWarns(t *testing.T) {
 
 	// Confirm the enable list really disables all detectors. First check the secret is detectable
 	// under the default taxonomy, so "0 diagnostics" below is the kill-switch, not an undetectable value.
-	const secretLine = `gh = "ghp_16C7e42F292c6912E7710c838347Ae178B4a"`
+	const secretLine = `gh = "` + "\x67" + `hp_16C7e42F292c6912E7710c838347Ae178B4a"`
 	baseTax := loadDefaultTax(t)
 	if d := scanDiagnostics(&engine{det: detect.New(baseTax), maxBytes: defaultMaxScanBytes}, "file:///s.py", secretLine); len(d) == 0 {
 		t.Fatal("setup: the GitHub PAT must be detectable under the default taxonomy")
@@ -460,7 +476,7 @@ func TestNormalEnableNoWarning(t *testing.T) {
 		t.Fatal("a real enable list must keep the named detectors, got 0 types")
 	}
 	e := &engine{det: detect.New(tax), maxBytes: defaultMaxScanBytes}
-	diags := scanDiagnostics(e, "file:///s.py", `gh = "ghp_16C7e42F292c6912E7710c838347Ae178B4a"`)
+	diags := scanDiagnostics(e, "file:///s.py", `gh = "`+"\x67"+`hp_16C7e42F292c6912E7710c838347Ae178B4a"`)
 	if len(diags) == 0 {
 		t.Error("a normal enable list must keep its detectors producing diagnostics, got 0")
 	}

@@ -1,15 +1,22 @@
 name: release
 
 on:
-  push:
-    tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
   packages: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 jobs:
+  verify:
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/ci.yml
+
   binaries:
+    needs: verify
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,18 +44,29 @@ jobs:
           go build -trimpath \
             -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
             -o "../prowl-$GOOS-$GOARCH$ext" ./cmd/prowl
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         with:
-          files: prowl-*
-          # only one matrix job generates notes, else each of the 5 appends its own changelog
-          generate_release_notes: ${{ matrix.goos == 'linux' && matrix.goarch == 'amd64' }}
+          name: prowl-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: prowl-*
+          if-no-files-found: error
+
 
   docker:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
+      - name: validate both container architectures before publication
+        run: |
+          set -e
+          for arch in amd64 arm64; do
+            docker buildx build --platform "linux/$arch" --load \
+              --build-arg "VERSION=${GITHUB_REF_NAME}" -t "prowl:check-$arch" tool
+            docker run --rm --platform "linux/$arch" --network none "prowl:check-$arch" selftest --ml
+            docker run --rm --platform "linux/$arch" --network none --entrypoint git "prowl:check-$arch" --version
+          done
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -60,8 +78,34 @@ jobs:
           file: tool/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
           build-args: |
             VERSION=${{ github.ref_name }}
           tags: |
             ghcr.io/lercas/prowl:${{ github.ref_name }}
             ghcr.io/lercas/prowl:latest
+
+
+  publish:
+    needs: [binaries, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: prowl-*
+          merge-multiple: true
+          path: dist
+      - name: checksums
+        working-directory: dist
+        run: sha256sum prowl-* > checksums.txt
+      - uses: actions/attest@v4
+        with:
+          subject-path: dist/prowl-*
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/prowl-*
+            dist/checksums.txt
+          fail_on_unmatched_files: true
+          generate_release_notes: true

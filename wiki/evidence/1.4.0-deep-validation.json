@@ -1,0 +1,302 @@
+{
+  "version": "1.4.0",
+  "date": "2026-10-01",
+  "branch": "feat/1.4.0",
+  "source_base": "5782248205e29b93992b54f525a8b05dbbb25146",
+  "source_code_manifest_sha256": "fb83b4675fad4431214fb2a02a0d678885bf5503b117495e2b85eb5fbf78591c",
+  "source_manifest_method": "SHA256 of canonical sorted relative-path to content-SHA256 JSON with trailing newline; includes cmd/internal/rules/verifiers/research/scripts/workflows and Go/build manifests, excludes Python cache. Retained alongside binaries.",
+  "source_manifest_file_count": 479,
+  "artifact_compiler": "go1.25.14 linux/arm64",
+  "CGO_ENABLED": 0,
+  "buildvcs": false,
+  "artifact_directory": "/tmp/prowl-1.4.0-release-deep-verified",
+  "artifact_sha256": {
+    "prowl-darwin-amd64": "5c652e4e54cb76e50eba5d0bb760462d760222c11a45645e8c7e048119103696",
+    "prowl-darwin-arm64": "a800681bb5c86367259b98f29771505e7a4c49196afc11e5cbcd0bcd1729834d",
+    "prowl-linux-amd64": "6746977ddf89b745bba331740f62b95a0698aacdd9b178a22810f0d284e42f36",
+    "prowl-linux-arm64": "05512e9fcaf1e48d6a1981f26d6a47baef1a9876c7ba2df6cebda64411d45e51",
+    "prowl-windows-amd64.exe": "d8a112f975adbd6ab0af7412906bfb60afa01de57515ef12164359ad4cb5fdab"
+  },
+  "artifact_rebuild_identity": "All five final binaries byte-identical to the deep-final artifacts used by acceptance and benchmark; Go comment-only clarifications changed no executable bytes. E2E builds the same source with the native toolchain.",
+  "node_reference": {
+    "engine": "v22.15.1",
+    "cases": 261,
+    "fixture_sha256": "e81dc07e523b53674e5e54ad4c8bfff4ed04110f2a17f88a600f0be0f7df5e51",
+    "native": "passed",
+    "linux_arm64": "passed in full static suite Go1.25.14",
+    "linux_amd64": "passed, network none",
+    "amd64_log": "/tmp/prowl-1.4.0-packaging-deep-final/node-parity-amd64.log"
+  },
+  "checks": {
+    "native_full_race": "passed, macOS arm64 Go1.27.1; followed by race checks of all subsequently changed components",
+    "full_static_suite": "passed, macOS arm64 and Linux arm64 Go1.25.14",
+    "vet": "passed",
+    "golangci_lint": "0 issues",
+    "ruff_real_error_classes": "passed",
+    "git_diff_check": "passed",
+    "e2e": "80 passed, 0 failed; temp inputs retained",
+    "reconstruction_fuzz_final": {
+      "executions": 5531345,
+      "requested_seconds": 15,
+      "assertions": [
+        "result/value budgets",
+        "original proof span boundaries",
+        "expression span boundaries"
+      ],
+      "result": "passed"
+    },
+    "reconstruction_fuzz_prior": {
+      "executions": 15806977,
+      "requested_seconds": 30,
+      "result": "passed"
+    },
+    "offline_ml_selftest": "7/7 on final amd64/arm64 runtime and Docker Action images; network none"
+  },
+  "acceptance": {
+    "candidate_version": "prowl 1.4.0",
+    "checks": [
+      {
+        "case": "partial_staging",
+        "new_detected": true,
+        "old_findings": 0
+      },
+      {
+        "case": "pre_commit_consumer_index",
+        "passed": true
+      },
+      {
+        "case": "split_js",
+        "new_detected": true,
+        "old_typed_detected": false
+      },
+      {
+        "case": "oversized_fail_closed",
+        "new_exit": 2,
+        "old_exit": 0
+      },
+      {
+        "case": "static_ml",
+        "new_exit": 0,
+        "old_exit": 2
+      },
+      {
+        "case": "absence_is_not_revocation",
+        "passed": true
+      },
+      {
+        "case": "offline_selftest_ml",
+        "passed": true
+      }
+    ],
+    "boundary": "local synthetic inputs; no provider calls or publication",
+    "inputs_retained": "/private/tmp/prowl-1.4.0-acceptance-deep-final"
+  },
+  "packaging": {
+    "git_index_nonroot_container": "passed, both Linux architectures",
+    "github_docker_action_sarif_workspace_write": "passed",
+    "network": "none",
+    "inputs_retained": "/tmp/prowl-1.4.0-packaging-deep-verified",
+    "selftests": {
+      "prowl:1.4.0-deep-verified-arm64": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      },
+      "prowl:1.4.0-deep-verified-amd64": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      },
+      "prowl:1.4.0-deep-verified-action": {
+        "schema_version": "1.4",
+        "profile": "all",
+        "passed": true,
+        "network": false,
+        "cases": [
+          {
+            "name": "split-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "encoded-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-example",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "dex-string",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "mobile-placeholder",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          },
+          {
+            "name": "encoded-mail",
+            "passed": true,
+            "complete": true,
+            "count": 1
+          },
+          {
+            "name": "public-identifier",
+            "passed": true,
+            "complete": true,
+            "count": 0
+          }
+        ]
+      }
+    },
+    "versions": {
+      "prowl:1.4.0-deep-verified-arm64": "prowl 1.4.0",
+      "prowl:1.4.0-deep-verified-amd64": "prowl 1.4.0",
+      "prowl:1.4.0-deep-verified-action": "prowl 1.4.0"
+    },
+    "local_image_id_sha256": {
+      "prowl:1.4.0-deep-verified-arm64": "sha256:e3af8e5bac6fff794aa5dec1e7917ba565400b6ed521206da04a72c9f14ba3dd",
+      "prowl:1.4.0-deep-verified-amd64": "sha256:1a6336d13b6a7a62614f4fccdf965b2baccfdbafd10309c13a2c3169278be10c",
+      "prowl:1.4.0-deep-verified-action": "sha256:f427f08d886f5534f4bb71572f1e8b75d7e9603ee413b012c1480423d2b79672"
+    }
+  },
+  "benchmark": {
+    "file": "1.4.0-deep-benchmark.json",
+    "positive_cases": 18,
+    "unsupported_contexts": 6,
+    "results": {
+      "prowl": {
+        "version": "prowl 1.4.0",
+        "binary_sha256": "a800681bb5c86367259b98f29771505e7a4c49196afc11e5cbcd0bcd1729834d",
+        "positive_cases_found": 18,
+        "unsupported_contexts_reported": 0
+      },
+      "gitleaks": {
+        "version": "8.30.1",
+        "binary_sha256": "f414bc2fb952be6c9072b75cb411e3368614ef4b16d48dbd9ad238034afd2302",
+        "positive_cases_found": 5,
+        "unsupported_contexts_reported": 0
+      },
+      "trufflehog": {
+        "version": "trufflehog 3.95.6",
+        "binary_sha256": "c096285759bc2a8fb5473316c5d87aa15155f5afa47ab7352daf42329bdae86a",
+        "positive_cases_found": 6,
+        "unsupported_contexts_reported": 0
+      },
+      "prowl_initial_candidate": {
+        "version": "prowl 1.4.0",
+        "binary_sha256": "7287f7c092793df5e44c78a75a4aa33937a35bc701c5cf10bebeced3d6ce3391",
+        "positive_cases_found": 15,
+        "unsupported_contexts_reported": 6
+      }
+    }
+  },
+  "boundaries": [
+    "Own synthetic inputs only. No live credentials or external target scans. Provider contract tests use loopback mocks.",
+    "This author-generated representation suite is not independent market precision/recall evidence or a performance benchmark.",
+    "Reference programs are generated locally and trusted; scanned JavaScript is never executed.",
+    "Real LLM quality is not measured; semantic output contracts are tested with mocks.",
+    "Reports used for correlation must be trusted. Secret identity HMAC does not authenticate entire reports or assert causal propagation.",
+    "Windows amd64 and macOS amd64 are compiled; native execution awaits CI. Linux amd64 container tests use Docker emulation on this arm64 host.",
+    "No push, tag, deployment or release publication was performed. Original checkout and unrelated dirty files were preserved."
+  ]
+}

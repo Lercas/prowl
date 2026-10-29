@@ -91,10 +91,7 @@ func (i scanItem) toModel() model.Item {
 	return model.Item{Text: i.Content, Source: src, Path: i.Path}
 }
 
-type scanResult struct {
-	Count    int             `json:"count"`
-	Findings []model.Finding `json:"findings"`
-}
+type scanResult = model.ScanResult
 
 // Handler returns the HTTP routes. Mountable into any server (tests, custom middleware).
 func (s *Server) Handler() http.Handler {
@@ -102,6 +99,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /healthz", s.handleHealth)
 	mux.HandleFunc("GET /metrics", s.handleMetrics)
 	mux.HandleFunc("GET /limits", s.handleLimits)
+	mux.HandleFunc("GET /capabilities", s.handleCapabilities)
 	mux.HandleFunc("POST /scan", s.handleScan)
 	mux.HandleFunc("POST /scan/batch", s.handleBatch)
 	return recoverMW(jsonErrorMW(mux))
@@ -236,15 +234,17 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusRequestEntityTooLarge, "item content too large")
 		return
 	}
-	fs := scan.Findings(r.Context(), s.det, s.eng, nil, in.toModel(), s.allow, nil)
+	coverage := model.NewCoverage()
+	ctx := model.WithCoverage(r.Context(), coverage)
+	s.registerScope(ctx, []scanItem{in})
+	fs := scan.Findings(ctx, s.det, s.eng, nil, in.toModel(), s.allow, nil)
 	atomic.AddInt64(&s.m.scanned, 1)
 	atomic.AddInt64(&s.m.findings, int64(len(fs)))
 	// Bound the per-request output: even an allowed-size item can fan out to thousands of findings.
 	if capped, truncated := capFindings(fs); truncated {
-		atomic.AddInt64(&s.m.truncated, 1)
 		fs = capped
 	}
-	writeJSON(w, http.StatusOK, scanResult{Count: len(fs), Findings: fs})
+	s.writeScanResult(w, fs, coverage)
 }
 
 func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
@@ -275,6 +275,9 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	// Initialize as empty (not nil) so a zero-hit batch serializes "findings": [] not null.
+	coverage := model.NewCoverage()
+	ctx = model.WithCoverage(ctx, coverage)
+	s.registerScope(ctx, in)
 	all := []model.Finding{}
 	batchTruncated := false
 	for _, it := range in {
@@ -305,16 +308,12 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		all = append(all, scan.Findings(ctx, s.det, s.eng, nil, it.toModel(), s.allow, nil)...)
+		atomic.AddInt64(&s.m.scanned, 1)
 	}
-	atomic.AddInt64(&s.m.scanned, int64(len(in)))
 	atomic.AddInt64(&s.m.findings, int64(len(all)))
 	// Final bound: the last item can push the aggregate just past the cap (capFindings trims), while
 	// batchTruncated covers stopping at exactly the cap with items left unscanned. Both add a note.
-	if capped, truncated := capFindings(all); truncated {
-		atomic.AddInt64(&s.m.truncated, 1)
-		all = capped
-	} else if batchTruncated {
-		atomic.AddInt64(&s.m.truncated, 1)
+	if batchTruncated {
 		all = append(all, model.Finding{
 			Detector:  "server",
 			Type:      "response_truncated",
@@ -323,17 +322,26 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 			Rationale: fmt.Sprintf("batch hit the per-request findings cap (%d); remaining items were not scanned", maxRespFindings),
 		})
 	}
-	writeJSON(w, http.StatusOK, scanResult{Count: len(all), Findings: all})
+	all, _ = capFindings(all)
+	s.writeScanResult(w, all, coverage)
 }
 
-func decode(w http.ResponseWriter, r *http.Request, v any, maxBytes int64) error {
-	return json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBytes)).Decode(v)
+func (s *Server) writeScanResult(w http.ResponseWriter, fs []model.Finding, coverage *model.Coverage) {
+	result := model.NewResult(fs, coverage)
+	if result.Truncated || !result.Complete {
+		atomic.AddInt64(&s.m.truncated, 1)
+	}
+	writeJSON(w, http.StatusOK, result)
 }
 
 // writeDecodeError maps a decode failure to its status: 413 when the body exceeded the MaxBytesReader
 // cap, else 400. No internal detail is sent to the client.
 func writeDecodeError(w http.ResponseWriter, err error) {
 	var maxErr *http.MaxBytesError
+	if errors.Is(err, errBatchItems) {
+		writeJSONError(w, http.StatusRequestEntityTooLarge, "too many items")
+		return
+	}
 	if errors.As(err, &maxErr) {
 		writeJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
 		return

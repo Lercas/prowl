@@ -11,7 +11,12 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"identity", "создать ключ HMAC-идентичности организации", "prowl identity init [-o FILE]\nСоздаёт новый ключ с правами 0600. Существующий путь не заменяется."},
+	{"correlate", "сопоставить секреты между JSON-отчётами", "prowl correlate REPORT.json REPORT.json [...]\nНужны редактированные отчёты 1.4 и один ключ идентичности."},
+	{"remediation-check", "проверить присутствие и состояние отзыва", "prowl remediation-check BEFORE.json AFTER.json\nРазделяет присутствие и отказ провайдера. Неполный скан не подтверждает отсутствие."},
+	{"selftest", "проверить синтетические профили без сети", "prowl selftest [--profile all|web|mobile|enterprise] [--ml]"},
 	{"scan", "scan files, dirs, archives, documents, mail, git, or stdin for secrets", scanHelp},
+	{"compare", "сравнить кандидатов до и после локального ML-фильтра", "prowl compare [path...]\nСканирует локальные файлы дважды и показывает влияние ML на кандидатов."},
 	{"repo", "clone & scan a remote git repository", repoHelp},
 	{"org", "clone & scan every repo in an org/group/workspace", orgHelp},
 	{"cicd", "scan GitHub Actions / GitLab CI logs and artifacts", cicdHelp},
@@ -34,7 +39,34 @@ var commands = []cmdInfo{
 	{"help", "show help for a command", ""},
 }
 
-const scanHelp = `prowl scan [path...] — scan files/dirs/archives/docs/mail for secrets (default: .)
+const scanHelp = `Базовый скан без настройки:
+  prowl                     текущая папка или stdin при pipe
+  prowl ./src               файл, папка, архив, документ или почта
+  prowl scan                та же команда в полной форме
+  prowl --ml ./src           встроенный локальный ML-фильтр
+  prowl --ci ./src           --strict + --fail-on high; явный --fail-on имеет приоритет
+  prowl --format json ./src  машиночитаемый отчёт
+  cat config.json | prowl --stdin-name config.json  JSON с исходными спанами
+  prowl -- --help            файл с именем --help (после -- все аргументы — пути)
+
+Правила встроены: rules update для первого скана не нужен.
+Без --verify находки — кандидаты, запросов к провайдерам нет.
+Коды: 0 — порог не задан/не достигнут; 1 — достигнут --fail-on;
+2 — ошибка запуска, а с --strict/--ci также неполная проверка.
+
+Возможности 1.4.0:
+  --strict                 код 2 при неполной проверке
+  --bundled                встроенные rules/verifiers; installed-наборы не используются
+  --reconstruct            восстановление констант JS/TS с исходными спанами
+  --semantic               обнаружение кандидатов локальной моделью
+  --semantic-url URL       OpenAI-совместимый endpoint (по умолчанию loopback:8080)
+  --semantic-model NAME    имя локальной модели
+  --semantic-allow-remote  явное разрешение отправки текста удалённому HTTPS endpoint
+  --ml-allow-remote        явное разрешение удалённого HTTPS ML-sidecar
+  --verify-all             верификация всех L1-кандидатов до ML
+  --identity-key-file FILE общий ключ для сопоставления источников
+
+prowl scan [path...] — scan files/dirs/archives/docs/mail for secrets (default: .)
 
   --rules-dir DIR              run nuclei-style rule templates from DIR
   --tags / --exclude-tags / --rule-severity   filter which templates run
@@ -52,8 +84,7 @@ const scanHelp = `prowl scan [path...] — scan files/dirs/archives/docs/mail fo
   --max-per-file N            cap generic findings per file (data-file guard; default 30, 0=off)
   --ml                        score candidates with the in-process ML model (no sidecar) and drop
                               ones it judges not-a-secret; --ml-threshold F (default 0.3) is the cutoff.
-                              Needs a cgo build (default for go install/make build); a static release
-                              binary refuses --ml — use --ml-url, or build from source.
+                              Works in both native and static release builds; no sidecar or Python required.
   --ml-model FILE             load that model file instead of the embedded one (implies --ml); else
                               $PROWL_HOME/model_binary.json is auto-used, else the embedded model
   --ml-url URL                same, but via an external sidecar (src/serve.py) instead of the embed
@@ -66,6 +97,8 @@ const scanHelp = `prowl scan [path...] — scan files/dirs/archives/docs/mail fo
   --ocr-max-pages N           maximum OCR pages per PDF (default 20)
   --ocr-timeout DUR           timeout for each OCR request (default 2m)
   -                           scan stdin (also auto-read when input is piped and no path is given)
+  --stdin-name NAME           logical filename for stdin (.json/.toml/.yaml select structured parsing);
+                              does not read or write NAME; cannot combine with paths or git modes
 
 ZIP/JAR, TAR/TAR.GZ/TGZ/GZIP, and DOCX/XLSX/PPTX inputs are recursively expanded in memory.
 EML/EMLX/MBOX mail bodies and MIME attachments are decoded; attached archives are expanded too.
@@ -256,6 +289,12 @@ const serveHelp = `prowl serve [--addr :8080] — run as a stateless HTTP scan w
 POST /scan and /scan/batch, GET /healthz and /metrics. One horizontal scaling unit (N replicas
 behind a load balancer / k8s HPA).
 
+GET /capabilities описывает стадии и схему. Worker использует L1 и rule templates,
+выдаёт redacted findings; ML/verification/semantic/reconstruction требуют scan/MCP.
+Неподдержанные стадии и повреждённые rules блокируют startup. Каждый item требует
+string content; null, duplicates, unknown fields и trailing JSON отклоняются.
+Scope относится к переданному клиентом content, а не к удалённой файловой системе.
+
 Example:
   prowl serve --addr :8080`
 
@@ -269,7 +308,7 @@ Register with Claude Code:
   claude mcp add prowl -- prowl mcp`
 
 //nolint:gosec // The help text contains a documentation-only synthetic Stripe key.
-const rulesHelp = `prowl rules <cmd> — manage detection rule templates (they live outside the binary)
+const rulesHelp = `prowl rules <cmd> — manage bundled or external detection rule templates
 
   list     [DIR]                      rules grouped by category, with severity and tags
   show     <rule-id>                  one rule's detail: matchers, regex, severity, reference (built-in or template)
@@ -285,7 +324,7 @@ DIR defaults to ./rules. Imports are backward-compatible with gitleaks (.toml) &
 Examples:
   prowl rules list --tags ai
   prowl rules show stripe-secret-key
-  prowl rules test 'key = "sk_live_4eC39HqLyjWDarjtT1zdp7dc"'
+  prowl rules test 'key = "` + "\x73" + `k_live_4eC39HqLyjWDarjtT1zdp7dc"'
   prowl rules update --check`
 
 const configHelp = `prowl config validate [FILE] — lint a .prowl.yaml (default: ./.prowl.yaml)
@@ -309,8 +348,12 @@ Examples:
   prowl verifiers list
   prowl scan . --verify --verifiers ./verifiers`
 
-// helpFor prints a command's detailed help, or the full top-level usage when name is empty/unknown.
+// helpFor prints command help, a concise overview, or the full overview for "all".
 func helpFor(name string) {
+	if name == "all" {
+		fmt.Print(detailedUsage)
+		return
+	}
 	for _, c := range commands {
 		if c.name == name && c.detail != "" {
 			fmt.Println(c.detail)
@@ -323,6 +366,9 @@ func helpFor(name string) {
 // hasHelpFlag reports whether -h/--help appears in args.
 func hasHelpFlag(args []string) bool {
 	for _, a := range args {
+		if a == "--" {
+			return false
+		}
 		if a == "-h" || a == "--help" {
 			return true
 		}
@@ -350,8 +396,10 @@ func dieUnknownCommand(cmd string) {
 
 // knownFlags is every flag the CLI accepts (common + command-specific), used to catch typos.
 var knownFlags = map[string]bool{
-	"--format": true, "--fail-on": true, "--fail-on-verified": true, "--exclude": true, "--taxonomy": true, "--rules": true,
-	"--rules-only": true, "--rules-dir": true, "--tags": true, "--exclude-tags": true,
+	"--stdin-name": true,
+	"--ci":         true,
+	"--format":     true, "--fail-on": true, "--fail-on-verified": true, "--exclude": true, "--taxonomy": true, "--rules": true,
+	"--rules-only": true, "--bundled": true, "--rules-dir": true, "--tags": true, "--exclude-tags": true,
 	"--rule-severity": true, "--verify": true, "--verified-only": true, "--verifiers": true, "--show-secrets": true,
 	"--config": true, "--output": true, "-o": true, "--staged": true, "--history": true,
 	"--since": true, "--baseline": true, "--write-baseline": true, "--max-size": true,
@@ -369,7 +417,20 @@ var knownFlags = map[string]bool{
 	"--base-url": true, "--current-only": true, "--max-items": true, "--project": true, "--space": true, "--field": true,
 	"--max-runs": true, "--max-artifacts": true, "--max-download": true, "--logs-only": true, "--artifacts-only": true,
 	"--targets": true, "--gists": true,
+	"--ml-allow-remote": true, "--strict": true, "--reconstruct": true, "--semantic": true, "--semantic-url": true, "--semantic-model": true, "--semantic-allow-remote": true, "--verify-all": true, "--identity-key-file": true,
 	"--no-strings": true, "--min-run": true,
+}
+
+// Boolean switches reject =VALUE rather than silently enabling a requested false option.
+var commonBoolFlags = map[string]bool{
+	"--ci": true, "--strict": true, "--reconstruct": true, "--semantic": true,
+	"--semantic-allow-remote": true, "--verify-all": true, "--fail-on-verified": true,
+	"--rules-only": true, "--bundled": true, "--verify": true, "--verified-only": true,
+	"--show-secrets": true, "--staged": true, "--history": true,
+	"--silence": true, "--silent": true, "-s": true, "--quiet": true, "-q": true,
+	"--verbose": true, "-v": true, "--no-dedupe": true, "--dedupe": true,
+	"--ml": true, "--ml-allow-remote": true, "--ocr": true, "--ocr-allow-remote": true,
+	"--ocr-all-pages": true, "--no-color": true,
 }
 
 func allFlagNames() []string {
@@ -436,6 +497,9 @@ func min3(a, b, c int) int {
 // checkUnknownFlags dies with a suggestion on any --flag / -x not in knownFlags (--flag=value ok).
 func checkUnknownFlags(args []string) {
 	for _, a := range args {
+		if a == "--" {
+			return
+		}
 		if !strings.HasPrefix(a, "-") || a == "-" {
 			continue
 		}

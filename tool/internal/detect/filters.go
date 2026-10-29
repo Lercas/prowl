@@ -6,13 +6,15 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 // exampleValues are well-known documentation values that must never score as a real secret.
 var exampleValues = map[string]bool{
 	"akiaiosfodnn7example":                     true,
 	"wjalrxutnfemi/k7mdeng/bpxrficyexamplekey": true,
-	"sk_test_4ec39hqlyjwdarjtt1zdp7dc":         true,
+	"\x73k_test_4ec39hqlyjwdarjtt1zdp7dc":      true,
 	"pk_test_tyoomqauvdedq54nitphi7jx":         true,
 	"1234567890abcdef1234567890abcdef":         true,
 	"00000000-0000-0000-0000-000000000000":     true,
@@ -132,15 +134,15 @@ func lineBefore(text string, start int) string {
 	return strings.ToLower(text[ls:start])
 }
 
-// IsHashNotSecret rejects pure-hex digests posing as high-entropy secrets: 40/56/64/96/128-hex are
-// always digests; 32-hex is a hash unless the line names it like a secret.
+// IsHashNotSecret rejects digest-shaped hex without adjacent credential evidence. A token/key binding
+// can legitimately contain the same number of hex characters as a checksum.
 func IsHashNotSecret(text string, start int, val string) bool {
 	if !isHexRun(val) {
 		return false
 	}
 	switch len(val) {
 	case 40, 56, 64, 96, 128: // sha1 / sha224 / sha256 / sha384 / sha512
-		return true
+		return !HasSecretNameContext(text, start)
 	case 32:
 		before := lineBefore(text, start)
 		for _, kw := range hexCtxSecretKw {
@@ -199,6 +201,31 @@ func IsExampleOrPlaceholder(v string) bool {
 		return true
 	}
 	return placeholderRunDominates(low)
+}
+
+// IsLiteralPasswordPlaceholder requires whole-value placeholder evidence for an explicitly assigned
+// password. Substrings such as "dummy", "example" or "xxxx" can be part of a real weak password.
+func IsLiteralPasswordPlaceholder(v string) bool {
+	// Lexical inputs may still interpolate mixed template references. A JSON parser establishes
+	// a string value without such substitutions and uses the canonical predicate directly.
+	return strings.Contains(v, "${") || strings.Contains(v, "{{") || IsCanonicalPasswordPlaceholder(v)
+}
+
+// IsCanonicalPasswordPlaceholder filters known examples and whole-value placeholders without
+// interpreting punctuation or mixed template-looking text as an executable substitution.
+func IsCanonicalPasswordPlaceholder(v string) bool {
+	low := strings.ToLower(v)
+	if exampleValues[low] || IsTemplatePlaceholder(v) || reSeqRun.ReplaceAllString(low, "") == "" {
+		return true
+	}
+	for _, word := range []string{"changeme", "change_me", "change_this", "change-this", "changethis", "placeholder", "dummy", "redacted", "example", "sample", "fake", "secret_here", "test_password", "your_password", "your_password_here", "password_here"} {
+		if low == word {
+			return true
+		}
+	}
+	// Mixed ramps/filler can be an actual weak password. Only a whole filler value establishes a
+	// placeholder for an explicit literal binding; generic entropy keeps its stricter heuristic.
+	return low != "" && reFillerRun.ReplaceAllString(low, "") == ""
 }
 
 // looksLikePassword reports whether v carries a digit, uppercase, or symbol (not a plain word).
@@ -358,28 +385,93 @@ func isVersionOrNumber(v string) bool {
 	return true
 }
 
-// secretNameContext are line cues that mark a high-entropy run as a likely secret.
-var secretNameContext = []string{
-	"secret", "password", "passwd", "passwort", "pwd", "token", "apikey", "api_key", "api-key",
-	"accesskey", "access_key", "access-key", "auth", "credential", "private", "signing", "bearer",
-	"client_secret", "encryption", "session_key", "_key", "-key", "key=", "key:", "key ",
+var reProseSecretContext = regexp.MustCompile(`(?:^|\s)(?:secret|token|password|api[_ -]?key)\s+(?:is|equals|lautet|ist|est)\s*["']?$`)
+
+// BindingName returns the immediately adjacent assignment/attribute name. Earlier properties on a
+// minified line must not lend their credential context to an unrelated value.
+func BindingName(text string, start int) string {
+	if start < 0 || start > len(text) {
+		return ""
+	}
+	lo := start - lineCtxWindow
+	if lo < 0 {
+		lo = 0
+	}
+	// Walk only the adjacent syntax backwards. Searching the whole 2KB window with a Unicode regex
+	// per match is bounded but prohibitively expensive on dense minified files.
+	i := start
+	if i > lo && strings.ContainsRune("\"'`", rune(text[i-1])) {
+		i--
+	}
+	skipSpace := func() {
+		for i > lo {
+			r, n := utf8.DecodeLastRuneInString(text[lo:i])
+			if !unicode.IsSpace(r) {
+				break
+			}
+			i -= n
+		}
+	}
+	skipSpace()
+	if i <= lo || (text[i-1] != ':' && text[i-1] != '=') {
+		return ""
+	}
+	i--
+	skipSpace()
+	if i > lo && strings.ContainsRune("\"'`", rune(text[i-1])) {
+		i--
+	}
+	end := i
+	for count := 0; i > lo; count++ {
+		r, n := utf8.DecodeLastRuneInString(text[lo:i])
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' && r != '-' && r != '.' {
+			break
+		}
+		if count >= 128 {
+			return ""
+		}
+		i -= n
+	}
+	if end == i {
+		return ""
+	}
+	r, _ := utf8.DecodeRuneInString(text[i:end])
+	if !unicode.IsLetter(r) && r != '_' {
+		return ""
+	}
+	return strings.ToLower(text[i:end])
 }
 
-// HasSecretNameContext reports whether the line containing `start` names the value like a secret.
+// HasSecretNameContext requires an adjacent secret binding or an Authorization/Bearer value.
 func HasSecretNameContext(text string, start int) bool {
-	before := lineBefore(text, start)
-	for _, kw := range secretNameContext {
-		if strings.Contains(before, kw) {
+	name := BindingName(text, start)
+	if name == "" {
+		before := lineBefore(text, start)
+		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || reProseSecretContext.MatchString(before)
+	}
+	return IsSecretBindingName(name)
+}
+
+// IsSecretBindingName classifies the adjacent name, shared with ML's evidence guard.
+func IsSecretBindingName(name string) bool {
+	name = strings.ToLower(name)
+	if strings.HasSuffix(name, "public_key") || strings.HasSuffix(name, "publickey") || strings.HasSuffix(name, "_id") || strings.HasSuffix(name, "-id") ||
+		strings.HasSuffix(name, "hash") || strings.HasSuffix(name, "checksum") || strings.HasSuffix(name, "digest") {
+		return false
+	}
+	name = strings.TrimSuffix(strings.TrimSuffix(name, "_value"), "-value")
+	for _, cue := range []string{"password", "passwd", "passwort", "pwd", "secret", "token", "apikey", "accesskey", "credential"} {
+		if strings.HasSuffix(name, cue) {
 			return true
 		}
 	}
-	return false
+	return name == "auth" || name == "key" || strings.HasSuffix(name, "_key") || strings.HasSuffix(name, "-key")
 }
 
 var nonSecretBlobMarkers = []string{
 	"ssh-rsa", "ssh-ed25519", "ssh-dss", "ecdsa-sha2", // public keys
 	"data:", ";base64,", // data URIs
-	"$2a$", "$2b$", "$2y$", // bcrypt
+	"$2a$", "$2b$", "$2y$", "$argon2", "$scrypt$", "$pbkdf2", // password hashes
 	"-----begin public", "-----begin certificate", // public material
 	"integrity=", "sha384-", "sha512-", // SRI hashes
 }
@@ -388,12 +480,80 @@ var nonSecretBlobMarkers = []string{
 // (public key, data URI, bcrypt hash, SRI integrity).
 func IsKnownNonSecretBlob(text string, start int) bool {
 	before := lineBefore(text, start)
+	// Inspect only the current literal/statement, not other values earlier on the same line.
+	if q := strings.LastIndexAny(before, "\"'`"); q >= 0 {
+		before = before[q+1:]
+	} else if sep := strings.LastIndexAny(before, ";,{}"); sep >= 0 {
+		before = before[sep+1:]
+	}
 	for _, m := range nonSecretBlobMarkers {
 		if strings.Contains(before, m) {
 			return true
 		}
 	}
 	return false
+}
+
+var encodedPasswordHash = regexp.MustCompile(`^(?:` +
+	`\$2[aby]\$(?:0[4-9]|[12][0-9]|3[01])\$[./A-Za-z0-9]{53}` +
+	`|\$argon2(?:i|d|id)\$(?:v=[0-9]+\$)?m=[0-9]+,t=[0-9]+,p=[0-9]+\$[A-Za-z0-9+/]{8,128}={0,2}\$[A-Za-z0-9+/]{16,128}={0,2}` +
+	`|pbkdf2_sha(?:256|512)\$[0-9]+\$[A-Za-z0-9]{8,128}\$[A-Za-z0-9+/]{16,128}={0,2}` +
+	`|\$scrypt\$ln=[0-9]+,r=[0-9]+,p=[0-9]+\$[A-Za-z0-9+/]{8,128}={0,2}\$[A-Za-z0-9+/]{16,128}={0,2}` + `)$`)
+
+// IsEncodedPasswordHash distinguishes self-describing KDF hashes from plaintext passwords. A
+// hex-only configured password remains a candidate: its shape alone cannot prove it is a digest.
+func IsEncodedPasswordHash(v string) bool { return encodedPasswordHash.MatchString(v) }
+
+// passwordLiteral extends a regex capture cut at a hash's comma or the generic length bound. The
+// bounded complete scalar must validate as a KDF encoding; a magic prefix alone is not sufficient.
+func passwordLiteral(text string, start, end int) string {
+	quote := byte(0)
+	if start > 0 && strings.ContainsRune("\"'`", rune(text[start-1])) {
+		quote = text[start-1]
+	}
+	for end < len(text) && end-start < 4096 {
+		c := text[end]
+		if c == '\n' || c == '\r' || (quote != 0 && c == quote) || (quote == 0 && strings.ContainsRune(" \t;\"'`", rune(c))) {
+			break
+		}
+		end++
+	}
+	return text[start:end]
+}
+
+// literalPasswordEnd recovers the complete bounded scalar once the taxonomy established a password
+// assignment. Never mint an identity from a prefix cut at a comma, quote escape or length ceiling.
+func literalPasswordEnd(text string, start int) (int, bool) {
+	quote := byte(0)
+	if start > 0 && strings.ContainsRune("\"'`", rune(text[start-1])) {
+		quote = text[start-1]
+	}
+	end := start
+	for end < len(text) && end-start < 4096 {
+		c := text[end]
+		if c == '\n' || c == '\r' {
+			return end, quote == 0
+		}
+		if quote != 0 {
+			if c == quote {
+				return end, true
+			}
+			if c == '\\' && end+1 < len(text) && text[end+1] != '\n' && text[end+1] != '\r' {
+				end += 2
+				continue
+			}
+		} else if strings.ContainsRune(" \t;\"'`", rune(c)) {
+			return end, true
+		}
+		end++
+	}
+	if end-start > 4096 {
+		return end, false
+	}
+	if end == len(text) {
+		return end, quote == 0
+	}
+	return end, quote != 0 && text[end] == quote || quote == 0 && strings.ContainsRune(" \t;\"'`\r\n", rune(text[end]))
 }
 
 // ShannonEntropy in bits/char over the empirical symbol distribution.

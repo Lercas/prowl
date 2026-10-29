@@ -1,13 +1,13 @@
 # Rules
 
-Prowl detection rules are nuclei-style YAML templates: one file per provider, an `info` block, `matchers` combined with AND/OR, and `extractors` that pull the secret out of the match. Templates live **outside the binary** in `~/.prowl/rules` and are installed from [github.com/Lercas/prowl-templates](https://github.com/Lercas/prowl-templates) via `prowl rules update`. The default library ships ~159 templates across cloud, payment, messaging, AI, VCS, SaaS, DB, observability, auth, and CI categories.
+Prowl detection rules are nuclei-style YAML templates: one file per provider, an `info` block, `matchers` combined with AND/OR, and `extractors` that pull the secret out of the match. В 1.4.0 шаблоны встроены в бинарник; отдельные наборы в `~/.prowl/rules` имеют приоритет. Их обновление доступно из [github.com/Lercas/prowl-templates](https://github.com/Lercas/prowl-templates) via `prowl rules update`. The default library ships ~159 templates across cloud, payment, messaging, AI, VCS, SaaS, DB, observability, auth, and CI categories.
 
 ```sh
 prowl rules update                 # install/refresh the template library into ~/.prowl/rules
 prowl rules list                   # every rule, grouped by category, with severity + tags
 prowl rules show stripe-secret-key # one rule's matchers, regex, severity, reference
 prowl rules search aws             # find rules (built-in + template) by id / tag / name / description
-prowl rules test 'key = "sk_live_4eC39HqLyjWDarjtT1zdp7dc"'  # which rules fire on a sample
+prowl rules test 'key = "sk_''live_4eC39HqLyjWDarjtT1zdp7dc"'  # which rules fire on a sample
 prowl rules validate rules/        # lint templates (parse / RE2 / fields)
 prowl rules stats rules/           # counts by category / severity / tag
 ```
@@ -16,7 +16,13 @@ Templates supplement the built-in detector taxonomy. They run during a scan only
 
 ## prowl rules workflow
 
-`prowl rules <subcommand>`. Most subcommands take an optional `DIR` positional that defaults to `./rules`; `show`, `test`, and `search` read the working-directory `rules/` if present, otherwise the installed `~/.prowl/rules` — and additionally consult the **built-in detector taxonomy** compiled into the binary, so a built-in like `aws_access_key_id` or `stripe_secret_key` is reachable without any installed templates.
+Для команд чтения `prowl rules <subcommand>` выбирается локальный `rules/`, если он существует, иначе установленный `~/.prowl/rules`. `list`, `validate` и `stats` принимают каталог позиционным аргументом; `--rules PATH` явно выбирает библиотеку для запросов, включая `show`, `test` и `search`. Эти три команды также используют встроенную таксономию: `aws_access_key_id` или `stripe_secret_key` доступны без установленных шаблонов. Если выбранная библиотека содержит ошибку, запрос завершается с ошибкой и для встроенного типа.
+
+Fallback разрешён только при отсутствии кандидата. Повреждённая ссылка, файл вместо
+каталога или ошибка доступа к выбранному пути (включая `PROWL_HOME`) останавливают
+загрузку. Правильные ссылки на каталоги допустимы. Явный путь имеет приоритет и не
+требует доступности невыбранной установленной библиотеки. Эти требования действуют
+и для автоматической загрузки шаблонов в scan и LSP; `--rules-only` отключает её.
 
 | Subcommand | Synopsis | What it does |
 |---|---|---|
@@ -99,7 +105,7 @@ Runs the sample through **both** detection paths — the built-in cascade detect
 The argument is a literal string, `@FILE` to test a real sample file, or `-` to read stdin:
 
 ```sh
-prowl rules test 'key = "sk_live_4eC39HqLyjWDarjtT1zdp7dc"'   # literal string
+prowl rules test 'key = "sk_''live_4eC39HqLyjWDarjtT1zdp7dc"'   # literal string
 prowl rules test @sample.env                                  # a real file's contents
 ```
 
@@ -179,6 +185,22 @@ prowl rules stats rules/
 
 Fetches templates from the canonical repo (`https://github.com/Lercas/prowl-templates.git`, its `rules/` subdir), validates them, and installs into `~/.prowl/rules`. With `--source` you can point at a different git URL or a local directory. If the default repo is unreachable, Prowl falls back to the snapshot bundled alongside the binary.
 
+Переход на bundled-копию применяется только при сбое получения репозитория по умолчанию.
+Отмена пользователем, ошибка проверки полученной библиотеки, чтения Git revision, локального
+ввода-вывода или установки завершают команду с кодом `2` без подмены результата резервной
+библиотекой. Явный `--source` не использует этот переход.
+
+Отсутствующий подкаталог `rules/` или `verifiers/` допускает библиотеку непосредственно в
+корне источника. Существующий файл вместо подкаталога, повреждённая ссылка или ошибка доступа
+отклоняются. Внутренний `Subdir` должен оставаться внутри источника: `..`, абсолютные пути и
+ссылки за его пределы запрещены; корректная ссылка на подкаталог внутри источника поддерживается.
+
+Git-вывод ограничен 64 КиБ; превышение явно помечается. Ожидание открытых дочерним процессом
+каналов вывода ограничено одной секундой; на Unix отмена и завершение останавливают группу
+процессов получения источника. Git revision должен читаться успешно и содержать короткий
+hex-хэш; ошибка не превращается в версию `unknown`. Проверка размера полученного checkout
+поддерживает отмену и ограничивает обход 200 000 записей, включая `.git`.
+
 ```sh
 prowl rules update                       # from the canonical templates repo
 prowl rules update --check               # show what would change, install nothing
@@ -193,6 +215,54 @@ rules installed: +12 ~3 -0 (version 1.0.0, 159 total) -> /Users/you/.prowl/rules
 ```
 
 `prowl version` prints the installed rule count, manifest version, and install path.
+
+Повреждённый или недоступный `.prowl-rules.json` даёт код `2` у `version` и `update`;
+обновление отказывается до получения источника. Отсутствие файла допустимо только при
+его фактическом отсутствии: повреждённые ссылки и ошибки доступа не считаются отсутствием.
+Лимит provenance JSON — 8 МиБ. Требуются `count` и объект `files`: счётчик должен совпадать
+с числом записей (не более 10 000), пути должны относиться к YAML-файлам внутри библиотеки,
+checksum — содержать 64 hex-символа. Неизвестные и повторяющиеся поля, `null`, неверный
+UTF-8 и непарные Unicode-surrogate запрещены. JSON записывается атомарно; ссылки в месте
+назначения отклоняются, жёсткие ссылки на прежний файл сохраняют его содержимое.
+
+Источник обновления может содержать `VERSION`: обычный UTF-8-файл до 64 КиБ с одной строкой
+версии. Пустой файл оставляет версию источника; отсутствие допустимо, а сбой чтения, FIFO,
+ссылка вне выбранного корня и лишние строки дают код `2` до установки.
+
+Обновление сохраняет снимок YAML, `SCHEMA.md`, `VERSION` и исходного checksum manifest.
+Проверка получает отдельную временную копию; установка и provenance используют сохранённые
+байты. Изменение исходного каталога после захвата не меняет устанавливаемый набор, а изменение
+проверочной копии отклоняется до установки. Лимиты снимка: 64 МиБ суммарно, 10 000 YAML,
+20 002 выбранных файла, 200 000 записей дерева (без `.git`); отдельный `SCHEMA.md` — до 8 МиБ.
+Обнаруженные ссылки в исходном дереве отклоняются. `--check` не меняет каталог назначения;
+внутренний Go API возвращает независимый `StagedDir`, который вызывающий освобождает через
+`UpdateResult.Close()`; CLI делает это автоматически.
+
+Запись шаблонов и provenance остаётся в открытом каталоге назначения, даже если его путь
+переименован или заменён. Все выбранные назначения проверяются перед записью: ссылки,
+специальные файлы и ссылки в родительских компонентах запрещены. Каждый файл заменяется
+атомарно, сохраняя другие жёсткие ссылки на прежний inode. Обновление всего набора не является
+транзакцией: поздняя ошибка записи или отмена может оставить часть файлов установленной.
+
+`--check` сравнивает снимок источника с фактическими управляемыми файлами в открытом каталоге
+назначения. Изменённый YAML, пропавший файл, лишний YAML и изменения `SCHEMA.md` отражаются
+в `+ / ~ / -`; эти счётчики включают схемы, а `total` и provenance `count` считают только YAML.
+Изменение версии, источника, provenance или checksum manifest отражается отдельно как обновление
+метаданных. Время предыдущей установки не создаёт изменение само по себе. Ссылки и специальные
+файлы среди управляемых файлов назначения отклоняются до записи, включая лишние файлы; они
+сохраняются. Превышение лимитов или сбой чтения установленной библиотеки дают код `2`.
+
+Установка записывает `MANIFEST.sha256` из сохранённых проверенных байтов в тот же открытый корень,
+что и шаблоны. CLI сверяет установленный provenance и checksum с ожидаемым результатом и загружает
+библиотеку без повторного подписания файлов. Изменение установленного файла, повторно подписанный
+другой набор или подмена пути назначения не превращаются в успешную проверку пустой библиотеки.
+
+Ошибка записи checksum manifest или повторной загрузки установленного набора завершает
+`rules update`/`verifiers update` с кодом `2`, без сообщения об успешной установке. Файлы к этому
+моменту могли уже измениться: такой код не означает откат. Команда `manifest` записывает файл
+атомарно в открытом каталоге, отклоняет ссылки и специальные файлы в месте назначения и не
+меняет другие жёсткие ссылки на прежний файл. Имена с переводами строки и обратной косой
+чертой экранируются в [формате GNU checksum](https://www.gnu.org/software/coreutils/manual/html_node/cksum-output-modes.html).
 
 ### export
 
@@ -317,7 +387,17 @@ extractors:
 - Prefer specific prefixes and bounded lengths over generic `[A-Za-z0-9]+`.
 - One provider concept per file, named `rules/<category>/<provider>-<thing>.yaml`.
 
-Safety limits guard untrusted templates: 512 KiB per document, 4 KiB per regex source, and a maximum `{n}`/`{n,m}` repetition bound of 100000.
+Лимиты шаблонов: 512 КиБ на YAML-файл со всеми его документами, 4 КиБ на regex, максимальная граница повторения `{n}`/`{n,m}` — 1000, сумма границ повторений на regex — 10 000. На каталог допускается 64 МиБ YAML и 10 000 YAML-файлов. Размер проверяется по фактически прочитанным байтам. Специальные файлы, включая FIFO, отклоняются; при обходе каталога ссылки за его пределы считаются ошибкой. Отдельный файл по ссылке можно выбрать явно.
+
+Если в выбранном каталоге есть `MANIFEST.sha256`, загрузчик проверяет его перед компиляцией.
+Изменённые, неуказанные и отсутствующие YAML-файлы блокируют весь каталог; повреждённые manifest,
+повторяющиеся записи и пути вне корня запрещены. Checksum и компиляция используют одинаковые
+прочитанные байты. Пробелы в именах файлов сохраняются. Лимит manifest — 8 МиБ; FIFO, повреждённая
+ссылка и ссылка за пределы библиотеки дают ошибку. Каталог без manifest поддерживается для
+авторских правил. Проверка действует для сканирования, `rules validate`, запросов библиотеки,
+MCP, HTTP-сервера и LSP.
+
+Ошибка чтения или некорректный шаблон останавливают сканирование до получения источника с кодом `2`; отчёт и baseline не создаются. Неизвестные YAML-поля, неверное AND/OR, пустые списки regex/word и неподдерживаемые extractors тоже считаются ошибками. `rules validate` возвращает `1` при ошибках; `rules list/show/test/search/stats` возвращают `2` вместо показа частичной библиотеки. LSP также отказывается запускаться с неполной установленной библиотекой или неверным custom regex.
 
 ## Filtering rules
 

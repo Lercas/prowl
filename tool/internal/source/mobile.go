@@ -2,7 +2,9 @@ package source
 
 import (
 	"archive/zip"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -27,7 +29,7 @@ var (
 	maxMobileTotalBytes int64 = 1 << 30 // 1 GiB
 	// maxMobileEntries caps how many zip entries are inspected (a zip can declare an absurd count).
 	maxMobileEntries = 200_000
-	// maxMobileEntryBytes bounds a single entry's charge when its header size is missing or lies.
+	// maxMobileEntryBytes bounds actual bytes read from a single entry, including forged headers.
 	maxMobileEntryBytes int64 = 64 << 20 // 64 MiB
 )
 
@@ -36,8 +38,7 @@ const (
 	// noise drop (scan.pathIsFilesystem allow-lists code|file|"") apply uniformly; the archive provenance
 	// is still visible in Path (<app>.apk!/<internal/path>).
 	mobileSource  = "code"
-	minRunDefault = 5    // min printable-run length; short runs on obfuscated binaries are entropy noise.
-	maxRunLen     = 4096 // clip an absurd single run.
+	minRunDefault = 5 // min printable-run length; short runs on obfuscated binaries are entropy noise.
 )
 
 // MobileOptions configures a mobile-app scan.
@@ -67,11 +68,18 @@ func (b *mobileBudget) addEntry(bodyBytes int64) bool {
 		b.err = fmt.Errorf("mobile extraction aborted: exceeded the %d-entry cap (possible zip bomb)", maxMobileEntries)
 		return false
 	}
-	b.totalBytes += bodyBytes
-	if b.totalBytes > maxMobileTotalBytes {
-		b.err = fmt.Errorf("mobile extraction aborted: extracted bytes exceeded the %d-byte cap (reached %d; possible zip bomb)", maxMobileTotalBytes, b.totalBytes)
+	return b.addBytes(bodyBytes)
+}
+
+func (b *mobileBudget) addBytes(bodyBytes int64) bool {
+	if b.err != nil {
 		return false
 	}
+	if bodyBytes < 0 || bodyBytes > maxMobileTotalBytes-b.totalBytes {
+		b.err = fmt.Errorf("mobile extraction aborted: extracted bytes exceeded the %d-byte cap (possible zip bomb)", maxMobileTotalBytes)
+		return false
+	}
+	b.totalBytes += bodyBytes
 	return true
 }
 
@@ -98,8 +106,12 @@ func Extract(ctx context.Context, p string, opts MobileOptions) (<-chan model.It
 		defer close(ch)
 		defer zr.Close()
 		resilience.Guard(
-			func() { emitMobile(ctx, ch, zr, archiveBase, opts) },
-			func(r any) { logx.Warn("recovered mobile-scan panic", "err", r) },
+			func() { emitMobile(ctx, ch, &zr.Reader, archiveBase, opts) },
+			func(r any) {
+				model.Note(ctx, "mobile_processing_failed", p, true)
+				logx.Warn("recovered mobile-scan panic")
+				emitSourceError(ctx, ch, archiveBase, errors.New("mobile reader failed"))
+			},
 		)
 	}()
 	return ch, nil
@@ -107,10 +119,12 @@ func Extract(ctx context.Context, p string, opts MobileOptions) (<-chan model.It
 
 // emitMobile walks every zip entry, classifies it, and sends its scannable text (or its extracted
 // printable strings for binaries) as an Item. It stops early on ctx cancel or a blown budget.
-func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, archiveBase string, opts MobileOptions) {
+func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.Reader, archiveBase string, opts MobileOptions) {
 	if len(zr.File) > maxMobileEntries {
+		model.Note(ctx, "mobile_entry_limit", archiveBase, true)
 		logx.Error("mobile extraction aborted: too many entries (possible zip bomb)",
 			"entries", len(zr.File), "limit", maxMobileEntries)
+		emitSourceError(ctx, ch, archiveBase, fmt.Errorf("mobile archive exceeds the %d-entry cap", maxMobileEntries))
 		return
 	}
 	b := &mobileBudget{}
@@ -122,53 +136,63 @@ func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, a
 		if f.FileInfo().IsDir() {
 			continue
 		}
+		reportPath := archiveBase + "!/" + name
+		// Inspected headers remain bounded even when bodies are deliberately excluded.
+		if !b.addEntry(0) {
+			model.Note(ctx, "mobile_budget_limit", archiveBase, true)
+			emitSourceError(ctx, ch, archiveBase, b.err)
+			return
+		}
+		if excludedMobile(name, opts.Exclude) || excludedMobile(reportPath, opts.Exclude) {
+			continue
+		}
+		cls := classifyEntry(name)
+		if cls == clsSkip || (cls == clsBinStrings && !opts.Strings) {
+			continue
+		}
 		usize := int64(math.MaxInt64)
 		if f.UncompressedSize64 <= math.MaxInt64 {
 			usize = int64(f.UncompressedSize64)
 		}
-		// Charge a bounded value (a lying/oversized header can't blow the budget arithmetic) BEFORE the
-		// per-entry filtering below, so a bomb of tiny skipped entries still trips the entry cap.
-		charge := usize
-		if charge < 0 || charge > maxMobileEntryBytes {
-			charge = maxMobileEntryBytes
+		limit := min(opts.MaxBytes, maxMobileEntryBytes)
+		if f.UncompressedSize64 > math.MaxInt64 || usize > limit {
+			model.Note(ctx, "max_size", reportPath, true)
+			if !emitSourceError(ctx, ch, reportPath, fmt.Errorf("mobile entry exceeds the %d-byte size limit", limit)) {
+				return
+			}
+			continue
 		}
-		if !b.addEntry(charge) {
-			logx.Error("mobile scan stopped", "err", b.err)
+		if !b.addBytes(usize) {
+			model.Note(ctx, "mobile_budget_limit", archiveBase, true)
+			emitSourceError(ctx, ch, archiveBase, b.err)
 			return
-		}
-		if usize == 0 {
-			continue
-		}
-		if usize > opts.MaxBytes {
-			logx.Warn("skipped: entry exceeds max-size", "path", name, "size", usize)
-			continue
-		}
-		if excludedMobile(name, opts.Exclude) {
-			continue
-		}
-		cls := classifyEntry(name)
-		if cls == clsSkip {
-			continue
 		}
 		rc, err := f.Open()
 		if err != nil {
-			logx.Debug("entry open error", "path", name, "err", err)
+			model.Note(ctx, "mobile_entry_failed", archiveBase, true)
+			if !emitSourceError(ctx, ch, reportPath, err) {
+				return
+			}
 			continue
 		}
-		body, rerr := readCapped(rc, usize, opts.MaxBytes)
-		rc.Close()
-		if rerr != nil {
-			logx.Debug("entry read error", "path", name, "err", rerr)
+		body, rerr := readCapped(rc, usize, limit)
+		closeErr := rc.Close()
+		if rerr != nil || closeErr != nil {
+			model.Note(ctx, "mobile_entry_failed", archiveBase, true)
+			if !emitSourceError(ctx, ch, reportPath, cmp(rerr, closeErr)) {
+				return
+			}
 			continue
 		}
-		reportPath := archiveBase + "!/" + name
 		switch cls {
 		case clsTextRaw:
 			text, ok := scannableText(body)
 			if !ok {
 				// A text-classified entry that is actually binary (mis-extensioned, or binary AXML /
 				// bplist): fall through to the strings pass so nothing is silently dropped.
-				emitStrings(ctx, ch, body, reportPath, opts)
+				if opts.Strings {
+					emitStrings(ctx, ch, body, reportPath, opts)
+				}
 				continue
 			}
 			if !send(ctx, ch, model.Item{Text: string(text), Source: mobileSource, Path: reportPath}) {
@@ -182,18 +206,16 @@ func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, a
 	}
 }
 
-// readCapped reads up to min(usize, max) bytes — it never trusts the header to over-allocate.
+// readCapped validates actual size and reads through EOF so ZIP CRC failures cannot be missed.
 func readCapped(rc io.Reader, usize, max int64) ([]byte, error) {
-	n := usize
-	if n < 0 || n > max {
-		n = max
-	}
-	buf := make([]byte, n)
-	k, err := io.ReadFull(rc, buf)
-	if err != nil && err != io.ErrUnexpectedEOF && err != io.EOF {
+	data, err := readSourceBytes(rc, max)
+	if err != nil {
 		return nil, err
 	}
-	return buf[:k], nil
+	if int64(len(data)) != usize {
+		return nil, errors.New("mobile entry size does not match its header")
+	}
+	return data, nil
 }
 
 // excludedMobile reports whether name matches any exclude pattern (glob OR substring, same matcher as
@@ -265,24 +287,20 @@ func isPrint(c byte) bool { return c == 0x09 || (c >= 0x20 && c <= 0x7e) }
 
 // ascii8 is the classic GNU-strings scan: contiguous printable bytes of length >= min become one line.
 func ascii8(body []byte, min int, b *strings.Builder) {
-	run := make([]byte, 0, 64)
-	flush := func() {
-		if len(run) >= min {
-			b.Write(run)
-			b.WriteByte('\n')
-		}
-		run = run[:0]
-	}
+	start := 0
 	for i := 0; i < len(body); i++ {
-		if c := body[i]; isPrint(c) {
-			if len(run) < maxRunLen {
-				run = append(run, c)
+		if !isPrint(body[i]) {
+			if i-start >= min {
+				b.Write(body[start:i])
+				b.WriteByte('\n')
 			}
-		} else {
-			flush()
+			start = i + 1
 		}
 	}
-	flush()
+	if len(body)-start >= min {
+		b.Write(body[start:])
+		b.WriteByte('\n')
+	}
 }
 
 // utf16le recovers printable ASCII stored as little-endian UTF-16 (low byte printable, high byte 0x00) —
@@ -306,12 +324,27 @@ func utf16lePhase(body []byte, start, min int, b *strings.Builder) {
 	for i := start; i+1 < len(body); i += 2 {
 		lo, hi := body[i], body[i+1]
 		if hi == 0x00 && isPrint(lo) {
-			if len(run) < maxRunLen {
-				run = append(run, lo)
-			}
+			run = append(run, lo)
 		} else {
 			flush()
 		}
 	}
 	flush()
+}
+
+// MobileBytes exercises the same intake without touching the filesystem.
+func MobileBytes(ctx context.Context, name string, data []byte, opts MobileOptions) (<-chan model.Item, error) {
+	if opts.MaxBytes <= 0 {
+		opts.MaxBytes = maxMobileEntryBytes
+	}
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return nil, err
+	}
+	ch := make(chan model.Item, 128)
+	go func() {
+		defer close(ch)
+		resilience.Guard(func() { emitMobile(ctx, ch, zr, name, opts) }, func(any) { model.Note(ctx, "mobile_processing_failed", name, true) })
+	}()
+	return ch, nil
 }

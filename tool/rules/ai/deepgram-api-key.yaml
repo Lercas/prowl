@@ -18,13 +18,13 @@ matchers:
   # excludes 40-hex git SHAs and avoids FP-flooding.
   - type: regex
     regex:
-      - '(?i)deepgram[a-z0-9_\-]{0,24}["'']?\s*[:=]\s*["'']?([0-9a-z]{40})\b'
+      - '(?i)(?:^|[^a-z0-9])deepgram(?:[_-]?(?:api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([0-9a-z]{40})(?:[^A-Za-z0-9_-]|$)'
       - '(?i)(?:authorization|token)["'' :=]+(?:token\s+)?([0-9a-z]{40})\b[\w"'' .:=,/-]{0,40}deepgram'
   - type: entropy
     min: 3.3
 extractors:
   - type: regex
     regex:
-      - '(?i)deepgram[a-z0-9_\-]{0,24}["'']?\s*[:=]\s*["'']?([0-9a-z]{40})\b'
+      - '(?i)(?:^|[^a-z0-9])deepgram(?:[_-]?(?:api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([0-9a-z]{40})(?:[^A-Za-z0-9_-]|$)'
       - '(?i)(?:authorization|token)["'' :=]+(?:token\s+)?([0-9a-z]{40})\b'
     group: 1

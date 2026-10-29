@@ -6,7 +6,7 @@ Most scanners stop at "this looks like a secret." Live verification goes further
 # Tag each finding live / dead by calling the provider
 prowl scan . --verify
 
-# Report ONLY provider-confirmed-live secrets (drops everything unconfirmed)
+# Подтверждённые live-находки плюс неопределённые проверки и high/critical без verifier
 prowl scan . --verified-only
 
 # Works the same on a domain scan
@@ -21,10 +21,18 @@ prowl scan . --verify --verifiers ./verifiers
 | Flag | Effect |
 |------|--------|
 | `--verify` | Confirm findings are LIVE by calling the provider. Each finding is tagged live, dead, or left unverified. Nothing is dropped. |
-| `--verified-only` | Report **only** provider-confirmed-live secrets. Implies `--verify`. The strongest false-positive filter. |
+| `--verified-only` | Сохраняет live-находки, неопределённые проверки и high/critical без verifier. Подтверждённо отклонённые ключи исключаются. Включает `--verify`. |
 | `--verifiers DIR` | Verifier YAML directory (repeatable). Defaults to the installed set at `~/.prowl/verifiers`, then `./verifiers`. |
 
 Once you have run `prowl verifiers update`, `--verify` auto-loads `~/.prowl/verifiers` — no `--verifiers` flag needed. `PROWL_HOME` overrides that directory.
+
+Переход к `./verifiers` допускается только при отсутствии установленного каталога.
+Повреждённая ссылка, файл вместо каталога, ошибка доступа или повреждённый родитель
+`PROWL_HOME` дают код `2` до получения источника или запроса провайдеру. Правильные
+ссылки на каталоги поддерживаются. Явный `--verifiers DIR` имеет приоритет и не
+проверяет невыбранную установленную библиотеку. `verifiers list` также возвращает `2`
+при ошибке обнаружения или загрузки набора, без показа частичного списка;
+`verifiers validate` возвращает `1`.
 
 ### `--verify` with no verifiers is a hard error
 
@@ -35,13 +43,36 @@ $ prowl scan . --verify
 ERROR verify setup failed err=--verify needs verifiers, but none are installed — run 'prowl verifiers update' (or pass --verifiers DIR)
 ```
 
-This is deliberate. A silent fall-back would leave every finding unverified, and `--verified-only` (which keeps only confirmed-live findings) would then drop **everything** — a green, empty report that looks like "no secrets" when in fact nothing was checked. Failing loudly forces you to fix the setup. Install the verifier set once:
+Неполный или отсутствующий набор не должен выглядеть как успешная проверка. `--verified-only`
+сохраняет неопределённые результаты и high/critical без verifier, однако это не заменяет рабочую
+конфигурацию проверки. Исправьте ошибку набора или установите verifier’ы перед повторным запуском:
 
 ```sh
 prowl verifiers update          # fetch + install ~/.prowl/verifiers
 ```
 
 or point `--verifiers DIR` at a directory that actually contains verifier YAML. The same hard error applies when the directory exists but loads to an empty set.
+
+Ошибка загрузки части набора также возвращает `2`, даже если остальные verifier’ы загрузились:
+scan не продолжается с незаметно уменьшенным покрытием. Исправьте синтаксис, regex или целостность
+набора перед повторным запуском.
+
+Загрузчик проверяет весь YAML-поток и известные поля. Неполные verifier’ы, повторяющиеся ID,
+неизвестные типы матчеров, неверные условия и пустые списки шаблонов являются ошибками.
+Чтение ограничено 512 КиБ на YAML, 8 МиБ на manifest, 64 МиБ YAML и 10 000 YAML-файлов
+на каталог; специальные файлы отклоняются без ожидания. Ссылки в библиотеке ограничены её
+корнем. Проверка checksum и компиляция используют один снимок байтов; повторяющиеся записи
+manifest и пути вне корня запрещены.
+
+
+Кэш различает выбранный verifier и извлечённые реквизиты. Один и тот же секрет с другим account
+SID проверяется отдельно; параллельные одинаковые проверки используют один запрос. Неопределённые
+результаты не кэшируются как постоянный вердикт. Отсутствие нужного реквизита предотвращает запрос
+и не помечает секрет как отозванный.
+
+HTTP 5xx, ошибки чтения и ответ больше 64 КиБ означают неопределённую проверку. Матчеры не
+оценивают частично прочитанный ответ, включая отрицательные проверки. `Retry-After` ограничен
+пятью секундами без переполнения длительности.
 
 ## How it works
 
@@ -52,7 +83,7 @@ For each finding, prowl selects a verifier by matching the detector type id **or
 - The request **errors** (timeout, DNS, blocked) → **inconclusive**; the finding is kept and left unverified.
 - The provider **rate-limits** the check (`429` / `503`) → **inconclusive**, never *dead*. prowl honors `Retry-After` for one bounded retry, then leaves the finding unverified rather than mislabel a throttled key as revoked. Re-run to resolve any left inconclusive.
 
-Verifiers target read-only identity/validate endpoints only (`/user`, `/account`, `whoami`, `validate`) — never anything that mutates state. Results are cached by value, so each distinct secret is checked exactly once even if it appears many times.
+Verifiers target read-only identity/validate endpoints only (`/user`, `/account`, `whoami`, `validate`) — never anything that mutates state. Кэш сохраняет определённый вердикт для выбранного verifier и извлечённых реквизитов; неопределённый результат допускает новую попытку.
 
 ## Blast radius — what the key unlocks
 

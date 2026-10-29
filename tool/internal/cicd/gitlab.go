@@ -12,6 +12,7 @@ import (
 type gitlabPipeline struct {
 	ID     int64  `json:"id"`
 	Ref    string `json:"ref"`
+	SHA    string `json:"sha"`
 	WebURL string `json:"web_url"`
 }
 
@@ -50,7 +51,7 @@ func (c *collector) collectGitLab(ctx context.Context, out chan<- model.Item, re
 			}
 			result.Runs++
 			prefix := "gitlab:" + c.target.repo + "/pipelines/" + runLabel(pipeline.Ref, pipeline.ID)
-			c.collectGitLabJobs(ctx, out, result, basePath, prefix, pipeline)
+			c.collectGitLabJobs(model.WithProvenance(ctx, map[string]any{"commit": pipeline.SHA, "run_id": strconv.FormatInt(pipeline.ID, 10)}), out, result, basePath, prefix, pipeline)
 		}
 		if len(pipelines) < 100 {
 			return

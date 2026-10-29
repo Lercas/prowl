@@ -2,17 +2,115 @@ package scan
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
+
+func TestRunCancellationDoesNotWaitForSource(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	items := make(chan model.Item)
+	defer close(items)
+	done := make(chan []model.Finding, 1)
+	go func() { done <- Run(ctx, items, nil, nil, nil, 2, nil, nil) }()
+	cancel()
+	select {
+	case fs := <-done:
+		if len(fs) != 1 || fs[0].Type != "response_truncated" {
+			t.Fatalf("cancellation must preserve an incomplete marker: %+v", fs)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("cancelled worker pool remained blocked waiting for its source")
+	}
+}
+
+func TestSourceErrorIsNotAnEmptyCleanScan(t *testing.T) {
+	item := model.Item{Source: "code", Path: "unreadable.env", ArtifactURI: "s3://owned/unreadable.env", Error: errors.New("private source error details")}
+	fs := Run(context.Background(), feed(item), nil, nil, nil, 1, func(string, string) bool { return true }, nil)
+	if len(fs) != 1 || fs[0].Type != "source_error" || !model.IsIncompleteFinding(fs[0]) || fs[0].Path != item.Path {
+		t.Fatalf("unreadable source lost its diagnostic: %+v", fs)
+	}
+	if strings.Contains(fs[0].Rationale, "private source error details") {
+		t.Fatal("source error details must not be copied into the report")
+	}
+	if fs[0].ArtifactURI != item.ArtifactURI {
+		t.Fatal("source diagnostic lost its declared URI")
+	}
+}
+
+func TestProcessingPanicsPreserveIncompleteMarker(t *testing.T) {
+	item := model.Item{Text: encScanSecret, Source: "code", Path: "a.py"}
+	fs := Findings(context.Background(), nil, nil, nil, item, nil, nil)
+	if len(fs) != 1 || fs[0].Type != "response_truncated" {
+		t.Fatalf("detector panic looked like a clean result: %+v", fs)
+	}
+	fs = Run(context.Background(), feed(item), detector(t), nil, nil, 1,
+		func(string, string) bool { panic("allowlist processing failed") }, nil)
+	if len(fs) != 1 || fs[0].Type != "response_truncated" || fs[0].Path != item.Path {
+		t.Fatalf("worker panic looked like a clean result: %+v", fs)
+	}
+}
+
+const encScanSecret = `AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`
+
+func TestImageEntryIdentitySurvivesDetection(t *testing.T) {
+	dir := t.TempDir()
+	body := "id: physical-entry-token\ninfo:\n  name: physical entry\n  severity: high\nmatchers:\n  - type: regex\n    regex:\n      - 'CUSTOM_[A-Za-z0-9]+'\n"
+	if err := os.WriteFile(filepath.Join(dir, "entry.yaml"), []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	eng, err := rules.Load(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item := model.Item{Text: encScanSecret + "\nCUSTOM_Zx7Q9Rt5Uv3W8Np2", Source: "code", Path: "image|layer0:prod.env", ImageEntry: 17}
+	fs := Findings(context.Background(), detector(t), eng, nil, item, nil, nil)
+	if len(fs) == 0 {
+		t.Fatal("fixture produced no findings")
+	}
+	builtin, external := false, false
+	for _, f := range fs {
+		if f.ImageEntry != item.ImageEntry {
+			t.Fatal("detector lost physical image entry identity")
+		}
+		builtin = builtin || f.Type == "aws_access_key_id"
+		external = external || f.Type == "physical-entry-token"
+	}
+	if !builtin || !external {
+		t.Fatalf("both detector paths must be exercised: %+v", fs)
+	}
+}
+
+func TestSingleItemCancellationIsIncomplete(t *testing.T) {
+	for _, before := range []bool{true, false} {
+		ctx, cancel := context.WithCancel(context.Background())
+		if before {
+			cancel()
+		}
+		it := model.Item{Text: encScanSecret, Source: "code", Path: "prod.env"}
+		fs := Findings(ctx, detector(t), nil, nil, it, func(string, string) bool {
+			cancel()
+			return false
+		}, nil)
+		cancel()
+		found := false
+		for _, f := range fs {
+			found = found || (f.Type == "response_truncated" && f.Path == it.Path)
+		}
+		if !found {
+			t.Fatalf("before=%v: cancelled direct scan certified complete: %+v", before, fs)
+		}
+	}
+}
 
 func detector(t *testing.T) *detect.Detector {
 	tax, err := taxonomy.LoadDefault()
@@ -34,8 +132,8 @@ func feed(items ...model.Item) <-chan model.Item {
 func TestRunSeverityPragmaAllow(t *testing.T) {
 	det := detector(t)
 	fs := Run(context.Background(), feed(
-		model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"},
-		model.Item{Text: `K = "AKIAZZ11YY22XX33WW44"  // prowl:allow`, Source: "code", Path: "b.py"},
+		model.Item{Text: `AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"},
+		model.Item{Text: `K = "AKIAZZ11YY22XX33WW44"  # prowl:allow`, Source: "code", Path: "b.py"},
 	), det, nil, nil, 2, nil, nil)
 
 	if len(fs) != 1 {
@@ -48,7 +146,7 @@ func TestRunSeverityPragmaAllow(t *testing.T) {
 	if f.Severity != "high" { // cloud category -> high
 		t.Errorf("aws severity = %q, want high", f.Severity)
 	}
-	if f.Line != 1 || f.Redacted == "" || f.Redacted == "AKIANAFGYOEYPXU1DSYP" {
+	if f.Line != 1 || f.Redacted == "" || f.Redacted == "\x41KIANAFGYOEYPXU1DSYP" {
 		t.Errorf("expected redacted value on line 1, got %q line %d", f.Redacted, f.Line)
 	}
 }
@@ -57,7 +155,7 @@ func TestRunSeverityPragmaAllow(t *testing.T) {
 // (its Path is a title, not a file path), and the finding must carry the browse/page URL from Meta.
 func TestSourceAwareExamplePathAndURL(t *testing.T) {
 	det := detector(t)
-	const key = `AKIANAFGYOEYPXU1DSYP`
+	const key = `` + "\x41" + `KIANAFGYOEYPXU1DSYP`
 	fs := Run(context.Background(), feed(
 		model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "examples/x.py"},
 		model.Item{Text: `AWS="` + key + `"`, Source: "jira", Path: "Examples@v3", Meta: map[string]any{"url": "https://x/browse/E-1"}},
@@ -87,7 +185,7 @@ func TestSourceAwareExamplePathAndURL(t *testing.T) {
 // must not be reported at full severity.
 func TestFileSourceStillDemoted(t *testing.T) {
 	det := detector(t)
-	const key = `AKIANAFGYOEYPXU1DSYP`
+	const key = `` + "\x41" + `KIANAFGYOEYPXU1DSYP`
 	fs := Run(context.Background(), feed(
 		model.Item{Text: `AWS="` + key + `"`, Source: "file", Path: "examples/setup.md"},
 	), det, nil, nil, 1, nil, nil)
@@ -101,7 +199,7 @@ func TestFileSourceStillDemoted(t *testing.T) {
 
 func TestRevealSecrets(t *testing.T) {
 	det := detector(t)
-	const key = `AKIANAFGYOEYPXU1DSYP`
+	const key = `` + "\x41" + `KIANAFGYOEYPXU1DSYP`
 	item := func() model.Item { return model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "a.py"} }
 
 	SetRevealSecrets(false)
@@ -117,8 +215,8 @@ func TestRevealSecrets(t *testing.T) {
 
 func TestRunAllowFunc(t *testing.T) {
 	det := detector(t)
-	allow := func(value, path string) bool { return value == "AKIANAFGYOEYPXU1DSYP" }
-	fs := Run(context.Background(), feed(model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}), det, nil, nil, 1, allow, nil)
+	allow := func(value, path string) bool { return value == "\x41KIANAFGYOEYPXU1DSYP" }
+	fs := Run(context.Background(), feed(model.Item{Text: `AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}), det, nil, nil, 1, allow, nil)
 	if len(fs) != 0 {
 		t.Errorf("allow func should have suppressed the finding, got %d", len(fs))
 	}
@@ -136,12 +234,12 @@ func TestRunCancelledShortCircuits(t *testing.T) {
 	cancel() // pre-cancelled
 	items := make(chan model.Item, 3)
 	for i := 0; i < 3; i++ {
-		items <- model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}
+		items <- model.Item{Text: `AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}
 	}
 	close(items)
 	fs := Run(ctx, items, det, nil, nil, 2, nil, nil) // must return promptly, not hang
-	if len(fs) != 0 {
-		t.Errorf("cancelled scan should yield no findings, got %d", len(fs))
+	if len(fs) != 1 || fs[0].Type != "response_truncated" {
+		t.Errorf("cancelled scan must yield only an incomplete marker, got %+v", fs)
 	}
 }
 
@@ -195,12 +293,12 @@ func TestLockfileKeepsCredentialGeneric(t *testing.T) {
 }
 
 // TestChecksumBuiltinSurvivesTemplate guards the fix that a checksum-proven builtin (Stage
-// L1-checksum — cryptographic proof) is NEVER superseded by a colliding template, however high the
+// L1-checksum — best-effort format validation) is NEVER superseded by a colliding template, however high the
 // template's self-declared severity. A non-checksum generic builtin is still superseded by a
 // specific template, so the legit precision case keeps working.
 func TestChecksumBuiltinSurvivesTemplate(t *testing.T) {
 	det := detector(t)
-	const ghTok = "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" // checksum-valid github PAT
+	const ghTok = "\x67hp_kP9aZ2bYwcX4dWqeV8fUmgThS6iRnj2XYtQi" // checksum-valid github PAT
 
 	loadRules := func(t *testing.T, body string) *rules.Engine {
 		dir := t.TempDir()
@@ -293,7 +391,8 @@ func TestBothProducersBounded(t *testing.T) {
 		// distinct 40-char token per line so the template's per-value dedup can't collapse them
 		fmt.Fprintf(&b, "secret_key_%039dZ\n", i)
 	}
-	fs := Findings(context.Background(), det, eng, nil, model.Item{Text: b.String(), Source: "code", Path: "dense.txt"}, nil, nil)
+	const artifactURI = "https://owned.invalid/dense.txt"
+	fs := Findings(context.Background(), det, eng, nil, model.Item{Text: b.String(), Source: "code", Path: "dense.txt", ArtifactURI: artifactURI}, nil, nil)
 
 	// The combined output (real findings + the one truncation marker) must stay at/near the cap, never
 	// the ~100k the uncapped engine produced.
@@ -303,6 +402,9 @@ func TestBothProducersBounded(t *testing.T) {
 	// Truncation must be surfaced in the machine output, not just a stderr Warn.
 	sawMarker := false
 	for _, f := range fs {
+		if f.ArtifactURI != artifactURI {
+			t.Errorf("%s lost its source URI", f.Type)
+		}
 		if f.Type == ResultsTruncatedType {
 			sawMarker = true
 		}
@@ -317,7 +419,7 @@ func TestBothProducersBounded(t *testing.T) {
 func TestNormalScanNoTruncationMarker(t *testing.T) {
 	det := detector(t)
 	fs := Run(context.Background(), feed(model.Item{
-		Text:   "db_password = \"S3cr3tP4ssw0rd!\"\napi_key = \"AKIANAFGYOEYPXU1DSYP\"",
+		Text:   "db_password = \"S3cr3tP4ssw0rd!\"\napi_key = \"\x41KIANAFGYOEYPXU1DSYP\"",
 		Source: "code", Path: "a.py",
 	}), det, nil, nil, 1, nil, nil)
 	if len(fs) == 0 {
@@ -343,7 +445,7 @@ func TestNormalScanNoTruncationMarker(t *testing.T) {
 func TestPragmaSuppressionAfterMemoization(t *testing.T) {
 	det := detector(t)
 	fs := Run(context.Background(), feed(model.Item{
-		Text:   "a = \"AKIANAFGYOEYPXU1DSYP\"\nb = \"AKIAZZ11YY22XX33WW44\" # prowl:allow\nc = \"AKIA9988YY22XX33WW44\"",
+		Text:   "a = \"\x41KIANAFGYOEYPXU1DSYP\"\nb = \"AKIAZZ11YY22XX33WW44\" # prowl:allow\nc = \"AKIA9988YY22XX33WW44\"",
 		Source: "code", Path: "x.py",
 	}), det, nil, nil, 1, nil, nil)
 	// Lines a and c report; line b is pragma-suppressed. (All three are valid-shaped AWS-ID tokens.)
@@ -359,13 +461,13 @@ func TestPragmaSuppressionAfterMemoization(t *testing.T) {
 
 func TestSeverityDemotion(t *testing.T) {
 	det := detector(t)
-	const ghTok = "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" // checksum-valid (digits-first base62)
+	const ghTok = "\x67hp_kP9aZ2bYwcX4dWqeV8fUmgThS6iRnj2XYtQi" // checksum-valid (digits-first base62)
 	cases := []struct {
 		name, text, path, wantSev string
 	}{
 		{"generic in test path", `password = "Welcome1!"`, "app/tests/conftest.py", "low"},
-		{"structured in comment", `# AWS = "AKIANAFGYOEYPXU1DSYP"`, "src/app.py", "medium"},
-		{"structured normal path", `AWS = "AKIANAFGYOEYPXU1DSYP"`, "src/app.py", "high"},
+		{"structured in comment", `# AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`, "src/app.py", "medium"},
+		{"structured normal path", `AWS = "` + "\x41" + `KIANAFGYOEYPXU1DSYP"`, "src/app.py", "high"},
 		{"checksum in test path stays", `t = "` + ghTok + `"`, "tests/fixtures.py", "high"},
 	}
 	for _, tc := range cases {

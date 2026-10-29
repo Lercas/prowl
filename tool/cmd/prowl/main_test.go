@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -11,6 +14,263 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/model"
 )
+
+func TestFindingCapCannotHideIncompleteScansOrOverflow(t *testing.T) {
+	for _, max := range []int{1, math.MaxInt} {
+		fs := []model.Finding{{Type: "aws-access-key-id", Path: "image"}}
+		for i := 0; i < 20; i++ {
+			fs = append(fs, model.Finding{Type: "source_error", Path: "image"})
+		}
+		got := capGenericPerFile(fs, max)
+		if len(got) != len(fs) {
+			t.Fatalf("max=%d: kept %d of %d findings", max, len(got), len(fs))
+		}
+	}
+}
+
+func TestDedupeFingerprintPrefersFinalOccurrenceInEitherOrder(t *testing.T) {
+	yes, no := true, false
+	for _, reverse := range []bool{false, true} {
+		fs := []model.Finding{{Fingerprint: "same", Line: 1, InFinalImage: &no}, {Fingerprint: "same", Line: 7, InFinalImage: &yes}}
+		if reverse {
+			fs[0], fs[1] = fs[1], fs[0]
+		}
+		fs = dedupeFingerprints(fs)
+		if len(fs) != 1 || fs[0].Line != 7 {
+			t.Fatalf("reverse=%v: chose the historical occurrence: %+v", reverse, fs)
+		}
+	}
+}
+
+func TestScanStagedUsesIndex(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+	dir := t.TempDir()
+	t.Setenv("PROWL_HOME", filepath.Join(dir, "home"))
+	git := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = dir
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	git("init", "-q")
+	const credential = "aws_access_key_id = \"AKIA4MNQ2RST7UVWX9YZ\"\n"
+	for name, content := range map[string]string{
+		"staged.env": credential,
+		"moved.env":  credential,
+		"clean.env":  "plain text\n",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	git("add", "-A")
+	if err := os.WriteFile(filepath.Join(dir, "staged.env"), []byte("plain text\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "clean.env"), []byte(credential), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(dir, "moved.env"), filepath.Join(dir, "untracked.env")); err != nil {
+		t.Fatal(err)
+	}
+	for _, nested := range []bool{false, true} {
+		t.Run(strconv.FormatBool(nested), func(t *testing.T) {
+			cwd := dir
+			if nested {
+				cwd = filepath.Join(dir, "subdir")
+				if err := os.Mkdir(cwd, 0o700); err != nil {
+					t.Fatal(err)
+				}
+			}
+			t.Chdir(cwd)
+			output := filepath.Join(t.TempDir(), "report.json")
+			if code := cmdScan([]string{"--staged", "--format", "json", "--output", output, "--silence", "--fail-on", "high"}); code != 1 {
+				t.Errorf("staged scan exit = %d, want 1 for indexed secrets", code)
+			}
+			data, err := os.ReadFile(output)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var report struct{ Findings []model.Finding }
+			if err := json.Unmarshal(data, &report); err != nil {
+				t.Fatal(err)
+			}
+			found := map[string]bool{}
+			for _, f := range report.Findings {
+				found[f.Path] = true
+			}
+			if !found["staged.env"] || !found["moved.env"] || found["clean.env"] || found["untracked.env"] {
+				t.Fatalf("staged scan used working-tree content: paths = %v", found)
+			}
+		})
+	}
+}
+
+func TestIncompleteDiagnosticsSurviveFiltersAndGate(t *testing.T) {
+	for _, kind := range []string{"source_error", "results_truncated", "response_truncated", "item_too_large"} {
+		fs := []model.Finding{{Type: kind, Path: "a.env", Severity: "info"}}
+		fs = keepVerified(fs)
+		fs = applyReportFilters(commonFlags{minConfidence: 1, minSeverity: "critical", disable: kind}, fs)
+		if len(fs) != 1 || fs[0].Type != kind {
+			t.Fatalf("filters hid %q diagnostic: %+v", kind, fs)
+		}
+		for _, failOn := range []string{"", "critical"} {
+			if code := gate(fs, failOn, true); code != 2 {
+				t.Errorf("incomplete %q scan exit = %d, want 2", kind, code)
+			}
+		}
+	}
+}
+
+func TestIncompleteScanCannotReplaceBaseline(t *testing.T) {
+	dir := t.TempDir()
+	baseline := filepath.Join(dir, "baseline.json")
+	const original = "[\"accepted-finding\"]"
+	if err := os.WriteFile(baseline, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	c := commonFlags{writeBaseline: baseline, format: "json", output: filepath.Join(dir, "report.json"), minSeverity: "critical"}
+	if code := reportFindings(c, []model.Finding{{Type: "source_error", Severity: "info"}}, 0); code != 2 {
+		t.Errorf("incomplete baseline generation returned %d, want 2", code)
+	}
+	data, err := os.ReadFile(baseline)
+	if err != nil || string(data) != original {
+		t.Fatalf("accepted baseline changed: content=%q err=%v", data, err)
+	}
+}
+
+func TestScanStagedOversizeIsIncomplete(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+	dir := t.TempDir()
+	t.Setenv("PROWL_HOME", filepath.Join(dir, "home"))
+	t.Chdir(dir)
+	for _, args := range [][]string{{"init", "-q"}, {"add", "large.env"}} {
+		if args[0] == "add" {
+			if err := os.WriteFile("large.env", []byte("large staged content\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if out, err := exec.Command("git", args...).CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	output := filepath.Join(t.TempDir(), "report.json")
+	if code := cmdScan([]string{"--staged", "--max-size", "4", "--min-confidence", "1", "--min-severity", "critical", "--disable", "source_error", "--format", "json", "--output", output, "--silence"}); code != 2 {
+		t.Errorf("oversized staged scan exit = %d, want 2", code)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report struct {
+		Truncated bool
+		Findings  []model.Finding
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	if !report.Truncated || len(report.Findings) != 1 || report.Findings[0].Type != "source_error" {
+		t.Fatalf("source diagnostic missing from JSON envelope: %+v", report)
+	}
+}
+
+func TestScanEmptyStagedWritesReport(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+	dir := t.TempDir()
+	t.Setenv("PROWL_HOME", filepath.Join(dir, "home"))
+	t.Chdir(dir)
+	if out, err := exec.Command("git", "init", "-q").CombinedOutput(); err != nil {
+		t.Fatalf("git init: %v: %s", err, out)
+	}
+	output := filepath.Join(t.TempDir(), "report.json")
+	if code := cmdScan([]string{"--staged", "--format", "json", "--output", output, "--silence"}); code != 0 {
+		t.Fatalf("empty staged scan exit = %d", code)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report struct {
+		Truncated bool
+		Findings  []model.Finding
+	}
+	if err := json.Unmarshal(data, &report); err != nil || report.Truncated || len(report.Findings) != 0 {
+		t.Fatalf("invalid empty report: %s (err=%v)", data, err)
+	}
+}
+
+func TestScanStdinHonorsMaxSize(t *testing.T) {
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	defer w.Close()
+	if _, err := w.Write([]byte("plain content exceeding the configured limit\n")); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	previous := os.Stdin
+	os.Stdin = r
+	t.Cleanup(func() { os.Stdin = previous })
+	dir := t.TempDir()
+	t.Setenv("PROWL_HOME", filepath.Join(dir, "home"))
+	t.Chdir(dir)
+	output := filepath.Join(dir, "report.json")
+	if code := cmdScan([]string{"-", "--max-size", "4", "--format", "json", "--output", output, "--silence"}); code != 2 {
+		t.Errorf("oversized stdin exit = %d, want 2", code)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report struct{ Truncated bool }
+	if err := json.Unmarshal(data, &report); err != nil || !report.Truncated {
+		t.Fatalf("oversized stdin returned a clean report: %s, err=%v", data, err)
+	}
+}
+
+func TestMissingRootPreservesOtherRootsAndJSON(t *testing.T) {
+	dir := t.TempDir()
+	t.Chdir(dir)
+	t.Setenv("PROWL_HOME", filepath.Join(dir, "home"))
+	if err := os.WriteFile("prod.env", []byte(`AWS = "AKIANAFGYOEYPXU1DSYP"`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	output := filepath.Join(dir, "report.json")
+	if code := cmdScan([]string{"prod.env", "missing.env", "--format", "json", "--output", output, "--silence"}); code != 2 {
+		t.Fatalf("missing root exit=%d", code)
+	}
+	raw, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report struct {
+		Truncated bool
+		Findings  []model.Finding
+	}
+	if err := json.Unmarshal(raw, &report); err != nil {
+		t.Fatal(err)
+	}
+	found, missing := false, false
+	for _, f := range report.Findings {
+		found = found || (f.Path == "prod.env" && !model.IsIncompleteFinding(f))
+		missing = missing || (f.Path == "missing.env" && f.Type == "source_error")
+	}
+	if !report.Truncated || !found || !missing {
+		t.Fatalf("partial scan lost readable roots or diagnostic: %+v", report)
+	}
+}
 
 func TestReadTargetList(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "hosts.txt")
@@ -48,7 +308,7 @@ func TestWriteReportFileSurfacesError(t *testing.T) {
 }
 
 // TestWriteReportFileHappyPath proves a normal --output path is written with valid content and the
-// O_NOFOLLOW open succeeds for a plain (non-symlink) target.
+// atomic writer succeeds for a plain regular-file target.
 func TestWriteReportFileHappyPath(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "report.json")
 	if err := writeReportFile(path, []model.Finding{{Type: "x", Severity: "high", Path: "p", Confidence: 0.9}}, "json"); err != nil {
@@ -136,17 +396,17 @@ func TestRulesOnlyIsolatesEngine(t *testing.T) {
 	installed := filepath.Join(home, "rules")
 	writeTemplate(t, installed, "installed-rule")
 	writeTemplate(t, installed, "another-installed")
-	if got := discoverRulesDirs(nil); len(got) != 1 || got[0] != installed {
+	if got, err := discoverRulesDirs(nil); err != nil || len(got) != 1 || got[0] != installed {
 		t.Fatalf("precondition: installed dir should be auto-discovered without --rules-only, got %v", got)
 	}
 
 	// --rules-only with NO --rules-dir: nothing is auto-discovered, engine is nil.
-	if eng := loadEngine(commonFlags{rulesOnly: true}); eng != nil {
-		t.Errorf("--rules-only with no --rules-dir must load no templates (got %d); the installed ~/.prowl/rules must be ignored", eng.Len())
+	if eng, err := loadEngine(commonFlags{rulesOnly: true}); err != nil || eng != nil {
+		t.Errorf("rules-only without explicit directories must load no templates: engine=%v err=%v", eng, err)
 	}
 
 	// Without --rules-only the installed set IS auto-loaded (the normal, documented behavior).
-	if eng := loadEngine(commonFlags{}); eng == nil || eng.Len() != 2 {
+	if eng, err := loadEngine(commonFlags{}); err != nil || eng == nil || eng.Len() != 2 {
 		n := 0
 		if eng != nil {
 			n = eng.Len()
@@ -157,7 +417,10 @@ func TestRulesOnlyIsolatesEngine(t *testing.T) {
 	// --rules-only WITH an explicit --rules-dir loads ONLY that dir, not the installed one.
 	userDir := t.TempDir()
 	writeTemplate(t, userDir, "user-rule")
-	eng := loadEngine(commonFlags{rulesOnly: true, rulesDir: []string{userDir}})
+	eng, err := loadEngine(commonFlags{rulesOnly: true, rulesDir: []string{userDir}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if eng == nil || eng.Len() != 1 {
 		n := 0
 		if eng != nil {

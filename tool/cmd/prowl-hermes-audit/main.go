@@ -6,17 +6,20 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/hermesaudit"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
+	"github.com/Lercas/prowl/tool/internal/targetlist"
 )
 
 type stringList []string
@@ -33,6 +36,12 @@ func (s *stringList) Set(value string) error {
 }
 
 func main() {
+	os.Exit(run(os.Args[1:]))
+}
+
+func run(args []string) int {
+	fs := flag.NewFlagSet("prowl-hermes-audit", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
 	var targetsFile string
 	var targets stringList
 	var providers stringList
@@ -42,47 +51,46 @@ func main() {
 	var concurrency int
 	var authorized bool
 	var active, passive bool
-	flag.Var(&targets, "target", "literal IP or IP:port (repeatable or comma-separated)")
-	flag.Var(&providers, "provider", "passive provider(s): censys,shodan,fofa,zoomeye,leakix")
-	flag.StringVar(&targetsFile, "targets", "", "newline-delimited IP inventory")
-	flag.StringVar(&output, "output", "", "write JSON to this file instead of stdout")
-	flag.DurationVar(&timeout, "timeout", 12*time.Second, "per-request timeout")
-	flag.IntVar(&retries, "max-retries", 2, "bounded retries after provider rate limits/server errors (0..5)")
-	flag.IntVar(&concurrency, "concurrency", 2, "target concurrency (capped at 8)")
-	flag.BoolVar(&authorized, "authorized", false, "REQUIRED: attest that every target is in your authorized inventory")
-	flag.BoolVar(&active, "active", true, "probe status/schema and bounded root dashboard assets")
-	flag.BoolVar(&passive, "passive", true, "query configured providers for the exact IP only")
-	flag.Usage = func() {
+	fs.Var(&targets, "target", "literal IP or IP:port (repeatable or comma-separated)")
+	fs.Var(&providers, "provider", "passive provider(s): censys,shodan,fofa,zoomeye,leakix")
+	fs.StringVar(&targetsFile, "targets", "", "newline-delimited IP inventory")
+	fs.StringVar(&output, "output", "", "write JSON to this file instead of stdout")
+	fs.DurationVar(&timeout, "timeout", 12*time.Second, "per-request timeout")
+	fs.IntVar(&retries, "max-retries", 2, "bounded retries after provider rate limits/server errors (0..5)")
+	fs.IntVar(&concurrency, "concurrency", 2, "target concurrency (capped at 8)")
+	fs.BoolVar(&authorized, "authorized", false, "REQUIRED: attest that every target is in your authorized inventory")
+	fs.BoolVar(&active, "active", true, "probe status/schema and bounded root dashboard assets")
+	fs.BoolVar(&passive, "passive", true, "query configured providers for the exact IP only")
+	fs.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Usage: prowl-hermes-audit --authorized --targets ips.txt [options]")
-		flag.PrintDefaults()
+		fs.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "Provider credentials are read from environment variables only; target secret values are never requested or stored (masked metadata may be checked when Hermes exposes its own session marker).")
 	}
-	flag.Parse()
+	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		return 2
+	}
 
 	if !authorized {
-		fatal("refusing to run: pass --authorized for an owned/engaged asset inventory")
+		return fatal("refusing to run: pass --authorized for an owned/engaged asset inventory")
 	}
 	if retries < 0 || retries > 5 {
-		fatal("--max-retries must be between 0 and 5")
+		return fatal("--max-retries must be between 0 and 5")
 	}
 	if timeout <= 0 {
-		fatal("--timeout must be positive")
+		return fatal("--timeout must be positive")
 	}
 	if targetsFile != "" {
-		data, err := os.ReadFile(targetsFile)
+		loaded, err := targetlist.Read(targetsFile)
 		if err != nil {
-			fatalf("read --targets: %v", err)
+			return fatalf("read --targets: %v", err)
 		}
-		for _, line := range strings.Split(string(data), "\n") {
-			line = strings.TrimSpace(line)
-			if line == "" || strings.HasPrefix(line, "#") {
-				continue
-			}
-			targets = append(targets, line)
-		}
+		targets = append(targets, loaded...)
 	}
 	if len(targets) == 0 {
-		fatal("provide at least one --target or --targets file")
+		return fatal("provide at least one --target or --targets file")
 	}
 	if len(providers) > 0 {
 		for i := range providers {
@@ -95,7 +103,7 @@ func main() {
 	// PROWL_ALLOW_PRIVATE_IPS only from a controlled internal runner, never as
 	// a proxy-rotation or public-scan escape hatch.
 	safehttp.AllowPrivate.Store(os.Getenv("PROWL_ALLOW_PRIVATE_IPS") != "")
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), auditSignals()...)
 	defer stop()
 	reports, err := hermesaudit.Audit(ctx, targets, hermesaudit.Options{
 		Timeout:        timeout,
@@ -107,7 +115,7 @@ func main() {
 		Authorized:     authorized,
 	})
 	if err != nil {
-		fatalf("audit: %v", err)
+		return fatalf("audit: %v", err)
 	}
 
 	var out interface{} = map[string]interface{}{
@@ -125,23 +133,31 @@ func main() {
 
 	data, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
-		fatalf("encode report: %v", err)
+		return fatalf("encode report: %v", err)
 	}
 	data = append(data, '\n')
-	if output == "" {
-		_, _ = os.Stdout.Write(data)
-		return
+	if err := writeReportOutput(output, data); err != nil {
+		return fatalf("write report: %v", err)
 	}
-	if err := os.WriteFile(output, data, 0o600); err != nil {
-		fatalf("write report: %v", err)
-	}
+	return 0
 }
 
-func fatal(message string) {
-	fatalf("%s", message)
+func writeReportOutput(path string, raw []byte) error {
+	if path != "" {
+		return localfile.WriteAtomicBytes(path, raw, 0o600)
+	}
+	n, err := os.Stdout.Write(raw)
+	if err == nil && n != len(raw) {
+		return io.ErrShortWrite
+	}
+	return err
 }
 
-func fatalf(format string, args ...interface{}) {
+func fatal(message string) int {
+	return fatalf("%s", message)
+}
+
+func fatalf(format string, args ...interface{}) int {
 	fmt.Fprintf(os.Stderr, "prowl-hermes-audit: "+format+"\n", args...)
-	os.Exit(2)
+	return 2
 }

@@ -16,11 +16,11 @@ matchers:
     condition: or
   - type: regex
     regex:
-      - '(?i)linode[a-z0-9_\-]{0,16}(?:token|api[_\-]?key)?["'' :=]{1,5}["'']?([0-9a-f]{64})["'']?'
+      - '(?i)(?:^|[^a-z0-9])linode(?:[_-]?(?:api[_-]?key|access[_-]?token|key|token))?["'']?\s*[:=]\s*["'']?([0-9a-f]{64})(?:[^A-Za-z0-9_-]|$)'
   - type: entropy
     min: 3.0
 extractors:
   - type: regex
     regex:
-      - '(?i)linode[a-z0-9_\-]{0,16}(?:token|api[_\-]?key)?["'' :=]{1,5}["'']?([0-9a-f]{64})["'']?'
+      - '(?i)(?:^|[^a-z0-9])linode(?:[_-]?(?:api[_-]?key|access[_-]?token|key|token))?["'']?\s*[:=]\s*["'']?([0-9a-f]{64})(?:[^A-Za-z0-9_-]|$)'
     group: 1

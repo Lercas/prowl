@@ -3,9 +3,11 @@ package mlscore
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/mlfeatures"
 	"github.com/Lercas/prowl/tool/internal/mlmodel"
 )
@@ -26,22 +28,26 @@ type Embedded struct {
 	threshold float64
 }
 
+func (e *Embedded) PolicyID() string { return e.model.Digest() }
+
 // NewEmbedded builds an in-process scorer, resolving which model to load (see resolveModel).
 // threshold is the score below which a non-checksum candidate is treated as not-a-secret.
 //
-// It refuses on a nocgo build: the compression_ratio feature only matches the trained model under the
-// cgo (system-zlib) path, so a nocgo binary would score secrets DIFFERENTLY from the validated model
-// — fail closed with a clear message rather than ship a silently-divergent scorer. The cascade, rule
-// templates, and live verification are unaffected; --ml-url (the sidecar) is the nocgo alternative.
+// Static binaries use a bounded embedded zlib module for the legacy feature contract.
 func NewEmbedded(threshold float64, modelPath string) (*Embedded, error) {
-	if !mlfeatures.BuiltWithCgo() {
-		return nil, errors.New("--ml: the in-process model needs a cgo build for feature parity with " +
-			"the trained model (compression_ratio uses the system zlib); this binary was built without " +
-			"cgo. Rebuild with CGO_ENABLED=1 (the default for `go install`/`make build`), or use --ml-url")
-	}
+
 	m, err := resolveModel(modelPath)
 	if err != nil {
 		return nil, err
+	}
+	if names := m.FeatureNames(); len(names) != len(mlfeatures.FeatureNames) {
+		return nil, errors.New("ml: model feature count does not match the extractor")
+	} else {
+		for i, name := range names {
+			if name != mlfeatures.FeatureNames[i] {
+				return nil, fmt.Errorf("ml: model feature order does not match the extractor at index %d", i)
+			}
+		}
 	}
 	return &Embedded{model: m, threshold: threshold}, nil
 }
@@ -54,8 +60,12 @@ func resolveModel(modelPath string) (*mlmodel.Model, error) {
 		return mlmodel.LoadFile(modelPath)
 	}
 	if p := externalModelPath(); p != "" {
-		if _, err := os.Stat(p); err == nil {
-			return mlmodel.LoadFile(p)
+		selected, err := localfile.FirstExisting(p)
+		if err != nil {
+			return nil, err
+		}
+		if selected != "" {
+			return mlmodel.LoadFile(selected)
 		}
 	}
 	return mlmodel.Default()
@@ -75,6 +85,12 @@ func externalModelPath() string {
 
 func (e *Embedded) Threshold() float64 { return e.threshold }
 
+// WithThreshold shares the immutable prepared model while applying the caller's finalized
+// configuration. It neither reloads files nor changes a scorer shared by other workers.
+func (e *Embedded) WithThreshold(threshold float64) *Embedded {
+	return &Embedded{model: e.model, threshold: threshold}
+}
+
 func (e *Embedded) Local() bool { return true }
 
 // Score returns one Result per record (same order), computing features + model probability inline.
@@ -84,7 +100,11 @@ func (e *Embedded) Score(ctx context.Context, recs []Record) ([]Result, error) {
 		if i&1023 == 0 && ctx.Err() != nil { // a flood of candidates is scored uncapped; stay cancellable
 			return nil, ctx.Err()
 		}
-		f := mlfeatures.Extract(r.Value, mlfeatures.Context{
+		extract := mlfeatures.Extract
+		if e.model.Portable() {
+			extract = mlfeatures.ExtractPortable
+		}
+		f := extract(r.Value, mlfeatures.Context{
 			Name: r.Context.Name, Line: r.Context.Line, Path: r.Context.Path, Source: r.Context.Source,
 		})
 		p, err := e.model.Predict(f)

@@ -14,6 +14,22 @@ type Item struct {
 	Source string // code | jira | confluence | slack | log
 	Path   string
 	Meta   map[string]any
+	// ArtifactURI identifies a source-declared locator independently of the display path.
+	ArtifactURI string `json:"-"`
+	// Error marks unreadable source content; it must not be treated as a clean empty item.
+	Error error
+	// ImageEntry identifies the physical TAR entry when a layer repeats a file path.
+	ImageEntry int
+}
+
+// IsIncompleteFinding identifies scan diagnostics that filtering must not hide as accepted secrets.
+func IsIncompleteFinding(f Finding) bool {
+	switch f.Type {
+	case "results_truncated", "response_truncated", "item_too_large", "source_error":
+		return true
+	default:
+		return false
+	}
 }
 
 // Finding is a single detected secret.
@@ -26,6 +42,14 @@ type Finding struct {
 	Path       string  `json:"path"`
 	Line       int     `json:"line"`
 	Col        int     `json:"col"`
+	// ByteStart/ByteEnd are local source offsets for editor diagnostics; never serialized in reports.
+	ByteStart int `json:"-"`
+	ByteEnd   int `json:"-"`
+	// UTF16Col is derived from the scanned snapshot for SARIF; Col remains byte-based for JSON/pretty.
+	// Zero means no derived column is available (e.g. an intake diagnostic).
+	UTF16Col int `json:"-"`
+	// ArtifactURI carries source-declared URI provenance for SARIF; Path remains the display identity.
+	ArtifactURI string `json:"-"`
 	// Redacted is the masked secret by default; with --show-secrets it holds the FULL unredacted value.
 	Redacted string `json:"redacted"`
 	Stage    string `json:"stage"`
@@ -34,7 +58,7 @@ type Finding struct {
 	URL       string `json:"url,omitempty"`
 	Verified  *bool  `json:"verified,omitempty"`
 	Rationale string `json:"rationale,omitempty"`
-	// Fingerprint is a stable per-secret identity (sha256 over type|path|RAW value), set once at
+	// Fingerprint is a stable type/path/value identity (SHA-256, or scoped HMAC with an identity key), set at
 	// scan time before redaction. Baselining keys on this so two distinct secrets that share their
 	// first/last 4 chars (e.g. all AWS keys start AKIA) don't collide to one fingerprint.
 	Fingerprint string `json:"fingerprint,omitempty"`
@@ -45,8 +69,36 @@ type Finding struct {
 	// InFinalImage (image scans only): true if the file survives to the flattened/deployed image, false
 	// if only in a historical/overwritten/whiteout-deleted layer, nil = unknown or not an image scan.
 	InFinalImage *bool `json:"in_final_image,omitempty"`
-	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
-	Instruction string `json:"instruction,omitempty"`
+	// ImageEntry is internal provenance; it is deliberately absent from report formats.
+	ImageEntry int `json:"-"`
+	// Instruction (image scans with --show-secrets only): the Dockerfile build step that introduced the layer.
+	Instruction   string            `json:"instruction,omitempty"`
+	SecretID      string            `json:"secret_id,omitempty"`
+	IdentityScope string            `json:"identity_scope,omitempty"`
+	Occurrences   []Occurrence      `json:"occurrences,omitempty"`
+	OccurrenceID  string            `json:"occurrence_id,omitempty"`
+	Evidence      []Evidence        `json:"evidence,omitempty"`
+	Provenance    map[string]string `json:"provenance,omitempty"`
+	Verification  *Verification     `json:"verification,omitempty"`
+	MLScore       *float64          `json:"ml_score,omitempty"`
+}
+
+// Evidence points at observed source spans; it never stores plaintext fragments.
+type Evidence struct {
+	Path      string `json:"path"`
+	Start     int    `json:"start"`
+	End       int    `json:"end"`
+	Line      int    `json:"line"`
+	Col       int    `json:"col"`
+	Transform string `json:"transform"`
+}
+
+type Verification struct {
+	Status       string   `json:"status"`
+	Verifier     string   `json:"verifier,omitempty"`
+	CheckedAt    string   `json:"checked_at,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	Reason       string   `json:"reason,omitempty"`
 }
 
 // FindingContext mirrors mlscore.Context's value-dependent fields (path/source are already on Finding).
@@ -84,14 +136,15 @@ func Redact(v string) string {
 // single-token secrets (API keys, passwords) where the head/tail aid recognition.
 func redactPlain(v string) string {
 	const keep = 4
-	if len(v) <= 2*keep {
-		return strings.Repeat("*", len(v))
+	runes := []rune(v)
+	if len(runes) <= 2*keep {
+		return strings.Repeat("*", len(runes))
 	}
-	mid := len(v) - 2*keep
+	mid := len(runes) - 2*keep
 	if mid > 8 {
 		mid = 8
 	}
-	return v[:keep] + strings.Repeat("*", mid) + v[len(v)-keep:]
+	return string(runes[:keep]) + strings.Repeat("*", mid) + string(runes[len(runes)-keep:])
 }
 
 // pemBegin matches the boilerplate header of a PEM private-key block and captures the key type

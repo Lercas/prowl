@@ -3,10 +3,78 @@ name: ci
 on:
   push:
   pull_request:
+  workflow_call:
 
 jobs:
+  portable-runtime:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15]
+    env:
+      CGO_ENABLED: '0'
+      PROWL_HOME: .prowl-clean-home
+    defaults:
+      run:
+        working-directory: tool
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: tool/go.sum
+      - name: mandatory portable ML contract
+        run: go test ./internal/mlfeatures ./internal/mlmodel ./internal/mlscore
+      - name: mandatory portable noise and recall contract
+        run: go test ./internal/scan ./internal/lsp
+      - name: offline runtime selftest
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          go build -trimpath -o "prowl-check$ext" ./cmd/prowl
+          "./prowl-check$ext" selftest --ml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: encoded values and source evidence contract
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python ../scripts/check-encoding-1.4.0.py \
+            --binary "./prowl-check$ext" \
+            --output-dir "$RUNNER_TEMP/prowl-encoding-$RUNNER_OS"
+      - name: canonical JSON and original occurrence contract
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python ../scripts/check-json-literals-1.4.0.py \
+            --binary "./prowl-check$ext" \
+            --output-dir "$RUNNER_TEMP/prowl-json-literals-$RUNNER_OS"
+      - name: canonical TOML and original occurrence contract
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python ../scripts/check-toml-literals-1.4.0.py \
+            --binary "./prowl-check$ext" \
+            --output-dir "$RUNNER_TEMP/prowl-toml-literals-$RUNNER_OS"
+      - name: canonical YAML and original alias occurrence contract
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python ../scripts/check-yaml-literals-1.4.0.py \
+            --binary "./prowl-check$ext" \
+            --output-dir "$RUNNER_TEMP/prowl-yaml-literals-$RUNNER_OS"
+      - name: operator pragmas and structural evidence contract
+        run: |
+          ext=""
+          [ "$RUNNER_OS" = Windows ] && ext=".exe"
+          python ../scripts/check-pipeline-evidence-1.4.0.py \
+            --binary "./prowl-check$ext" \
+            --output-dir "$RUNNER_TEMP/prowl-pipeline-evidence-$RUNNER_OS"
+
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         working-directory: tool
@@ -23,9 +91,14 @@ jobs:
       - name: build
         run: go build ./...
       - name: test (race + coverage)
-        run: go test -race -coverprofile=/tmp/cover.out ./...
+        run: go test -p 2 -race -coverprofile=/tmp/cover.out ./...
       - name: coverage summary
         run: go tool cover -func=/tmp/cover.out | tail -1
+      - name: static build and feature parity
+        run: |
+          CGO_ENABLED=0 go test ./...
+          CGO_ENABLED=0 go build -trimpath -o /tmp/prowl-static ./cmd/prowl
+          PROWL_HOME="$(mktemp -d)" /tmp/prowl-static selftest --ml
       - name: e2e
         run: bash test/e2e.sh
       - name: rules & verifiers valid + manifest fresh
@@ -37,6 +110,17 @@ jobs:
           /tmp/prowl verifiers manifest verifiers/
           git diff --exit-code rules/MANIFEST.sha256 verifiers/MANIFEST.sha256 \
             || { echo "MANIFEST.sha256 stale — run 'prowl rules manifest rules' (and verifiers) and commit"; exit 1; }
+
+  docker-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test both action entry points
+        run: |
+          docker build -f Dockerfile -t prowl-action-root:ci .
+          bash scripts/check-docker-action.sh prowl-action-root:ci
+          docker build -f tool/Dockerfile.action -t prowl-action-tool:ci tool
+          bash scripts/check-docker-action.sh prowl-action-tool:ci
 
   lint:
     runs-on: ubuntu-latest
@@ -82,3 +166,8 @@ jobs:
           go test ./internal/detect/ -run '^$' -fuzz '^FuzzScanStructure$' -fuzztime 20s
           go test ./internal/rules/  -run '^$' -fuzz '^FuzzParseTemplate$' -fuzztime 20s
           go test ./internal/verify/ -run '^$' -fuzz '^FuzzInterpolate$'   -fuzztime 20s
+          go test ./internal/reconstruct/ -run '^$' -fuzz '^FuzzExtract$' -fuzztime 20s
+          go test ./internal/scan/ -run '^$' -fuzz '^FuzzJSONLiteralInventory$' -fuzztime 20s
+          go test ./internal/scan/ -run '^$' -fuzz '^FuzzTOMLLiteralInventory$' -fuzztime 20s
+          go test ./internal/scan/ -run '^$' -fuzz '^FuzzYAMLLiteralInventory$' -fuzztime 20s
+          go test ./internal/detect/ -run '^$' -fuzz '^FuzzBoundedBase64SourceMapping$' -fuzztime 20s

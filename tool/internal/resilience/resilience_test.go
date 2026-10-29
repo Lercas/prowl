@@ -3,9 +3,25 @@ package resilience
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 )
+
+func TestRetryDoesNotRepeatPermanentFailure(t *testing.T) {
+	cause := errors.New("storage budget exceeded")
+	calls := 0
+	err := Retry(context.Background(), 3, time.Millisecond, time.Millisecond, func() error {
+		calls++
+		return fmt.Errorf("download: %w", Permanent(cause))
+	})
+	if calls != 1 || !errors.Is(err, cause) {
+		t.Fatalf("terminal failure retried or lost its cause: calls=%d err=%v", calls, err)
+	}
+	if Permanent(nil) != nil {
+		t.Fatal("nil error became a failure")
+	}
+}
 
 func TestRetrySucceedsAfterTransientFailures(t *testing.T) {
 	calls := 0
