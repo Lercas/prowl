@@ -78,9 +78,9 @@ docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl scan /src
 # binary - download from the GitHub Releases page (linux/macos/windows, amd64/arm64)
 ```
 
-> **1.4.0:** `--ml` работает в статических и native-сборках без Python и sidecar.
-> Правила и верификаторы встроены в бинарник и проверяются по SHA-256 manifest.
-> [Новые возможности, команды и ограничения](wiki/Release-1.4.0.md).
+> **1.4.0:** `--ml` works in static and native builds without Python or a sidecar.
+> Rules and verifiers are embedded in the binary and checked against a SHA-256 manifest.
+> [New features, commands, and limitations](wiki/Release-1.4.0.md).
 
 ### Pre-commit
 
@@ -210,8 +210,8 @@ One scanner, many sources - every one runs the same detection cascade and the sa
   shapes, `\uXXXX` unicode strings, hash digests, and URL-parsing regexes while keeping real secrets; the
   `--ml` stage scores dense minified bundles, and the private-key detector requires an actual key body (a
   bare PEM header no longer fires).
-- **Правила встроены и расширяемы.** 159 YAML-шаблонов доступны автономно; их можно править, отключать
-  или расширять. Существующие наборы **gitleaks** `.toml` и **trufflehog** `.yaml` подключаются без изменений.
+- **Built-in and extensible rules.** 159 YAML templates are available offline and can be edited, disabled,
+  or extended. Existing **gitleaks** `.toml` and **trufflehog** `.yaml` rule sets can be used unchanged.
 - **Fast.** ~310 MB/s single-threaded, zero-allocation hot path, scales linearly across cores. An
   Aho-Corasick pre-filter means a 159-rule library costs almost nothing.
 - **Built for pipelines.** CLI, pre-commit, GitHub Action, SARIF output, exit-code gating, an LSP
@@ -311,11 +311,10 @@ you want them upstreamed).
 The published multilingual encoder remains an experimental research/integration model. It can back a
 custom scorer, but it is not an automatic third runtime stage in the shipped binary.
 
-**ML в 1.4.0.** L2 включается через `--ml` во всех поставляемых сборках.
-Статический бинарник вычисляет `compression_ratio` через встроенный ограниченный
-WASM-модуль zlib, native-сборка использует системную zlib. Обе реализации
-проверяются на обязательном Python/Go fixture. `--ml-url` остаётся отдельным
-sidecar-режимом; удалённая передача требует `--ml-allow-remote` и HTTPS.
+**ML in 1.4.0.** L2 is enabled with `--ml` in all distributed builds. The static binary calculates
+`compression_ratio` using an embedded, bounded zlib WASM module; native builds use the system zlib.
+Both implementations are checked against a required Python/Go fixture. `--ml-url` remains a separate
+sidecar mode; remote transmission requires `--ml-allow-remote` and HTTPS.
 
 ## Rules and verifiers
 
