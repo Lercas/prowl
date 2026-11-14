@@ -171,6 +171,7 @@ var cliFlags = []flagSpec{
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
 	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
 	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
+	boolFlag("--git-timeline", "scan repo org", "построить хронологию наблюдений Git (включает --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
 	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
 	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
 	stringFlag("--baseline", scanCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
@@ -369,6 +370,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		return c, nil, &commandHelpRequest{command}
 	}
 	c.explicitFlags = seen
+	if c.gitTimeline {
+		c.history = true
+	}
 	if c.verifiedOnly {
 		c.verify = true
 	}
@@ -474,7 +478,7 @@ type commonFlags struct {
 	format, failOn, taxonomy, config, output string
 	since, baseline, writeBaseline           string
 	logFormat, logLevel                      string
-	staged, history                          bool
+	staged, history, gitTimeline             bool
 	silence, quiet, verbose, noColor         bool
 	rulesOnly                                bool
 	noAutoConfig                             bool              // repo/org: don't honor the scanned tree's own .prowl.yaml

@@ -65,6 +65,9 @@ func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []mo
 		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
 			Path: "scan", Stage: "ML setup", Rationale: "requested ML model was not prepared; scan results are incomplete"})
 	}
+	if p.flags.gitTimeline {
+		findings = scan.FinalizeGitTimeline(findings)
+	}
 	if p.flags.verifiedOnly && p.flags.indexDir == "" {
 		findings = keepVerified(findings)
 	}

@@ -34,14 +34,16 @@ func IsIncompleteFinding(f Finding) bool {
 
 // Finding is a single detected secret.
 type Finding struct {
-	Detector   string  `json:"detector"`
-	Type       string  `json:"type"`
-	Confidence float64 `json:"confidence"`
-	Severity   string  `json:"severity"`
-	Source     string  `json:"source"`
-	Path       string  `json:"path"`
-	Line       int     `json:"line"`
-	Col        int     `json:"col"`
+	Git        *GitTimeline `json:"git,omitempty"`
+	GitRecord  *GitRecord   `json:"-"`
+	Detector   string       `json:"detector"`
+	Type       string       `json:"type"`
+	Confidence float64      `json:"confidence"`
+	Severity   string       `json:"severity"`
+	Source     string       `json:"source"`
+	Path       string       `json:"path"`
+	Line       int          `json:"line"`
+	Col        int          `json:"col"`
 	// UTF16Col is derived from the scanned snapshot for SARIF; Col remains byte-based for JSON/pretty.
 	// Zero means no derived column is available (e.g. an intake diagnostic).
 	UTF16Col int `json:"-"`

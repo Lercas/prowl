@@ -36,6 +36,25 @@ func mapSourcePaths(ctx context.Context, items <-chan model.Item, path func(stri
 		for it := range items {
 			if path != nil {
 				p, err := path(it.Path)
+
+				if record, ok := it.Meta["git_history"].(*model.GitRecord); ok {
+					display := record.DisplayPath
+					if display == "" {
+						display = record.Object.Path
+					}
+					mapped, mapErr := path(display)
+					if mapErr != nil {
+						err = errors.Join(err, mapErr)
+					}
+					copyRecord := *record
+					copyRecord.DisplayPath = mapped
+					meta := make(map[string]any, len(it.Meta))
+					for key, value := range it.Meta {
+						meta[key] = value
+					}
+					meta["git_history"] = &copyRecord
+					it.Meta = meta
+				}
 				it.Path = p
 				if err != nil {
 					it.Error = err

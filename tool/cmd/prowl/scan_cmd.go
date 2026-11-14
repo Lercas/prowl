@@ -293,6 +293,9 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 		if !source.IsGitRepo(repoDir) { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
 			return nil, fmt.Errorf("--history needs a git repository, but this is not one")
 		}
+		if c.gitTimeline {
+			return source.GitTimelineBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
+		}
 		return source.GitHistoryBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
 	case len(rest) == 1 && rest[0] == "-":
 		return source.StdinLimited(ctx, c.maxSize), nil

@@ -342,7 +342,27 @@ func processingError(it model.Item, reason string) model.Finding {
 
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
-func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding {
+func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
+	gitRecord, _ := it.Meta["git_history"].(*model.GitRecord)
+	if record := gitRecord; record != nil {
+		defer func() {
+			complete := ctx.Err() == nil
+			for i := range result {
+				result[i].GitRecord = record
+				complete = complete && !model.IsIncompleteFinding(result[i])
+			}
+			literalPath := record.DisplayPath
+			if literalPath == "" {
+				literalPath = record.Object.Path
+			}
+			if it.Path == literalPath {
+				record.Graph.Inspected.LoadOrStore(record.Object, complete)
+				if !complete {
+					record.Graph.Inspected.Store(record.Object, false)
+				}
+			}
+		}()
+	}
 	det, eng, vset, allow, ml := p.options.Detector, p.options.Rules, p.options.Verifiers, p.options.Allow, p.options.ML
 	if ctx.Err() != nil {
 		return []model.Finding{processingError(it, "scan interrupted; results are incomplete")}
@@ -389,6 +409,9 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 		if i&1023 == 0 && ctx.Err() != nil { // let --timeout / Ctrl-C abort mid-file, not only between files
 
 			break
+		}
+		if gitRecord != nil {
+			observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
 		}
 		if allow != nil && allow(m.Value, it.Path) {
 			continue
@@ -464,6 +487,9 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 			if len(out) >= maxMatches {
 				truncated = true
 				break
+			}
+			if gitRecord != nil {
+				observeGitCandidate(gitRecord, h.RuleID, it.Path, h.Value)
 			}
 			if allow != nil && allow(h.Value, it.Path) {
 				continue

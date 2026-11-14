@@ -194,7 +194,11 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 	defer cleanup()
 	var items <-chan model.Item
 	if c.history {
-		items = source.GitHistoryBlobs(ctx, dir, c.exclude, c.maxSize)
+		if c.gitTimeline {
+			items = source.GitTimelineBlobs(ctx, dir, c.exclude, c.maxSize)
+		} else {
+			items = source.GitHistoryBlobs(ctx, dir, c.exclude, c.maxSize)
+		}
 	} else {
 		items = source.Filesystem(ctx, []string{dir}, c.exclude, c.maxSize)
 	}
