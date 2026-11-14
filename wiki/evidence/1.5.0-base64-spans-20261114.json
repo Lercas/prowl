@@ -1770,5 +1770,15 @@
     "nonlinear gzip zlib hex retains previous container winner behavior",
     "verification companion extraction remains on existing source/parser path",
     "full LSP prototype and 290 noise corpus failures remain isolated and unqualified"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "697c631",
+    "full_go_suite_passed": true,
+    "lint_passed": true,
+    "native_passed": 197,
+    "native_total": 197,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-base64-native-aw4d3eo3/qualification.json",
+    "native_binary_sha256": "b7ecbb4f6734603e06e3c74b3e9c5d4f1e9e162cfb9391e4c564a1442e4665a5",
+    "working_copy": "existing uncommitted CLI work retained"
+  }
 }

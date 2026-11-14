@@ -41,5 +41,16 @@
     "bundled LSP templates and full CLI parity still need qualification"
   ],
   "model_changed": false,
-  "native_lsp_qualified": false
+  "native_lsp_qualified": false,
+  "followup_base64": {
+    "source_commit": "697c631",
+    "native_passed": 197,
+    "native_total": 197,
+    "encoded_padding_range_fixed": true,
+    "repeated_decoded_occurrences_fixed": true,
+    "lsp_encoded_range_tests_passed": true,
+    "full_lsp_qualified": false,
+    "remaining_corpus_failures": 290,
+    "isolated_worktree_base64_sync_commit": "3584d6e"
+  }
 }
