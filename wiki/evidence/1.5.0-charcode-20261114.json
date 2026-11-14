@@ -1,0 +1,679 @@
+{
+  "date": "2026-11-14",
+  "qualified_at_utc": "2026-11-14 11:17:00 UTC",
+  "status": "locally_qualified_increment",
+  "source_commit": "2ccfb2fa562ab9a053b34ad177573caf2b3ea3a3",
+  "parent": "9504f07d7de73704e88a72d8b90abed7fe97371c",
+  "isolated_source": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-charcode-clean-qqki7je_",
+  "source_sha256": {
+    "tool/internal/detect/charcode.go": "6a2f5d4a4d992ac9b34133b19c99db9d0ac9fa7535c9fa28243f6a9969546cf8",
+    "tool/internal/detect/charcode_test.go": "ac2090249af7c6af42f27023222f5e3d6e6f67c65bfb6ae5df95bd68dbb520b7",
+    "tool/internal/detect/comparison.go": "896f3c0f8c7fb7670ce10fa58c28548c2c6a6f46f142fdce34745db7c7927198",
+    "tool/internal/detect/comparison_test.go": "7e8c547f00ddf06c5e71b1e7faa587ad798b54cebe97a253a3d26c298c35a1f9",
+    "tool/internal/detect/rules.go": "ad3ec085055ab41138a20526c16869656dc25be1c1ebbb9154fbee182ad3424a",
+    "tool/internal/detect/tables.go": "9acc6242136e09faf137bceea57de6dfd4353eb6063a04a16c2176d092770171",
+    "tool/internal/detect/views.go": "6f6ff9a66a515932b1282796fd5ef800eb3616b10f308b24022fa1759855fec4",
+    "tool/internal/scan/charcode_test.go": "35dbde9f5ff532e80ef5f0f67823b9b66ec24204c33d75891271a76edd9b8dbc",
+    "tool/internal/model/model.go": "1e2d3c255e5b39c235fa2fe009d0d0a27c7ae66a88e17b0ba17b8f9740cfcfb1",
+    "tool/internal/scan/scan.go": "20227346ac9f6c72b6b50915f0a2de58064c8e67b550b33d0e7fcd58f426cbba",
+    "tool/internal/taxonomy/secret_taxonomy.yaml": "f7e46f18c7ecb18c4816d6044d7f89d2466d0e568dfcba31b6586092227cf81f"
+  },
+  "scope": "Static String.fromCharCode numeric conversions; semantic ML context, source provenance, URI literal delimiters and contextual numeric-argument disambiguation. No JS engine dependency or live provider traffic in scanner runtime.",
+  "specification": [
+    "https://tc39.es/ecma262/2026/multipage/text-processing.html#sec-string.fromcharcode",
+    "https://tc39.es/ecma262/2026/multipage/abstract-operations.html#sec-touint16"
+  ],
+  "contract": {
+    "forms": [
+      "String.fromCharCode(numeric literals)",
+      "String.fromCharCode(...[numeric literals])",
+      "String.fromCharCode.apply(null/undefined, [numeric literals])"
+    ],
+    "numbers": "Optional unary sign, decimal fraction/exponent, hex/binary/octal, valid underscore separators. Number rounding, truncation and modulo 65536; UTF-16 pair preservation. Legacy octal without 0o and computed arguments not guessed.",
+    "typed": "Initial confidence >=0.9, not GenericLast, multiplied by 0.95; original source span is the full call.",
+    "generic": "Full printable logical value under a recognized credential field in assignment/comparison, either direction; same minimum lengths and placeholder/metadata policy. No wrapper stripping from actual value.",
+    "source_disambiguation": "Only loose L1-context-pw guesses fully contained in proven static conversion spans are discarded. Exact and typed candidates are retained; unrelated contextual findings remain.",
+    "ml_context": "Only the already selected scoring value is projected into the existing bounded context. No additional payload is decoded for scoring. Name retained; context.line exposes exact model features only under --show-secrets, context.original_line preserves the bounded physical source.",
+    "limits": {
+      "call_source_bytes": 16384,
+      "utf16_units": 4096,
+      "numeric_literal_bytes": 128,
+      "shared_normalized_text_bytes": 1048576,
+      "shared_constructs": 4096
+    },
+    "broken_utf16": "Partial typed inspection and incomplete status. No generic candidate from broken call, no typed value containing lossy U+FFFD; legitimate literal U+FFFD remains supported.",
+    "identity": "Canonical logical value, source position, redaction, HMAC and private-state scrubbing checked. URI match excludes closing source quote; inline code wrappers remain token boundaries."
+  },
+  "validation": {
+    "full_go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test -p 2 ./... passed on final product source. An extra opt-in numeric oracle harness exists only in isolated validation copy and skips without explicit input.",
+    "lint": "golangci-lint v2.15.0 full module, zero issues; no new suppressions",
+    "race": "Final targeted detect/scan/model/taxonomy charcode, comparison, table, context and quoted URI tests passed",
+    "minimum_go": "Go1.26.11 CGO_ENABLED=0 full detect/scan/model/taxonomy suites passed",
+    "fuzz": [
+      {
+        "target": "FuzzCharCodeSourceBounds",
+        "execs": 326280,
+        "elapsed_seconds": 6.17,
+        "status": "passed"
+      },
+      {
+        "target": "FuzzScan",
+        "execs": 30856,
+        "elapsed_seconds": 6.407,
+        "status": "passed"
+      }
+    ],
+    "numeric_oracle": {
+      "cases": 1987,
+      "differences": 0,
+      "node": "v22.23.4",
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-charcode-oracle-000mhgfb",
+      "fixture_sha256": "12e42129fb9697af9a1520db82ba517f1aeac09dd07c09f3b85674da1c8f3c10",
+      "probe_sha256": "480bf07d92e0c1fab9b35894d678c48d5cd9cd139e25a4442f0fe407b58dff52",
+      "excluded_over_declared_128_byte_limit": 69,
+      "scope": "Trusted generated literals within declared source limits. Initial unbounded harness hit the explicit 128-byte number limit; limits unchanged, over-limit cases separately verified fail-closed. Oracle probe exists only in isolated validation copy; Node is not used by product.",
+      "toolchains": [
+        "Go1.26.11",
+        "Go1.27.4",
+        "v22.23.4"
+      ],
+      "final_source_parity": "1987 numeric literals, zero differences on both Go versions and fresh Node run",
+      "final_numeric_source_sha256": "f32ddc338b984fcfa0c7465ab831f9f37932cbb62a1a93085a35ac30ef042730",
+      "source_proof": "Numeric constants, regex and conversion function unchanged from final dual-Go/Node oracle run; later changes concern provenance/context/range disambiguation."
+    },
+    "native": {
+      "binary_sha256": "1e50c49ef68867f471c4e28ffb5abb7b70f3fddcf3b253281cd426d877490047",
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-charcode-native-bc65f05s",
+      "runs": [
+        {
+          "case": "decimal",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "decimal",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "decimal",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "hex",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "hex",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "hex",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "float",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "float",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "float",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "negative",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "negative",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "negative",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "spread",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "spread",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "spread",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "apply",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "apply",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "apply",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "password",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "password",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "password",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "reverse",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "reverse",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "reverse",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "russian",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "russian",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "russian",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "metadata",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "metadata",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "dynamic",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "dynamic",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "surrogate",
+          "ml": false,
+          "exit": 2,
+          "findings": 1,
+          "truncated": true,
+          "expected_value_found": true
+        },
+        {
+          "case": "surrogate",
+          "ml": true,
+          "exit": 2,
+          "findings": 1,
+          "truncated": true,
+          "expected_value_found": true
+        },
+        {
+          "case": "surrogate",
+          "guard": "raw",
+          "exit": 2
+        },
+        {
+          "case": "budget",
+          "ml": false,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "budget",
+          "ml": true,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "budget",
+          "guard": "raw",
+          "exit": 2
+        },
+        {
+          "case": "number-limit",
+          "ml": false,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "number-limit",
+          "ml": true,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "number-limit",
+          "guard": "raw",
+          "exit": 2
+        },
+        {
+          "case": "lossy-uri",
+          "ml": false,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "lossy-uri",
+          "ml": true,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "lossy-uri",
+          "guard": "raw",
+          "exit": 2
+        },
+        {
+          "case": "literal-replacement",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "literal-replacement",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "literal-replacement",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "wrappedhex-password",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "wrappedhex-password",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "wrappedhex-password",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "wrappedhex-placeholder",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": false
+        },
+        {
+          "case": "wrappedhex-placeholder",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": false
+        },
+        {
+          "case": "wrappedhex-placeholder",
+          "guard": "raw",
+          "exit": 0
+        },
+        {
+          "case": "wrappedhex-metadata",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": false
+        },
+        {
+          "case": "wrappedhex-metadata",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": false
+        },
+        {
+          "case": "wrappedhex-metadata",
+          "guard": "raw",
+          "exit": 0
+        },
+        {
+          "case": "exponent-password",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "exponent-password",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "exponent-password",
+          "guard": "raw",
+          "exit": 1
+        }
+      ],
+      "redaction": "3 extra --ml scans have no context without --show-secrets",
+      "index": "2 plain/numeric scans have equal logical HMAC; no plaintext in state",
+      "context": "Actual model line and separately preserved physical original_line verified; no model threshold changes"
+    },
+    "native_total": "58 scan/guard + 3 default-redaction + 2 index = 63 checks",
+    "corpus_equivalence": {
+      "files": 12044,
+      "matches": 1149,
+      "diffs": 0,
+      "status_diffs": 0,
+      "windowed_seconds": 9.3,
+      "whole_seconds": 45.3,
+      "log": "/tmp/prowl-charcode-qualified-equivalence-20261114.log"
+    }
+  },
+  "regression_followups": [
+    {
+      "commit": "5924660",
+      "issue": "A typed URI could contain a replacement character created from an unpaired surrogate.",
+      "resolution": "Reject lossy typed values while retaining independent valid typed fragments and incomplete status; literal U+FFFD separately accepted."
+    },
+    {
+      "commit": "27d6154",
+      "issue": "Numeric source context caused L2 to drop a valid URI retained in plaintext; URI regex captured closing literal quotes, and wrapper deletion could glue statement syntax to a value.",
+      "resolution": "Bounded logical scoring context plus separately disclosed original_line, URI quote exclusion and token boundaries. Embedded-model plaintext/numeric identity regression and privacy bounds tests passed without model/threshold changes."
+    },
+    {
+      "commit": "2ccfb2f",
+      "issue": "A wrapped hex argument displaced the decoded generic password; metadata/placeholder constructors could expose numeric arguments as passwords.",
+      "resolution": "Discard only contained loose contextual guesses inside parsed static calls. Positive, placeholder, metadata, unaffected external credential and native ML/guard cases passed."
+    }
+  ],
+  "prowlbench": {
+    "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-bz1mqs6a",
+    "metrics": {
+      "parent": {
+        "secret_hits": 1616,
+        "hard_negative_hits": 61,
+        "binary_sha256": "72bd46e0d6fa4a3a75083edfbdb80da032e00740d6bec04d9754e6e021c379ac"
+      },
+      "candidate": {
+        "secret_hits": 1616,
+        "hard_negative_hits": 61,
+        "binary_sha256": "1e50c49ef68867f471c4e28ffb5abb7b70f3fddcf3b253281cd426d877490047"
+      }
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "secrets": 2094,
+      "hardnegs": 982
+    },
+    "epsilon": 0.005,
+    "gate": "passed",
+    "added_ids": [],
+    "removed_ids": [],
+    "secrets": 2094,
+    "hard_negatives": 982,
+    "scope": "Local file-level labeled subset with embedded portable model, bundled rules and empty temporary PROWL_HOME. Fixtures retained; baseline and epsilon unchanged. Not the full research corpus."
+  },
+  "performance": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 11009249042.0,
+          "B/op": 639233224.0,
+          "allocs/op": 1445494.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11087531209.0,
+          "B/op": 636255784.0,
+          "allocs/op": 1445150.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11154624417.0,
+          "B/op": 637561704.0,
+          "allocs/op": 1444986.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 11010689458.0,
+          "B/op": 640782120.0,
+          "allocs/op": 1445991.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11096971042.0,
+          "B/op": 638191944.0,
+          "allocs/op": 1445526.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11406804458.0,
+          "B/op": 638095992.0,
+          "allocs/op": 1445262.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "9504f07d7de73704e88a72d8b90abed7fe97371c",
+      "candidate": "2ccfb2fa562ab9a053b34ad177573caf2b3ea3a3"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 11087531209.0,
+        "B/op": 637561704.0,
+        "allocs/op": 1445150.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      },
+      "candidate": {
+        "ns/op": 11096971042.0,
+        "B/op": 638191944.0,
+        "allocs/op": 1445526.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.000851391786148,
+      "B/op": 1.0009885160856524,
+      "allocs/op": 1.0002601806040896
+    },
+    "regressions": [],
+    "scope": "Explicit incremental parent comparison, L1 + bundled rules, no ML/verify. Not the fixed release baseline or published artifact acceptance."
+  },
+  "new_open_migration_issue": {
+    "flag": "--stdin-name",
+    "reference_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "evidence": "refs/tags/v1.4.0 CLI advertises/parses stdin-name and calls source.StdinNamed. Current CLI returns unknown flag; flag/helper absent. Added separate P0 TODO; not restored in this increment."
+  },
+  "limitations": [
+    "Bounded static numeric grammar, not general JS evaluation or proof of a non-shadowed String binding",
+    "No variable/arithmetic arguments, array holes, arbitrary apply forms or concatenation of multiple converted calls/literals",
+    "Generic whitespace/control passwords and existing short-value exclusions remain",
+    "Quoted URI fingerprints corrected with the value; fingerprint formula unchanged",
+    "No installed model/client changes, full research-corpus run, external CI, signing, push or publication in this increment"
+  ]
+}
