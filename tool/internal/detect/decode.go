@@ -6,6 +6,7 @@ import (
 	"compress/zlib"
 	"context"
 	"encoding/hex"
+	"errors"
 	"io"
 	"strings"
 
@@ -42,6 +43,8 @@ func decodeBlobStatus(s string) (string, bool, bool) {
 		dec = inflated
 	}
 	if !printableText(dec) {
+		// Reject opaque bytes as text, but keep uncertainty about an uninspected
+		// compressed tail: a binary-looking prefix cannot prove it contains no text.
 		return "", false, limited
 	}
 	return string(dec), true, limited
@@ -57,8 +60,8 @@ func isHex(s string) bool {
 	return true
 }
 
-// inflate decompresses a gzip or zlib stream, reading at most maxInflateBytes. A truncated or
-// oversized stream still yields its readable prefix, which is enough to find a secret in it.
+// inflate decompresses gzip/zlib within maxInflateBytes. Available output is retained,
+// while the status API preserves uncertainty about damaged or oversized streams.
 func inflate(b []byte) ([]byte, bool) {
 	out, ok, _ := inflateStatus(b)
 	return out, ok
@@ -89,7 +92,14 @@ func inflateStatus(b []byte) ([]byte, bool, bool) {
 	closeErr := r.Close()
 	// A plausible header followed only by invalid data is not evidence of a
 	// compressed document. Random provider tokens can have those bytes too.
-	limited := len(out) > maxInflateBytes || len(out) > 0 && (err != nil || closeErr != nil)
+	oversized := len(out) > maxInflateBytes
+	// Even a short or low-entropy prefix can come from a real damaged stream.
+	// Entropy and printability must not turn an integrity failure into a clean scan.
+	// A validated empty deflate stream with a bad checksum is also evidence of
+	// damage; in gzip it can stop inspection before a later member holding text.
+	checksumFailure := errors.Is(err, gzip.ErrChecksum) || errors.Is(err, zlib.ErrChecksum)
+	damaged := (len(out) > 0 || checksumFailure) && (err != nil || closeErr != nil)
+	limited := oversized || damaged
 	if len(out) > maxInflateBytes {
 		out = out[:maxInflateBytes]
 	}

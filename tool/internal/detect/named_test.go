@@ -1,6 +1,7 @@
 package detect
 
 import (
+	"bytes"
 	"encoding/base64"
 	"math/rand"
 	"strings"
@@ -173,5 +174,26 @@ func TestClassSwitchRateSeparatesIdentifiers(t *testing.T) {
 	}
 	if low > 20 { // 1%
 		t.Errorf("%d of 2000 random base62 tokens fall below the identifier threshold", low)
+	}
+}
+
+// Chance headers must not manufacture decoded secrets. A nonempty damaged
+// prefix may still be ambiguous, so this test does not require a complete scan.
+func TestChanceCompressionHeadersDoNotCreateDecodedSecrets(t *testing.T) {
+	d := newDetector(t)
+	r := rand.New(rand.NewSource(7))
+	var text bytes.Buffer
+	for i := 0; i < 4000; i++ {
+		raw := make([]byte, 57)
+		_, _ = r.Read(raw)
+		raw[0], raw[1] = 0x78, 0x9c // zlib header followed by noise
+		text.WriteString(base64.StdEncoding.EncodeToString(raw))
+		text.WriteByte('\n')
+	}
+	ms, _ := d.ScanCtxWithStatus(t.Context(), text.String())
+	for _, m := range ms {
+		if m.Stage == "L1-base64" {
+			t.Fatalf("noise behind a chance compression header became a decoded finding: %s", m.Type)
+		}
 	}
 }

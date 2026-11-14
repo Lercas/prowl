@@ -396,6 +396,14 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	if p.options.ValueFingerprint != nil {
 		for _, m := range ms {
 			indexValues = append(indexValues, m.Value)
+			// Keep observed source spelling private too: normalized values may occur
+			// in a filename as percent/HTML/base64 text rather than their logical bytes.
+			if m.Start >= 0 && m.End >= m.Start && m.End <= len(it.Text) {
+				spelling := it.Text[m.Start:m.End]
+				if spelling != m.Value {
+					indexValues = append(indexValues, spelling)
+				}
+			}
 		}
 	}
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active

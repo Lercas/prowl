@@ -36,6 +36,7 @@ type rewrite struct {
 }
 
 type view struct {
+	constructs int // consumed discovery budget, before neighbourhood merging
 	text       string
 	start, end []int32 // per view byte: the original [start,end) it came from
 	edits      []int   // view offsets where a rewrite happened, ascending
@@ -196,6 +197,10 @@ func buildView(text string) *view {
 }
 
 func buildViewStatus(ctx context.Context, text string) (*view, bool) {
+	return buildViewBudget(ctx, text, false, maxViewBytes, maxViewConstructs)
+}
+
+func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBudget, constructBudget int) (*view, bool) {
 	if ctx.Err() != nil {
 		return nil, false
 	}
@@ -208,7 +213,7 @@ func buildViewStatus(ctx context.Context, text string) (*view, bool) {
 	// around adds the neighbourhood of [lo,hi): viewContext bytes each side, kept within the lines
 	// that hold lo and hi.
 	around := func(lo, hi int) {
-		if len(regions) >= maxViewConstructs {
+		if len(regions) >= constructBudget {
 			limited = true
 			return
 		}
@@ -221,74 +226,93 @@ func buildViewStatus(ctx context.Context, text string) (*view, bool) {
 		}
 		regions = append(regions, [2]int{ls, le})
 	}
-	for i := strings.IndexByte(text, '\\'); i >= 0 && i+1 < len(text); {
-		if limited || ctx.Err() != nil {
-			break
-		}
-		step := 1
-		switch text[i+1] {
-		case '\\':
-			step = 2 // an escaped backslash is rewritten only inside a region another construct opens
-		case '"', '\'', 'u', 'x':
-			if _, n := unescapeAt(text, i); n > 0 {
-				around(i, i+n)
-				step = n
-			}
-		case '/':
-			// `\/` inside a token (a JSON-escaped base64 or URL-safe secret), not a path separator
-			if i > 0 && i+2 < len(text) && isB64Byte(text[i-1]) && isB64Byte(text[i+2]) {
-				around(i, i+2)
-				step = 2
-			}
-		}
-		next := strings.IndexByte(text[i+step:], '\\')
-		if next < 0 {
-			break
-		}
-		i += step + next
-	}
-	for i := strings.IndexByte(text, '+'); i >= 0; {
-		if limited || ctx.Err() != nil {
-			break
-		}
-		if lo, hi, ok := concatAt(text, i); ok {
-			rewrites = append(rewrites, rewrite{pos: lo, end: hi, join: true})
-			around(lo, hi)
-		}
-		next := strings.IndexByte(text[i+1:], '+')
-		if next < 0 {
-			break
-		}
-		i += 1 + next
-	}
-	for i := strings.IndexAny(text, "|>"); i >= 0; {
-		if limited || ctx.Err() != nil {
-			break
-		}
-		if lo, hi, ok := blockScalarAt(text, i); ok {
-			rewrites = append(rewrites, rewrite{pos: lo, end: hi, repl: " "})
-			around(lo, hi)
-		}
-		next := strings.IndexAny(text[i+1:], "|>")
-		if next < 0 {
-			break
-		}
-		i += 1 + next
-	}
-	if strings.Contains(text, "**") || strings.IndexByte(text, '`') >= 0 {
-		for i := strings.IndexAny(text, ":="); i >= 0; {
+	if encodingOnly {
+		for i := strings.IndexAny(text, "%&"); i >= 0; {
 			if limited || ctx.Err() != nil {
 				break
 			}
-			for _, sp := range markupAt(text, i) {
-				rewrites = append(rewrites, rewrite{pos: sp[0], end: sp[1]})
-				around(sp[0], sp[1])
+			step := 1
+			if out, n := textEncodingAt(text, i); n > 0 {
+				rewrites = append(rewrites, rewrite{pos: i, end: i + n, repl: out})
+				around(i, i+n)
+				step = n
 			}
-			next := strings.IndexAny(text[i+1:], ":=")
+			next := strings.IndexAny(text[i+step:], "%&")
+			if next < 0 {
+				break
+			}
+			i += step + next
+		}
+	} else {
+		for i := strings.IndexByte(text, '\\'); i >= 0 && i+1 < len(text); {
+			if limited || ctx.Err() != nil {
+				break
+			}
+			step := 1
+			switch text[i+1] {
+			case '\\':
+				step = 2 // an escaped backslash is rewritten only inside a region another construct opens
+			case '"', '\'', 'u', 'x':
+				if _, n := unescapeAt(text, i); n > 0 {
+					around(i, i+n)
+					step = n
+				}
+			case '/':
+				// `\/` inside a token (a JSON-escaped base64 or URL-safe secret), not a path separator
+				if i > 0 && i+2 < len(text) && isB64Byte(text[i-1]) && isB64Byte(text[i+2]) {
+					around(i, i+2)
+					step = 2
+				}
+			}
+			next := strings.IndexByte(text[i+step:], '\\')
+			if next < 0 {
+				break
+			}
+			i += step + next
+		}
+		for i := strings.IndexByte(text, '+'); i >= 0; {
+			if limited || ctx.Err() != nil {
+				break
+			}
+			if lo, hi, ok := concatAt(text, i); ok {
+				rewrites = append(rewrites, rewrite{pos: lo, end: hi, join: true})
+				around(lo, hi)
+			}
+			next := strings.IndexByte(text[i+1:], '+')
 			if next < 0 {
 				break
 			}
 			i += 1 + next
+		}
+		for i := strings.IndexAny(text, "|>"); i >= 0; {
+			if limited || ctx.Err() != nil {
+				break
+			}
+			if lo, hi, ok := blockScalarAt(text, i); ok {
+				rewrites = append(rewrites, rewrite{pos: lo, end: hi, repl: " "})
+				around(lo, hi)
+			}
+			next := strings.IndexAny(text[i+1:], "|>")
+			if next < 0 {
+				break
+			}
+			i += 1 + next
+		}
+		if strings.Contains(text, "**") || strings.IndexByte(text, '`') >= 0 {
+			for i := strings.IndexAny(text, ":="); i >= 0; {
+				if limited || ctx.Err() != nil {
+					break
+				}
+				for _, sp := range markupAt(text, i) {
+					rewrites = append(rewrites, rewrite{pos: sp[0], end: sp[1]})
+					around(sp[0], sp[1])
+				}
+				next := strings.IndexAny(text[i+1:], ":=")
+				if next < 0 {
+					break
+				}
+				i += 1 + next
+			}
 		}
 	}
 	if len(regions) == 0 {
@@ -297,10 +321,10 @@ func buildViewStatus(ctx context.Context, text string) (*view, bool) {
 	sort.Slice(regions, func(a, b int) bool { return regions[a][0] < regions[b][0] })
 	sort.Slice(rewrites, func(a, b int) bool { return rewrites[a].pos < rewrites[b].pos })
 
-	v := &view{}
+	v := &view{constructs: len(regions)}
 	var b strings.Builder
 	emit := func(s string, from, to int) bool {
-		if len(s) > maxViewBytes-b.Len() {
+		if len(s) > byteBudget-b.Len() {
 			limited = true
 			v.cuts = append(v.cuts, b.Len())
 			return false
@@ -388,12 +412,27 @@ func (d *Detector) scanViews(ctx context.Context, text string) []Match {
 
 func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, bool) {
 	v, limited := buildViewStatus(ctx, text)
+	out, collectLimited := d.scanMappedView(ctx, text, v, false)
+	remainingBytes, remainingConstructs := maxViewBytes, maxViewConstructs
+	if v != nil {
+		remainingBytes -= len(v.text)
+		remainingConstructs -= v.constructs
+	}
+	encoded, encodedLimited := buildViewBudget(ctx, text, true, remainingBytes, remainingConstructs)
+	extra, extraLimited := d.scanMappedView(ctx, text, encoded, true)
+	return append(out, extra...), limited || collectLimited || encodedLimited || extraLimited
+}
+
+func (d *Detector) scanMappedView(ctx context.Context, text string, v *view, typedOnly bool) ([]Match, bool) {
 	if v == nil || ctx.Err() != nil {
-		return nil, limited
+		return nil, false
 	}
 	matches, collectLimited := d.collect(ctx, v.text, "", "", d.keywordsPresent(strings.ToLower(v.text)), scanStructure(v.text, 32))
 	var out []Match
 	for _, m := range matches {
+		if typedOnly && (taxonomy.GenericLast[m.Type] || m.Confidence < 0.9) {
+			continue
+		}
 		if m.End <= m.Start || m.End > len(v.text) {
 			continue
 		}
@@ -417,8 +456,11 @@ func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, b
 			}
 			m.Confidence *= 0.95
 		}
+		if typedOnly {
+			m.Confidence *= 0.95
+		}
 		m.Start, m.End = int(v.start[m.Start]), int(v.end[m.End-1])
 		out = append(out, m)
 	}
-	return out, limited || collectLimited
+	return out, collectLimited
 }
