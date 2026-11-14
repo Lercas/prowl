@@ -1,0 +1,367 @@
+{
+  "scope": "Bounded typed percent/HTML normalization, shared view budgets, observed encoded-spelling index privacy, and compressed integrity status",
+  "candidate_commit": "190704b9d855485bf5fee03e5034fa45331b09c0",
+  "reference_commit": "727cf033576b491f8ee8e54558cae6005a11777f",
+  "qualified_file_manifest": [
+    {
+      "path": "tool/internal/detect/decode.go",
+      "sha256": "dbd7f018867cfd974387c9f6d2e28d4a58c21637c936bc4f7046e122f16b4b3c"
+    },
+    {
+      "path": "tool/internal/detect/named_test.go",
+      "sha256": "808f34cc68dda9bb1babac2c7df1abe8590066d88397bc81ca6573096aaf743b"
+    },
+    {
+      "path": "tool/internal/detect/views.go",
+      "sha256": "151355887be878c556357a64d57940f25b76367eefd48d58e1b21df5ce2a5365"
+    },
+    {
+      "path": "tool/internal/scan/scan.go",
+      "sha256": "929977e11e7c9349b704c687561fc18dc69260e124d8759489f6dd090269c4b6"
+    },
+    {
+      "path": "wiki/Secret-Index.md",
+      "sha256": "a09cece7c1f740a893b79bf8f131bac8a19f7814dcccb44d4df6a1913a209d0e"
+    },
+    {
+      "path": "TODO.md",
+      "sha256": "fac60858578d1f936775b1b025cce2aa95740eb469fba0e4d68283aec062a34e"
+    },
+    {
+      "path": "wiki/Decoding.md",
+      "sha256": "1f5c4fe4da50cf7f94bb1651f05d9cbfc60cff98bd04c1b278fc5a16f6a12625"
+    },
+    {
+      "path": "tool/internal/detect/compressed_integrity_test.go",
+      "sha256": "d6737677b9513745205357b46c4cf24c249bef53dc639fc929833b0413eb8da1"
+    },
+    {
+      "path": "tool/internal/detect/text_encoding.go",
+      "sha256": "1eb6c915570a8f500db772c1302d847b932ce6dee357dac0f144dbf660f0dc49"
+    },
+    {
+      "path": "tool/internal/detect/text_encoding_test.go",
+      "sha256": "838ef27a805e2be4d5b5b9a23d1a44c65b50394f8daba30ab6dc0b86c7031ce6"
+    },
+    {
+      "path": "tool/internal/scan/text_encoding_test.go",
+      "sha256": "c81a998eb57498f4e769877d154f595046d3518d9c780f005d6a15b1a110cd24"
+    }
+  ],
+  "pending_patch_review": {
+    "original_directory": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-pending-decode-original-57o07o29",
+    "patch_sha256": "42e2140592d774064ee14cab17e1db781890092b95e70e2dbd90ff5eb601e9b6",
+    "decision": "Rejected uncommitted entropy/prefix-length suppression and clearing incomplete on opaque prefixes; retained random-header regression with a no-phantom-secret invariant. Original patch archived before point edits.",
+    "distinction": "Entropy suppression was not in the parent commit. The empty-stream checksum status bug was present in the parent and is separately fixed."
+  },
+  "counterexamples": {
+    "base": "727cf033576b491f8ee8e54558cae6005a11777f",
+    "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-decoder-integrity-xlcxqpm5",
+    "runs": [
+      {
+        "variant": "committed",
+        "exit": 0,
+        "stdout": "ok  \tgithub.com/Lercas/prowl/tool/internal/detect\t0.476s\n",
+        "stderr": ""
+      },
+      {
+        "variant": "pending",
+        "exit": 1,
+        "stdout": "--- FAIL: TestCompressedIntegrityDoesNotUseEntropyOrPrefixLength (0.01s)\n    compressed_integrity_test.go:19: damaged real stream discarded: gzip=false length=5\n--- FAIL: TestCompressedOutputLimitSurvivesNonPrintablePrefix (0.00s)\n    compressed_integrity_test.go:37: uninspected compressed tail became a complete binary rejection\nFAIL\nFAIL\tgithub.com/Lercas/prowl/tool/internal/detect\t0.259s\nFAIL\n",
+        "stderr": ""
+      }
+    ],
+    "expanded_pending_regression": {
+      "exit": 1,
+      "stdout": "--- FAIL: TestCompressedIntegrityDoesNotUseEntropyOrPrefixLength (0.01s)\n    compressed_integrity_test.go:19: damaged real stream discarded: gzip=false length=5\n    compressed_integrity_test.go:19: damaged real stream discarded: gzip=false length=4121\n    compressed_integrity_test.go:24: low-entropy damaged text hid a detected credential\n    compressed_integrity_test.go:19: damaged real stream discarded: gzip=true length=5\n    compressed_integrity_test.go:19: damaged real stream discarded: gzip=true length=4121\n    compressed_integrity_test.go:24: low-entropy damaged text hid a detected credential\n--- FAIL: TestCompressedOutputLimitSurvivesNonPrintablePrefix (0.00s)\n    compressed_integrity_test.go:37: uninspected compressed tail became a complete binary rejection\nFAIL\nFAIL\tgithub.com/Lercas/prowl/tool/internal/detect\t0.260s\nFAIL\n",
+      "stderr": ""
+    },
+    "head_empty_checksum_regression": {
+      "exit": 1,
+      "stdout": "--- FAIL: TestEmptyStreamChecksumFailureCannotHideUnreadGzipMember (0.01s)\n    compressed_integrity_test.go:58: empty deflate checksum failure lost uncertainty: gzip=false\n    compressed_integrity_test.go:61: unread tail became a complete scan: gzip=false\n    compressed_integrity_test.go:58: empty deflate checksum failure lost uncertainty: gzip=true\n    compressed_integrity_test.go:61: unread tail became a complete scan: gzip=true\nFAIL\nFAIL\tgithub.com/Lercas/prowl/tool/internal/detect\t0.513s\nFAIL\n",
+      "stderr": ""
+    }
+  },
+  "validation": {
+    "full_go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test ./... passed on final runtime. Final change to failing-test messages separately covered by targeted race/minimum-Go runs.",
+    "transient_test_failure": "An earlier full run exceeded the existing 500ms bucket-child cancellation deadline while corpus equivalence ran concurrently. That source path was unchanged; three isolated repeats and the subsequent full suite passed. No timeout/test relaxation.",
+    "race": "Go1.27.4 targeted detect/scan encoding, compression, empty-checksum, source-position, disclosure and private-index cases passed",
+    "minimum_go": "Go1.26.11 CGO_ENABLED=0 full detect and scan suites passed",
+    "lint": "golangci-lint v2.15.0: zero issues in detect and scan",
+    "fuzz": {
+      "target": "FuzzTextEncodingView",
+      "requested_seconds": 5,
+      "actual_seconds": 5.378,
+      "executions": 364838,
+      "status": "passed",
+      "scope": "Bounded rewrite text and original-offset maps, not exhaustive semantic recall"
+    },
+    "window_equivalence": {
+      "corpus": "Go1.27.4 GOROOT/src",
+      "files": 12044,
+      "builtin_matches": 1149,
+      "differences": 0,
+      "includes_status_comparison": true,
+      "log": "/tmp/prowl-text-views-equivalence-final-20261114.log"
+    },
+    "native_static": {
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-text-view-native-f9lv2zpd",
+      "binary_sha256": "8da3a4e419cc8f35b1768366ad4c27d5b17da70427355fdc4e646cd362316ddc",
+      "normalized_cases": [
+        {
+          "encoding": "percent",
+          "ml": false,
+          "scan_exit": 0,
+          "findings": 1,
+          "line": 2,
+          "no_plaintext_or_observed_encoded_value_in_index": true,
+          "guard_exit": 1
+        },
+        {
+          "encoding": "percent",
+          "ml": true,
+          "scan_exit": 0,
+          "findings": 1,
+          "line": 2,
+          "no_plaintext_or_observed_encoded_value_in_index": true,
+          "guard_exit": 1
+        },
+        {
+          "encoding": "html",
+          "ml": false,
+          "scan_exit": 0,
+          "findings": 1,
+          "line": 2,
+          "no_plaintext_or_observed_encoded_value_in_index": true,
+          "guard_exit": 1
+        },
+        {
+          "encoding": "html",
+          "ml": true,
+          "scan_exit": 0,
+          "findings": 1,
+          "line": 2,
+          "no_plaintext_or_observed_encoded_value_in_index": true,
+          "guard_exit": 1
+        }
+      ],
+      "unread_gzip_member": {
+        "scan_exit": 2,
+        "truncated": true,
+        "guard_exit": 2
+      },
+      "parent_binary_comparison": {
+        "sha256": "dc37eac3f03de31037566a3212729a6365628d4fc7b96c3c13d09418590af49b",
+        "normalization_cases": [
+          {
+            "encoding": "percent",
+            "parent_exit": 0,
+            "parent_has_typed_plaintext_identity": false
+          },
+          {
+            "encoding": "html",
+            "parent_exit": 0,
+            "parent_has_typed_plaintext_identity": false
+          }
+        ],
+        "bad_empty_checksum": {
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        }
+      },
+      "combined_index": {
+        "exit": 0,
+        "findings": 2,
+        "one_value_identity": true,
+        "distinct_path_fingerprints": true
+      }
+    },
+    "prowlbench_subset": {
+      "run": {
+        "exit": 0,
+        "stdout": "Retained fixture: /var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-2tyavig8\nProwlBench(subset): recall=0.768 (1608/2094) T4-FP=0.062 (61/982)\n  OK vs baseline (recall 0.747, T4-FP 0.058)\n",
+        "stderr": ""
+      },
+      "secret_hits": 1608,
+      "secret_total": 2094,
+      "false_positive_files": 61,
+      "negative_total": 982,
+      "baseline_unchanged": true,
+      "thresholds_unchanged": true,
+      "profile": "Empty temporary PROWL_HOME, portable embedded ML, explicit bundled rules; only fixture cleanup disabled"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9833403000.0,
+            "B/op": 615941576.0,
+            "allocs/op": 1240901.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 9945846583.0,
+            "B/op": 605971184.0,
+            "allocs/op": 1240642.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 9977549167.0,
+            "B/op": 620453184.0,
+            "allocs/op": 1241191.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 9932944208.0,
+            "B/op": 618409728.0,
+            "allocs/op": 1255647.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1154.0
+          },
+          {
+            "ns/op": 9949341833.0,
+            "B/op": 617882984.0,
+            "allocs/op": 1255311.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1154.0
+          },
+          {
+            "ns/op": 10036057583.0,
+            "B/op": 621552904.0,
+            "allocs/op": 1254958.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1154.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "727cf033576b491f8ee8e54558cae6005a11777f",
+        "candidate": "190704b9d855485bf5fee03e5034fa45331b09c0"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 9945846583.0,
+          "B/op": 615941576.0,
+          "allocs/op": 1240901.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        },
+        "candidate": {
+          "ns/op": 9949341833.0,
+          "B/op": 618409728.0,
+          "allocs/op": 1255311.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      },
+      "ratios": {
+        "ns/op": 1.0003514281032622,
+        "B/op": 1.0040071203116836,
+        "allocs/op": 1.011612529927851
+      },
+      "regressions": []
+    },
+    "performance_scope": "Three alternating immutable parent/candidate pairs with existing thresholds; not global release-baseline qualification. Index/ML off, bundled rules enabled.",
+    "corpus_diagnostics": {
+      "reference": {
+        "commit": "727cf03",
+        "directory": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-view-diagnostic-probe-hh354pbh",
+        "diagnostics": [
+          {
+            "path": "debug/buildinfo/testdata/go117/go117.base64",
+            "type": "results_truncated"
+          }
+        ],
+        "summary": {
+          "files": 12044,
+          "rows": 1153
+        }
+      },
+      "candidate": {
+        "commit": "190704b",
+        "directory": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-view-diagnostic-probe-fx43_ze7",
+        "diagnostics": [
+          {
+            "path": "cmd/vendor/rsc.io/markdown/entity.go",
+            "type": "results_truncated"
+          },
+          {
+            "path": "debug/buildinfo/testdata/go117/go117.base64",
+            "type": "results_truncated"
+          }
+        ],
+        "summary": {
+          "files": 12044,
+          "rows": 1154
+        },
+        "entity_table_budget": {
+          "new_bytes": 79550,
+          "new_constructs": 2013,
+          "new_limited": true,
+          "old_bytes": 89262,
+          "old_constructs": 2083,
+          "old_limited": false
+        }
+      }
+    },
+    "corpus_row_delta": "1153 -> 1154 is one additional results_truncated diagnostic in generated HTML entity data, not a new secret. 2083 old + 2013 new constructs exhaust the shared 4096 discovery budget. Existing wrapped-binary diagnostic remains."
+  },
+  "invariants": [
+    "Percent decoding handles printable ASCII only; plus is never form whitespace",
+    "Only complete bounded HTML entities with valid non-control output are rewritten",
+    "One layer, no execution or recursive reinterpretation",
+    "New encoding view accepts only non-generic matches with pre-penalty confidence >= 0.9, then multiplies confidence by 0.95",
+    "Legacy views remain independent so an unrelated encoding cannot suppress existing generic markup/JSON findings",
+    "Both views share 1MiB rewritten text and 4096 discovered constructs",
+    "Original source coordinates, logical value fingerprints and explicit-disclosure context preserved",
+    "Private index scrubs both logical values and observed original source spellings from metadata",
+    "Short/low-entropy damaged streams preserve output and incomplete status",
+    "Opaque truncated prefixes preserve uncertainty",
+    "Checksum failures after validated empty deflate preserve uncertainty about unread tails; valid empty streams remain clean"
+  ],
+  "boundaries": [
+    "Generic-only percent/HTML interpretation without known consumer semantics remains open in TODO",
+    "No universal HTML/form parser, arbitrary UTF-8 percent reconstruction, String.fromCharCode evaluation or recursive language execution",
+    "Existing conservative malformed/binary diagnostics are not silently treated as clean",
+    "No provider requests, release publication, push, deployment or active-runtime replacement",
+    "Native Windows execution and final release matrix remain separate; this checkpoint uses native static CLI plus minimum-Go tests",
+    "Other 1.5.0 TODO items remain open"
+  ]
+}
