@@ -333,5 +333,14 @@
   "limits": [
     "No scanner algorithm or provider policy changes",
     "semantic remains open"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "56cc8ed",
+    "targeted_cli_flags_mcp_tests": "passed",
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-strict-native-1wgc1lqv/qualification.json",
+    "native_passed": 79,
+    "native_total": 79,
+    "binary_sha256": "fc84d80315d8f9a634ce2775b4511d816dd348807980ac4d47d22276634d0c3f",
+    "unrelated_dirty_changes_preserved": true
+  }
 }
