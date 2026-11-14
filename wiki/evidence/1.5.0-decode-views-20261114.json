@@ -1,0 +1,181 @@
+{
+  "scope": "nested base64/hex, gzip/zlib, encoded auth, mapped normalized text views; named assignments remain disabled in this immutable candidate",
+  "candidate_commit": "c24455b691e3a520212b2cfdd303d30f6e18e202",
+  "limits": {
+    "candidate_bytes_min": 16,
+    "candidate_bytes_max": 8192,
+    "decode_layers": 3,
+    "nested_attempts_per_outer_blob": 32,
+    "inflate_output_bytes": 262144,
+    "view_bytes": 1048576,
+    "view_constructs": 4096,
+    "view_context_bytes": 256
+  },
+  "invariants": [
+    "No executable interpretation or provider requests",
+    "Outer encoded span with decoded typed value",
+    "Original source byte mapping for normalized values",
+    "Only typed matches inside encoded blobs; unnamed blobs require confidence >= 0.9 before encoding penalty",
+    "Shared nested attempt budget",
+    "Readers closed; strict output and bookkeeping caps",
+    "Readable damaged stream or resource exhaustion preserves incomplete status through pipeline/JSON/CLI",
+    "Random header with zero inflated output does not imply a compressed document",
+    "Default masking and explicit disclosure retain original positions and value-based fingerprint input"
+  ],
+  "validation": {
+    "source": "all ten changed source/test files in c24455b compared byte-for-byte with the isolated qualified copy; parallel named-assignment edits excluded",
+    "full_go_suite": "go1.27.4 CGO_ENABLED=0 go test ./... passed again from immutable exported candidate after final refinements",
+    "race": "full internal/detect feature suite and scan decoding/privacy integration tests passed; before the final zero-output error-status refinement, which was separately regression-tested",
+    "minimum_go": "go1.26.11 complete internal/detect and internal/scan tests passed after final status refinement",
+    "lint": "0 issues in internal/detect and internal/scan",
+    "fuzz": {
+      "view_bounds": {
+        "executions": 773815,
+        "seconds": 10.379
+      },
+      "compressed_output_bounds": {
+        "executions": 174181,
+        "seconds": 11.145
+      },
+      "scope_note": "fuzz ran before final zero-output status refinement; output-bound logic unchanged"
+    },
+    "window_equivalence": {
+      "corpus": "go1.27.4 GOROOT/src",
+      "files": 12044,
+      "builtin_matches": 1129,
+      "differences": 0,
+      "scope_note": "feature candidate before final zero-output status refinement; both matching modes share decoding-status logic"
+    },
+    "ci_subset": {
+      "status": "passed",
+      "secret_hits_before": 1580,
+      "secret_hits_after": 1585,
+      "secret_total": 2094,
+      "false_positive_files_before": 61,
+      "false_positive_files_after": 61,
+      "negative_total": 982,
+      "baseline_unchanged": true,
+      "thresholds_unchanged": true,
+      "subset_sha256": "c8de0a5b15d3f360c50b387d1869158ef32d43fa1c9ddce26e4ff4174667db9e",
+      "profile": "empty temporary PROWL_HOME, embedded portable model, explicit bundled rules",
+      "harness": "benchmark/ci_gate.py with only fixture cleanup disabled; generated fixtures retained"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9237036833.0,
+            "B/op": 578342888.0,
+            "allocs/op": 1161672.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9571893375.0,
+            "B/op": 576235888.0,
+            "allocs/op": 1161133.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9189674916.0,
+            "B/op": 575097912.0,
+            "allocs/op": 1161407.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 8685327292.0,
+            "B/op": 620668024.0,
+            "allocs/op": 1235848.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          },
+          {
+            "ns/op": 8696027333.0,
+            "B/op": 608726168.0,
+            "allocs/op": 1235434.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          },
+          {
+            "ns/op": 8849935000.0,
+            "B/op": 606374552.0,
+            "allocs/op": 1235356.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "a5347b0e2677b8756602a6f09aec8a9e87f352f0",
+        "candidate": "c24455b691e3a520212b2cfdd303d30f6e18e202"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 9237036833.0,
+          "B/op": 576235888.0,
+          "allocs/op": 1161407.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        "candidate": {
+          "ns/op": 8696027333.0,
+          "B/op": 608726168.0,
+          "allocs/op": 1235434.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1133.0
+        }
+      },
+      "ratios": {
+        "ns/op": 0.9414304056829996,
+        "B/op": 1.0563836454420903,
+        "allocs/op": 1.063739068216396
+      },
+      "regressions": []
+    },
+    "performance_reference": "Explicit local override a5347b0 measures this feature against its immediate parent; CI policy stays pinned to e0f05cd.",
+    "additional_corpus_marker": {
+      "path": "debug/buildinfo/testdata/go117/go117.base64",
+      "bytes": 1564142,
+      "kind": "results_truncated, not a secret finding",
+      "stage": "partial zlib interpretation of wrapped binary base64 fragments",
+      "investigation": "collect and normalization not capped; independent decoder candidates and decoded stage reported uncertainty",
+      "limitation": "Conservative incomplete status can occur on wrapped encoded binary data; not evidence of operational non-regression for all inputs."
+    }
+  },
+  "qualification": "local supported-form correctness, subset quality, and performance evidence only; publication and the remaining TODO are not complete"
+}
