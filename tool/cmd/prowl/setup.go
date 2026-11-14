@@ -148,7 +148,7 @@ func loadEngine(c commonFlags) (*rules.Engine, error) {
 		return nil, fmt.Errorf("incomplete rule template set: %w", err)
 	}
 	eng.Filter(rules.FilterOpts{Tags: splitCSV(c.tags), ExcludeTags: splitCSV(c.excludeTags), Severities: splitCSV(c.ruleSeverity)})
-	logx.Info("loaded rule templates", "count", eng.Len())
+	logx.Debug("loaded rule templates", "count", eng.Len())
 	return eng, nil
 }
 

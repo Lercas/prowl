@@ -33,7 +33,7 @@ func WriteWithCoverage(w io.Writer, findings []model.Finding, format string, col
 	case "defectdojo", "dojo":
 		return writeDefectDojo(w, findings)
 	case "pretty", "":
-		return writePretty(w, findings, color)
+		return writePretty(w, findings, PrettyOptions{Color: color})
 	default:
 		return fmt.Errorf("unsupported report format %q", format)
 	}
@@ -99,13 +99,43 @@ func (w *reportWriter) Write(p []byte) (int, error) {
 	return n, err
 }
 
-// writePretty renders findings grouped by file, worst-file first, with a summary footer.
-func writePretty(w io.Writer, fs []model.Finding, color bool) (err error) {
+// PrettyOptions tunes the human report.
+type PrettyOptions struct {
+	Color bool
+	// Snippet returns the source line of a finding with its secrets already masked, or "".
+	// The caller owns the masking; the report only strips terminal escapes and prints it.
+	Snippet func(model.Finding) string
+}
+
+// WritePretty renders the human report with options the format-dispatching Write does not carry.
+func WritePretty(w io.Writer, findings []model.Finding, options PrettyOptions) error {
+	return writePretty(w, findings, options)
+}
+
+// writePretty renders secrets grouped by file, worst-file first, with a summary footer. Scan
+// diagnostics (an unreadable source, a capped result) are not secrets: they are listed in their own
+// block so a missing path never reads as "1 finding" and a partial scan never reads as clean.
+func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err error) {
+	color := options.Color
 	output := &reportWriter{w: w}
 	w = output
 	defer func() { err = output.err }()
+	var fs, gaps []model.Finding
+	for _, f := range all {
+		if model.IsIncompleteFinding(f) {
+			gaps = append(gaps, f)
+		} else {
+			fs = append(fs, f)
+		}
+	}
 	if len(fs) == 0 {
-		fmt.Fprintln(w, paint(color, "\x1b[32m", "✓ no secrets found"))
+		if len(gaps) == 0 {
+			fmt.Fprintln(w, paint(color, "\x1b[32m", "✓ no secrets found"))
+			return nil
+		}
+		fmt.Fprintln(w)
+		writeGaps(w, gaps, color)
+		fmt.Fprintln(w, "  "+paint(color, cBold, "no secrets found in what was scanned"))
 		return nil
 	}
 	byFile := map[string][]model.Finding{}
@@ -166,6 +196,11 @@ func writePretty(w io.Writer, fs []model.Finding, color bool) (err error) {
 				badge, maxType, sanitizeTerminal(f.Type),
 				paint(color, cDim, fmt.Sprintf("%-7s", loc)),
 				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag, locator)
+			if options.Snippet != nil {
+				if line := sanitizeTerminal(options.Snippet(f)); line != "" {
+					fmt.Fprintf(w, "        %s\n", paint(color, cDim, line))
+				}
+			}
 		}
 		fmt.Fprintln(w)
 	}
@@ -177,14 +212,61 @@ func writePretty(w io.Writer, fs []model.Finding, color bool) (err error) {
 			parts = append(parts, paint(color, col, fmt.Sprintf("%d %s", count[sev], sev)))
 		}
 	}
+	if len(gaps) > 0 {
+		writeGaps(w, gaps, color)
+	}
 	fmt.Fprintf(w, "  %s  %s  %s\n",
-		paint(color, cBold, fmt.Sprintf("%d findings", len(fs))),
+		paint(color, cBold, fmt.Sprintf("%d finding%s", len(fs), plural(len(fs)))),
 		strings.Join(parts, paint(color, cDim, " · ")),
 		paint(color, cDim, fmt.Sprintf("in %d file%s", len(files), plural(len(files)))))
 	if line := bbSummary(fs, color); line != "" {
 		fmt.Fprintln(w, line)
 	}
 	return nil
+}
+
+// maxGapRows bounds the diagnostics block: past it the remaining inputs are only counted.
+const maxGapRows = 10
+
+// writeGaps lists what the scan could not fully cover, one input per row with a plain reason.
+func writeGaps(w io.Writer, gaps []model.Finding, color bool) {
+	const warn = "\x1b[33m"
+	summary := fmt.Sprintf("%d input%s not fully checked", len(gaps), plural(len(gaps)))
+	for _, f := range gaps {
+		if f.Stage == "occurrence aggregation" {
+			summary = fmt.Sprintf("%d completeness issue%s", len(gaps), plural(len(gaps)))
+			break
+		}
+	}
+	fmt.Fprintln(w, "  "+paint(color, warn, "! scan incomplete — "+summary))
+	for i, f := range gaps {
+		if i == maxGapRows {
+			fmt.Fprintln(w, "    "+paint(color, cDim, fmt.Sprintf("… and %d more (use --format json for the full list)", len(gaps)-i)))
+			break
+		}
+		where := sanitizeTerminal(f.Path)
+		if where == "" {
+			where = "scan"
+		}
+		fmt.Fprintf(w, "    %s  %s\n", where, paint(color, cDim, gapReason(f)))
+	}
+	fmt.Fprintln(w)
+}
+
+// gapReason says in plain words why an input is not fully covered and what changes that.
+func gapReason(f model.Finding) string {
+	switch f.Type {
+	case "source_error":
+		return "could not be read (see the warning above)"
+	case "item_too_large":
+		return "larger than --max-size, skipped"
+	case "results_truncated":
+		return "too many candidates, results capped"
+	}
+	if f.Rationale != "" {
+		return sanitizeTerminal(f.Rationale)
+	}
+	return "results are incomplete"
 }
 
 // bbSummary is the one-line live/dead/unverified verdict appended after a verification run; empty when

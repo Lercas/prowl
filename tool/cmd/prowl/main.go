@@ -103,6 +103,10 @@ func runCLI(args []string) int {
 		}
 	case "mcp":
 		return cmdMCP(args[1:])
+	case "init":
+		return cmdInit(args[1:])
+	case "completion":
+		return cmdCompletion(args[1:])
 	default:
 		fmt.Fprintln(os.Stderr, unknownCommandMessage(cmd))
 		return 2

@@ -100,6 +100,22 @@ Migrating from gitleaks needs no rewrite: a `.gitleaks.toml` is auto-loaded, you
 keeps the same findings suppressed, and `gitleaks:allow` comments are honored. Run `prowl compare`
 to see how many of your current findings Prowl's ML stage flags as noise before you switch.
 
+### Project setup
+
+`prowl init` in a project root writes a starter `.prowl.yaml` and a git pre-commit hook that runs
+`prowl scan --staged --ci`. It never replaces a file that already exists.
+
+### Shell completion
+
+`prowl completion` prints a script that completes commands, the flags each command accepts, and
+the values of enumerated flags:
+
+```bash
+source <(prowl completion bash)                              # bash, current session
+prowl completion zsh > "${fpath[1]}/_prowl"                  # zsh, then restart the shell
+prowl completion fish > ~/.config/fish/completions/prowl.fish
+```
+
 ## Quick start
 
 ```sh

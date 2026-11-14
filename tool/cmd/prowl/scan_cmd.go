@@ -24,6 +24,7 @@ func cmdScan(args []string) int {
 	if code := checkSourceModes(c, rest); code != 0 {
 		return code
 	}
+	warnMissingPaths(rest)
 	ctx, stop := rootContext(c)
 	defer stop()
 	return scanItems(ctx, c, rest)
@@ -271,7 +272,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, withProgress(ctx, c, items))
 	return finalizeOCR(ocrEngine, code)
 }
 

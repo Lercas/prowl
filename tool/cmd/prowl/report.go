@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"math"
 	"os"
@@ -62,7 +63,15 @@ func writeReport(c commonFlags, findings []model.Finding) error {
 		return nil // --silence suppresses the human report; an explicit --format json/sarif still writes for CI
 	}
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout)
-	if err := report.WriteWithCoverage(os.Stdout, findings, c.format, color, c.coverage); err != nil {
+	var err error
+	if interactiveReport(c) {
+		// Source lines are shown to a person at a terminal only: a piped or stored report keeps its
+		// shape and never gains file content.
+		err = report.WritePretty(os.Stdout, findings, report.PrettyOptions{Color: color, Snippet: sourceLines(findings)})
+	} else {
+		err = report.WriteWithCoverage(os.Stdout, findings, c.format, color, c.coverage)
+	}
+	if err != nil {
 		logx.Error("cannot write report to stdout", "err", err)
 		return err
 	}
@@ -82,7 +91,7 @@ func writeReportFile(path string, findings []model.Finding, format string, cover
 }
 
 // summarize logs a one-line scan summary grouped by severity (suppressed by --silence).
-func summarize(findings []model.Finding, dur time.Duration) {
+func summarize(findings []model.Finding, dur time.Duration, interactive bool) {
 	bySev := map[string]int{}
 	live, rejected, attempted := 0, 0, 0
 	for _, f := range findings {
@@ -103,7 +112,54 @@ func summarize(findings []model.Finding, dur time.Duration) {
 	if attempted > 0 {
 		args = append(args, "verified_live", live, "rejected", rejected)
 	}
+	if interactive {
+		// The pretty report's own footer already carries these counts on a terminal.
+		logx.Debug("scan complete", args...)
+		return
+	}
 	logx.Info("scan complete", args...)
+}
+
+// interactiveReport reports whether a person is reading the pretty report on a terminal right now,
+// as opposed to a pipe, a file, or a machine format.
+func interactiveReport(c commonFlags) bool {
+	return c.format == "pretty" && c.output == "" && !c.silence && isTTY(os.Stdout) && isTTY(os.Stderr)
+}
+
+// reportFooter tells a person at a terminal how long the scan took and, when there are findings,
+// the three ways to act on them. It goes to stderr so a redirected report stays unchanged.
+func reportFooter(c commonFlags, findings []model.Finding, elapsed time.Duration) {
+	if !interactiveReport(c) || c.quiet {
+		return
+	}
+	dim, reset := "\x1b[2m", "\x1b[0m"
+	if c.noColor || os.Getenv("NO_COLOR") != "" {
+		dim, reset = "", ""
+	}
+	secrets := 0
+	for _, f := range findings {
+		if !model.IsIncompleteFinding(f) {
+			secrets++
+		}
+	}
+	fmt.Fprintf(os.Stderr, "%s  done in %s%s\n", dim, elapsed.Round(time.Millisecond), reset)
+	if secrets == 0 {
+		return
+	}
+	var hints []string
+	if !c.verify {
+		hints = append(hints, "--verify              check which of these are live at the provider")
+	}
+	if !c.showSecrets {
+		hints = append(hints, "--show-secrets        print full values (authorized triage only)")
+	}
+	hints = append(hints,
+		"# prowl:allow         put this comment on a line to accept that finding",
+		"--write-baseline F    accept everything found now; later scans report only new secrets")
+	fmt.Fprintf(os.Stderr, "\n%s  next steps:%s\n", dim, reset)
+	for _, h := range hints {
+		fmt.Fprintf(os.Stderr, "%s    %s%s\n", dim, h, reset)
+	}
 }
 
 // capGenericPerFile bounds how many shape-only generic findings (generic_high_entropy /
@@ -197,7 +253,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info", Stage: "coverage", Rationale: "requested scan coverage is incomplete"})
 	}
 	findings = applyReportFilters(c, findings)
-	summarize(findings, elapsed)
+	summarize(findings, elapsed, interactiveReport(c))
 
 	if c.writeBaseline != "" {
 		for _, f := range findings {
@@ -290,6 +346,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 	if err := writeReport(c, findings); err != nil {
 		return 2
 	}
+	reportFooter(c, findings, elapsed)
 	return gate(findings, c.failOn, c.failOnVerified)
 }
 
@@ -298,7 +355,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 	disabled := map[string]bool{}
 	for _, t := range splitCSV(c.disable) {
-		disabled[t] = true
+		disabled[typeKey(t)] = true
 	}
 	minSev := -1
 	if c.minSeverity != "" {
@@ -319,7 +376,7 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 		if minSev >= 0 && model.SeverityOrder[f.Severity] < minSev {
 			continue
 		}
-		if disabled[f.Type] {
+		if disabled[typeKey(f.Type)] {
 			continue
 		}
 		out = append(out, f)

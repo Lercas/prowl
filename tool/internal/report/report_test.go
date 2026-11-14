@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"math"
 	"strings"
@@ -463,5 +464,53 @@ func TestDefectDojoEmptyFindings(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), `"findings": []`) {
 		t.Errorf("expected literal \"findings\": [], got %s", buf.String())
+	}
+}
+
+// A scan diagnostic is not a secret: it must not be counted as a finding or hide behind the green
+// "no secrets" line, and a single finding is not "1 findings".
+func TestPrettySeparatesDiagnosticsFromSecrets(t *testing.T) {
+	gap := model.Finding{Detector: "source", Type: "source_error", Severity: "info", Path: "missing.txt"}
+	secret := model.Finding{Type: "aws_access_key_id", Severity: "high", Path: "a.go", Line: 1, Redacted: "AKIA****1234", Confidence: 0.9}
+	var only bytes.Buffer
+	if err := Write(&only, []model.Finding{gap}, "pretty", false); err != nil {
+		t.Fatal(err)
+	}
+	out := only.String()
+	if strings.Contains(out, "✓") || strings.Contains(out, "1 finding") ||
+		!strings.Contains(out, "scan incomplete — 1 input not fully checked") || !strings.Contains(out, "missing.txt  could not be read") {
+		t.Fatalf("diagnostic-only report is misleading:\n%s", out)
+	}
+	var mixed bytes.Buffer
+	gaps := []model.Finding{gap}
+	for i := 0; i < maxGapRows+2; i++ {
+		gaps = append(gaps, model.Finding{Type: "item_too_large", Severity: "info", Path: fmt.Sprintf("big%02d.bin", i)})
+	}
+	if err := Write(&mixed, append([]model.Finding{secret}, gaps...), "pretty", false); err != nil {
+		t.Fatal(err)
+	}
+	out = mixed.String()
+	if !strings.Contains(out, "1 finding  1 high  in 1 file\n") || strings.Contains(out, "source_error") ||
+		!strings.Contains(out, "larger than --max-size, skipped") || !strings.Contains(out, "… and 3 more") {
+		t.Fatalf("mixed report miscounts or hides diagnostics:\n%s", out)
+	}
+}
+
+func TestPrettySnippetIsSanitizedAndOptional(t *testing.T) {
+	finding := model.Finding{Type: "aws_access_key_id", Severity: "high", Path: "a.go", Line: 1, Redacted: "AKIA****1234", Confidence: 0.9}
+	var out bytes.Buffer
+	err := WritePretty(&out, []model.Finding{finding}, PrettyOptions{Snippet: func(model.Finding) string { return "key = \"AKIA****1234\"\x1b[2J" }})
+	if err != nil || !strings.Contains(out.String(), "        key = \"AKIA****1234\"") || strings.ContainsRune(out.String(), 0x1b) {
+		t.Fatalf("snippet missing or unsafe: %q", out.String())
+	}
+	var plain, empty bytes.Buffer
+	if err := Write(&plain, []model.Finding{finding}, "pretty", false); err != nil {
+		t.Fatal(err)
+	}
+	if err := WritePretty(&empty, []model.Finding{finding}, PrettyOptions{Snippet: func(model.Finding) string { return "" }}); err != nil {
+		t.Fatal(err)
+	}
+	if plain.String() != empty.String() {
+		t.Fatal("an empty snippet changed the report")
 	}
 }

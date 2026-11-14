@@ -76,6 +76,22 @@ docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl scan /src
 git clone https://github.com/Lercas/prowl && cd prowl/tool && make build
 ```
 
+### Подготовка проекта
+
+`prowl init` в корне проекта создаёт стартовый `.prowl.yaml` и pre-commit-хук git, который
+запускает `prowl scan --staged --ci`. Существующие файлы не перезаписываются.
+
+### Автодополнение в оболочке
+
+`prowl completion` печатает скрипт, который дополняет команды, флаги конкретной команды и значения
+перечислимых флагов:
+
+```bash
+source <(prowl completion bash)                              # bash, текущая сессия
+prowl completion zsh > "${fpath[1]}/_prowl"                  # zsh, затем перезапустить оболочку
+prowl completion fish > ~/.config/fish/completions/prowl.fish
+```
+
 ## Быстрый старт
 
 ```sh

@@ -33,12 +33,14 @@ var commands = []cmdInfo{
 	{"serve", "run as a stateless HTTP scan worker", serveHelp},
 	{"lsp", "run as a Language Server (in-editor highlighting)", ""},
 	{"mcp", "run as an MCP server (AI agents call scans as tools)", mcpHelp},
+	{"init", "create a starter .prowl.yaml and a git pre-commit hook", initHelp},
 	{"doctor", "self-diagnose the install", ""},
 	{"detectors", "list built-in detector types", ""},
 	{"rules", "manage detection rule templates", rulesHelp},
 	{"verifiers", "manage live-credential verifiers", verifiersHelp},
 	{"config", "validate a .prowl.yaml", configHelp},
 	{"version", "print the version", ""},
+	{"completion", "print a shell completion script (bash, zsh, fish)", completionHelp},
 	{"help", "show help for a command", ""},
 }
 
@@ -87,9 +89,7 @@ Examples:
   prowl scan . --verify --verified-only --format sarif -o report.sarif
   prowl scan screenshots/ contract.pdf --ocr
   prowl scan --staged --fail-on high            # pre-commit / CI gate
-  kubectl get secret x -o yaml | prowl scan -   # scan piped input (stdin)
-
-Run 'prowl help' for the full flag list.`
+  kubectl get secret x -o yaml | prowl scan -   # scan piped input (stdin)`
 
 const repoHelp = `prowl repo <git-url> — clone a remote repository and scan it
 
@@ -352,7 +352,7 @@ func helpFor(name string) {
 		if children := commandSubcommands[parent]; !nested && len(children) > 0 {
 			fmt.Printf("\nSubcommands: %s\n", strings.Join(children, ", "))
 		}
-		fmt.Println("\nFlags:")
+		fmt.Println()
 		fmt.Print(commandFlagHelp(name))
 		fmt.Println("\nUse -- to end flag parsing; use --flag=VALUE for values starting with --.")
 
@@ -419,14 +419,4 @@ func min3(a, b, c int) int {
 		a = c
 	}
 	return a
-}
-
-func usageText() string {
-	var output strings.Builder
-	output.WriteString("prowl — configurable secret scanner\n\nUsage: prowl <command> [flags] [targets]\n\nCommands:\n")
-	for _, command := range commands {
-		fmt.Fprintf(&output, "  %-15s %s\n", command.name, command.summary)
-	}
-	output.WriteString("\nRun 'prowl <command> --help' for accepted flags and examples.\nFlags are command-scoped; -- ends flag parsing.\n")
-	return output.String()
 }

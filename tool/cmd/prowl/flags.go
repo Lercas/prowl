@@ -502,33 +502,6 @@ func commandFlagNames(command string) []string {
 	return names
 }
 
-func commandFlagHelp(command string) string {
-	var output strings.Builder
-	for _, flag := range cliFlags {
-		applies := flag.applies(command)
-		var scopes []string
-		for _, scope := range flag.commands {
-			applies = applies || strings.HasPrefix(scope, command+".")
-			if strings.HasPrefix(scope, command+".") {
-				scopes = append(scopes, strings.ReplaceAll(scope, ".", " "))
-			}
-		}
-		if !applies {
-			continue
-		}
-		label := strings.Join(flag.names, ", ")
-		if flag.value != "" {
-			label += " " + flag.value
-		}
-		description := flag.description
-		if !flag.applies(command) && len(scopes) > 0 {
-			description += " [" + strings.Join(scopes, ", ") + "]"
-		}
-		fmt.Fprintf(&output, "  %-34s %s\n", label, description)
-	}
-	return output.String()
-}
-
 func splitCSV(s string) []string {
 	if s == "" {
 		return nil
