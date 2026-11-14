@@ -1,15 +1,16 @@
 // Package linewin runs a regex over proven literal-anchored regions instead of
 // the whole text, with results identical to a whole-text run.
 //
-// For each regex, Analyze proves two things from the parsed syntax tree, or declines:
+// For each regex, Analyze proves a required literal set and at least one region
+// bound from the parsed syntax tree, or declines:
 //
 //  1. a set of required literals — every match contains at least one of them;
-//  2. a bound on how many line breaks a match can cross (its "gaps").
+//  2. a finite byte width, a separator budget, or a finite line-gap bound.
 //
 // At scan time one Aho-Corasick pass locates the literals. Finite match widths or
 // non-consuming separators allow byte-bounded windows even on minified lines.
 // Otherwise a window uses the literal's line plus `gaps` neighboring non-blank lines.
-// Regexes that cannot be proven (no usable literal, an unbounded newline-capable construct) keep the
+// Regexes that cannot be proven (no usable literal or region bound) keep the
 // whole-text path, so adopting the package never changes what is reported.
 package linewin
 
@@ -47,11 +48,13 @@ type Plan struct {
 	// foldS / foldK: a case-insensitive literal contains 's' / 'k', which also match U+017F (ſ) and
 	// U+212A (K) — runes an ASCII-lowered literal search can't see.
 	foldS, foldK bool
-	// Byte windows use either a finite match-width proof or ASCII separators
-	// that cannot be consumed anywhere in the expression.
-	maxBytes int
-	cuts     [128]bool
-	hasCuts  bool
+	// Byte windows use a finite match width or a bound on ASCII separator
+	// bytes that can be consumed outside unbounded repetitions.
+	maxBytes  int
+	cuts      [128]bool
+	hasCuts   bool
+	cutBudget int  // finite skeleton may consume at most this many separator bytes
+	lineSafe  bool // false: an unsuccessful byte proof must use the whole text
 }
 
 // Analyze returns the windowing plan for re, or nil when windowed matching can't be proven equivalent.
@@ -65,10 +68,10 @@ func Analyze(re *regexp.Regexp) *Plan {
 	}
 	p := &Plan{}
 	gaps, ok := gapsOf(tree, p)
-	if !ok || gaps > maxGaps {
-		return nil
+	p.lineSafe = ok && gaps <= maxGaps
+	if p.lineSafe {
+		p.Gaps = gaps
 	}
-	p.Gaps = gaps
 	info := litsOf(tree)
 	lits := info.best()
 	if len(lits) == 0 {
@@ -95,6 +98,9 @@ func Analyze(re *regexp.Regexp) *Plan {
 	}
 	p.Lits = dedupe(lits)
 	p.prepareByteWindows(tree)
+	if !p.lineSafe && p.maxBytes == 0 && !p.hasCuts {
+		return nil
+	}
 	return p
 }
 

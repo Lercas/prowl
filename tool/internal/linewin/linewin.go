@@ -91,7 +91,9 @@ type Windows struct {
 }
 
 type winState struct {
-	coveredUntil int  // literal starts before this offset are covered by a complete line/separator region
+	coveredUntil int // literal starts before this offset are covered by a complete line/separator region
+	coveredFrom  int
+	byteWork     int  // bounds aggregate separator searches before reverting to a whole-text regex
 	full         bool // regions unusable for this regex — run on the whole text
 	wanted       bool
 	byteEdges    bool // artificial byte boundaries require checking every touching match
@@ -237,7 +239,7 @@ func (w *Windows) locate(hay string, unicodePass bool) {
 				if o.exact != "" && text[start:end] != o.exact {
 					continue
 				}
-				if !unicodePass && start < st.coveredUntil {
+				if !unicodePass && start >= st.coveredFrom && start < st.coveredUntil {
 					continue // complete line or separator-delimited segment already covered
 				}
 				w.add(int(o.re), start, end, unicodePass)
@@ -251,15 +253,22 @@ func (w *Windows) add(re, start, end int, unordered bool) {
 	text := w.text
 	plan := w.set.plans[re]
 	st := &w.state[re]
-	ws, we, covered, bounded := plan.byteWindow(text, start, end)
+	region, bounded := plan.byteWindow(text, start, end)
+	st.byteWork += region.work
+	if st.byteWork > 2*len(text) || (!bounded && !plan.lineSafe) {
+		st.full = true
+		return
+	}
+	ws, we := region.lo, region.hi
 	if bounded {
 		st.byteEdges = true
 		if !unordered {
-			st.coveredUntil = covered
+			st.coveredFrom, st.coveredUntil = region.coveredFrom, region.coveredUntil
 		}
 	} else {
 		ws, we = lineStart(text, start), lineEnd(text, end)
 		if !unordered {
+			st.coveredFrom = ws
 			st.coveredUntil = we
 		}
 		for g := 0; g < plan.Gaps; g++ {

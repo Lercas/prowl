@@ -26,8 +26,8 @@ func TestAnalyze(t *testing.T) {
 		{rx: `(?i)пароль=\S+`, lits: []Lit{{S: "пар", Fold: true}}}, // cut at 'о': U+1C82 folds to it
 		{rx: `(?s)ab.cd`, lits: []Lit{{S: "ab"}}, gaps: 1},
 		// not provable: whole-text
-		{rx: `[0-9]{8,10}:[A-Za-z0-9_-]{35}`},      // no literal
-		{rx: `"key"[^"]*"value"`},                  // unbounded class that can cross lines
+		{rx: `[0-9]{8,10}:[A-Za-z0-9_-]{35}`},                  // no literal
+		{rx: `"key"[^"]*"value"`, lits: []Lit{{S: `"value"`}}}, // byte proof, no finite line bound
 		{rx: `a\w{3}`},                             // literal too short
 		{rx: `-----BEGIN KEY-----\n[A-Za-z]+`},     // required literal spans a line break
 		{rx: `(?:foo|[a-z]{3})bar\d+[A-Z]{2}=\S*`}, // alternation with a literal-free branch; "bar" still required
@@ -80,6 +80,9 @@ var equivalencePatterns = []string{
 	`bar\s*\z`,
 	`(?i)(?:^|\s)-p(\S{4,})`,
 	`Ñandú=\w+`,
+	`"key"[^"]*"value"`,
+	`(?i)deepseek[\s_-]*(?:api[\s_-]*)?key["']?\s*[=:]\s*["']?(sk-[a-z0-9_-]{8,32})(?:[^a-z0-9_-]|$)`,
+	`BEGIN[A-Za-z0-9+/=\s-]{4,}?END`,
 }
 
 var fragments = []string{
@@ -89,6 +92,7 @@ var fragments = []string{
 	"hunter2abc", "S3cr3t!", "value", "\n", "\n", "\n\n", "\n \n", " ", "  ", "\t", "\r\n", "\f", "\v",
 	"пароль", "ПАРОЛЬ", "Пароль", "парᲂль", "contraseña", "CONTRASEÑA", "Ñandú", "ñandú", "\u017f", "\u212a",
 	"pa\u017f\u017f", "to\u212aen", "\u0130", "\xff", "é", "// comment", "#",
+	"deepseek", "deepseek_", "sk-abcd0123456789", "BEGIN", "END", `"key"`, `"value"`,
 }
 
 func randomText(r *rand.Rand) string {

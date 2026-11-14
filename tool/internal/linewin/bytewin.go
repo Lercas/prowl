@@ -17,11 +17,31 @@ func (p *Plan) prepareByteWindows(tree *syntax.Regexp) {
 		p.cuts[c] = !used
 		p.hasCuts = p.hasCuts || !used
 	}
+	if p.maxBytes > 0 || p.hasCuts {
+		return
+	}
+	var unbounded [128]bool
+	budget, ok := byteCost(tree, &unbounded)
+	if !ok {
+		return
+	}
+	p.cutBudget = budget
+	for c, used := range unbounded {
+		p.cuts[c] = !used
+		p.hasCuts = p.hasCuts || !used
+	}
 }
 
 // matchBytes proves a finite upper bound on bytes consumed by a match. The
 // bound includes every alternative and case-fold partner, not just captures.
 func matchBytes(tree *syntax.Regexp) (int, bool) {
+	return byteCost(tree, nil)
+}
+
+// With unbounded non-nil, repetitions contribute their alphabet to that mask
+// instead of their infinite width. The finite skeleton then bounds how many
+// bytes outside that alphabet any complete match can consume.
+func byteCost(tree *syntax.Regexp, unbounded *[128]bool) (int, bool) {
 	var size int
 	switch tree.Op {
 	case syntax.OpNoMatch, syntax.OpEmptyMatch, syntax.OpBeginLine, syntax.OpEndLine,
@@ -42,9 +62,13 @@ func matchBytes(tree *syntax.Regexp) (int, bool) {
 	case syntax.OpAnyChar, syntax.OpAnyCharNotNL:
 		size = utf8.UTFMax
 	case syntax.OpCapture, syntax.OpQuest:
-		return matchBytes(tree.Sub[0])
+		return byteCost(tree.Sub[0], unbounded)
 	case syntax.OpStar, syntax.OpPlus, syntax.OpRepeat:
-		child, finite := matchBytes(tree.Sub[0])
+		if unbounded != nil && (tree.Op != syntax.OpRepeat || tree.Max < 0) {
+			consumedASCII(tree.Sub[0], unbounded)
+			return 0, true
+		}
+		child, finite := byteCost(tree.Sub[0], unbounded)
 		if finite && child == 0 {
 			return 0, true
 		}
@@ -54,7 +78,7 @@ func matchBytes(tree *syntax.Regexp) (int, bool) {
 		size = child * tree.Max
 	case syntax.OpConcat, syntax.OpAlternate:
 		for _, sub := range tree.Sub {
-			child, finite := matchBytes(sub)
+			child, finite := byteCost(sub, unbounded)
 			if !finite {
 				return 0, false
 			}
@@ -111,50 +135,79 @@ func consumedASCII(tree *syntax.Regexp, used *[128]bool) {
 	}
 }
 
+type byteRegion struct {
+	lo, hi                    int
+	coveredFrom, coveredUntil int
+	work                      int // bytes examined while proving separators
+}
+
 // byteWindow includes real neighboring context. Finite-width matches fit
-// around their required literal; otherwise both sides must reach an actual
-// non-consuming separator or the file boundary within the size budget.
-// covered is a literal-start skip boundary, valid only for separator windows.
-func (p *Plan) byteWindow(text string, start, end int) (lo, hi, covered int, ok bool) {
+// around their required literal. Otherwise both sides must reach more
+// separator bytes than a match can consume, or a real file boundary.
+func (p *Plan) byteWindow(text string, start, end int) (region byteRegion, ok bool) {
 	if p.maxBytes > 0 {
 		padding := p.maxBytes - (end - start) + utf8.UTFMax
 		if padding < utf8.UTFMax {
-			return 0, 0, 0, false
+			return region, false
 		}
-		lo, hi = max(0, start-padding), min(len(text), end+padding)
+		lo, hi := max(0, start-padding), min(len(text), end+padding)
 		lo = runeBoundaryBefore(text, lo)
 		if before := runeBoundaryBefore(text, hi); before < hi {
 			_, size := utf8.DecodeRuneInString(text[before:])
 			hi = before + size
 		}
-		return lo, hi, 0, hi-lo <= maxByteWindow
+		region.lo, region.hi = lo, hi
+		return region, hi-lo <= maxByteWindow
 	}
 	if !p.hasCuts || end-start >= maxByteWindow-2 {
-		return 0, 0, 0, false
+		return region, false
 	}
 	radius := (maxByteWindow-(end-start))/2 - 1
-	lo = start
+	lo := start
+	remaining := p.cutBudget + 1
 	for lo > 0 && start-lo < radius {
 		lo--
+		region.work++
 		if c := text[lo]; c < 128 && p.cuts[c] {
-			break
+			remaining--
+			if remaining == 0 {
+				break
+			}
 		}
 	}
-	if lo > 0 && (text[lo] >= 128 || !p.cuts[text[lo]]) {
-		return 0, 0, 0, false
+	if lo > 0 && remaining > 0 {
+		return region, false
 	}
-	hi = end
+	hi := end
+	remaining = p.cutBudget + 1
+	firstCut := -1
 	for hi < len(text) && hi-end < radius {
 		c := text[hi]
 		hi++
+		region.work++
 		if c < 128 && p.cuts[c] {
-			return lo, hi, hi - 1, true
+			if firstCut < 0 {
+				firstCut = hi - 1
+			}
+			remaining--
+			if remaining == 0 {
+				break
+			}
 		}
 	}
-	if hi < len(text) {
-		return 0, 0, 0, false
+	if hi < len(text) && remaining > 0 {
+		return region, false
 	}
-	return lo, hi, hi, true
+	region.lo, region.hi = lo, hi
+	region.coveredFrom = start
+	region.coveredUntil = hi
+	if firstCut >= 0 {
+		region.coveredUntil = firstCut
+	}
+	if p.cutBudget == 0 {
+		region.coveredFrom = lo
+	}
+	return region, true
 }
 
 // A bounded look-behind distinguishes a split valid rune from invalid bytes,

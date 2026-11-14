@@ -1,0 +1,61 @@
+{
+  "scope": "byte-window proofs for newline-capable unbounded repetitions; remaining prefixless scans stay open",
+  "base_commit": "0ca15384c2fbe8ec7d989fa27f7b0904a602ebcd",
+  "proof": "outside the union of all unbounded-repeat ASCII alphabets, a match consumes at most B bytes from finite syntax; B+1 separators on each side contain the match",
+  "safety": {
+    "no_line_proof_and_byte_proof_failure": "whole text",
+    "separator_work_budget": "2*input bytes plus at most one 8 KiB probe per regex before whole-text fallback",
+    "skipping_cached_regions": "requires both lower and upper literal-start bounds"
+  },
+  "planning": {
+    "new_builtins": [
+      "deepseek_api_key",
+      "private_key_pem"
+    ],
+    "template_regexes_before": 406,
+    "template_regexes_after": 414,
+    "template_regexes_total": 421,
+    "remaining_builtins": [
+      "telegram_bot_token",
+      "discord_bot_token"
+    ],
+    "remaining_template_regexes": 7,
+    "basic_auth_header_coarse_anchor": "still open"
+  },
+  "validation": {
+    "full_go_suite": "passed in original worktree and clean isolated candidate",
+    "race": "linewin short suite and targeted new proofs passed",
+    "minimum_go": "go1.26.11 linewin short suite passed",
+    "lint": "0 issues",
+    "vet": "passed",
+    "weighted_window_fuzz": {
+      "executions": 122400,
+      "seconds": 6.264
+    },
+    "corpus_equivalence": {
+      "source": "clean isolated candidate",
+      "corpus": "go1.27.4 GOROOT/src",
+      "files": 12044,
+      "detector_matches": 1129,
+      "rule_hits": 3,
+      "differences": 0
+    },
+    "cli_parity": {
+      "prowlbench": {
+        "exact_findings_equal": true,
+        "findings": 2246
+      },
+      "unbounded-fixture": {
+        "exact_findings_equal": true,
+        "findings": 2
+      }
+    }
+  },
+  "limitations": [
+    "prefixless rules still need structural anchors",
+    "some real inputs still use whole-text fallback when a local byte bound cannot be proved",
+    "corpus performance gate not yet run for this revision",
+    "concurrent decoder changes excluded from candidate and commit",
+    "release not published"
+  ]
+}
