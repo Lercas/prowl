@@ -8,7 +8,7 @@ Scan every repository under a GitHub org or user, a GitLab group, or a Bitbucket
 
 By default each repository's working tree (the default branch) is scanned. Add `--history` to scan every blob in each repository's full git history instead.
 
-`prowl org` accepts every [`prowl scan`](Scanning-Files.md) flag (verification, fail-on gating, output format, rule selection, tags, …) in addition to `--history`. It is the multi-repository counterpart to [`prowl repo`](Repository-Scanning.md), which scans a single git URL. To scan a built container image rather than source, see [Container Scanning](Container-Scanning.md); to download & scan an S3 / GCS prefix, see [Cloud Storage Scanning](Bucket-Scanning.md).
+`prowl org` поддерживает общие флаги детекции, проверки, фильтрации и отчёта из [`prowl scan`](Scanning-Files.md), а также `--history`. Флаги `--staged`, `--since`, `--branch` и `--depth` для этой команды не поддерживаются; их передача возвращает код `2`. It is the multi-repository counterpart to [`prowl repo`](Repository-Scanning.md), which scans a single git URL. To scan a built container image rather than source, see [Container Scanning](Container-Scanning.md); to download & scan an S3 / GCS prefix, see [Cloud Storage Scanning](Bucket-Scanning.md).
 
 ## Targets
 
@@ -72,17 +72,19 @@ When `prowl org` scans a repository, that repository's own `.prowl.yaml` is **ig
 
 | Code | Meaning |
 |------|---------|
-| `0` | No finding tripped `--fail-on` (or it was not set), even if some repositories failed to clone. |
+| `0` | Обход завершён полностью; находки не достигли порога `--fail-on` либо порог не задан. |
 | `1` | A finding at or above the `--fail-on` threshold was found in any repository. |
-| `2` | The repository listing failed (bad target, API error, bad token), or **no** repository could be scanned. |
+| `2` | Обход неполный: ошибка API, лимит страниц, ошибка хотя бы одного clone/источника, прерывание либо неверные настройки. |
 
-The code reflects `--fail-on` over the **merged** findings of every repository, so `prowl org … --fail-on <sev>` is a CI gate over a whole org. A repository that fails to clone is logged and **skipped** — a few unreachable repos do not fail the run; only a total listing failure or zero scannable repos returns `2`. A `failed=N` line is logged when some repositories error, so partial failures stay visible.
+При частичном сбое уже полученные репозитории продолжают сканироваться, а находки сохраняются в общем отчёте вместе с диагностикой `source_error`. JSON содержит `truncated: true`; код `2` имеет приоритет над порогом находок. Такой отчёт нельзя использовать для создания baseline. Пустой, успешно полученный список даёт обычный пустой отчёт.
+
+Пагинация учитывает продолжение из `Link`/`X-Next-Page` и поля Bitbucket `next`, а не размер страницы. Переход на другой origin или endpoint запрещён до отправки токена. Ограничение `limits.org_max_pages` прекращает обход с диагностикой неполноты. API-ответ ограничен 32 MiB и должен содержать один полный JSON-документ. Повторяющиеся clone URL сканируются один раз.
 
 ## Output
 
 Repositories are cloned and scanned **in parallel** — `--concurrency N` (default `min(4, number of repos)`) — each in its own temp checkout that is removed as it finishes. Progress is logged to stderr (`scanned repo=… findings=N`) so you can watch a long sweep.
 
-All repositories' findings are merged into **one report**, with every path prefixed `"<owner>/<repo>: "` so you can tell which repository each finding came from (e.g. `octocat/linguist: samples/Apex/TwilioAPI.cls`). Because it is a single report:
+Находки всех репозиториев объединяются в один отчёт. Пути имеют вид `"<clone URL без credentials и .git>: <путь файла>"` (например, `https://github.com/octocat/linguist: samples/Apex/TwilioAPI.cls`). Путь нормализуется до вычисления fingerprint: повторный clone сохраняет идентичность находки, а одинаковые пути на разных forge не смешиваются. Baseline, созданный прежней версией `org`, может потребовать обновления после полного повторного сканирования.
 
 - **`pretty`** groups findings across the whole org by file.
 - **`json` / `sarif`** is **one valid document** spanning all repositories — pipe it straight into a SARIF consumer or `jq`, no stream-splitting needed.

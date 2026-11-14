@@ -25,8 +25,14 @@ It automatically skips:
 - Noise directories: `.git`, `node_modules`, `vendor`, `dist`, `build`, `.venv`, `__pycache__`, `target`, `.idea`, `.terraform`.
 - Unsupported binary file extensions (images, fonts, compiled objects, `.wasm`, `.exe`, `.7z`,
   `.bz2`, ...) and any ordinary file whose first bytes look binary.
-- Empty files and files larger than `--max-size`.
-- Symlinks — they are never followed, so a link pointing outside the scanned root cannot escape scope.
+- Пустые файлы. Превышение `--max-size` отмечается как неполное сканирование.
+- Симлинки, обнаруженные внутри дерева. Явно выбранный симлинк на файл или каталог сканируется.
+
+Если выбранный путь содержит `..`, Prowl сначала разрешает симлинки средствами
+операционной системы. Обход, проверка размера и чтение используют фактический
+каталог, а отображаемые пути сохраняют выбранный пользователем корень. SARIF получает
+фактический абсолютный URI отдельно: `alias/../prod.env` не превращается в ссылку
+на одноимённый файл рядом с `alias`. Исключения продолжают применяться к отображаемым путям.
 
 Once the libraries are installed, `scan` auto-loads the rule templates from `~/.prowl/rules`; `--verify` auto-loads verifiers from `~/.prowl/verifiers`. No `--rules-dir` / `--verifiers` flags are needed for the default library.
 
@@ -183,6 +189,14 @@ A baseline records known/accepted findings so subsequent scans report only what 
 | `--baseline FILE` | Suppress any finding present in `FILE`. |
 
 If neither flag is given and `.prowl-baseline.json` exists in the working directory, it is loaded automatically. When a baseline suppresses one or more findings, the number is logged (`baseline suppressed findings count=N`) so an auto-loaded baseline can't silently mask a new leak.
+
+Отмена после сканирования, при финальной обработке или перед атомарной заменой
+baseline блокирует его запись с кодом `2`. Проверка контекста выполняется после
+закрытия временного файла перед `Rename`; прежний baseline и его hardlink остаются
+нетронутыми, временный файл очищается. Уже завершённая замена не откатывается при
+более поздней отмене. Частичные результаты выводятся с диагностикой неполноты и
+`truncated: true` в JSON; фильтры и списки подавления не скрывают эту диагностику.
+При отмене код `2` имеет приоритет над кодом `1` для найденных секретов.
 
 ```bash
 prowl scan . --write-baseline .prowl-baseline.json   # snapshot accepted state

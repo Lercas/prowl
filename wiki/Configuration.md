@@ -42,6 +42,32 @@ performance:
 
 Discovery looks for `.prowl.yaml`, then `.prowl.yml`, then `prowl.yaml` in the working directory. See [Scanning Files](Scanning-Files.md) for the scan flags these defaults back.
 
+Первый существующий файл выбирается окончательно: ошибка чтения, повреждённая ссылка,
+неверный YAML или отклонённый custom regex дают код `2` до чтения/скачивания источника.
+Перехода к следующему имени или настройкам по умолчанию при ошибке нет. Это действует
+и для LSP. Конфигурация содержит ровно один непустой YAML-документ; пустые завершающие
+документы допустимы. Чтение ограничено 8 МиБ; FIFO и другие специальные файлы отклоняются
+без ожидания данных. Для внешних taxonomy/gitleaks-файлов действует лимит 16 МиБ.
+
+`performance.ml_threshold` принимает только конечное число от `0` до `1`.
+Нулевое или пропущенное значение сохраняет встроенный порог; `--ml-threshold`
+переопределяет допустимое значение из файла. NaN, бесконечность и числа вне диапазона
+блокируют загрузку конфигурации до получения источника, даже при явном флаге порога.
+`prowl config validate` проверяет те же ограничения и читает один снимок обычного
+файла размером не более 8 МиБ; FIFO и другие специальные файлы отклоняются сразу.
+
+Файлы подавления `.prowl-baseline.json` и `.gitleaksignore` в каталоге запуска
+необязательны. Явно заданный `--baseline FILE` должен существовать. Повреждённая
+ссылка, ошибка чтения или разбора любого выбранного файла дают код `2` без записи
+отчёта; частичный список не применяется. Оба файла должны быть обычными и занимать
+не более 16 МиБ, с лимитом 100 000 записей. Строка `.gitleaksignore` ограничена 1 МиБ.
+Baseline — JSON-массив непустых строк fingerprint (старое пустое значение `null`
+также допустимо). В ignore-файле каждая непустая строка без комментария `#` содержит
+`путь:правило:строка` или `commit:путь:правило:строка`; путь и правило непустые,
+номер строки неотрицательный. Ошибки UTF-8 и непарные JSON-surrogate отклоняются.
+Исправные ссылки на обычные файлы поддерживаются. Создание baseline соблюдает те же
+лимиты и сохраняет прежний файл, если новый список превышает их.
+
 ## Fields
 
 Every field of the config (from `internal/config/config.go`). All are optional.
@@ -218,7 +244,7 @@ Flags accept either a separate value or an `=`-joined value: `--format json` and
 Prowl is a drop-in for several gitleaks conventions:
 
 - The `gitleaks:allow` inline pragma is honored (alongside `prowl:allow`).
-- gitleaks `.toml` rulesets import unchanged via `--rules` (`--rules-only` for a pure drop-in). See [Rules](Rules#importing-gitleaks-and-trufflehog-rulesets).
+- CLI и LSP автоматически выбирают `.gitleaks.toml`, затем `gitleaks.toml` из каталога запуска, включая allowlist; `detectors.enable/disable` применяются после импорта. Ошибка выбранного файла блокирует загрузку политики. CLI также принимает явный `--rules`; `--rules-only` отключает автоматический импорт. Подробнее: [правила](Rules#importing-gitleaks-and-trufflehog-rulesets).
 - trufflehog `.yaml` rulesets import the same way.
 
 ## See also
