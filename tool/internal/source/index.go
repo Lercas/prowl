@@ -88,9 +88,11 @@ func GitIndexFilesIn(ctx context.Context, dir string, paths, exclude []string, m
 				return
 			}
 			if path, err := readIndexFiles(ctx, ch, root, selected, maxBytes, exclude); err != nil {
+				model.Note(ctx, "git_index_read_failed", path, true)
 				send(ctx, ch, model.Item{Source: "code", Path: path, Error: err})
 			}
 		}, func(any) {
+			model.Note(ctx, "git_index_read_failed", dir, true)
 			send(ctx, ch, model.Item{Source: "code", Error: fmt.Errorf("git index reader failed")})
 		})
 	}()
@@ -141,6 +143,7 @@ func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, sele
 		found[path] = true
 		fields := strings.Fields(head)
 		if len(fields) != 3 || fields[2] != "0" {
+			model.Note(ctx, "git_index_unmerged", path, true)
 			if !send(ctx, ch, model.Item{Source: "code", Path: path, Error: fmt.Errorf("git index entry is unresolved")}) {
 				return path, ctx.Err()
 			}
@@ -166,6 +169,7 @@ func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, sele
 			return path, err
 		}
 		if size > maxBytes {
+			model.Note(ctx, "max_size", path, true)
 			if !send(ctx, ch, model.Item{Source: "code", Path: path, Error: fmt.Errorf("staged file exceeds max-size")}) {
 				return path, ctx.Err()
 			}
@@ -176,8 +180,11 @@ func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, sele
 		}
 	}
 	for path := range selected {
-		if !found[path] && !send(ctx, ch, model.Item{Source: "code", Path: path, Error: fmt.Errorf("selected file is missing from git index")}) {
-			return path, ctx.Err()
+		if !found[path] {
+			model.Note(ctx, "git_index_entry_missing", path, true)
+			if !send(ctx, ch, model.Item{Source: "code", Path: path, Error: fmt.Errorf("selected file is missing from git index")}) {
+				return path, ctx.Err()
+			}
 		}
 	}
 	return "", nil

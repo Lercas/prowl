@@ -6,6 +6,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"compress/gzip"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -38,11 +39,13 @@ type Entry struct {
 // Stats summarizes an expansion. Skipped covers unsafe names, directories, links, and oversized
 // ordinary entries; a blown global budget is returned as an error.
 type Stats struct {
-	Archives int
-	Entries  int
-	Emitted  int
-	Skipped  int
-	Limited  int // content omitted due to size/depth limits, excluding deliberate policy skips
+	Archives     int
+	Entries      int
+	Emitted      int
+	Skipped      int
+	Oversized    int
+	DepthLimited int
+	Limited      int // content omitted due to size/depth limits, excluding deliberate policy skips
 }
 
 // BoundedLimits builds practical recursive limits from the caller's per-entry and compressed-input
@@ -77,6 +80,7 @@ const (
 )
 
 type walker struct {
+	ctx       context.Context
 	limits    Limits
 	remaining uint64
 	stats     Stats
@@ -87,11 +91,21 @@ type walker struct {
 // Walk recursively expands root and calls emit for each ordinary member. recognized=false means the
 // payload is not a supported ZIP/TAR/GZIP archive and emit was not called.
 func Walk(root string, raw []byte, limits Limits, emit func(Entry) error) (stats Stats, recognized bool, err error) {
-	return WalkFiltered(root, raw, limits, nil, emit)
+	return WalkFilteredContext(context.Background(), root, raw, limits, nil, emit)
+}
+
+// WalkContext checks cancellation between headers and during decompression reads.
+func WalkContext(ctx context.Context, root string, raw []byte, limits Limits, emit func(Entry) error) (stats Stats, recognized bool, err error) {
+	return WalkFilteredContext(ctx, root, raw, limits, nil, emit)
 }
 
 // WalkFiltered applies explicit member exclusions before decompression and size-budget accounting.
 func WalkFiltered(root string, raw []byte, limits Limits, skip func(string) bool, emit func(Entry) error) (stats Stats, recognized bool, err error) {
+	return WalkFilteredContext(context.Background(), root, raw, limits, skip, emit)
+}
+
+// WalkFilteredContext applies exclusions while respecting cancellation during expansion.
+func WalkFilteredContext(ctx context.Context, root string, raw []byte, limits Limits, skip func(string) bool, emit func(Entry) error) (stats Stats, recognized bool, err error) {
 	f := detectFormat(root, raw)
 	if f == formatNone {
 		return stats, false, nil
@@ -104,6 +118,7 @@ func WalkFiltered(root string, raw []byte, limits Limits, skip func(string) bool
 		return stats, true, fmt.Errorf("archive exceeds compressed-size limit (%d > %d)", len(raw), limits.MaxArchive)
 	}
 	w := &walker{
+		ctx:       ctx,
 		limits:    limits,
 		remaining: uint64(limits.MaxTotal), //nolint:gosec // normalizeLimits guarantees a positive int64.
 		emit:      emit,
@@ -178,8 +193,12 @@ func detectFormat(name string, raw []byte) format {
 }
 
 func (w *walker) walk(name string, raw []byte, f format, depth int) error {
+	if err := w.ctx.Err(); err != nil {
+		return err
+	}
 	if depth >= w.limits.MaxDepth {
 		w.stats.Skipped++
+		w.stats.DepthLimited++
 		w.stats.Limited++
 		return nil
 	}
@@ -205,6 +224,9 @@ func (w *walker) charge(n uint64) error {
 }
 
 func (w *walker) addHeader() error {
+	if err := w.ctx.Err(); err != nil {
+		return err
+	}
 	w.stats.Entries++
 	if w.stats.Entries > w.limits.MaxEntries {
 		return fmt.Errorf("archive exceeds the %d-entry cumulative limit", w.limits.MaxEntries)
@@ -239,11 +261,13 @@ func (w *walker) walkZIP(root string, raw []byte, depth int) error {
 		}
 		limit := w.entryReadLimit(name)
 		if f.UncompressedSize64 > math.MaxInt64 {
+			w.stats.Oversized++
 			w.stats.Skipped++
 			w.stats.Limited++
 			continue
 		}
-		if int64(f.UncompressedSize64) > limit { //nolint:gosec // MaxInt64 guard proves representability.
+		if int64(f.UncompressedSize64) > limit {
+			w.stats.Oversized++ //nolint:gosec // MaxInt64 guard proves representability.
 			w.stats.Skipped++
 			w.stats.Limited++
 			continue
@@ -252,7 +276,7 @@ func (w *walker) walkZIP(root string, raw []byte, depth int) error {
 		if err != nil {
 			return err
 		}
-		data, err := readBounded(rc, limit)
+		data, err := w.readBounded(rc, limit)
 		closeErr := rc.Close()
 		if err != nil {
 			return err
@@ -268,7 +292,7 @@ func (w *walker) walkZIP(root string, raw []byte, depth int) error {
 }
 
 func (w *walker) walkTAR(root string, raw []byte, depth int) error {
-	tr := tar.NewReader(bytes.NewReader(raw))
+	tr := tar.NewReader(contextReader{w.ctx, bytes.NewReader(raw)})
 	for {
 		h, err := tr.Next()
 		if errors.Is(err, io.EOF) {
@@ -302,11 +326,12 @@ func (w *walker) walkTAR(root string, raw []byte, depth int) error {
 		}
 		limit := w.entryReadLimit(name)
 		if h.Size > limit {
+			w.stats.Oversized++
 			w.stats.Skipped++
 			w.stats.Limited++
 			continue
 		}
-		data, err := readBounded(tr, limit)
+		data, err := w.readBounded(tr, limit)
 		if err != nil {
 			return err
 		}
@@ -326,7 +351,7 @@ func (w *walker) walkGZIP(root string, raw []byte, depth int) error {
 		w.stats.Skipped++
 		return gr.Close()
 	}
-	data, readErr := readBounded(gr, w.limits.MaxArchive)
+	data, readErr := w.readBounded(gr, w.limits.MaxArchive)
 	closeErr := gr.Close()
 	if readErr != nil {
 		return readErr
@@ -351,10 +376,14 @@ func (w *walker) entryReadLimit(name string) int64 {
 }
 
 func (w *walker) handle(name string, data []byte, depth int) error {
+	if err := w.ctx.Err(); err != nil {
+		return err
+	}
 	if f := detectFormat(name, data); f != formatNone {
 		return w.walk(name, data, f, depth+1)
 	}
 	if int64(len(data)) > w.limits.MaxEntry {
+		w.stats.Oversized++
 		w.stats.Skipped++
 		w.stats.Limited++
 		return nil
@@ -378,6 +407,21 @@ func readBounded(r io.Reader, limit int64) ([]byte, error) {
 		return nil, fmt.Errorf("archive member exceeds the %d-byte read limit", limit)
 	}
 	return data, nil
+}
+
+type contextReader struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (r contextReader) Read(p []byte) (int, error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.reader.Read(p)
+}
+func (w *walker) readBounded(r io.Reader, limit int64) ([]byte, error) {
+	return readBounded(contextReader{w.ctx, r}, limit)
 }
 
 func safeName(name string) (string, bool) {

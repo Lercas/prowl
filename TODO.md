@@ -221,6 +221,13 @@
       `wiki/evidence/1.5.0-source-map-contract-20261114.json`.
       Indexed maps/VLQ не разворачиваются; полный аудит remote adapters остаётся открыт.
 
+    - [x] Восстановлены причины неполноты Git index и архивов, читаемый plaintext
+      fallback повреждённого архива и context cancellation в unpack. Возвращены
+      выпущенные source/unpack boundary regressions. Нативная матрица — 17/17:
+      staged/conflict/empty/subdirectory, depth/malformed, reconstruction и link cap;
+      JSON/SARIF ±L2 сохраняют находку, redaction и baseline guard при ошибке архива.
+      Evidence — `wiki/evidence/1.5.0-source-boundaries-20261114.json`.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

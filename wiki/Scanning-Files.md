@@ -50,6 +50,26 @@ bounded, and `--max-size` applies to the compressed filesystem/blob input and to
 Use `--exclude '*.zip'` to skip an archive entirely, or an inner-path glob such as
 `--exclude '**/fixtures/**'` to filter members.
 
+Повреждённый архив не скрывает доступный открытый текст: после ошибки извлечения
+Prowl сканирует его читаемое представление и сохраняет уже прочитанные члены.
+Отчёт при этом неполный (`archive_incomplete`), код выхода `2`, запись baseline
+запрещена. Превышение глубины и размера члена имеет отдельную диагностику
+`archive_depth_limit` / `archive_entry_size_limit`. Отмена проверяется между
+заголовками и во время чтения распакованных данных; исходники на диск не извлекаются.
+
+Для Git index причины также различаются: `git_index_unmerged` — неразрешённый
+конфликт, `git_index_entry_missing` — отсутствующий выбранный blob,
+`git_index_read_failed` — ошибка чтения потока объектов, `max_size` — превышение
+размера staged blob. Они сохраняются отдельно от безопасного `source_error`
+в findings и делают отчёт неполным.
+
+Воспроизведение выпущенных границ:
+`python3 scripts/check_source_boundaries.py --binary /path/to/prowl --output-dir /new/private/path`.
+Необязательный `--baseline-binary` сохраняет наблюдения предыдущего бинарника;
+критерии приёмки применяются к `--binary`. Fixtures и результаты остаются для разбора,
+сеть и provider verification не используются. Evidence:
+`wiki/evidence/1.5.0-source-boundaries-20261114.json`.
+
 Office XML is converted to visible character data before scanning. Adjacent Word/Excel/PowerPoint
 text runs are joined, so a token split across multiple XML nodes is still detected.
 

@@ -43,6 +43,9 @@ func emitPayload(ctx context.Context, ch chan<- model.Item, itemPath string, dat
 }
 
 func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string, data []byte, maxBytes int64, exclude []string, meta map[string]any, depth int) bool {
+	if ctx.Err() != nil {
+		return false
+	}
 	for _, pattern := range exclude {
 		if config.PathMatch(pattern, itemPath) {
 			model.Note(ctx, "excluded_path", itemPath, false)
@@ -50,12 +53,13 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 		}
 	}
 	if depth >= maxEmbeddedPayloadDepth {
+		model.Note(ctx, "embedded_depth_limit", itemPath, true)
 		logx.Warn("embedded payload depth limit reached", "path", itemPath, "limit", maxEmbeddedPayloadDepth)
 		return emitSourceError(ctx, ch, itemPath, errors.New("embedded payload depth limit reached"))
 	}
 
 	limits := unpack.BoundedLimits(maxBytes, maxBytes)
-	stats, recognized, err := unpack.WalkFiltered(itemPath, data, limits, func(path string) bool {
+	stats, recognized, err := unpack.WalkFilteredContext(ctx, itemPath, data, limits, func(path string) bool {
 		excluded := excludedSourcePath(path, exclude)
 		if excluded {
 			model.Note(ctx, "excluded_path", path, false)
@@ -68,17 +72,27 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 		return nil
 	})
 	if recognized {
+		if stats.DepthLimited > 0 {
+			model.Note(ctx, "archive_depth_limit", itemPath, true)
+		}
+		if stats.Oversized > 0 {
+			model.Note(ctx, "archive_entry_size_limit", itemPath, true)
+		}
 		if err == nil && stats.Limited > 0 {
 			err = errors.New("archive content omitted at extraction limits")
 		}
 		if err != nil && ctx.Err() == nil {
+			model.Note(ctx, "archive_incomplete", itemPath, true)
 			logx.Warn("archive extraction incomplete", "path", itemPath, "err", err,
 				"archives", stats.Archives, "entries", stats.Entries, "emitted", stats.Emitted)
 			if !emitSourceError(ctx, ch, itemPath, err) {
 				return false
 			}
 		}
-		return ctx.Err() == nil
+		if err == nil || ctx.Err() != nil {
+			return ctx.Err() == nil
+		}
+		// Preserve visible plaintext evidence from malformed named archives.
 	}
 
 	mailStats, mailRecognized, mailErr := mailbox.WalkFiltered(
