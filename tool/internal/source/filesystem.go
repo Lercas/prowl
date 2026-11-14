@@ -29,7 +29,24 @@ func StdinLimited(ctx context.Context, maxBytes int64) <-chan model.Item {
 	return stdinFrom(ctx, os.Stdin, maxBytes)
 }
 
+// StdinNamed treats name only as a logical label and format hint. It never opens
+// or resolves that path; all content still comes exclusively from standard input.
+func StdinNamed(ctx context.Context, name string, limits ...int64) <-chan model.Item {
+	maxBytes := int64(10 << 20)
+	if len(limits) > 0 && limits[0] > 0 {
+		maxBytes = limits[0]
+	}
+	if name == "" {
+		name = "<stdin>"
+	}
+	return stdinNamedFrom(ctx, os.Stdin, maxBytes, name)
+}
+
 func stdinFrom(ctx context.Context, input io.ReadCloser, maxBytes int64) <-chan model.Item {
+	return stdinNamedFrom(ctx, input, maxBytes, "<stdin>")
+}
+
+func stdinNamedFrom(ctx context.Context, input io.ReadCloser, maxBytes int64, name string) <-chan model.Item {
 	ch := make(chan model.Item, 1)
 	go func() {
 		defer close(ch)
@@ -37,11 +54,11 @@ func stdinFrom(ctx context.Context, input io.ReadCloser, maxBytes int64) <-chan 
 		defer stopClose()
 		data, err := readSourceBytes(input, maxBytes)
 		if err != nil {
-			emitSourceError(ctx, ch, "<stdin>", err)
+			emitSourceError(ctx, ch, name, err)
 			return
 		}
 		if len(data) > 0 {
-			emitPayload(ctx, ch, "<stdin>", data, maxBytes, nil, nil)
+			emitPayload(ctx, ch, name, data, maxBytes, nil, nil)
 		}
 	}()
 	return ch

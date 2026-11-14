@@ -152,6 +152,7 @@ var cliFlags = []flagSpec{
 	stringFlag("--scope", indexedCommands+" index diff", "NAME", "стабильное имя области скана для индекса", func(c *commonFlags) *string { return &c.indexScope }),
 	enumFlag("--format", scanCommands+" index diff", "report format (default pretty; index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
 	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
+	boolFlag("--ci", scanCommands, "CI: код 1 для high/critical; явный --fail-on имеет приоритет, неполный скан — код 2", func(c *commonFlags) *bool { return &c.ci }),
 	boolFlag("--fail-on-verified", scanCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
 	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),
 	stringFlag("--taxonomy", detectorCommands, "FILE", "override the embedded taxonomy", func(c *commonFlags) *string { return &c.taxonomy }),
@@ -175,6 +176,7 @@ var cliFlags = []flagSpec{
 	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
 	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
+	stringFlag("--stdin-name", "scan", "NAME", "логическое имя stdin для выбора формата; файл не открывается", func(c *commonFlags) *string { return &c.stdinName }),
 	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
 	boolFlag("--git-timeline", "scan repo org", "построить хронологию наблюдений Git (включает --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
 	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
@@ -380,6 +382,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		return c, nil, &commandHelpRequest{command}
 	}
 	c.explicitFlags = seen
+	if c.ci && !seen["--fail-on"] {
+		c.failOn = "high"
+	}
 	if command == "guard" && (c.maxSize > 8<<20 || c.timeout <= 0 || c.timeout > 30*time.Second) {
 		return c, nil, errors.New("guard: размер не более 8 МиБ; таймаут должен быть положительным и не более 30 с")
 	}
@@ -494,7 +499,9 @@ type commonFlags struct {
 	format, failOn, taxonomy, config, output string
 	since, baseline, writeBaseline           string
 	logFormat, logLevel                      string
+	stdinName                                string
 	staged, history, gitTimeline             bool
+	ci                                       bool
 	silence, quiet, verbose, noColor         bool
 	rulesOnly                                bool
 	noAutoPolicy                             bool              // agents: only explicit rule and suppression inputs

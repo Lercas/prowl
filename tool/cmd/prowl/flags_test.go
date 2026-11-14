@@ -170,7 +170,4 @@ func TestCLIHelpRoutesDoNotOpenSourcesOrProtocolStreams(t *testing.T) {
 	if code := runCLI([]string{"scna"}); code != 2 {
 		t.Fatal("unknown command was accepted")
 	}
-	if code := runCLI(nil); code != 2 {
-		t.Fatal("missing command was accepted")
-	}
 }

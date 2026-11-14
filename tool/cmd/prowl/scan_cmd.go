@@ -181,6 +181,10 @@ func printCompare(raw, kept []model.Finding) {
 // checkSourceModes rejects mutually-exclusive scan inputs (--staged / --since / --history / '-' stdin /
 // paths) with a clear message instead of letting one silently win.
 func checkSourceModes(c commonFlags, rest []string) int {
+	if err := stdinModeError(c, rest); err != nil {
+		logx.Error(err.Error())
+		return 2
+	}
 	var modes []string
 	if c.staged {
 		modes = append(modes, "--staged")
@@ -201,6 +205,14 @@ func checkSourceModes(c commonFlags, rest []string) int {
 		return 2
 	}
 	return 0
+}
+
+// stdinModeError validates the label before configuration, reports or input I/O.
+func stdinModeError(c commonFlags, rest []string) error {
+	if c.stdinName != "" && (c.staged || c.since != "" || c.history || c.gitTimeline || len(rest) > 1 || (len(rest) == 1 && rest[0] != "-")) {
+		return fmt.Errorf("--stdin-name применяется только к stdin; пути и Git-режимы несовместимы")
+	}
+	return nil
 }
 
 // scanItems runs the full scan pipeline (config, detector, source, report) for the given roots under
@@ -269,6 +281,9 @@ func scanInput(ctx context.Context, c commonFlags, rest []string) (<-chan model.
 }
 
 func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir string) (<-chan model.Item, error) {
+	if err := stdinModeError(c, rest); err != nil {
+		return nil, err
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -297,6 +312,8 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 			return source.GitTimelineBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
 		}
 		return source.GitHistoryBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
+	case c.stdinName != "":
+		return source.StdinNamed(ctx, c.stdinName, c.maxSize), nil
 	case len(rest) == 1 && rest[0] == "-":
 		return source.StdinLimited(ctx, c.maxSize), nil
 	case len(rest) == 0 && !isTTY(os.Stdin):
