@@ -92,7 +92,11 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 		if vs >= 2 && comparisonIdentByte(text[vs-2]) || lo >= 0 && (text[lo] == '+' || text[lo] == '.') {
 			return Match{}, false
 		}
-		if ne < len(text) && (comparisonIdentByte(text[ne]) || text[ne] == '.' || text[ne] == '[' || text[ne] == '(') {
+		if ne < len(text) && comparisonIdentByte(text[ne]) {
+			return Match{}, false
+		}
+		next := skipBlanks(text, ne)
+		if next < len(text) && (text[next] == '.' || text[next] == '[' || text[next] == '(' || text[next] == '+') {
 			return Match{}, false
 		}
 	} else {
@@ -107,6 +111,10 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 			return Match{}, false
 		}
 		ns = nameStart(text, ns)
+		before := skipBlanksBack(text, ns-1)
+		if before >= 0 && text[before] == '+' {
+			return Match{}, false
+		}
 		next := skipBlanks(text, ve+1)
 		if next < len(text) && (text[next] == '+' || text[next] == '.' || text[next] == '[' || text[next] == '`') {
 			return Match{}, false

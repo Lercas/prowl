@@ -45,3 +45,18 @@ func TestComparisonIdentityDisclosureAndML(t *testing.T) {
 		}
 	}
 }
+
+func TestComparisonRejectsDerivedOperandsInPipeline(t *testing.T) {
+	p := New(Options{Detector: detector(t)})
+	for _, text := range []string{
+		`if "Kx7;mPq2" == password_value .get():`,
+		`if "Kx7;mPq2" == password_value ():`,
+		`if "Kx7;mPq2" == password + suffix:`,
+		`if prefix + password == "Kx7;mPq2":`,
+	} {
+		fs := p.Findings(t.Context(), model.Item{Source: "code", Path: "prod/auth.py", Text: text})
+		if len(fs) != 0 {
+			t.Errorf("derived operand produced a credential finding: %+v", fs)
+		}
+	}
+}
