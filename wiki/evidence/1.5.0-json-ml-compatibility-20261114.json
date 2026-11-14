@@ -1,0 +1,321 @@
+{
+  "binary": "/tmp/prowl-json-final-20261114",
+  "sha256": "a77128c06330f684aeb315fe71991a135a13d60d4fa352b6bcb1728fc8126c2f",
+  "checks": [
+    {
+      "case": 0,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 0,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 0,
+      "ml": true,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 0,
+      "ml": true,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 1,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 1,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 1,
+      "ml": true,
+      "stdin": false,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 1,
+      "ml": true,
+      "stdin": true,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 2,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 2,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 2,
+      "ml": true,
+      "stdin": false,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 2,
+      "ml": true,
+      "stdin": true,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 3,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 3,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 3,
+      "ml": true,
+      "stdin": false,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 3,
+      "ml": true,
+      "stdin": true,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 4,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 4,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 4,
+      "ml": true,
+      "stdin": false,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 4,
+      "ml": true,
+      "stdin": true,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 5,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 5,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 5,
+      "ml": true,
+      "stdin": false,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 5,
+      "ml": true,
+      "stdin": true,
+      "passed": false,
+      "found": 0,
+      "exit": 0
+    },
+    {
+      "case": 6,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 6,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 6,
+      "ml": true,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 6,
+      "ml": true,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 7,
+      "ml": false,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 7,
+      "ml": false,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 7,
+      "ml": true,
+      "stdin": false,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": 7,
+      "ml": true,
+      "stdin": true,
+      "passed": true,
+      "found": 1,
+      "exit": 0
+    },
+    {
+      "case": "surrogate",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "malformed",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "size",
+      "passed": true,
+      "exit": 2
+    }
+  ],
+  "parent_revision": "b41f18689ffd43f17fa6439932ea106e1e14186b",
+  "status": "partial: L1 canonical JSON restored; ML compatibility is not qualified",
+  "case_descriptions": [
+    "ordinary ASCII password",
+    "Unicode password and name",
+    "quotes/newline/backslash password",
+    "angle-bracket data inside password",
+    "mixed dollar-brace data inside password",
+    "mixed double-brace data inside password",
+    "Unicode-escaped AWS key",
+    "Unicode-escaped Stripe key"
+  ],
+  "passed": 25,
+  "total": 35,
+  "source_blobs": {
+    "tool/internal/detect/rules.go": "f76755b8f72b2ce824116f69c42a2d9d8b36c218",
+    "tool/internal/detect/scalars.go": "58d045d0d057d1c1143b8757fb3d379406bddd5f",
+    "tool/internal/detect/canonical.go": "c85ae05b03f78c0af4253fbf77c2cc7f2464ed10",
+    "tool/internal/model/model.go": "46f18aff1a61e4ff514a75c35ef34ce84c6f7ec1",
+    "tool/internal/model/coverage.go": "3a853fe7c6d2906bc7ab27fccd1e30b790ad1de7",
+    "tool/internal/model/provenance.go": "8cdfcd21406bcdb5351a00e4477bf263ae8c8eef",
+    "tool/internal/scan/scan.go": "7b26a9e26025595705a83e667abdf8731036a38f",
+    "tool/internal/scan/json_literals.go": "3d0c86a39e888ff046298d9468452d1946d7a0ee",
+    "tool/internal/scan/literal_pipeline.go": "bafe3e14403bfe6ef447f39510266a9004036ced",
+    "tool/internal/scan/literal_roles.go": "7f56aa7f4a2e9bb40992fce398d18eb71c6b68e9",
+    "tool/internal/scan/literal_pragmas.go": "dda636e3e89cda8b5b411eedf3cebffd6d5e2793",
+    "tool/internal/verify/verify.go": "09e075c0d16b41ab95f6bdcbfac9983b1dc96cd8",
+    "tool/internal/verify/literals.go": "13e5bdd7133596420a65f76fc232db97d9f8de3b"
+  },
+  "local_artifacts": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-json-final-20261114-3o62ik0n",
+  "source_revision": "88ff691235a630c525df7ea745fb14d7acc31688",
+  "validation": {
+    "go_1_27_4_full_suite": "passed before final allocation-free path selection; affected packages rechecked afterward",
+    "go_1_27_4_affected_package_tests": "passed",
+    "go_1_26_11_targeted_tests": "passed",
+    "race_scan_model_detect_verify": "passed",
+    "golangci_lint": "0 issues",
+    "json_inventory_fuzz": {
+      "executions": 9815,
+      "seconds": 6.614,
+      "result": "passed"
+    },
+    "native_matrix": "25/35; ten ML compatibility failures remain open"
+  }
+}
