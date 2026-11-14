@@ -43,7 +43,7 @@ jobs:
         with:
           go-version: '1.27.4'
           cache-dependency-path: tool/go.sum
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v6.2.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
       - name: prepare qualification dependencies

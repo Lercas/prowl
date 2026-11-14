@@ -83,5 +83,77 @@
     "Docker hook points to planned v1.5.0; exact final image blocked by Docker storage and pending approval",
     "Qualification uses cached Go modules with GOPROXY/GOSUMDB disabled after selecting an installed toolchain",
     "Dependency installation for the test framework is separate from offline fixture execution"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "d2c14d9",
+    "native": {
+      "passed": 14,
+      "total": 14,
+      "checks": [
+        {
+          "case": "direct-partial-staging/redacted",
+          "passed": true
+        },
+        {
+          "case": "direct-consumer-index",
+          "passed": true
+        },
+        {
+          "case": "direct-reconstruction/redacted",
+          "passed": true
+        },
+        {
+          "case": "direct-reconstruct",
+          "passed": true
+        },
+        {
+          "case": "framework-partial-staging/redacted",
+          "passed": true
+        },
+        {
+          "case": "framework-real-index",
+          "passed": true
+        },
+        {
+          "case": "framework-restored-working-copy",
+          "passed": true
+        },
+        {
+          "case": "framework-clean/redacted",
+          "passed": true
+        },
+        {
+          "case": "framework-clean-index",
+          "passed": true
+        },
+        {
+          "case": "direct-unmerged/redacted",
+          "passed": true
+        },
+        {
+          "case": "direct-incomplete",
+          "passed": true
+        },
+        {
+          "case": "installed-overlay-untouched",
+          "passed": true
+        },
+        {
+          "case": "direct-empty/redacted",
+          "passed": true
+        },
+        {
+          "case": "empty-index-scope",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-precommit-native-i04f9fv1",
+      "source_revision": "d2c14d9b7a6603afad0e05ee4f84c08e4d032895",
+      "pre_commit_version": "pre-commit 4.7.0",
+      "scope": "native script hook and real pre-commit on local disposable consumer repositories; Go module network disabled; Docker hook and publication not qualified"
+    },
+    "manifest_validation": "passed",
+    "actionlint": "passed",
+    "preserved_unrelated_dirty_work": true
+  }
 }
