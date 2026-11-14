@@ -1,5 +1,13 @@
 {
   "status": "locally qualified detailed verdict transport; not published",
+  "main_integration": {
+    "source_commit": "dcd4d4d",
+    "full_go_suite_passed": true,
+    "native_passed": 49,
+    "native_total": 49,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-verdict-native-08dwxhdl/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained"
+  },
   "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
   "native": {
     "binary_sha256": "5e663973a6534fe7840514b69fb1e3cb0e89c84d60d82f3ba2014cd8e9c2aa37",
