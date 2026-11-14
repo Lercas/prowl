@@ -26,6 +26,43 @@ prowl scan . --verify --verifiers ./verifiers
 
 Once you have run `prowl verifiers update`, `--verify` auto-loads `~/.prowl/verifiers` — no `--verifiers` flag needed. `PROWL_HOME` overrides that directory.
 
+### Подробный результат в кандидате 1.5.0
+
+JSON Finding, его `occurrences` и SARIF result properties сохраняют объект
+`verification`: `status`, `verifier`, `checked_at`, `capabilities`, `reason`.
+Старое поле `verified` сохраняет tri-state семантику:
+
+| status | verified | Смысл |
+|---|---|---|
+| `verified` | `true` | Проверка подтвердила доступ; capabilities содержат только успешные пробы. |
+| `invalid` | `false` | Провайдер отклонил предъявленные данные. |
+| `error` | `null`/нет поля | Проверка неопределённа; это не подтверждение live или отзыва. |
+| `unsupported` | `null`/нет поля | Для типа/значения не найден verifier. |
+| `skipped` | `null`/нет поля | Пример/placeholder не отправлялся провайдеру. |
+
+Без запрошенной проверки объект отсутствует. `checked_at` — UTC-время завершения
+исходной локальной попытки (RFC3339Nano), сохранённое вместе с результатом в кэше.
+Cache hit не создаёт нового времени проверки. Для unsupported/skipped и отказа
+structured binding до попытки поле отсутствует. Это не время часов провайдера.
+Метки capabilities копируются, а транспортные ошибки остаются фиксированными
+категориями: запрос, URL с credential и тело ответа в reason не переносятся.
+
+Ошибка проверки делает запрошенный скан неполным и даёт код 2, даже если фильтр
+отчёта скрывает саму находку. Из такого результата новый baseline не записывается.
+Отсутствующий/неоднозначный обязательный companion в JSON/YAML/TOML также является
+неопределённой проверкой; данные из соседнего объекта не подставляются.
+
+```sh
+python3 scripts/check_verdicts.py /path/to/prowl
+```
+
+Нативная матрица 49/49 использует собственный loopback HTTP-server и синтетические
+значения: файл/stdin, ML, JSON/SARIF, default dedupe, кэш и отказ замены baseline.
+Она не проверяет действующие credentials у внешних провайдеров. Статус `skipped`
+дополнительно покрыт unit-тестом; L1 обычно исключает такие значения до проверки.
+Evidence — `evidence/1.5.0-verdicts-20261114.json`. Восстановление default-порядка
+L2 → verification, `--verify-all` и полного coverage envelope остаётся в TODO.
+
 Переход к `./verifiers` допускается только при отсутствии установленного каталога.
 Повреждённая ссылка, файл вместо каталога, ошибка доступа или повреждённый родитель
 `PROWL_HOME` дают код `2` до получения источника или запроса провайдеру. Правильные

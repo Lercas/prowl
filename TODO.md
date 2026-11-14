@@ -84,6 +84,9 @@
     - [x] Возвращён `--ci`: порог high, явный `--fail-on` сильнее независимо от порядка
       аргументов и настроек файла. Неполнота по-прежнему даёт код 2 даже с `--ci=false`.
       Флаг не включает ML, OCR или проверку у провайдера.
+    - [ ] Восстановить default-порядок L2 → verification и явный `--verify-all`
+      из 1.4.0. Сохранить сбор подтверждённых ответов до ML для нового индекса;
+      текущая 1.5.0 вызывает verification до L2 для всех кандидатов.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
     - [x] Producer provenance передаётся в Item/Finding; восстановлены report HMAC
@@ -105,6 +108,13 @@
     - [x] SARIF result properties сохраняют report identity, occurrences, evidence,
       provenance и имеющийся verification; alert fingerprint и UTF-16 координаты
       сохранены. Полный coverage envelope и run-level metadata остаются открыты.
+    - [x] Подробные verdicts проходят из verify в Finding/occurrences и JSON/SARIF:
+      status, verifier, capabilities, checked_at, безопасный error reason. Кэш
+      сохраняет время исходной попытки; unsupported/skipped не получают ложный
+      timestamp. Ошибка провайдера или обязательного binding даёт неполноту и
+      код 2, новый baseline не записывается. Нативная loopback-матрица — 49/49;
+      `wiki/evidence/1.5.0-verdicts-20261114.json`. Полный coverage envelope,
+      порядок каскада и `--verify-all` остаются отдельными открытыми пунктами.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

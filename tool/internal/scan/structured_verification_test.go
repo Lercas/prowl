@@ -48,16 +48,16 @@ func TestStructuredCompanionVerificationRespectsObjectBoundaries(t *testing.T) {
 		{"yaml-objects", ".yaml", "one: {account: tenant_a, token: " + first + "}\ntwo: {account: tenant_b, token: " + second + "}\n", 2, false},
 		{"yaml-sequence", ".yaml", "accounts:\n  - {account: tenant_a, token: " + first + "}\n  - {account: tenant_b, token: " + second + "}\n", 2, false},
 		{"yaml-merge-override", ".yaml", "base: &a {account: tenant_a, token: " + first + "}\ncopy: {<<: *a, account: tenant_b}\n", 2, false},
-		{"yaml-scalar-alias", ".yaml", "definition: &a " + first + "\none: {account: tenant_a, token: *a}\ntwo: {account: tenant_b, token: *a}\n", 2, false},
+		{"yaml-scalar-alias", ".yaml", "definition: &a " + first + "\none: {account: tenant_a, token: *a}\ntwo: {account: tenant_b, token: *a}\n", 2, true},
 		{"yaml-binary", ".yaml", "account: tenant_a\ntoken: !!binary " + base64.StdEncoding.EncodeToString([]byte(first)) + "\n", 1, false},
 		{"toml-tables", ".toml", "[one]\naccount='tenant_a'\ntoken='" + first + "'\n[two]\naccount='tenant_b'\ntoken='" + second + "'\n", 2, false},
 		{"toml-array-tables", ".toml", "[[accounts]]\naccount='tenant_a'\ntoken='" + first + "'\n[[accounts]]\naccount='tenant_b'\ntoken='" + second + "'\n", 2, false},
 		{"toml-dotted-keys", ".toml", "one.account='tenant_a'\none.token='" + first + "'\ntwo.account='tenant_b'\ntwo.token='" + second + "'\n", 2, false},
 		{"toml-inline-array", ".toml", "accounts=[{account='tenant_a', token='" + first + "'}, {account='tenant_b', token='" + second + "'}]\n", 2, false},
-		{"yaml-other-object", ".yaml", "account: tenant_a\nother: {token: " + first + "}\n", 0, false},
-		{"toml-other-object", ".toml", "account='tenant_a'\n[other]\ntoken='" + first + "'\n", 0, false},
-		{"yaml-string-injection", ".yaml", "token: " + first + "\nnote: 'account=tenant_a'\n", 0, false},
-		{"toml-string-injection", ".toml", "token='" + first + "'\nnote='account=tenant_a'\n", 0, false},
+		{"yaml-other-object", ".yaml", "account: tenant_a\nother: {token: " + first + "}\n", 0, true},
+		{"toml-other-object", ".toml", "account='tenant_a'\n[other]\ntoken='" + first + "'\n", 0, true},
+		{"yaml-string-injection", ".yaml", "token: " + first + "\nnote: 'account=tenant_a'\n", 0, true},
+		{"toml-string-injection", ".toml", "token='" + first + "'\nnote='account=tenant_a'\n", 0, true},
 		{"yaml-duplicate", ".yaml", "token: " + first + "\naccount: tenant_a\naccount: tenant_b\n", 0, true},
 		{"yaml-unknown-tag", ".yaml", "token: !env " + first + "\naccount: tenant_a\n", 0, true},
 		{"yaml-alias-cycle", ".yaml", "base: &a {self: *a, account: tenant_a, token: " + first + "}\n", 0, true},
@@ -80,6 +80,12 @@ func TestStructuredCompanionVerificationRespectsObjectBoundaries(t *testing.T) {
 				incomplete = incomplete || model.IsIncompleteFinding(f)
 				if f.Verified != nil {
 					verdicts++
+					if f.Verification == nil || f.Verification.Status != "invalid" || f.Verification.Verifier == "" || f.Verification.CheckedAt == "" {
+						t.Fatal("confirmed rejection lost its detailed source verdict")
+					}
+				}
+				if c.calls == 0 && f.Verification != nil && f.Verification.CheckedAt != "" {
+					t.Fatal("a blocked structured check acquired a provider attempt timestamp")
 				}
 				if strings.Contains(f.Rationale, first) || strings.Contains(f.Rationale, second) {
 					t.Fatal("verification rationale leaked a credential")

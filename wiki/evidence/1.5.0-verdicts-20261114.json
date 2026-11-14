@@ -1,0 +1,367 @@
+{
+  "status": "locally qualified detailed verdict transport; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "native": {
+    "binary_sha256": "5e663973a6534fe7840514b69fb1e3cb0e89c84d60d82f3ba2014cd8e9c2aa37",
+    "passed": 49,
+    "total": 49,
+    "checks": [
+      {
+        "status": "verified",
+        "stdin": false,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": false,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": false,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": false,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": true,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": true,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": true,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "stdin": true,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "case": "default-dedupe",
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "verified",
+        "case": "default-dedupe",
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": false,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": false,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": false,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": false,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": true,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": true,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": true,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "stdin": true,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "case": "default-dedupe",
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "invalid",
+        "case": "default-dedupe",
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": false,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": false,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": false,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": false,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": true,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": true,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": true,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "stdin": true,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "case": "default-dedupe",
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "error",
+        "case": "default-dedupe",
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": false,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": false,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": false,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": false,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": true,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": true,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": true,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "stdin": true,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "case": "default-dedupe",
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "unsupported",
+        "case": "default-dedupe",
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": false,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": false,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": false,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": false,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": true,
+        "ml": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": true,
+        "ml": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": true,
+        "ml": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "status": "off",
+        "stdin": true,
+        "ml": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "provider-error-preserves-baseline",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite": true,
+    "affected_race": true,
+    "minimum_go_1_26_11": true,
+    "golangci_lint_issues": 0
+  },
+  "contracts": [
+    "typed status, verifier, capabilities and attempt time reach Finding and occurrence metadata",
+    "legacy verified boolean remains tri-state",
+    "cached definite result preserves original local attempt completion time",
+    "unsupported/skipped and blocked structured bindings do not fabricate an attempt time",
+    "capability slices are copied at cache and report boundaries",
+    "provider errors and missing required structured companions remain inconclusive and incomplete",
+    "provider failure gives exit 2 and cannot overwrite a baseline through severity filtering",
+    "JSON diagnostic locators are sanitized; declared ArtifactURI contract is retained",
+    "verification error reason does not serialize request credentials or provider response bodies"
+  ],
+  "limitations": [
+    "Owned loopback HTTP fixture only; no external credential or provider acceptance",
+    "Default verification ordering and --verify-all restoration remain pending",
+    "Complete coverage envelope and SARIF run-level metadata remain pending",
+    "Private index confirmation dates continue to denote scan observations; its storage format was not changed",
+    "Installed runtime and published release artifacts unchanged"
+  ]
+}

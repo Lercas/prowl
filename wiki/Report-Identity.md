@@ -79,5 +79,8 @@ JSON/SARIF-отчётом. Проверены файл/stdin, keyless/keyed, ML,
 реестр и live provider для этой проверки не используются. Evidence —
 `evidence/1.5.0-occurrences-20261114.json`.
 
-Полный coverage envelope, run-level свойства SARIF, транспорт подробных verdicts
-из верификатора и остальные контракты выпущенной базы остаются открытыми в TODO.
+Подробные verdicts из верификатора также проходят в Finding и occurrences:
+статус, имя verifier, время исходной попытки, capabilities и безопасная причина
+ошибки. Формат и границы описаны в [Live Verification](Live-Verification.md).
+Полный coverage envelope, run-level свойства SARIF, порядок каскада и остальные
+контракты выпущенной базы остаются открытыми в TODO.

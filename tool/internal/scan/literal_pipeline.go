@@ -53,16 +53,16 @@ func (doc *literalDocument) accepts(typ string, start, end int) bool {
 	return typ != "generic_password" || v.raw || start == v.preparedStart && end == v.preparedEnd
 }
 
-func applyLiteralVerify(ctx context.Context, vset *verify.Set, doc *literalDocument, typ, value string, start, end int, original string) (*bool, string) {
+func applyLiteralVerify(ctx context.Context, vset *verify.Set, doc *literalDocument, typ, value string, start, end int, original string) (*bool, string, *model.Verification) {
 	if vset == nil {
-		return nil, ""
+		return nil, "", nil
 	}
 	if doc == nil {
 		return applyVerify(ctx, vset, typ, value, original)
 	}
 	v := doc.locate(start, end)
 	if v == nil || doc.verificationUnsafe || doc.unsafeGroups[v.group] {
-		return nil, "verification inconclusive: structured literal could not be established"
+		return verificationResult(verify.Result{Status: verify.Errored, Note: "structured literal could not be established"})
 	}
 	return verificationResult(vset.VerifyLiteral(ctx, typ, value, doc.bindings[v.group], detect.IsExampleOrPlaceholder(value)))
 }

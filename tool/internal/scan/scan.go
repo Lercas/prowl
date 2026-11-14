@@ -344,7 +344,7 @@ func (p *Pipeline) Run(ctx context.Context, items <-chan model.Item) []model.Fin
 
 func processingError(it model.Item, reason string) model.Finding {
 	return model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
-		Source: it.Source, Path: it.Path, ArtifactURI: it.ArtifactURI, Stage: "intake", Rationale: reason}
+		Source: it.Source, Path: model.SafeLocator(it.Path), ArtifactURI: it.ArtifactURI, Stage: "intake", Rationale: reason}
 }
 
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
@@ -372,7 +372,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		model.CoverageFrom(ctx).Filtered()
 	}
 	if !complete {
-		result = append(result, processingError(it, "source content could not be completely interpreted; results are incomplete"))
+		result = append(result, processingError(it, "scan could not complete all requested checks; results are incomplete"))
 		if record, _ := it.Meta["git_history"].(*model.GitRecord); record != nil {
 			record.Graph.Inspected.Store(record.Object, false)
 		}
@@ -512,7 +512,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
-		ver, why := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, verificationText)
+		ver, why, check := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, verificationText)
+		noteVerificationFailure(ctx, it.Path, check)
 		out = append(out, model.Finding{
 			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
@@ -524,7 +525,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			Fingerprint:      model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			ValueFingerprint: p.valueFingerprint(m.Value), IndexPath: p.indexText(it.Path, ""),
 			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
-			Verified: ver, Rationale: why, Instruction: itemInstr,
+			Verified: ver, Rationale: why, Verification: check, Instruction: itemInstr,
 			ImageEntry: it.ImageEntry,
 			Context:    p.revealMatchContext(it, m),
 		})
@@ -604,7 +605,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if sev == "" {
 				sev = severityFor(h.Category, 0.9)
 			}
-			ver, why := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, verificationText)
+			ver, why, check := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, verificationText)
+			noteVerificationFailure(ctx, it.Path, check)
 			f := model.Finding{
 				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
@@ -616,7 +618,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				Fingerprint:      model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				ValueFingerprint: p.valueFingerprint(h.Value), IndexPath: p.indexText(it.Path, ""),
 				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
-				Verified: ver, Rationale: why, Instruction: itemInstr,
+				Verified: ver, Rationale: why, Verification: check, Instruction: itemInstr,
 				ImageEntry: it.ImageEntry,
 				Context:    p.revealContext(it, h.Start),
 			}
@@ -906,29 +908,30 @@ func stronger(a, b model.Finding) bool {
 
 // applyVerify runs the opt-in live-credential check on a raw secret before redaction, returning a
 // tri-state pointer (nil = not attempted/inconclusive) and a human rationale.
-func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context string) (*bool, string) {
+func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context string) (*bool, string, *model.Verification) {
 	if vset == nil {
-		return nil, ""
+		return nil, "", nil
 	}
 	r := vset.Verify(ctx, typeID, raw, context, detect.IsExampleOrPlaceholder(raw))
 	return verificationResult(r)
 }
 
-func verificationResult(r verify.Result) (*bool, string) {
+func verificationResult(r verify.Result) (*bool, string, *model.Verification) {
+	detail := verificationMetadata(r)
 	switch r.Status {
 	case verify.Verified:
 		t := true
 		if r.Note != "" {
-			return &t, "verified live: " + r.Note // carries the blast radius (unlocks: …) when mapped
+			return &t, "verified live: " + r.Note, detail // carries the blast radius (unlocks: …) when mapped
 		}
-		return &t, "verified live via " + r.Verifier
+		return &t, "verified live via " + r.Verifier, detail
 	case verify.Invalid:
 		f := false
-		return &f, "provider rejected the credential (" + r.Verifier + ")"
+		return &f, "provider rejected the credential (" + r.Verifier + ")", detail
 	case verify.Errored:
-		return nil, "verification inconclusive: " + r.Note
+		return nil, "verification inconclusive: " + r.Note, detail
 	default:
-		return nil, ""
+		return nil, "", detail
 	}
 }
 

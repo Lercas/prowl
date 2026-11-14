@@ -45,6 +45,9 @@ type Result struct {
 	// Access is the blast radius: the capability labels of the probes that succeeded (what the live
 	// key actually unlocks), for verifiers whose requests carry a `capability`.
 	Access []string
+	// CheckedAt is completion of the original attempt, retained on cache hits.
+	// It is zero when no attempt was made (unsupported, skipped, or rejected input).
+	CheckedAt time.Time
 }
 
 // Matcher is a conditional check on a response: status code, a word in the body/headers, or a regex.
@@ -318,6 +321,7 @@ func (s *Set) verify(ctx context.Context, typeID, value, text string, bindings m
 	if err := ctx.Err(); err != nil {
 		pending.result = Result{Status: Errored, Verifier: v.ID, Note: classifyErr(err)}
 	}
+	pending.result.CheckedAt = time.Now().UTC()
 	return copyResult(pending.result)
 }
 
