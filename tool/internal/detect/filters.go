@@ -422,9 +422,35 @@ func HasSecretNameContext(text string, start int) bool {
 	name := BindingName(text, start)
 	if name == "" {
 		before := lineBefore(text, start)
-		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || reProseSecretContext.MatchString(before)
+		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || reProseSecretContext.MatchString(before) || proseNamesSecret(before)
 	}
 	return IsSecretBindingName(name)
+}
+
+// reProseNamedSecret matches prose that names a credential by its identifier right before the value:
+// "the staging awsSecretKey is <v>", "rotate the AWS_SECRET_ACCESS_KEY (<v>)", "set `api_key` to `<v>`",
+// "DATADOG_API_KEY: !secret <v>". The identifier must end the clause: at most three connective words
+// may follow it, so an earlier property on a dense line still cannot lend its name to an unrelated
+// value. A separator is mandatory, and a dash counts only between spaces: in `secrets.GPG_KEY_<hex>`
+// and `docker-credential-helpers/…` the run is part of the name, not a value.
+var reProseNamedSecret = regexp.MustCompile(`(?:^|[^a-z0-9_])([a-z0-9_.-]*(?:secret|token|passwd|password|passwort|pwd|api[_ -]?key|[a-z0-9]_key|credential)[a-z0-9_]*)[` + "`" + `"']?` +
+	`(?:\s+(?:is|was|equals|lautet|ist|est|actuel|actual|atual|é|è|es|to|now|は|是)){0,3}` +
+	`(?:\s*[(:（：]\s*|\s+[—–-]\s+|\s+)(?:!secret\s+)?[` + "`" + `"'(]?$`)
+
+// proseNamesSecret applies the same name exclusions as an assignment: an id, hash or public key
+// named in prose is not credential evidence either.
+func proseNamesSecret(before string) bool {
+	m := reProseNamedSecret.FindStringSubmatch(before)
+	if m == nil {
+		return false
+	}
+	name := strings.TrimRight(m[1], ".-")
+	for _, suffix := range []string{"public_key", "publickey", "_id", "-id", "hash", "checksum", "digest", "_name", "_type", "_url", "_path", "_file"} {
+		if strings.HasSuffix(name, suffix) {
+			return false
+		}
+	}
+	return true
 }
 
 // IsSecretBindingName classifies the adjacent name, shared with ML's evidence guard.

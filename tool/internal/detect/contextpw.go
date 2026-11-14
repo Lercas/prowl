@@ -76,6 +76,72 @@ func isTokenChar(c byte) bool {
 		c == '*' || c == '_' || c == '-' || c == '+' || c == '=' || c == '.'
 }
 
+// cueEndsIdentifier accepts a cue that closes a snake_case name written in prose ("the staging
+// db_password is …"): the name is the credential, exactly as in an assignment.
+func cueEndsIdentifier(line string, start, end int) bool {
+	if start == 0 || line[start-1] != '_' {
+		return false
+	}
+	if end < len(line) {
+		if r, _ := utf8.DecodeRuneInString(line[end:]); unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
+			return false
+		}
+	}
+	return true
+}
+
+// skipCueSeparators returns the width of spacing and value-introducing punctuation before the next
+// word: "password: x", "пароль сервиса — x". An opening bracket counts only directly after the cue
+// ("password (x)", "passwd（x）"): later in the clause it is a call (`Password: mask("x")`). A comma
+// always ends the clause, as in a signature `password: str, mode: str = "oauth2flow"`.
+func skipCueSeparators(s string, afterCue bool) int {
+	set := " \t:=\"'`—–："
+	if afterCue {
+		set += "(（"
+	}
+	n := 0
+	for n < len(s) {
+		r, size := utf8.DecodeRuneInString(s[n:])
+		if !strings.ContainsRune(set, r) {
+			break
+		}
+		n += size
+	}
+	return n
+}
+
+// maxWeakPasswordGap is how many free prose words may separate a cue from a weak value (lowercase
+// letters and digits only). Such a value looks like any word with a digit ("rpm2cpio" in a list of
+// commands), so it needs the cue close by; a value with a capital or a symbol may sit further away.
+const maxWeakPasswordGap = 2
+
+func isWeakPasswordToken(tok string) bool {
+	for i := 0; i < len(tok); i++ {
+		if c := tok[i]; !(c >= 'a' && c <= 'z' || c >= '0' && c <= '9') {
+			return false
+		}
+	}
+	return true
+}
+
+// maxProseWordRunes bounds a connective: longer runs are names or values, not grammar.
+const maxProseWordRunes = 12
+
+// isProseWord reports whether tok is an ordinary lowercase word that may stand between a password
+// cue and its value ("password for the admin account is …"). Letters only: a digit, a symbol or an
+// inner capital makes it a name or a value, which ends the clause.
+func isProseWord(tok string) bool {
+	n := 0
+	for _, r := range tok {
+		// A leading capital is a noun or a sentence start ("Konto"); an inner one is a name.
+		if !unicode.IsLetter(r) || n > 0 && unicode.IsUpper(r) {
+			return false
+		}
+		n++
+	}
+	return n > 0 && n <= maxProseWordRunes
+}
+
 // contextualPassword finds a password token in any line carrying a credential cue but no adjacent
 // assignment. lower is the per-line ASCII-lowercased text (offsets match); uniLower is the Unicode-correct
 // lowercase (empty when pure ASCII), used only to detect non-ASCII cues — spans always come from the
@@ -114,37 +180,46 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 		lineStart = i + 1
 		beforeCount := len(out)
 		for _, cue := range passwordCueRE.FindAllStringIndex(line, maxScanMatches) {
-			if !cueWordBoundary(line, cue[0], cue[1]) {
+			if !cueWordBoundary(line, cue[0], cue[1]) && !cueEndsIdentifier(line, cue[0], cue[1]) {
 				continue
 			}
 			j := cue[1]
+			freeWords := 0
 			for words := 0; words < 6 && j < len(line) && j-cue[1] < 96; words++ {
-				for j < len(line) && strings.ContainsRune(" \t:=\"'`", rune(line[j])) {
-					j++
-				}
+				j += skipCueSeparators(line[j:], words == 0)
 				k := j
 				for k < len(line) && isTokenChar(line[k]) {
 					k++
 				}
-				if k == j {
-					// Unicode connectives are words too; byte offsets always refer to the original source.
-					for k < len(line) {
-						r, n := utf8.DecodeRuneInString(line[k:])
-						if !unicode.IsLetter(r) {
-							break
-						}
-						k += n
+				// Unicode connectives are words too ("für", "сервиса"); byte offsets always refer to
+				// the original source. An ASCII run continues only into letters, never out of a value.
+				for k < len(line) && line[k] >= utf8.RuneSelf {
+					r, n := utf8.DecodeRuneInString(line[k:])
+					if !unicode.IsLetter(r) {
+						break
+					}
+					k += n
+					for k < len(line) && (line[k] >= 'a' && line[k] <= 'z' || line[k] >= 'A' && line[k] <= 'Z') {
+						k++
 					}
 				}
+				// A full stop that closes the sentence is not part of the value.
+				for k > j+1 && line[k-1] == '.' && (k == len(line) || line[k] == ' ') {
+					k--
+				}
 				tok := line[j:k]
-				if isLikelyPasswordToken(tok) && (k == len(line) || !strings.ContainsRune("([.=", rune(line[k]))) {
+				if isLikelyPasswordToken(tok) && (k == len(line) || !strings.ContainsRune("([=", rune(line[k])) && (line[k] != '.' || k+1 == len(line) || line[k+1] == ' ')) &&
+					(freeWords <= maxWeakPasswordGap || !isWeakPasswordToken(tok)) {
 					out = append(out, Match{Type: "generic_password", Value: tok,
 						Start: base + j, End: base + k, Confidence: 0.6,
 						Category: "generic", Stage: "L1-context-pw"})
 					break
 				}
 				if !passwordConnectives[strings.ToLower(tok)] {
-					break
+					if !isProseWord(tok) {
+						break
+					}
+					freeWords++
 				}
 				j = k
 			}
