@@ -6,9 +6,77 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/Lercas/prowl/tool/internal/model"
 )
+
+func TestGitChangedFilesStatusShapedNames(t *testing.T) {
+	dir, run := gitRepo(t)
+	names := []string{"C090", "R100", "a.txt", "b.txt"}
+	for _, name := range names {
+		write(t, filepath.Join(dir, name), "tracked content\n")
+	}
+	run("add", "-A")
+	t.Chdir(dir)
+	files, err := GitChangedFiles(context.Background(), "staged", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]bool{}
+	for _, file := range files {
+		got[file] = true
+	}
+	for _, name := range names {
+		if !got[name] {
+			t.Errorf("changed file %q missing from %q", name, files)
+		}
+	}
+}
+
+func TestProcessBlobPreservesPathWhitespace(t *testing.T) {
+	const sha = "0123456789012345678901234567890123456789"
+	for _, path := range []string{" file.txt ", "\tfile.txt\t", "file.txt\r"} {
+		t.Run(path, func(t *testing.T) {
+			ch := make(chan model.Item, 1)
+			br := bufio.NewReader(strings.NewReader(sha + " blob 5\nhello\n"))
+			var requests strings.Builder
+			if !processBlob(context.Background(), ch, br, &requests, sha+" "+path+"\n", nil, 1024) {
+				t.Fatal("blob processing failed")
+			}
+			select {
+			case item := <-ch:
+				if item.Path != path || item.Text != "hello" {
+					t.Fatalf("item = %+v, want path %q and original text", item, path)
+				}
+			default:
+				t.Fatal("blob was not emitted")
+			}
+		})
+	}
+}
+
+func TestGitHistoryPreservesPathWhitespace(t *testing.T) {
+	dir, run := gitRepo(t)
+	paths := []string{" padded.txt ", "tabbed.txt\t", "carriage.txt\r"}
+	for i, path := range paths {
+		write(t, filepath.Join(dir, path), strings.Repeat("content", i+1))
+	}
+	run("add", "-A")
+	run("commit", "-qm", "path fixtures")
+	got := map[string]bool{}
+	for item := range GitHistoryBlobs(context.Background(), dir, nil, 1024) {
+		got[item.Path] = true
+	}
+	for _, path := range paths {
+		if !got[path] {
+			t.Errorf("history lost original path %q: got %v", path, got)
+		}
+	}
+}
 
 // TestGitChangedFilesRejectsOptionRev: a "since" rev shaped like a git option (--output=<path>) must be
 // rejected before exec and must not cause `git diff` to write to the attacker-chosen path.
@@ -307,22 +375,6 @@ func TestGitChangedFilesPureRenameNoCrash(t *testing.T) {
 	}
 }
 
-// TestRenameStatusTokenParsing checks the rename-status-token regexp: valid score tokens (R100, C090)
-// match, while real filenames (README, config.go) do not.
-func TestRenameStatusTokenParsing(t *testing.T) {
-	for _, tok := range []string{"R100", "R074", "C090", "R0"} {
-		if !renameStatusToken.MatchString(tok) {
-			t.Errorf("renameStatusToken(%q) = false, want true (valid rename/copy score token)", tok)
-		}
-	}
-	// Real filenames must NOT be misread as status tokens (no all-digit score / wrong shape).
-	for _, name := range []string{"R", "README", "Rakefile", "RENAME.md", "A", "old.txt", "C", "config.go", "R12x"} {
-		if renameStatusToken.MatchString(name) {
-			t.Errorf("renameStatusToken(%q) = true, want false (a real filename wrongly treated as a status token)", name)
-		}
-	}
-}
-
 func TestCheckRev(t *testing.T) {
 	bad := []string{"-x", "--output=/tmp/x", "--since=--output=/x", "-O/tmp/x", "--"}
 	for _, r := range bad {
@@ -432,5 +484,49 @@ func TestConsumeBlobMissingTrailingNewline(t *testing.T) {
 	_, err := consumeBlob(br, int64(len("hello")), 1<<20)
 	if err == nil {
 		t.Fatal("missing trailing newline should surface as an error")
+	}
+}
+
+func TestConsumeBlobRejectsWrongTerminator(t *testing.T) {
+	br := bufio.NewReader(strings.NewReader("helloXnext\n"))
+	if _, err := consumeBlob(br, 5, 1024); err == nil {
+		t.Fatal("invalid frame terminator must fail rather than desynchronize the next object")
+	}
+}
+
+func TestGitHistoryCommandFailureIsIncomplete(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell fixture requires POSIX")
+	}
+	dir := t.TempDir()
+	script := "#!/bin/sh\ncase \"$1\" in\nrev-list) exit 7;;\ncat-file) while IFS= read -r line; do :; done;;\nesac\n"
+	if err := os.WriteFile(filepath.Join(dir, "git"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	items := archiveItems(GitHistoryBlobs(ctx, dir, nil, 1024))
+	if ctx.Err() != nil || len(items) != 1 || items[0].Error == nil {
+		t.Fatalf("failed history command was clean or hung: items=%+v ctx=%v", items, ctx.Err())
+	}
+}
+
+func TestGitHistoryEarlyFailureReapsBlockedProducer(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell fixture requires POSIX")
+	}
+	dir := t.TempDir()
+	const sha = "0123456789012345678901234567890123456789"
+	script := "#!/bin/sh\ncase \"$1\" in\nrev-list) while :; do printf '" + sha + " file.env\\n'; done;;\ncat-file) IFS= read -r line; printf '" + sha + " missing\\n'; exit 0;;\nesac\n"
+	if err := os.WriteFile(filepath.Join(dir, "git"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	items := archiveItems(GitHistoryBlobs(ctx, dir, nil, 1024))
+	if ctx.Err() != nil || len(items) != 1 || items[0].Error == nil {
+		t.Fatalf("history abort did not stop/reap rev-list: items=%+v ctx=%v", items, ctx.Err())
 	}
 }

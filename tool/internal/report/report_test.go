@@ -3,12 +3,58 @@ package report
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"math"
 	"strings"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/model"
 )
+
+type failingReportWriter struct {
+	remaining int
+	err       error
+}
+
+func (w *failingReportWriter) Write(p []byte) (int, error) {
+	if len(p) <= w.remaining {
+		w.remaining -= len(p)
+		return len(p), nil
+	}
+	n := w.remaining
+	w.remaining = 0
+	return n, w.err
+}
+
+func TestPrettyPropagatesWriteFailure(t *testing.T) {
+	failure := errors.New("report destination failed")
+	for _, findings := range [][]model.Finding{nil, sample} {
+		for _, budget := range []int{0, 12} {
+			for _, writerErr := range []error{failure, nil} {
+				w := &failingReportWriter{remaining: budget, err: writerErr}
+				want := writerErr
+				if want == nil {
+					want = io.ErrShortWrite
+				}
+				if err := Write(w, findings, "pretty", false); !errors.Is(err, want) {
+					t.Errorf("Write(budget=%d, findings=%d) = %v, want %v", budget, len(findings), err, want)
+				}
+			}
+		}
+	}
+}
+
+func TestPrettySanitizesImportedType(t *testing.T) {
+	var out bytes.Buffer
+	findings := []model.Finding{{Type: "rule\x1b[2J\x00id", Severity: "high", Path: "a.txt", Line: 1, Redacted: "****"}}
+	if err := Write(&out, findings, "pretty", false); err != nil {
+		t.Fatal(err)
+	}
+	if strings.ContainsAny(out.String(), "\x1b\x00") || !strings.Contains(out.String(), "rule[2Jid") {
+		t.Fatalf("unsafe imported type in report: %q", out.String())
+	}
+}
 
 func TestBBSummary(t *testing.T) {
 	tru, fls := true, false
@@ -60,6 +106,26 @@ func TestSARIFValid(t *testing.T) {
 	}
 }
 
+func TestSARIFCleanRunHasArrays(t *testing.T) {
+	for _, fs := range [][]model.Finding{nil, {}} {
+		var buf bytes.Buffer
+		if err := Write(&buf, fs, "sarif", false); err != nil {
+			t.Fatal(err)
+		}
+		var doc map[string]any
+		if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
+			t.Fatal(err)
+		}
+		run := doc["runs"].([]any)[0].(map[string]any)
+		driver := run["tool"].(map[string]any)["driver"].(map[string]any)
+		for name, value := range map[string]any{"rules": driver["rules"], "results": run["results"]} {
+			if array, ok := value.([]any); !ok || len(array) != 0 {
+				t.Errorf("clean run %s must be an empty array, got %v", name, value)
+			}
+		}
+	}
+}
+
 func TestJSONCount(t *testing.T) {
 	var buf bytes.Buffer
 	Write(&buf, sample, "json", false)
@@ -72,6 +138,21 @@ func TestJSONCount(t *testing.T) {
 	}
 	if doc.Count != 2 || len(doc.Findings) != 2 {
 		t.Errorf("count=%d findings=%d", doc.Count, len(doc.Findings))
+	}
+}
+
+func TestUTF16MetadataDoesNotChangeJSONColumn(t *testing.T) {
+	var buf bytes.Buffer
+	fs := []model.Finding{{Type: "owned", Severity: "high", Line: 2, Col: 15, UTF16Col: 9}}
+	if err := Write(&buf, fs, "json", false); err != nil {
+		t.Fatal(err)
+	}
+	var doc struct{ Findings []map[string]any }
+	if err := json.Unmarshal(buf.Bytes(), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if doc.Findings[0]["col"] != float64(15) || strings.Contains(strings.ToLower(buf.String()), "utf16") {
+		t.Fatal("internal SARIF coordinates changed the public JSON finding")
 	}
 }
 

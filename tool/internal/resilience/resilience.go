@@ -4,10 +4,24 @@ package resilience
 
 import (
 	"context"
+	"errors"
+	"math"
 	"math/rand"
 	"sync"
 	"time"
 )
+
+type permanentError struct{ error }
+
+func (err permanentError) Unwrap() error { return err.error }
+
+// Permanent marks a failure that another attempt cannot fix while preserving errors.Is/As.
+func Permanent(err error) error {
+	if err == nil {
+		return nil
+	}
+	return permanentError{err}
+}
 
 // Retry runs fn until it returns nil, attempts are exhausted, or ctx is cancelled. Backoff grows
 // exponentially from base (capped at maxDelay) with full jitter to avoid thundering herds.
@@ -23,14 +37,14 @@ func Retry(ctx context.Context, attempts int, base, maxDelay time.Duration, fn f
 		if err = fn(); err == nil {
 			return nil
 		}
+		var terminal permanentError
+		if errors.As(err, &terminal) {
+			return err
+		}
 		if i == attempts-1 {
 			break
 		}
-		delay := base << i
-		if delay > maxDelay || delay <= 0 {
-			delay = maxDelay
-		}
-		jittered := time.Duration(rand.Int63n(int64(delay) + 1)) // full jitter
+		jittered := retryJitter(retryBackoff(base, maxDelay, i))
 		select {
 		case <-time.After(jittered):
 		case <-ctx.Done():
@@ -38,6 +52,31 @@ func Retry(ctx context.Context, attempts int, base, maxDelay time.Duration, fn f
 		}
 	}
 	return err
+}
+
+// retryBackoff saturates before shifting, so exponential growth cannot wrap into a smaller delay.
+// A nonpositive base or cap disables waiting; it does not disable the bounded attempts.
+func retryBackoff(base, maxDelay time.Duration, attempt int) time.Duration {
+	if base <= 0 || maxDelay <= 0 {
+		return 0
+	}
+	if attempt < 0 {
+		attempt = 0
+	}
+	if attempt >= 63 || base > maxDelay>>attempt {
+		return maxDelay
+	}
+	return base << attempt
+}
+
+func retryJitter(delay time.Duration) time.Duration {
+	if delay <= 0 {
+		return 0
+	}
+	if delay == time.Duration(math.MaxInt64) {
+		return time.Duration(rand.Int63()) // [0, MaxInt64], without overflowing the exclusive bound
+	}
+	return time.Duration(rand.Int63n(int64(delay) + 1))
 }
 
 // Breaker is a per-key circuit breaker: after `threshold` consecutive failures for a key it opens

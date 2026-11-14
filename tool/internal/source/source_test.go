@@ -45,7 +45,7 @@ func TestFilesystemWalkFiltering(t *testing.T) {
 	write(t, filepath.Join(dir, "big.go"), strings.Repeat("x", 5000))
 	write(t, filepath.Join(dir, "skipme.txt"), "excluded by substr")
 
-	got := drain(Filesystem(context.Background(), []string{dir}, []string{"skipme"}, 1000)) // maxSize 1000 -> big.go skipped
+	got := drain(Filesystem(context.Background(), []string{dir}, []string{"skipme"}, 1000)) // maxSize 1000 -> big.go diagnosed
 
 	if _, ok := got["a.py"]; !ok {
 		t.Error("a.py should be scanned")
@@ -56,7 +56,10 @@ func TestFilesystemWalkFiltering(t *testing.T) {
 	if got["a.py"].Source != "code" {
 		t.Error("a.py source should be code")
 	}
-	for _, skip := range []string{"lib.js", "logo.png", "bin.dat", "big.go", "skipme.txt"} {
+	if got["big.go"].Error == nil {
+		t.Error("oversized file must preserve an incomplete-source diagnostic")
+	}
+	for _, skip := range []string{"lib.js", "logo.png", "bin.dat", "skipme.txt"} {
 		if _, ok := got[skip]; ok {
 			t.Errorf("%s should have been skipped (dir/ext/binary/size/exclude)", skip)
 		}
@@ -100,6 +103,36 @@ func TestFilesystemOCRImage(t *testing.T) {
 	}
 	if stats := engine.Stats(); stats.Calls != 1 || stats.Failures != 0 {
 		t.Fatalf("OCR stats = %+v", stats)
+	}
+}
+
+func TestOCRFailureIsIncompleteUnlessOutputExcluded(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer server.Close()
+	engine, err := ocr.New(ocr.Config{URL: server.URL, Model: "test-model"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	png, err := base64.StdEncoding.DecodeString("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := WithOCR(context.Background(), engine)
+	for _, exclude := range [][]string{nil, {"!/ocr.txt"}} {
+		before := engine.Stats().Calls
+		ch := make(chan model.Item, 8)
+		emitPayload(ctx, ch, "screenshot.png", png, 1<<20, exclude, nil)
+		close(ch)
+		items := archiveItems(ch)
+		if len(exclude) == 0 {
+			if len(items) != 1 || items[0].Error == nil {
+				t.Fatalf("failed OCR was certified clean: %+v", items)
+			}
+		} else if len(items) != 0 || engine.Stats().Calls != before {
+			t.Fatalf("excluded OCR output was processed: items=%+v stats=%+v", items, engine.Stats())
+		}
 	}
 }
 
@@ -214,8 +247,20 @@ func TestFilesFromList(t *testing.T) {
 	p := filepath.Join(dir, "x.py")
 	write(t, p, `K = "secret"`)
 	got := drain(FilesFromList(context.Background(), []string{p, filepath.Join(dir, "missing.py")}, 1<<20))
-	if _, ok := got["x.py"]; !ok || len(got) != 1 {
-		t.Errorf("FilesFromList should yield exactly the existing file, got %d", len(got))
+	if _, ok := got["x.py"]; !ok || len(got) != 2 || got["missing.py"].Error == nil {
+		t.Errorf("FilesFromList must keep the existing file and diagnose the missing one: %+v", got)
+	}
+}
+
+func TestFilesystemReportsOversizedInput(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "large.env")
+	write(t, path, "content larger than the configured bound\n")
+	for _, roots := range [][]string{{path}, {dir}} {
+		items := archiveItems(Filesystem(context.Background(), roots, nil, 4))
+		if len(items) != 1 || items[0].Error == nil || items[0].Path != path {
+			t.Errorf("oversized input was silently clean: %+v", items)
+		}
 	}
 }
 
@@ -365,6 +410,31 @@ func TestFilesystemFollowsExplicitSymlinkRoot(t *testing.T) {
 	got2 := drain(Filesystem(context.Background(), []string{tree}, nil, 1<<20))
 	if _, leaked := got2["intree.py"]; leaked {
 		t.Error("an in-tree symlink must stay refused (scope-escape protection)")
+	}
+}
+
+func TestFilesystemFollowsExplicitDirectorySymlinkRoot(t *testing.T) {
+	dir := t.TempDir()
+	real := filepath.Join(dir, "real")
+	write(t, filepath.Join(real, "nested", "secret.py"), encSecret)
+	write(t, filepath.Join(real, "skip.py"), encSecret)
+	write(t, filepath.Join(real, "node_modules", "ignored.py"), encSecret)
+	outside := filepath.Join(dir, "outside.py")
+	write(t, outside, encSecret)
+	if err := os.Symlink(outside, filepath.Join(real, "nested", "escape.py")); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	link := filepath.Join(dir, "linked")
+	if err := os.Symlink(real, link); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	got := drain(Filesystem(context.Background(), []string{link}, []string{filepath.Join(link, "skip.py")}, 1<<20))
+	item, ok := got["secret.py"]
+	if !ok || item.Path != filepath.Join(link, "nested", "secret.py") || item.Text != encSecret {
+		t.Fatalf("directory symlink scan = %+v, want nested secret under the chosen root", got)
+	}
+	if len(got) != 1 {
+		t.Fatalf("excluded, generated or in-tree symlink content was emitted: %+v", got)
 	}
 }
 

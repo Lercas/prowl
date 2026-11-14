@@ -42,6 +42,7 @@ type Stats struct {
 	Entries  int
 	Emitted  int
 	Skipped  int
+	Limited  int // content omitted due to size/depth limits, excluding deliberate policy skips
 }
 
 // BoundedLimits builds practical recursive limits from the caller's per-entry and compressed-input
@@ -80,11 +81,21 @@ type walker struct {
 	remaining uint64
 	stats     Stats
 	emit      func(Entry) error
+	skip      func(string) bool
 }
 
 // Walk recursively expands root and calls emit for each ordinary member. recognized=false means the
 // payload is not a supported ZIP/TAR/GZIP archive and emit was not called.
 func Walk(root string, raw []byte, limits Limits, emit func(Entry) error) (stats Stats, recognized bool, err error) {
+	return WalkFiltered(root, raw, limits, nil, emit)
+}
+
+// WalkFiltered applies explicit member exclusions before decompression and size-budget accounting.
+func WalkFiltered(root string, raw []byte, limits Limits, skip func(string) bool, emit func(Entry) error) (stats Stats, recognized bool, err error) {
+	f := detectFormat(root, raw)
+	if f == formatNone {
+		return stats, false, nil
+	}
 	limits = normalizeLimits(limits)
 	if limits.MaxEntry == math.MaxInt64 || limits.MaxArchive == math.MaxInt64 {
 		return stats, true, errors.New("archive size limit is too large")
@@ -92,14 +103,11 @@ func Walk(root string, raw []byte, limits Limits, emit func(Entry) error) (stats
 	if int64(len(raw)) > limits.MaxArchive {
 		return stats, true, fmt.Errorf("archive exceeds compressed-size limit (%d > %d)", len(raw), limits.MaxArchive)
 	}
-	f := detectFormat(root, raw)
-	if f == formatNone {
-		return stats, false, nil
-	}
 	w := &walker{
 		limits:    limits,
 		remaining: uint64(limits.MaxTotal), //nolint:gosec // normalizeLimits guarantees a positive int64.
 		emit:      emit,
+		skip:      skip,
 	}
 	err = w.walk(root, raw, f, 0)
 	return w.stats, true, err
@@ -156,6 +164,15 @@ func detectFormat(name string, raw []byte) format {
 	case strings.HasSuffix(strings.ToLower(name), ".tar"):
 		return formatTAR
 	default:
+		lower := strings.ToLower(name)
+		if strings.HasSuffix(lower, ".gz") || strings.HasSuffix(lower, ".tgz") {
+			return formatGZIP
+		}
+		// Named archives still reach the parser when their magic is missing or corrupted.
+		// The parser validates structure and returns an error instead of a clean binary skip.
+		if MaybeArchive(name) {
+			return formatZIP
+		}
 		return formatNone
 	}
 }
@@ -163,6 +180,7 @@ func detectFormat(name string, raw []byte) format {
 func (w *walker) walk(name string, raw []byte, f format, depth int) error {
 	if depth >= w.limits.MaxDepth {
 		w.stats.Skipped++
+		w.stats.Limited++
 		return nil
 	}
 	w.stats.Archives++
@@ -207,21 +225,27 @@ func (w *walker) walkZIP(root string, raw []byte, depth int) error {
 			w.stats.Skipped++
 			continue
 		}
-		if err := w.charge(f.UncompressedSize64); err != nil {
-			return err
-		}
 		name, ok := safeName(f.Name)
 		if !ok {
 			w.stats.Skipped++
 			continue
 		}
+		if w.skip != nil && w.skip(root+"!/"+name) {
+			w.stats.Skipped++
+			continue
+		}
+		if err := w.charge(f.UncompressedSize64); err != nil {
+			return err
+		}
 		limit := w.entryReadLimit(name)
 		if f.UncompressedSize64 > math.MaxInt64 {
 			w.stats.Skipped++
+			w.stats.Limited++
 			continue
 		}
 		if int64(f.UncompressedSize64) > limit { //nolint:gosec // MaxInt64 guard proves representability.
 			w.stats.Skipped++
+			w.stats.Limited++
 			continue
 		}
 		rc, err := f.Open()
@@ -264,17 +288,22 @@ func (w *walker) walkTAR(root string, raw []byte, depth int) error {
 		if h.Size < 0 {
 			return errors.New("TAR entry has a negative size")
 		}
-		if err := w.charge(uint64(h.Size)); err != nil { //nolint:gosec // h.Size is checked non-negative.
-			return err
-		}
 		name, ok := safeName(h.Name)
 		if !ok {
 			w.stats.Skipped++
 			continue
 		}
+		if w.skip != nil && w.skip(root+"!/"+name) {
+			w.stats.Skipped++
+			continue
+		}
+		if err := w.charge(uint64(h.Size)); err != nil { //nolint:gosec // h.Size is checked non-negative.
+			return err
+		}
 		limit := w.entryReadLimit(name)
 		if h.Size > limit {
 			w.stats.Skipped++
+			w.stats.Limited++
 			continue
 		}
 		data, err := readBounded(tr, limit)
@@ -293,6 +322,10 @@ func (w *walker) walkGZIP(root string, raw []byte, depth int) error {
 		return fmt.Errorf("open GZIP: %w", err)
 	}
 	name := gzipMemberName(root, gr.Name)
+	if w.skip != nil && w.skip(root+"!/"+name) {
+		w.stats.Skipped++
+		return gr.Close()
+	}
 	data, readErr := readBounded(gr, w.limits.MaxArchive)
 	closeErr := gr.Close()
 	if readErr != nil {
@@ -323,6 +356,7 @@ func (w *walker) handle(name string, data []byte, depth int) error {
 	}
 	if int64(len(data)) > w.limits.MaxEntry {
 		w.stats.Skipped++
+		w.stats.Limited++
 		return nil
 	}
 	if err := w.emit(Entry{Path: name, Data: data}); err != nil {

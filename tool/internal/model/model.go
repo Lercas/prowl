@@ -14,6 +14,22 @@ type Item struct {
 	Source string // code | jira | confluence | slack | log
 	Path   string
 	Meta   map[string]any
+	// ArtifactURI identifies a source-declared locator independently of the display path.
+	ArtifactURI string `json:"-"`
+	// Error marks unreadable source content; it must not be treated as a clean empty item.
+	Error error
+	// ImageEntry identifies the physical TAR entry when a layer repeats a file path.
+	ImageEntry int
+}
+
+// IsIncompleteFinding identifies scan diagnostics that filtering must not hide as accepted secrets.
+func IsIncompleteFinding(f Finding) bool {
+	switch f.Type {
+	case "results_truncated", "response_truncated", "item_too_large", "source_error":
+		return true
+	default:
+		return false
+	}
 }
 
 // Finding is a single detected secret.
@@ -26,6 +42,11 @@ type Finding struct {
 	Path       string  `json:"path"`
 	Line       int     `json:"line"`
 	Col        int     `json:"col"`
+	// UTF16Col is derived from the scanned snapshot for SARIF; Col remains byte-based for JSON/pretty.
+	// Zero means no derived column is available (e.g. an intake diagnostic).
+	UTF16Col int `json:"-"`
+	// ArtifactURI carries source-declared URI provenance for SARIF; Path remains the display identity.
+	ArtifactURI string `json:"-"`
 	// Redacted is the masked secret by default; with --show-secrets it holds the FULL unredacted value.
 	Redacted string `json:"redacted"`
 	Stage    string `json:"stage"`
@@ -45,6 +66,8 @@ type Finding struct {
 	// InFinalImage (image scans only): true if the file survives to the flattened/deployed image, false
 	// if only in a historical/overwritten/whiteout-deleted layer, nil = unknown or not an image scan.
 	InFinalImage *bool `json:"in_final_image,omitempty"`
+	// ImageEntry is internal provenance; it is deliberately absent from report formats.
+	ImageEntry int `json:"-"`
 	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
 	Instruction string `json:"instruction,omitempty"`
 }
@@ -84,14 +107,15 @@ func Redact(v string) string {
 // single-token secrets (API keys, passwords) where the head/tail aid recognition.
 func redactPlain(v string) string {
 	const keep = 4
-	if len(v) <= 2*keep {
-		return strings.Repeat("*", len(v))
+	runes := []rune(v)
+	if len(runes) <= 2*keep {
+		return strings.Repeat("*", len(runes))
 	}
-	mid := len(v) - 2*keep
+	mid := len(runes) - 2*keep
 	if mid > 8 {
 		mid = 8
 	}
-	return v[:keep] + strings.Repeat("*", mid) + v[len(v)-keep:]
+	return string(runes[:keep]) + strings.Repeat("*", mid) + string(runes[len(runes)-keep:])
 }
 
 // pemBegin matches the boilerplate header of a PEM private-key block and captures the key type

@@ -52,6 +52,71 @@ func archiveItems(ch <-chan model.Item) []model.Item {
 	return out
 }
 
+func TestExtractionErrorsAreNotClean(t *testing.T) {
+	for name, raw := range map[string][]byte{
+		"broken.zip":   {'P', 'K', 3, 4},
+		"no-magic.zip": []byte("damaged archive"),
+		"empty.zip":    nil,
+		"broken.gz":    []byte("damaged archive"),
+		"broken.docx":  []byte("damaged document"),
+		"broken.pdf":   []byte("%PDF-1.4\nmalformed PDF"),
+		"broken.eml":   []byte("malformed headers\n" + encSecret),
+	} {
+		t.Run(name, func(t *testing.T) {
+			ch := make(chan model.Item, 8)
+			if !emitPayload(context.Background(), ch, name, raw, 1024, nil, nil) {
+				t.Fatal("extraction unexpectedly cancelled")
+			}
+			close(ch)
+			items := archiveItems(ch)
+			failure := false
+			fallback := false
+			for _, item := range items {
+				failure = failure || item.Error != nil
+				fallback = fallback || strings.Contains(item.Text, encSecret)
+			}
+			if !failure || (name == "broken.eml" && !fallback) {
+				t.Fatalf("extraction error or raw-mail fallback missing: %+v", items)
+			}
+		})
+	}
+}
+
+func TestArchiveLimitRespectsExplicitExclusions(t *testing.T) {
+	raw := makeZIP(t, map[string][]byte{
+		"large.txt": bytes.Repeat([]byte("x"), 600),
+		"keep.env":  []byte(encSecret),
+	})
+	for _, exclude := range [][]string{nil, {"large.txt"}} {
+		ch := make(chan model.Item, 8)
+		emitPayload(context.Background(), ch, "bundle.zip", raw, 512, exclude, nil)
+		close(ch)
+		items := archiveItems(ch)
+		failure, kept := false, false
+		for _, item := range items {
+			failure = failure || item.Error != nil
+			kept = kept || (item.Path == "bundle.zip!/keep.env" && item.Text == encSecret)
+		}
+		if !kept || failure != (len(exclude) == 0) {
+			t.Fatalf("limits/exclusions misclassified coverage: exclude=%v items=%+v", exclude, items)
+		}
+	}
+}
+
+func TestNestedArchiveDepthIsIncomplete(t *testing.T) {
+	raw := makeZIP(t, map[string][]byte{"secret.env": []byte(encSecret)})
+	for i := 0; i < 3; i++ {
+		raw = makeZIP(t, map[string][]byte{"inner.zip": raw})
+	}
+	ch := make(chan model.Item, 8)
+	emitPayload(context.Background(), ch, "nested.zip", raw, 4096, nil, nil)
+	close(ch)
+	items := archiveItems(ch)
+	if len(items) != 1 || items[0].Error == nil {
+		t.Fatalf("depth-capped archive was certified clean: %+v", items)
+	}
+}
+
 func TestFilesystemExpandsZIPAndHonorsInnerExclude(t *testing.T) {
 	dir := t.TempDir()
 	archive := filepath.Join(dir, "bundle.zip")
@@ -118,8 +183,8 @@ func TestFilesystemSkipsArchiveBeyondCompressedMaxSize(t *testing.T) {
 	dir := t.TempDir()
 	archive := filepath.Join(dir, "large.zip")
 	writeZIPFile(t, archive, map[string][]byte{"random.bin": bytes.Repeat([]byte{0x42}, 4096)})
-	if items := archiveItems(Filesystem(context.Background(), []string{archive}, nil, 32)); len(items) != 0 {
-		t.Fatalf("oversized compressed archive emitted items: %+v", items)
+	if items := archiveItems(Filesystem(context.Background(), []string{archive}, nil, 32)); len(items) != 1 || items[0].Error == nil {
+		t.Fatalf("oversized compressed archive must emit a diagnostic: %+v", items)
 	}
 }
 

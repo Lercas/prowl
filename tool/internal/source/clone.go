@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -82,15 +83,15 @@ func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), er
 		actx, cancel := context.WithTimeout(ctx, perAttempt)
 		defer cancel()
 		cmd := exec.CommandContext(actx, "git", args...)
-		out, err := cmd.CombinedOutput()
+		_, err := runOwnedCommand(cmd)
 		if err != nil {
 			if ctx.Err() != nil { // parent cancelled (Ctrl-C / overall --timeout): give up, don't retry
 				return ctx.Err()
 			}
 			if actx.Err() == context.DeadlineExceeded {
-				return fmt.Errorf("git clone timed out after %s", perAttempt)
+				return fmt.Errorf("git clone timed out after %s: %w", perAttempt, context.DeadlineExceeded)
 			}
-			return fmt.Errorf("git clone failed: %v: %s", err, strings.TrimSpace(string(out)))
+			return &cloneFailure{cause: err}
 		}
 		return nil
 	})
@@ -100,6 +101,28 @@ func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), er
 	}
 	return tmp, cleanup, nil
 }
+
+// cloneFailure keeps command/provider-controlled diagnostics out of logs and reports. Git helpers
+// can print credentials separately from the input URL, so replacing the URL alone is insufficient.
+// Keep the original cause for callers that classify startup, exit, or pipe-wait failures.
+type cloneFailure struct{ cause error }
+
+func (e *cloneFailure) Error() string {
+	var exit *exec.ExitError
+	if errors.As(e.cause, &exit) {
+		if code := exit.ExitCode(); code >= 0 {
+			return fmt.Sprintf("git clone failed (exit status %d)", code)
+		}
+		return "git clone failed (terminated by signal)"
+	}
+	var start *exec.Error
+	if errors.As(e.cause, &start) {
+		return "git clone could not be started"
+	}
+	return "git clone failed"
+}
+
+func (e *cloneFailure) Unwrap() error { return e.cause }
 
 // resetDir empties dir by removing and recreating it (so a retried clone sees an empty destination).
 func resetDir(dir string) error {

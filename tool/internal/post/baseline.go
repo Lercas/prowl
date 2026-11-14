@@ -2,14 +2,18 @@
 package post
 
 import (
+	"bytes"
+	"context"
 	"crypto/sha1" //nolint:gosec // Required for compatibility with legacy baseline fingerprints.
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
+	"io"
+	"strings"
+	"unicode/utf8"
 
-	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
@@ -27,33 +31,74 @@ func Fingerprint(f model.Finding) string {
 	return hex.EncodeToString(h[:])
 }
 
-// LoadBaseline reads a fingerprint list. A read miss yields an empty (no-op) baseline; a malformed file
-// is logged rather than silently treated as empty, so a corrupt --baseline doesn't suppress nothing quietly.
-func LoadBaseline(path string) *Baseline {
+// LoadBaseline reads a complete, bounded fingerprint list. The caller owns optional discovery;
+// a selected file must be readable and valid before any suppression is applied.
+func LoadBaseline(path string) (*Baseline, error) {
 	b := &Baseline{fps: map[string]bool{}}
-	data, err := os.ReadFile(path)
+	data, err := localfile.ReadRegular(path, maxSuppressionBytes)
 	if err != nil {
-		return b
+		return nil, fmt.Errorf("baseline read: %w", err)
 	}
-	var list []string
-	if err := json.Unmarshal(data, &list); err != nil {
-		logx.Error("baseline parse failed — suppressing nothing", "path", path, "err", err)
-		return b
+	if err := jsonstrict.ValidateEncoding(data); err != nil {
+		return nil, fmt.Errorf("baseline encoding: %w", err)
 	}
-	for _, f := range list {
+	// Older writers encode an empty baseline as null. Keep that no-op representation readable.
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		return b, nil
+	}
+	dec := json.NewDecoder(bytes.NewReader(data))
+	token, err := dec.Token()
+	if err != nil || token != json.Delim('[') {
+		return nil, fmt.Errorf("baseline must be a fingerprint array")
+	}
+	for entries := 0; dec.More(); entries++ {
+		if entries >= maxSuppressionEntries {
+			return nil, fmt.Errorf("baseline exceeds %d entries", maxSuppressionEntries)
+		}
+		var f string
+		if err := dec.Decode(&f); err != nil {
+			return nil, fmt.Errorf("baseline fingerprint: %w", err)
+		}
+		// encoding/json turns a null array element into an empty string. Neither is a fingerprint.
+		if strings.TrimSpace(f) == "" {
+			return nil, fmt.Errorf("baseline contains an empty fingerprint")
+		}
 		b.fps[f] = true
 	}
-	return b
+	return b, nil
 }
 
 // WriteBaseline writes the deduplicated fingerprints atomically (temp file + rename in the same dir),
 // so a Ctrl-C mid-write can't leave a half-written baseline.
 func WriteBaseline(path string, fs []model.Finding) error {
+	return WriteBaselineContext(context.Background(), path, fs)
+}
+
+// WriteBaselineContext refuses cancellation during post-processing or before atomic commit.
+func WriteBaselineContext(ctx context.Context, path string, fs []model.Finding) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	seen := map[string]bool{}
 	var list []string
 	for _, f := range fs {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if model.IsIncompleteFinding(f) {
+			return fmt.Errorf("cannot write a baseline from incomplete scan results")
+		}
 		fp := Fingerprint(f)
+		if strings.TrimSpace(fp) == "" {
+			return fmt.Errorf("baseline contains an empty fingerprint")
+		}
+		if !utf8.ValidString(fp) {
+			return fmt.Errorf("baseline fingerprint must be valid UTF-8")
+		}
 		if !seen[fp] {
+			if len(list) >= maxSuppressionEntries {
+				return fmt.Errorf("baseline exceeds %d entries", maxSuppressionEntries)
+			}
 			seen[fp] = true
 			list = append(list, fp)
 		}
@@ -62,27 +107,15 @@ func WriteBaseline(path string, fs []model.Finding) error {
 	if err != nil {
 		return fmt.Errorf("baseline marshal: %w", err)
 	}
-
-	dir := filepath.Dir(path)
-	tmp, err := os.CreateTemp(dir, ".prowl-baseline-*.tmp")
-	if err != nil {
-		return fmt.Errorf("baseline temp file: %w", err)
+	if len(data) > maxSuppressionBytes {
+		return fmt.Errorf("baseline exceeds %d bytes", maxSuppressionBytes)
 	}
-	tmpName := tmp.Name()
-	defer os.Remove(tmpName) // no-op once renamed; cleans up on any failure path
 
-	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
+	if err := localfile.WriteAtomicContext(ctx, path, 0o644, func(w io.Writer) error {
+		_, err := w.Write(data)
+		return err
+	}); err != nil {
 		return fmt.Errorf("baseline write: %w", err)
-	}
-	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("baseline close: %w", err)
-	}
-	if err := os.Chmod(tmpName, 0o644); err != nil {
-		return fmt.Errorf("baseline chmod: %w", err)
-	}
-	if err := os.Rename(tmpName, path); err != nil {
-		return fmt.Errorf("baseline rename: %w", err)
 	}
 	return nil
 }
@@ -94,7 +127,7 @@ func (b *Baseline) Suppress(fs []model.Finding) []model.Finding {
 	}
 	out := fs[:0]
 	for _, f := range fs {
-		if !b.fps[Fingerprint(f)] {
+		if model.IsIncompleteFinding(f) || !b.fps[Fingerprint(f)] {
 			out = append(out, f)
 		}
 	}

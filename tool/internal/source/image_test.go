@@ -236,7 +236,7 @@ func drainItems(ch <-chan model.Item) int {
 // TestEmitLayerTotalBytesCap: the cumulative-bytes budget must abort a layer whose entries sum past the
 // cap, even though each individual file is under the per-file --max-size.
 func TestEmitLayerTotalBytesCap(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 2048 // tiny cap so a few 1 KiB files trip it
 	maxImageEntries = 1_000_000
 	maxImageLayers = 1000
@@ -267,7 +267,7 @@ func TestEmitLayerTotalBytesCap(t *testing.T) {
 // TestEmitLayerEntryCap: the entry-count budget must abort a tar with too many entries (a bomb of empty
 // entries exhausts CPU even with zero body bytes).
 func TestEmitLayerEntryCap(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 1 << 30
 	maxImageEntries = 5
 	maxImageLayers = 1000
@@ -296,7 +296,7 @@ func TestEmitLayerEntryCap(t *testing.T) {
 
 // TestEmitLayerUnderBudgetScans confirms a legitimate under-budget layer is fully scanned.
 func TestEmitLayerUnderBudgetScans(t *testing.T) {
-	defer restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers)
+	t.Cleanup(restoreImageCaps(maxImageTotalBytes, maxImageEntries, maxImageLayers))
 	maxImageTotalBytes = 1 << 30
 	maxImageEntries = 1000
 	maxImageLayers = 1000

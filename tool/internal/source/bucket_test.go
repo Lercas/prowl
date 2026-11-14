@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,6 +12,12 @@ import (
 )
 
 func TestBucketBudget(t *testing.T) {
+	if got := BucketBudget(math.MinInt64/64 - 1); got != DefaultBucketBudget {
+		t.Errorf("negative max-size overflowed the bucket budget: %d", got)
+	}
+	if got := BucketBudget(math.MaxInt64); got != math.MaxInt64 {
+		t.Errorf("large max-size overflowed the bucket budget: %d", got)
+	}
 	// Below the scaling threshold -> the default floor; above it -> 64x --max-size.
 	if got := BucketBudget(0); got != DefaultBucketBudget {
 		t.Errorf("BucketBudget(0) = %d, want default %d", got, DefaultBucketBudget)
@@ -28,8 +35,103 @@ func TestDirSize(t *testing.T) {
 	dir := t.TempDir()
 	write(t, filepath.Join(dir, "a.txt"), strings.Repeat("x", 100))
 	write(t, filepath.Join(dir, "sub", "b.txt"), strings.Repeat("y", 50))
-	if got := dirSize(dir); got != 150 {
-		t.Errorf("dirSize = %d, want 150", got)
+	if got, err := measureBucketDir(context.Background(), dir, 1000, false); err != nil || got != 150 {
+		t.Errorf("directory size = %d, err=%v, want 150", got, err)
+	}
+	if _, err := measureBucketDir(context.Background(), dir, 149, false); err == nil {
+		t.Fatal("cumulative disk budget ignored")
+	}
+	if _, err := measureBucketDir(context.Background(), filepath.Join(dir, "a.txt"), 1000, false); err == nil {
+		t.Fatal("a regular file was accepted as a bucket destination")
+	}
+}
+
+func TestBucketBudgetPreventsStartingAnotherDownload(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake cloud CLI is POSIX-only")
+	}
+	dir := t.TempDir()
+	marker := filepath.Join(dir, "started")
+	t.Setenv("PROWL_START_MARKER", marker)
+	if err := os.WriteFile(filepath.Join(dir, "aws"), []byte("#!/bin/sh\nprintf ran >> \"$PROWL_START_MARKER\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	dest := t.TempDir()
+	write(t, filepath.Join(dest, "already-large"), strings.Repeat("x", 5000))
+	if err := SyncBucket(context.Background(), "s3://owned/prefix", dest, 4096, 0); err == nil {
+		t.Fatal("existing over-budget destination was accepted")
+	}
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatal("terminal budget failure launched another acquisition command")
+	}
+}
+
+func TestBucketFinalMeasurementCannotIgnoreMissingDestination(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake cloud CLI is POSIX-only")
+	}
+	binDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(binDir, "aws"), []byte("#!/bin/sh\nmv \"$4\" \"$4-moved\"\n"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	dest := filepath.Join(t.TempDir(), "destination")
+	if err := os.Mkdir(dest, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := SyncBucket(context.Background(), "s3://owned/prefix", dest, 4096, time.Second); err == nil {
+		t.Fatal("sync certified success without measuring its final destination")
+	}
+}
+
+func TestBucketCancellationDoesNotWaitForChildPipes(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("process-group cancellation is Unix-only")
+	}
+	dir := t.TempDir()
+	started, release := filepath.Join(dir, "started"), filepath.Join(dir, "release")
+	t.Setenv("PROWL_CHILD_STARTED", started)
+	t.Setenv("PROWL_CHILD_RELEASE", release)
+	script := "#!/bin/sh\n(printf started > \"$PROWL_CHILD_STARTED\"; while [ ! -f \"$PROWL_CHILD_RELEASE\" ]; do sleep 0.01; done) &\nwhile :; do sleep 1; done\n"
+	if err := os.WriteFile(filepath.Join(dir, "aws"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- SyncBucket(ctx, "s3://owned/prefix", t.TempDir(), 4096, 30*time.Second) }()
+	deadline := time.After(3 * time.Second)
+	for {
+		if _, err := os.Stat(started); err == nil {
+			break
+		}
+		select {
+		case <-deadline:
+			cancel()
+			_ = os.WriteFile(release, nil, 0o600)
+			t.Fatal("fake cloud CLI did not reach child barrier")
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("cancelled sync certified success")
+		}
+	case <-time.After(500 * time.Millisecond):
+		// Release the test-owned child so the original implementation cannot leave it behind.
+		if err := os.WriteFile(release, nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+			t.Fatal("cancelled fake cloud CLI did not terminate")
+		}
+		t.Fatal("cancellation waited for a surviving child to close inherited pipes")
 	}
 }
 

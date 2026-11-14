@@ -2,11 +2,14 @@ package post
 
 import (
 	"bufio"
-	"os"
+	"bytes"
+	"fmt"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
@@ -21,28 +24,50 @@ type GitleaksIgnore struct {
 	relaxed map[int][]string // startLine -> file components (suffix-matched against a finding's path)
 }
 
-// LoadGitleaksIgnore reads a .gitleaksignore file. A read miss yields an empty (no-op) suppressor.
-func LoadGitleaksIgnore(path string) *GitleaksIgnore {
-	g := &GitleaksIgnore{exact: map[string]bool{}, relaxed: map[int][]string{}}
-	f, err := os.Open(path)
-	if err != nil {
-		return g
-	}
-	defer f.Close()
+const (
+	maxSuppressionBytes   = 16 * 1024 * 1024
+	maxSuppressionEntries = 100000
+	maxIgnoreLineBytes    = 1024 * 1024
+)
 
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+// LoadGitleaksIgnore reads the whole selected policy or returns an error. An unreadable suffix
+// must never leave the caller with a partially populated suppressor.
+func LoadGitleaksIgnore(path string) (*GitleaksIgnore, error) {
+	g := &GitleaksIgnore{exact: map[string]bool{}, relaxed: map[int][]string{}}
+	raw, err := localfile.ReadRegular(path, maxSuppressionBytes)
+	if err != nil {
+		return nil, fmt.Errorf("gitleaksignore read: %w", err)
+	}
+	if !utf8.Valid(raw) {
+		return nil, fmt.Errorf("gitleaksignore must be valid UTF-8")
+	}
+
+	sc := bufio.NewScanner(bytes.NewReader(raw))
+	sc.Buffer(make([]byte, 0, 64*1024), maxIgnoreLineBytes)
+	entries, lineNumber := 0, 0
 	for sc.Scan() {
+		lineNumber++
 		line := strings.TrimSpace(sc.Text())
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		g.exact[line] = true
-		if file, ln, ok := parseGitleaksFP(line); ok {
+		entries++
+		if entries > maxSuppressionEntries {
+			return nil, fmt.Errorf("gitleaksignore exceeds %d entries", maxSuppressionEntries)
+		}
+		file, ln, ok := parseGitleaksFP(line)
+		if !ok {
+			return nil, fmt.Errorf("gitleaksignore invalid fingerprint at line %d", lineNumber)
+		}
+		if !g.exact[line] {
+			g.exact[line] = true
 			g.relaxed[ln] = append(g.relaxed[ln], file)
 		}
 	}
-	return g
+	if err := sc.Err(); err != nil {
+		return nil, fmt.Errorf("gitleaksignore parse: %w", err)
+	}
+	return g, nil
 }
 
 // parseGitleaksFP splits a fingerprint into its file component and start line, tolerating the
@@ -54,7 +79,7 @@ func parseGitleaksFP(line string) (file string, startLine int, ok bool) {
 		return "", 0, false
 	}
 	ln, err := strconv.Atoi(parts[len(parts)-1])
-	if err != nil {
+	if err != nil || ln < 0 || parts[len(parts)-2] == "" {
 		return "", 0, false
 	}
 	remaining := parts[:len(parts)-2] // drop ":{rule}:{line}"
@@ -62,7 +87,8 @@ func parseGitleaksFP(line string) (file string, startLine int, ok bool) {
 	if len(remaining) >= 2 && looksLikeCommit(remaining[0]) {
 		remaining = remaining[1:]
 	}
-	return filepath.ToSlash(strings.Join(remaining, ":")), ln, true
+	file = filepath.ToSlash(strings.Join(remaining, ":"))
+	return file, ln, strings.TrimSpace(file) != ""
 }
 
 func looksLikeCommit(s string) bool {
@@ -84,7 +110,7 @@ func (g *GitleaksIgnore) Suppress(fs []model.Finding) []model.Finding {
 	}
 	out := fs[:0]
 	for _, f := range fs {
-		if !g.match(f) {
+		if model.IsIncompleteFinding(f) || !g.match(f) {
 			out = append(out, f)
 		}
 	}

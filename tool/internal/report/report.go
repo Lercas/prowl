@@ -27,23 +27,17 @@ func Write(w io.Writer, findings []model.Finding, format string, color bool) err
 		return writeSARIF(w, findings)
 	case "defectdojo", "dojo":
 		return writeDefectDojo(w, findings)
-	default:
+	case "pretty", "":
 		return writePretty(w, findings, color)
+	default:
+		return fmt.Errorf("unsupported report format %q", format)
 	}
 }
 
-// truncationTypes are the synthetic finding Types marking a capped/incomplete result. Their presence
-// sets the report envelope's `truncated` flag so a JSON/SARIF consumer knows results are incomplete.
-var truncationTypes = map[string]bool{
-	"results_truncated":  true,
-	"response_truncated": true,
-	"item_too_large":     true,
-}
-
-// anyTruncated reports whether the findings include a truncation marker (some results were capped).
+// anyTruncated reports whether the scan includes a cap or a source failure indicating incomplete results.
 func anyTruncated(fs []model.Finding) bool {
 	for _, f := range fs {
-		if truncationTypes[f.Type] {
+		if model.IsIncompleteFinding(f) {
 			return true
 		}
 	}
@@ -92,8 +86,29 @@ func paint(on bool, code, s string) string {
 	return code + s + cReset
 }
 
+// reportWriter retains the first failure so a report with many formatted writes can return it.
+type reportWriter struct {
+	w   io.Writer
+	err error
+}
+
+func (w *reportWriter) Write(p []byte) (int, error) {
+	if w.err != nil {
+		return 0, w.err
+	}
+	n, err := w.w.Write(p)
+	if err == nil && n != len(p) {
+		err = io.ErrShortWrite
+	}
+	w.err = err
+	return n, err
+}
+
 // writePretty renders findings grouped by file, worst-file first, with a summary footer.
-func writePretty(w io.Writer, fs []model.Finding, color bool) error {
+func writePretty(w io.Writer, fs []model.Finding, color bool) (err error) {
+	output := &reportWriter{w: w}
+	w = output
+	defer func() { err = output.err }()
 	if len(fs) == 0 {
 		fmt.Fprintln(w, paint(color, "\x1b[32m", "✓ no secrets found"))
 		return nil
@@ -151,10 +166,9 @@ func writePretty(w io.Writer, fs []model.Finding, color bool) error {
 			if f.URL != "" {
 				locator = "  " + paint(color, cDim, sanitizeTerminal(f.URL))
 			}
-			// The redacted value can carry attacker bytes — strip them before painting. f.Type is from
-			// prowl's own rule set, so it needs no sanitizing.
+			// Imported rule IDs and redacted values can carry terminal escapes.
 			fmt.Fprintf(w, "    %s  %-*s  %s  %s%s%s\n",
-				badge, maxType, f.Type,
+				badge, maxType, sanitizeTerminal(f.Type),
 				paint(color, cDim, fmt.Sprintf("%-7s", loc)),
 				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag, locator)
 		}
@@ -255,8 +269,8 @@ func writeJSON(w io.Writer, fs []model.Finding) error {
 	if fs == nil {
 		fs = []model.Finding{}
 	}
-	// encoding/json errors on a NaN/Inf float, which would leave the --output file truncated-but-empty;
-	// clamp any non-finite Confidence to [0,1] so a valid report is always produced.
+	// encoding/json rejects NaN/Inf. Clamp confidence so a non-finite model score still yields a
+	// valid report instead of refusing its serialization.
 	for i := range fs {
 		fs[i].Confidence = safeConfidence(fs[i].Confidence)
 	}
@@ -272,7 +286,7 @@ func writeJSON(w io.Writer, fs []model.Finding) error {
 func writeSARIF(w io.Writer, fs []model.Finding) error {
 	sortFindings(fs)
 	ruleIndex := map[string]int{}
-	var rules []map[string]any
+	rules := make([]map[string]any, 0)
 	results := make([]map[string]any, 0, len(fs))
 	for _, f := range fs {
 		idx, ok := ruleIndex[f.Type]
@@ -291,6 +305,10 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 				},
 			})
 		}
+		column := f.UTF16Col
+		if column == 0 {
+			column = f.Col // legacy/constructed findings do not carry scanned text metadata
+		}
 		res := map[string]any{
 			"ruleId":    f.Type,
 			"ruleIndex": idx,
@@ -303,7 +321,7 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 					"artifactLocation": map[string]any{"uri": sarifURI(f)},
 					// SARIF 2.1.0 requires startLine/startColumn >= 1; a Line/Col-0 hit is clamped
 					// (see sarifPos) so it doesn't fail schema validation.
-					"region": map[string]any{"startLine": sarifPos(f.Line), "startColumn": sarifPos(f.Col)},
+					"region": map[string]any{"startLine": sarifPos(f.Line), "startColumn": sarifPos(column)},
 				},
 			}},
 			// Mirror confidence/stage for downstream tooling that reads result properties.
@@ -317,8 +335,9 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 		results = append(results, res)
 	}
 	run := map[string]any{
-		"tool":    map[string]any{"driver": map[string]any{"name": "prowl", "informationUri": "https://github.com/Lercas/prowl", "rules": rules}},
-		"results": results,
+		"tool":       map[string]any{"driver": map[string]any{"name": "prowl", "informationUri": "https://github.com/Lercas/prowl", "rules": rules}},
+		"results":    results,
+		"columnKind": "utf16CodeUnits",
 	}
 	// Surface the global match cap, mirroring the JSON envelope's `truncated` field (run-level
 	// properties is the SARIF-valid place for tool-specific metadata).
@@ -401,15 +420,6 @@ func sarifPos(n int) int {
 		return 1
 	}
 	return n
-}
-
-// sarifURI is the artifactLocation uri: a finding's direct URL when it has one (Jira/Confluence),
-// else its Path (a code finding's file path — a valid relative URI).
-func sarifURI(f model.Finding) string {
-	if f.URL != "" {
-		return f.URL
-	}
-	return f.Path
 }
 
 // safeConfidence clamps a confidence to [0,1] and maps NaN to 0. A non-finite value (e.g. from a buggy

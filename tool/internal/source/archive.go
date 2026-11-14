@@ -46,28 +46,37 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 	}
 	if depth >= maxEmbeddedPayloadDepth {
 		logx.Warn("embedded payload depth limit reached", "path", itemPath, "limit", maxEmbeddedPayloadDepth)
-		return true
+		return emitSourceError(ctx, ch, itemPath, errors.New("embedded payload depth limit reached"))
 	}
 
 	limits := unpack.BoundedLimits(maxBytes, maxBytes)
-	stats, recognized, err := unpack.Walk(itemPath, data, limits, func(entry unpack.Entry) error {
+	stats, recognized, err := unpack.WalkFiltered(itemPath, data, limits, func(path string) bool {
+		return excludedSourcePath(path, exclude)
+	}, func(entry unpack.Entry) error {
 		if !emitPayloadDepth(ctx, ch, entry.Path, entry.Data, maxBytes, exclude, meta, depth+1) {
 			return ctx.Err()
 		}
 		return nil
 	})
 	if recognized {
+		if err == nil && stats.Limited > 0 {
+			err = errors.New("archive content omitted at extraction limits")
+		}
 		if err != nil && ctx.Err() == nil {
 			logx.Warn("archive extraction incomplete", "path", itemPath, "err", err,
 				"archives", stats.Archives, "entries", stats.Entries, "emitted", stats.Emitted)
+			if !emitSourceError(ctx, ch, itemPath, err) {
+				return false
+			}
 		}
 		return ctx.Err() == nil
 	}
 
-	mailStats, mailRecognized, mailErr := mailbox.Walk(
+	mailStats, mailRecognized, mailErr := mailbox.WalkFiltered(
 		itemPath,
 		data,
 		mailbox.BoundedLimits(maxBytes),
+		func(path string) bool { return excludedSourcePath(path, exclude) },
 		func(part mailbox.Part) error {
 			if !emitPayloadDepth(ctx, ch, part.Path, part.Data, maxBytes, exclude, meta, depth+1) {
 				return ctx.Err()
@@ -76,12 +85,18 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 		},
 	)
 	if mailRecognized {
+		if mailErr == nil && mailStats.Limited > 0 {
+			mailErr = errors.New("mail content omitted at extraction limits")
+		}
 		if mailErr == nil {
 			return ctx.Err() == nil
 		}
 		if ctx.Err() == nil {
 			logx.Warn("mail extraction incomplete", "path", itemPath, "err", mailErr,
 				"messages", mailStats.Messages, "parts", mailStats.Parts, "emitted", mailStats.Emitted)
+			if !emitSourceError(ctx, ch, itemPath, mailErr) {
+				return false
+			}
 		}
 		// A malformed EML/MBOX is still text. Fall through and scan its raw representation so a
 		// parser error cannot hide an otherwise visible credential.
@@ -102,6 +117,9 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 		if pdfErr != nil && ctx.Err() == nil {
 			logx.Warn("PDF text extraction incomplete", "path", itemPath, "err", pdfErr,
 				"pages", pdfStats.Pages, "emitted", pdfStats.Emitted, "empty", pdfStats.Empty)
+			if !emitSourceError(ctx, ch, itemPath, pdfErr) {
+				return false
+			}
 		}
 		if engine := ocrEngine(ctx); engine != nil && ctx.Err() == nil {
 			pages := pdfStats.EmptyPages
@@ -115,20 +133,29 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 				skipped := len(pages) - limit
 				engine.Skip(skipped, fmt.Sprintf("PDF OCR page limit reached for %s", itemPath))
 				logx.Warn("PDF OCR page limit reached", "path", itemPath, "limit", limit, "skipped", skipped)
+				if !emitSourceError(ctx, ch, itemPath, errors.New("PDF OCR page limit reached")) {
+					return false
+				}
 				pages = pages[:limit]
 			}
 			for _, page := range pages {
+				path := fmt.Sprintf("%s!/page-%04d.ocr.txt", itemPath, page)
+				if excludedSourcePath(path, exclude) {
+					continue
+				}
 				text, err := engine.ExtractPDFPage(ctx, data, page)
 				if err != nil {
 					if ctx.Err() == nil {
 						logx.Warn("PDF OCR failed", "path", itemPath, "page", page, "err", err)
+						if !emitSourceError(ctx, ch, itemPath, err) {
+							return false
+						}
 					}
 					continue
 				}
 				if strings.TrimSpace(text) == "" {
 					continue
 				}
-				path := fmt.Sprintf("%s!/page-%04d.ocr.txt", itemPath, page)
 				if !send(ctx, ch, model.Item{Text: text, Source: sourceForPath(path), Path: path, Meta: meta}) {
 					return false
 				}
@@ -138,17 +165,21 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 	}
 
 	if engine := ocrEngine(ctx); engine != nil && ocr.MaybeImage(itemPath) {
+		path := itemPath + "!/ocr.txt"
+		if excludedSourcePath(path, exclude) {
+			return true
+		}
 		text, err := engine.ExtractImage(ctx, data)
 		if err != nil {
 			if ctx.Err() == nil {
 				logx.Warn("image OCR failed", "path", itemPath, "err", err)
+				return emitSourceError(ctx, ch, itemPath, err)
 			}
 			return ctx.Err() == nil
 		}
 		if strings.TrimSpace(text) == "" {
 			return true
 		}
-		path := itemPath + "!/ocr.txt"
 		return send(ctx, ch, model.Item{Text: text, Source: sourceForPath(path), Path: path, Meta: meta})
 	}
 

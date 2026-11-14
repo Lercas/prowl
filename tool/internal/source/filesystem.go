@@ -4,6 +4,7 @@ package source
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"io"
 	"io/fs"
 	"os"
@@ -18,18 +19,29 @@ import (
 	"github.com/Lercas/prowl/tool/internal/resilience"
 )
 
-// Stdin reads all of standard input as a single item, for `prowl scan -` (piped logs, command output).
+// Stdin scans bounded standard input with the default per-file cap.
 func Stdin(ctx context.Context) <-chan model.Item {
+	return StdinLimited(ctx, 10<<20)
+}
+
+// StdinLimited honors --max-size and closes stdin on cancellation to interrupt a blocked read.
+func StdinLimited(ctx context.Context, maxBytes int64) <-chan model.Item {
+	return stdinFrom(ctx, os.Stdin, maxBytes)
+}
+
+func stdinFrom(ctx context.Context, input io.ReadCloser, maxBytes int64) <-chan model.Item {
 	ch := make(chan model.Item, 1)
 	go func() {
 		defer close(ch)
-		data, err := io.ReadAll(os.Stdin)
+		stopClose := closeInputOnCancel(ctx, input)
+		defer stopClose()
+		data, err := readSourceBytes(input, maxBytes)
 		if err != nil {
-			logx.Warn("stdin read error", "err", err)
+			emitSourceError(ctx, ch, "<stdin>", err)
 			return
 		}
 		if len(data) > 0 {
-			send(ctx, ch, model.Item{Text: string(data), Source: "code", Path: "<stdin>"})
+			emitPayload(ctx, ch, "<stdin>", data, maxBytes, nil, nil)
 		}
 	}()
 	return ch
@@ -37,6 +49,9 @@ func Stdin(ctx context.Context) <-chan model.Item {
 
 // send delivers an item unless ctx is cancelled; returns false when the consumer should stop.
 func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
+	if origin, ok := ctx.Value(filesystemOriginKey{}).(filesystemOrigin); ok && it.ArtifactURI == "" {
+		it.ArtifactURI = origin.uri(it.Path)
+	}
 	select {
 	case ch <- it:
 		return true
@@ -71,7 +86,10 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 		// Guard the whole walk: a panic in the callback must not crash the process or skip close(ch).
 		resilience.Guard(
 			func() { walkRoots(ctx, ch, roots, exclude, maxBytes) },
-			func(r any) { logx.Warn("recovered filesystem-walk panic", "err", r) },
+			func(r any) {
+				logx.Warn("recovered filesystem-walk panic", "err", r)
+				emitSourceError(ctx, ch, "", errors.New("filesystem reader failed"))
+			},
 		)
 	}()
 	return ch
@@ -79,36 +97,91 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 
 func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []string, maxBytes int64) {
 	for _, root := range roots {
-		// An explicitly-named symlink ROOT was chosen by the user, so follow it (the in-tree guard below
-		// only refuses links discovered inside a tree, not a target the user listed).
-		if fi, lerr := os.Lstat(root); lerr == nil && fi.Mode()&fs.ModeSymlink != 0 {
-			if !emitSymlinkRoot(ctx, ch, root, exclude, maxBytes) {
-				return
-			}
+		rootCtx := ctx
+		if excludedSourcePath(root, exclude) {
 			continue
 		}
 		info, statErr := os.Stat(root)
 		if statErr != nil {
-			logx.Debug("skipped: stat error", "path", root, "err", statErr)
-			continue
-		}
-		if !info.IsDir() {
-			if !emitFile(ctx, ch, root, maxBytes, exclude) {
+			if !emitSourceError(ctx, ch, root, statErr) {
 				return
 			}
 			continue
 		}
-		rootFS, openErr := os.OpenRoot(root)
-		if openErr != nil {
-			logx.Debug("skipped: cannot open scan root", "path", root, "err", openErr)
+		walkRoot := root
+		if info.IsDir() && hasParentSegment(root) {
+			// OS traversal resolves symlinks before '..'; filepath.Join/WalkDir clean lexically.
+			resolved, err := filepath.EvalSymlinks(root)
+			if err != nil {
+				if !emitSourceError(ctx, ch, root, err) {
+					return
+				}
+				continue
+			}
+			rootCtx, err = withFilesystemOrigin(ctx, root, resolved)
+			if err != nil {
+				if !emitSourceError(ctx, ch, root, err) {
+					return
+				}
+				continue
+			}
+			walkRoot = resolved
+		}
+		// An explicitly-named symlink ROOT was chosen by the user, so follow it (the in-tree guard below
+		// only refuses links discovered inside a tree, not a target the user listed).
+		if fi, lerr := os.Lstat(root); lerr == nil && fi.Mode()&fs.ModeSymlink != 0 {
+			if !info.IsDir() {
+				if !emitSymlinkRoot(rootCtx, ch, root, exclude, maxBytes) {
+					return
+				}
+				continue
+			}
+			// WalkDir does not descend into a symlink, even when it is the explicitly chosen root.
+			resolved, err := filepath.EvalSymlinks(root)
+			if err != nil {
+				if !emitSourceError(ctx, ch, root, err) {
+					return
+				}
+				continue
+			}
+			walkRoot = resolved
+		}
+		if !info.IsDir() {
+			if !emitFile(rootCtx, ch, root, maxBytes, exclude) {
+				return
+			}
 			continue
 		}
-		_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return nil
+		rootFS, openErr := os.OpenRoot(walkRoot)
+		if openErr != nil {
+			if !emitSourceError(rootCtx, ch, root, openErr) {
+				return
 			}
+			continue
+		}
+		walkErr := filepath.WalkDir(walkRoot, func(path string, d fs.DirEntry, err error) error {
 			if ctx.Err() != nil {
 				return filepath.SkipAll
+			}
+			if walkRoot != root {
+				rel, err := filepath.Rel(walkRoot, path)
+				if err != nil {
+					return err
+				}
+				// Keep report paths and exclusions relative to the root the user chose.
+				path = displaySourcePath(root, rel)
+			}
+			if excludedSourcePath(path, exclude) {
+				if err == nil && d.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if err != nil {
+				if !emitSourceError(rootCtx, ch, path, err) {
+					return filepath.SkipAll
+				}
+				return nil
 			}
 			if d.IsDir() {
 				// Prune default-skip dirs (generated/vendored noise), unless one is named explicitly as
@@ -127,41 +200,53 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 			if skipByExtension(ctx, path) {
 				return nil
 			}
-			for _, ex := range exclude {
-				if config.PathMatch(ex, path) { // glob (*.go, **/vendor/**) or substring
-					return nil
-				}
-			}
 			info, err := d.Info()
-			if err != nil || info.Size() == 0 {
+			if err != nil {
+				if !emitSourceError(rootCtx, ch, path, err) {
+					return filepath.SkipAll
+				}
 				return nil
 			}
+			if !info.Mode().IsRegular() {
+				return nil // special files discovered in a tree are outside the regular-file scan policy
+			}
 			if info.Size() > maxBytes {
-				logx.Warn("skipped: file exceeds max-size", "path", path, "size", info.Size(), "limit", maxBytes)
+				if !emitSourceError(rootCtx, ch, path, errSourceTooLarge) {
+					return filepath.SkipAll
+				}
 				return nil
 			}
 			rel, err := filepath.Rel(root, path)
 			if err != nil {
-				logx.Debug("skipped: cannot resolve path under root", "path", path, "err", err)
+				if !emitSourceError(rootCtx, ch, path, err) {
+					return filepath.SkipAll
+				}
 				return nil
 			}
-			data, err := rootFS.ReadFile(rel)
+			data, err := readSourceFile(func() (*os.File, error) {
+				return rootFS.OpenFile(rel, os.O_RDONLY|sourceOpenFlags, 0)
+			}, maxBytes)
 			if err != nil {
-				logx.Debug("skipped: file read error", "path", path, "err", err)
+				if !emitSourceError(rootCtx, ch, path, err) {
+					return filepath.SkipAll
+				}
 				return nil
 			}
-			if !emitPayload(ctx, ch, path, data, maxBytes, exclude, nil) {
+			if !emitPayload(rootCtx, ch, path, data, maxBytes, exclude, nil) {
 				return filepath.SkipAll
 			}
 			return nil
 		})
 		_ = rootFS.Close()
+		if walkErr != nil && !emitSourceError(rootCtx, ch, root, walkErr) {
+			return
+		}
 	}
 }
 
 // emitFile reads one explicitly-listed file (a FilesFromList entry) and emits it as an Item. A symlink
 // among them is followed (Stat, not Lstat) since the user chose the path; this differs from the fs walk,
-// which refuses links discovered by descent. A broken symlink fails Stat and is skipped with a Debug log.
+// which refuses links discovered by descent. Unreadable targets produce an incomplete-source item.
 func emitFile(ctx context.Context, ch chan<- model.Item, path string, maxBytes int64, exclude []string) bool {
 	return emitListedTarget(ctx, ch, path, path, maxBytes, exclude)
 }
@@ -189,25 +274,44 @@ func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPat
 	if skipByExtension(ctx, path) {
 		return true
 	}
+	if hasParentSegment(path) {
+		physical, err := filepath.EvalSymlinks(path)
+		if err != nil {
+			return emitSourceError(ctx, ch, reportPath, err)
+		}
+		ctx, err = withFilesystemOrigin(ctx, reportPath, physical)
+		if err != nil {
+			return emitSourceError(ctx, ch, reportPath, err)
+		}
+		path = physical
+	}
 	// Stat (follows symlinks) so an explicitly-listed link is resolved to its target's regular file.
 	info, err := os.Stat(path)
 	if err != nil {
-		logx.Debug("skipped: stat error (missing or broken symlink)", "path", path, "err", err)
-		return true
+		return emitSourceError(ctx, ch, reportPath, err)
 	}
-	if info.IsDir() || info.Size() == 0 {
-		return true // a directory target is not a single file to emit; the fs walk handles dir roots
+	if !info.Mode().IsRegular() {
+		return emitSourceError(ctx, ch, reportPath, errors.New("source is not a regular file"))
 	}
 	if info.Size() > maxBytes {
-		logx.Warn("skipped: file exceeds max-size", "path", path, "size", info.Size(), "limit", maxBytes)
-		return true
+		return emitSourceError(ctx, ch, reportPath, errSourceTooLarge)
 	}
-	data, err := os.ReadFile(path)
+	data, err := readSourceFile(func() (*os.File, error) {
+		return os.OpenFile(path, os.O_RDONLY|sourceOpenFlags, 0)
+	}, maxBytes)
 	if err != nil {
-		logx.Debug("skipped: file read error", "path", path, "err", err)
-		return true
+		return emitSourceError(ctx, ch, reportPath, err)
 	}
 	return emitPayload(ctx, ch, reportPath, data, maxBytes, exclude, nil)
+}
+
+func excludedSourcePath(path string, exclude []string) bool {
+	for _, pattern := range exclude {
+		if config.PathMatch(pattern, path) {
+			return true
+		}
+	}
+	return false
 }
 
 // docMagic are leading magic bytes of document/asset formats that slip the NUL check but embed base64
