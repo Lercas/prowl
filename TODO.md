@@ -132,8 +132,11 @@
 - [x] Fuzz-цели продублированы в `Makefile` и `ci.yml` — CI вызывает `make fuzz`,
   который обнаруживает все fuzz-цели в пакетах продукта (15 на 2026-11-14, включая новые тесты).
   Локальный smoke: `GOMAXPROCS=2 make fuzz FUZZTIME=1s` — все 15 прошли.
-- [ ] Покрытие: `internal/model` — 24% (`Redact`, `RedactKey`, `ComputeFingerprint`),
-  `internal/hermesaudit` — 54%, `internal/ahocorasick` и `internal/ownedcmd` без тестов.
+- [x] Покрытие: `internal/model`, `internal/ahocorasick`, `internal/ownedcmd` — 100%,
+  `internal/hermesaudit` — 78,0% (было 54,4%). Проверены маскирование PEM/Unicode,
+  стабильность fingerprint, URI, Aho против substring-оракула, параллельное чтение,
+  лимиты диагностики и отмена дерева процессов, точные passive IP-запросы, отсутствие
+  payload/credentials в отчёте, cookie/redirect и размер ответа. Race и Go 1.25 прошли.
 - [x] Проверить, что `tool/.dockerignore` исключает локальный мусор (`purrloin`, `*.test`,
   `0N_*`-фикстуры, `.env.prod`, ~30 МБ) — Dockerfile делает `COPY . .`.
   Добавлен отсутствовавший `purrloin`; остальные указанные шаблоны уже были.
