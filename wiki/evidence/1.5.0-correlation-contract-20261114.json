@@ -218,5 +218,15 @@
     "Actual provider revocation and report authenticity are not qualified by this matrix",
     "Provider verdict cases are declared metadata fixtures",
     "Remote/unknown acquisition scopes cannot prove absence until their provenance audit is complete"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "40d19c1",
+    "full_go": "passed after help grouping integration fix",
+    "native_passed": 46,
+    "native_total": 46,
+    "binary_sha256": "9bf32bc47b4655dade28b43153b2462d4f5eb388b7a9bdcec66bac8605e2cabe",
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-correlation-native-1mbmo75z/qualification.json",
+    "integration_fix": "Added correlate/remediation-check to the existing untracked help_flags.go Track and compare group; user file remains unstaged",
+    "unrelated_dirty_changes_preserved": true
+  }
 }
