@@ -47,7 +47,15 @@ func cmdCompare(args []string) int {
 		return 2
 	}
 	if c.ocrEnabled {
-		fmt.Fprintln(os.Stderr, "compare does not support --ocr: it would OCR every image twice")
+		fmt.Fprintln(os.Stderr, "compare does not support --ocr")
+		return 2
+	}
+	if c.verify || c.verifyAll || c.verifiedOnly || c.failOnVerified {
+		fmt.Fprintln(os.Stderr, "compare does not support provider verification")
+		return 2
+	}
+	if c.mlURL != "" {
+		fmt.Fprintln(os.Stderr, "compare requires an in-process model; --ml-url is not supported")
 		return 2
 	}
 	ctx, stop := rootContext(c)
@@ -74,37 +82,37 @@ func cmdCompare(args []string) int {
 		rest = []string{"."}
 	}
 
-	// Pass 1: regex/cascade only — the noisy set a regex scanner reports. No ML, no per-file cap.
-	rawC := c
-	rawC.mlEmbed, rawC.mlModel, rawC.mlURL = false, "", ""
-	rawC.verifiedOnly, rawC.maxPerFile = false, 0
-	rawItems, err := scanInput(ctx, c, rest)
-	if err != nil {
-		logx.Error("scan source failed", "err", err)
-		return 2
-	}
-	raw := prepareScan(rawC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed}).Collect(ctx, rawItems)
-	if code := failClosedIfIncomplete(ctx, gate(raw, "", false)); code != 0 {
-		return code
-	}
-
-	// Pass 2: the same scan + Prowl's in-process ML context filter (isolated from the per-file cap).
 	mlC := c
 	mlC.mlEmbed = true
 	mlC.verifiedOnly, mlC.maxPerFile = false, 0
-	// compare requires the in-process model — fail closed rather than run cascade-only and report a
-	// misleading "0% suppressed by ML" (e.g. with a bad --ml-model).
 	if code := mlC.mlPreflight(); code != 0 {
 		return code
 	}
-	keptItems, err := scanInput(ctx, c, rest)
-	if err != nil {
-		logx.Error("scan source failed", "err", err)
+	prepared := prepareScan(mlC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed})
+	if prepared.mlError != nil {
+		logx.Error("ML setup failed", "err", prepared.mlError)
 		return 2
 	}
-	kept := prepareScan(mlC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed}).Collect(ctx, keptItems)
-	if code := failClosedIfIncomplete(ctx, gate(kept, "", false)); code != 0 {
-		return code
+	comparison, err := prepared.pipeline.Compare(ctx, func(ctx context.Context) (<-chan model.Item, error) {
+		return scanInput(ctx, c, rest)
+	})
+	if err != nil {
+		logx.Error("comparison failed", "err", err)
+		return 2
+	}
+	raw, kept := comparison.Raw, comparison.Kept
+	if c.dedupe {
+		raw, kept = dedupeFingerprints(raw), dedupeFingerprints(kept)
+		// Retained values may survive at a different occurrence than the raw dedupe winner.
+		retained := map[string]model.Finding{}
+		for _, f := range kept {
+			retained[f.Fingerprint] = f
+		}
+		for i, f := range raw {
+			if survivor, ok := retained[f.Fingerprint]; ok {
+				raw[i] = survivor
+			}
+		}
 	}
 
 	printCompare(raw, kept)
@@ -112,23 +120,21 @@ func cmdCompare(args []string) int {
 }
 
 func compareKey(f model.Finding) string {
-	if f.Fingerprint != "" {
-		return f.Fingerprint
-	}
-	return f.Path + "\x00" + f.Type + "\x00" + strconv.Itoa(f.Line)
+	return f.Fingerprint + "\x00" + f.Source + "\x00" + f.Path + "\x00" + f.Type + "\x00" + strconv.Itoa(f.Line) + ":" + strconv.Itoa(f.Col) + ":" + strconv.Itoa(f.ByteStart) + ":" + strconv.Itoa(f.ByteEnd)
 }
 
 // printCompare renders the regex-baseline -> Prowl funnel and a breakdown of what the ML suppressed.
 func printCompare(raw, kept []model.Finding) {
-	keptSet := make(map[string]bool, len(kept))
+	keptSet := make(map[string]int, len(kept))
 	for _, f := range kept {
-		keptSet[compareKey(f)] = true
+		keptSet[compareKey(f)]++
 	}
 	byType := map[string]int{}
 	var sample []model.Finding
 	suppressed := 0
 	for _, f := range raw {
-		if keptSet[compareKey(f)] {
+		if keptSet[compareKey(f)] > 0 {
+			keptSet[compareKey(f)]--
 			continue
 		}
 		suppressed++
@@ -142,16 +148,15 @@ func printCompare(raw, kept []model.Finding) {
 	if n > 0 {
 		pct = 100 * float64(suppressed) / float64(n)
 	}
-	fmt.Printf("\nProwl compare — detector candidates vs the ML-confirmed set\n\n")
-	fmt.Printf("  detectors (regex + cascade, no ML):  %6d findings\n", n)
+	fmt.Printf("\nProwl compare — fixed candidates vs the ML-filtered set\n\n")
+	fmt.Printf("  before local L2 (fixed candidates):  %6d findings\n", n)
 	fmt.Printf("  after Prowl's ML context filter:     %6d findings\n", m)
 	fmt.Printf("  -----------------------------------------------------\n")
 	fmt.Printf("  suppressed by ML as not-a-secret:    %6d  (%.0f%%)\n", suppressed, pct)
-	fmt.Printf("\n  (the cascade already rejects hashes/UUIDs/placeholders before the ML runs, so the\n")
-	fmt.Printf("   gap vs a raw-regex tool like gitleaks is larger than the ML delta shown here. In a\n")
-	fmt.Printf("   repo with a .gitleaks.toml, those rules are auto-loaded into the baseline above.)\n")
+	fmt.Printf("\n  (Input and candidate discovery run once; counts follow duplicate handling.\n")
+	fmt.Printf("   Accuracy and credential validity require separate validation.)\n")
 	if suppressed == 0 {
-		fmt.Printf("\n  The ML kept every candidate here — nothing the cascade surfaced looked like noise.\n\n")
+		fmt.Printf("\n  No displayed candidate identities were removed by local L2.\n\n")
 		return
 	}
 	type tc struct {
@@ -163,7 +168,7 @@ func printCompare(raw, kept []model.Finding) {
 		tcs = append(tcs, tc{t, c})
 	}
 	sort.Slice(tcs, func(i, j int) bool { return tcs[i].n > tcs[j].n })
-	fmt.Printf("\n  suppressed by detector type (a regex scanner would report these):\n")
+	fmt.Printf("\n  suppressed by detector type:\n")
 	for i, t := range tcs {
 		if i >= 8 {
 			fmt.Printf("    %6d  … and %d more types\n", 0, len(tcs)-8)

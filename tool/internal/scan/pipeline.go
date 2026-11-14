@@ -31,6 +31,8 @@ type Options struct {
 	// reconstruction maps a child scan to its original expression before observers.
 	reconstruction  *reconstructionOrigin
 	matchLimit      int
+	beforeML        func([]model.Finding) bool
+	resultSink      func([]model.Finding)
 	candidateBudget *int
 	// IgnorePragmas is for untrusted in-flight payloads which cannot grant themselves exceptions.
 	IgnorePragmas bool

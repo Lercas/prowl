@@ -84,7 +84,8 @@ def main():
         before = state['calls']
         check('opt-out', run(['scan', 'production.txt', '--semantic=false', '--format=json', '--silence']).returncode == 0 and state['calls'] == before)
         before = state['calls']
-        check('compare-rejected', run(['compare', 'production.txt', '--semantic']).returncode == 2 and state['calls'] == before)
+        check('compare-single-discovery', run(['compare', 'production.txt', '--semantic']).returncode == 0 and state['calls'] == before + 1)
+        before = state['calls']
         output = root / 'owned-report.json'
         output.write_bytes(b'owned report sentinel\n')
         result = run(['scan', 'production.txt', '--semantic-url=https://owned.invalid/model', '--output=' + str(output)])

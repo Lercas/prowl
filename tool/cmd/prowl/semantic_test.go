@@ -34,8 +34,8 @@ func TestSemanticCLISelectionAndPrivacy(t *testing.T) {
 	if _, _, err := parseCommand("scan", []string{"--semantic", "--semantic-allow-remote"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := parseCommand("compare", []string{"--semantic"}); err == nil {
-		t.Fatal("nondeterministic semantic comparison accepted without a frozen candidate set")
+	if _, _, err := parseCommand("compare", []string{"--semantic", "--semantic-allow-remote"}); err != nil {
+		t.Fatal("fixed candidate comparison rejected semantic discovery")
 	}
 	if _, _, err := parseCommand("serve", []string{"--semantic"}); err == nil {
 		t.Fatal("unsupported worker stage silently accepted")

@@ -188,9 +188,13 @@
       targeted race, lint и Go 1.26.11. Качество реальной модели и retention с L2
       не квалифицированы. Контракт: `wiki/Semantic-Discovery.md`, evidence:
       `wiki/evidence/1.5.0-semantic-contract-20261114.json`.
-    - [ ] `compare --semantic`: фиксировать один bounded набор кандидатов для
-      сравнения L2. Пока флаг отклоняется, чтобы два независимых model inference
-      не представлялись как подавление шума одним и тем же L2.
+    - [x] `compare --semantic`: один intake и один кандидатный проход, raw/kept
+      projections до/после local L2 с bounds 100000 строк / 32 MiB. Ошибка score,
+      неполнота, timeout и budget отменяют источник и не дают процента подавления.
+      Одно inference на наблюдаемый chunk; файл не читается повторно после модели.
+      Исправлен подсчёт повторных fingerprint с `--no-dedupe`; provider/sidecar
+      опции не выдаются за возможности compare. Нативная матрица — 31/31.
+      `wiki/evidence/1.5.0-compare-contract-20261114.json`.
 
     - [x] Возвращены CLI `correlate` и `remediation-check` для keyed JSON envelope.
       Shared immutable metadata links не выдаются за направление распространения;

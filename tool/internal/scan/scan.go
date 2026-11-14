@@ -329,6 +329,10 @@ func (p *Pipeline) Run(ctx context.Context, items <-chan model.Item) []model.Fin
 				if len(local) == 0 {
 					continue
 				}
+				if p.options.resultSink != nil {
+					p.options.resultSink(local)
+					continue
+				}
 				mu.Lock()
 				findings = append(findings, local...)
 				mu.Unlock()
@@ -754,6 +758,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	}
 	// The per-item cap bounds a network sidecar; the in-process model scores dense bundles too (where ML
 	// earns its keep). The truncation marker is appended AFTER ML so it is never scored.
+	if p.options.beforeML != nil && !p.options.beforeML(out) {
+		return []model.Finding{processingError(it, "comparison candidate budget exhausted")}
+	}
 	var selected []int // nil denotes unchanged candidate order on absent/failing ML
 	if ml != nil && len(out) > 0 && (ml.Local() || len(out) <= mlMaxItemFindings) {
 		out, selected = mlFilterSelected(ctx, ml, out, reqs)
