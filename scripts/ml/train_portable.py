@@ -22,8 +22,19 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import average_precision_score, precision_score, recall_score, f1_score
 
 
-def partition(records, seed):
-    """Merge connected template/value groups before assigning complete groups."""
+def record_template(record):
+    value = record["value"]
+    text = record.get("text") or value
+    span = record.get("span")
+    if isinstance(span, (list, tuple)) and len(span) == 2:
+        text = text[:span[0]] + "\x00" + text[span[1]:]
+    elif value:
+        text = text.replace(value, "\x00")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def connected_groups(records):
+    """Merge transitive template/value components without assigning buckets."""
     parent = list(range(len(records)))
 
     def root(i):
@@ -35,13 +46,7 @@ def partition(records, seed):
     seen_values, seen_templates = {}, {}
     for i, record in enumerate(records):
         value = record["value"]
-        text = record.get("text") or value
-        span = record.get("span")
-        if isinstance(span, (list, tuple)) and len(span) == 2:
-            text = text[:span[0]] + "\x00" + text[span[1]:]
-        elif value:
-            text = text.replace(value, "\x00")
-        template = re.sub(r"\s+", " ", text).strip()
+        template = record_template(record)
         for seen, key in ((seen_values, value), (seen_templates, template)):
             if key in seen:
                 parent[root(i)] = root(seen[key])
@@ -50,8 +55,13 @@ def partition(records, seed):
     groups = defaultdict(list)
     for i in range(len(records)):
         groups[root(i)].append(i)
+    return list(groups.values())
+
+
+def partition(records, seed):
+    """Merge connected template/value groups before assigning complete groups."""
     strata = defaultdict(list)
-    for indices in groups.values():
+    for indices in connected_groups(records):
         strata[records[indices[0]]["label_type"]].append(indices)
     rng = random.Random(seed)
     buckets = {key: [] for key in ("train", "val", "test")}
@@ -62,6 +72,32 @@ def partition(records, seed):
                 "val" if i < int(len(groups) * .85) else "test")
             buckets[bucket].extend(indices)
     return {key: np.asarray(indices, dtype=int) for key, indices in buckets.items()}
+
+
+def extend_partition(base, frozen, augmentation, seed):
+    """Keep original holdouts fixed; exclude components bridging frozen buckets."""
+    values, templates = {}, {}
+    for bucket, indices in frozen.items():
+        for index in indices:
+            record = base[index]
+            values[record["value"]] = bucket
+            templates[record_template(record)] = bucket
+    proposed = {int(index): bucket for bucket, indices in partition(augmentation, seed).items()
+                for index in indices}
+    result = {bucket: list(indices) for bucket, indices in frozen.items()}
+    excluded = []
+    for group in connected_groups(augmentation):
+        links = set()
+        for index in group:
+            record = augmentation[index]
+            links.update(bucket for bucket in (values.get(record["value"]),
+                                                templates.get(record_template(record))) if bucket)
+        if len(links) > 1:
+            excluded.extend(group)
+            continue
+        bucket = next(iter(links)) if links else proposed[group[0]]
+        result[bucket].extend(len(base) + index for index in group)
+    return {bucket: np.asarray(indices, dtype=int) for bucket, indices in result.items()}, excluded
 
 
 def export_model(clf, names):
@@ -107,29 +143,56 @@ def main():
     parser.add_argument("--extractor", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=13)
+    parser.add_argument("--augmentation", type=Path)
+    parser.add_argument("--reference-report", type=Path)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
     names = json.loads(subprocess.check_output([str(args.extractor), "--names"]))
     assert names[7] == "compression_ratio_go_flate_v2"
     print("Extracting canonical Go features", flush=True)
-    with args.corpus.open("rb") as corpus, (args.out / "features.jsonl").open("wb") as features:
-        subprocess.run([str(args.extractor)], stdin=corpus, stdout=features, check=True)
+    with (args.out / "features.jsonl").open("wb") as features:
+        for path in [args.corpus] + ([args.augmentation] if args.augmentation else []):
+            with path.open("rb") as corpus:
+                subprocess.run([str(args.extractor)], stdin=corpus, stdout=features, check=True)
     print("Loading corpus and feature matrix", flush=True)
     records = [json.loads(line) for line in args.corpus.open() if line.strip()]
+    original_n = len(records)
+    original_split = partition(records, args.seed)
+    corpus_sha256 = hashlib.sha256(args.corpus.read_bytes()).hexdigest()
+    reference = None
+    if args.reference_report:
+        reference = json.loads(args.reference_report.read_text())
+        if (not reference.get("qualified") or reference["corpus_sha256"] != corpus_sha256 or
+                reference["seed"] != args.seed or reference["threshold"] != .3 or
+                reference["split"] != {k: len(v) for k, v in original_split.items()}):
+            raise ValueError("Reference report does not identify the same qualified frozen corpus, split, seed and threshold")
+    split = original_split
+    excluded = []
+    if args.augmentation:
+        augmentation = [json.loads(line) for line in args.augmentation.open() if line.strip()]
+        if not augmentation:
+            raise ValueError("Augmentation corpus is empty")
+        split, excluded = extend_partition(records, original_split, augmentation, args.seed)
+        records.extend(augmentation)
     X = np.asarray([json.loads(line) for line in (args.out / "features.jsonl").open()], dtype=float)
     assert X.shape == (len(records), len(names)) and np.isfinite(X).all()
     y = np.asarray([r["label_binary"] for r in records])
-    split = partition(records, args.seed)
     for indices in split.values():
         assert len(indices) and set(y[indices]) == {0, 1}
     old_ratio = np.asarray([len(zlib.compress(r["value"].encode())) / len(r["value"].encode())
                             if r["value"] else 0. for r in records])
-    report = {"corpus_sha256": hashlib.sha256(args.corpus.read_bytes()).hexdigest(),
+    report = {"corpus_sha256": corpus_sha256,
               "seed": args.seed, "numpy": np.__version__, "sklearn": sklearn.__version__,
               "extractor_sha256": hashlib.sha256(args.extractor.read_bytes()).hexdigest(),
               "n": len(records), "split": {k: len(v) for k, v in split.items()},
               "threshold": .3, "max_regression": .005, "models": {},
               "selection": "smallest max_leaf_nodes in [31,63,127] within 0.0001 of best validation F1 at threshold 0.3"}
+    if args.augmentation:
+        report["augmentation"] = {
+            "sha256": hashlib.sha256(args.augmentation.read_bytes()).hexdigest(),
+            "n": len(records) - original_n, "excluded_cross_bucket_rows": len(excluded),
+            "original_n": original_n, "original_split": {k: len(v) for k, v in original_split.items()},
+            "policy": "original partitions frozen; linked augmentation follows its bucket; bridges excluded"}
     portable = None
     for name in ("zlib_control", "go_flate"):
         print(f"Training {name}: {len(split['train'])} records", flush=True)
@@ -159,6 +222,13 @@ def main():
             report["selected_max_leaf_nodes"] = clf.max_leaf_nodes
         report["models"][name] = {bucket: metrics(y[indices], clf.predict_proba(data[indices])[:, 1], threshold)
                                   for bucket, indices in split.items() if bucket != "train"}
+        if args.augmentation:
+            for bucket in ("val", "test"):
+                indices = original_split[bucket]
+                report["models"][name]["original_" + bucket] = metrics(y[indices], clf.predict_proba(data[indices])[:, 1], threshold)
+                indices = split[bucket][split[bucket] >= original_n]
+                if len(indices):
+                    report["models"][name]["augmentation_" + bucket] = metrics(y[indices], clf.predict_proba(data[indices])[:, 1], threshold)
         print(json.dumps(report["models"][name]), flush=True)
         if name == "go_flate":
             portable = clf
@@ -166,6 +236,13 @@ def main():
         report["models"]["go_flate"][bucket][metric] >=
         report["models"]["zlib_control"][bucket][metric] - report["max_regression"]
         for bucket in ("val", "test") for metric in ("pr_auc", "precision", "recall", "f1"))
+    if reference:
+        report["reference_model_sha256"] = reference["model_sha256"]
+        report["original_quality_gate"] = all(
+            report["models"]["go_flate"]["original_" + bucket if args.augmentation else bucket][metric] >=
+            reference["models"]["go_flate"][bucket][metric] - report["max_regression"]
+            for bucket in ("val", "test") for metric in ("pr_auc", "precision", "recall", "f1"))
+        report["qualified"] = report["qualified"] and report["original_quality_gate"]
     (args.out / "qualification.json").write_text(json.dumps(report, indent=2) + "\n")
     if not report["qualified"]:
         raise SystemExit("Portable model failed the quality regression gate")
@@ -174,7 +251,11 @@ def main():
     (args.out / "model_binary_go.json").write_bytes(model_bytes)
     report["model_sha256"] = hashlib.sha256(model_bytes).hexdigest()
     (args.out / "qualification.json").write_text(json.dumps(report, indent=2) + "\n")
-    fixture_indices = np.concatenate([split["val"][:128], split["test"][:128]])
+    fixture_parts = [split["val"][:128], split["test"][:128]]
+    if args.augmentation:
+        fixture_parts.extend(split[bucket][split[bucket] >= original_n][:128]
+                             for bucket in ("val", "test"))
+    fixture_indices = np.unique(np.concatenate(fixture_parts))
     probabilities = portable.predict_proba(X[fixture_indices])[:, 1]
     fixtures = [{"features": X[index].tolist(), "l2_prob": float(probability)}
                 for index, probability in zip(fixture_indices, probabilities)]

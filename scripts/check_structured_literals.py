@@ -79,8 +79,10 @@ def fixtures():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary", type=Path)
+    parser.add_argument("--model", type=Path, help="qualify an explicit candidate without replacing the installed model")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
+    candidate = args.model.resolve(strict=True) if args.model else None
     root = Path(tempfile.mkdtemp(prefix="prowl-structured-native-"))
     home = root / "home"
     home.mkdir()
@@ -98,6 +100,8 @@ def main():
                 path.write_bytes(sentinel if stdin else payload)
                 command = [str(binary), "scan", "--format=json", "--silence", "--no-dedupe"]
                 command += ["--ml"] if ml else []
+                if ml and candidate:
+                    command += ["--ml-model=" + str(candidate)]
                 command += ["--stdin-name=" + name] if stdin else [name]
                 result = subprocess.run(command, input=payload if stdin else b"", cwd=root, env=env, capture_output=True, timeout=20)
                 report = json.loads(result.stdout)
@@ -112,6 +116,8 @@ def main():
                     ok = ok and path.read_bytes() == sentinel
                 checks.append(dict(case=case["name"], ml=ml, stdin=stdin, passed=ok, expected=sum(expected.values()), found=len(found), exit=result.returncode))
     report = dict(binary=str(binary), sha256=hashlib.sha256(binary.read_bytes()).hexdigest(), artifact_dir=str(root), checks=checks)
+    if candidate:
+        report.update(model=str(candidate), model_sha256=hashlib.sha256(candidate.read_bytes()).hexdigest())
     report["passed"] = sum(c["passed"] for c in checks)
     report["total"] = len(checks)
     output = root / "qualification.json"

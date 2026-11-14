@@ -35,5 +35,34 @@ class SelectionTests(unittest.TestCase):
                                            127: {"f1": .991}}), 127)
 
 
+class FrozenAugmentationTests(unittest.TestCase):
+    def test_original_buckets_and_transitive_links_are_preserved(self):
+        from train_portable import extend_partition
+        base = [
+            {"value": "train-value", "text": "train-carrier=train-value", "label_type": "secret"},
+            {"value": "val-value", "text": "val-carrier=val-value", "label_type": "secret"},
+            {"value": "test-value", "text": "test-carrier=test-value", "label_type": "secret"},
+        ]
+        frozen = {"train": [0], "val": [1], "test": [2]}
+        augmentation = [
+            {"value": "train-value", "text": "new=train-value", "label_type": "secret"},
+            {"value": "extra", "text": "new=extra", "label_type": "secret"},
+            {"value": "test-value", "text": "other=test-value", "label_type": "secret"},
+            {"value": "val-value", "text": "bridge=val-value", "label_type": "secret"},
+            {"value": "test-value", "text": "bridge=test-value", "label_type": "secret"},
+        ]
+        split, excluded = extend_partition(base, frozen, augmentation, 13)
+        self.assertEqual(list(split["train"]), [0, 3, 4])
+        self.assertEqual(list(split["val"]), [1])
+        self.assertEqual(list(split["test"]), [2])
+        self.assertEqual(sorted(excluded), [2, 3, 4])
+
+    def test_multibyte_character_spans_mask_the_same_carrier(self):
+        from train_portable import record_template
+        records = [{"value": value, "text": '"пароль":"' + value + '"',
+                    "span": [10, 10 + len(value)]} for value in ["ЖукЖук🦋", "КитКит🐳"]]
+        self.assertEqual(record_template(records[0]), record_template(records[1]))
+
+
 if __name__ == "__main__":
     unittest.main()
