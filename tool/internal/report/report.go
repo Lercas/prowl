@@ -327,6 +327,9 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 			// Mirror confidence/stage for downstream tooling that reads result properties.
 			"properties": map[string]any{"confidence": safeConfidence(f.Confidence), "stage": f.Stage},
 		}
+		if f.ValueFingerprint != "" {
+			res["properties"].(map[string]any)["value_fingerprint"] = f.ValueFingerprint
+		}
 		// partialFingerprints drives alert identity so a finding that moves lines isn't resurrected as a
 		// new alert. Skip it when there's no stable identity.
 		if f.Fingerprint != "" {

@@ -59,6 +59,15 @@ type Finding struct {
 	// scan time before redaction. Baselining keys on this so two distinct secrets that share their
 	// first/last 4 chars (e.g. all AWS keys start AKIA) don't collide to one fingerprint.
 	Fingerprint string `json:"fingerprint,omitempty"`
+	// ValueFingerprint is a local-key HMAC over the value alone, present only
+	// when an opt-in index supplies the identity function to the pipeline.
+	ValueFingerprint string `json:"value_fingerprint,omitempty"`
+	// IndexPath is sanitized while the raw value is still available. The index
+	// never reads report context or the potentially unredacted display value.
+	IndexPath       string `json:"-"`
+	IndexSource     string `json:"-"`
+	IndexType       string `json:"-"`
+	IndexLocationID string `json:"-"`
 	// Context is the ML feature context (surrounding line + leading name). Emitted only under
 	// --show-secrets, since the line holds the raw secret; it lets the flywheel train on the exact
 	// features the scan scored, instead of a context-stripped value.

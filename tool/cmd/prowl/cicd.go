@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/Lercas/prowl/tool/internal/cicd"
 	"github.com/Lercas/prowl/tool/internal/logx"
@@ -34,7 +35,7 @@ func cmdCICD(args []string) int {
 		return 2
 	}
 	target := targets[0]
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 
@@ -83,6 +84,10 @@ func cmdCICD(args []string) int {
 
 	ctx, stop := rootContext(c)
 	defer stop()
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.indexError != nil {
+		return indexError(prepared.indexError)
+	}
 	items, done, err := cicd.Collect(ctx, target, cicd.Options{
 		BaseURL:          baseURL,
 		Token:            token,
@@ -99,8 +104,13 @@ func cmdCICD(args []string) int {
 		return 2
 	}
 
-	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
-	result := <-done
+	var result cicd.Result
+	var resultOnce sync.Once
+	getResult := func() { resultOnce.Do(func() { result = <-done }) }
+	c.indexCoverageComplete = func() bool { getResult(); return result.Items > 0 && result.Failures == 0 }
+	prepared.flags.indexCoverageComplete = c.indexCoverageComplete
+	code := prepared.Run(ctx, items)
+	getResult()
 	logx.Info("CI collection complete", "target", target, "runs", result.Runs, "artifacts",
 		result.Artifacts, "items", result.Items, "skipped", result.Skipped, "failures", result.Failures)
 	if result.Items == 0 && ctx.Err() == nil {

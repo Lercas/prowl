@@ -129,6 +129,7 @@ func enumFlag(name, commands, description string, allowed []string, field func(*
 }
 
 const scanCommands = "scan compare repo org cicd image mobile bucket domain jira confluence"
+const indexedCommands = "scan repo org cicd image mobile bucket domain jira confluence"
 
 const detectorCommands = scanCommands + " serve doctor"
 
@@ -142,7 +143,9 @@ var commandSubcommands = map[string][]string{
 
 var cliFlags = []flagSpec{
 	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
-	enumFlag("--format", scanCommands, "report format (default pretty)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
+	stringFlag("--index", indexedCommands+" index diff", "DIR", "локальный приватный индекс секретов (явное включение)", func(c *commonFlags) *string { return &c.indexDir }),
+	stringFlag("--scope", indexedCommands+" index diff", "NAME", "стабильное имя области скана для индекса", func(c *commonFlags) *string { return &c.indexScope }),
+	enumFlag("--format", scanCommands+" index diff", "report format (default pretty; index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
 	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
 	boolFlag("--fail-on-verified", scanCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
 	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),
@@ -166,7 +169,7 @@ var cliFlags = []flagSpec{
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
 	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
-	stringFlag("--output -o", scanCommands+" rules.export hermes-audit", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
+	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
 	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
 	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
 	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
@@ -380,6 +383,18 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.cmd.logsOnly && c.cmd.artifactsOnly {
 		return c, nil, errors.New("--logs-only and --artifacts-only are mutually exclusive")
 	}
+	if command == "index" || command == "diff" {
+		if c.format != "pretty" && c.format != "json" {
+			return c, nil, errors.New("index/diff поддерживает --format pretty|json")
+		}
+		if c.indexDir == "" {
+			return c, nil, errors.New("--index DIR обязателен")
+		}
+	} else if c.indexDir != "" && strings.TrimSpace(c.indexScope) == "" {
+		return c, nil, errors.New("для --index требуется явный --scope NAME")
+	} else if c.indexScope != "" && c.indexDir == "" {
+		return c, nil, errors.New("--scope требует --index DIR")
+	}
 	if command == "domain" && c.cmd.targetsFile != "" && len(rest) > 0 {
 		return c, nil, errors.New("domain accepts a target or --targets, not both")
 	}
@@ -392,6 +407,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		if len(rest) > 1 {
 			return c, nil, fmt.Errorf("%s accepts at most one target", command)
 		}
+	}
+	if c.indexDir != "" && command != "index" && command != "diff" {
+		c.indexEvidence = &indexEvidence{}
 	}
 	return c, rest, nil
 }
@@ -448,6 +466,9 @@ func splitCSV(s string) []string {
 }
 
 type commonFlags struct {
+	indexDir, indexScope                     string
+	indexEvidence                            *indexEvidence
+	indexCoverageComplete                    func() bool // optional source-specific completion evidence (e.g. OCR)
 	cmd                                      commandOptions
 	explicitFlags                            map[string]bool // immutable after parsing; explicit defaults override configuration
 	format, failOn, taxonomy, config, output string

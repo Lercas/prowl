@@ -268,6 +268,7 @@ type evaluation struct {
 	text, lower string
 	wins        *linewin.Windows
 	words       []bool // nil for standalone Template.Match, which uses the supplied lowercase text
+	occurrences bool   // preserve distinct locations of the same value for indexing
 }
 
 // matchN is Match capped at limit hits, also reporting truncation. A limit <= 0
@@ -291,7 +292,7 @@ func (t *Template) matchN(in evaluation, limit int) ([]Hit, bool) {
 	if (and && !matchedAll) || (!and && !matchedAny) {
 		return nil, false
 	}
-	return t.extract(in.text, in.wins, minEntropy, limit)
+	return t.extract(in.text, in.wins, minEntropy, limit, in.occurrences)
 }
 
 // winAt returns the line-window index recorded for regex i, or -1 when none was assigned.
@@ -355,7 +356,7 @@ type extractRe struct {
 // extract pulls values via the extractors (or regex matchers) and applies the entropy floor, bounded
 // at limit hits (the bool reports truncation). Each regex's FindAll is capped at the remaining budget
 // so a dense file never materializes the full submatch slice up front.
-func (t *Template) extract(text string, wins *linewin.Windows, minEntropy float64, limit int) ([]Hit, bool) {
+func (t *Template) extract(text string, wins *linewin.Windows, minEntropy float64, limit int, occurrences bool) ([]Hit, bool) {
 	if limit <= 0 {
 		return nil, false
 	}
@@ -371,6 +372,10 @@ func (t *Template) extract(text string, wins *linewin.Windows, minEntropy float6
 	var hits []Hit
 	truncated := false
 	seen := map[string]bool{}
+	var seenSpans map[[2]int]bool
+	if occurrences {
+		seenSpans = map[[2]int]bool{}
+	}
 	for _, x := range res {
 		// Ask for at most (remaining budget + 1) so we stop early on a dense file yet can detect
 		// truncation; dedupe via seen, so the +1 is a safe over-fetch.
@@ -396,10 +401,18 @@ func (t *Template) extract(text string, wins *linewin.Windows, minEntropy float6
 			if minEntropy > 0 && shannon(val) < minEntropy {
 				continue
 			}
-			if seen[val] {
-				continue
+			if occurrences {
+				span := [2]int{s, e}
+				if seenSpans[span] {
+					continue
+				}
+				seenSpans[span] = true
+			} else {
+				if seen[val] {
+					continue
+				}
+				seen[val] = true
 			}
-			seen[val] = true
 			hits = append(hits, t.hit(val, s, e))
 			if len(hits) >= limit {
 				return hits, true // budget hit: stop before building more

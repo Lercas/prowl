@@ -23,7 +23,7 @@ func cmdImage(args []string) int {
 		return code
 	}
 	setupLogging(c)
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 	if len(rest) == 0 {

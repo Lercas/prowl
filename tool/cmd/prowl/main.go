@@ -42,6 +42,8 @@ func runCLI(args []string) int {
 		return cmdScan(args[1:])
 	case "compare":
 		return cmdCompare(args[1:])
+	case "index", "diff":
+		return cmdIndex(cmd, args[1:])
 	case "repo":
 		return cmdRepo(args[1:])
 	case "org":

@@ -31,7 +31,7 @@ func cmdOrg(args []string) int {
 	if code := checkSourceModes(c, nil); code != 0 {
 		return code
 	}
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 	target := ""
@@ -61,6 +61,7 @@ func cmdOrg(args []string) int {
 	}
 	if ocrEngine != nil {
 		ctx = source.WithOCR(ctx, ocrEngine)
+		c.indexCoverageComplete = func() bool { stats := ocrEngine.Stats(); return stats.Failures == 0 && stats.Skipped == 0 }
 		logx.Info("OCR enabled", "model", firstNonEmpty(c.ocrModel, ocr.DefaultModel),
 			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
 			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
@@ -87,6 +88,10 @@ func cmdOrg(args []string) int {
 	}
 
 	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.indexError != nil {
+		logx.Error("подготовка индекса не удалась", "err", prepared.indexError)
+		return 2
+	}
 	var urls []string
 	if gists {
 		logx.Info("listing gists", "target", target)

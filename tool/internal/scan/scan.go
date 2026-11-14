@@ -3,7 +3,6 @@ package scan
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"runtime"
 	"sort"
@@ -373,6 +372,12 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 	// truncated records when either producer hit the cap so the output can carry a truncation marker.
 	maxMatches := detect.MaxScanMatches()
 	out := make([]model.Finding, 0, len(ms))
+	var indexValues []string
+	if p.options.ValueFingerprint != nil {
+		for _, m := range ms {
+			indexValues = append(indexValues, m.Value)
+		}
+	}
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
 	dedup := map[string]int{} // value+line key -> index in out, avoids cascade/template double-reporting
 	li := newLineIndex(it.Text)
@@ -398,7 +403,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 		}
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
-		dedup[fmt.Sprintf("%d:%s", line, m.Value)] = len(out) // index of the finding appended next
+		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
 		ver, why := applyVerify(ctx, vset, m.Type, m.Value, it.Text)
 		out = append(out, model.Finding{
 			Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
@@ -407,8 +412,10 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 			UTF16Col:    li.utf16Col(m.Start),
 			ArtifactURI: it.ArtifactURI,
 			Redacted:    p.redactValue(m.Value), Stage: m.Stage, URL: itemURL,
-			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
-			Verified:    ver, Rationale: why, Instruction: itemInstr,
+			Fingerprint:      model.ComputeFingerprint(m.Type, it.Path, m.Value),
+			ValueFingerprint: p.valueFingerprint(m.Value), IndexPath: p.indexText(it.Path, ""),
+			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
+			Verified: ver, Rationale: why, Instruction: itemInstr,
 			ImageEntry: it.ImageEntry,
 			Context:    p.revealContext(it, m.Start),
 		})
@@ -426,7 +433,13 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 		budget := maxMatches - len(out)
 		if budget > 0 {
 			resilience.Guard(
-				func() { hits, engTrunc = eng.MatchN(it.Text, budget) },
+				func() {
+					if p.options.ValueFingerprint != nil {
+						hits, engTrunc = eng.MatchOccurrencesN(it.Text, budget)
+					} else {
+						hits, engTrunc = eng.MatchN(it.Text, budget)
+					}
+				},
 				func(r any) {
 					logx.Warn("recovered rule-engine panic", "path", it.Path, "err", r)
 					failed = true
@@ -437,6 +450,11 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 		}
 		if engTrunc {
 			truncated = true
+		}
+		if p.options.ValueFingerprint != nil {
+			for _, h := range hits {
+				indexValues = append(indexValues, h.Value)
+			}
 		}
 		for i, h := range hits {
 			if i&1023 == 0 && ctx.Err() != nil {
@@ -460,7 +478,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 				continue
 			}
 			line, col := li.cols(h.Start)
-			key := fmt.Sprintf("%d:%s", line, h.Value)
+			key := p.findingDedupKey(line, col, h.Value)
 			idx, collided := dedup[key]
 			sev := h.Severity
 			if sev == "" {
@@ -474,8 +492,10 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 				UTF16Col:    li.utf16Col(h.Start),
 				ArtifactURI: it.ArtifactURI,
 				Redacted:    p.redactValue(h.Value), Stage: "rule", URL: itemURL,
-				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
-				Verified:    ver, Rationale: why, Instruction: itemInstr,
+				Fingerprint:      model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
+				ValueFingerprint: p.valueFingerprint(h.Value), IndexPath: p.indexText(it.Path, ""),
+				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
+				Verified: ver, Rationale: why, Instruction: itemInstr,
 				ImageEntry: it.ImageEntry,
 				Context:    p.revealContext(it, h.Start),
 			}
@@ -497,6 +517,12 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 			if ml != nil {
 				reqs = append(reqs, recordFor(h.Value, it, h.Start))
 			}
+		}
+	}
+	p.sanitizeIndexMetadata(out, indexValues)
+	if p.options.ObserveVerification != nil {
+		for _, f := range out {
+			p.observeVerification(f)
 		}
 	}
 	// The per-item cap bounds a network sidecar; the in-process model scores dense bundles too (where ML

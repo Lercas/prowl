@@ -10,6 +10,8 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"index", "локальный индекс: места обнаружения и проверенные состояния", "prowl index --index DIR [--scope NAME] [--format json]"},
+	{"diff", "новые и не наблюдавшиеся секреты между сканами", "prowl diff [FROM TO] --index DIR [--scope NAME] [--format json]"},
 	{"compare", "compare cascade and ML results on a repeatable source", "prowl compare [path...] — compare cascade and portable ML findings"},
 	{"scan", "scan files, dirs, archives, documents, mail, git, or stdin for secrets", scanHelp},
 	{"repo", "clone & scan a remote git repository", repoHelp},

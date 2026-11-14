@@ -269,6 +269,16 @@ func (e *Engine) Match(text string) []Hit {
 // anchor-less ones) run, and extraction stops once the running total reaches limit. A limit <= 0
 // produces nothing (the combined cap is already exhausted upstream).
 func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
+	return e.matchN(text, limit, false)
+}
+
+// MatchOccurrencesN preserves distinct source spans for indexing while still
+// collapsing duplicate extractor hits at the same span.
+func (e *Engine) MatchOccurrencesN(text string, limit int) ([]Hit, bool) {
+	return e.matchN(text, limit, true)
+}
+
+func (e *Engine) matchN(text string, limit int, occurrences bool) ([]Hit, bool) {
 	if len(e.templates) == 0 || limit <= 0 {
 		return nil, false
 	}
@@ -324,7 +334,7 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 		}
 		// Cap each template's contribution to the remaining budget so no template can push the combined
 		// slice past the cap; matchN stops its FindAll walk early.
-		th, ttrunc := t.matchN(evaluation{text: text, wins: wins, words: present}, limit-len(hits))
+		th, ttrunc := t.matchN(evaluation{text: text, wins: wins, words: present, occurrences: occurrences}, limit-len(hits))
 		hits = append(hits, th...)
 		truncated = truncated || ttrunc
 		if len(hits) >= limit {

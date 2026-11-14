@@ -28,7 +28,7 @@ func cmdAtlassian(args []string, product string) int {
 		return code
 	}
 	setupLogging(c)
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 
@@ -88,6 +88,10 @@ func cmdAtlassian(args []string, product string) int {
 		return 2
 	}
 	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.indexError != nil {
+		logx.Error("подготовка индекса не удалась", "err", prepared.indexError)
+		return 2
+	}
 	if err := prepared.mlError; err != nil {
 		logx.Error("ML setup failed", "err", err)
 		return 2
@@ -128,7 +132,7 @@ func cmdAtlassian(args []string, product string) int {
 		logx.Error("scanned 0 items — check credentials, the account's project/space access, and any --project/--space filter", "product", product)
 		return 2
 	}
-	if c.verifiedOnly {
+	if c.verifiedOnly && c.indexDir == "" {
 		findings = keepVerified(findings)
 	}
 	if c.failOnVerified {

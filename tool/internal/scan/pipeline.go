@@ -3,6 +3,7 @@ package scan
 import (
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
@@ -17,6 +18,13 @@ type Options struct {
 	Allow         func(value, path string) bool
 	Workers       int
 	RevealSecrets bool
+	// ValueFingerprint is optional and must be safe for concurrent calls. It
+	// receives a raw value in memory, before redaction, but must never retain it.
+	ValueFingerprint    func(string) string
+	LocationFingerprint func(source, path string, line, col int) string
+	// ObserveVerification receives only sanitized keyed evidence, before ML can
+	// suppress a provider-rejected credential. The callback must be concurrency-safe.
+	ObserveVerification func(model.Finding)
 }
 
 // Pipeline is an immutable scan configuration. A pipeline can be shared between

@@ -150,6 +150,20 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 
 // reportScan carries lifecycle cancellation through suppression, baseline commit and the gate.
 func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	if c.indexDir != "" {
+		if err := recordIndexedScan(ctx, c, findings); err != nil {
+			logx.Error("запись индекса не удалась", "err", err)
+			_ = writeReport(c, markInterrupted(ctx, findings))
+			return 2
+		}
+		if c.verifiedOnly {
+			findings = keepVerified(findings)
+		}
+		if c.dedupe {
+			findings = dedupeFingerprints(findings)
+		}
+		findings = capGenericPerFile(findings, c.maxPerFile)
+	}
 	return failClosedIfIncomplete(ctx, reportFindingsContext(ctx, c, findings, elapsed))
 }
 

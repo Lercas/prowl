@@ -178,6 +178,7 @@ func setupLogging(c commonFlags) {
 // deadline. Caller must defer the stop func.
 func rootContext(c commonFlags) (context.Context, context.CancelFunc) {
 	ctx, stop := signal.NotifyContext(context.Background(), scanSignals()...)
+	ctx = source.WithStateDirectory(ctx, c.indexDir)
 	if c.timeout > 0 {
 		tctx, cancel := context.WithTimeout(ctx, c.timeout)
 		return tctx, func() { cancel(); stop() }

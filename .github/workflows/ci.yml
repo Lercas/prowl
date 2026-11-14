@@ -9,6 +9,29 @@ permissions:
   contents: read
 
 jobs:
+  index-windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.4'
+          cache-dependency-path: tool/go.sum
+      - name: native private-index and ACL contracts
+        working-directory: tool
+        env:
+          CGO_ENABLED: '0'
+          GOTOOLCHAIN: go1.27.4
+          GOMAXPROCS: '2'
+          GOFLAGS: -p=2
+        run: >-
+          go test ./internal/secretindex ./internal/scan ./internal/source ./cmd/prowl
+          -run 'TestIndex|TestIdentityFiles|TestConcurrentIndex|TestPrivateState|TestIncompleteIndexed|TestAutomaticIndex|TestEmptyCICD'
+          -count=1
+
   corpus-performance:
     runs-on: ubuntu-latest
     timeout-minutes: 20

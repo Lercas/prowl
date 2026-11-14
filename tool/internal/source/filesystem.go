@@ -98,6 +98,9 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []string, maxBytes int64) {
 	for _, root := range roots {
 		rootCtx := ctx
+		if stateDirectoryExcluded(ctx, root) {
+			continue
+		}
 		if excludedSourcePath(root, exclude) {
 			continue
 		}
@@ -162,6 +165,12 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 		walkErr := filepath.WalkDir(walkRoot, func(path string, d fs.DirEntry, err error) error {
 			if ctx.Err() != nil {
 				return filepath.SkipAll
+			}
+			if stateDirectoryExcluded(ctx, path) {
+				if err == nil && d.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
 			}
 			if walkRoot != root {
 				rel, err := filepath.Rel(walkRoot, path)
@@ -266,6 +275,9 @@ func emitSymlinkRoot(ctx context.Context, ch chan<- model.Item, path string, exc
 // symlinks (Stat), applies the binary-extension / size / encoding filters, and emits under reportPath.
 // Returns false only when the consumer stopped.
 func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPath string, maxBytes int64, exclude []string) bool {
+	if stateDirectoryExcluded(ctx, path) {
+		return true
+	}
 	for _, pattern := range exclude {
 		if config.PathMatch(pattern, reportPath) {
 			return true

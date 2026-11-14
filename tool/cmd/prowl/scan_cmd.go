@@ -214,7 +214,7 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 // scanItemStream resolves operator configuration before acquiring a source, keeping relative
 // report/config paths anchored to the caller's directory and applying configured acquisition limits.
 func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Context, commonFlags) (<-chan model.Item, error)) int {
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 	cfg, err := loadConfig(&c)
@@ -230,6 +230,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 	}
 	if ocrEngine != nil {
 		ctx = source.WithOCR(ctx, ocrEngine)
+		c.indexCoverageComplete = func() bool { stats := ocrEngine.Stats(); return stats.Failures == 0 && stats.Skipped == 0 }
 		logx.Info("OCR enabled", "model", firstNonEmpty(c.ocrModel, ocr.DefaultModel),
 			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
 			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)

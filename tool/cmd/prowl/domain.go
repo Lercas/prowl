@@ -22,7 +22,7 @@ func cmdDomain(args []string) int {
 		return code
 	}
 	setupLogging(c)
-	if code := c.mlPreflight(); code != 0 {
+	if code := c.scanPreflight(); code != 0 {
 		return code
 	}
 	opts := domain.Options{Recon: c.cmd.recon, Authorized: c.cmd.authorized, MaxAssets: c.cmd.maxAssets}
@@ -85,6 +85,10 @@ func cmdDomain(args []string) int {
 	}
 
 	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.indexError != nil {
+		logx.Error("подготовка индекса не удалась", "err", prepared.indexError)
+		return 2
+	}
 	ctx, stop := rootContext(c)
 	defer stop()
 	start := time.Now()

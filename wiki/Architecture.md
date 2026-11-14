@@ -62,6 +62,13 @@ YAML block scalars и markdown-выделение. Исходные позици
 Лимиты распаковки и нормализации передают признак неполного результата.
 Поддерживаемые формы и ограничения описаны в [декодировании](Decoding.md).
 
+**Сквозной индекс.** По явному `--index DIR --scope NAME` Pipeline вычисляет HMAC
+точного значения до маскирования. SQLite хранит идентификаторы и безопасные координаты,
+а `prowl index` / `prowl diff` связывают наблюдения между источниками и сканами.
+Подтверждённые ответы верификатора сохраняются до ML; фильтры отображения не уничтожают
+историю. Признак неполного сбора запрещает сравнение отсутствия. Подробнее:
+[контракт локального индекса](Secret-Index.md).
+
 **Multilingual password context.** For passwords with no `=`/`:` anchor, Stage 1 scans any line carrying a credential cue — `pass`, `pwd`, plus non-English roots `kennwort`, `mot de passe`, `contrase`, `wachtwoord`, `пароль`, `salasana`, and more — for a plausible password token (length, mixed character classes, not a path/version/hash). These land as `generic_password`, stage `L1-context-pw`.
 
 Кандидат contextual-password должен иметь признак учётных данных вне собственного
