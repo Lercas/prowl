@@ -198,5 +198,27 @@
   "limits": [
     "Native test covers the local CGO=0 host artifact only; other operating systems are not executed",
     "Smoke cases do not qualify precision/recall, actual providers or production deployment"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "7320dfe",
+    "full_go": "passed",
+    "native_passed": 43,
+    "native_total": 43,
+    "binary_sha256": "2e35c04f7094d637ac55fe1780f07181553074e676f5ab3239a7981ae290a47a",
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-offline-native-6oq8i0cb/qualification.json",
+    "non_regression": {
+      "correlation": {
+        "passed": 46,
+        "total": 46,
+        "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-correlation-native-9ki_xu0j/qualification.json"
+      },
+      "source_coverage": {
+        "passed": 36,
+        "total": 36,
+        "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-source-coverage-native-jtwus_if/qualification.json"
+      }
+    },
+    "integration_fix": "Added selftest to Set up in the existing untracked help_flags.go; file remains unstaged",
+    "unrelated_dirty_changes_preserved": true
+  }
 }
