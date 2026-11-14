@@ -189,6 +189,11 @@ func (d *Detector) tableValue(text string, cell tableCell, field tableField) (Ma
 		return Match{}, false
 	}
 	value, lo, hi := renderTableCell(text, cell)
+	return d.fieldValue(value, lo, hi, field, stageTable)
+}
+
+// fieldValue validates logical credential data independently of its source syntax.
+func (d *Detector) fieldValue(value string, lo, hi int, field tableField, stage string) (Match, bool) {
 	if !utf8.ValidString(value) || strings.ContainsAny(value, " \t\r\n\v\f") || IsExampleOrPlaceholder(value) || IsTemplatePlaceholder(value) {
 		return Match{}, false
 	}
@@ -207,7 +212,7 @@ func (d *Detector) tableValue(text string, cell tableCell, field tableField) (Ma
 	default:
 		return Match{}, false
 	}
-	return Match{Type: typ, Value: value, Start: lo, End: hi, Confidence: 0.6, Category: category, Stage: stageTable, ContextName: field.name}, true
+	return Match{Type: typ, Value: value, Start: lo, End: hi, Confidence: 0.6, Category: category, Stage: stage, ContextName: field.name}, true
 }
 
 // tableSecrets recognizes vertical key/value rows and validated horizontal

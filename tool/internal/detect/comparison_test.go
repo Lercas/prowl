@@ -24,6 +24,8 @@ func TestLiteralCredentialComparisons(t *testing.T) {
 		{`if key == "` + namedHex64 + `":`, namedHex64, "key"},
 		{`if password == "longpassword":`, "longpassword", "password"},
 		{`if db_pw == "Kx7;mPq2":`, "Kx7;mPq2", "db_pw"},
+		{`if cfg['db_password'] == "Kx7;mPq2":`, "Kx7;mPq2", "db_password"},
+
 		{`if "Kx7;mPq2" == db_pw:`, "Kx7;mPq2", "db_pw"},
 	} {
 		ms, _ := d.namedSecrets(t.Context(), c.text, strings.ToLower(c.text), 100)
@@ -54,6 +56,7 @@ func TestLiteralComparisonExcludesMetadataAndExpressions(t *testing.T) {
 		`if password_type == "bcrypt":`, `if password_status == "active":`,
 		`if password_policy == "required":`, `if password_ref == "vault01":`,
 		`if compass == "Kx7;mPq2":`, `if bypass == "Kx7;mPq2":`,
+		`if 'db_password' == 'Kx7;mPq2':`,
 		`if 'password' == 'Kx7;mPq2':`, `if ['password'] == 'Kx7;mPq2':`,
 		`if public_key == "` + namedToken + `":`, `if token_id == "` + namedToken + `":`,
 		`if api_key == "REPLACE_WITH_YOUR_TOKEN_12345":`,

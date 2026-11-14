@@ -315,13 +315,18 @@ func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBu
 			}
 		}
 	}
+	return assembleView(ctx, text, rewrites, regions, byteBudget, len(regions), limited)
+}
+
+// assembleView shares source mapping and output bounds across normalization forms.
+func assembleView(ctx context.Context, text string, rewrites []rewrite, regions [][2]int, byteBudget, constructs int, limited bool) (*view, bool) {
 	if len(regions) == 0 {
 		return nil, limited
 	}
 	sort.Slice(regions, func(a, b int) bool { return regions[a][0] < regions[b][0] })
 	sort.Slice(rewrites, func(a, b int) bool { return rewrites[a].pos < rewrites[b].pos })
 
-	v := &view{constructs: len(regions)}
+	v := &view{constructs: constructs}
 	var b strings.Builder
 	emit := func(s string, from, to int) bool {
 		if len(s) > byteBudget-b.Len() {
@@ -420,7 +425,13 @@ func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, b
 	}
 	encoded, encodedLimited := buildViewBudget(ctx, text, true, remainingBytes, remainingConstructs)
 	extra, extraLimited := d.scanMappedView(ctx, text, encoded, true)
-	return append(out, extra...), limited || collectLimited || encodedLimited || extraLimited
+	if encoded != nil {
+		remainingBytes -= len(encoded.text)
+		remainingConstructs -= encoded.constructs
+	}
+	numeric, numericLimited := d.charCodeSecrets(ctx, text, remainingBytes, remainingConstructs)
+	out = append(out, extra...)
+	return append(out, numeric...), limited || collectLimited || encodedLimited || extraLimited || numericLimited
 }
 
 func (d *Detector) scanMappedView(ctx context.Context, text string, v *view, typedOnly bool) ([]Match, bool) {

@@ -531,7 +531,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 
 // isContextStage marks the builtins that infer a secret from the name around it.
 func isContextStage(stage string) bool {
-	return stage == "L1-context-pw" || stage == stageContextKey || stage == stageTable || stage == stageComparison
+	return stage == "L1-context-pw" || stage == stageContextKey || stage == stageTable || stage == stageComparison || stage == stageCharCode
 }
 
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.

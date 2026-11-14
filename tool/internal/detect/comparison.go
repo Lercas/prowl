@@ -100,6 +100,7 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 			return Match{}, false
 		}
 	} else {
+		ns = nameStart(text, ns)
 		if ns > 0 && (text[ns-1] == '\'' || text[ns-1] == '"' || text[ns-1] == '`') {
 			// A quoted name is a field only when indexed, not another string literal.
 			quote := text[ns-1]
@@ -110,7 +111,6 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 		} else if ne < len(text) && (text[ne] == '\'' || text[ne] == '"' || text[ne] == '`' || text[ne] == ']') {
 			return Match{}, false
 		}
-		ns = nameStart(text, ns)
 		before := skipBlanksBack(text, ns-1)
 		if before >= 0 && text[before] == '+' {
 			return Match{}, false
