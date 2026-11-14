@@ -94,6 +94,13 @@ An empty list entry never matches (it is a no-op, not match-all).
 | `detectors.disable` | list of string | turn off these detector type ids |
 | `detectors.custom` | list | user-defined regex detectors |
 
+В 1.5.0 `detectors.disable` сопоставляет имена без учёта регистра, окружающих пробелов
+и различия `-`/`_`: `AWS-Access_KEY-id` отключает `aws_access_key_id` и
+`aws-access-key-id`. Это применяется к встроенной таксономии, imported/custom
+детекторам и шаблонам правил до получения кандидатов и live verification, в CLI
+и LSP. Идентификаторы находок в отчётах не переименовываются. `detectors.enable`
+сохраняет точное сравнение и прежнюю область применения; disable сильнее enable.
+
 A custom detector is `{ id, regex, category }`. `category` drives its severity (defaults to `generic` when empty); an invalid regex is reported as a config issue, not silently dropped. `enable` and `disable` interact as: a disabled id is always off; if `enable` is non-empty, only ids in it run (and not also disabled).
 
 An **empty or match-everything regex** (`""`, `.*`, `.+`, `(?i).*`, and other `.*`-equivalents) is **rejected at load** — Prowl refuses to start rather than flag every line in the tree as a critical finding. Fix the pattern or remove the rule. `prowl config validate` (below) surfaces the same problem without running a scan.

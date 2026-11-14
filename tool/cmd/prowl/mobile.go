@@ -59,7 +59,7 @@ func cmdMobile(args []string) int {
 		return 2
 	}
 
-	eng, err := loadEngine(c)
+	eng, err := loadConfiguredEngine(c, cfg)
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2

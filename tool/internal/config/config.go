@@ -630,15 +630,30 @@ func (c *Config) MergeAllowlist(regexes, paths, stopwords []string) {
 	}
 }
 
+// TypeDisabled matches the same public type spellings as --disable. Report IDs remain unchanged.
+func (c *Config) TypeDisabled(id string) bool {
+	if c == nil {
+		return false
+	}
+	key := func(s string) string {
+		return strings.ReplaceAll(strings.ToLower(strings.TrimSpace(s)), "-", "_")
+	}
+	id = key(id)
+	for _, disabled := range c.Detectors.Disable {
+		if key(disabled) == id {
+			return true
+		}
+	}
+	return false
+}
+
 // TypeEnabled reports whether a type id is active under the enable/disable rules.
 func (c *Config) TypeEnabled(id string) bool {
 	if c == nil {
 		return true
 	}
-	for _, d := range c.Detectors.Disable {
-		if d == id {
-			return false
-		}
+	if c.TypeDisabled(id) {
+		return false
 	}
 	if len(c.Detectors.Enable) > 0 {
 		for _, e := range c.Detectors.Enable {

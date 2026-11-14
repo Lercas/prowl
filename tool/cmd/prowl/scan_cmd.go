@@ -61,7 +61,7 @@ func cmdCompare(args []string) int {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
-	eng, err := loadEngine(c)
+	eng, err := loadConfiguredEngine(c, cfg)
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2
@@ -255,7 +255,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 	if len(tax.Skipped) > 0 {
 		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
 	}
-	eng, err := loadEngine(c)
+	eng, err := loadConfiguredEngine(c, cfg)
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2

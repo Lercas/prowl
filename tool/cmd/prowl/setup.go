@@ -94,6 +94,9 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 			if cat == "" {
 				cat = "generic"
 			}
+			if cfg.TypeDisabled(cr.ID) {
+				continue
+			}
 			tax.Types = append(tax.Types, taxonomy.SecretType{
 				ID: cr.ID, Name: cr.ID, Category: cat,
 				Detection: taxonomy.Detection{Regex: cr.Regex}, RE: re,
@@ -101,6 +104,22 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 		}
 	}
 	return detect.New(tax), tax, nil
+}
+
+// loadConfiguredEngine applies config suppression to templates before candidates or verifiers run.
+func loadConfiguredEngine(c commonFlags, cfg *config.Config) (*rules.Engine, error) {
+	eng, err := loadEngine(c)
+	if err != nil || eng == nil || cfg == nil {
+		return eng, err
+	}
+	var disabled []string
+	for _, template := range eng.Templates() {
+		if cfg.TypeDisabled(template.ID) {
+			disabled = append(disabled, template.ID)
+		}
+	}
+	eng.Filter(rules.FilterOpts{ExcludeIDs: disabled})
+	return eng, nil
 }
 
 // loadEngine preserves explicit isolation and otherwise falls back to the immutable snapshot.

@@ -1,0 +1,168 @@
+{
+  "status": "locally qualified config disable type matching; not published",
+  "native": {
+    "binary_sha256": "3ce5f137f4760dbba76c06ba408ea6f03009617be38377af93fcfbc236f536b2",
+    "passed": 36,
+    "total": 36,
+    "checks": [
+      {
+        "case": "False/json/positive",
+        "passed": true
+      },
+      {
+        "case": "False/json/0/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/json/0/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/json/1/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/json/1/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/json/2/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/json/2/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/json/unrelated",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/positive",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/0/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/0/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/1/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/1/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/2/disabled",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/2/redacted",
+        "passed": true
+      },
+      {
+        "case": "False/sarif/unrelated",
+        "passed": true
+      },
+      {
+        "case": "True/json/positive",
+        "passed": true
+      },
+      {
+        "case": "True/json/0/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/json/0/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/json/1/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/json/1/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/json/2/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/json/2/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/json/unrelated",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/positive",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/0/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/0/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/1/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/1/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/2/disabled",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/2/redacted",
+        "passed": true
+      },
+      {
+        "case": "True/sarif/unrelated",
+        "passed": true
+      },
+      {
+        "case": "json/custom-positive",
+        "passed": true
+      },
+      {
+        "case": "sarif/custom-positive",
+        "passed": true
+      },
+      {
+        "case": "json/custom-disabled",
+        "passed": true
+      },
+      {
+        "case": "sarif/custom-disabled",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-config-disable-native-xjrz8xx2",
+    "scope": "synthetic local values, bundled rules, no provider or network requests"
+  },
+  "checks": {
+    "full_go": "passed",
+    "race_config_lsp_cli": "passed",
+    "golangci_lint": "0 issues",
+    "go_1_26_11_config_lsp_cli": "passed"
+  },
+  "behavior": [
+    "detectors.disable folds case, outer whitespace, hyphens and underscores across taxonomy/imported/custom/template producers.",
+    "CLI scan adapters and LSP remove disabled rule producers before candidate extraction or verification.",
+    "detectors.enable retains its existing exact matching and producer scope. Report IDs are unchanged."
+  ],
+  "scope": "Synthetic local fixtures; no live provider, deployment, remote publication or final Docker image qualification."
+}

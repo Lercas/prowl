@@ -263,6 +263,12 @@
       `wiki/evidence/1.5.0-bucket-contract-20261114.json`.
       Cloud inventory/identity/version и remote absence не подтверждаются.
 
+    - [x] `detectors.disable`: регистр, дефис/подчёркивание и окружающие пробелы
+      обрабатываются одинаково для taxonomy/import/custom и rule templates в CLI/LSP.
+      Шаблоны отключаются до кандидатов и verification; report IDs не меняются.
+      `detectors.enable` сохраняет прежний exact-match контракт.
+      Доказательства: `wiki/evidence/1.5.0-config-disable-20261114.json`.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

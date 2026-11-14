@@ -185,6 +185,15 @@ func buildWithBundled(bundled bool) (*engine, error) {
 			return nil, fmt.Errorf("lsp: embedded rule templates failed to load: %w", err)
 		}
 	}
+	if e.eng != nil {
+		var disabled []string
+		for _, template := range e.eng.Templates() {
+			if cfg.TypeDisabled(template.ID) {
+				disabled = append(disabled, template.ID)
+			}
+		}
+		e.eng.Filter(rules.FilterOpts{ExcludeIDs: disabled})
+	}
 	if e.eng != nil && e.eng.Len() > 0 {
 		logx.Info("lsp: loaded rule templates", "count", e.eng.Len(), "dir", dir)
 	}
@@ -267,6 +276,9 @@ func applyConfig(tax *taxonomy.Taxonomy, cfg *config.Config) error {
 		cat := cr.Category
 		if cat == "" {
 			cat = "generic"
+		}
+		if cfg.TypeDisabled(cr.ID) {
+			continue
 		}
 		tax.Types = append(tax.Types, taxonomy.SecretType{
 			ID: cr.ID, Name: cr.ID, Category: cat,

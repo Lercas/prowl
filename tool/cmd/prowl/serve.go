@@ -37,7 +37,7 @@ func cmdServe(args []string) int {
 	}
 	// Load the rule templates too (as scan and lsp do) so the HTTP worker has the same coverage as the
 	// CLI, not just the embedded taxonomy detectors.
-	eng, err := loadEngine(c)
+	eng, err := loadConfiguredEngine(c, cfg)
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2

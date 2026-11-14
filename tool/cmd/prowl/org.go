@@ -76,7 +76,7 @@ func cmdOrg(args []string) int {
 	if len(tax.Skipped) > 0 {
 		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
 	}
-	eng, err := loadEngine(c)
+	eng, err := loadConfiguredEngine(c, cfg)
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2
