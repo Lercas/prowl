@@ -216,11 +216,9 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	// contextualPassword honors the remaining budget internally (one match per cue line)
 	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
 	all = append(all, cp...)
-	// Named-assignment builtins (named.go) are implemented and measured but not wired in yet: enabling
-	// them changes the winning type in three pinned tests (see TODO.md, "Движок детекта").
-	// all = append(all, d.namedSecrets(ctx, text, lower, maxScanMatches-len(all))...)
-	_ = d.namedSecrets
-	candidateCapped := collectCapped || len(all) >= maxScanMatches
+	named, namedCapped := d.namedSecrets(ctx, text, lower, maxScanMatches-len(all))
+	all = append(all, named...)
+	candidateCapped := collectCapped || namedCapped || len(all) >= maxScanMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on

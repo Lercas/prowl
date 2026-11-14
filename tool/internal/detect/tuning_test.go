@@ -6,7 +6,9 @@ import "testing"
 func TestApplyTuning(t *testing.T) {
 	defer ApplyTuning(3.5, 4.2, 50000) // restore defaults regardless of outcome
 	d := newDetector(t)
-	const val = `token_value = "Xk9Zm2Qp7Lr4Ns8Tv1Wy6Bd3Fg5Hj0aQw"`
+	// "signing" gives the entropy net its name context without being a key/token/secret name, which
+	// the named-assignment builtin would report as generic_api_key instead.
+	const val = `signing_blob = "Xk9Zm2Qp7Lr4Ns8Tv1Wy6Bd3Fg5Hj0aQw"`
 
 	ApplyTuning(2.0, 4.2, 50000) // very low entropy floor -> the high-entropy token is reported
 	if n := countType(d.Scan(val), "generic_high_entropy"); n == 0 {

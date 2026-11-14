@@ -20,6 +20,9 @@ import (
 //	Authorization: "Basic …"        a header built as a string in code
 //	password = "Kx7;mP,q2'vL"       a quoted value holding the separators the regex stops at
 //
+// The builtins are single-line on purpose (blanks around the sign are spaces and tabs only): the line
+// windows then cover one line per cue instead of five.
+//
 // Each builtin is one regex (run through the same line windows as the taxonomy) plus a validator that
 // decides on the name and the value, so widening the accepted syntax does not widen what is reported.
 
@@ -30,15 +33,17 @@ const (
 )
 
 var (
-	// 1 = name, 2-5 = value (double-quoted, single-quoted, backticked, bare).
-	reNamedKey = regexp.MustCompile("(?i)([A-Za-z0-9_.\\-]*(?:token|secret|api[_\\- ]?key|apikey|key|credential)[A-Za-z0-9_\\-]*)" +
-		"[\"'`\\])]{0,3}\\s*(?:=>|:=|=|:)\\s*[bru]?" +
-		"(?:\"([^\"\\s]{16,200})\"|'([^'\\s]{16,200})'|`([^`\\s]{16,200})`|([A-Za-z0-9_\\-+/=.]{16,200}))")
+	// 1 = the name from its cue word on, 2-5 = value (double-quoted, single-quoted, backticked, bare).
+	// The regex starts at the cue so it has a literal to anchor on; what precedes the cue in the name
+	// (DEPLOY_ in DEPLOY_TOKEN) is recovered by nameStart.
+	reNamedKey = regexp.MustCompile("(?i)((?:token|secret|api[_\\- ]?key|apikey|key|credential)[A-Za-z0-9_\\-]*)" +
+		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*" +
+		"(?:[bru]?\"([^\"\\s]{16,200})\"|[bru]?'([^'\\s]{16,200})'|`([^`\\s]{16,200})`|([A-Za-z0-9_\\-+/=.]{16,200}))")
 	// 1 = base64 credentials after the Basic scheme.
 	reBasicScheme = regexp.MustCompile(`(?i)\bbasic\s+([A-Za-z0-9+/]{8,512}={0,2})`)
-	// 1 = double-quoted value, 2 = single-quoted value, after a password-like name.
-	reQuotedPassword = regexp.MustCompile("(?i)(?:pass(?:word|wd|phrase)?|pwd)[A-Za-z0-9_]{0,24}" +
-		"[\"'`\\])]{0,3}\\s*(?:=>|:=|=|:)\\s*[bru]?(?:\"([^\"\\s]{6,64})\"|'([^'\\s]{6,64})')")
+	// 1 = what follows the cue in the name, 2 = double-quoted value, 3 = single-quoted value.
+	reQuotedPassword = regexp.MustCompile("(?i)(?:pass(?:word|wd|phrase)?|pwd)([A-Za-z0-9_]{0,24})" +
+		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*[bru]?(?:\"([^\"\\s]{6,64})\"|'([^'\\s]{6,64})')")
 
 	namedBuiltins = []*regexp.Regexp{reNamedKey, reBasicScheme, reQuotedPassword}
 )
@@ -48,13 +53,18 @@ var (
 var nonSecretNameParts = []string{
 	"hash", "sha", "md5", "digest", "checksum", "crc", "fingerprint", "thumbprint", "etag", "integrity",
 	"commit", "revision", "uuid", "guid", "public", "pub_", "_pub", "pubkey",
-	"name", "ref", "path", "file", "dir", "url", "uri", "endpoint", "host", "type", "kind", "algo",
-	"length", "size", "count", "len", "version", "label", "title", "desc", "prefix", "suffix", "field",
-	"header", "param", "env", "var", "arn", "format", "pattern", "regex", "expir", "ttl", "lifetime",
+	"name", "reference", "path", "file", "url", "uri", "endpoint", "host", "type", "kind", "algo",
+	"length", "size", "count", "version", "label", "title", "desc", "prefix", "suffix", "field",
+	"header", "param", "format", "pattern", "regex", "expir", "lifetime",
 	"timeout", "created", "updated", "status", "enabled", "required", "valid", "policy", "rotation",
 	"csrf", "xsrf", "page", "cursor", "continuation", "nonce", "idempot", "tokenizer", "keyword",
 	"keyboard", "keystroke", "keyframe", "monkey", "turkey", "hotkey", "shortcut",
 }
+
+// nonSecretNameWords are the short markers: matched only as a whole word of the name (a `_`/`-`
+// separated part, or its ending), since as substrings they sit inside real names — "ref" in
+// refresh_token, "len" in challenge_token, "env" in environment_secret.
+var nonSecretNameWords = []string{"ref", "len", "dir", "env", "var", "arn", "ttl", "id", "ids", "alg"}
 
 // keyQualifiers are what make a bare "…key" name a credential (as opposed to a cache key, a sort key,
 // a primary key, a map key).
@@ -77,8 +87,18 @@ func nameIsSecretLike(name string) (ok, hexOnly bool) {
 			return false, false
 		}
 	}
-	if strings.HasSuffix(n, "_id") || strings.HasSuffix(n, "id") && !strings.HasSuffix(n, "valid") {
-		return false, false
+	for _, part := range strings.FieldsFunc(n, func(r rune) bool { return r == '_' || r == '-' }) {
+		for _, w := range nonSecretNameWords {
+			if part == w {
+				return false, false
+			}
+		}
+	}
+	// camelCase endings (secretRef, tokenId, keyLen) survive lowercasing only as suffixes
+	for _, w := range []string{"ref", "id", "ids", "len", "arn", "ttl"} {
+		if strings.HasSuffix(n, w) && len(n) > len(w) && !strings.HasSuffix(n, "valid") && !strings.HasSuffix(n, "token") {
+			return false, false
+		}
 	}
 	switch {
 	case strings.Contains(n, "token"), strings.Contains(n, "secret"), strings.Contains(n, "credential"),
@@ -116,7 +136,7 @@ func looksRandom(v string) bool {
 	if isHexRun(v) {
 		return len(v) >= minHexSecret && ShannonEntropy(v) >= 3.0
 	}
-	if ShannonEntropy(v) < genericEntropyMin {
+	if ShannonEntropy(v) < genericEntropyMin || classSwitchRate(v) < minClassSwitchRate {
 		return false
 	}
 	parts := strings.FieldsFunc(v, func(r rune) bool { return r == '_' || r == '-' || r == '.' })
@@ -129,6 +149,41 @@ func looksRandom(v string) bool {
 		}
 	}
 	return false
+}
+
+// minClassSwitchRate separates generated material from identifiers. Random base62 switches between
+// lowercase, uppercase and digit on well over half of its adjacent pairs; camelCase names and dotted
+// expressions (testRSAPrivateKey, tls13.NewEarlySecret, encapsulationKey1024) on about one in seven.
+const minClassSwitchRate = 0.3
+
+// classSwitchRate is the share of adjacent alphanumeric pairs whose character class differs.
+func classSwitchRate(v string) float64 {
+	class := func(c byte) int {
+		switch {
+		case c >= 'a' && c <= 'z':
+			return 1
+		case c >= 'A' && c <= 'Z':
+			return 2
+		case c >= '0' && c <= '9':
+			return 3
+		}
+		return 0
+	}
+	pairs, switches := 0, 0
+	for i := 1; i < len(v); i++ {
+		a, b := class(v[i-1]), class(v[i])
+		if a == 0 || b == 0 {
+			continue
+		}
+		pairs++
+		if a != b {
+			switches++
+		}
+	}
+	if pairs == 0 {
+		return 0
+	}
+	return float64(switches) / float64(pairs)
 }
 
 // partIsRandom: a run of 12+ characters mixing digits with letters, or both letter cases, densely
@@ -164,6 +219,51 @@ func namedKeyValueOK(v string, hexOnly bool) bool {
 	return looksRandom(v)
 }
 
+var identifierWords = []string{
+	"private", "public", "secret", "token", "passw", "config", "default", "client", "server",
+	"example", "sample", "test", "value", "string", "key",
+}
+
+// bareValueIsCode reports whether an unquoted value is an expression rather than a literal: a call
+// or index (`NewEarlySecret(`, `keys[`), or a member access (`tls13.NewEarlySecret`, `cert.PrivateKey`).
+func bareValueIsCode(text string, vs, ve int) bool {
+	if ve < len(text) && (text[ve] == '(' || text[ve] == '[' || text[ve] == '{') {
+		return true
+	}
+	v := text[vs:ve]
+	// An unquoted value spelling out what it is (`jwtTestEC256PrivateKey`, `defaultClientSecret2`) is a
+	// reference to a variable. Generated material does not contain these words by chance.
+	low := strings.ToLower(v)
+	for _, w := range identifierWords {
+		if strings.Contains(low, w) {
+			return true
+		}
+	}
+	for i := 1; i+1 < len(v); i++ {
+		if v[i] != '.' {
+			continue
+		}
+		a, b := v[i-1], v[i+1]
+		if (a >= 'a' && a <= 'z' || a >= 'A' && a <= 'Z' || a == ')' || a == ']') && (b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z') {
+			return true
+		}
+	}
+	return false
+}
+
+// nameStart extends a name leftwards from its cue word over identifier characters.
+func nameStart(text string, cue int) int {
+	i := cue
+	for i > 0 && cue-i < 64 {
+		c := text[i-1]
+		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == '.' || c == '-') {
+			break
+		}
+		i--
+	}
+	return i
+}
+
 // firstGroup returns the span of the first participating capture group in [from, to].
 func firstGroup(ix []int, from, to int) (int, int, bool) {
 	for g := from; g <= to; g++ {
@@ -175,9 +275,9 @@ func firstGroup(ix []int, from, to int) (int, int, bool) {
 }
 
 // namedSecrets runs the named-assignment builtins. lower is the ASCII-lowered text.
-func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget int) []Match {
+func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget int) ([]Match, bool) {
 	if budget <= 0 || (!d.genericKey && !d.genericPwd && !d.basicAuth) {
-		return nil
+		return nil, false
 	}
 	if lower == "" {
 		lower = strings.ToLower(text)
@@ -188,7 +288,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 	hasPass := strings.Contains(lower, "pass") || strings.Contains(lower, "pwd")
 	want := []bool{d.genericKey && hasKey, d.basicAuth && hasBasic, d.genericPwd && hasPass}
 	if !want[0] && !want[1] && !want[2] {
-		return nil
+		return nil, false
 	}
 	var wins *linewin.Windows
 	if !wholeTextOnly.Load() {
@@ -199,19 +299,33 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 		defer wins.Release()
 	}
 	var out []Match
+	capped := false
+	indices := func(i int, re *regexp.Regexp) [][]int {
+		ix := wins.FindAll(i, re, text, budget+1)
+		if len(ix) > budget {
+			capped = true
+			ix = ix[:budget]
+		}
+		return ix
+	}
 	full := func() bool { return len(out) >= budget || ctx.Err() != nil }
 
 	if want[0] {
-		for _, ix := range wins.FindAll(0, reNamedKey, text, budget+1) {
+		for _, ix := range indices(0, reNamedKey) {
 			if full() {
 				break
 			}
-			ok, hexOnly := nameIsSecretLike(text[ix[2]:ix[3]])
+			ok, hexOnly := nameIsSecretLike(text[nameStart(text, ix[2]):ix[3]])
 			vs, ve, found := firstGroup(ix, 2, 5)
 			if !ok || !found {
 				continue
 			}
-			val := strings.TrimRight(text[vs:ve], ".") // a bare value ending a sentence
+			// Drop a sentence-ending dot and base64 '=' padding: spans exclude padding everywhere in
+			// this package, so the decode stage and this one agree on the blob's extent.
+			if ix[10] >= 0 && bareValueIsCode(text, vs, ve) {
+				continue
+			}
+			val := strings.TrimRight(text[vs:ve], ".=")
 			if !namedKeyValueOK(val, hexOnly) {
 				continue
 			}
@@ -220,7 +334,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 		}
 	}
 	if want[1] {
-		for _, ix := range wins.FindAll(1, reBasicScheme, text, budget+1) {
+		for _, ix := range indices(1, reBasicScheme) {
 			if full() {
 				break
 			}
@@ -240,12 +354,12 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 		}
 	}
 	if want[2] {
-		for _, ix := range wins.FindAll(2, reQuotedPassword, text, budget+1) {
+		for _, ix := range indices(2, reQuotedPassword) {
 			if full() {
 				break
 			}
-			vs, ve, found := firstGroup(ix, 1, 2)
-			if !found {
+			vs, ve, found := firstGroup(ix, 2, 3)
+			if !found || passwordNameSuffixIsMeta(text[ix[2]:ix[3]]) {
 				continue
 			}
 			val := text[vs:ve]
@@ -257,7 +371,25 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 				Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
 		}
 	}
-	return out
+	return out, capped || ctx.Err() != nil
+}
+
+// passwordMetaSuffixes: what may follow "password" in a name that describes the password instead of
+// holding it (password_rules, passwordPolicy, password_hint, passwordRegex ...).
+var passwordMetaSuffixes = []string{
+	"rule", "polic", "hint", "regex", "pattern", "format", "length", "min", "max", "field", "label",
+	"prompt", "message", "msg", "error", "help", "text", "title", "placeholder", "reset", "valid",
+	"strength", "expir", "hash", "salt", "requirement", "complex", "charset", "chars", "option",
+}
+
+func passwordNameSuffixIsMeta(suffix string) bool {
+	low := strings.ToLower(suffix)
+	for _, m := range passwordMetaSuffixes {
+		if strings.Contains(low, m) {
+			return true
+		}
+	}
+	return false
 }
 
 // passwordWithSeparatorsOK: a quoted password holding separator characters must still look like one —
