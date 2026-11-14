@@ -43,8 +43,8 @@ func TestMCPReportsProtocolAndOutputErrors(t *testing.T) {
 	}{
 		{`{"name":"unknown"}`, nil, `"code":-32602`},
 		{`{"name":5}`, nil, `"code":-32602`},
-		{`{"name":"prowl_scan","arguments":{"path":"."}}`, errMCPOutputLimit, "32 МиБ"},
-		{`{"name":"prowl_scan","arguments":{"path":"."}}`, errors.New("sensitive detail"), "проверьте путь"},
+		{`{"name":"prowl_scan","arguments":{"path":"."}}`, errMCPOutputLimit, "32 MiB"},
+		{`{"name":"prowl_scan","arguments":{"path":"."}}`, errors.New("sensitive detail"), "check the path"},
 	} {
 		var output bytes.Buffer
 		w := newMCPWriter(&output)

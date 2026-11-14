@@ -17,7 +17,7 @@ const mcpProtocolVersion = "2025-06-18"
 const mcpModernVersion = "2026-07-28"
 const maxMCPMessageBytes = 16 << 20
 
-var errMCPOutput = errors.New("mcp: не удалось записать сообщение")
+var errMCPOutput = errors.New("mcp: cannot write the message")
 
 type mcpWriter struct {
 	*bufio.Writer
@@ -84,12 +84,12 @@ func mcpTools() []mcpTool {
 	for i := range result {
 		result[i].InputSchema["additionalProperties"] = false
 		props := result[i].InputSchema["properties"].(map[string]any)
-		props["semantic"] = boolProp("opt-in обнаружение source-backed кандидатов локальной моделью")
-		props["strict"] = boolProp("совместимость с 1.4: неполный скан всегда возвращает ошибку")
-		props["bundled"] = boolProp("использовать встроенные rules/verifiers релиза, сохранив текущий identity key")
-		props["reconstruct"] = boolProp("статическое восстановление JS/TS")
+		props["semantic"] = boolProp("opt-in discovery of source-backed candidates by a local model")
+		props["strict"] = boolProp("1.4 compatibility: an incomplete scan always returns an error")
+		props["bundled"] = boolProp("use the release's bundled rules/verifiers, keeping the current identity key")
+		props["reconstruct"] = boolProp("static JS/TS string reconstruction")
 		if _, supportsVerify := props["verify"]; supportsVerify {
-			props["verified_only"] = boolProp("проверить секреты у провайдеров и оставить подтверждённые находки")
+			props["verified_only"] = boolProp("verify secrets with their providers and keep the confirmed findings")
 		}
 		result[i].OutputSchema = map[string]any{"type": "object", "required": []string{"findings", "complete", "schema_version"}, "properties": map[string]any{"findings": map[string]any{"type": "array", "items": map[string]any{"type": "object"}}, "complete": map[string]any{"type": "boolean"}, "schema_version": map[string]any{"type": "string"}}}
 	}
@@ -101,7 +101,7 @@ func cmdMCP(args []string) int {
 		return commandParseError(err)
 	}
 	if len(args) > 0 {
-		fmt.Fprintln(os.Stderr, "MCP не принимает параметры запуска; передайте параметры скана в tools/call")
+		fmt.Fprintln(os.Stderr, "MCP takes no launch arguments; pass scan options in tools/call")
 		return 2
 	}
 	return serveMCP(os.Stdin, os.Stdout, os.Stderr)

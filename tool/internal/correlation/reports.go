@@ -279,9 +279,9 @@ func Compare(before, after model.ScanResult) (RemediationReport, error) {
 			}
 		} else if comparable && out.Complete {
 			x.Presence = "absent_in_scope"
-			x.Reason = "Отсутствие в выбранном объёме не подтверждает отзыв credential"
+			x.Reason = "Absence from the selected scope does not prove the credential was revoked"
 		} else {
-			x.Reason = "Неполный, отфильтрованный или несопоставимый скан"
+			x.Reason = "Incomplete, filtered or incomparable scan"
 		}
 		out.Items = append(out.Items, x)
 	}

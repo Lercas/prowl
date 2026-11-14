@@ -86,7 +86,7 @@ func cmdDomain(args []string) int {
 
 	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
 	if prepared.indexError != nil {
-		logx.Error("подготовка индекса не удалась", "err", prepared.indexError)
+		logx.Error("index setup failed", "err", prepared.indexError)
 		return 2
 	}
 	ctx, stop := rootContext(c)

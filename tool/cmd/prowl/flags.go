@@ -147,22 +147,22 @@ var commandSubcommands = map[string][]string{
 }
 
 var cliFlags = []flagSpec{
-	enumFlag("--profile", "selftest", "профиль офлайн-самопроверки (по умолчанию all)", []string{"all", "web", "mobile", "enterprise"}, func(c *commonFlags) *string { return &c.cmd.selftestProfile }),
-	boolFlag("--bundled", detectorCommands+" lsp version", "использовать встроенные rules/verifiers релиза, сохранив конфигурацию и identity key", func(c *commonFlags) *bool { return &c.bundled }),
-	enumFlag("--protocol", "guard", "протокол хука (по умолчанию raw)", []string{"raw", "claude", "cursor-prompt", "cursor-tool"}, func(c *commonFlags) *string { return &c.cmd.guardProtocol }),
-	stringFlag("--agent-home", "agents", "DIR", "явно проверить пользовательские конфиги и транскрипты агентов", func(c *commonFlags) *string { return &c.cmd.agentHome }),
-	boolFlag("--shell-history", "agents", "включить историю оболочки из явного --agent-home", func(c *commonFlags) *bool { return &c.cmd.shellHistory }),
+	enumFlag("--profile", "selftest", "offline self-test profile (default all)", []string{"all", "web", "mobile", "enterprise"}, func(c *commonFlags) *string { return &c.cmd.selftestProfile }),
+	boolFlag("--bundled", detectorCommands+" lsp version", "use the release's bundled rules/verifiers, keeping the configuration and identity key", func(c *commonFlags) *bool { return &c.bundled }),
+	enumFlag("--protocol", "guard", "hook protocol (default raw)", []string{"raw", "claude", "cursor-prompt", "cursor-tool"}, func(c *commonFlags) *string { return &c.cmd.guardProtocol }),
+	stringFlag("--agent-home", "agents", "DIR", "explicitly scan user-level agent configs and transcripts", func(c *commonFlags) *string { return &c.cmd.agentHome }),
+	boolFlag("--shell-history", "agents", "include shell history from the explicit --agent-home", func(c *commonFlags) *bool { return &c.cmd.shellHistory }),
 	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
-	stringFlag("--index", indexedCommands+" index diff", "DIR", "локальный приватный индекс секретов (явное включение)", func(c *commonFlags) *string { return &c.indexDir }),
-	stringFlag("--scope", indexedCommands+" index diff", "NAME", "стабильное имя области скана для индекса", func(c *commonFlags) *string { return &c.indexScope }),
+	stringFlag("--index", indexedCommands+" index diff", "DIR", "local private secret index (opt-in)", func(c *commonFlags) *string { return &c.indexDir }),
+	stringFlag("--scope", indexedCommands+" index diff", "NAME", "stable scan scope name for the index", func(c *commonFlags) *string { return &c.indexScope }),
 	enumFlag("--format", scanCommands+" index diff", "report format (default pretty; index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
 	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
 	// In 1.5 every incomplete scan fails closed; retain the released flag without allowing opt-out.
-	valueFlag("--strict", scanCommands, "", "совместимость с 1.4: неполный скан всегда даёт код 2, включая --strict=false", func(_ *commonFlags, value string) error {
+	valueFlag("--strict", scanCommands, "", "1.4 compatibility: an incomplete scan always exits 2, including --strict=false", func(_ *commonFlags, value string) error {
 		_, err := booleanValue(value)
 		return err
 	}),
-	boolFlag("--ci", scanCommands, "CI: код 1 для high/critical; явный --fail-on имеет приоритет, неполный скан — код 2", func(c *commonFlags) *bool { return &c.ci }),
+	boolFlag("--ci", scanCommands, "CI gate: exit 1 on high/critical; an explicit --fail-on wins; an incomplete scan exits 2", func(c *commonFlags) *bool { return &c.ci }),
 	boolFlag("--fail-on-verified", scanCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
 	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),
 	stringFlag("--taxonomy", detectorCommands, "FILE", "override the embedded taxonomy", func(c *commonFlags) *string { return &c.taxonomy }),
@@ -181,16 +181,16 @@ var cliFlags = []flagSpec{
 		return nil
 	}),
 	boolFlag("--verify", scanCommands, "validate supported credentials against the provider", func(c *commonFlags) *bool { return &c.verify }),
-	boolFlag("--verify-all", scanCommands, "проверить все принятые L1-кандидаты до ML (включает --verify)", func(c *commonFlags) *bool { return &c.verifyAll }),
+	boolFlag("--verify-all", scanCommands, "verify every accepted L1 candidate before ML (implies --verify)", func(c *commonFlags) *bool { return &c.verifyAll }),
 	boolFlag("--verified-only", scanCommands, "report only provider-confirmed live findings (implies --verify)", func(c *commonFlags) *bool { return &c.verifiedOnly }),
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
 	listFlag("--verifiers", scanCommands+" doctor", "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
 	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff identity.init", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
-	stringFlag("--identity-key-file", scanCommands, "FILE", "ключ HMAC для идентичности секретов и позиций в отчёте", func(c *commonFlags) *string { return &c.identityKeyFile }),
-	stringFlag("--stdin-name", "scan", "NAME", "логическое имя stdin для выбора формата; файл не открывается", func(c *commonFlags) *string { return &c.stdinName }),
+	stringFlag("--identity-key-file", scanCommands, "FILE", "HMAC key for secret and location identities in the report", func(c *commonFlags) *string { return &c.identityKeyFile }),
+	stringFlag("--stdin-name", "scan", "NAME", "logical name for stdin, used to pick the format; the file is not opened", func(c *commonFlags) *string { return &c.stdinName }),
 	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
-	boolFlag("--git-timeline", "scan repo org", "построить хронологию наблюдений Git (включает --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
+	boolFlag("--git-timeline", "scan repo org", "build a Git observation timeline (implies --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
 	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
 	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
 	stringFlag("--baseline", scanCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
@@ -224,11 +224,11 @@ var cliFlags = []flagSpec{
 	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
 	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
 	boolFlag("--ml", scanCommands+" selftest", "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
-	boolFlag("--semantic", indexedCommands, "искать source-backed кандидаты opt-in моделью (по умолчанию loopback)", func(c *commonFlags) *bool { return &c.semantic }),
-	stringFlag("--semantic-url", indexedCommands, "URL", "endpoint модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticURL }),
-	stringFlag("--semantic-model", indexedCommands, "MODEL", "имя модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticModel }),
-	boolFlag("--semantic-allow-remote", indexedCommands, "разрешить отправку исходного текста модели по HTTPS", func(c *commonFlags) *bool { return &c.semanticAllowRemote }),
-	boolFlag("--reconstruct", scanCommands, "восстанавливать ограниченные статические строки JS/TS без выполнения кода", func(c *commonFlags) *bool { return &c.reconstruct }),
+	boolFlag("--semantic", indexedCommands, "find source-backed candidates with an opt-in model (loopback by default)", func(c *commonFlags) *bool { return &c.semantic }),
+	stringFlag("--semantic-url", indexedCommands, "URL", "model endpoint (implies semantic)", func(c *commonFlags) *string { return &c.semanticURL }),
+	stringFlag("--semantic-model", indexedCommands, "MODEL", "model name (implies semantic)", func(c *commonFlags) *string { return &c.semanticModel }),
+	boolFlag("--semantic-allow-remote", indexedCommands, "allow source text to be sent to the model over HTTPS", func(c *commonFlags) *bool { return &c.semanticAllowRemote }),
+	boolFlag("--reconstruct", scanCommands, "reconstruct bounded static JS/TS strings without executing code", func(c *commonFlags) *bool { return &c.reconstruct }),
 	stringFlag("--ml-model", scanCommands, "FILE", "load a compatible external model (implies ML)", func(c *commonFlags) *string { return &c.mlModel }),
 	stringFlag("--ml-url", scanCommands, "URL", "score candidates through an external sidecar", func(c *commonFlags) *string { return &c.mlURL }),
 	floatFlag("--ml-threshold", scanCommands, "L2 suppression threshold (default 0.3)", func(c *commonFlags) *float64 { return &c.mlThreshold }),
@@ -406,10 +406,10 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		c.failOn = "high"
 	}
 	if command == "guard" && (c.maxSize > 8<<20 || c.timeout <= 0 || c.timeout > 30*time.Second) {
-		return c, nil, errors.New("guard: размер не более 8 МиБ; таймаут должен быть положительным и не более 30 с")
+		return c, nil, errors.New("guard: size is at most 8 MiB; timeout must be positive and at most 30s")
 	}
 	if command == "agents" && c.cmd.shellHistory && c.cmd.agentHome == "" {
-		return c, nil, errors.New("--shell-history требует явный --agent-home DIR")
+		return c, nil, errors.New("--shell-history requires an explicit --agent-home DIR")
 	}
 	if c.gitTimeline {
 		c.history = true
@@ -447,15 +447,15 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	}
 	if command == "index" || command == "diff" {
 		if c.format != "pretty" && c.format != "json" {
-			return c, nil, errors.New("index/diff поддерживает --format pretty|json")
+			return c, nil, errors.New("index/diff supports --format pretty|json")
 		}
 		if c.indexDir == "" {
-			return c, nil, errors.New("--index DIR обязателен")
+			return c, nil, errors.New("--index DIR is required")
 		}
 	} else if c.indexDir != "" && strings.TrimSpace(c.indexScope) == "" {
-		return c, nil, errors.New("для --index требуется явный --scope NAME")
+		return c, nil, errors.New("--index requires an explicit --scope NAME")
 	} else if c.indexScope != "" && c.indexDir == "" {
-		return c, nil, errors.New("--scope требует --index DIR")
+		return c, nil, errors.New("--scope requires --index DIR")
 	}
 	if command == "domain" && c.cmd.targetsFile != "" && len(rest) > 0 {
 		return c, nil, errors.New("domain accepts a target or --targets, not both")

@@ -208,7 +208,7 @@ func TestIndexPrettyOutputSanitizesPathsAndPropagatesWriteErrors(t *testing.T) {
 	if err := writeIndexPayload(&b, payload, "pretty"); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(b.String(), "\x1b") || !strings.Contains(b.String(), "мест за историю: 1") {
+	if strings.Contains(b.String(), "\x1b") || !strings.Contains(b.String(), "locations ever seen: 1") {
 		t.Fatal("pretty index report unsafe or unreadable")
 	}
 	if err := writeIndexPayload(shortIndexWriter{}, payload, "pretty"); !errors.Is(err, io.ErrShortWrite) {

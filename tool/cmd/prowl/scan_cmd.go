@@ -210,7 +210,7 @@ func checkSourceModes(c commonFlags, rest []string) int {
 // stdinModeError validates the label before configuration, reports or input I/O.
 func stdinModeError(c commonFlags, rest []string) error {
 	if c.stdinName != "" && (c.staged || c.since != "" || c.history || c.gitTimeline || len(rest) > 1 || (len(rest) == 1 && rest[0] != "-")) {
-		return fmt.Errorf("--stdin-name применяется только к stdin; пути и Git-режимы несовместимы")
+		return fmt.Errorf("--stdin-name applies to stdin only; it cannot be combined with paths or Git modes")
 	}
 	return nil
 }

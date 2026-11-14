@@ -124,7 +124,7 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 			active.Unlock()
 			reply(func() {
 				w.modern = modern
-				mcpToolResult(w, req.ID, "Достигнут лимит одновременных сканов", true)
+				mcpToolResult(w, req.ID, "The concurrent scan limit has been reached", true)
 				w.modern = false
 			})
 			continue
@@ -161,11 +161,11 @@ func serveMCPWithRunnerAndErrors(input io.Reader, output, stderr io.Writer, runn
 		return 2
 	}
 	if inputTooLarge {
-		fmt.Fprintln(stderr, "mcp: превышен лимит входного сообщения")
+		fmt.Fprintln(stderr, "mcp: the input message exceeds the size limit")
 		return 2
 	}
 	if sc.Err() != nil {
-		fmt.Fprintln(stderr, "mcp: не удалось прочитать входной поток")
+		fmt.Fprintln(stderr, "mcp: cannot read the input stream")
 		return 2
 	}
 	return 0

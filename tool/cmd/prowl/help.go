@@ -10,14 +10,14 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
-	{"selftest", "офлайн-проверка синтетических web/mobile/mail примеров", "prowl selftest [--profile all|web|mobile|enterprise] [--ml]"},
-	{"correlate", "сопоставить JSON-наблюдения по HMAC identity", "prowl correlate REPORT.json REPORT.json [...]"},
-	{"remediation-check", "сравнить наличие и provider-вердикты в двух отчётах", "prowl remediation-check BEFORE.json AFTER.json"},
-	{"identity", "создать приватный ключ идентичности секретов", "prowl identity init [-o FILE]"},
-	{"agents", "проверить конфиги и текстовые транскрипты AI-агентов", "prowl agents [PROJECT...] [--agent-home DIR] [--shell-history] [scan flags]"},
-	{"guard", "проверить stdin перед передачей промпта или вызовом инструмента", "prowl guard [--protocol raw|claude|cursor-prompt|cursor-tool] [--max-size BYTES] [--timeout DUR]"},
-	{"index", "локальный индекс: места обнаружения и проверенные состояния", "prowl index --index DIR [--scope NAME] [--format json]"},
-	{"diff", "новые и не наблюдавшиеся секреты между сканами", "prowl diff [FROM TO] --index DIR [--scope NAME] [--format json]"},
+	{"selftest", "offline check on synthetic web/mobile/mail samples", "prowl selftest [--profile all|web|mobile|enterprise] [--ml]"},
+	{"correlate", "correlate JSON observations by HMAC identity", "prowl correlate REPORT.json REPORT.json [...]"},
+	{"remediation-check", "compare presence and provider verdicts across two reports", "prowl remediation-check BEFORE.json AFTER.json"},
+	{"identity", "create a private secret-identity key", "prowl identity init [-o FILE]"},
+	{"agents", "scan AI-agent configs and text transcripts", "prowl agents [PROJECT...] [--agent-home DIR] [--shell-history] [scan flags]"},
+	{"guard", "check stdin before a prompt is sent or a tool is called", "prowl guard [--protocol raw|claude|cursor-prompt|cursor-tool] [--max-size BYTES] [--timeout DUR]"},
+	{"index", "local index: where secrets were seen and their verified states", "prowl index --index DIR [--scope NAME] [--format json]"},
+	{"diff", "new and no-longer-seen secrets between scans", "prowl diff [FROM TO] --index DIR [--scope NAME] [--format json]"},
 	{"compare", "compare cascade and ML results on a repeatable source", "prowl compare [path...] — compare cascade and portable ML findings"},
 	{"scan", "scan files, dirs, archives, documents, mail, git, or stdin for secrets", scanHelp},
 	{"repo", "clone & scan a remote git repository", repoHelp},

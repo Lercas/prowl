@@ -68,8 +68,8 @@ func (p preparedScan) WithFinalizer(finalize func([]model.Finding) []model.Findi
 // look like a complete ML-filtered scan to reports, gates or baseline writers.
 func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []model.Finding {
 	if p.indexError != nil {
-		logx.Error("подготовка индекса не удалась", "err", p.indexError)
-		return []model.Finding{{Detector: "scan", Type: "response_truncated", Severity: "info", Path: "index", Stage: "index setup", Rationale: "локальный индекс недоступен; скан не выполнен"}}
+		logx.Error("index setup failed", "err", p.indexError)
+		return []model.Finding{{Detector: "scan", Type: "response_truncated", Severity: "info", Path: "index", Stage: "index setup", Rationale: "the local index is unavailable; the scan did not run"}}
 	}
 	findings := p.pipeline.Run(ctx, items)
 	if p.mlError != nil {

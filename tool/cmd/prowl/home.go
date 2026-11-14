@@ -38,7 +38,7 @@ func installedVerifiersDir() string { return filepath.Join(prowlHome(), "verifie
 
 func validateTemplateSelection(c commonFlags) error {
 	if c.bundled && (c.rulesOnly || len(c.rulesDir) > 0 || len(c.verifiers) > 0) {
-		return fmt.Errorf("--bundled несовместим с --rules-only/--rules-dir/--verifiers: выберите один источник шаблонов")
+		return fmt.Errorf("--bundled cannot be combined with --rules-only/--rules-dir/--verifiers: choose one template source")
 	}
 	return nil
 }
@@ -233,9 +233,9 @@ func updateInto(kind, source, target, now string, check, allowUnsigned bool) (co
 		len(res.Added), len(res.Changed), len(res.Removed), orNone(res.Manifest.Version), res.Manifest.Count, target)
 	if res.MetadataChanged {
 		if check {
-			fmt.Println("Метаданные библиотеки требуют обновления.")
+			fmt.Println("Library metadata needs an update.")
 		} else {
-			fmt.Println("Метаданные библиотеки обновлены.")
+			fmt.Println("Library metadata updated.")
 		}
 	}
 	return 0

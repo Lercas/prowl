@@ -45,22 +45,22 @@ func mcpCallContext(ctx context.Context, w *mcpWriter, req mcpRequest, runners .
 	}
 	out, runErr := runner(ctx, argv)
 	if errors.Is(runErr, errMCPOutputLimit) {
-		mcpToolResult(w, req.ID, "Отчёт превышает лимит MCP (32 МиБ)", true)
+		mcpToolResult(w, req.ID, "The report exceeds the MCP limit (32 MiB)", true)
 		return
 	}
 	if strings.TrimSpace(out) == "" && runErr != nil {
-		message := "Скан не запустился или завершился без отчёта; проверьте путь, настройки и доступ к источнику"
+		message := "The scan did not start or ended without a report; check the path, the settings and access to the source"
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			message = "Превышен лимит времени сканирования (5 минут)"
+			message = "The scan exceeded its time limit (5 minutes)"
 		} else if errors.Is(ctx.Err(), context.Canceled) {
-			message = "Сканирование отменено"
+			message = "The scan was cancelled"
 		}
 		mcpToolResult(w, req.ID, message, true)
 		return
 	}
 	var result model.ScanResult
 	if jsonstrict.UnmarshalContext(context.Background(), []byte(out), &result) != nil || result.SchemaVersion != "1.4" || result.Findings == nil || result.Count != len(result.Findings) {
-		mcpToolResult(w, req.ID, "Недопустимый ответ сканера", true)
+		mcpToolResult(w, req.ID, "Invalid scanner response", true)
 		return
 	}
 	failed := !result.Complete || result.Truncated || model.NewResult(result.Findings, nil).Truncated

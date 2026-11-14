@@ -70,6 +70,13 @@ report); `false` = dead/rotated; `null` = generic type with no verifier, judge b
   OpenAI-compatible endpoint at `127.0.0.1:8080`. A remote endpoint requires
   `--ocr-allow-remote` plus HTTPS because documents can contain the very secrets being scanned.
 
+## Interface language
+
+Everything the tool shows a user is in English: help, flag descriptions, errors, logs, report text,
+MCP/LSP messages. This overrides the global "UI texts in Russian" convention for this project.
+Russian stays only in detection data (keywords, test fixtures) and in the Russian docs
+(`README.ru.md`, `TODO.md`).
+
 ## Атрибуция Iteralys
 
 В коммитах с вкладом Iteralys сохраняй автора пользователя и добавляй trailer:

@@ -549,7 +549,7 @@ func scanDiagnostics(e *engine, uri, text string) (diags []map[string]any) {
 		func(any) {
 			// Panic payloads can contain the candidate that was being processed.
 			logx.Warn("lsp: scan failed; results are incomplete")
-			diags = []map[string]any{incompleteDiagnostic("scan_failed", "Проверка не завершена из-за внутренней ошибки.")}
+			diags = []map[string]any{incompleteDiagnostic("scan_failed", "The check did not complete because of an internal error.")}
 		},
 	)
 	return diags
@@ -571,7 +571,7 @@ func collectDiagnostics(e *engine, uri, text string) []map[string]any {
 	diags := []map[string]any{}
 	if e.maxBytes > 0 && len(text) > e.maxBytes {
 		return []map[string]any{incompleteDiagnostic("document_too_large",
-			fmt.Sprintf("Документ не проверен: размер %d байт превышает лимит %d байт.", len(text), e.maxBytes))}
+			fmt.Sprintf("Document not checked: its size of %d bytes exceeds the %d-byte limit.", len(text), e.maxBytes))}
 	}
 	path := uriToPath(uri) // allowlist path-substring matching needs a filesystem path, not a file:// URI
 	// Share final suppression and collision handling with CLI. No verifier or ML is attached here,
@@ -585,7 +585,7 @@ func collectDiagnostics(e *engine, uri, text string) []map[string]any {
 	positions := offsetPositions(text, offsets)
 	for _, f := range findings {
 		if model.IsIncompleteFinding(f) {
-			diags = append(diags, incompleteDiagnostic(f.Type, "Проверка неполная: "+f.Rationale))
+			diags = append(diags, incompleteDiagnostic(f.Type, "The check is incomplete: "+f.Rationale))
 			continue
 		}
 		if f.ByteEnd <= f.ByteStart {
@@ -608,7 +608,7 @@ func collectDiagnostics(e *engine, uri, text string) []map[string]any {
 			hasIncomplete = hasIncomplete || model.IsIncompleteFinding(f)
 		}
 		if !hasIncomplete {
-			diags = append(diags, incompleteDiagnostic("scan_incomplete", "Проверка неполная: достигнут лимит или произошла ошибка."))
+			diags = append(diags, incompleteDiagnostic("scan_incomplete", "The check is incomplete: a limit was reached or an error occurred."))
 		}
 	}
 	return diags
@@ -695,7 +695,7 @@ type safeWriter struct {
 	onFailure func() // immutable after the session starts; called once outside mu
 }
 
-var errOutput = errors.New("lsp: не удалось записать сообщение")
+var errOutput = errors.New("lsp: cannot write the message")
 
 func newSafeWriter(w *bufio.Writer) *safeWriter { return &safeWriter{w: w} }
 

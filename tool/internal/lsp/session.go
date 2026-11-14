@@ -201,9 +201,9 @@ func initializeParams(raw json.RawMessage) bool {
 
 func respondError(w *safeWriter, id json.RawMessage, code int) {
 	messages := map[int]string{
-		parseError: "Некорректный JSON.", invalidRequest: "Некорректный запрос.",
-		methodNotFound: "Метод не поддерживается.", invalidParams: "Некорректные параметры.",
-		internalError: "Внутренняя ошибка сервера.", serverNotInitialized: "Сервер ещё не инициализирован.",
+		parseError: "Invalid JSON.", invalidRequest: "Invalid request.",
+		methodNotFound: "Method not supported.", invalidParams: "Invalid parameters.",
+		internalError: "Internal server error.", serverNotInitialized: "Server not initialized yet.",
 	}
 	w.send(map[string]any{"jsonrpc": "2.0", "id": id, "error": map[string]any{"code": code, "message": messages[code]}})
 }

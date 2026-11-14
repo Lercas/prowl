@@ -21,8 +21,8 @@ const MaxBytes = 8 << 20
 const maxParts = 8192
 const maxDepth = 32
 
-const BlockReason = "Обнаружен возможный секрет. Передача заблокирована."
-const ErrorReason = "Проверка секретов не завершена. Передача заблокирована."
+const BlockReason = "Possible secret detected. Transfer blocked."
+const ErrorReason = "Secret check did not complete. Transfer blocked."
 
 type Result struct {
 	Allowed    bool

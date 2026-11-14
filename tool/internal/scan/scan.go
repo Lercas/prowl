@@ -589,7 +589,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: m.Start, End: m.End, Line: line, Col: col, Transform: m.Transform})
 		}
 		if m.Stage == "semantic-candidate" {
-			out[len(out)-1].Rationale = "Кандидат модели с точным совпадением в исходном тексте; действительность не подтверждена"
+			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
 		if vset != nil {
 			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})

@@ -163,7 +163,7 @@ func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, el
 	}
 	if c.indexDir != "" {
 		if err := recordIndexedScan(ctx, c, findings); err != nil {
-			logx.Error("запись индекса не удалась", "err", err)
+			logx.Error("index write failed", "err", err)
 			_ = writeReport(c, markInterrupted(ctx, findings))
 			return 2
 		}

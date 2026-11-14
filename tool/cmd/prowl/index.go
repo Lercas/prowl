@@ -59,7 +59,7 @@ func recordIndexedScan(ctx context.Context, c commonFlags, findings []model.Find
 	}
 	id, err := store.Record(ctx, c.indexScope, time.Now().UTC(), complete, findings)
 	if err == nil {
-		logx.Info("скан записан в локальный индекс", "scan_id", id, "scope", c.indexScope)
+		logx.Info("scan recorded in the local index", "scan_id", id, "scope", c.indexScope)
 	}
 	return err
 }
@@ -73,16 +73,16 @@ func cmdIndex(command string, args []string) int {
 		return indexError(err)
 	}
 	if command == "index" && len(rest) != 0 {
-		return commandParseError(errors.New("index не принимает позиционные аргументы"))
+		return commandParseError(errors.New("index does not accept positional arguments"))
 	}
 	if command == "diff" && len(rest) != 0 && len(rest) != 2 {
-		return commandParseError(errors.New("diff принимает два ID сканов или --scope для последних двух сканов"))
+		return commandParseError(errors.New("diff takes two scan IDs, or --scope for the two latest scans"))
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	store, err := secretindex.Open(ctx, c.indexDir, true)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "индекс:", err)
+		fmt.Fprintln(os.Stderr, "index:", err)
 		return 2
 	}
 	defer store.Close()
@@ -106,22 +106,22 @@ func cmdIndex(command string, args []string) int {
 		if len(rest) == 2 {
 			from, err = strconv.ParseInt(rest[0], 10, 64)
 			if err != nil || from <= 0 {
-				return indexError(errors.New("неверный ID первого скана"))
+				return indexError(errors.New("invalid first scan ID"))
 			}
 			to, err = strconv.ParseInt(rest[1], 10, 64)
 			if err != nil || to <= 0 {
-				return indexError(errors.New("неверный ID второго скана"))
+				return indexError(errors.New("invalid second scan ID"))
 			}
 		} else {
 			if c.indexScope == "" {
-				return indexError(errors.New("для автоматического diff требуется --scope NAME"))
+				return indexError(errors.New("an automatic diff requires --scope NAME"))
 			}
 			scans, err := store.Scans(ctx, c.indexScope)
 			if err != nil {
 				return indexError(err)
 			}
 			if len(scans) < 2 {
-				return indexError(errors.New("в области нет двух сканов"))
+				return indexError(errors.New("the scope has fewer than two scans"))
 			}
 			from, to = scans[len(scans)-2].ID, scans[len(scans)-1].ID
 		}
@@ -130,7 +130,7 @@ func cmdIndex(command string, args []string) int {
 			return indexError(err)
 		}
 		if c.indexScope != "" && diff.From.Scope != c.indexScope {
-			return indexError(errors.New("ID сканов не принадлежат указанной области"))
+			return indexError(errors.New("the scan IDs do not belong to the given scope"))
 		}
 		payload = diff
 	}
@@ -146,7 +146,7 @@ func cmdIndex(command string, args []string) int {
 	return 0
 }
 
-func indexError(err error) int { fmt.Fprintln(os.Stderr, "индекс:", err); return 2 }
+func indexError(err error) int { fmt.Fprintln(os.Stderr, "index:", err); return 2 }
 
 type indexEvidence struct {
 	mu       sync.Mutex
@@ -183,16 +183,16 @@ func writeIndexPayload(w io.Writer, payload any, format string) error {
 	}
 	switch value := payload.(type) {
 	case indexView:
-		fmt.Fprintf(&b, "Сканы: %d; секреты: %d\n", len(value.Scans), len(value.Secrets))
+		fmt.Fprintf(&b, "Scans: %d; secrets: %d\n", len(value.Scans), len(value.Secrets))
 		for _, s := range value.Scans {
-			state := "неполный"
+			state := "incomplete"
 			if s.Complete {
-				state = "полный"
+				state = "complete"
 			}
-			fmt.Fprintf(&b, "  Скан %d | %s | %s | %s\n", s.ID, clean(s.Scope), s.At.Format(time.RFC3339), state)
+			fmt.Fprintf(&b, "  Scan %d | %s | %s | %s\n", s.ID, clean(s.Scope), s.At.Format(time.RFC3339), state)
 		}
 		for _, s := range value.Secrets {
-			fmt.Fprintf(&b, "\nСекрет %s | мест за историю: %d | последнее подтверждённое состояние: %s", label(s.ValueID), s.LocationCount, s.LastConfirmedState)
+			fmt.Fprintf(&b, "\nSecret %s | locations ever seen: %d | last confirmed state: %s", label(s.ValueID), s.LocationCount, s.LastConfirmedState)
 			if s.LastConfirmedAt != nil {
 				fmt.Fprintf(&b, " (%s)", s.LastConfirmedAt.Format(time.RFC3339))
 			}
@@ -203,18 +203,18 @@ func writeIndexPayload(w io.Writer, payload any, format string) error {
 			for _, e := range s.Transitions {
 				fmt.Fprintf(&b, "  %s → %s: %s", e.From, e.To, e.ObservedAt.Format(time.RFC3339))
 				if e.SecondsSinceFirstLive != nil {
-					fmt.Fprintf(&b, "; после первого live-наблюдения %.0f с", *e.SecondsSinceFirstLive)
+					fmt.Fprintf(&b, "; %.0f s after the first live observation", *e.SecondsSinceFirstLive)
 				}
 				b.WriteByte('\n')
 			}
 		}
 	case secretindex.Diff:
-		fmt.Fprintf(&b, "Сканы %d → %d | %s\nНовые секреты: %d\nНе наблюдались: %d\nНовые места: %d\nНе наблюдались в прежних местах: %d\n", value.From.ID, value.To.ID, clean(value.From.Scope), len(value.NewValues), len(value.NotSeenValues), len(value.NewLocations), len(value.NotSeenLocations))
+		fmt.Fprintf(&b, "Scans %d → %d | %s\nNew secrets: %d\nNot seen: %d\nNew locations: %d\nNot seen at previous locations: %d\n", value.From.ID, value.To.ID, clean(value.From.Scope), len(value.NewValues), len(value.NotSeenValues), len(value.NewLocations), len(value.NotSeenLocations))
 		for _, id := range value.NewValues {
-			fmt.Fprintf(&b, "  + секрет %s\n", label(id))
+			fmt.Fprintf(&b, "  + secret %s\n", label(id))
 		}
 		for _, id := range value.NotSeenValues {
-			fmt.Fprintf(&b, "  ? секрет %s\n", label(id))
+			fmt.Fprintf(&b, "  ? secret %s\n", label(id))
 		}
 		for _, l := range value.NewLocations {
 			fmt.Fprintf(&b, "  + %s %s:%d:%d\n", label(l.ValueID), clean(l.Path), l.Line, l.Col)
@@ -264,7 +264,7 @@ func validateIndexOutputs(c commonFlags) error {
 		}
 		rel, err := filepath.Rel(root, path)
 		if err == nil && (rel == "." || filepath.IsLocal(rel)) {
-			return errors.New("отчёт или baseline нельзя записывать внутрь каталога индекса")
+			return errors.New("a report or baseline cannot be written inside the index directory")
 		}
 	}
 	return nil

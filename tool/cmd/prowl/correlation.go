@@ -15,16 +15,16 @@ func cmdCorrelate(args []string) int {
 	}
 	args = rest
 	if len(args) < 2 {
-		fmt.Fprintln(os.Stderr, "Использование: prowl correlate REPORT.json REPORT.json [...]")
+		fmt.Fprintln(os.Stderr, "usage: prowl correlate REPORT.json REPORT.json [...]")
 		return 2
 	}
 	if len(args) > 32 {
-		fmt.Fprintln(os.Stderr, "Не более 32 отчётов за один запуск")
+		fmt.Fprintln(os.Stderr, "at most 32 reports per run")
 		return 2
 	}
 	reports, err := correlation.ReadMany(args)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Сопоставление:", err)
+		fmt.Fprintln(os.Stderr, "correlate:", err)
 		return 2
 	}
 	result, err := correlation.Join(reports)
@@ -47,7 +47,7 @@ func cmdRemediation(args []string) int {
 	}
 	args = rest
 	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, "Использование: prowl remediation-check BEFORE.json AFTER.json")
+		fmt.Fprintln(os.Stderr, "usage: prowl remediation-check BEFORE.json AFTER.json")
 		return 2
 	}
 	reports, err := correlation.ReadMany(args)

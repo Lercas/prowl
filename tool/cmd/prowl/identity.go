@@ -61,7 +61,7 @@ func loadIdentityKey(path string) ([]byte, error) {
 
 func cmdIdentity(args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, "Использование: prowl identity init [-o FILE]")
+		fmt.Fprintln(os.Stderr, "usage: prowl identity init [-o FILE]")
 		return 2
 	}
 	c, rest, err := parseCommand("identity", args)
@@ -69,11 +69,11 @@ func cmdIdentity(args []string) int {
 		return commandParseError(err)
 	}
 	if args[0] != "init" {
-		fmt.Fprintln(os.Stderr, "Использование: prowl identity init [-o FILE]")
+		fmt.Fprintln(os.Stderr, "usage: prowl identity init [-o FILE]")
 		return 2
 	}
 	if len(rest) != 0 {
-		fmt.Fprintln(os.Stderr, "identity init не принимает позиционные аргументы")
+		fmt.Fprintln(os.Stderr, "identity init does not accept positional arguments")
 		return 2
 	}
 	path := c.output
@@ -82,7 +82,7 @@ func cmdIdentity(args []string) int {
 	}
 	// The explicit CLI path is the intended destination; no untrusted scanned data reaches it.
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil { // #nosec G703 -- user-selected output path
-		fmt.Fprintln(os.Stderr, "Не удалось создать каталог ключа")
+		fmt.Fprintln(os.Stderr, "cannot create the key directory")
 		return 2
 	}
 	key := make([]byte, 32)
@@ -91,7 +91,7 @@ func cmdIdentity(args []string) int {
 	}
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600) // #nosec G703 -- exclusive creation at user-selected output path
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Не удалось создать ключ: путь уже занят или недоступен")
+		fmt.Fprintln(os.Stderr, "cannot create the key: the path already exists or is not accessible")
 		return 2
 	}
 	_, err = f.WriteString(hex.EncodeToString(key) + "\n")
@@ -99,6 +99,6 @@ func cmdIdentity(args []string) int {
 	if err != nil || closeErr != nil {
 		return 2
 	}
-	fmt.Fprintln(os.Stdout, "Ключ идентичности создан:", path)
+	fmt.Fprintln(os.Stdout, "Identity key created:", path)
 	return 0
 }

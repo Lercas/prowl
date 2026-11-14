@@ -95,7 +95,7 @@ func runSelftest(profile string, useML bool) (selftestResult, error) {
 		fixtures = append(fixtures, fixture{"encoded-mail", "incident.eml", []byte(mail), true, false}, fixture{"public-identifier", "report.txt", []byte("Public document number: 20261001; password: changeme"), false, false})
 	}
 	if len(fixtures) == 0 {
-		return out, fmt.Errorf("профиль должен быть all, web, mobile или enterprise")
+		return out, fmt.Errorf("profile must be all, web, mobile or enterprise")
 	}
 	for _, f := range fixtures {
 		coverage := model.NewCoverage()
@@ -119,7 +119,7 @@ func runSelftest(profile string, useML bool) (selftestResult, error) {
 				found = true
 			}
 			if strings.Contains(x.Redacted, credential) {
-				return out, fmt.Errorf("самопроверка выявила утечку в редактированном выводе")
+				return out, fmt.Errorf("self-test found a leak in redacted output")
 			}
 		}
 		passed := complete && ((f.positive && found) || (!f.positive && len(fs) == 0))
@@ -134,7 +134,7 @@ func cmdSelftest(args []string) int {
 		return commandParseError(err)
 	}
 	if len(rest) > 0 {
-		fmt.Fprintln(os.Stderr, "selftest не принимает позиционные аргументы")
+		fmt.Fprintln(os.Stderr, "selftest does not accept positional arguments")
 		return 2
 	}
 	profile := c.cmd.selftestProfile
