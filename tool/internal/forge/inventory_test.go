@@ -182,3 +182,25 @@ func TestAPIBaseRejectsCredentialAndSelectionURLComponents(t *testing.T) {
 		t.Fatalf("ordinary API base changed: %s %v", got, err)
 	}
 }
+
+func TestValidListingEntriesSurviveBodyCloseFailure(t *testing.T) {
+	previous := client
+	t.Cleanup(func() { client = previous })
+	for _, bitbucket := range []bool{false, true} {
+		body := `[{"clone_url":"https://owned.invalid/a.git"}]`
+		if bitbucket {
+			body = `{"values":[{"links":{"clone":[{"name":"https","href":"https://owned.invalid/a.git"}]}}]}`
+		}
+		client = &http.Client{Transport: errorTransport{body: closeFailure{strings.NewReader(body)}}}
+		var urls []string
+		var err error
+		if bitbucket {
+			urls, err = bitbucketList(context.Background(), "https://owned.invalid/repositories", nil)
+		} else {
+			urls, _, err = listArrays(context.Background(), "https://owned.invalid/repositories", nil, "clone_url")
+		}
+		if !errors.Is(err, errListingClose) || len(urls) != 1 || urls[0] != "https://owned.invalid/a.git" {
+			t.Fatalf("readable listing lost on close failure: %v %v", urls, err)
+		}
+	}
+}

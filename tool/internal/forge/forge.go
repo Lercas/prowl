@@ -127,7 +127,7 @@ func listArrays(ctx context.Context, first string, hdr map[string]string, field 
 		seen[next] = true
 		var entries []map[string]json.RawMessage
 		status, headers, err := getJSON(ctx, next, hdr, &entries)
-		if err != nil || status != 200 {
+		if status != 200 || (err != nil && !errors.Is(err, errListingClose)) {
 			if page > 0 && err == nil {
 				err = fmt.Errorf("repository pagination returned %d", status)
 			}
@@ -146,6 +146,9 @@ func listArrays(ctx context.Context, first string, hdr map[string]string, field 
 				urls = append(urls, clone)
 				repos[clone] = true
 			}
+		}
+		if err != nil {
+			return urls, status, errors.Join(problems, err)
 		}
 		continuation, err := nextPage(headers, next)
 		if err != nil {
@@ -193,7 +196,7 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 		if status != 200 {
 			err = errors.Join(err, fmt.Errorf("bitbucket API returned %d", status))
 		}
-		if err != nil {
+		if status != 200 || (err != nil && !errors.Is(err, errListingClose)) {
 			return urls, errors.Join(problems, err)
 		}
 		if page.Values == nil {
@@ -213,6 +216,9 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 			if !found {
 				problems = errors.New("one or more bitbucket entries have no HTTPS clone URL")
 			}
+		}
+		if err != nil {
+			return urls, errors.Join(problems, err)
 		}
 		next = page.Next
 		if next != "" {
@@ -351,6 +357,8 @@ type apiRequestError struct{ cause error }
 func (e *apiRequestError) Error() string { return "repository API request failed" }
 func (e *apiRequestError) Unwrap() error { return e.cause }
 
+var errListingClose = errors.New("close repository listing body failed")
+
 func getJSON(ctx context.Context, rawURL string, hdr map[string]string, out any) (status int, headers http.Header, err error) {
 	if len(rawURL) > 8192 {
 		return 0, nil, errors.New("repository API endpoint exceeds size limit")
@@ -375,7 +383,7 @@ func getJSON(ctx context.Context, rawURL string, hdr map[string]string, out any)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil && err == nil {
-			err = errors.New("close repository listing body failed")
+			err = errListingClose
 		}
 	}()
 	if resp.StatusCode == http.StatusOK {
