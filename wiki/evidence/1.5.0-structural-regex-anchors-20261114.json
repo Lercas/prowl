@@ -1,0 +1,158 @@
+{
+  "scope": "mandatory ASCII-run structural anchors for prefixless regexes",
+  "candidate_commit": "05681ca55b8aafa2ddcf5646c95c80156dda70f4",
+  "proof": "Every regex match includes a delimiter immediately following a mandatory ASCII character-class run of at least eight bytes. All alternation branches require a proof; guard suffix length is capped at 64 bytes.",
+  "planning": {
+    "template_regexes_before": 414,
+    "template_regexes_after": 421,
+    "template_regexes_total": 421,
+    "new_builtins": [
+      "telegram_bot_token",
+      "discord_bot_token"
+    ],
+    "basic_auth_header_coarse_anchor": "still open"
+  },
+  "validation": {
+    "source": "isolated clean HEAD plus scoped linewin patch; CLI and performance from immutable candidate commit",
+    "full_go_suite": "passed",
+    "race": "structural tests and fuzz seeds passed",
+    "minimum_go": "go1.26.11 structural tests and fuzz seeds passed",
+    "lint": "0 issues in linewin",
+    "structural_fuzz": {
+      "executions": 220292,
+      "seconds": 31.265,
+      "differences": 0
+    },
+    "randomized_token_tests": 2000,
+    "corpus_equivalence": {
+      "corpus": "go1.27.4 GOROOT/src",
+      "files": 12044,
+      "detector_matches": 1129,
+      "rule_hits": 3,
+      "differences": 0
+    },
+    "cli_parity": {
+      "fixture": "retained ProwlBench subset",
+      "findings": 2246,
+      "exact_findings_equal": true,
+      "ml": true,
+      "previous_binary_revision": "361320a"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 10364508500.0,
+            "B/op": 575892168.0,
+            "allocs/op": 1160458.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10382646375.0,
+            "B/op": 572111440.0,
+            "allocs/op": 1160801.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10350689458.0,
+            "B/op": 583264168.0,
+            "allocs/op": 1161086.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 9688802208.0,
+            "B/op": 579844720.0,
+            "allocs/op": 1161144.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9680868333.0,
+            "B/op": 581895808.0,
+            "allocs/op": 1161346.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9654762625.0,
+            "B/op": 592399816.0,
+            "allocs/op": 1161438.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "candidate": "05681ca55b8aafa2ddcf5646c95c80156dda70f4"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 10364508500.0,
+          "B/op": 575892168.0,
+          "allocs/op": 1160801.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        "candidate": {
+          "ns/op": 9680868333.0,
+          "B/op": 581895808.0,
+          "allocs/op": 1161346.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      },
+      "ratios": {
+        "ns/op": 0.9340402714706636,
+        "B/op": 1.0104249377463317,
+        "allocs/op": 1.000469503386024
+      },
+      "regressions": []
+    },
+    "microbenchmark": {
+      "scope": "three regexes over 983085 bytes of synthetic minified punctuation plus Telegram token; includes window preparation",
+      "whole_ns_median": 46142238,
+      "windowed_ns_median": 2682102,
+      "samples": 3,
+      "benchtime": "300ms",
+      "claim": "not overall scanner throughput"
+    }
+  },
+  "qualification": "local correctness and performance evidence only; historical ProwlBench false-positive gate and release publication remain open"
+}
