@@ -52,6 +52,16 @@ Findings are grouped by file (worst first), severity-coloured, with the secret m
 (`--format json`), SARIF (`--format sarif`, for the GitHub/GitLab Security tab), and DefectDojo
 (`--format defectdojo`, Generic Findings Import for direct upload) are one flag away.
 
+## Demo
+
+[![Prowl terminal recording](assets/terminal-demo-plain/poster.png)](assets/terminal-demo-plain/prowl-terminal.mp4)
+
+[Watch the terminal recording (MP4)](assets/terminal-demo-plain/prowl-terminal.mp4).
+A continuous interactive shell session: scan a config, build log and ZIP, inspect
+masked findings and JSON, fail a CI gate, fix the files and rescan. Synthetic
+credentials; no ML or live verification.
+[Recording details and reproduction](assets/terminal-demo-plain/README.md).
+
 ## Install
 
 ```sh

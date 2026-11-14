@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+# Preserve attribution on existing commits and Git-generated merge messages.
+case "${2:-}" in
+    merge|squash|commit) exit 0 ;;
+esac
+
+# Set to 0 for commits made without Iteralys assistance.
+[ "${PROWL_ITERALYS_COAUTHOR:-1}" != 0 ] || exit 0
+
+git interpret-trailers --in-place --if-exists addIfDifferent --if-missing add \
+    --trailer 'Co-authored-by: Iteralys <349563214+Iteralys@users.noreply.github.com>' \
+    "$1"

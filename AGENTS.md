@@ -69,5 +69,21 @@ report); `false` = dead/rotated; `null` = generic type with no verifier, judge b
 - **OCR is opt-in.** `--ocr` sends PNG/JPEG/WebP and PDF pages without a text layer to the local
   OpenAI-compatible endpoint at `127.0.0.1:8080`. A remote endpoint requires
   `--ocr-allow-remote` plus HTTPS because documents can contain the very secrets being scanned.
+
+## Атрибуция Iteralys
+
+В коммитах с вкладом Iteralys сохраняй автора пользователя и добавляй trailer:
+
+```text
+Co-authored-by: Iteralys <349563214+Iteralys@users.noreply.github.com>
+```
+
+Локальный hook `.githooks/prepare-commit-msg` добавляет строку без дублей
+и сохраняет других соавторов. Подключение в новом checkout:
+`git config --local core.hooksPath .githooks`.
+Для коммита без участия Iteralys используй `PROWL_ITERALYS_COAUTHOR=0 git commit`.
+Hook не меняет сообщения merge, squash и amend/reuse-коммитов; при их подготовке
+проверяй атрибуцию вручную. Для появления соавторства на GitHub коммит должен
+быть опубликован; изменение README само по себе этого не делает.
 - **`prowl_domain` / `prowl_mobile`** surface different things: web = source maps + bundles; mobile =
   `resources.arsc` + dex strings + `google-services.json` (often richer). Run both for full coverage.

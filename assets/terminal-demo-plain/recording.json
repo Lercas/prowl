@@ -1,0 +1,23 @@
+{
+  "duration": 63.29,
+  "workspace": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-terminal-upi07mnd",
+  "binary_sha256": "5d2cc02ee35080fa58cfebcd73235b7c86b1247551fa7b69f464c4f1dd77d2ab",
+  "method": "Live bash PTY, unmodified timestamped output; agg terminal renderer, MP4 encoding.",
+  "commands": [
+    "find checkout -type f",
+    "cat checkout/config/app.env checkout/logs/build.log",
+    "clear",
+    "prowl scan checkout",
+    "clear",
+    "prowl scan checkout --format json > findings.json",
+    "python3 -c 'import json; print(json.dumps(json.load(open(\"findings.json\"))[\"findings\"][-1], indent=2))'",
+    "clear",
+    "prowl scan checkout --fail-on high",
+    "echo $?",
+    "clear",
+    "python3 fix-demo.py",
+    "cat checkout/config/app.env",
+    "prowl scan checkout --fail-on high",
+    "echo $?"
+  ]
+}

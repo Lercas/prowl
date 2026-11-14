@@ -53,6 +53,16 @@ $ prowl scan .
 JSON (`--format json`), SARIF (`--format sarif`, для вкладки Security в GitHub/GitLab) и DefectDojo
 (`--format defectdojo`, формат Generic Findings Import для прямого импорта) - в один флаг.
 
+## Демо
+
+[![Запись терминала с Prowl](assets/terminal-demo-plain/poster.png)](assets/terminal-demo-plain/prowl-terminal.mp4)
+
+[Смотреть запись терминала (MP4)](assets/terminal-demo-plain/prowl-terminal.mp4).
+Непрерывная сессия командной оболочки: сканирование конфига, лога и ZIP,
+маскированные находки, JSON, блокировка CI, исправление файлов и повторная проверка.
+Ключи синтетические; ML и live-проверка выключены.
+[Подробности записи и воспроизведение](assets/terminal-demo-plain/README.md).
+
 ## Установка
 
 ```sh

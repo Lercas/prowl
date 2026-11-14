@@ -1,0 +1,58 @@
+{
+  "count": 4,
+  "findings": [
+    {
+      "detector": "db_connection_string",
+      "type": "db_connection_string",
+      "confidence": 0.9,
+      "severity": "critical",
+      "source": "code",
+      "path": "checkout/artifacts/release.zip!/deploy.env",
+      "line": 1,
+      "col": 14,
+      "redacted": "post********5432",
+      "stage": "L1-regex",
+      "fingerprint": "4ae40956ce70983c1379f248e12baab84110b37117e96e9ff5e4e1d03a914db4"
+    },
+    {
+      "detector": "db_connection_string",
+      "type": "db_connection_string",
+      "confidence": 0.9,
+      "severity": "critical",
+      "source": "code",
+      "path": "checkout/config/app.env",
+      "line": 2,
+      "col": 14,
+      "redacted": "post********5432",
+      "stage": "L1-regex",
+      "fingerprint": "c3dc7b759a2f3422544d552edf864980ad76ddbfd985de13d5cb55ebfffbc8bd"
+    },
+    {
+      "detector": "aws_access_key_id",
+      "type": "aws_access_key_id",
+      "confidence": 0.9,
+      "severity": "high",
+      "source": "code",
+      "path": "checkout/config/app.env",
+      "line": 1,
+      "col": 19,
+      "redacted": "AKIA********DSYP",
+      "stage": "L1-regex",
+      "fingerprint": "4c8ddbbb1dd61a7cdbee35ca0231ab040c5641c7da5365eb49d19e4074b0e9a5"
+    },
+    {
+      "detector": "github_pat_classic",
+      "type": "github_pat_classic",
+      "confidence": 0.99,
+      "severity": "high",
+      "source": "code",
+      "path": "checkout/logs/build.log",
+      "line": 2,
+      "col": 22,
+      "redacted": "ghp_********YtQi",
+      "stage": "L1-checksum",
+      "fingerprint": "bd27bfdb7060c193f0b0ab9312760d417e3c28654d2e404b8501024c493d605d"
+    }
+  ],
+  "truncated": false
+}
