@@ -188,3 +188,31 @@ func FuzzCharCodeSourceBounds(f *testing.F) {
 		}
 	})
 }
+
+func TestCharCodeBrokenUTF16DoesNotInventCredentialValue(t *testing.T) {
+	expr := strings.Replace(charCodeFixture("postgresql://svc:Kx7$mPq2@prod.internal/db", "decimal"), ",75,", ",55296,75,", 1)
+	ms, limited := newDetector(t).charCodeSecrets(t.Context(), "blob="+expr, maxViewBytes, maxViewConstructs)
+	if !limited {
+		t.Fatal("broken credential encoding presented as complete")
+	}
+	for _, m := range ms {
+		if strings.ContainsRune(m.Value, '\ufffd') {
+			t.Fatal("lossy replacement became a credential value")
+		}
+	}
+	valid := "postgresql://svc:Kx7\ufffdmPq2@prod.internal"
+	ms, limited = newDetector(t).charCodeSecrets(t.Context(), "blob="+charCodeFixture(valid, "decimal"), maxViewBytes, maxViewConstructs)
+	if limited || namedMatch(ms, "db_connection_string", valid) == nil {
+		t.Fatal("literal U+FFFD was confused with lossy UTF-16 recovery")
+	}
+}
+
+func TestCharCodePreservesPlainTypedWinnerBeforeSourceMapping(t *testing.T) {
+	const uri = "postgresql://svc:Kx7$mPq2@prod.internal"
+	d := newDetector(t)
+	plain := findType(d.Scan(uri), "db_connection_string")
+	encoded := findType(d.Scan("blob="+charCodeFixture(uri, "decimal")), "db_connection_string")
+	if plain == nil || encoded == nil || plain.Value != encoded.Value {
+		t.Fatal("outer source mapping changed overlapping typed winner or logical identity")
+	}
+}

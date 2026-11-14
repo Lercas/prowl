@@ -319,16 +319,16 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 	if v != nil && ctx.Err() == nil {
 		matches, cap := d.collect(ctx, v.text, "", "", d.keywordsPresent(strings.ToLower(v.text)), scanStructure(v.text, 32))
 		limited = limited || cap
-		spans := make(map[int]int, len(calls))
+		spans := make(map[int]charCodeCall, len(calls))
 		for _, call := range calls {
-			spans[call.start] = call.end
+			spans[call.start] = call
 		}
 		for _, m := range matches {
 			if taxonomy.GenericLast[m.Type] || m.Confidence < .9 || m.Start < 0 || m.End <= m.Start || m.End > len(v.text) || anyIn(v.cuts, m.Start, m.Start) || anyIn(v.cuts, m.End, m.End) {
 				continue
 			}
 			lo, hi := int(v.start[m.Start]), int(v.end[m.End-1])
-			if end, ok := spans[lo]; !ok || end != hi {
+			if call, ok := spans[lo]; !ok || call.end != hi || call.brokenUTF16 && strings.ContainsRune(m.Value, utf8.RuneError) {
 				continue
 			}
 			m.Start, m.End, m.Confidence = lo, hi, m.Confidence*.95
