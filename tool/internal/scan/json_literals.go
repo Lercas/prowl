@@ -32,17 +32,18 @@ type sourceLiteral struct {
 }
 
 type literalDocument struct {
-	original     string
-	text         string
-	values       []sourceLiteral
-	scalars      map[int]detect.PasswordScalar
-	contexts     map[int]string
-	bindings     map[int]map[string]string
-	roles        map[int]literalRole
-	unsafeGroups map[int]bool
-	lines        *lineIndex
-	pragmas      *lineIndex // Optional parser-specific logical line boundaries.
-	transform    string
+	original           string
+	text               string
+	values             []sourceLiteral
+	scalars            map[int]detect.PasswordScalar
+	contexts           map[int]string
+	bindings           map[int]map[string]string
+	roles              map[int]literalRole
+	unsafeGroups       map[int]bool
+	verificationUnsafe bool
+	lines              *lineIndex
+	pragmas            *lineIndex // Optional parser-specific logical line boundaries.
+	transform          string
 }
 
 func (doc *literalDocument) hasPragma(pos int) bool {
@@ -198,6 +199,7 @@ func (doc *literalDocument) prepare() {
 		prepared.WriteString(v.value)
 		v.preparedEnd = prepared.Len()
 		if v.raw {
+			doc.scalars[v.preparedStart] = detect.PasswordScalar{Value: v.value, End: v.preparedEnd, Raw: true}
 			prepared.WriteByte('\n')
 		} else {
 			prepared.WriteString("\"\n")

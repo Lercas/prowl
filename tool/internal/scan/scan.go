@@ -178,7 +178,13 @@ type lineIndex struct {
 func newLineIndex(text string) *lineIndex {
 	starts := make([]int, 1, len(text)/40+1) // starts[0] = 0
 	for i := 0; i < len(text); i++ {
-		if text[i] == '\n' {
+		switch text[i] {
+		case '\r':
+			if i+1 < len(text) && text[i+1] == '\n' {
+				i++
+			}
+			starts = append(starts, i+1)
+		case '\n':
 			starts = append(starts, i+1)
 		}
 	}
@@ -344,7 +350,7 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
-	if !isJSONItem(it) {
+	if literalFormat(it) == "" {
 		return p.findings(ctx, it, nil)
 	}
 	coverage := model.NewCoverage()
@@ -395,8 +401,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			Rationale: "source content could not be read; scan results are incomplete",
 		}}
 	}
-	if literalDoc == nil && isJSONItem(it) {
-		if doc := jsonLiterals(ctx, it); doc != nil {
+	if literalDoc == nil && literalFormat(it) != "" {
+		if doc := parseLiterals(ctx, it); doc != nil {
 			return p.literalFindings(ctx, it, doc)
 		}
 		// A failed parser cannot establish a value safe for provider submission.

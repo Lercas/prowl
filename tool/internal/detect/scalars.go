@@ -9,9 +9,11 @@ import (
 
 // PasswordScalar is a parser-established binding within a canonical view.
 // End and the map key identify exactly Value, excluding presentation quotes.
+// Raw preserves lexical candidates in comments and other presentation data.
 type PasswordScalar struct {
 	Name, Value string
 	End         int
+	Raw         bool
 }
 
 // ScanWithScalars preserves parser-established values without asking a lexical
@@ -21,11 +23,22 @@ func (d *Detector) ScanWithScalars(ctx context.Context, text string, scalars map
 }
 
 func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Match, scalars map[int]PasswordScalar) ([]Match, bool) {
+	var rawStarts []int
+	for start, v := range scalars {
+		if v.Raw {
+			rawStarts = append(rawStarts, start)
+		}
+	}
+	sort.Ints(rawStarts)
 	// A truncated lexical password must not displace the complete scalar in the
 	// confidence-first overlap pass. Other types still compete on actual evidence.
 	kept := matches[:0]
 	for _, m := range matches {
 		if m.Type == "generic_password" {
+			i := sort.Search(len(rawStarts), func(i int) bool { return rawStarts[i] > m.Start }) - 1
+			if i >= 0 && m.End <= scalars[rawStarts[i]].End {
+				kept = append(kept, m)
+			}
 			// Loose contextual guesses cannot establish a parser binding. The
 			// taxonomy-gated nomination below replaces every password candidate.
 			continue
@@ -34,7 +47,7 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 	}
 	starts := make([]int, 0, len(scalars))
 	for start, v := range scalars {
-		if v.Name != "" {
+		if v.Name != "" && !v.Raw {
 			starts = append(starts, start)
 		}
 	}
