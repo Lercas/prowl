@@ -8,6 +8,17 @@ import (
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
+// Keep original prepared spans even after findings are mapped to source coordinates.
+type verificationCandidate struct {
+	typ, value string
+	start, end int
+}
+
+func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
+	f.Verified, f.Rationale, f.Verification = applyLiteralVerify(ctx, set, doc, c.typ, c.value, c.start, c.end, original)
+	noteVerificationFailure(ctx, path, f.Verification)
+}
+
 func noteVerificationFailure(ctx context.Context, path string, detail *model.Verification) {
 	if detail != nil && detail.Status == string(verify.Errored) {
 		code := "verification_inconclusive"

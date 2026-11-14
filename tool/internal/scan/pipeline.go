@@ -14,6 +14,7 @@ type Options struct {
 	Detector      *detect.Detector
 	Rules         *rules.Engine
 	Verifiers     *verify.Set
+	VerifyAll     bool // verify before ML; observers also retain this mode for index evidence
 	ML            mlscore.Scorer
 	Allow         func(value, path string) bool
 	Workers       int

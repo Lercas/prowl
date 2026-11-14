@@ -450,6 +450,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		truncated = true
 	}
 	out := make([]model.Finding, 0, len(ms))
+	var pending []verificationCandidate // parallel to final producer winners, never serialized
+	verifyBeforeML := p.options.VerifyAll || p.options.ObserveVerification != nil
 	var indexValues []string
 	if p.options.ValueFingerprint != nil {
 		for _, m := range ms {
@@ -512,8 +514,6 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
-		ver, why, check := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, verificationText)
-		noteVerificationFailure(ctx, it.Path, check)
 		out = append(out, model.Finding{
 			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
@@ -525,10 +525,13 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			Fingerprint:      model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			ValueFingerprint: p.valueFingerprint(m.Value), IndexPath: p.indexText(it.Path, ""),
 			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
-			Verified: ver, Rationale: why, Verification: check, Instruction: itemInstr,
-			ImageEntry: it.ImageEntry,
-			Context:    p.revealMatchContext(it, m),
+			Instruction: itemInstr,
+			ImageEntry:  it.ImageEntry,
+			Context:     p.revealMatchContext(it, m),
 		})
+		if vset != nil {
+			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})
+		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
 			record := recordForMatch(m, it)
@@ -605,8 +608,6 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if sev == "" {
 				sev = severityFor(h.Category, 0.9)
 			}
-			ver, why, check := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, verificationText)
-			noteVerificationFailure(ctx, it.Path, check)
 			f := model.Finding{
 				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
@@ -618,9 +619,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				Fingerprint:      model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				ValueFingerprint: p.valueFingerprint(h.Value), IndexPath: p.indexText(it.Path, ""),
 				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
-				Verified: ver, Rationale: why, Verification: check, Instruction: itemInstr,
-				ImageEntry: it.ImageEntry,
-				Context:    p.revealContext(it, h.Start),
+				Instruction: itemInstr,
+				ImageEntry:  it.ImageEntry,
+				Context:     p.revealContext(it, h.Start),
 			}
 			p.annotateIdentity(ctx, &f, h.Value, it)
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
@@ -631,6 +632,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 					continue
 				}
 				out[idx] = f
+				if vset != nil {
+					pending[idx] = verificationCandidate{h.RuleID, h.Value, h.Start, h.End}
+				}
 				if ml != nil {
 					reqs[idx] = recordFor(h.Value, it, h.Start)
 					if literalDoc != nil {
@@ -641,6 +645,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			dedup[key] = len(out)
 			out = append(out, f)
+			if vset != nil {
+				pending = append(pending, verificationCandidate{h.RuleID, h.Value, h.Start, h.End})
+			}
 			if ml != nil {
 				record := recordFor(h.Value, it, h.Start)
 				if literalDoc != nil {
@@ -648,6 +655,11 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				}
 				reqs = append(reqs, record)
 			}
+		}
+	}
+	if vset != nil && verifyBeforeML {
+		for i := range out {
+			pending[i].apply(ctx, vset, literalDoc, verificationText, it.Path, &out[i])
 		}
 	}
 	if literalDoc != nil {
@@ -678,8 +690,18 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	}
 	// The per-item cap bounds a network sidecar; the in-process model scores dense bundles too (where ML
 	// earns its keep). The truncation marker is appended AFTER ML so it is never scored.
+	var selected []int // nil denotes unchanged candidate order on absent/failing ML
 	if ml != nil && len(out) > 0 && (ml.Local() || len(out) <= mlMaxItemFindings) {
-		out = mlFilter(ctx, ml, out, reqs)
+		out, selected = mlFilterSelected(ctx, ml, out, reqs)
+	}
+	if vset != nil && !verifyBeforeML {
+		for i := range out {
+			original := i
+			if selected != nil {
+				original = selected[i]
+			}
+			pending[original].apply(ctx, vset, literalDoc, verificationText, it.Path, &out[i])
+		}
 	}
 	if failed {
 		out = append(out, processingError(it, "rule engine failed; scan results are incomplete"))
@@ -832,35 +854,42 @@ func leadingName(line string) string {
 // secrets (score below the threshold), EXCEPT provider-confirmed and structurally-proven hits,
 // which are never dropped on a model miss. It fails open: any sidecar error keeps every finding.
 func mlFilter(ctx context.Context, ml mlscore.Scorer, out []model.Finding, reqs []mlscore.Record) []model.Finding {
+	kept, _ := mlFilterSelected(ctx, ml, out, reqs)
+	return kept
+}
+
+func mlFilterSelected(ctx context.Context, ml mlscore.Scorer, out []model.Finding, reqs []mlscore.Record) ([]model.Finding, []int) {
 	results, err := ml.Score(ctx, reqs)
 	if err != nil {
 		logx.Warn("ml scoring failed — keeping all findings (fail-open)", "err", err)
-		return out
+		return out, nil
 	}
 	if len(results) != len(out) {
 		logx.Warn("ml scoring returned an incomplete batch — keeping all findings (fail-open)")
-		return out
+		return out, nil
 	}
 	threshold := ml.Threshold()
 	if !mlscore.ValidScore(threshold) {
 		logx.Warn("ml scoring has an invalid threshold — keeping all findings (fail-open)")
-		return out
+		return out, nil
 	}
 	// Validate the entire batch before reusing out's backing array; a later invalid result must
 	// preserve earlier candidates too, regardless of their otherwise-valid low scores.
 	for _, result := range results {
 		if !mlscore.ValidScore(result.Score) {
 			logx.Warn("ml scoring returned an invalid score — keeping all findings (fail-open)")
-			return out
+			return out, nil
 		}
 	}
 	kept := out[:0]
+	indices := make([]int, 0, len(out))
 	for i, f := range out {
 		if mlExempt(f) || results[i].Score >= threshold {
 			kept = append(kept, f)
+			indices = append(indices, i)
 		}
 	}
-	return kept
+	return kept, indices
 }
 
 // mlExemptTypes carry no "private"/"key" token yet must never be ML-dropped — notably

@@ -27,6 +27,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.IgnorePragmas = flags.noAutoPolicy
 	options.IdentityKey = flags.identityKey
 	options.Reconstruct = flags.reconstruct
+	options.VerifyAll = flags.verifyAll || flags.failOnVerified
 	var indexErr error
 	if flags.indexDir != "" {
 		indexErr = validateIndexOutputs(flags)

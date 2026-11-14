@@ -21,6 +21,7 @@ prowl scan . --verify --verifiers ./verifiers
 | Flag | Effect |
 |------|--------|
 | `--verify` | Confirm findings are LIVE by calling the provider. Each finding is tagged live, dead, or left unverified. Nothing is dropped. |
+| `--verify-all` | Включает `--verify` и проверяет принятых кандидатов до ML; подтверждённый live не отбрасывается моделью. |
 | `--verified-only` | Сохраняет live-находки, неопределённые проверки и high/critical без verifier. Подтверждённо отклонённые ключи исключаются. Включает `--verify`. |
 | `--verifiers DIR` | Verifier YAML directory (repeatable). Defaults to the installed set at `~/.prowl/verifiers`, then `./verifiers`. |
 
@@ -60,8 +61,37 @@ python3 scripts/check_verdicts.py /path/to/prowl
 значения: файл/stdin, ML, JSON/SARIF, default dedupe, кэш и отказ замены baseline.
 Она не проверяет действующие credentials у внешних провайдеров. Статус `skipped`
 дополнительно покрыт unit-тестом; L1 обычно исключает такие значения до проверки.
-Evidence — `evidence/1.5.0-verdicts-20261114.json`. Восстановление default-порядка
-L2 → verification, `--verify-all` и полного coverage envelope остаётся в TODO.
+Evidence — `evidence/1.5.0-verdicts-20261114.json`. Полный coverage envelope остаётся
+в TODO.
+
+### Порядок L2 и проверки провайдера
+
+По умолчанию `--ml --verify` сначала применяет L2, затем проверяет оставшиеся
+находки. Отброшенный моделью кандидат не отправляется провайдеру. При недоступном
+или некорректном ответе ML сохраняются все кандидаты, после чего выполняется
+проверка; структурно доказанные находки также не теряются.
+
+`--verify-all` включает проверку до ML для принятых кандидатов. Live-вердикт
+защищает находку от подавления моделью. `--fail-on-verified` сохраняет этот же
+порядок, чтобы ML не мог превратить подтверждённый live в успешный gate; флаг
+по-прежнему требует `--verify` или включающий его `--verify-all`.
+
+При включённом локальном индексе проверка также выполняется до ML: отдельный
+observer сохраняет подтверждённый ответ, включая rejected, даже если модель
+затем скрыла находку. Это осознанное отличие режима индекса от обычного отчёта.
+
+При замене builtin на более сильное правило проверяется только выбранный
+кандидат. После ML сохраняется его исходный structured binding; сдвиг позиции
+в результирующем массиве не подставляет поля соседнего объекта.
+
+```sh
+python3 scripts/check_verification_order.py /path/to/prowl
+```
+
+Матрица 48/48 использует локальный HTTP-fixture, счётчик реальных запросов и
+собственные временные SQLite-индексы: default/all/live-gate/index, live/rejected/error,
+файл/stdin, JSON/SARIF. Внешние провайдеры и рабочие индексы не используются.
+Evidence — `evidence/1.5.0-verification-order-20261114.json`.
 
 Переход к `./verifiers` допускается только при отсутствии установленного каталога.
 Повреждённая ссылка, файл вместо каталога, ошибка доступа или повреждённый родитель

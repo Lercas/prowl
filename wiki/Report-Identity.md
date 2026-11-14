@@ -82,5 +82,5 @@ JSON/SARIF-отчётом. Проверены файл/stdin, keyless/keyed, ML,
 Подробные verdicts из верификатора также проходят в Finding и occurrences:
 статус, имя verifier, время исходной попытки, capabilities и безопасная причина
 ошибки. Формат и границы описаны в [Live Verification](Live-Verification.md).
-Полный coverage envelope, run-level свойства SARIF, порядок каскада и остальные
+Полный coverage envelope, run-level свойства SARIF и остальные
 контракты выпущенной базы остаются открытыми в TODO.

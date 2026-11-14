@@ -172,6 +172,7 @@ var cliFlags = []flagSpec{
 		return nil
 	}),
 	boolFlag("--verify", scanCommands, "validate supported credentials against the provider", func(c *commonFlags) *bool { return &c.verify }),
+	boolFlag("--verify-all", scanCommands, "проверить все принятые L1-кандидаты до ML (включает --verify)", func(c *commonFlags) *bool { return &c.verifyAll }),
 	boolFlag("--verified-only", scanCommands, "report only provider-confirmed live findings (implies --verify)", func(c *commonFlags) *bool { return &c.verifiedOnly }),
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
 	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
@@ -400,7 +401,7 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.gitTimeline {
 		c.history = true
 	}
-	if c.verifiedOnly {
+	if c.verifiedOnly || c.verifyAll {
 		c.verify = true
 	}
 	c.mlURL = strings.TrimRight(c.mlURL, "/")
@@ -509,6 +510,7 @@ func splitCSV(s string) []string {
 type commonFlags struct {
 	identityKeyFile                          string
 	identityKey                              []byte
+	verifyAll                                bool
 	indexDir, indexScope                     string
 	indexEvidence                            *indexEvidence
 	indexCoverageComplete                    func() bool // optional source-specific completion evidence (e.g. OCR)
