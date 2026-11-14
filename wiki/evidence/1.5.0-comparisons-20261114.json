@@ -1,0 +1,397 @@
+{
+  "date": "2026-11-14",
+  "status": "locally_qualified_increment",
+  "source_commit": "8d43a48a21498f9d7990766a0c993b38edc3b459",
+  "parent": "3c622006d52763dc84e416af9d8aaadd77474aec",
+  "isolated_source": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-comparison-clean-63ckl5fp",
+  "source_sha256": {
+    "tool/internal/detect/comparison.go": "2967ec610cefe1b310abc825ee0b3961d8c5a89772772e675aa4f0d24a8ac597",
+    "tool/internal/detect/comparison_test.go": "c8aac175517ca52cb3c886315a9ae95f2efc1dea8a02b891c0d09c6e59c47845",
+    "tool/internal/detect/named.go": "4fa4882d5ac74a690a55b38d2b996cbc0860b92e3eb4b2707e81b3b81102382e",
+    "tool/internal/detect/rules.go": "e2b07df04d1791c15628835eb1c9d4fc909220827fff0686044f017a37f321a3",
+    "tool/internal/scan/comparison_test.go": "23633025dc38093628fe14decde9d9d6758c98ce4f0ad5ee7fa58885ff9eb954"
+  },
+  "scope": "Credential-name / quoted-literal comparisons in the default L1 cascade; local detection only, existing lower length limits and explicit online verification unchanged.",
+  "contract": {
+    "operators": [
+      "==",
+      "!=",
+      "===",
+      "!=="
+    ],
+    "direction": "Either side may contain the quoted credential; the other is a named identifier/property/simple quoted dictionary field",
+    "literal_semantics": "Bounded quoted source; printable escapes handled by existing unescapeAt, no code execution; logical value identity and original span/context",
+    "ml": "Semantic field name preserved in direct/reverse comparisons; identical contextual spans retain a proven label",
+    "precision": "Metadata, known placeholders, prefixed literals, direct concatenations and derived operand calls are excluded from the new producer; other independent detectors still run",
+    "limits": "Existing generic lengths retained; regex literals bounded to 6..200 source units, password logical 6..64 runes; named candidate budget counts rejected matches and survives filtering as incomplete"
+  },
+  "validation": {
+    "full_go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test -p 2 ./... passed in final isolated source",
+    "lint": "golangci-lint v2.15.0, full module, zero issues; no new suppression",
+    "race": "Go1.27.4 CGO_ENABLED=1 targeted detect/scan comparison and table suites passed",
+    "minimum_go": "Go1.26.11 CGO_ENABLED=0 full detect/scan suites passed",
+    "fuzz": {
+      "target": "FuzzComparisonSourceBounds",
+      "execs": 248970,
+      "elapsed_seconds": 6.387,
+      "status": "passed"
+    },
+    "native": {
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-comparison-native-llrbeao4",
+      "binary_sha256": "72bd46e0d6fa4a3a75083edfbdb80da032e00740d6bec04d9754e6e021c379ac",
+      "runs": [
+        {
+          "case": "forward",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "forward",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "forward",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "reverse",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "reverse",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "reverse",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "strict",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "strict",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "strict",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "escape",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "escape",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false
+        },
+        {
+          "case": "escape",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "metadata",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "metadata",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "budget",
+          "ml": false,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true
+        },
+        {
+          "case": "budget",
+          "ml": true,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true
+        },
+        {
+          "case": "budget",
+          "guard": "raw",
+          "exit": 2
+        },
+        {
+          "case": "derived0",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived0",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived0",
+          "guard": "raw",
+          "exit": 0
+        },
+        {
+          "case": "derived1",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived1",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived1",
+          "guard": "raw",
+          "exit": 0
+        },
+        {
+          "case": "derived2",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived2",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived2",
+          "guard": "raw",
+          "exit": 0
+        },
+        {
+          "case": "derived3",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived3",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false
+        },
+        {
+          "case": "derived3",
+          "guard": "raw",
+          "exit": 0
+        }
+      ],
+      "index": "Two native plain/escaped scans: same logical value_fingerprint, redacted, no plaintext in private state"
+    },
+    "corpus_equivalence": {
+      "files": 12044,
+      "matches": 1149,
+      "diffs": 0,
+      "status_diffs": 0,
+      "windowed_seconds": 9.5,
+      "whole_seconds": 46.5,
+      "log": "/tmp/prowl-comparison-final-equivalence-20261114.log"
+    }
+  },
+  "regression_followup": {
+    "commit": "8d43a48a21498f9d7990766a0c993b38edc3b459",
+    "problem": "Four extra expression cases exposed partial operand acceptance: spaced method/call and field/literal concatenation",
+    "proof": "All four new detector tests failed on 1d61b32, then passed after boundary guards. Final pipeline tests and native scan/guard matrix also reject them. Full Go/lint, race, minimum-Go, fuzz, native, subset, paired performance and corpus equivalence rerun."
+  },
+  "prowlbench": {
+    "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-y81y4b1b",
+    "metrics": {
+      "parent": {
+        "secret_hits": 1611,
+        "hard_negative_hits": 61,
+        "binary_sha256": "ed1ebeca2dbd448ba9db046bad1e5cf42830a857e3cc0d1f22b69f6258117034"
+      },
+      "candidate": {
+        "secret_hits": 1616,
+        "hard_negative_hits": 61,
+        "binary_sha256": "72bd46e0d6fa4a3a75083edfbdb80da032e00740d6bec04d9754e6e021c379ac"
+      }
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "secrets": 2094,
+      "hardnegs": 982
+    },
+    "epsilon": 0.005,
+    "gate": "passed",
+    "added_secret_ids": [
+      "pb-00544",
+      "pb-03808",
+      "pb-16112",
+      "pb-19728",
+      "pb-20248"
+    ],
+    "added_negative_ids": [],
+    "removed_ids": [],
+    "secrets": 2094,
+    "hard_negatives": 982,
+    "scope": "Local labeled subset, embedded portable model and bundled rules, empty temporary PROWL_HOME. Initial ci_gate.py cleanup replaced with retained-fixture output; source baseline and thresholds unchanged."
+  },
+  "performance": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 10007344458.0,
+          "B/op": 621404400.0,
+          "allocs/op": 1443994.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10238775750.0,
+          "B/op": 630486248.0,
+          "allocs/op": 1444347.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10198877416.0,
+          "B/op": 628207120.0,
+          "allocs/op": 1444299.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 11206112083.0,
+          "B/op": 631223872.0,
+          "allocs/op": 1444561.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11238832500.0,
+          "B/op": 628657856.0,
+          "allocs/op": 1444496.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 11347841041.0,
+          "B/op": 630828296.0,
+          "allocs/op": 1445052.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "3c622006d52763dc84e416af9d8aaadd77474aec",
+      "candidate": "8d43a48a21498f9d7990766a0c993b38edc3b459"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 10198877416.0,
+        "B/op": 628207120.0,
+        "allocs/op": 1444299.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      },
+      "candidate": {
+        "ns/op": 11238832500.0,
+        "B/op": 630828296.0,
+        "allocs/op": 1444561.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.1019676030587953,
+      "B/op": 1.0041724710156104,
+      "allocs/op": 1.0001814028812595
+    },
+    "regressions": [],
+    "scope": "Explicit local comparison against parent; does not substitute for the fixed release baseline or publication acceptance"
+  },
+  "limitations": [
+    "Text heuristic, not language AST or proof that comparison authenticates a user",
+    "ASCII names and bounded single-line quoted operand forms; no method invocation interpretation or general expression evaluation",
+    "Existing independent detectors may still report a value rejected by this producer",
+    "Short-token and sub-six-character password TODOs remain open",
+    "No full research corpus or external CI/native Windows run for this increment",
+    "No push, release signing, installed model changes or publication in this increment"
+  ]
+}
