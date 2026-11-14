@@ -169,13 +169,11 @@ func TestCmdMobileNoTarget(t *testing.T) {
 	}
 }
 
-// TestCmdMobileUnknownFlagAccepted: the mobile-only flags must be in knownFlags (else checkUnknownFlags
-// exits the process). Parsing a fixture with --min-run / --no-strings must NOT die on
-// flag parse — a successful scan returns 0 here (no --fail-on).
+// Mobile-only flags must be scoped to mobile and reach the archive reader.
 func TestCmdMobileUnknownFlagAccepted(t *testing.T) {
 	for _, f := range []string{"--min-run", "--no-strings"} {
-		if !knownFlags[f] {
-			t.Fatalf("%s missing from knownFlags; checkUnknownFlags would kill cmdMobile", f)
+		if !strings.Contains(" "+strings.Join(commandFlagNames("mobile"), " ")+" ", " "+f+" ") {
+			t.Fatalf("%s missing from the mobile flag schema", f)
 		}
 	}
 	apk := writeAPK(t, map[string][]byte{"res/raw/x.json": []byte(`{"k":"v"}`)})
@@ -218,15 +216,38 @@ func TestIsURL(t *testing.T) {
 
 func TestDownloadName(t *testing.T) {
 	cases := map[string]string{
-		"https://x/build/app.apk":     "app.apk",
-		"https://x/build/myapp.ipa":   "myapp.ipa",
-		"https://x/build/app.apk?v=2": "app.apk",
-		"https://x/":                  "app.apk",
-		"https://x/path.ipa/":         "app.ipa",
+		"https://x/build/app.apk":        "app.apk",
+		"https://x/build/myapp.ipa":      "myapp.ipa",
+		"https://x/build/app.apk?v=2":    "app.apk",
+		"https://x/":                     "app.apk",
+		"https://x/path.ipa/":            "app.ipa",
+		"https://x/%2e%2e%5coutside.apk": "app.apk",
+		"https://x/file.apk:stream":      "app.apk",
+		"https://x/%00.apk":              "app.apk",
+		"https://x/..":                   "app.apk",
 	}
 	for in, want := range cases {
 		if got := downloadName(in); got != want {
 			t.Errorf("downloadName(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestMobileDownloadDoesNotReplaceAnExistingEntry(t *testing.T) {
+	previous := safehttp.AllowPrivate.Load()
+	safehttp.AllowPrivate.Store(true)
+	t.Cleanup(func() { safehttp.AllowPrivate.Store(previous) })
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("download")) }))
+	defer server.Close()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "app.apk")
+	if err := os.WriteFile(path, []byte("existing"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := downloadToTemp(context.Background(), server.URL+"/app.apk", dir, 10<<20, time.Second); !os.IsExist(err) {
+		t.Fatalf("expected exclusive creation failure: %v", err)
+	}
+	if raw, err := os.ReadFile(path); err != nil || string(raw) != "existing" {
+		t.Fatal("download replaced an existing file")
 	}
 }

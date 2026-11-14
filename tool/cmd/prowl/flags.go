@@ -1,0 +1,423 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"log/slog"
+	"math"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/Lercas/prowl/tool/internal/model"
+)
+
+type commandOptions struct {
+	sub, branch, targetsFile, addr, baseURL, source                                                                        string
+	depth, concurrency, maxAssets, maxConcurrent, maxItems, maxRuns, maxArtifacts, minRun, maxRetries                      int
+	maxDownload                                                                                                            int64
+	excludeRepos, projects, spaces, fields, targets, providers                                                             []string
+	gists, authorized, recon, currentOnly, logsOnly, artifactsOnly, noStrings, check, allowUnsigned, active, passive, help bool
+}
+
+type flagSpec struct {
+	names, commands    []string
+	value, description string
+	apply              func(*commonFlags, string) error
+}
+
+func (f flagSpec) applies(command string) bool {
+	for _, name := range f.commands {
+		if name == "*" || name == command {
+			return true
+		}
+	}
+	return false
+}
+
+func valueFlag(names, commands, value, description string, apply func(*commonFlags, string) error) flagSpec {
+	return flagSpec{strings.Fields(names), strings.Fields(commands), value, description, apply}
+}
+
+func stringFlag(names, commands, value, description string, field func(*commonFlags) *string) flagSpec {
+	return valueFlag(names, commands, value, description, func(c *commonFlags, value string) error {
+		*field(c) = value
+		return nil
+	})
+}
+
+func boolFlag(names, commands, description string, field func(*commonFlags) *bool) flagSpec {
+	return valueFlag(names, commands, "", description, func(c *commonFlags, value string) error {
+		b, err := booleanValue(value)
+		if err == nil {
+			*field(c) = b
+		}
+		return err
+	})
+}
+
+func listFlag(names, commands, description string, csv bool, field func(*commonFlags) *[]string) flagSpec {
+	return valueFlag(names, commands, "VALUE", description+" (repeatable)", func(c *commonFlags, value string) error {
+		values := []string{value}
+		if csv {
+			values = splitCSV(value)
+		}
+		*field(c) = append(*field(c), values...)
+		return nil
+	})
+}
+
+func intFlag(name, commands, description string, minimum int, field func(*commonFlags) *int) flagSpec {
+	return valueFlag(name, commands, "N", description, func(c *commonFlags, value string) error {
+		n, err := integerValue(value, minimum)
+		if err == nil {
+			*field(c) = n
+		}
+		return err
+	})
+}
+
+func floatFlag(name, commands, description string, field func(*commonFlags) *float64) flagSpec {
+	return valueFlag(name, commands, "F", description, func(c *commonFlags, value string) error {
+		n, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+		if err != nil || math.IsNaN(n) || math.IsInf(n, 0) || n < 0 || n > 1 {
+			return errors.New("expects a number in 0..1")
+		}
+		*field(c) = n
+		if name == "--ml-threshold" {
+			c.mlThresholdSet = true
+		}
+		return nil
+	})
+}
+
+func durationFlag(name, commands, description string, field func(*commonFlags) *time.Duration) flagSpec {
+	return valueFlag(name, commands, "DUR", description, func(c *commonFlags, value string) error {
+		n, err := time.ParseDuration(value)
+		if err != nil || n <= 0 {
+			return errors.New("expects a positive Go duration (e.g. 30s, 5m)")
+		}
+		*field(c) = n
+		return nil
+	})
+}
+
+func sizeFlag(name, commands, description string, field func(*commonFlags) *int64) flagSpec {
+	return valueFlag(name, commands, "BYTES", description, func(c *commonFlags, value string) error {
+		n, err := parseByteSize(value)
+		if err != nil || n <= 0 {
+			return errors.New("expects a positive size (e.g. 10485760, 10MB, 4M)")
+		}
+		*field(c) = n
+		return nil
+	})
+}
+
+func enumFlag(name, commands, description string, allowed []string, field func(*commonFlags) *string) flagSpec {
+	return valueFlag(name, commands, strings.Join(allowed, "|"), description, func(c *commonFlags, value string) error {
+		for _, option := range allowed {
+			if value == option {
+				*field(c) = value
+				return nil
+			}
+		}
+		return fmt.Errorf("must be one of %s", strings.Join(allowed, "|"))
+	})
+}
+
+const scanCommands = "scan compare repo org cicd image mobile bucket domain jira confluence"
+const detectorCommands = scanCommands + " serve doctor"
+const ocrCommands = "scan compare repo org"
+
+var cliFlags = []flagSpec{
+	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
+	enumFlag("--format", scanCommands, "report format (default pretty)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
+	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
+	boolFlag("--fail-on-verified", scanCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
+	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),
+	stringFlag("--taxonomy", detectorCommands, "FILE", "override the embedded taxonomy", func(c *commonFlags) *string { return &c.taxonomy }),
+	listFlag("--rules", detectorCommands+" rules.list rules.show rules.test rules.search rules.validate rules.stats", "import external rules", false, func(c *commonFlags) *[]string { return &c.rules }),
+	boolFlag("--rules-only", detectorCommands, "use only explicit external rules", func(c *commonFlags) *bool { return &c.rulesOnly }),
+	listFlag("--rules-dir", detectorCommands, "load template rules from a directory", false, func(c *commonFlags) *[]string { return &c.rulesDir }),
+	stringFlag("--tags", detectorCommands+" rules.list", "CSV", "include templates with these tags", func(c *commonFlags) *string { return &c.tags }),
+	stringFlag("--exclude-tags", detectorCommands, "CSV", "exclude templates with these tags", func(c *commonFlags) *string { return &c.excludeTags }),
+	valueFlag("--rule-severity", detectorCommands+" rules.list", "CSV", "include template severities", func(c *commonFlags, v string) error {
+		for _, s := range splitCSV(v) {
+			if _, ok := model.SeverityOrder[s]; !ok {
+				return errors.New("entries must be info|low|medium|high|critical")
+			}
+		}
+		c.ruleSeverity = v
+		return nil
+	}),
+	boolFlag("--verify", scanCommands, "validate supported credentials against the provider", func(c *commonFlags) *bool { return &c.verify }),
+	boolFlag("--verified-only", scanCommands, "report only provider-confirmed live findings (implies --verify)", func(c *commonFlags) *bool { return &c.verifiedOnly }),
+	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
+	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
+	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
+	stringFlag("--output -o", scanCommands+" rules.export hermes-audit", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
+	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
+	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
+	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
+	stringFlag("--baseline", scanCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
+	stringFlag("--write-baseline", scanCommands, "FILE", "write a baseline from complete scan results", func(c *commonFlags) *string { return &c.writeBaseline }),
+	sizeFlag("--max-size", scanCommands, "maximum input/member size (default 10MB)", func(c *commonFlags) *int64 { return &c.maxSize }),
+	intFlag("--workers", scanCommands, "scan concurrency; 0 selects the runtime default", 0, func(c *commonFlags) *int { return &c.workers }),
+	durationFlag("--timeout", scanCommands+" serve hermes-audit", "total scan or request timeout", func(c *commonFlags) *time.Duration { return &c.timeout }),
+	boolFlag("--silence --silent -s", detectorCommands, "suppress human output and logging", func(c *commonFlags) *bool { return &c.silence }),
+	boolFlag("--quiet -q", detectorCommands, "log errors only", func(c *commonFlags) *bool { return &c.quiet }),
+	boolFlag("--verbose -v", detectorCommands, "enable debug logging", func(c *commonFlags) *bool { return &c.verbose }),
+	boolFlag("--no-color", detectorCommands, "disable terminal colors", func(c *commonFlags) *bool { return &c.noColor }),
+	enumFlag("--log-format", detectorCommands, "logging format", []string{"console", "json"}, func(c *commonFlags) *string { return &c.logFormat }),
+	valueFlag("--log-level", detectorCommands, "LEVEL", "debug|info|warn|error (case-insensitive)", func(c *commonFlags, v string) error {
+		var level slog.Level
+		if err := level.UnmarshalText([]byte(v)); err != nil {
+			return errors.New("must be debug|info|warn|error")
+		}
+		c.logLevel = v
+		return nil
+	}),
+	boolFlag("--dedupe", scanCommands, "collapse repeated findings (default true)", func(c *commonFlags) *bool { return &c.dedupe }),
+	valueFlag("--no-dedupe", scanCommands, "", "retain repeated findings", func(c *commonFlags, v string) error {
+		b, err := booleanValue(v)
+		if err == nil {
+			c.dedupe = !b
+		}
+		return err
+	}),
+	floatFlag("--min-confidence", scanCommands, "minimum reported confidence", func(c *commonFlags) *float64 { return &c.minConfidence }),
+	enumFlag("--min-severity", scanCommands, "minimum reported severity", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.minSeverity }),
+	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
+	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
+	boolFlag("--ml", scanCommands, "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
+	stringFlag("--ml-model", scanCommands, "FILE", "load a compatible external model (implies ML)", func(c *commonFlags) *string { return &c.mlModel }),
+	stringFlag("--ml-url", scanCommands, "URL", "score candidates through an external sidecar", func(c *commonFlags) *string { return &c.mlURL }),
+	floatFlag("--ml-threshold", scanCommands, "L2 suppression threshold (default 0.3)", func(c *commonFlags) *float64 { return &c.mlThreshold }),
+	boolFlag("--ocr", ocrCommands, "OCR local images and image-only PDF pages", func(c *commonFlags) *bool { return &c.ocrEnabled }),
+	stringFlag("--ocr-url", ocrCommands, "URL", "OpenAI-compatible OCR endpoint (implies OCR)", func(c *commonFlags) *string { return &c.ocrURL }),
+	stringFlag("--ocr-model", ocrCommands, "MODEL", "OCR model identifier (implies OCR)", func(c *commonFlags) *string { return &c.ocrModel }),
+	boolFlag("--ocr-allow-remote", ocrCommands, "allow documents to leave this machine for a remote HTTPS OCR endpoint", func(c *commonFlags) *bool { return &c.ocrAllowRemote }),
+	boolFlag("--ocr-all-pages", ocrCommands, "OCR every PDF page", func(c *commonFlags) *bool { return &c.ocrAllPages }),
+	intFlag("--ocr-max-pages", ocrCommands, "maximum PDF pages to OCR (default 20)", 1, func(c *commonFlags) *int { return &c.ocrMaxPages }),
+	durationFlag("--ocr-timeout", ocrCommands, "per-page OCR timeout (default 2m)", func(c *commonFlags) *time.Duration { return &c.ocrTimeout }),
+	stringFlag("--branch", "repo cicd", "REF", "select the repository/CI branch", func(c *commonFlags) *string { return &c.cmd.branch }),
+	intFlag("--depth", "repo", "clone depth (at least 1)", 1, func(c *commonFlags) *int { return &c.cmd.depth }),
+	intFlag("--concurrency", "org hermes-audit", "source concurrency", 1, func(c *commonFlags) *int { return &c.cmd.concurrency }),
+	listFlag("--exclude-repo", "org", "skip matching repository URL substrings", true, func(c *commonFlags) *[]string { return &c.cmd.excludeRepos }),
+	boolFlag("--gists", "org", "scan a GitHub user's public gists", func(c *commonFlags) *bool { return &c.cmd.gists }),
+	boolFlag("--authorized", "domain hermes-audit", "attest that all targets are in your authorized scope", func(c *commonFlags) *bool { return &c.cmd.authorized }),
+	boolFlag("--recon", "domain", "enumerate public subdomains and historical assets", func(c *commonFlags) *bool { return &c.cmd.recon }),
+	intFlag("--max-assets", "domain", "maximum web assets (default 300)", 1, func(c *commonFlags) *int { return &c.cmd.maxAssets }),
+	stringFlag("--targets", "domain hermes-audit", "FILE", "read a newline-delimited target inventory", func(c *commonFlags) *string { return &c.cmd.targetsFile }),
+	stringFlag("--addr", "serve", "HOST:PORT", "listen address (default 127.0.0.1:8080)", func(c *commonFlags) *string { return &c.cmd.addr }),
+	intFlag("--max-concurrent", "serve", "maximum concurrent requests; 0 selects the default", 0, func(c *commonFlags) *int { return &c.cmd.maxConcurrent }),
+	enumFlag("--image-input", "image", "force image source kind", []string{"ref", "tar", "oci-dir", "stdin"}, func(c *commonFlags) *string { return &c.imageInput }),
+	stringFlag("--base-url", "jira confluence", "URL", "Atlassian deployment base URL", func(c *commonFlags) *string { return &c.cmd.baseURL }),
+	boolFlag("--current-only", "jira confluence", "scan only the latest issue/page version", func(c *commonFlags) *bool { return &c.cmd.currentOnly }),
+	listFlag("--project", "jira", "include Jira projects (comma-separated)", true, func(c *commonFlags) *[]string { return &c.cmd.projects }),
+	listFlag("--space", "confluence", "include Confluence spaces (comma-separated)", true, func(c *commonFlags) *[]string { return &c.cmd.spaces }),
+	listFlag("--field", "jira", "include additional Jira fields (comma-separated)", true, func(c *commonFlags) *[]string { return &c.cmd.fields }),
+	intFlag("--max-items", "jira confluence", "maximum issues/pages", 1, func(c *commonFlags) *int { return &c.cmd.maxItems }),
+	intFlag("--max-runs", "cicd", "maximum CI runs (default 20)", 1, func(c *commonFlags) *int { return &c.cmd.maxRuns }),
+	intFlag("--max-artifacts", "cicd", "maximum CI artifacts (default 100)", 1, func(c *commonFlags) *int { return &c.cmd.maxArtifacts }),
+	sizeFlag("--max-download", "cicd", "maximum CI download size (default 100MB)", func(c *commonFlags) *int64 { return &c.cmd.maxDownload }),
+	boolFlag("--logs-only", "cicd", "scan CI logs only", func(c *commonFlags) *bool { return &c.cmd.logsOnly }),
+	boolFlag("--artifacts-only", "cicd", "scan CI artifacts only", func(c *commonFlags) *bool { return &c.cmd.artifactsOnly }),
+	boolFlag("--no-strings", "mobile", "skip printable strings in mobile binaries", func(c *commonFlags) *bool { return &c.cmd.noStrings }),
+	intFlag("--min-run", "mobile", "minimum printable string length", 1, func(c *commonFlags) *int { return &c.cmd.minRun }),
+	stringFlag("--source", "rules.update verifiers.update", "SOURCE", "template source directory or git URL", func(c *commonFlags) *string { return &c.cmd.source }),
+	boolFlag("--check", "rules.update verifiers.update", "check availability without installing", func(c *commonFlags) *bool { return &c.cmd.check }),
+	boolFlag("--allow-unsigned", "rules.update verifiers.update verifiers.list verifiers.validate", "explicitly permit an unsigned template set", func(c *commonFlags) *bool { return &c.cmd.allowUnsigned }),
+	listFlag("--target", "hermes-audit", "literal authorized IP or IP:port (comma-separated)", true, func(c *commonFlags) *[]string { return &c.cmd.targets }),
+	listFlag("--provider", "hermes-audit", "passive inventory providers (comma-separated)", true, func(c *commonFlags) *[]string { return &c.cmd.providers }),
+	intFlag("--max-retries", "hermes-audit", "bounded retries, 0..5 (default 2)", 0, func(c *commonFlags) *int { return &c.cmd.maxRetries }),
+	boolFlag("--active", "hermes-audit", "probe bounded dashboard assets (default true)", func(c *commonFlags) *bool { return &c.cmd.active }),
+	boolFlag("--passive", "hermes-audit", "query exact-IP passive inventory (default true)", func(c *commonFlags) *bool { return &c.cmd.passive }),
+}
+
+func integerValue(value string, minimum int) (int, error) {
+	n, err := strconv.Atoi(strings.TrimSpace(value))
+	if err != nil || n < minimum {
+		return 0, fmt.Errorf("expects an integer >= %d", minimum)
+	}
+	return n, nil
+}
+
+func booleanValue(value string) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "1", "t", "true", "y", "yes", "on":
+		return true, nil
+	case "0", "f", "false", "n", "no", "off":
+		return false, nil
+	default:
+		return false, errors.New("expects true|false|yes|no|on|off|1|0")
+	}
+}
+
+type commandHelpRequest struct{ command string }
+
+func (e *commandHelpRequest) Error() string { return "help requested for " + e.command }
+
+func commandParseError(err error) int {
+	var help *commandHelpRequest
+	if errors.As(err, &help) {
+		helpFor(help.command)
+		return 0
+	}
+	fmt.Fprintln(os.Stderr, err)
+	return 2
+}
+
+func parseCommand(command string, args []string) (commonFlags, []string, error) {
+	c := commonFlags{format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: .3, ocrMaxPages: 20, ocrTimeout: 2 * time.Minute}
+	c.cmd = commandOptions{maxAssets: 300, addr: "127.0.0.1:8080", maxRuns: 20, maxArtifacts: 100, maxDownload: 100 << 20, minRun: minRunDefault}
+	if command == "hermes-audit" {
+		c.timeout = 12 * time.Second
+		c.cmd.maxRetries = 2
+		c.cmd.concurrency = 2
+		c.cmd.active = true
+		c.cmd.passive = true
+	}
+	if command == "rules" || command == "verifiers" || command == "config" {
+		c.cmd.sub = "list"
+		if command == "config" {
+			c.cmd.sub = "validate"
+		}
+		if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
+			c.cmd.sub, args = args[0], args[1:]
+		}
+		command += "." + c.cmd.sub
+		subcommands := map[string][]string{
+			"rules":     {"list", "show", "test", "search", "validate", "stats", "update", "manifest", "export"},
+			"verifiers": {"list", "validate", "update", "manifest"},
+			"config":    {"validate"},
+		}
+		parent, _, _ := strings.Cut(command, ".")
+		valid := false
+		for _, sub := range subcommands[parent] {
+			valid = valid || sub == c.cmd.sub
+		}
+		if !valid {
+			return c, nil, fmt.Errorf("unknown %s subcommand %q", parent, c.cmd.sub)
+		}
+	}
+	var rest []string
+	seen := map[string]bool{}
+	for i := 0; i < len(args); i++ {
+		token := args[i]
+		if token == "--" {
+			rest = append(rest, args[i+1:]...)
+			break
+		}
+		if token == "-" || !strings.HasPrefix(token, "-") {
+			rest = append(rest, token)
+			continue
+		}
+		name, value, inline := strings.Cut(token, "=")
+		var selected *flagSpec
+		known := false
+		for j := range cliFlags {
+			for _, alias := range cliFlags[j].names {
+				if alias == name {
+					known = true
+					if cliFlags[j].applies(command) {
+						selected = &cliFlags[j]
+					}
+					break
+				}
+			}
+		}
+		if selected == nil {
+			if known {
+				return c, nil, fmt.Errorf("flag %q does not apply to command %q", name, strings.ReplaceAll(command, ".", " "))
+			}
+			message := fmt.Sprintf("unknown flag %q", name)
+			if suggestion := closest(name, commandFlagNames(command)); suggestion != "" {
+				message += fmt.Sprintf("; did you mean '%s'?", suggestion)
+			}
+			return c, nil, errors.New(message)
+		}
+		if selected.value != "" {
+			if !inline {
+				i++
+				if i >= len(args) || (strings.HasPrefix(args[i], "-") && args[i] != "-" && (len(args[i]) < 2 || args[i][1] < '0' || args[i][1] > '9')) {
+					return c, nil, fmt.Errorf("flag %q expects a value (use %s=VALUE for values starting with --)", name, name)
+				}
+				value = args[i]
+			}
+			if value == "" {
+				return c, nil, fmt.Errorf("flag %q expects a non-empty value", name)
+			}
+		} else if !inline {
+			value = "true"
+		}
+		if err := selected.apply(&c, value); err != nil {
+			return c, nil, fmt.Errorf("%s %w", name, err)
+		}
+		seen[selected.names[0]] = true
+	}
+	if c.cmd.help {
+		return c, nil, &commandHelpRequest{command}
+	}
+	c.explicitFlags = seen
+	if c.verifiedOnly {
+		c.verify = true
+	}
+	c.mlURL = strings.TrimRight(c.mlURL, "/")
+	c.ocrURL = strings.TrimRight(c.ocrURL, "/")
+	if c.ocrAllowRemote || c.ocrAllPages || seen["--ocr-url"] || seen["--ocr-model"] || seen["--ocr-max-pages"] || seen["--ocr-timeout"] {
+		c.ocrEnabled = true
+	}
+	if command == "hermes-audit" && c.cmd.maxRetries > 5 {
+		return c, nil, errors.New("--max-retries must be 0..5")
+	}
+	if c.cmd.logsOnly && c.cmd.artifactsOnly {
+		return c, nil, errors.New("--logs-only and --artifacts-only are mutually exclusive")
+	}
+	if command == "domain" && c.cmd.targetsFile != "" && len(rest) > 0 {
+		return c, nil, errors.New("domain accepts a target or --targets, not both")
+	}
+	switch command {
+	case "serve", "doctor", "mcp", "lsp", "detectors", "version":
+		if len(rest) > 0 {
+			return c, nil, fmt.Errorf("%s does not accept positional arguments", command)
+		}
+	case "repo", "org", "cicd", "bucket", "domain", "mobile", "jira", "confluence", "config.validate":
+		if len(rest) > 1 {
+			return c, nil, fmt.Errorf("%s accepts at most one target", command)
+		}
+	}
+	return c, rest, nil
+}
+
+func commandFlagNames(command string) []string {
+	var names []string
+	for _, flag := range cliFlags {
+		if flag.applies(command) {
+			names = append(names, flag.names...)
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
+func commandFlagHelp(command string) string {
+	var output strings.Builder
+	for _, flag := range cliFlags {
+		applies := flag.applies(command)
+		for _, scope := range flag.commands {
+			applies = applies || strings.HasPrefix(scope, command+".")
+		}
+		if !applies {
+			continue
+		}
+		label := strings.Join(flag.names, ", ")
+		if flag.value != "" {
+			label += " " + flag.value
+		}
+		fmt.Fprintf(&output, "  %-34s %s\n", label, flag.description)
+	}
+	return output.String()
+}

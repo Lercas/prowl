@@ -149,7 +149,7 @@ func TestServeRejectsVerificationBeforeListen(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !strings.Contains(string(b), "serve does not support live verification") || strings.Contains(string(b), "listening") {
+			if !strings.Contains(string(b), flag) || !strings.Contains(string(b), "does not apply to command \"serve\"") || strings.Contains(string(b), "listening") {
 				t.Errorf("verification was not rejected before listening: %s", b)
 			}
 		})

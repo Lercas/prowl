@@ -144,17 +144,21 @@ Run 'prowl <command> --help' for command-specific flags and examples.
 // version is the binary version, stamped at release via -ldflags; "dev" for a plain go build.
 var version = "dev"
 
-func main() {
-	args := os.Args[1:]
+func main() { os.Exit(runCLI(os.Args[1:])) }
+
+func runCLI(args []string) int {
 	if len(args) == 0 {
 		fmt.Print(usage)
-		os.Exit(2)
+		return 2
 	}
 	// Block outbound connections to private/loopback IPs (SSRF guard) by default; opt out explicitly.
 	safehttp.AllowPrivate.Store(os.Getenv("PROWL_ALLOW_PRIVATE_IPS") != "")
 	cmd := args[0]
 	if cmd == "version" || cmd == "--version" || cmd == "-V" {
-		os.Exit(printVersions())
+		if _, _, err := parseCommand("version", args[1:]); err != nil {
+			return commandParseError(err)
+		}
+		return printVersions()
 	}
 	if cmd == "help" || cmd == "-h" || cmd == "--help" {
 		topic := ""
@@ -162,62 +166,66 @@ func main() {
 			topic = args[1]
 		}
 		helpFor(topic)
-		return
-	}
-	if hasHelpFlag(args[1:]) { // prowl <cmd> --help
-		helpFor(cmd)
-		return
+		return 0
 	}
 	switch cmd {
 	case "scan":
-		os.Exit(cmdScan(args[1:]))
+		return cmdScan(args[1:])
 	case "compare":
-		os.Exit(cmdCompare(args[1:]))
+		return cmdCompare(args[1:])
 	case "repo":
-		os.Exit(cmdRepo(args[1:]))
+		return cmdRepo(args[1:])
 	case "org":
-		os.Exit(cmdOrg(args[1:]))
+		return cmdOrg(args[1:])
 	case "cicd":
-		os.Exit(cmdCICD(args[1:]))
+		return cmdCICD(args[1:])
 	case "image":
-		os.Exit(cmdImage(args[1:]))
+		return cmdImage(args[1:])
 	case "mobile":
-		os.Exit(cmdMobile(args[1:]))
+		return cmdMobile(args[1:])
 	case "bucket":
-		os.Exit(cmdBucket(args[1:]))
+		return cmdBucket(args[1:])
 	case "domain":
-		os.Exit(cmdDomain(args[1:]))
+		return cmdDomain(args[1:])
 	case "hermes-audit":
-		os.Exit(cmdHermesAudit(args[1:]))
+		return cmdHermesAudit(args[1:])
 	case "jira":
-		os.Exit(cmdJira(args[1:]))
+		return cmdJira(args[1:])
 	case "confluence":
-		os.Exit(cmdConfluence(args[1:]))
+		return cmdConfluence(args[1:])
 	case "serve":
-		os.Exit(cmdServe(args[1:]))
+		return cmdServe(args[1:])
 	case "config":
-		os.Exit(cmdConfig(args[1:]))
+		return cmdConfig(args[1:])
 	case "doctor":
-		os.Exit(cmdDoctor(args[1:]))
+		return cmdDoctor(args[1:])
 	case "detectors":
-		os.Exit(cmdDetectors())
+		if _, _, err := parseCommand("detectors", args[1:]); err != nil {
+			return commandParseError(err)
+		}
+		return cmdDetectors()
 	case "rules":
-		os.Exit(cmdRules(args[1:]))
+		return cmdRules(args[1:])
 	case "verifiers":
-		os.Exit(cmdVerifiers(args[1:]))
+		return cmdVerifiers(args[1:])
 	case "lsp":
+		if _, _, err := parseCommand("lsp", args[1:]); err != nil {
+			return commandParseError(err)
+		}
 		if err := lsp.Serve(); err != nil {
 			if errors.Is(err, lsp.ErrExitWithoutShutdown) {
-				os.Exit(1)
+				return 1
 			}
 			fmt.Fprintln(os.Stderr, "lsp error:", err)
-			os.Exit(2)
+			return 2
 		}
 	case "mcp":
-		os.Exit(cmdMCP(args[1:]))
+		return cmdMCP(args[1:])
 	default:
-		dieUnknownCommand(cmd)
+		fmt.Fprintln(os.Stderr, unknownCommandMessage(cmd))
+		return 2
 	}
+	return 0
 }
 
 // loadDetector builds the detector from the taxonomy, external --rules, and config overrides.
@@ -397,6 +405,8 @@ func keepVerified(fs []model.Finding) []model.Finding {
 }
 
 type commonFlags struct {
+	cmd                                      commandOptions
+	explicitFlags                            map[string]bool // immutable after parsing; explicit defaults override configuration
 	format, failOn, taxonomy, config, output string
 	since, baseline, writeBaseline           string
 	logFormat, logLevel                      string
@@ -572,16 +582,16 @@ func loadConfig(c *commonFlags) (*config.Config, error) {
 		logx.Warn("config issue", "detail", is)
 	}
 	c.exclude = append(c.exclude, cfg.Exclude...)
-	if c.format == "pretty" && cfg.Output.Format != "" {
+	if !c.explicitFlags["--format"] && c.format == "pretty" && cfg.Output.Format != "" {
 		c.format = cfg.Output.Format
 	}
 	if c.failOn == "" {
 		c.failOn = cfg.Output.FailOn
 	}
-	if c.maxSize == 10<<20 && cfg.Performance.MaxSize > 0 {
+	if !c.explicitFlags["--max-size"] && c.maxSize == 10<<20 && cfg.Performance.MaxSize > 0 {
 		c.maxSize = cfg.Performance.MaxSize
 	}
-	if c.workers == 0 && cfg.Performance.Workers > 0 {
+	if !c.explicitFlags["--workers"] && c.workers == 0 && cfg.Performance.Workers > 0 {
 		c.workers = cfg.Performance.Workers
 	}
 	// Apply config-file detection thresholds + operational limits (zero/empty keeps the default; these
@@ -632,239 +642,15 @@ func parseByteSize(s string) (int64, error) {
 	return n * mult, nil
 }
 
-// mustInt strictly parses an int flag value (>= min), exiting 2 on failure. Uses strconv, not
-// fmt.Sscan, which would partial-parse "5x" to 5 and let a typo'd flag take a bogus value.
-func mustInt(name, v string, min int) int {
-	n, err := strconv.Atoi(strings.TrimSpace(v))
-	if err != nil || n < min {
-		fmt.Fprintf(os.Stderr, "%s needs an integer >= %d, got %q\n", name, min, v)
-		os.Exit(2)
-	}
-	return n
-}
-
-// mustEnum validates that v is one of the allowed values, exiting 2 otherwise (a bogus enum value must
-// not fall back silently and hide a typo).
-func mustEnum(name, v string, allowed ...string) string {
-	for _, a := range allowed {
-		if v == a {
-			return v
-		}
-	}
-	fmt.Fprintf(os.Stderr, "%s must be one of %s, got %q\n", name, strings.Join(allowed, "|"), v)
-	os.Exit(2)
-	return ""
-}
-
-// mustFloat01 strictly parses a flag value as a number in [0,1] (rejecting trailing garbage, NaN, Inf).
-func mustFloat01(name, v string) float64 {
-	f, err := strconv.ParseFloat(strings.TrimSpace(v), 64)
-	if err != nil || math.IsNaN(f) || math.IsInf(f, 0) || f < 0 || f > 1 {
-		fmt.Fprintf(os.Stderr, "%s needs a number in 0..1, got %q\n", name, v)
-		os.Exit(2)
-	}
-	return f
-}
-
 // redactURL strips embedded credentials (`user:token@`) from a clone URL before logging, so a token
 // injected from a CI secret store never lands in build logs.
 func redactURL(raw string) string { return safehttp.RedactURL(raw) }
 
-func parseCommon(args []string) (commonFlags, []string) {
-	checkUnknownFlags(args)
-	c := commonFlags{
-		format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: 0.3,
-		ocrMaxPages: 20, ocrTimeout: 2 * time.Minute,
-	}
-	var rest []string
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		inlineVal, hasInline := "", false
-		if strings.HasPrefix(a, "--") { // support the --key=value form (and an escape for --leading values)
-			if eq := strings.IndexByte(a, '='); eq >= 0 {
-				a, inlineVal, hasInline = a[:eq], a[eq+1:], true
-			}
-		}
-		next := func() string {
-			if hasInline {
-				return inlineVal
-			}
-			i++
-			if i < len(args) {
-				if v := args[i]; strings.HasPrefix(v, "--") { // don't swallow the next flag as a value
-					fmt.Fprintf(os.Stderr, "flag %q expects a value, got %q (use %s=VALUE if the value must start with --)\n", a, v, a)
-					os.Exit(2)
-				}
-				return args[i]
-			}
-			return ""
-		}
-		switch {
-		case a == "--format":
-			c.format = mustEnum("--format", next(), "pretty", "json", "sarif", "defectdojo", "dojo")
-		case a == "--fail-on":
-			c.failOn = next()
-			if _, ok := model.SeverityOrder[c.failOn]; !ok {
-				fmt.Fprintf(os.Stderr, "--fail-on must be info|low|medium|high|critical, got %q\n", c.failOn)
-				os.Exit(2)
-			}
-		case a == "--fail-on-verified":
-			c.failOnVerified = true
-		case a == "--exclude":
-			c.exclude = append(c.exclude, next())
-		case a == "--image-input":
-			c.imageInput = next()
-		case a == "--taxonomy":
-			c.taxonomy = next()
-		case a == "--rules":
-			c.rules = append(c.rules, next())
-		case a == "--rules-only":
-			c.rulesOnly = true
-		case a == "--rules-dir":
-			c.rulesDir = append(c.rulesDir, next())
-		case a == "--tags":
-			c.tags = next()
-		case a == "--exclude-tags":
-			c.excludeTags = next()
-		case a == "--rule-severity":
-			c.ruleSeverity = next()
-			for _, s := range splitCSV(c.ruleSeverity) { // CSV of severities — a typo'd one silently filtered nothing
-				if _, ok := model.SeverityOrder[s]; !ok {
-					fmt.Fprintf(os.Stderr, "--rule-severity entries must be info|low|medium|high|critical, got %q\n", s)
-					os.Exit(2)
-				}
-			}
-		case a == "--verify":
-			c.verify = true
-		case a == "--verified-only":
-			c.verify = true
-			c.verifiedOnly = true
-		case a == "--show-secrets":
-			c.showSecrets = true
-		case a == "--verifiers":
-			c.verifiers = append(c.verifiers, next())
-		case a == "--config":
-			c.config = next()
-		case a == "--output" || a == "-o":
-			c.output = next()
-		case a == "--staged":
-			c.staged = true
-		case a == "--history":
-			c.history = true
-		case a == "--since":
-			c.since = next()
-		case a == "--baseline":
-			c.baseline = next()
-		case a == "--write-baseline":
-			c.writeBaseline = next()
-		case a == "--max-size":
-			v := next()
-			sz, err := parseByteSize(v)
-			if err != nil || sz < 1 {
-				fmt.Fprintf(os.Stderr, "--max-size needs a positive size like 10485760, 10MB, or 4M, got %q\n", v)
-				os.Exit(2)
-			}
-			c.maxSize = sz
-		case a == "--workers":
-			c.workers = mustInt("--workers", next(), 0)
-		case a == "--timeout":
-			v := next()
-			d, err := time.ParseDuration(v)
-			if err != nil || d <= 0 {
-				fmt.Fprintf(os.Stderr, "--timeout needs a positive Go duration (e.g. 30s, 5m), got %q\n", v)
-				os.Exit(2)
-			}
-			c.timeout = d
-		case a == "--silence" || a == "--silent" || a == "-s":
-			c.silence = true
-		case a == "--quiet" || a == "-q":
-			c.quiet = true
-		case a == "--verbose" || a == "-v":
-			c.verbose = true
-		case a == "--no-dedupe":
-			c.dedupe = false
-		case a == "--dedupe":
-			c.dedupe = true
-		case a == "--min-confidence":
-			c.minConfidence = mustFloat01("--min-confidence", next())
-		case a == "--min-severity":
-			c.minSeverity = next()
-			if _, ok := model.SeverityOrder[c.minSeverity]; !ok {
-				fmt.Fprintf(os.Stderr, "--min-severity must be info|low|medium|high|critical, got %q\n", c.minSeverity)
-				os.Exit(2)
-			}
-		case a == "--disable":
-			c.disable = next()
-		case a == "--max-per-file":
-			c.maxPerFile = mustInt("--max-per-file", next(), 0)
-		case a == "--ml":
-			c.mlEmbed = true
-		case a == "--ml-model":
-			c.mlModel = next()
-		case a == "--ml-url":
-			c.mlURL = strings.TrimRight(next(), "/")
-		case a == "--ml-threshold":
-			v := next()
-			// strconv (not fmt.Sscan) so NaN/Inf are caught — a NaN threshold passes < / > as false and
-			// would delete every non-exempt finding (score >= NaN is never true).
-			f, err := strconv.ParseFloat(v, 64)
-			if err != nil || math.IsNaN(f) || math.IsInf(f, 0) || f < 0 || f > 1 {
-				fmt.Fprintf(os.Stderr, "--ml-threshold needs a number in 0..1, got %q\n", v)
-				os.Exit(2)
-			}
-			c.mlThreshold = f
-			c.mlThresholdSet = true
-		case a == "--ocr":
-			c.ocrEnabled = true
-		case a == "--ocr-url":
-			c.ocrURL = strings.TrimRight(next(), "/")
-			c.ocrEnabled = true
-		case a == "--ocr-model":
-			c.ocrModel = next()
-			c.ocrEnabled = true
-		case a == "--ocr-allow-remote":
-			c.ocrAllowRemote = true
-			c.ocrEnabled = true
-		case a == "--ocr-all-pages":
-			c.ocrAllPages = true
-			c.ocrEnabled = true
-		case a == "--ocr-max-pages":
-			c.ocrMaxPages = mustInt("--ocr-max-pages", next(), 1)
-			c.ocrEnabled = true
-		case a == "--ocr-timeout":
-			v := next()
-			d, err := time.ParseDuration(v)
-			if err != nil || d <= 0 {
-				fmt.Fprintf(os.Stderr, "--ocr-timeout needs a positive Go duration (e.g. 30s, 2m), got %q\n", v)
-				os.Exit(2)
-			}
-			c.ocrTimeout = d
-			c.ocrEnabled = true
-		case a == "--no-color":
-			c.noColor = true
-		case a == "--log-format":
-			c.logFormat = mustEnum("--log-format", next(), "console", "json")
-		case a == "--log-level":
-			c.logLevel = next()
-			var lvl slog.Level // validate via slog (debug|info|warn|error, case-insensitive) — was silently ignored
-			if err := lvl.UnmarshalText([]byte(c.logLevel)); err != nil {
-				fmt.Fprintf(os.Stderr, "--log-level must be debug|info|warn|error, got %q\n", c.logLevel)
-				os.Exit(2)
-			}
-		case strings.HasPrefix(a, "--"):
-			// Preserve the ORIGINAL token (incl. the --key=value form) — a command-specific flag's
-			// inline value must survive for the caller's flagVal/multiFlag/stripValueFlags (which all
-			// understand --key=value). Appending the stripped name dropped `=value` silently.
-			rest = append(rest, args[i])
-		default:
-			rest = append(rest, a)
-		}
-	}
-	return c, rest
-}
-
 func cmdScan(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("scan", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := checkSourceModes(c, rest); code != 0 {
 		return code
 	}
@@ -877,7 +663,10 @@ func cmdScan(args []string) int {
 // runs the regex/cascade detectors alone, then the same scan with Prowl's ML context filter, and
 // reports how many findings the model suppresses as not-a-secret.
 func cmdCompare(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("compare", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := checkSourceModes(c, rest); code != 0 {
 		return code
 	}
@@ -1500,12 +1289,11 @@ func dedupeFingerprints(fs []model.Finding) []model.Finding {
 // cmdRepo clones a remote git repository (any git URL) into a temp dir and scans it. --history scans
 // every blob; otherwise the default-branch working tree. Auth via your existing git credentials.
 func cmdRepo(args []string) int {
-	branch := flagVal(args, "--branch")
-	var depth int
-	if d := flagVal(args, "--depth"); d != "" {
-		depth = mustInt("--depth", d, 1)
+	c, rest, err := parseCommand("repo", args)
+	if err != nil {
+		return commandParseError(err)
 	}
-	c, rest := parseCommon(stripValueFlags(args, "--branch", "--depth"))
+	branch, depth := c.cmd.branch, c.cmd.depth
 	if code := checkSourceModes(c, nil); code != 0 {
 		return code
 	}
@@ -1559,40 +1347,28 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 // --concurrency N caps the pool (default min(4, #repos)); a failed repo remains a diagnostic. Exit is
 // 2 whenever repository acquisition or scanning is incomplete.
 func cmdOrg(args []string) int {
-	conc := 0
-	if v := flagVal(args, "--concurrency"); v != "" {
-		conc = mustInt("--concurrency", v, 1)
+	c, rest, err := parseCommand("org", args)
+	if err != nil {
+		return commandParseError(err)
 	}
-	excludeRepo := splitCSV(flagVal(args, "--exclude-repo"))
-	c, rest := parseCommon(stripValueFlags(args, "--branch", "--depth", "--concurrency", "--exclude-repo"))
+	conc, excludeRepo := c.cmd.concurrency, c.cmd.excludeRepos
 	setupLogging(c)
 	if code := checkSourceModes(c, nil); code != 0 {
 		return code
-	}
-	if c.staged || c.since != "" || flagVal(args, "--branch") != "" || flagVal(args, "--depth") != "" {
-		logx.Error("org supports --history, but not --staged, --since, --branch or --depth")
-		return 2
 	}
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
 	target := ""
-	for _, arg := range rest {
-		if arg == "--gists" || strings.HasPrefix(arg, "--gists=") {
-			continue
-		}
-		if strings.HasPrefix(arg, "-") || target != "" {
-			logx.Error("org requires exactly one target and supported scan flags")
-			return 2
-		}
-		target = arg
+	if len(rest) == 1 {
+		target = rest[0]
 	}
 	if target == "" {
 		fmt.Fprintln(os.Stderr, "usage: prowl org <github|gitlab|bitbucket>:<name> [--gists] [--history] [--concurrency N] [--exclude-repo S,…] [scan flags]")
 		fmt.Fprintln(os.Stderr, "  auth via GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN env (for private repos)")
 		return 2
 	}
-	gists := hasFlag(rest, "--gists")
+	gists := c.cmd.gists
 	ctx, stop := rootContext(c)
 	defer stop()
 	// Load config before listing so limits.org_max_pages bounds ListRepos. noAutoConfig is set first so
@@ -1767,33 +1543,11 @@ func orgDiagnostic(path, reason string) model.Finding {
 // Keep the host in identities so equally named repositories on different forges cannot collide.
 func repoLabel(url string) string { return strings.TrimSuffix(redactURL(url), ".git") }
 
-// stripValueFlags removes the named value-flags (and their values, in both "--k v" and "--k=v" forms)
-// so a subcommand can pre-consume its own flags before handing the remainder to parseCommon.
-func stripValueFlags(args []string, names ...string) []string {
-	want := map[string]bool{}
-	for _, n := range names {
-		want[n] = true
-	}
-	var out []string
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		key := a
-		if eq := strings.IndexByte(a, '='); eq >= 0 {
-			key = a[:eq]
-		}
-		if want[key] {
-			if !strings.Contains(a, "=") && i+1 < len(args) {
-				i++ // also skip the separate value token
-			}
-			continue
-		}
-		out = append(out, a)
-	}
-	return out
-}
-
 func cmdDomain(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("domain", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "domain"); code != 0 {
 		return code
 	}
@@ -1801,24 +1555,21 @@ func cmdDomain(args []string) int {
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
-	opts := domain.Options{Recon: hasFlag(rest, "--recon"), Authorized: hasFlag(rest, "--authorized"), MaxAssets: 300}
-	if v := flagVal(rest, "--max-assets"); v != "" {
-		opts.MaxAssets = mustInt("--max-assets", v, 1)
-	}
+	opts := domain.Options{Recon: c.cmd.recon, Authorized: c.cmd.authorized, MaxAssets: c.cmd.maxAssets}
 	if opts.Timeout == 0 {
 		opts.Timeout = 12 * time.Second
 	}
 
 	var targets []string
-	if f := flagVal(rest, "--targets"); f != "" {
+	if f := c.cmd.targetsFile; f != "" {
 		ts, err := readTargetList(f)
 		if err != nil {
 			logx.Error("could not read --targets file", "path", f, "err", err)
 			return 2
 		}
 		targets = ts
-	} else if t := firstNonFlag(stripValueFlags(rest, "--max-assets", "--targets")); t != "" {
-		targets = []string{t}
+	} else if len(rest) == 1 {
+		targets = []string{rest[0]}
 	}
 	if len(targets) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: prowl domain <host> [--targets file] [--authorized] [--recon]")
@@ -1929,7 +1680,10 @@ func readTargetList(path string) ([]string, error) {
 }
 
 func cmdServe(args []string) int {
-	c, rest := parseCommon(args)
+	c, _, err := parseCommand("serve", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "serve"); code != 0 {
 		return code
 	}
@@ -1940,19 +1694,7 @@ func cmdServe(args []string) int {
 	}
 	// Default to loopback: the server is unauthenticated, so the operator must opt into network
 	// exposure with an explicit --addr 0.0.0.0:PORT (behind auth/a proxy).
-	addr, maxConc := "127.0.0.1:8080", 0
-	// flagVal understands both "--addr X" and "--addr=X" (the exact-match loop missed the = form).
-	if v := flagVal(rest, "--addr"); v != "" {
-		addr = v
-	}
-	if v := flagVal(rest, "--max-concurrent"); v != "" {
-		maxConc = mustInt("--max-concurrent", v, 0)
-	}
-	// serve runs the cascade + rule templates only (no ML or live-verification) — warn rather than
-	// silently ignore --ml/--ml-url so results aren't mistaken for ML-filtered.
-	if c.mlEmbed || c.mlModel != "" || c.mlURL != "" {
-		logx.Warn("serve does not run the ML stage or live-verification — ignoring --ml/--ml-model/--ml-url (cascade + rule templates only)")
-	}
+	addr, maxConc := c.cmd.addr, c.cmd.maxConcurrent
 	cfg, err := loadConfig(&c)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "config error:", err)
@@ -1980,7 +1722,10 @@ func cmdServe(args []string) int {
 }
 
 func cmdDoctor(args []string) int {
-	c, _ := parseCommon(args)
+	c, _, err := parseCommand("doctor", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "doctor"); code != 0 {
 		return code
 	}
@@ -2041,50 +1786,13 @@ func cmdDetectors() int {
 
 // cmdRules manages the rule set: export|list|validate|update|stats. DIR defaults to ./rules.
 func cmdRules(args []string) int {
-	checkUnknownFlags(args)
-	sub := "list"
-	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
-		sub, args = args[0], args[1:]
+	c, dirs, err := parseCommand("rules", args)
+	if err != nil {
+		return commandParseError(err)
 	}
-	var out, source, tagFilter, sevFilter string
-	var ruleFiles, dirs []string
-	check := false
-	allowUnsigned := false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--tags":
-			if i+1 < len(args) {
-				i++
-				tagFilter = args[i]
-			}
-		case a == "--rule-severity":
-			if i+1 < len(args) {
-				i++
-				sevFilter = args[i]
-			}
-		case a == "-o" || a == "--output":
-			if i+1 < len(args) {
-				i++
-				out = args[i]
-			}
-		case a == "--rules":
-			if i+1 < len(args) {
-				i++
-				ruleFiles = append(ruleFiles, args[i])
-			}
-		case a == "--source":
-			if i+1 < len(args) {
-				i++
-				source = args[i]
-			}
-		case a == "--check":
-			check = true
-		case a == "--allow-unsigned":
-			allowUnsigned = true
-		case !strings.HasPrefix(a, "-"):
-			dirs = append(dirs, a)
-		}
-	}
+	sub, out, source := c.cmd.sub, c.output, c.cmd.source
+	tagFilter, sevFilter, ruleFiles := c.tags, c.ruleSeverity, c.rules
+	check, allowUnsigned := c.cmd.check, c.cmd.allowUnsigned
 	userPos := dirs // positionals as given (rule id / test text for show/test)
 	if len(dirs) == 0 {
 		dirs = []string{"rules"}
@@ -2216,30 +1924,11 @@ func cmdRules(args []string) int {
 // cmdVerifiers manages live-verifiers: list|validate|update. DIR defaults to the installed
 // ~/.prowl/verifiers (then ./verifiers); `update` installs there from --source or the bundled set.
 func cmdVerifiers(args []string) int {
-	checkUnknownFlags(args)
-	sub := "list"
-	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
-		sub, args = args[0], args[1:]
+	c, dirs, err := parseCommand("verifiers", args)
+	if err != nil {
+		return commandParseError(err)
 	}
-	var source string
-	var dirs []string
-	check := false
-	allowUnsigned := false
-	for i := 0; i < len(args); i++ {
-		switch a := args[i]; {
-		case a == "--source":
-			if i+1 < len(args) {
-				i++
-				source = args[i]
-			}
-		case a == "--check":
-			check = true
-		case a == "--allow-unsigned":
-			allowUnsigned = true
-		case !strings.HasPrefix(a, "-"):
-			dirs = append(dirs, a)
-		}
-	}
+	sub, source, check, allowUnsigned := c.cmd.sub, c.cmd.source, c.cmd.check, c.cmd.allowUnsigned
 	if sub == "update" {
 		return updateInto("verifiers", source, installedVerifiersDir(), time.Now().UTC().Format(time.RFC3339), check, allowUnsigned)
 	}
@@ -2367,19 +2056,6 @@ func gate(fs []model.Finding, failOn string, failOnVerified bool) int {
 	return 0
 }
 
-// flagVal returns the token after the first occurrence of name in ss (for value-flags in --recon-style lists).
-func flagVal(ss []string, name string) string {
-	for i, s := range ss {
-		if s == name && i+1 < len(ss) {
-			return ss[i+1] // --branch main
-		}
-		if strings.HasPrefix(s, name+"=") {
-			return s[len(name)+1:] // --branch=main
-		}
-	}
-	return ""
-}
-
 // matchesAny reports whether s contains any of the (non-empty) substrings.
 func matchesAny(s string, subs []string) bool {
 	for _, sub := range subs {
@@ -2388,49 +2064,4 @@ func matchesAny(s string, subs []string) bool {
 		}
 	}
 	return false
-}
-
-// hasFlag reports whether a presence (boolean) flag is set. It matches the bare "--flag" AND the
-// "--flag=VALUE" form (parseCommon preserves the inline-value token), and — crucially — it HONORS the
-// value: "--flag=false"/"=0"/"=no" yield false, so a user being explicit about NOT wanting current-only
-// (or NOT being authorized) is not silently flipped to true. A non-boolean value (or bare flag) is
-// treated as set, matching presence semantics.
-func hasFlag(ss []string, name string) bool {
-	eq := name + "="
-	for _, s := range ss {
-		if s == name {
-			return true
-		}
-		if v, ok := strings.CutPrefix(s, eq); ok {
-			return parseBoolFlag(v)
-		}
-	}
-	return false
-}
-
-// parseBoolFlag interprets a --flag=VALUE boolean. It accepts the strconv.ParseBool forms PLUS the
-// common yes/no/on/off words (ParseBool rejects those, and silently treating "--current-only=no" as set
-// would disable the history walk). An unparseable value returns false — the safe direction for every
-// flag read this way (--current-only/--recon -> scan MORE; --authorized -> stay unauthorized) — rather
-// than treating a typo as set.
-func parseBoolFlag(v string) bool {
-	switch strings.ToLower(strings.TrimSpace(v)) {
-	case "1", "t", "true", "y", "yes", "on":
-		return true
-	case "0", "f", "false", "n", "no", "off", "":
-		return false
-	}
-	if b, err := strconv.ParseBool(v); err == nil {
-		return b
-	}
-	return false
-}
-
-func firstNonFlag(ss []string) string {
-	for _, s := range ss {
-		if !strings.HasPrefix(s, "--") {
-			return s
-		}
-	}
-	return ""
 }

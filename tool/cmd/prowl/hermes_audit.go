@@ -3,58 +3,27 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/Lercas/prowl/tool/internal/hermesaudit"
 	"github.com/Lercas/prowl/tool/internal/targetlist"
 )
 
-type hermesAuditList []string
-
-func (s *hermesAuditList) String() string { return strings.Join(*s, ",") }
-
-func (s *hermesAuditList) Set(value string) error {
-	for _, item := range strings.Split(value, ",") {
-		item = strings.TrimSpace(item)
-		if item != "" {
-			*s = append(*s, item)
-		}
-	}
-	return nil
-}
-
-// cmdHermesAudit is intentionally a small command-specific parser. Passing its
-// flags through parseCommon would make a safe, redacted report accidentally
-// inherit scan-only options such as --show-secrets.
+// cmdHermesAudit uses an isolated schema: scan-only options such as --show-secrets
+// are never accepted by this authorized inventory command.
 func cmdHermesAudit(args []string) int {
-	fs := flag.NewFlagSet("hermes-audit", flag.ContinueOnError)
-	fs.SetOutput(os.Stderr)
-	var targets hermesAuditList
-	var providers hermesAuditList
-	var targetsFile, output string
-	var timeout time.Duration
-	var retries, concurrency int
-	var authorized, active, passive bool
-	fs.Var(&targets, "target", "literal IP or IP:port (repeatable or comma-separated)")
-	fs.Var(&providers, "provider", "passive provider(s): censys,shodan,fofa,zoomeye,leakix")
-	fs.StringVar(&targetsFile, "targets", "", "newline-delimited IP inventory")
-	fs.StringVar(&output, "output", "", "write JSON to this file instead of stdout")
-	fs.StringVar(&output, "o", "", "alias for --output")
-	fs.DurationVar(&timeout, "timeout", 12*time.Second, "per-request timeout")
-	fs.IntVar(&retries, "max-retries", 2, "bounded retries after provider rate limits/server errors (0..5)")
-	fs.IntVar(&concurrency, "concurrency", 2, "target concurrency (capped at 8)")
-	fs.BoolVar(&authorized, "authorized", false, "REQUIRED: attest that every target is in your authorized inventory")
-	fs.BoolVar(&active, "active", true, "probe status/schema and bounded root dashboard assets")
-	fs.BoolVar(&passive, "passive", true, "query configured providers for the exact IP only")
-	if err := fs.Parse(normalizeHermesArgs(args)); err != nil {
-		return 2
+	c, rest, err := parseCommand("hermes-audit", args)
+	if err != nil {
+		return commandParseError(err)
 	}
+	targets, providers := c.cmd.targets, c.cmd.providers
+	targetsFile, output := c.cmd.targetsFile, c.output
+	timeout, retries, concurrency := c.timeout, c.cmd.maxRetries, c.cmd.concurrency
+	authorized, active, passive := c.cmd.authorized, c.cmd.active, c.cmd.passive
 	if !authorized {
 		fmt.Fprintln(os.Stderr, "refusing: pass --authorized to attest that every target is in your scope")
 		return 2
@@ -71,7 +40,7 @@ func cmdHermesAudit(args []string) int {
 		}
 		targets = append(targets, loaded...)
 	}
-	targets = append(targets, fs.Args()...)
+	targets = append(targets, rest...)
 	if len(targets) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: prowl hermes-audit [IP ...] --authorized [--targets FILE]")
 		return 2
@@ -119,32 +88,4 @@ func cmdHermesAudit(args []string) int {
 		return 2
 	}
 	return 0
-}
-
-// normalizeHermesArgs lets operators put positional IPs before or after flags,
-// matching the rest of Prowl's CLI instead of the standard flag package's
-// "stop at first positional" behavior.
-func normalizeHermesArgs(args []string) []string {
-	valueFlags := map[string]bool{
-		"--target": true, "--provider": true, "--targets": true, "--output": true, "-o": true,
-		"--timeout": true, "--max-retries": true, "--concurrency": true,
-	}
-	var flags, positional []string
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		if !strings.HasPrefix(a, "-") {
-			positional = append(positional, a)
-			continue
-		}
-		flags = append(flags, a)
-		name := a
-		if eq := strings.IndexByte(name, '='); eq >= 0 {
-			name = name[:eq]
-		}
-		if valueFlags[name] && !strings.Contains(a, "=") && i+1 < len(args) {
-			flags = append(flags, args[i+1])
-			i++
-		}
-	}
-	return append(flags, positional...)
 }

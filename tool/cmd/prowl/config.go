@@ -10,13 +10,17 @@ import (
 // cmdConfig handles `prowl config validate`: lint a .prowl.yaml for unknown/typo'd keys, empty or
 // match-everything custom regexes, and unknown custom-rule categories. Exit 0 clean, 1 problems, 2 error.
 func cmdConfig(args []string) int {
-	if len(args) == 0 || args[0] != "validate" {
-		fmt.Fprintln(os.Stderr, "usage: prowl config validate [FILE]   (default .prowl.yaml)")
+	c, rest, err := parseCommand("config", args)
+	if err != nil {
+		return commandParseError(err)
+	}
+	if len(args) == 0 || c.cmd.sub != "validate" {
+		fmt.Fprintln(os.Stderr, "usage: prowl config validate [FILE]")
 		return 2
 	}
 	path := ".prowl.yaml"
-	if len(args) > 1 {
-		path = args[1]
+	if len(rest) == 1 {
+		path = rest[0]
 	}
 	problems, ioErr := config.ValidateFile(path)
 	if ioErr != nil {

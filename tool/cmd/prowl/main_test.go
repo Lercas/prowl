@@ -493,14 +493,16 @@ func TestFailOnVerified(t *testing.T) {
 	}
 }
 
-func TestMustIntStrict(t *testing.T) {
-	// valid
-	for _, v := range []string{"0", "5", "100"} {
-		_ = mustInt("--x", v, 0) // must not exit (can't easily assert os.Exit; just exercise the parse)
+func TestIntegerValueStrict(t *testing.T) {
+	for _, value := range []string{"0", "5", "100"} {
+		if _, err := integerValue(value, 0); err != nil {
+			t.Fatal(err)
+		}
 	}
-	// parseByteSize already covers strict-parse rejection; mustInt mirrors it via strconv.Atoi.
-	if _, err := strconv.Atoi("5x"); err == nil {
-		t.Error("strconv.Atoi should reject 5x (the strict-parse contract mustInt relies on)")
+	for _, value := range []string{"5x", "-1", "", "9999999999999999999999999"} {
+		if _, err := integerValue(value, 0); err == nil {
+			t.Fatalf("accepted invalid integer %q", value)
+		}
 	}
 }
 
@@ -535,26 +537,28 @@ func TestRedactURLPasswordWithAt(t *testing.T) {
 	}
 }
 
-// TestFailOnVerifiedIsKnownFlag guards the half-wired regression where --fail-on-verified was parsed in
-// the switch but missing from knownFlags, so checkUnknownFlags rejected it (exit 2) before it ever ran.
-func TestFailOnVerifiedIsKnownFlag(t *testing.T) {
+// Verification, ML and OCR options must remain present in the scan schema.
+func TestScanSchemaIncludesVerificationAndModelFlags(t *testing.T) {
 	for _, f := range []string{
 		"--fail-on-verified", "--fail-on", "--verify", "--ml", "--ml-threshold",
 		"--ocr", "--ocr-url", "--ocr-model", "--ocr-allow-remote", "--ocr-all-pages",
 		"--ocr-max-pages", "--ocr-timeout",
 	} {
-		if !knownFlags[f] {
-			t.Errorf("%s is handled by parseCommon but missing from knownFlags — checkUnknownFlags will reject it", f)
+		if !strings.Contains(" "+strings.Join(commandFlagNames("scan"), " ")+" ", " "+f+" ") {
+			t.Errorf("%s is missing from the scan flag schema", f)
 		}
 	}
 }
 
 func TestParseOCRFlags(t *testing.T) {
-	c, rest := parseCommon([]string{
+	c, rest, err := parseCommand("scan", []string{
 		"scan.png", "--ocr-url", "https://ocr.example/v1/chat/completions",
 		"--ocr-model", "local-model", "--ocr-allow-remote", "--ocr-all-pages",
 		"--ocr-max-pages", "7", "--ocr-timeout", "45s",
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(rest) != 1 || rest[0] != "scan.png" || !c.ocrEnabled || !c.ocrAllowRemote ||
 		!c.ocrAllPages || c.ocrMaxPages != 7 || c.ocrTimeout != 45*time.Second ||
 		c.ocrModel != "local-model" {
@@ -597,44 +601,29 @@ func TestRestoreMissingLive(t *testing.T) {
 	}
 }
 
-// round-7 regression: parseCommon preserves the --key=value token, so the bare-flag readers must be
-// equals-aware (a plain contains() would miss --current-only=true / --authorized=true).
-func TestHasFlagEqualsForm(t *testing.T) {
-	if !hasFlag([]string{"host", "--current-only=true"}, "--current-only") {
-		t.Error("--current-only=true not matched")
-	}
-	if !hasFlag([]string{"--authorized"}, "--authorized") {
-		t.Error("bare --authorized not matched")
-	}
-	if hasFlag([]string{"--currently-broken"}, "--current-only") {
-		t.Error("a different flag wrongly matched")
-	}
-	// ultra-audit regression: --current-only=false must be HONORED (false), else the entire history
-	// walk is silently disabled (T30 defeated); likewise --authorized=false must not authorize.
-	if hasFlag([]string{"--current-only=false"}, "--current-only") {
-		t.Error("--current-only=false must be false (would silently disable history)")
-	}
-	if hasFlag([]string{"--current-only=0"}, "--current-only") {
-		t.Error("--current-only=0 must be false")
-	}
-	if hasFlag([]string{"--authorized=false"}, "--authorized") {
-		t.Error("--authorized=false must NOT authorize")
-	}
-	if !hasFlag([]string{"--current-only=true"}, "--current-only") {
-		t.Error("--current-only=true must be true")
-	}
-	// verify-round regression: yes/no/on/off must be honored (ParseBool alone rejects them, which would
-	// silently treat --current-only=no as set), and an unparseable value defaults to the SAFE direction.
-	if hasFlag([]string{"--current-only=no"}, "--current-only") {
-		t.Error("--current-only=no must be false")
-	}
-	if hasFlag([]string{"--current-only=off"}, "--current-only") {
-		t.Error("--current-only=off must be false")
-	}
-	if !hasFlag([]string{"--current-only=yes"}, "--current-only") {
-		t.Error("--current-only=yes must be true")
-	}
-	if hasFlag([]string{"--current-only=banana"}, "--current-only") {
-		t.Error("unparseable value must default false (safe: scan more)")
+// Explicit false never authorizes a scan or disables historical coverage.
+func TestBooleanFlagsHonorExplicitValues(t *testing.T) {
+	for _, scope := range []string{"domain", "jira"} {
+		flag := "--authorized"
+		if scope == "jira" {
+			flag = "--current-only"
+		}
+		for _, value := range []string{"false", "0", "no", "off", "true", "yes", "on"} {
+			c, _, err := parseCommand(scope, []string{flag + "=" + value})
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := value == "true" || value == "yes" || value == "on"
+			got := c.cmd.authorized
+			if scope == "jira" {
+				got = c.cmd.currentOnly
+			}
+			if got != want {
+				t.Fatalf("%s=%s: got %v", flag, value, got)
+			}
+		}
+		if _, _, err := parseCommand(scope, []string{flag + "=banana"}); err == nil {
+			t.Fatal("invalid boolean was silently accepted")
+		}
 	}
 }

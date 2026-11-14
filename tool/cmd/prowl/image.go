@@ -14,7 +14,10 @@ import (
 // cmdImage scans an image — remote ref, local tarball, OCI-layout dir, or stdin "-" — across every layer
 // plus the config. --image-input forces the source kind when auto-detect would guess wrong.
 func cmdImage(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("image", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "image"); code != 0 {
 		return code
 	}

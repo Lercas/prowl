@@ -44,7 +44,11 @@ func TestAtlassianConnectionLogsDoNotExposeBaseURL(t *testing.T) {
 				stdout, stderr := os.Stdout, os.Stderr
 				os.Stdout, os.Stderr = f, f
 				defer func() { os.Stdout, os.Stderr = stdout, stderr; logx.Setup(logx.Options{}); f.Close() }()
-				code := cmdAtlassian([]string{base, "--current-only", "--project", "P", "--format", "json", "--log-format", format}, product)
+				filter := "--project"
+				if product == "confluence" {
+					filter = "--space"
+				}
+				code := cmdAtlassian([]string{base, "--current-only", filter, "P", "--format", "json", "--log-format", format}, product)
 				b, err := os.ReadFile(f.Name())
 				if err != nil {
 					t.Fatal(err)

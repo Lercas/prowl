@@ -12,43 +12,17 @@ import (
 // cmdCICD scans recent CI logs and downloadable artifacts from one GitHub or GitLab repository.
 // Authentication is environment-only so a forge token never lands in argv, shell history, or help.
 func cmdCICD(args []string) int {
-	maxRuns := 20
-	if v := flagVal(args, "--max-runs"); v != "" {
-		maxRuns = mustInt("--max-runs", v, 1)
+	c, rest, err := parseCommand("cicd", args)
+	if err != nil {
+		return commandParseError(err)
 	}
-	maxArtifacts := 100
-	if v := flagVal(args, "--max-artifacts"); v != "" {
-		maxArtifacts = mustInt("--max-artifacts", v, 1)
-	}
-	maxDownload := int64(100 << 20)
-	if v := flagVal(args, "--max-download"); v != "" {
-		n, err := parseByteSize(v)
-		if err != nil || n <= 0 {
-			fmt.Fprintf(os.Stderr, "--max-download needs a positive size like 100MB, got %q\n", v)
-			return 2
-		}
-		maxDownload = n
-	}
-	logsOnly := hasFlag(args, "--logs-only")
-	artifactsOnly := hasFlag(args, "--artifacts-only")
-	if logsOnly && artifactsOnly {
-		fmt.Fprintln(os.Stderr, "--logs-only and --artifacts-only are mutually exclusive")
-		return 2
-	}
-
-	branch := flagVal(args, "--branch")
-	cleanArgs := stripValueFlags(args, "--max-runs", "--max-artifacts", "--max-download", "--branch")
-	c, rest := parseCommon(cleanArgs)
+	maxRuns, maxArtifacts, maxDownload := c.cmd.maxRuns, c.cmd.maxArtifacts, c.cmd.maxDownload
+	logsOnly, artifactsOnly, branch := c.cmd.logsOnly, c.cmd.artifactsOnly, c.cmd.branch
 	if code := rejectUnsupportedOCR(c, "cicd"); code != 0 {
 		return code
 	}
 	setupLogging(c)
-	var targets []string
-	for _, arg := range rest {
-		if !strings.HasPrefix(arg, "-") {
-			targets = append(targets, arg)
-		}
-	}
+	targets := rest
 	if len(targets) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: prowl cicd <github:owner/repo|gitlab:group/project> [--max-runs N] [--branch REF] [scan flags]")
 		fmt.Fprintln(os.Stderr, "  auth: GITHUB_TOKEN or GITLAB_TOKEN; API overrides: GITHUB_API / GITLAB_API")

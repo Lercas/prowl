@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -11,6 +10,7 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"compare", "compare cascade and ML results on a repeatable source", "prowl compare [path...] — compare cascade and portable ML findings"},
 	{"scan", "scan files, dirs, archives, documents, mail, git, or stdin for secrets", scanHelp},
 	{"repo", "clone & scan a remote git repository", repoHelp},
 	{"org", "clone & scan every repo in an org/group/workspace", orgHelp},
@@ -309,25 +309,40 @@ Examples:
   prowl verifiers list
   prowl scan . --verify --verifiers ./verifiers`
 
-// helpFor prints a command's detailed help, or the full top-level usage when name is empty/unknown.
+// helpFor derives the accepted flags from the same schema used by the parser.
 func helpFor(name string) {
-	for _, c := range commands {
-		if c.name == name && c.detail != "" {
-			fmt.Println(c.detail)
-			return
+	if name == "" {
+		fmt.Print(usage)
+		return
+	}
+	parent, _, nested := strings.Cut(name, ".")
+	for _, command := range commands {
+		if command.name != parent {
+			continue
 		}
+		if nested {
+			fmt.Printf("prowl %s [flags]\n", strings.ReplaceAll(name, ".", " "))
+		} else if command.detail != "" {
+			first, _, _ := strings.Cut(command.detail, "\n")
+			fmt.Println(first)
+		} else {
+			fmt.Printf("prowl %s — %s\n", name, command.summary)
+		}
+		fmt.Println("\nFlags:")
+		fmt.Print(commandFlagHelp(name))
+		fmt.Println("\nUse -- to end flag parsing; use --flag=VALUE for values starting with --.")
+		if !nested {
+			examples := strings.Index(command.detail, "\nExamples:")
+			if examples < 0 {
+				examples = strings.Index(command.detail, "\nExample:")
+			}
+			if examples >= 0 {
+				fmt.Println(command.detail[examples:])
+			}
+		}
+		return
 	}
 	fmt.Print(usage)
-}
-
-// hasHelpFlag reports whether -h/--help appears in args.
-func hasHelpFlag(args []string) bool {
-	for _, a := range args {
-		if a == "-h" || a == "--help" {
-			return true
-		}
-	}
-	return false
 }
 
 func commandNames() []string {
@@ -338,55 +353,12 @@ func commandNames() []string {
 	return out
 }
 
-// dieUnknownCommand prints a "did you mean" suggestion and exits.
-func dieUnknownCommand(cmd string) {
-	fmt.Fprintf(os.Stderr, "unknown command %q\n", cmd)
-	if s := closest(cmd, commandNames()); s != "" {
-		fmt.Fprintf(os.Stderr, "did you mean 'prowl %s'?\n", s)
+func unknownCommandMessage(command string) string {
+	message := fmt.Sprintf("unknown command %q", command)
+	if suggestion := closest(command, commandNames()); suggestion != "" {
+		message += fmt.Sprintf("; did you mean 'prowl %s'?", suggestion)
 	}
-	fmt.Fprintln(os.Stderr, "run 'prowl help' for the list of commands")
-	os.Exit(2)
-}
-
-// knownFlags is every flag the CLI accepts (common + command-specific), used to catch typos.
-var knownFlags = map[string]bool{
-	"--format": true, "--fail-on": true, "--fail-on-verified": true, "--exclude": true, "--taxonomy": true, "--rules": true,
-	"--rules-only": true, "--rules-dir": true, "--tags": true, "--exclude-tags": true,
-	"--rule-severity": true, "--verify": true, "--verified-only": true, "--verifiers": true, "--show-secrets": true,
-	"--config": true, "--output": true, "-o": true, "--staged": true, "--history": true,
-	"--since": true, "--baseline": true, "--write-baseline": true, "--max-size": true,
-	"--workers": true, "--timeout": true, "--silence": true, "--silent": true, "-s": true,
-	"--quiet": true, "-q": true, "--verbose": true, "-v": true, "--no-color": true,
-	"--log-format": true, "--log-level": true, "--help": true, "-h": true,
-	"--authorized": true, "--recon": true, "--max-assets": true, "--addr": true,
-	"--max-concurrent": true, "--source": true, "--check": true, "--allow-unsigned": true,
-	"--dedupe": true, "--no-dedupe": true, "--image-input": true,
-	"--min-confidence": true, "--min-severity": true, "--disable": true, "--exclude-repo": true,
-	"--branch": true, "--depth": true, "--concurrency": true, "--max-per-file": true,
-	"--ml": true, "--ml-model": true, "--ml-url": true, "--ml-threshold": true,
-	"--ocr": true, "--ocr-url": true, "--ocr-model": true, "--ocr-allow-remote": true,
-	"--ocr-all-pages": true, "--ocr-max-pages": true, "--ocr-timeout": true,
-	"--base-url": true, "--current-only": true, "--max-items": true, "--project": true, "--space": true, "--field": true,
-	"--max-runs": true, "--max-artifacts": true, "--max-download": true, "--logs-only": true, "--artifacts-only": true,
-	"--targets": true, "--gists": true,
-	"--no-strings": true, "--min-run": true,
-}
-
-func allFlagNames() []string {
-	out := make([]string, 0, len(knownFlags))
-	for f := range knownFlags {
-		out = append(out, f)
-	}
-	return out
-}
-
-// dieUnknownFlag prints a suggestion for a mistyped flag and exits.
-func dieUnknownFlag(flag string) {
-	fmt.Fprintf(os.Stderr, "unknown flag %q\n", flag)
-	if s := closest(flag, allFlagNames()); s != "" {
-		fmt.Fprintf(os.Stderr, "did you mean '%s'?\n", s)
-	}
-	os.Exit(2)
+	return message + "; run 'prowl help' for the list of commands"
 }
 
 // closest returns the nearest candidate within an edit-distance budget, or "".
@@ -431,23 +403,4 @@ func min3(a, b, c int) int {
 		a = c
 	}
 	return a
-}
-
-// checkUnknownFlags dies with a suggestion on any --flag / -x not in knownFlags (--flag=value ok).
-func checkUnknownFlags(args []string) {
-	for _, a := range args {
-		if !strings.HasPrefix(a, "-") || a == "-" {
-			continue
-		}
-		if len(a) > 1 && a[1] >= '0' && a[1] <= '9' { // a negative-number value, not a flag (e.g. --workers -1)
-			continue
-		}
-		name := a
-		if i := strings.IndexByte(a, '='); i >= 0 {
-			name = a[:i]
-		}
-		if !knownFlags[name] {
-			dieUnknownFlag(name)
-		}
-	}
 }

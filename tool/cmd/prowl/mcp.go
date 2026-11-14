@@ -83,6 +83,9 @@ func mcpTools() []mcpTool {
 }
 
 func cmdMCP(args []string) int {
+	if _, _, err := parseCommand("mcp", args); err != nil {
+		return commandParseError(err)
+	}
 	return serveMCP(os.Stdin, os.Stdout, os.Stderr)
 }
 

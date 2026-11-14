@@ -22,7 +22,10 @@ import (
 // is just a ZIP: resources/JSON/plist/xml are scanned raw and binary entries (.dex/.arsc/.so/Mach-O)
 // get a printable-strings pass so embedded keys surface. Pure-Go, no SDK required.
 func cmdMobile(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("mobile", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "mobile"); code != 0 {
 		return code
 	}
@@ -30,9 +33,11 @@ func cmdMobile(args []string) int {
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
-	// The positional target is the first non-flag, ignoring the value of --min-run (which would otherwise
-	// be picked up as the target).
-	target := firstNonFlag(stripValueFlags(rest, "--min-run"))
+	// The command parser has already separated the target from option values.
+	target := ""
+	if len(rest) == 1 {
+		target = rest[0]
+	}
 	if target == "" {
 		fmt.Fprintln(os.Stderr, "usage: prowl mobile <app.apk|app.ipa|path|https://…> [scan flags]")
 		return 2
@@ -78,7 +83,7 @@ func cmdMobile(args []string) int {
 			return 2
 		}
 		localPath = p
-	} else if _, err := os.Stat(localPath); err != nil {
+	} else if _, err := os.Stat(localPath); err != nil { // #nosec G703 -- explicitly selected local scanner input, not a sandboxed server path.
 		logx.Error("mobile file not found", "path", localPath)
 		return 2
 	}
@@ -86,11 +91,8 @@ func cmdMobile(args []string) int {
 	opts := source.MobileOptions{
 		MaxBytes: c.maxSize,
 		Exclude:  c.exclude,
-		Strings:  !hasFlag(rest, "--no-strings"),
-		MinRun:   minRunDefault,
-	}
-	if v := flagVal(rest, "--min-run"); v != "" {
-		opts.MinRun = mustInt("--min-run", v, 1)
+		Strings:  !c.cmd.noStrings,
+		MinRun:   c.cmd.minRun,
 	}
 
 	logx.Info("scanning mobile app", "path", localPath)
@@ -120,11 +122,11 @@ func isURL(target string) bool {
 func downloadToTemp(ctx context.Context, rawURL, dir string, maxBytes int64, timeout time.Duration) (string, error) {
 	// safehttp.Client defaults a zero/negative timeout to a sane value, so a no-flag run is still bounded.
 	client := safehttp.Client(timeout)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil) // #nosec G704 -- safehttp.Client enforces resolved-IP and redirect guards at dial time.
 	if err != nil {
 		return "", err
 	}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 -- guarded safehttp transport; covered by TestDownloadToTempSSRF.
 	if err != nil {
 		return "", err
 	}
@@ -133,7 +135,7 @@ func downloadToTemp(ctx context.Context, rawURL, dir string, maxBytes int64, tim
 		return "", fmt.Errorf("download %s: unexpected status %s", redactURL(rawURL), resp.Status)
 	}
 	dst := filepath.Join(dir, downloadName(rawURL))
-	f, err := os.Create(dst)
+	f, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600) // #nosec G703 -- safe basename in an owned private directory; never replaces an existing entry.
 	if err != nil {
 		return "", err
 	}
@@ -185,7 +187,7 @@ func downloadName(rawURL string) string {
 		return fallback
 	}
 	base := path.Base(urlPath) // URL paths are '/'-separated regardless of OS
-	if base == "" || base == "." || base == "/" {
+	if base == "" || base == "." || base == ".." || base == "/" || strings.ContainsAny(base, "\\:\x00") {
 		return fallback
 	}
 	return base

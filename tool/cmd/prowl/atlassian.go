@@ -20,7 +20,10 @@ func cmdConfluence(args []string) int { return cmdAtlassian(args, "confluence") 
 // historical version of each issue/page (default), feeding the extracted text through the same
 // cascade as every other source. It mirrors cmdDomain: detect/connect, stream items, scan, gate.
 func cmdAtlassian(args []string, product string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand(product, args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, product); code != 0 {
 		return code
 	}
@@ -29,9 +32,11 @@ func cmdAtlassian(args []string, product string) int {
 		return code
 	}
 
-	base := flagVal(rest, "--base-url")
+	base := c.cmd.baseURL
 	if base == "" {
-		base = firstNonFlag(stripValueFlags(rest, "--base-url", "--project", "--space", "--field", "--max-items"))
+		if len(rest) == 1 {
+			base = rest[0]
+		}
 	}
 	if base == "" {
 		base = os.Getenv("ATLASSIAN_BASE_URL")
@@ -54,14 +59,12 @@ func cmdAtlassian(args []string, product string) int {
 	}
 
 	opts := atlassian.Options{
-		CurrentOnly: hasFlag(rest, "--current-only"),
-		Projects:    multiFlag(rest, "--project"),
-		Spaces:      multiFlag(rest, "--space"),
-		Fields:      multiFlag(rest, "--field"),
+		CurrentOnly: c.cmd.currentOnly,
+		Projects:    c.cmd.projects,
+		Spaces:      c.cmd.spaces,
+		Fields:      c.cmd.fields,
+		MaxItems:    c.cmd.maxItems,
 		Workers:     c.workers, // --workers tunes the per-item fetch concurrency (0 -> package default)
-	}
-	if v := flagVal(rest, "--max-items"); v != "" {
-		opts.MaxItems = mustInt("--max-items", v, 1)
 	}
 
 	cfg, err := loadConfig(&c)
@@ -157,28 +160,4 @@ func firstEnv(names ...string) string {
 		}
 	}
 	return ""
-}
-
-// multiFlag collects every `--name VALUE` and `--name=VALUE` occurrence (repeatable) and also splits
-// a comma-separated value, so `--project A,B --project=C` yields [A B C]. Supporting the equals form
-// avoids silently scanning ALL projects when a user writes `--project=FOO`.
-func multiFlag(args []string, name string) []string {
-	var out []string
-	add := func(v string) {
-		for _, part := range strings.Split(v, ",") {
-			if p := strings.TrimSpace(part); p != "" {
-				out = append(out, p)
-			}
-		}
-	}
-	prefix := name + "="
-	for i := 0; i < len(args); i++ {
-		switch {
-		case args[i] == name && i+1 < len(args):
-			add(args[i+1])
-		case strings.HasPrefix(args[i], prefix):
-			add(strings.TrimPrefix(args[i], prefix))
-		}
-	}
-	return out
 }

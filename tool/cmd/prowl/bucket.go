@@ -15,7 +15,10 @@ import (
 // cmdBucket downloads a cloud-storage prefix (s3:// or gs://) into a temp dir with the platform CLI and
 // scans it, then removes the download. The bucket is untrusted, so its own .prowl.yaml is ignored.
 func cmdBucket(args []string) int {
-	c, rest := parseCommon(args)
+	c, rest, err := parseCommand("bucket", args)
+	if err != nil {
+		return commandParseError(err)
+	}
 	if code := rejectUnsupportedOCR(c, "bucket"); code != 0 {
 		return code
 	}
