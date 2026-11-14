@@ -80,7 +80,7 @@ func (e *Extractor) UnmarshalYAML(node *yaml.Node) error {
 
 // Template is one nuclei-style rule.
 type Template struct {
-	Sensitive *bool `yaml:"sensitive"`
+	Sensitive         *bool       `yaml:"sensitive"`
 	ID                string      `yaml:"id"`
 	Info              Info        `yaml:"info"`
 	Category          string      `yaml:"category"` // optional Prowl category override (severity mapping)
