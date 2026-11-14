@@ -48,6 +48,7 @@ func commandFlagHelp(command string) string {
 	rows := make([][]flagHelpRow, len(flagGroups)+1)
 	total, width := 0, 0
 	for _, flag := range cliFlags {
+		flag = flag.forCommand(command)
 		applies := flag.applies(command)
 		var scopes []string
 		for _, scope := range flag.commands {

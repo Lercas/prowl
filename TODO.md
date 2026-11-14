@@ -195,9 +195,12 @@
       Исправлен подсчёт повторных fingerprint с `--no-dedupe`; provider/sidecar
       опции не выдаются за возможности compare. Нативная матрица — 31/31.
       `wiki/evidence/1.5.0-compare-contract-20261114.json`.
-    - [ ] Проверить report/post-filter флаги `compare`: текстовая сводка обходит
-      `reportScan`, поэтому `--format`/`-o`, baseline и post-filters требуют явного
-      связывания или ограничения областей вместо молчаливого игнорирования.
+    - [x] Связаны report/post-filter флаги `compare`: pretty/JSON и атомарный `-o`,
+      одинаковые confidence/severity/disable фильтры до dedupe. Неподдерживаемые
+      baseline/CI/gate/cap и `--ml=false` отклоняются до intake. Help и shell
+      completion согласованы с parser. Нативная матрица — 52/52, full Go, race,
+      lint и Go 1.26.11 проходят. При ошибке нет процента и замены готового файла.
+      `wiki/evidence/1.5.0-compare-report-20261115.json`.
 
     - [x] Возвращены CLI `correlate` и `remediation-check` для keyed JSON envelope.
       Shared immutable metadata links не выдаются за направление распространения;

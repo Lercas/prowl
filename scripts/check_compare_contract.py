@@ -47,7 +47,7 @@ def main():
     def run(argv):
         nonlocal call
         call += 1
-        r = subprocess.run([str(binary), 'compare', '--bundled', '--silence', *argv], cwd=root, env=env, input=b'', capture_output=True, timeout=60)
+        r = subprocess.run([str(binary), 'compare', '--bundled', '--log-level=error', *argv], cwd=root, env=env, input=b'', capture_output=True, timeout=60)
         (root / f'case-{call:03}.stdout').write_bytes(r.stdout); (root / f'case-{call:03}.stderr').write_bytes(r.stderr)
         return r
     def summary(r):
@@ -85,11 +85,39 @@ def main():
         (root / 'ordinary.env').write_text('AWS=' + aws)
         before = state['calls']; r = run(['ordinary.env'])
         check('ordinary/no-discovery', r.returncode == 0 and summary(r)[0] == 1 and state['calls'] == before and safe(r))
+        r = run(['ordinary.env', '--format=json'])
+        report = json.loads(r.stdout)
+        check('json/schema', r.returncode == 0 and report['schema_version'] == '1.5.0-compare-v1' and report['complete'] and report['before'] == 1 and report['after'] <= 1 and report['suppressed'] == report['before']-report['after'] and safe(r))
+        for name, flags in [('disable', ['--disable=AWS-ACCESS-KEY-ID']), ('severity', ['--min-severity=critical']), ('confidence', ['--min-confidence=1'])]:
+            r = run(['ordinary.env', '--format=json', *flags])
+            report = json.loads(r.stdout)
+            check('filters/' + name, r.returncode == 0 and report['raw'] == [] and report['kept'] == [] and report['before'] == report['after'] == report['suppression_percent'] == 0)
+        output = root / 'report.json'
+        r = run(['ordinary.env', '--format=json', '-o', str(output)])
+        check('output/json-private', r.returncode == 0 and not r.stdout and json.loads(output.read_text())['before'] == 1 and output.stat().st_mode & 0o777 == 0o600)
+        r = run(['ordinary.env', '--silence', '-o', str(output)])
+        check('output/pretty-explicit', r.returncode == 0 and not r.stdout and 'fixed candidates' in output.read_text())
+        r = run(['ordinary.env', '--silence'])
+        check('output/pretty-silence', r.returncode == 0 and not r.stdout)
+        for name, flags in [('source', ['missing.env']), ('baseline', ['ordinary.env', '--baseline=missing']), ('ci', ['ordinary.env', '--ci=false']), ('fail-on', ['ordinary.env', '--fail-on=high']), ('cap', ['ordinary.env', '--max-per-file=0']), ('format', ['ordinary.env', '--format=sarif']), ('ml-false', ['ordinary.env', '--ml=false'])]:
+            output.write_text('owned-existing-report')
+            before = state['calls']
+            r = run(['--format=json', '-o', str(output), *flags])
+            check('output/preserve-' + name, r.returncode == 2 and not r.stdout and output.read_text() == 'owned-existing-report' and state['calls'] == before)
+        r = run(['missing.env', '--format=json', '--min-confidence=1'])
+        report = json.loads(r.stdout)
+        check('json/incomplete-no-counts', r.returncode == 2 and report['complete'] is False and not any(key in report for key in ('before', 'after', 'suppressed', 'suppression_percent')) and safe(r))
         for mode, flags in (('error', []), ('hallucinate', []), ('slow', ['--timeout=50ms'])):
             state['mode'] = mode
             r = run(['production.txt', '--semantic', *flags])
             check(mode + '/no-percentage', r.returncode == 2 and b'fixed candidates vs' not in r.stdout)
             check(mode + '/private', safe(r))
+            r = run(['production.txt', '--semantic', '--format=json', *flags])
+            failed = json.loads(r.stdout)
+            check(mode + '/json-incomplete', r.returncode == 2 and failed['complete'] is False and 'suppression_percent' not in failed and safe(r))
+            output.write_text('owned-existing-report')
+            r = run(['production.txt', '--semantic', '--format=json', '-o', str(output), *flags])
+            check(mode + '/preserve-output', r.returncode == 2 and not r.stdout and output.read_text() == 'owned-existing-report')
         state['mode'] = 'normal'
         invalid = root / 'invalid-model.json'; invalid.write_text('{}')
         for name, argv in (

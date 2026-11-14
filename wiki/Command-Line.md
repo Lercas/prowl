@@ -98,7 +98,9 @@ python3 scripts/check_reconstruction.py /path/to/prowl
 
 Неподдерживаемые режимы теперь отклоняются явно. Например, `serve` исполняет
 каскад и правила, поэтому не принимает `--ml` и `--verify`. OCR доступен у
-`scan`, `repo` и `org`. `compare` повторяет сканирование и не поддерживает OCR.
+`scan`, `repo` и `org`. `compare` выполняет один кандидатный проход с локальным L2 и не поддерживает OCR.
+Он принимает `--format pretty|json`, `-o` и report-фильтры; baseline/CI gate для него
+недоступны. Подробнее — [сравнение](Semantic-Discovery.md).
 `--project` относится к Jira, `--space` — к
 Confluence. Все фактически поддерживаемые Git-режимы `repo` сохранены.
 

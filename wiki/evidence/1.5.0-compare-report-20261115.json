@@ -1,0 +1,234 @@
+{
+  "status": "locally qualified comparison reporting; not published",
+  "base_commit": "36c31fd",
+  "native": {
+    "binary_sha256": "91ac20d0d56da5548f65ea8605dfc19fc4dfb74a286cb6da09f4ef0555d9ce54",
+    "passed": 52,
+    "total": 52,
+    "checks": [
+      {
+        "case": "production.txt/pool",
+        "passed": true
+      },
+      {
+        "case": "production.txt/one-discovery",
+        "passed": true
+      },
+      {
+        "case": "production.txt/private",
+        "passed": true
+      },
+      {
+        "case": "production.json/pool",
+        "passed": true
+      },
+      {
+        "case": "production.json/one-discovery",
+        "passed": true
+      },
+      {
+        "case": "production.json/private",
+        "passed": true
+      },
+      {
+        "case": "production.yaml/pool",
+        "passed": true
+      },
+      {
+        "case": "production.yaml/one-discovery",
+        "passed": true
+      },
+      {
+        "case": "production.yaml/private",
+        "passed": true
+      },
+      {
+        "case": "production.toml/pool",
+        "passed": true
+      },
+      {
+        "case": "production.toml/one-discovery",
+        "passed": true
+      },
+      {
+        "case": "production.toml/private",
+        "passed": true
+      },
+      {
+        "case": "bundle.js/pool",
+        "passed": true
+      },
+      {
+        "case": "bundle.js/one-discovery",
+        "passed": true
+      },
+      {
+        "case": "bundle.js/private",
+        "passed": true
+      },
+      {
+        "case": "changed-during-inference/pool",
+        "passed": true
+      },
+      {
+        "case": "changed-during-inference/no-reread",
+        "passed": true
+      },
+      {
+        "case": "ordinary/no-discovery",
+        "passed": true
+      },
+      {
+        "case": "json/schema",
+        "passed": true
+      },
+      {
+        "case": "filters/disable",
+        "passed": true
+      },
+      {
+        "case": "filters/severity",
+        "passed": true
+      },
+      {
+        "case": "filters/confidence",
+        "passed": true
+      },
+      {
+        "case": "output/json-private",
+        "passed": true
+      },
+      {
+        "case": "output/pretty-explicit",
+        "passed": true
+      },
+      {
+        "case": "output/pretty-silence",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-source",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-baseline",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-ci",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-fail-on",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-cap",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-format",
+        "passed": true
+      },
+      {
+        "case": "output/preserve-ml-false",
+        "passed": true
+      },
+      {
+        "case": "json/incomplete-no-counts",
+        "passed": true
+      },
+      {
+        "case": "error/no-percentage",
+        "passed": true
+      },
+      {
+        "case": "error/private",
+        "passed": true
+      },
+      {
+        "case": "error/json-incomplete",
+        "passed": true
+      },
+      {
+        "case": "error/preserve-output",
+        "passed": true
+      },
+      {
+        "case": "hallucinate/no-percentage",
+        "passed": true
+      },
+      {
+        "case": "hallucinate/private",
+        "passed": true
+      },
+      {
+        "case": "hallucinate/json-incomplete",
+        "passed": true
+      },
+      {
+        "case": "hallucinate/preserve-output",
+        "passed": true
+      },
+      {
+        "case": "slow/no-percentage",
+        "passed": true
+      },
+      {
+        "case": "slow/private",
+        "passed": true
+      },
+      {
+        "case": "slow/json-incomplete",
+        "passed": true
+      },
+      {
+        "case": "slow/preserve-output",
+        "passed": true
+      },
+      {
+        "case": "bad-model/rejected",
+        "passed": true
+      },
+      {
+        "case": "missing-source/rejected",
+        "passed": true
+      },
+      {
+        "case": "verification/rejected",
+        "passed": true
+      },
+      {
+        "case": "sidecar/rejected",
+        "passed": true
+      },
+      {
+        "case": "remote-discovery/rejected",
+        "passed": true
+      },
+      {
+        "case": "global-pool-bound",
+        "passed": true
+      },
+      {
+        "case": "auth",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compare-native-qy4qhqri",
+    "scope": "synthetic local files, owned loopback inference stub and embedded L2 only; no real model-quality, provider or production claim"
+  },
+  "validation": {
+    "full_go": "passed Go 1.27.4 CGO_ENABLED=0 ./...",
+    "race": "passed cmd/prowl and internal/scan",
+    "lint": "0 issues",
+    "minimum_go": "passed Go 1.26.11 cmd/prowl and internal/scan",
+    "completion": "executed Bash and Zsh command-specific format choices; fish generated but runtime not installed"
+  },
+  "limits": [
+    "synthetic local fixtures and owned loopback semantic stub only",
+    "not model accuracy or provider validity evidence",
+    "early parser/config/model errors remain stderr CLI errors",
+    "final Docker images and release publication remain unqualified"
+  ]
+}

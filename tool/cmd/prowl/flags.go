@@ -31,6 +31,29 @@ type flagSpec struct {
 	names, commands    []string
 	value, description string
 	apply              func(*commonFlags, string) error
+	commandValues      map[string][]string
+}
+
+func (f flagSpec) forCommand(command string) flagSpec {
+	if values := f.commandValues[command]; values != nil {
+		f.value = strings.Join(values, "|")
+		apply := f.apply
+		f.apply = func(c *commonFlags, value string) error {
+			for _, allowed := range values {
+				if value == allowed {
+					return apply(c, value)
+				}
+			}
+			return fmt.Errorf("must be one of %s", strings.Join(values, "|"))
+		}
+	}
+	return f
+}
+
+func reportFormatFlag() flagSpec {
+	f := enumFlag("--format", scanCommands+" index diff", "report format (compare/index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format })
+	f.commandValues = map[string][]string{"compare": {"pretty", "json"}, "index": {"pretty", "json"}, "diff": {"pretty", "json"}}
+	return f
 }
 
 func (f flagSpec) applies(command string) bool {
@@ -43,7 +66,7 @@ func (f flagSpec) applies(command string) bool {
 }
 
 func valueFlag(names, commands, value, description string, apply func(*commonFlags, string) error) flagSpec {
-	return flagSpec{strings.Fields(names), strings.Fields(commands), value, description, apply}
+	return flagSpec{names: strings.Fields(names), commands: strings.Fields(commands), value: value, description: description, apply: apply}
 }
 
 func stringFlag(names, commands, value, description string, field func(*commonFlags) *string) flagSpec {
@@ -155,14 +178,14 @@ var cliFlags = []flagSpec{
 	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
 	stringFlag("--index", indexedCommands+" index diff", "DIR", "local private secret index (opt-in)", func(c *commonFlags) *string { return &c.indexDir }),
 	stringFlag("--scope", indexedCommands+" index diff", "NAME", "stable scan scope name for the index", func(c *commonFlags) *string { return &c.indexScope }),
-	enumFlag("--format", scanCommands+" index diff", "report format (default pretty; index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
-	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
+	reportFormatFlag(),
+	enumFlag("--fail-on", indexedCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
 	// In 1.5 every incomplete scan fails closed; retain the released flag without allowing opt-out.
 	valueFlag("--strict", scanCommands, "", "1.4 compatibility: an incomplete scan always exits 2, including --strict=false", func(_ *commonFlags, value string) error {
 		_, err := booleanValue(value)
 		return err
 	}),
-	boolFlag("--ci", scanCommands, "CI gate: exit 1 on high/critical; an explicit --fail-on wins; an incomplete scan exits 2", func(c *commonFlags) *bool { return &c.ci }),
+	boolFlag("--ci", indexedCommands, "CI gate: exit 1 on high/critical; an explicit --fail-on wins; an incomplete scan exits 2", func(c *commonFlags) *bool { return &c.ci }),
 	boolFlag("--fail-on-verified", indexedCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
 	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),
 	stringFlag("--taxonomy", detectorCommands, "FILE", "override the embedded taxonomy", func(c *commonFlags) *string { return &c.taxonomy }),
@@ -193,8 +216,8 @@ var cliFlags = []flagSpec{
 	boolFlag("--git-timeline", "scan repo org", "build a Git observation timeline (implies --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
 	boolFlag("--history", "scan compare repo org", "scan Git blob history", func(c *commonFlags) *bool { return &c.history }),
 	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
-	stringFlag("--baseline", scanCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
-	stringFlag("--write-baseline", scanCommands, "FILE", "write a baseline from complete scan results", func(c *commonFlags) *string { return &c.writeBaseline }),
+	stringFlag("--baseline", indexedCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
+	stringFlag("--write-baseline", indexedCommands, "FILE", "write a baseline from complete scan results", func(c *commonFlags) *string { return &c.writeBaseline }),
 	sizeFlag("--max-size", scanCommands+" guard", "maximum input/member size (scan: 10MB; guard: 1MiB, max 8MiB)", func(c *commonFlags) *int64 { return &c.maxSize }),
 	intFlag("--workers", scanCommands, "scan concurrency; 0 selects the runtime default", 0, func(c *commonFlags) *int { return &c.workers }),
 	durationFlag("--timeout", scanCommands+" serve hermes-audit guard", "total scan/request timeout (guard: default 3s, max 30s)", func(c *commonFlags) *time.Duration { return &c.timeout }),
@@ -222,7 +245,7 @@ var cliFlags = []flagSpec{
 	floatFlag("--min-confidence", scanCommands, "minimum reported confidence", func(c *commonFlags) *float64 { return &c.minConfidence }),
 	enumFlag("--min-severity", scanCommands, "minimum reported severity", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.minSeverity }),
 	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
-	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
+	intFlag("--max-per-file", indexedCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
 	boolFlag("--ml", scanCommands+" selftest", "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
 	boolFlag("--semantic", indexedCommands+" compare", "find source-backed candidates with an opt-in model (loopback by default)", func(c *commonFlags) *bool { return &c.semantic }),
 	stringFlag("--semantic-url", indexedCommands+" compare", "URL", "model endpoint (implies semantic)", func(c *commonFlags) *string { return &c.semanticURL }),
@@ -369,6 +392,10 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 				}
 			}
 		}
+		if selected != nil {
+			effective := selected.forCommand(command)
+			selected = &effective
+		}
 		if selected == nil {
 			if known {
 				return c, nil, fmt.Errorf("flag %q does not apply to command %q", name, strings.ReplaceAll(command, ".", " "))
@@ -410,6 +437,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	}
 	if command == "agents" && c.cmd.shellHistory && c.cmd.agentHome == "" {
 		return c, nil, errors.New("--shell-history requires an explicit --agent-home DIR")
+	}
+	if command == "compare" && seen["--ml"] && !c.mlEmbed {
+		return c, nil, errors.New("compare requires local L2; --ml=false is not supported")
 	}
 	if c.gitTimeline {
 		c.history = true

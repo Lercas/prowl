@@ -50,14 +50,14 @@ func (c *comparisonPool) capture(batch []model.Finding, raw bool) bool {
 			return false
 		}
 		// Include conservative struct/string-allocation overhead without marshaling large batches.
-		n := 1024 + len(finding.Type) + len(finding.Source) + len(finding.Path) + len(finding.Redacted) + len(finding.Fingerprint)
+		n := 1024 + len(finding.Type) + len(finding.Source) + len(finding.Path) + len(finding.Redacted) + len(finding.Fingerprint) + len(finding.Severity) + len(finding.Stage)
 		if c.rows >= c.maxRows || n > c.maxBytes-c.bytes {
 			c.fail()
 			return false
 		}
 		c.rows++
 		c.bytes += n
-		projected := model.Finding{Type: strings.Clone(finding.Type), Source: strings.Clone(finding.Source), Path: strings.Clone(finding.Path), Redacted: strings.Clone(finding.Redacted), Fingerprint: strings.Clone(finding.Fingerprint), Line: finding.Line, Col: finding.Col, ByteStart: finding.ByteStart, ByteEnd: finding.ByteEnd}
+		projected := model.Finding{Type: strings.Clone(finding.Type), Severity: strings.Clone(finding.Severity), Confidence: finding.Confidence, Stage: strings.Clone(finding.Stage), Source: strings.Clone(finding.Source), Path: strings.Clone(finding.Path), Redacted: strings.Clone(finding.Redacted), Fingerprint: strings.Clone(finding.Fingerprint), Line: finding.Line, Col: finding.Col, ByteStart: finding.ByteStart, ByteEnd: finding.ByteEnd}
 		if raw {
 			c.result.Raw = append(c.result.Raw, projected)
 		} else {

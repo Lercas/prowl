@@ -192,3 +192,18 @@ func TestComparisonPreflightRejectsInvalidScorersBeforeInput(t *testing.T) {
 		}
 	}
 }
+
+func TestComparisonProjectionRetainsReportFilterMetadata(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	pool := comparisonPool{ctx: ctx, cancel: cancel, maxRows: 2, maxBytes: 8192}
+	f := model.Finding{Type: "aws_access_key_id", Severity: "high", Confidence: .91, Stage: "l1"}
+	if !pool.capture([]model.Finding{f}, true) || !pool.capture([]model.Finding{f}, false) {
+		t.Fatal("capture failed")
+	}
+	for _, got := range []model.Finding{pool.result.Raw[0], pool.result.Kept[0]} {
+		if got.Severity != f.Severity || got.Confidence != f.Confidence || got.Stage != f.Stage {
+			t.Fatalf("filter metadata lost: %+v", got)
+		}
+	}
+}

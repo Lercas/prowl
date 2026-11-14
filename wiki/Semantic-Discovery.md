@@ -69,8 +69,14 @@ MCP не принимает. LSP не вызывает модель при вв�
 Compare использует только in-process L2, включая совместимую `--ml-model`.
 Sidecar `--ml-url`, provider verification и verifier selection для compare
 отклоняются. OCR и stdin сохраняют прежнее ограничение команды. Remote semantic
-по-прежнему требует явный opt-in и HTTPS. Вывод compare остаётся текстовой сводкой;
-он не измеряет ground-truth accuracy и не подтверждает действительность секрета.
+по-прежнему требует явный opt-in и HTTPS. `--format pretty|json` выбирает сводку или envelope `1.5.0-compare-v1`,
+`-o` атомарно записывает приватный файл (0600). JSON содержит `complete`, raw/kept,
+счётчики до/после и процент подавления. При неполном intake stdout JSON содержит
+`complete:false` без счётчиков; существующий файл отчёта сохраняется.
+`--min-confidence`, `--min-severity` и `--disable` применяются к обеим выборкам до
+dedupe. Baseline, CI gate, `--fail-on`, `--max-per-file` и `--ml=false` отклоняются;
+сравнение всегда включает локальный L2. `--silence` скрывает только pretty stdout.
+Сводка не измеряет ground-truth accuracy и не подтверждает действительность секрета.
 По умолчанию строки группируются по fingerprint: сохранившийся context сохраняет
 идентичность в группе. `--no-dedupe` считает отдельные принятые кандидатные строки;
 одинаковое значение у оставшегося кандидата не скрывает подавление другой строки.

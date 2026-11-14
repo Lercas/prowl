@@ -43,7 +43,7 @@ func cmdCompare(args []string) int {
 		return code
 	}
 	if len(rest) == 1 && rest[0] == "-" {
-		fmt.Fprintln(os.Stderr, "compare needs a repeatable source; stdin cannot be scanned twice")
+		fmt.Fprintln(os.Stderr, "compare does not support stdin")
 		return 2
 	}
 	if c.ocrEnabled {
@@ -66,6 +66,10 @@ func cmdCompare(args []string) int {
 		return 2
 	}
 	setupLogging(c)
+	if c.format != "pretty" && c.format != "json" {
+		logx.Error("compare supports only pretty or json output")
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
@@ -98,9 +102,10 @@ func cmdCompare(args []string) int {
 	})
 	if err != nil {
 		logx.Error("comparison failed", "err", err)
+		writeComparisonFailure(c)
 		return 2
 	}
-	raw, kept := comparison.Raw, comparison.Kept
+	raw, kept := applyReportFilters(c, comparison.Raw), applyReportFilters(c, comparison.Kept)
 	if c.dedupe {
 		raw, kept = dedupeFingerprints(raw), dedupeFingerprints(kept)
 		// Retained values may survive at a different occurrence than the raw dedupe winner.
@@ -115,7 +120,10 @@ func cmdCompare(args []string) int {
 		}
 	}
 
-	printCompare(raw, kept)
+	if err := writeComparison(ctx, c, raw, kept); err != nil {
+		logx.Error("cannot write comparison", "err", err)
+		return 2
+	}
 	return 0
 }
 
@@ -124,7 +132,10 @@ func compareKey(f model.Finding) string {
 }
 
 // printCompare renders the regex-baseline -> Prowl funnel and a breakdown of what the ML suppressed.
-func printCompare(raw, kept []model.Finding) {
+func printCompare(raw, kept []model.Finding) { fmt.Print(formatCompare(raw, kept)) }
+
+func formatCompare(raw, kept []model.Finding) string {
+	var b strings.Builder
 	keptSet := make(map[string]int, len(kept))
 	for _, f := range kept {
 		keptSet[compareKey(f)]++
@@ -148,16 +159,16 @@ func printCompare(raw, kept []model.Finding) {
 	if n > 0 {
 		pct = 100 * float64(suppressed) / float64(n)
 	}
-	fmt.Printf("\nProwl compare — fixed candidates vs the ML-filtered set\n\n")
-	fmt.Printf("  before local L2 (fixed candidates):  %6d findings\n", n)
-	fmt.Printf("  after Prowl's ML context filter:     %6d findings\n", m)
-	fmt.Printf("  -----------------------------------------------------\n")
-	fmt.Printf("  suppressed by ML as not-a-secret:    %6d  (%.0f%%)\n", suppressed, pct)
-	fmt.Printf("\n  (Input and candidate discovery run once; counts follow duplicate handling.\n")
-	fmt.Printf("   Accuracy and credential validity require separate validation.)\n")
+	fmt.Fprintf(&b, "\nProwl compare — fixed candidates vs the ML-filtered set\n\n")
+	fmt.Fprintf(&b, "  before local L2 (fixed candidates):  %6d findings\n", n)
+	fmt.Fprintf(&b, "  after Prowl's ML context filter:     %6d findings\n", m)
+	fmt.Fprintf(&b, "  -----------------------------------------------------\n")
+	fmt.Fprintf(&b, "  suppressed by ML as not-a-secret:    %6d  (%.0f%%)\n", suppressed, pct)
+	fmt.Fprintf(&b, "\n  (Input and candidate discovery run once; counts follow duplicate handling.\n")
+	fmt.Fprintf(&b, "   Accuracy and credential validity require separate validation.)\n")
 	if suppressed == 0 {
-		fmt.Printf("\n  No displayed candidate identities were removed by local L2.\n\n")
-		return
+		fmt.Fprintf(&b, "\n  No displayed candidate identities were removed by local L2.\n\n")
+		return b.String()
 	}
 	type tc struct {
 		typ string
@@ -167,22 +178,28 @@ func printCompare(raw, kept []model.Finding) {
 	for t, c := range byType {
 		tcs = append(tcs, tc{t, c})
 	}
-	sort.Slice(tcs, func(i, j int) bool { return tcs[i].n > tcs[j].n })
-	fmt.Printf("\n  suppressed by detector type:\n")
+	sort.Slice(tcs, func(i, j int) bool {
+		if tcs[i].n == tcs[j].n {
+			return tcs[i].typ < tcs[j].typ
+		}
+		return tcs[i].n > tcs[j].n
+	})
+	fmt.Fprintf(&b, "\n  suppressed by detector type:\n")
 	for i, t := range tcs {
 		if i >= 8 {
-			fmt.Printf("    %6d  … and %d more types\n", 0, len(tcs)-8)
+			fmt.Fprintf(&b, "    %6d  … and %d more types\n", 0, len(tcs)-8)
 			break
 		}
-		fmt.Printf("    %6d  %s\n", t.n, logx.SanitizeTerminal(t.typ))
+		fmt.Fprintf(&b, "    %6d  %s\n", t.n, logx.SanitizeTerminal(t.typ))
 	}
-	fmt.Printf("\n  examples Prowl silenced:\n")
+	fmt.Fprintf(&b, "\n  examples Prowl silenced:\n")
 	for _, f := range sample {
 		// f.Path/Type/Redacted come from a (possibly hostile) scanned repo — strip terminal escapes.
-		fmt.Printf("    %s:%d  %s  %s\n", logx.SanitizeTerminal(f.Path), f.Line,
+		fmt.Fprintf(&b, "    %s:%d  %s  %s\n", logx.SanitizeTerminal(f.Path), f.Line,
 			logx.SanitizeTerminal(f.Type), logx.SanitizeTerminal(f.Redacted))
 	}
-	fmt.Println()
+	fmt.Fprintln(&b)
+	return b.String()
 }
 
 // checkSourceModes rejects mutually-exclusive scan inputs (--staged / --since / --history / '-' stdin /
