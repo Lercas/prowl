@@ -7,7 +7,7 @@ import (
 )
 
 // PolicyDigest includes extraction semantics omitted by ordinary JSON serialization.
-func (e *Engine) PolicyDigest() string {
+func (e *Engine) PolicyDigest() (string, error) {
 	type policyTemplate struct {
 		Template *Template
 		Groups   []int
@@ -24,7 +24,10 @@ func (e *Engine) PolicyDigest() string {
 		}
 		templates = append(templates, policyTemplate{t, groups})
 	}
-	b, _ := json.Marshal(templates)
+	b, err := json.Marshal(templates)
+	if err != nil {
+		return "", err
+	}
 	h := sha256.Sum256(b)
-	return hex.EncodeToString(h[:])
+	return hex.EncodeToString(h[:]), nil
 }

@@ -9,14 +9,17 @@ import (
 )
 
 // PolicyDigest describes the active taxonomy without exposing its patterns in reports.
-func (d *Detector) PolicyDigest() string {
+func (d *Detector) PolicyDigest() (string, error) {
 	types := make([]taxonomy.SecretType, 0, len(d.types))
 	for _, compiled := range d.types {
 		st := compiled.st
 		st.RE = nil
 		types = append(types, st)
 	}
-	b, _ := json.Marshal(types)
+	b, err := json.Marshal(types)
+	if err != nil {
+		return "", err
+	}
 	h := sha256.Sum256(b)
-	return hex.EncodeToString(h[:])
+	return hex.EncodeToString(h[:]), nil
 }

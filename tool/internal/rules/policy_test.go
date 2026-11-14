@@ -23,7 +23,11 @@ func TestPolicyDistinguishesDefaultAndExplicitWholeMatchExtraction(t *testing.T)
 			t.Fatalf("expected one extraction: %+v", hits)
 		}
 		values = append(values, hits[0].Value)
-		policies = append(policies, e.PolicyDigest())
+		policy, err := e.PolicyDigest()
+		if err != nil {
+			t.Fatal(err)
+		}
+		policies = append(policies, policy)
 	}
 	if values[0] != "OWNEDVALUE42" || values[1] != "CUSTOM=OWNEDVALUE42" || policies[0] == policies[1] {
 		t.Fatal("different effective extraction semantics share a policy digest")

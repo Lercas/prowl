@@ -27,7 +27,11 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 	}
 	taxonomy := ""
 	if o.Detector != nil {
-		taxonomy = o.Detector.PolicyDigest()
+		var err error
+		taxonomy, err = o.Detector.PolicyDigest()
+		if err != nil {
+			c.Note("detection_policy_failed", "", true)
+		}
 	}
 	_, stages := p.Capabilities()
 	c.RegisterScope("detection_policy", "1.5.0", map[string]any{
@@ -36,7 +40,11 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 	})
 	rulePolicy := ""
 	if o.Rules != nil {
-		rulePolicy = o.Rules.PolicyDigest()
+		var err error
+		rulePolicy, err = o.Rules.PolicyDigest()
+		if err != nil {
+			c.Note("rules_policy_failed", "", true)
+		}
 	}
 	c.RegisterScope("rules", "", rulePolicy)
 }

@@ -131,6 +131,7 @@ rules. Каждый input добавляет scope своего caller-supplied 
 Digest active taxonomy и templates различает наборы правил, включая различие
 между неуказанным extractor group и явным `group: 0`; callback allowlist
 и изменяемые внешние сервисы не становятся доказательством immutable revision.
+Ошибка формирования policy digest помечает отчёт неполным, включая пустой batch.
 
 ### `GET /healthz`
 

@@ -2,12 +2,16 @@ package server
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
@@ -98,5 +102,29 @@ func TestHTTPPolicyScopeChangesWithActiveTaxonomy(t *testing.T) {
 	}
 	if len(policies) != 2 || policies[0] == policies[1] {
 		t.Fatal("different active taxonomies share a policy")
+	}
+}
+
+func TestHTTPUnserializablePolicyCannotCertifyEmptyBatch(t *testing.T) {
+	tax, err := taxonomy.LoadDefault()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tax.Types[0].Entropy = math.NaN()
+	dir := t.TempDir()
+	// Non-entropy matcher minima are unused by matching, but still part of the loaded policy.
+	body := "id: owned-policy\ninfo:\n  name: Owned policy\n  severity: high\nmatchers:\n  - type: word\n    words: ['CUSTOM=']\n    min: .nan\n"
+	if err := os.WriteFile(filepath.Join(dir, "owned.yaml"), []byte(body), 0600); err != nil {
+		t.Fatal(err)
+	}
+	engine, err := rules.Load(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := New(scan.New(scan.Options{Detector: detect.New(tax), Rules: engine}), 1)
+	r := do(s, http.MethodPost, "/scan/batch", `[]`)
+	var result model.ScanResult
+	if err := json.Unmarshal(r.Body.Bytes(), &result); err != nil || result.Complete || len(result.Diagnostics) != 2 {
+		t.Fatalf("policy digest failure became complete: %+v err=%v", result, err)
 	}
 }
