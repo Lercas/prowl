@@ -662,8 +662,9 @@
   },
   "full_corpus_comparison": {
     "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-recall-fullbench-f6yuqdry",
+    "source_commit": "c221047",
+    "binary_sha256": "af765bad3e3aec138f03b2e547499ac0c0ecf258fa65a446559dc7cd2d7f792f",
     "reference": {
-      "exit_code": 0,
       "complete": true,
       "positive": 12069,
       "negative": 428,
@@ -688,7 +689,7 @@
     },
     "gained_positive_count": 339,
     "lost_positive_ids": [],
-    "scope": "full pinned public corpus comparison with original extensions, unchanged model/threshold; subset remains the formal CI policy"
+    "scope": "full pinned public corpus, original extensions and unchanged model/threshold; subset remains the formal gate"
   },
   "native": {
     "complete": true,
@@ -1473,5 +1474,133 @@
     "new prose labels do not alter existing adjacent assignment ML records",
     "no external providers or production calls",
     "final Docker images and release still require qualification/publication"
-  ]
+  ],
+  "committed_source_validation": {
+    "source_commit": "c221047",
+    "subset": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "af765bad3e3aec138f03b2e547499ac0c0ecf258fa65a446559dc7cd2d7f792f",
+      "passed": true,
+      "recall": 0.7430754536771729,
+      "t4_fp_rate": 0.05804480651731161,
+      "secret_hits": 1556,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "status": "passed"
+    },
+    "native": {
+      "complete": true,
+      "expected_checks": 169,
+      "binary_sha256": "af765bad3e3aec138f03b2e547499ac0c0ecf258fa65a446559dc7cd2d7f792f",
+      "passed": 169,
+      "total": 169,
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-prose-native-hsq26n50",
+      "scope": "synthetic local prose only; no providers, remote model or production acceptance"
+    },
+    "final_suffix_guard": "covered by TestProseKeyDoesNotRequireEntropyDetectorInCustomTaxonomy, including the overlong-token case; passed Go 1.26.11 and race"
+  },
+  "main_integration": {
+    "source_commit": "ef45d85",
+    "full_go": "passed ./... Go 1.27.4 CGO_ENABLED=0",
+    "subset": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "388b59dcbfae22f81f16b3ff9b076493fc20e271fcf1586ea168eb1e85ae8665",
+      "passed": true,
+      "recall": 0.7430754536771729,
+      "t4_fp_rate": 0.05804480651731161,
+      "secret_hits": 1556,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "status": "passed"
+    },
+    "minimum_go_subset": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "fbb7f209c77a440b7d739a05491a42775d122bbce2a7a3a230826ba3f937c58c",
+      "passed": true,
+      "recall": 0.7430754536771729,
+      "t4_fp_rate": 0.05804480651731161,
+      "secret_hits": 1556,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "status": "passed"
+    },
+    "native": {
+      "complete": true,
+      "expected_checks": 169,
+      "binary_sha256": "388b59dcbfae22f81f16b3ff9b076493fc20e271fcf1586ea168eb1e85ae8665",
+      "passed": 169,
+      "total": 169,
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-prose-native-dh89itki",
+      "scope": "synthetic local prose only; no providers, remote model or production acceptance"
+    },
+    "lsp": {
+      "binary_sha256": "388b59dcbfae22f81f16b3ff9b076493fc20e271fcf1586ea168eb1e85ae8665",
+      "passed": 2332,
+      "total": 2332,
+      "corpus": {
+        "positive": 319,
+        "negative": 344,
+        "ambiguous": 2
+      },
+      "scope": "local real stdio; no ML, OCR or live-provider qualification",
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-lsp-native-xdjn2rvf"
+    },
+    "candidate_source_commit": "57aa3b0",
+    "final_images": "not rebuilt or qualified",
+    "external_ci": "not run"
+  }
 }
