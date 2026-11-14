@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"runtime"
 	"strings"
@@ -92,8 +93,9 @@ func (i scanItem) toModel() model.Item {
 }
 
 type scanResult struct {
-	Count    int             `json:"count"`
-	Findings []model.Finding `json:"findings"`
+	Count     int             `json:"count"`
+	Findings  []model.Finding `json:"findings"`
+	Truncated bool            `json:"truncated"`
 }
 
 // Handler returns the HTTP routes. Mountable into any server (tests, custom middleware).
@@ -241,10 +243,9 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 	atomic.AddInt64(&s.m.findings, int64(len(fs)))
 	// Bound the per-request output: even an allowed-size item can fan out to thousands of findings.
 	if capped, truncated := capFindings(fs); truncated {
-		atomic.AddInt64(&s.m.truncated, 1)
 		fs = capped
 	}
-	writeJSON(w, http.StatusOK, scanResult{Count: len(fs), Findings: fs})
+	s.writeScanResult(w, fs)
 }
 
 func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
@@ -305,16 +306,12 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		all = append(all, scan.Findings(ctx, s.det, s.eng, nil, it.toModel(), s.allow, nil)...)
+		atomic.AddInt64(&s.m.scanned, 1)
 	}
-	atomic.AddInt64(&s.m.scanned, int64(len(in)))
 	atomic.AddInt64(&s.m.findings, int64(len(all)))
 	// Final bound: the last item can push the aggregate just past the cap (capFindings trims), while
 	// batchTruncated covers stopping at exactly the cap with items left unscanned. Both add a note.
-	if capped, truncated := capFindings(all); truncated {
-		atomic.AddInt64(&s.m.truncated, 1)
-		all = capped
-	} else if batchTruncated {
-		atomic.AddInt64(&s.m.truncated, 1)
+	if batchTruncated {
 		all = append(all, model.Finding{
 			Detector:  "server",
 			Type:      "response_truncated",
@@ -323,11 +320,39 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 			Rationale: fmt.Sprintf("batch hit the per-request findings cap (%d); remaining items were not scanned", maxRespFindings),
 		})
 	}
-	writeJSON(w, http.StatusOK, scanResult{Count: len(all), Findings: all})
+	all, _ = capFindings(all)
+	s.writeScanResult(w, all)
+}
+
+func (s *Server) writeScanResult(w http.ResponseWriter, fs []model.Finding) {
+	if fs == nil {
+		fs = []model.Finding{}
+	}
+	truncated := false
+	for _, f := range fs {
+		if model.IsIncompleteFinding(f) {
+			truncated = true
+			break
+		}
+	}
+	if truncated {
+		atomic.AddInt64(&s.m.truncated, 1)
+	}
+	writeJSON(w, http.StatusOK, scanResult{Count: len(fs), Findings: fs, Truncated: truncated})
 }
 
 func decode(w http.ResponseWriter, r *http.Request, v any, maxBytes int64) error {
-	return json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBytes)).Decode(v)
+	raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBytes))
+	if err != nil {
+		return err
+	}
+	if err := validateRequestJSON(raw); err != nil {
+		return err
+	}
+	if _, batch := v.(*[]scanItem); batch && strings.TrimSpace(string(raw))[0] != '[' {
+		return errors.New("batch must be a JSON array")
+	}
+	return json.Unmarshal(raw, v)
 }
 
 // writeDecodeError maps a decode failure to its status: 413 when the body exceeded the MaxBytesReader

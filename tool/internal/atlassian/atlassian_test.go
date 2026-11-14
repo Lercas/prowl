@@ -119,7 +119,7 @@ func confluenceCloudMock() *httptest.Server {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Runbook",
 			"body":    map[string]any{"storage": map[string]any{"value": body}},
-			"version": map[string]any{"number": 1},
+			"version": map[string]any{"number": fixtureVersion(r, 3)},
 			"_links":  map[string]any{"webui": "/spaces/SP/pages/200"},
 		})
 	})
@@ -248,7 +248,7 @@ func TestConfluenceServerVersionPagination(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "500", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": body}},
-			"version": map[string]any{"number": 3}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 3)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -331,7 +331,7 @@ func TestConfluenceCloudVersionsRejectsBadSort(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": body}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 2)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -365,7 +365,7 @@ func TestConfluenceCloudStatusResilience(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": "live " + v1Secret}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 1)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -438,7 +438,7 @@ func TestConfluenceSkipIdenticalVersions(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{ // SAME body for every version
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": "unchanged " + v1Secret}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 3)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -516,7 +516,7 @@ func TestConfluenceEntityEncodedSecretFound(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": "url=https://h/?a=1&amp;k=" + v1Secret}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 1)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -593,11 +593,11 @@ func TestConfluenceParallelVersionsAllFound(t *testing.T) {
 		w.Write([]byte(`{"results":[{"number":1},{"number":2},{"number":3}],"_links":{}}`))
 	})
 	mux.HandleFunc("/wiki/api/v2/pages/200", func(w http.ResponseWriter, r *http.Request) {
-		v := r.URL.Query().Get("version")
+		v := strconv.Itoa(fixtureVersion(r, 3))
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": "key=" + secrets[v]}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 3)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -628,7 +628,7 @@ func TestConfluenceIdenticalBodyEmitsMinVersion(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "200", "title": "Doc",
 			"body":    map[string]any{"storage": map[string]any{"value": "key=" + v1Secret}},
-			"version": map[string]any{"number": 1}, "_links": map[string]any{"webui": "/x"},
+			"version": map[string]any{"number": fixtureVersion(r, 4)}, "_links": map[string]any{"webui": "/x"},
 		})
 	})
 	srv := httptest.NewServer(mux)
@@ -759,7 +759,7 @@ func confServerMock() *httptest.Server {
 		json.NewEncoder(w).Encode(map[string]any{
 			"id": "500", "title": "Runbook",
 			"body":    map[string]any{"storage": map[string]any{"value": body}},
-			"version": map[string]any{"number": 3},
+			"version": map[string]any{"number": fixtureVersion(r, 3)},
 			"_links":  map[string]any{"webui": "/display/ENG/Runbook"},
 		})
 	})
@@ -783,4 +783,14 @@ func TestConfluenceServerHistoryAndCurrent(t *testing.T) {
 	if !anyContains(items, currentSecret) {
 		t.Errorf("Server/DC Confluence: CURRENT-version secret NOT found — status=historical does not serve the latest version; items=%d", len(items))
 	}
+}
+
+// fixtureVersion models the requested version rather than returning a constant metadata number.
+func fixtureVersion(r *http.Request, live int) int {
+	if text := r.URL.Query().Get("version"); text != "" {
+		if n, err := strconv.Atoi(text); err == nil {
+			return n
+		}
+	}
+	return live
 }

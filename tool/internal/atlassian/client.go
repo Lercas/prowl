@@ -13,11 +13,14 @@ import (
 	"io"
 	"math/rand/v2"
 	"net/http"
+	"net/netip"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
@@ -52,6 +55,7 @@ type Client struct {
 	base     string // normalized base URL, no trailing slash (may include a context path)
 	authHdr  string
 	maxRetry int
+	initErr  error // invalid input is retained as a safe failure, never as a raw URL
 }
 
 // NewClient builds a Client over the SSRF-guarded transport (Server/DC on an internal host needs
@@ -66,15 +70,7 @@ const (
 )
 
 func NewClient(base string, auth Auth, timeout time.Duration) *Client {
-	base = strings.TrimRight(base, "/")
-	// Strip any userinfo (credential leak) AND any query/fragment — a base URL like
-	// "https://host/?x=1" or "...#frag" would otherwise corrupt every request path we append to it.
-	if u, err := url.Parse(base); err == nil && (u.User != nil || u.RawQuery != "" || u.Fragment != "") {
-		u.User = nil
-		u.RawQuery = ""
-		u.Fragment = ""
-		base = strings.TrimRight(u.String(), "/")
-	}
+	base, initErr := normalizeBaseURL(base)
 	hc := safehttp.Client(timeout)
 	// The walk hammers ONE host with many concurrent requests. On HTTP/1.1 (typical Server/DC) Go's
 	// default MaxIdleConnsPerHost of 2 means beyond two workers each request re-handshakes TCP+TLS every
@@ -89,8 +85,49 @@ func NewClient(base string, auth Auth, timeout time.Duration) *Client {
 		base:     base,
 		authHdr:  auth.header(),
 		maxRetry: 5,
+		initErr:  initErr,
 	}
 }
+
+func normalizeBaseURL(raw string) (string, error) {
+	invalid := errors.New("invalid Atlassian base URL: expected an absolute HTTP(S) URL with a host and valid port")
+	u, err := url.Parse(raw)
+	if err != nil || u.Opaque != "" || u.Hostname() == "" || (u.Scheme != "http" && u.Scheme != "https") {
+		return "", invalid
+	}
+	if strings.HasPrefix(u.Host, "[") {
+		ip, err := netip.ParseAddr(u.Hostname())
+		if err != nil || !ip.Is6() {
+			return "", invalid
+		}
+	} else if strings.Contains(u.Hostname(), ":") {
+		return "", invalid
+	}
+	if strings.HasSuffix(u.Host, ":") {
+		return "", invalid
+	}
+	if port := u.Port(); port != "" {
+		n, err := strconv.Atoi(port)
+		if err != nil || n < 1 || n > 65535 {
+			return "", invalid
+		}
+	}
+	// Always clear optional URL components, including a bare '?' (ForceQuery). Preserve escaped
+	// context paths: trimming decoded Path would reinterpret a trailing encoded slash (%2F).
+	u.User, u.RawQuery, u.Fragment, u.RawFragment = nil, "", "", ""
+	u.ForceQuery = false
+	return strings.TrimRight(u.String(), "/"), nil
+}
+
+// clientFailure preserves cause classification without printing provider/transport-controlled
+// error text, which may include a redirect URL, userinfo, or a secret response fragment.
+type clientFailure struct {
+	operation string
+	cause     error
+}
+
+func (e *clientFailure) Error() string { return "atlassian " + e.operation + " failed" }
+func (e *clientFailure) Unwrap() error { return e.cause }
 
 // reqError carries the HTTP status so callers can branch fallbacks on 401/404/410.
 type reqError struct {
@@ -100,7 +137,7 @@ type reqError struct {
 }
 
 func (e *reqError) Error() string {
-	return fmt.Sprintf("%s -> HTTP %d: %s", safehttp.RedactURL(e.URL), e.Status, truncate(e.Body, 200))
+	return fmt.Sprintf("atlassian HTTP request failed (status %d)", e.Status)
 }
 
 // statusOf returns the HTTP status of a request error, or 0 if it was not an HTTP error.
@@ -121,6 +158,12 @@ func (c *Client) post(ctx context.Context, path string, params url.Values, body,
 }
 
 func (c *Client) do(ctx context.Context, method, path string, params url.Values, body, out any) error {
+	if c.initErr != nil {
+		return c.initErr
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	full := c.base + path
 	if len(params) > 0 {
 		full += "?" + params.Encode()
@@ -129,7 +172,7 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 	if body != nil {
 		b, err := json.Marshal(body)
 		if err != nil {
-			return fmt.Errorf("marshal body: %w", err)
+			return &clientFailure{operation: "request encoding", cause: err}
 		}
 		bodyBytes = b
 	}
@@ -142,7 +185,7 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 		}
 		req, err := http.NewRequestWithContext(ctx, method, full, reader)
 		if err != nil {
-			return err
+			return &clientFailure{operation: "request construction", cause: err}
 		}
 		if c.authHdr != "" {
 			req.Header.Set("Authorization", c.authHdr)
@@ -155,7 +198,7 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 
 		resp, err := c.http.Do(req)
 		if err != nil {
-			return fmt.Errorf("%s %s: %w", method, safehttp.RedactURL(full), err)
+			return &clientFailure{operation: "HTTP request", cause: err}
 		}
 
 		// Rate limited / transiently unavailable: honor Retry-After, bounded retries.
@@ -168,11 +211,11 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 			if wait > 90*time.Second {
 				wait = 90 * time.Second
 			}
-			if _, err := io.Copy(io.Discard, io.LimitReader(resp.Body, 4096)); err != nil {
-				resp.Body.Close()
-				return fmt.Errorf("drain rate-limit response: %w", err)
+			_, readErr := io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+			closeErr := resp.Body.Close()
+			if readErr != nil || closeErr != nil {
+				return &clientFailure{operation: "rate-limit response cleanup", cause: errors.Join(readErr, closeErr)}
 			}
-			resp.Body.Close()
 			if attempt >= c.maxRetry {
 				return &reqError{Status: resp.StatusCode, URL: full, Body: "rate limited; retries exhausted"}
 			}
@@ -193,23 +236,53 @@ func (c *Client) do(ctx context.Context, method, path string, params url.Values,
 			return &reqError{Status: resp.StatusCode, URL: full, Body: string(b)}
 		}
 
+		// Read through EOF even if the first JSON value is already complete. Otherwise trailing
+		// bytes, a failed transport tail or an over-budget response could be reported as complete.
 		if out == nil {
-			if _, err := io.Copy(io.Discard, resp.Body); err != nil {
-				resp.Body.Close()
-				return fmt.Errorf("drain %s response: %w", safehttp.RedactURL(full), err)
-			}
-			resp.Body.Close()
-			return nil
+			n, readErr := io.Copy(io.Discard, io.LimitReader(resp.Body, maxResponseBytes+1))
+			closeErr := resp.Body.Close()
+			return checkedResponse(ctx, n, readErr, closeErr)
 		}
-		// Bound the response body: a hostile or pathological endpoint (a 200 MB Confluence page) would
-		// otherwise be read fully into memory. A truncated body fails to decode -> the item is skipped.
-		decErr := json.NewDecoder(io.LimitReader(resp.Body, maxResponseBytes)).Decode(out)
-		resp.Body.Close()
-		if decErr != nil {
-			return fmt.Errorf("decode %s: %w", safehttp.RedactURL(full), decErr)
+		raw, readErr := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+		closeErr := resp.Body.Close()
+		if err := checkedResponse(ctx, int64(len(raw)), readErr, closeErr); err != nil {
+			return err
 		}
+		// Validate the expected endpoint shape before committing it to the caller. A JSON error
+		// object with HTTP 200 must never be confused with an empty issue/version listing.
+		dst := reflect.ValueOf(out)
+		if dst.Kind() != reflect.Pointer || dst.IsNil() {
+			return errors.New("invalid Atlassian response destination")
+		}
+		parsed := reflect.New(dst.Type().Elem())
+		if err := jsonstrict.UnmarshalContext(ctx, raw, parsed.Interface()); err != nil {
+			return err
+		}
+		if err := validateResponse(parsed.Interface()); err != nil {
+			return err
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		dst.Elem().Set(parsed.Elem())
 		return nil
 	}
+}
+
+func checkedResponse(ctx context.Context, n int64, readErr, closeErr error) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if n > maxResponseBytes {
+		return errors.New("atlassian response exceeds the byte budget")
+	}
+	if readErr != nil {
+		return errors.New("atlassian response read failed")
+	}
+	if closeErr != nil {
+		return errors.New("atlassian response close failed")
+	}
+	return nil
 }
 
 func retryAfter(resp *http.Response, fallback time.Duration) time.Duration {
@@ -222,11 +295,4 @@ func retryAfter(resp *http.Response, fallback time.Duration) time.Duration {
 		}
 	}
 	return fallback
-}
-
-func truncate(s string, n int) string {
-	if len(s) <= n {
-		return s
-	}
-	return s[:n] + "…"
 }

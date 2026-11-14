@@ -149,19 +149,19 @@ func TestOffsetPosUTF16Column(t *testing.T) {
 	}
 }
 
-// TestReadMessageRecoversAfterBadFrame asserts an oversized Content-Length doesn't swallow the
-// following valid frame: readMessage rejects the bad frame, then resyncs and returns the next body.
+// Recovery is safe only after consuming a bounded, unique Content-Length. An unknown/oversized
+// length cannot identify which later header-like bytes belong to a rejected document's content.
 func TestReadMessageRecoversAfterBadFrame(t *testing.T) {
 	const good = `{"jsonrpc":"2.0","id":42,"method":"shutdown"}`
-	stream := "Content-Length: 99999999\r\n\r\n{\"x\":1}" + // oversized lie + short body
+	stream := "Content-Length: 7\r\nContent-Type: application/vscode-jsonrpc; charset=utf-16\r\n\r\n{\"x\":1}" +
 		"Content-Length: " + strconv.Itoa(len(good)) + "\r\n\r\n" + good
 	r := bufio.NewReader(strings.NewReader(stream))
 
-	// First read: the malformed frame is rejected as errBadFrame (not a disconnect).
+	// First read consumes the entire known body before returning a recoverable error.
 	if _, err := readMessage(r); !errors.Is(err, errBadFrame) {
 		t.Fatalf("first readMessage err = %v, want errBadFrame", err)
 	}
-	// Second read: the stream has resynced — the valid shutdown frame comes through intact.
+	// The following valid frame comes through intact at its exact boundary.
 	body, err := readMessage(r)
 	if err != nil {
 		t.Fatalf("second readMessage err = %v, want the recovered shutdown frame", err)
@@ -250,8 +250,8 @@ func TestDebounceCoalescesBurst(t *testing.T) {
 	}
 }
 
-// TestLargeDocumentBounded asserts an over-cap document returns empty diagnostics promptly (the
-// CLI's --max-size parity) while a document under the cap is still scanned and flags its secret.
+// TestLargeDocumentBounded asserts an over-cap document returns an incomplete warning promptly,
+// while a document under the cap is still scanned and flags its secret.
 func TestLargeDocumentBounded(t *testing.T) {
 	defer restoreDetectDefaults()
 	restoreDetectDefaults()
@@ -261,7 +261,7 @@ func TestLargeDocumentBounded(t *testing.T) {
 	}
 	e := &engine{det: detect.New(tax), maxBytes: 1 << 10} // 1 KiB cap for the test
 
-	// Over the cap: the document is skipped (no diagnostics, no full scan) even though it holds a secret.
+	// Over the cap: detection is skipped but the editor must not receive a clean result.
 	big := genericSecretLine + "\n" + strings.Repeat("filler filler filler\n", 300)
 	if len(big) <= e.maxBytes {
 		t.Fatalf("setup: doc (%d bytes) must exceed the cap (%d)", len(big), e.maxBytes)
@@ -270,8 +270,8 @@ func TestLargeDocumentBounded(t *testing.T) {
 	go func() { done <- scanDiagnostics(e, "file:///big.py", big) }()
 	select {
 	case got := <-done:
-		if len(got) != 0 {
-			t.Errorf("over-cap document must be skipped (empty diagnostics), got %d", len(got))
+		if len(got) != 1 || diagnosticCodeCount(got, "document_too_large") != 1 {
+			t.Errorf("over-cap document must carry an incomplete warning, got %d diagnostics", len(got))
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("over-cap scan did not return promptly — size cap not bounding the work")

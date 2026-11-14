@@ -2,8 +2,9 @@ package atlassian
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"hash/fnv"
+	"math"
 	"net/url"
 	"sort"
 	"strconv"
@@ -33,11 +34,14 @@ type confSpacesPageV2 struct {
 type confPageV2 struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
+	Status  string `json:"status"`
 	SpaceID string `json:"spaceId"`
 	Version struct {
 		Number int `json:"number"`
 	} `json:"version"`
 	Links confLinks `json:"_links"`
+	// Keep the listing filter when optional response metadata does not identify the status.
+	listStatuses []string
 }
 type confPagesPageV2 struct {
 	Results []confPageV2 `json:"results"`
@@ -56,7 +60,7 @@ type confVersionsPageV2 struct {
 
 type confBody struct {
 	Storage struct {
-		Value string `json:"value"`
+		Value *string `json:"value"`
 	} `json:"storage"`
 }
 type confPageBodyV2 struct {
@@ -120,18 +124,33 @@ const maxPages = 10000
 // round-trips the cap never sees. We keep the most recent maxVersionsPerPage.
 const maxVersionsPerPage = 5000
 
-// capVersions enforces the per-page fetch budget with a loud warn, keeping the most recent (numerically
-// largest) maxVersionsPerPage. It sorts first because the version-list endpoints return numbers in API
-// order (Cloud v2 is newest-first), so a positional tail-slice would otherwise keep the OLDEST window.
-func capVersions(versions []int, pageID string) []int {
-	if len(versions) <= maxVersionsPerPage {
-		return versions
+// versionWindow counts distinct versions, not repeated entries from overlapping API pages.
+func versionWindow(versions []int, limit int) ([]int, bool) {
+	window := newBoundedVersions(limit)
+	for _, n := range versions {
+		window.add(n)
 	}
-	logx.Warn("confluence: version count exceeds per-page budget — scanning the most recent only",
-		"page", pageID, "versions", len(versions), "cap", maxVersionsPerPage)
-	sorted := append([]int(nil), versions...)
-	sort.Ints(sorted)
-	return sorted[len(sorted)-maxVersionsPerPage:]
+	return window.window()
+}
+
+func itemVersionRank(it model.Item, fallback int) int {
+	if n, ok := it.Meta["version"].(int); ok && n > 0 {
+		return n
+	}
+	if fallback > 0 {
+		return fallback
+	}
+	return math.MaxInt
+}
+
+func withVersionSlot(ctx context.Context, sem chan struct{}, fetch func() error) error {
+	select {
+	case sem <- struct{}{}:
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	defer func() { <-sem }()
+	return fetch()
 }
 
 // scanVersionsParallel fetches each version of one page CONCURRENTLY, bounded by the shared sem so the
@@ -139,17 +158,22 @@ func capVersions(versions []int, pageID string) []int {
 // bodies per page (mutex-guarded) and emits the new ones. Fanning the per-version fetches out stops a
 // single heavily-versioned page from monopolizing one pool worker while the others idle — Confluence
 // has no bulk endpoint, so per-version concurrency is the only speed lever.
-func scanVersionsParallel(ctx context.Context, sem chan struct{}, versions []int, fetch func(n int) (model.Item, bool), emit func(model.Item)) {
+func scanVersionsParallel(ctx context.Context, sem chan struct{}, versions []int, fetch func(n int) (model.Item, bool), emit func(model.Item), initial ...model.Item) {
 	type winner struct {
 		n  int
 		it model.Item
 	}
 	var mu sync.Mutex
-	// bodyHash -> the item from the SMALLEST version number with that body. Picking the min version
+	// Exact text -> the item from the SMALLEST version number with that body. Picking the min version
 	// (rather than whichever goroutine won the mutex race) makes the emitted Path/Fingerprint of an
 	// unchanged-across-versions secret DETERMINISTIC across runs, so a --baseline doesn't flap. The min
 	// is also the version where the secret first appeared with that content — the most useful locator.
-	winners := map[uint64]winner{}
+	winners := map[string]winner{}
+	for _, it := range initial {
+		if it.Text != "" {
+			winners[it.Text] = winner{itemVersionRank(it, 0), it}
+		}
+	}
 	// A bounded set of workers (<= the global sem capacity) pulls version numbers off a channel, rather
 	// than spawning one goroutine per version — a page with thousands of versions would otherwise create
 	// thousands of mostly-blocked goroutines. Concurrency is still bounded GLOBALLY by sem.
@@ -179,13 +203,17 @@ func scanVersionsParallel(ctx context.Context, sem chan struct{}, versions []int
 					defer func() { <-sem }()
 					return fetch(n)
 				}()
+				if it.Error != nil {
+					emit(it)
+					continue
+				}
 				if !ok || it.Text == "" {
 					continue
 				}
-				h := bodyHash(it.Text)
+				rank := itemVersionRank(it, n)
 				mu.Lock()
-				if w, exists := winners[h]; !exists || n < w.n {
-					winners[h] = winner{n, it}
+				if w, exists := winners[it.Text]; !exists || rank < w.n {
+					winners[it.Text] = winner{rank, it}
 				}
 				mu.Unlock()
 			}
@@ -234,15 +262,19 @@ func nextCursor(next string) string {
 	if next == "" {
 		return ""
 	}
-	i := strings.IndexByte(next, '?')
-	if i < 0 {
-		return ""
-	}
-	q, err := url.ParseQuery(next[i+1:])
+	u, err := url.Parse(next)
 	if err != nil {
 		return ""
 	}
-	return q.Get("cursor")
+	q, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return ""
+	}
+	values := q["cursor"]
+	if len(values) != 1 {
+		return ""
+	}
+	return values[0]
 }
 
 func spaceWanted(key string, filter []string) bool {
@@ -267,7 +299,7 @@ type confCloudJob struct {
 func walkConfluenceCloud(ctx context.Context, c *Client, dep Deployment, opts Options, emit func(model.Item)) error {
 	spaces, err := confCloudSpaces(ctx, c, opts.Spaces)
 	if err != nil {
-		return err
+		emit(sourceFailure("confluence", "spaces", "space listing failed"))
 	}
 	workers := workerCount(opts)
 	logx.Info("confluence: spaces", "count", len(spaces), "workers", workers)
@@ -283,7 +315,7 @@ func walkConfluenceCloud(ctx context.Context, c *Client, dep Deployment, opts Op
 					return
 				}
 				if err := confCloudEnumSpace(ctx, c, sp, func(p confPageV2) { push(confCloudJob{sp.Key, p}) }); err != nil {
-					logx.Warn("confluence: space enumeration stopped early", "space", sp.Key, "err", err)
+					emit(sourceFailure("confluence", sp.Key, "space enumeration failed"))
 				}
 			}
 		},
@@ -298,6 +330,7 @@ func confCloudSpaces(ctx context.Context, c *Client, filter []string) ([]confSpa
 	// current AND archived spaces — pages in an archived space are otherwise invisible (T20).
 	for _, status := range []string{"current", "archived"} {
 		cursor := ""
+		var walk cursorWalk
 		for pages := 0; ; pages++ {
 			if err := ctx.Err(); err != nil {
 				return out, err
@@ -308,7 +341,7 @@ func confCloudSpaces(ctx context.Context, c *Client, filter []string) ([]confSpa
 			}
 			var page confSpacesPageV2
 			if err := c.get(ctx, "/wiki/api/v2/spaces", params, &page); err != nil {
-				if status == "archived" {
+				if status == "archived" && unsupportedStatus(err, pages == 0) {
 					break
 				}
 				return out, err
@@ -320,7 +353,13 @@ func confCloudSpaces(ctx context.Context, c *Client, filter []string) ([]confSpa
 				}
 			}
 			next := nextCursor(page.Links.Next)
-			if next == "" || next == cursor || pages >= maxPages { // empty-but-with-cursor page is legitimate
+			if page.Links.Next != "" && next == "" {
+				return out, fmt.Errorf("invalid pagination link")
+			}
+			if err := walk.advance(next); err != nil {
+				return out, err
+			}
+			if next == "" {
 				break
 			}
 			cursor = next
@@ -330,19 +369,23 @@ func confCloudSpaces(ctx context.Context, c *Client, filter []string) ([]confSpa
 }
 
 func confCloudEnumSpace(ctx context.Context, c *Client, sp confSpaceV2, push func(confPageV2)) error {
-	// Two status groups: live content (current+archived) is REQUIRED — its error fails the space; the
+	// Two status groups: live content (current+archived) is REQUIRED — its error marks the walk incomplete; the
 	// trashed/deleted pass is best-effort, so a build that rejects those statuses (a 400 on the
 	// combined request) does not also lose the live pages (T20). seen dedupes a page in both groups.
 	seen := map[string]bool{}
-	groups := []struct {
+	type statusGroup struct {
 		statuses []string
 		required bool
-	}{
+	}
+	groups := []statusGroup{
 		{[]string{"current", "archived"}, true},
 		{[]string{"trashed", "deleted"}, false},
 	}
-	for _, g := range groups {
+	var failures []error
+	for group := 0; group < len(groups); group++ {
+		g := groups[group]
 		cursor := ""
+		var walk cursorWalk
 		for pages := 0; ; pages++ {
 			if err := ctx.Err(); err != nil {
 				return err
@@ -356,71 +399,133 @@ func confCloudEnumSpace(ctx context.Context, c *Client, sp confSpaceV2, push fun
 			}
 			var page confPagesPageV2
 			if err := c.get(ctx, "/wiki/api/v2/spaces/"+url.PathEscape(sp.ID)+"/pages", params, &page); err != nil {
-				if !g.required {
-					break // optional trashed/deleted unsupported — live pages already scanned
+				if !g.required && unsupportedStatus(err, pages == 0) {
+					// A rejected combined filter does not prove each status is unsupported.
+					if len(g.statuses) > 1 {
+						for _, status := range g.statuses {
+							groups = append(groups, statusGroup{[]string{status}, false})
+						}
+					}
+					break
 				}
-				return err
+				failures = append(failures, err)
+				break
 			}
 			for _, p := range page.Results {
 				if p.ID == "" || seen[p.ID] {
 					continue
 				}
 				seen[p.ID] = true
+				p.listStatuses = g.statuses
 				push(p)
 			}
 			next := nextCursor(page.Links.Next)
-			if next == "" || next == cursor || pages >= maxPages { // empty-but-with-cursor page is legitimate
+			if page.Links.Next != "" && next == "" {
+				failures = append(failures, fmt.Errorf("invalid pagination link"))
+				break
+			}
+			if err := walk.advance(next); err != nil {
+				failures = append(failures, err)
+				break
+			}
+			if next == "" {
 				break
 			}
 			cursor = next
 		}
 	}
-	return nil
+	return errors.Join(failures...)
 }
 
 func confCloudScanPage(ctx context.Context, c *Client, dep Deployment, sem chan struct{}, spaceKey string, p confPageV2, opts Options, emit func(model.Item)) {
 	cur := p.Version.Number
-	if cur == 0 { // a page list missing version.number must not become ?version=0 (which is skipped)
-		cur = 1
-	}
-	versions := []int{cur}
-	if !opts.CurrentOnly && cur > 1 { // cur==1 -> only one version exists; skip the version-list call
-		// Enumerate version numbers WITHOUT body-format (T18: body-format caps limit at 50).
-		all, err := confCloudPageVersions(ctx, c, p.ID)
-		if err != nil {
-			logx.Warn("confluence: version list failed", "page", p.ID, "err", err)
-		} else if len(all) > 0 {
-			versions = capVersions(all, p.ID)
-			if !containsInt(versions, cur) {
-				versions = append(versions, cur)
+	fetch := func(n int) (model.Item, bool) {
+		params := url.Values{"body-format": {"storage"}, "include-version": {"true"}}
+		statuses := p.listStatuses
+		if p.Status != "" {
+			statuses = []string{p.Status}
+		}
+		for _, status := range statuses {
+			params.Add("status", status)
+		}
+		if n > 0 {
+			params.Set("version", strconv.Itoa(n))
+			if n != cur && len(statuses) > 0 {
+				params.Add("status", "historical")
 			}
 		}
-	}
-	// Fetch the per-version bodies concurrently (bounded by sem) — see scanVersionsParallel.
-	scanVersionsParallel(ctx, sem, versions, func(n int) (model.Item, bool) {
-		params := url.Values{"body-format": {"storage"}, "version": {strconv.Itoa(n)}}
 		var body confPageBodyV2
 		if err := c.get(ctx, "/wiki/api/v2/pages/"+url.PathEscape(p.ID), params, &body); err != nil {
-			logx.Warn("confluence: version body fetch failed", "page", p.ID, "version", n, "err", err)
-			return model.Item{}, false
+			return sourceFailure("confluence", confPath(p.Title, p.ID, n), "version body fetch failed"), false
 		}
-		text := storageText(body.Body.Storage.Value)
-		if text == "" {
-			return model.Item{}, false
+		version := n
+		if body.Version.Number > 0 {
+			version = body.Version.Number
+			if n > 0 && version != n {
+				emit(sourceFailure("confluence", confPath(p.Title, p.ID, n), "requested version differs from response metadata"))
+			}
 		}
-		return model.Item{
-			Source: "confluence",
-			Path:   confPath(p.Title, p.ID, n),
-			Text:   text,
-			Meta: map[string]any{
-				"url":     dep.BaseURL + dep.WikiPrefix + body.Links.Webui,
-				"version": n,
-				"page_id": p.ID,
-				"space":   spaceKey,
-				"updated": body.Version.CreatedAt,
-			},
-		}, true
-	}, emit)
+		return confBodyItem(p.Title, p.ID, spaceKey, version, storageText(*body.Body.Storage.Value),
+			dep.BaseURL+dep.WikiPrefix+body.Links.Webui, body.Version.CreatedAt, ""), true
+	}
+	// Read the live body independently of page-list and version-list snapshots. Either listing
+	// can lag behind an edit; pinning its number would miss the actual latest content.
+	var live model.Item
+	var liveOK bool
+	if withVersionSlot(ctx, sem, func() error { live, liveOK = fetch(0); return nil }) != nil {
+		return
+	}
+	if live.Error != nil {
+		emit(live)
+	}
+	if opts.CurrentOnly {
+		if liveOK && live.Text != "" {
+			emit(live)
+		}
+		return
+	}
+	var initial []model.Item
+	if liveOK {
+		initial = append(initial, live)
+	}
+	// Finalize the live number before historical workers start using the fetch closure.
+	cur, _ = live.Meta["version"].(int)
+	versions := []int{p.Version.Number, cur}
+	var listingCapped bool
+	if cur != 1 || p.Version.Number > 1 || !liveOK {
+		all, capped, err := confCloudPageVersions(ctx, c, p.ID)
+		listingCapped = capped
+		if err != nil {
+			emit(sourceFailure("confluence", p.ID+"#versions", "version listing failed"))
+		}
+		if len(all) == 0 && err == nil {
+			emit(sourceFailure("confluence", p.ID+"#versions", "version listing is empty for an existing page"))
+		}
+		versions = append(versions, all...)
+	}
+	// The live attempt spends one body slot even on failure. A known successful live number is
+	// cached, including an explicitly empty body, and must not be fetched again as historical.
+	pending := make([]int, 0, len(versions))
+	for _, n := range versions {
+		if n > 0 && (!liveOK || n != cur) {
+			pending = append(pending, n)
+		}
+	}
+	pending, capped := versionWindow(pending, maxVersionsPerPage-1)
+	if capped || listingCapped {
+		emit(sourceFailure("confluence", p.ID+"#versions", "version budget exhausted"))
+	}
+	scanVersionsParallel(ctx, sem, pending, fetch, emit, initial...)
+}
+
+func confBodyItem(title, pageID, spaceKey string, version int, text, bodyURL, updated, author string) model.Item {
+	var metaVersion any = version
+	if version <= 0 {
+		metaVersion = "current"
+	}
+	return model.Item{Source: "confluence", Path: confPath(title, pageID, version), Text: text,
+		Meta: map[string]any{"url": bodyURL, "version": metaVersion, "page_id": pageID,
+			"space": spaceKey, "updated": updated, "author": author}}
 }
 
 // storageEntities decodes ONLY the five XML predefined entities that Confluence storage XHTML uses to
@@ -441,30 +546,37 @@ func storageText(raw string) string {
 	return storageEntities.Replace(raw)
 }
 
-func confCloudPageVersions(ctx context.Context, c *Client, pageID string) ([]int, error) {
-	var nums []int
+func confCloudPageVersions(ctx context.Context, c *Client, pageID string) ([]int, bool, error) {
+	window := newBoundedVersions(maxVersionsPerPage)
 	cursor := ""
-	for pages := 0; ; pages++ {
+	var walk cursorWalk
+	for {
 		if err := ctx.Err(); err != nil {
-			return nums, err
+			return window.listing(err)
 		}
 		// NO sort param: the v2 VersionSortOrder enum is only {modified-date,-modified-date}; sending
 		// sort=version makes the strict Cloud API return 400, which dropped the WHOLE page history.
-		// Order is irrelevant here — every Number is collected regardless.
+		// Page order cannot affect the retained window: keep the highest distinct numbers.
 		params := url.Values{"limit": {"250"}}
 		if cursor != "" {
 			params.Set("cursor", cursor)
 		}
 		var page confVersionsPageV2
 		if err := c.get(ctx, "/wiki/api/v2/pages/"+url.PathEscape(pageID)+"/versions", params, &page); err != nil {
-			return nums, err
+			return window.listing(err)
 		}
 		for _, v := range page.Results {
-			nums = append(nums, v.Number)
+			window.add(v.Number)
 		}
 		next := nextCursor(page.Links.Next)
-		if next == "" || next == cursor || pages >= maxPages { // empty-but-with-cursor page is legitimate
-			return nums, nil
+		if page.Links.Next != "" && next == "" {
+			return window.listing(fmt.Errorf("invalid pagination link"))
+		}
+		if err := walk.advance(next); err != nil {
+			return window.listing(err)
+		}
+		if next == "" {
+			return window.listing(nil)
 		}
 		cursor = next
 	}
@@ -481,7 +593,7 @@ type confServerJob struct {
 func walkConfluenceServer(ctx context.Context, c *Client, dep Deployment, opts Options, emit func(model.Item)) error {
 	keys, err := confServerSpaceKeys(ctx, c, opts.Spaces)
 	if err != nil {
-		return err
+		emit(sourceFailure("confluence", "spaces", "space listing failed"))
 	}
 	workers := workerCount(opts)
 	logx.Info("confluence: spaces", "count", len(keys), "workers", workers)
@@ -495,7 +607,7 @@ func walkConfluenceServer(ctx context.Context, c *Client, dep Deployment, opts O
 				if err := confServerEnumSpace(ctx, c, sk, func(status string, p confContentV1) {
 					push(confServerJob{sk, status, p})
 				}); err != nil {
-					logx.Warn("confluence: space enumeration stopped early", "space", sk, "err", err)
+					emit(sourceFailure("confluence", sk, "space enumeration failed"))
 				}
 			}
 		},
@@ -520,7 +632,7 @@ func confServerSpaceKeys(ctx context.Context, c *Client, filter []string) ([]str
 			params := url.Values{"limit": {"100"}, "start": {strconv.Itoa(start)}, "status": {status}}
 			var page confSpacesPageV1
 			if err := c.get(ctx, "/rest/api/space", params, &page); err != nil {
-				if status == "archived" {
+				if status == "archived" && unsupportedStatus(err, pages == 0) {
 					break // some builds reject status=archived — current pass still ran
 				}
 				return keys, err
@@ -532,12 +644,14 @@ func confServerSpaceKeys(ctx context.Context, c *Client, filter []string) ([]str
 				}
 			}
 			pages++
-			if page.Links.Next == "" || len(page.Results) == 0 {
+			if page.Links.Next == "" {
 				break
 			}
+			if len(page.Results) == 0 {
+				return keys, fmt.Errorf("empty page with pagination link")
+			}
 			if pages >= maxPages {
-				logx.Warn("confluence: space listing hit the page cap — some spaces not enumerated", "status", status)
-				break
+				return keys, fmt.Errorf("space page budget exhausted")
 			}
 			start += len(page.Results)
 		}
@@ -550,6 +664,7 @@ func confServerEnumSpace(ctx context.Context, c *Client, spaceKey string, push f
 	// page, T20). A status the build rejects is skipped, not fatal. seen dedupes a page that appears
 	// under more than one status pass.
 	seen := map[string]bool{}
+	var failures []error
 	for _, status := range []string{"current", "draft", "trashed"} {
 		start, pages := 0, 0
 		for {
@@ -562,10 +677,11 @@ func confServerEnumSpace(ctx context.Context, c *Client, spaceKey string, push f
 			}
 			var page confContentPageV1
 			if err := c.get(ctx, "/rest/api/content", params, &page); err != nil {
-				if status != "current" {
+				if status != "current" && unsupportedStatus(err, pages == 0) {
 					break // optional status unsupported on this build — keep the other passes
 				}
-				return err
+				failures = append(failures, err)
+				break
 			}
 			for _, p := range page.Results {
 				if p.ID == "" || seen[p.ID] {
@@ -575,99 +691,114 @@ func confServerEnumSpace(ctx context.Context, c *Client, spaceKey string, push f
 				push(status, p)
 			}
 			pages++
-			if page.Links.Next == "" || len(page.Results) == 0 {
+			if page.Links.Next == "" {
+				break
+			}
+			if len(page.Results) == 0 {
+				failures = append(failures, fmt.Errorf("empty page with pagination link"))
 				break
 			}
 			if pages >= maxPages {
-				logx.Warn("confluence: page listing hit the page cap — some pages not enumerated", "space", spaceKey, "status", status)
+				failures = append(failures, fmt.Errorf("content page budget exhausted"))
 				break
 			}
 			start += len(page.Results)
 		}
 	}
-	return nil
+	return errors.Join(failures...)
 }
 
 func confServerScanPage(ctx context.Context, c *Client, dep Deployment, sem chan struct{}, spaceKey, listStatus string, p confContentV1, opts Options, emit func(model.Item)) {
-	current := p.Version.Number
-	if current == 0 {
-		current = 1
+	// Fetch the live body once before choosing history requests. An edit between the page list
+	// and this request must not label a new body with the old list's version number.
+	params := url.Values{"expand": {"body.storage,version"}}
+	if listStatus != "" && listStatus != "current" {
+		params.Set("status", listStatus)
 	}
-	versions := []int{current}
-	// Only walk history for live (current) pages: a draft/trashed page's live body is fetched with
-	// its own status (below); its historical versions are not reliably retrievable, so scan just the
-	// one we can read rather than fire 404s.
-	if !opts.CurrentOnly && listStatus == "current" && current > 1 { // current==1 -> only one version
-		all, err := confServerPageVersions(ctx, c, p.ID)
-		if err != nil {
-			logx.Warn("confluence: version list failed", "page", p.ID, "err", err)
-		} else if len(all) > 0 {
-			for _, n := range all {
-				if n > current {
-					current = n
-				}
-			}
-			versions = capVersions(all, p.ID)
-			// some DC builds omit the live version from /version — always scan the page's own
-			// current number so the latest content is never dropped.
-			if !containsInt(versions, current) {
-				versions = append(versions, current)
-			}
-		}
-	}
-	// current is finalized above; the fetch closure reads it (no concurrent mutation).
-	scanVersionsParallel(ctx, sem, versions, func(n int) (model.Item, bool) {
-		// The live version is fetched WITHOUT status=historical (Confluence 404s
-		// status=historical&version=<current>); a draft/trashed page's live body needs ITS status.
-		// Older versions use the portable status=historical&version=N (works Confluence 5.7 -> 10.x).
-		params := url.Values{"expand": {"body.storage,version"}}
-		switch {
-		case n != current:
-			params.Set("status", "historical")
-			params.Set("version", strconv.Itoa(n))
-		case listStatus != "current" && listStatus != "":
-			params.Set("status", listStatus)
-		}
-		var cont confContentV1
-		if err := c.get(ctx, "/rest/api/content/"+url.PathEscape(p.ID), params, &cont); err != nil {
-			logx.Warn("confluence: version body fetch failed", "page", p.ID, "version", n, "err", err)
-			return model.Item{}, false
-		}
-		text := storageText(cont.Body.Storage.Value)
-		if text == "" {
-			return model.Item{}, false
-		}
-		author := cont.Version.By.Email
+	var live confContentV1
+	liveErr := withVersionSlot(ctx, sem, func() error {
+		return c.get(ctx, "/rest/api/content/"+url.PathEscape(p.ID), params, &live)
+	})
+	current := live.Version.Number
+	var initial []model.Item
+	if liveErr != nil {
+		emit(sourceFailure("confluence", confPath(p.Title, p.ID, 0), "current body fetch failed"))
+	} else {
+		author := live.Version.By.Email
 		if author == "" {
-			author = cont.Version.By.DisplayName
+			author = live.Version.By.DisplayName
 		}
-		return model.Item{
-			Source: "confluence",
-			Path:   confPath(p.Title, p.ID, n),
-			Text:   text,
-			Meta: map[string]any{
-				"url":     dep.BaseURL + cont.Links.Webui,
-				"version": n,
-				"page_id": p.ID,
-				"space":   spaceKey,
-				"updated": cont.Version.When,
-				"author":  author,
-			},
-		}, true
-	}, emit)
+		initial = append(initial, confBodyItem(p.Title, p.ID, spaceKey, current,
+			storageText(*live.Body.Storage.Value), dep.BaseURL+live.Links.Webui, live.Version.When, author))
+	}
+	// Draft/trashed history is outside the supported Server/DC API contour.
+	if opts.CurrentOnly || (listStatus != "" && listStatus != "current") {
+		for _, it := range initial {
+			if it.Text != "" {
+				emit(it)
+			}
+		}
+		return
+	}
+	versions := []int{p.Version.Number, current}
+	var listingCapped bool
+	if current != 1 || p.Version.Number > 1 || liveErr != nil {
+		all, capped, err := confServerPageVersions(ctx, c, p.ID)
+		listingCapped = capped
+		if err != nil {
+			emit(sourceFailure("confluence", p.ID+"#versions", "version listing failed"))
+		}
+		if len(all) == 0 && err == nil && (current > 1 || p.Version.Number > 1 || current == 0) {
+			emit(sourceFailure("confluence", p.ID+"#versions", "version listing is empty for an existing page"))
+		}
+		versions = append(versions, all...)
+	}
+	// The live request has already spent one body slot, even if its metadata/body was unavailable.
+	// Its known number is cached; only other numbers consume further requests.
+	pending := make([]int, 0, len(versions))
+	for _, n := range versions {
+		if n > 0 && (liveErr != nil || n != current) {
+			pending = append(pending, n)
+		}
+	}
+	pending, capped := versionWindow(pending, maxVersionsPerPage-1)
+	if capped || listingCapped {
+		emit(sourceFailure("confluence", p.ID+"#versions", "version budget exhausted"))
+	}
+	fetch := func(n int) (model.Item, bool) {
+		q := url.Values{"expand": {"body.storage,version"}, "status": {"historical"}, "version": {strconv.Itoa(n)}}
+		var body confContentV1
+		if err := c.get(ctx, "/rest/api/content/"+url.PathEscape(p.ID), q, &body); err != nil {
+			return sourceFailure("confluence", confPath(p.Title, p.ID, n), "version body fetch failed"), false
+		}
+		version := n
+		if body.Version.Number > 0 {
+			version = body.Version.Number
+			if version != n {
+				emit(sourceFailure("confluence", confPath(p.Title, p.ID, n), "requested version differs from response metadata"))
+			}
+		}
+		author := body.Version.By.Email
+		if author == "" {
+			author = body.Version.By.DisplayName
+		}
+		return confBodyItem(p.Title, p.ID, spaceKey, version, storageText(*body.Body.Storage.Value),
+			dep.BaseURL+body.Links.Webui, body.Version.When, author), true
+	}
+	scanVersionsParallel(ctx, sem, pending, fetch, emit, initial...)
 }
 
-func confServerPageVersions(ctx context.Context, c *Client, pageID string) ([]int, error) {
+func confServerPageVersions(ctx context.Context, c *Client, pageID string) ([]int, bool, error) {
 	// The version list is OFFSET-paginated: a page edited for years has hundreds of versions, and the
 	// oldest (which may hold a since-removed secret) sit on later pages. A single fetch would silently
 	// drop them — the exact T30 history-walk miss. Loop on start until the last page.
 	path := "/rest/api/content/" + url.PathEscape(pageID) + "/version"
 	exp := "/rest/experimental/content/" + url.PathEscape(pageID) + "/version"
-	var nums []int
+	window := newBoundedVersions(maxVersionsPerPage)
 	start, pages := 0, 0
 	for {
 		if err := ctx.Err(); err != nil {
-			return nums, err
+			return window.listing(err)
 		}
 		params := url.Values{"start": {strconv.Itoa(start)}, "limit": {"200"}}
 		var page confVersionsPageV1
@@ -677,21 +808,23 @@ func confServerPageVersions(ctx context.Context, c *Client, pageID string) ([]in
 				path = exp // DC 7.x / Server expose the version list only under /rest/experimental
 				continue
 			}
-			return nums, err
+			return window.listing(err)
 		}
 		for _, v := range page.Results {
-			nums = append(nums, v.Number)
+			window.add(v.Number)
 		}
 		pages++
 		// Primary terminal is the absence of _links.next (Confluence v1 sets it whenever more rows
 		// remain); a short page is NOT treated as terminal here, so a partial middle page cannot drop
 		// the older versions on later pages. maxPages backstops a server that never drops next.
-		if page.Links.Next == "" || len(page.Results) == 0 {
-			return nums, nil
+		if page.Links.Next == "" {
+			return window.listing(nil)
+		}
+		if len(page.Results) == 0 {
+			return window.listing(fmt.Errorf("empty page with pagination link"))
 		}
 		if pages >= maxPages {
-			logx.Warn("confluence: version list exceeded the page cap — older versions not enumerated", "page", pageID)
-			return nums, nil
+			return window.listing(fmt.Errorf("version page budget exhausted"))
 		}
 		start += len(page.Results)
 	}
@@ -709,22 +842,8 @@ func confPath(title, pageID string, version int) string {
 	if pageID != "" {
 		title += " (" + pageID + ")"
 	}
-	return title + "@v" + strconv.Itoa(version)
-}
-
-func containsInt(xs []int, v int) bool {
-	for _, x := range xs {
-		if x == v {
-			return true
-		}
+	if version <= 0 {
+		return title + "@current"
 	}
-	return false
-}
-
-// bodyHash is a fast non-cryptographic hash used only to detect a page version whose storage body is
-// byte-identical to one already scanned (de-dup), never for security.
-func bodyHash(s string) uint64 {
-	h := fnv.New64a()
-	h.Write([]byte(s))
-	return h.Sum64()
+	return title + "@v" + strconv.Itoa(version)
 }

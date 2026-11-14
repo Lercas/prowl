@@ -108,6 +108,13 @@ func Collect(ctx context.Context, rawTarget string, opts Options) (<-chan model.
 		case "gitlab":
 			c.collectGitLab(ctx, items, &result)
 		}
+		if result.Failures > 0 {
+			// Completeness must reach the scan before reporting or baseline generation.
+			select {
+			case items <- model.Item{Source: "ci", Path: rawTarget, Error: result.LastError}:
+			case <-ctx.Done():
+			}
+		}
 		done <- result
 		close(done)
 	}()
@@ -283,6 +290,9 @@ func (c *collector) emitPayload(ctx context.Context, out chan<- model.Item, pref
 	})
 	result.Skipped += stats.Skipped
 	if recognized {
+		if err == nil && stats.Limited > 0 {
+			return fmt.Errorf("artifact content omitted at extraction limits")
+		}
 		return err
 	}
 	return c.emitFile(ctx, out, prefix, itemURL, raw, result)
@@ -291,7 +301,7 @@ func (c *collector) emitPayload(ctx context.Context, out chan<- model.Item, pref
 func (c *collector) emitFile(ctx context.Context, out chan<- model.Item, itemPath, itemURL string, raw []byte, result *Result) error {
 	if int64(len(raw)) > c.opts.MaxItem {
 		result.Skipped++
-		return nil
+		return fmt.Errorf("CI item exceeds --max-size (%d bytes)", c.opts.MaxItem)
 	}
 	text, ok := source.ScannableText(raw)
 	if !ok || len(text) == 0 {

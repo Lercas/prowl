@@ -86,6 +86,32 @@ func TestBadJSONIsClientError(t *testing.T) {
 	}
 }
 
+func TestScanRejectsAmbiguousOrLossyJSON(t *testing.T) {
+	for name, body := range map[string]string{
+		"second value":      `{"content":"clean"}{"content":"secret"}`,
+		"trailing text":     `{"content":"clean"} garbage`,
+		"duplicate content": `{"content":"secret","content":"clean"}`,
+		"case alias":        `{"content":"secret","Content":"clean"}`,
+		"invalid UTF8":      "{\"content\":\"\xff\"}",
+		"high surrogate":    `{"content":"\ud800"}`,
+		"low surrogate":     `{"content":"\udc00"}`,
+		"escaped duplicate": `{"content":"secret","\u0063ontent":"clean"}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			for _, endpoint := range []string{"/scan", "/scan/batch"} {
+				payload := body
+				if endpoint == "/scan/batch" {
+					payload = "[" + body + "]"
+				}
+				rr := do(newSrv(t), http.MethodPost, endpoint, payload)
+				if rr.Code != http.StatusBadRequest {
+					t.Errorf("%s accepted ambiguous input, status=%d", endpoint, rr.Code)
+				}
+			}
+		})
+	}
+}
+
 // TestServeUsesRuleTemplates proves the HTTP worker runs the rule-template engine, not just the
 // embedded taxonomy. A custom template fires on a token the taxonomy does not recognise, so a hit can
 // only come from the engine being wired through New -> handleScan/handleBatch.
@@ -248,7 +274,7 @@ func TestBatchResponseBoundedOnDenseInput(t *testing.T) {
 	}
 	var res scanResult
 	json.Unmarshal(rr.Body.Bytes(), &res)
-	if res.Count > maxRespFindings+1 { // +1 for the appended note when we stop at exactly the cap
+	if res.Count > maxRespFindings {
 		t.Fatalf("batch response not bounded: %d findings, cap is %d", res.Count, maxRespFindings)
 	}
 	gotNote := false

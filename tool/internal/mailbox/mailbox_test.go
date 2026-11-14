@@ -154,6 +154,40 @@ func TestWalkLimitsAndNonMail(t *testing.T) {
 	}
 }
 
+func TestExplicitExcludeDoesNotSpendMailLimits(t *testing.T) {
+	raw := "From: a@example.com\r\nContent-Type: multipart/mixed; boundary=x\r\n\r\n" +
+		"--x\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=large.txt\r\n\r\n" +
+		strings.Repeat("x", 1000) + "\r\n" +
+		"--x\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=keep.txt\r\n\r\n" +
+		"password = MailPass123!\r\n--x--\r\n"
+	var parts []Part
+	stats, recognized, err := WalkFiltered("filtered.eml", []byte(raw), Limits{
+		MaxPart: 160, MaxTotal: 300, MaxParts: 10, MaxDepth: 4,
+	}, func(path string) bool {
+		return strings.Contains(path, "!/large.txt")
+	}, func(part Part) error {
+		parts = append(parts, part)
+		return nil
+	})
+	if !recognized || err != nil || stats.Limited != 0 || !partsContain(parts, "MailPass123!") {
+		t.Fatalf("recognized=%v err=%v stats=%+v parts=%+v", recognized, err, stats, parts)
+	}
+	if partsContain(parts, strings.Repeat("x", 10)) {
+		t.Fatal("excluded body was emitted")
+	}
+}
+
+func TestDepthLimitDistinguishesOmittedMail(t *testing.T) {
+	raw := "From: outer@example.com\r\nContent-Type: message/rfc822\r\n\r\n" +
+		"From: inner@example.com\r\nContent-Type: text/plain\r\n\r\npassword = MailPass123!"
+	parts, stats, err := collect(t, "forward.eml", raw, Limits{
+		MaxPart: 1 << 20, MaxTotal: 2 << 20, MaxParts: 10, MaxDepth: 1,
+	})
+	if err != nil || stats.Limited != 1 || partsContain(parts, "MailPass123!") {
+		t.Fatalf("err=%v stats=%+v parts=%+v", err, stats, parts)
+	}
+}
+
 func partsContain(parts []Part, needle string) bool {
 	for _, part := range parts {
 		if strings.Contains(string(part.Data), needle) {
