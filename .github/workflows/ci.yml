@@ -84,6 +84,8 @@ jobs:
         run: |
           python3 scripts/check_bucket_contract.py "$RUNNER_TEMP/prowl-acquisition"
           python3 scripts/check_config_disable.py "$RUNNER_TEMP/prowl-acquisition"
+      - name: Jira and Confluence acquisition reports
+        run: python3 scripts/check_atlassian_contract.py "$RUNNER_TEMP/prowl-acquisition"
 
   corpus-performance:
     runs-on: ubuntu-latest

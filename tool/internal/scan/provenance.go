@@ -19,7 +19,7 @@ func (p *Pipeline) annotateIdentity(ctx context.Context, f *model.Finding, raw s
 		f.IdentityScope = hex.EncodeToString(scope[:8])
 		f.Fingerprint = p.reportFingerprint(f.Type, it.Path, raw)
 	}
-	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "layer_digest", "source_url", "source_map", "original_source", "git_index"} {
+	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "layer_digest", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "git_index"} {
 		if v, ok := it.Meta[k]; ok {
 			value := model.SafeLocator(fmt.Sprint(v))
 			if len(value) > 2048 {

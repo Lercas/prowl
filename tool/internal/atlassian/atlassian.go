@@ -50,6 +50,7 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		c.http = opts.HTTPClient
 	}
 
+	registerScope(ctx, c.base, product, opts)
 	var (
 		dep Deployment
 		err error
@@ -63,8 +64,14 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		return nil, Deployment{}, fmt.Errorf("unknown product %q (want jira|confluence)", product)
 	}
 	if err != nil {
+		model.Note(ctx, "atlassian_detection_failed", scopeOrigin(c.base), true)
 		return nil, dep, fmt.Errorf("detect %s: %w", product, err)
 	}
+	model.CoverageFrom(ctx).RegisterScope("atlassian-deployment", scopeOrigin(c.base), struct {
+		BaseURL                   string
+		Product, Kind, WikiPrefix string
+		CloudV1                   bool
+	}{c.base, product, dep.Kind, dep.WikiPrefix, dep.CloudV1})
 
 	out := make(chan model.Item, 256)
 	walkCtx, cancel := context.WithCancel(ctx)
@@ -76,6 +83,10 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		var capped atomic.Bool
 		max := int64(opts.MaxItems)
 		emit := func(it model.Item) {
+			attachSourceMetadata(&it)
+			if it.Error != nil {
+				model.Note(ctx, "atlassian_coverage_incomplete", it.Path, true)
+			}
 			if it.Error == nil {
 				for {
 					n := emitted.Load()
@@ -103,9 +114,13 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 		// Use the parent context: hitting our own budget cancels the walker, not the consumer.
 		var diagnostic model.Item
 		if capped.Load() {
+			model.Note(ctx, "atlassian_item_limit", scopeOrigin(c.base), true)
 			diagnostic = sourceFailure(product, product, "item budget exhausted")
 		} else if werr != nil {
+			model.Note(ctx, "atlassian_collection_failed", scopeOrigin(c.base), true)
 			diagnostic = sourceFailure(product, product, "enumeration failed")
+		} else if ctx.Err() != nil {
+			model.Note(ctx, "atlassian_cancelled", scopeOrigin(c.base), true)
 		}
 		if diagnostic.Error != nil {
 			select {

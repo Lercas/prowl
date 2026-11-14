@@ -68,6 +68,37 @@ All the common scan flags — `--ml`, `--verify`, `--fail-on`, `--min-severity`,
 
 The per-item fetches (changelog, comments, page versions) run across a worker pool, and Jira Cloud uses the batched `/changelog/bulkfetch` endpoint so history costs one round-trip per ~50 issues instead of one per issue. A `429` is honored with jittered exponential backoff. Still, a full first-to-current history walk of a large instance is a lot of requests — use `--current-only`, `--project`/`--space`, and `--max-items` to bound a first run, and prefer off-peak hours.
 
+## Provenance и coverage в 1.5.0
+
+Scopes `jira`/`confluence` фиксируют нормализованный base URL, выбор project/space/field,
+режим истории, лимит items, workers, timeout и внутренние пределы API. В открытом
+`target` публикуется только origin; context path входит в policy hash. Scope
+`atlassian-deployment` разделяет фактически выбранные Cloud/v1/Server API shapes.
+Auth и состояние HTTPClient в policy не сериализуются. Порядок выбора ключей не
+меняет scope. Наличие scope не подтверждает доступ токена ко всему tenant.
+
+JSON и SARIF передают `source_url`, `source_version` и доступные `page_id`, `issue_id`,
+`history_id`, `comment_id`. URL credentials/query/fragment удаляются. Это метки
+наблюдения: `current` не является закреплённой версией; Jira changelog содержит
+фрагменты from/to, а comment body не доказывает историю редактирования комментария.
+Digest API-ответа, commit или immutable revision из этих меток не изобретаются.
+Координаты находки относятся к извлечённому тексту, а не к байтам удалённого JSON
+или Confluence storage body. Одинаковые тела версий Confluence по-прежнему
+объединяются по существующей политике выбора версии.
+
+Ошибки отдельных объектов, остановка по item budget и сбой перечисления отмечаются
+в общем coverage ledger независимо от доставки diagnostic Item. Читаемый текст
+сохраняется. Пустой сбор и ошибка подключения дают код `2` и обычный неполный
+JSON/SARIF envelope; `--write-baseline` не заменяет baseline. С индексом неполный
+скан записывается как incomplete, и automatic diff не подставляет прежнюю зелёную
+пару. Отсутствие находки не доказывает remote absence или отзыв секрета.
+
+Нативная Cloud-shaped матрица использует собственные локальные API, синтетические
+ключи и встроенную L2; внешние tenant и provider не вызываются. Проверяются также
+пустой/ошибочный сбор после полных индексированных сканов. Она включена в CI job
+`native-acquisition`; внешний CI не запускался. Доказательства:
+[Atlassian contract](evidence/1.5.0-atlassian-contract-20261114.json).
+
 ## Notes & limits
 
 - **Курсоры Confluence и ссылки Jira.** Из `_links.next` читается ровно один непустой query-параметр `cursor`; фрагмент URL не входит в его значение. Некорректный URL, ошибочное percent-encoding, отсутствующий или повторный курсор дают диагностику неполного сбора; уже прочитанный контент сохраняется. Сканер повторяет исходный API-путь на настроенном хосте, используя только курсор, а не переходит по адресу из ответа. Ключ задачи Jira экранируется как один сегмент пути, а `focusedCommentId` — как одно query-значение. Исходные идентификаторы в пути находки и fingerprint не изменяются.

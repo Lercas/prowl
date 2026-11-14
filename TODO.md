@@ -279,6 +279,17 @@
       Добавлен CI gate для нативных repo/forge/bucket/config матриц.
       Полный remote inventory, права токена и absence/remediation не доказываются.
 
+    - [x] Jira/Confluence: восстановлены acquisition/deployment scopes и coverage
+      ledger для object/collection/budget ошибок. В provenance сохранены source URL,
+      наблюдаемая version label и доступные object/event IDs без выдуманного digest
+      или immutable revision. Empty/connect failures дают неполный JSON/SARIF,
+      защищают baseline и записываются incomplete в индекс.
+      Cloud-shaped native CLI ±L2 — 157/157; доказательства:
+      `wiki/evidence/1.5.0-atlassian-contract-20261114.json`.
+    - [ ] Atlassian tenant-qualified occurrence/index: одинаковые локальные issue/page
+      IDs на разных tenant должны разделяться до fingerprint/location identity;
+      нужны проверки совместимости baseline и отдельных event IDs при одинаковой дате.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

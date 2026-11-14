@@ -104,7 +104,8 @@ func cmdAtlassian(args []string, product string) int {
 	items, dep, derr := atlassian.Collect(ctx, base, product, auth, opts)
 	if derr != nil {
 		logx.Error("could not connect to "+product, "err", derr)
-		return 2
+		c.coverage.Note("atlassian_detection_failed", product, true)
+		return reportScan(ctx, c, []model.Finding{atlassianFailure(product, "connection or deployment detection failed")}, time.Since(start))
 	}
 	logx.Info("connected", "deployment", dep.String(), "history", !opts.CurrentOnly)
 
@@ -130,7 +131,8 @@ func cmdAtlassian(args []string, product string) int {
 	findings := prepared.pipeline.Run(ctx, counted)
 	if itemCount.Load() == 0 && ctx.Err() == nil {
 		logx.Error("scanned 0 items — check credentials, the account's project/space access, and any --project/--space filter", "product", product)
-		return 2
+		c.coverage.Note("atlassian_empty_collection", product, true)
+		findings = append(findings, atlassianFailure(product, "collection returned no content"))
 	}
 	if c.verifiedOnly && c.indexDir == "" {
 		findings = keepVerified(findings)
@@ -142,6 +144,10 @@ func cmdAtlassian(args []string, product string) int {
 	// --min-confidence / --disable and the in-repo baseline/.gitleaksignore pickup all apply, exactly
 	// as for scan/repo/org/image/bucket.
 	return reportScan(ctx, c, findings, time.Since(start))
+}
+
+func atlassianFailure(product, reason string) model.Finding {
+	return model.Finding{Detector: "source", Type: "source_error", Severity: "info", Source: product, Path: product, Stage: "intake", Rationale: reason + "; scan results are incomplete"}
 }
 
 // atlassianAuthFromEnv reads credentials from the environment. ATLASSIAN_API_LOGIN /

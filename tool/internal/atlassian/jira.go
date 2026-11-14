@@ -437,8 +437,9 @@ func jiraEmitCurrent(dep Deployment, scanFields []string, iss jiraIssue, emit fu
 		Path:   iss.Key,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     jiraBrowseURL(dep, iss.Key),
-			"version": "current",
+			"url":      jiraBrowseURL(dep, iss.Key),
+			"issue_id": iss.ID,
+			"version":  "current",
 		},
 	})
 }
@@ -580,8 +581,9 @@ func jiraEmitComment(dep Deployment, key, commentID string, body any, emit func(
 		Path:   path,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     link,
-			"version": version,
+			"url":        link,
+			"comment_id": commentID,
+			"version":    version,
 		},
 	})
 }
@@ -677,10 +679,11 @@ func jiraEmitHistory(dep Deployment, key string, h jiraHistory, emit func(model.
 		Path:   key + "@" + h.Created,
 		Text:   text,
 		Meta: map[string]any{
-			"url":     jiraBrowseURL(dep, key),
-			"version": "history",
-			"author":  h.Author.label(),
-			"updated": h.Created,
+			"url":        jiraBrowseURL(dep, key),
+			"version":    "history",
+			"history_id": h.ID,
+			"author":     h.Author.label(),
+			"updated":    h.Created,
 		},
 	})
 }
