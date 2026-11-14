@@ -22,6 +22,12 @@ func WithProvenance(ctx context.Context, p map[string]any) context.Context {
 	return context.WithValue(ctx, provenanceKey{}, merged)
 }
 
+// WithoutProvenance starts a new acquisition boundary without changing the parent's metadata.
+// Item-specific producer facts can still be attached normally within the new source.
+func WithoutProvenance(ctx context.Context) context.Context {
+	return context.WithValue(ctx, provenanceKey{}, map[string]any{})
+}
+
 // Only immutable content/revision identifiers can justify shared-metadata links.
 func ValidImmutableMetadata(key, value string) bool {
 	if key == "digest" || key == "layer_digest" {

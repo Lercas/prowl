@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"os"
 	"strings"
 
@@ -37,6 +36,10 @@ func cmdBucket(args []string) int {
 		return 2
 	}
 	uri := rest[0]
+	if err := source.ValidateBucketTarget(uri); err != nil {
+		logx.Error("invalid bucket target", "err", err)
+		return 2
+	}
 	ctx, stop := rootContext(c)
 	defer stop()
 
@@ -49,6 +52,10 @@ func cmdBucket(args []string) int {
 
 	c.noAutoConfig = true // a downloaded bucket is untrusted — ignore any .prowl.yaml it contains
 	return scanItemStream(ctx, c, func(ctx context.Context, c commonFlags) (<-chan model.Item, error) {
+		ctx, err := source.BucketContext(ctx, tmp, uri, source.BucketBudget(c.maxSize), c.maxSize, c.exclude)
+		if err != nil {
+			return nil, err
+		}
 		logx.Info("downloading bucket", "uri", uri)
 		syncErr := source.SyncBucket(ctx, uri, tmp, source.BucketBudget(c.maxSize), c.timeout)
 		if syncErr != nil {
@@ -72,20 +79,7 @@ func cmdBucket(args []string) int {
 
 // Cloud CLIs take literal object keys: '#' and '?' are key bytes, and '%20' is not a space.
 func bucketArtifactURI(display string) string {
-	scheme, rest, ok := strings.Cut(display, "://")
-	if !ok || scheme != "s3" && scheme != "gs" {
-		return ""
-	}
-	host, key, hasKey := strings.Cut(rest, "/")
-	u := &url.URL{Scheme: scheme, Host: host}
-	if hasKey {
-		u.Path = "/" + key
-	}
-	address := u.String()
-	if _, err := url.Parse(address); err != nil {
-		return ""
-	}
-	return address
+	return source.BucketArtifactURI(display)
 }
 
 func bucketURIs(ctx context.Context, items <-chan model.Item) <-chan model.Item {

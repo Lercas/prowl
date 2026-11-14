@@ -112,6 +112,7 @@ func RepositoryContext(ctx context.Context, dir string, opts CloneOpts) (context
 	if physical, err := filepath.EvalSymlinks(dir); err == nil && physical != origin.roots[0] {
 		origin.roots = append(origin.roots, physical)
 	}
+	ctx = context.WithValue(ctx, bucketOriginKey{}, struct{}{})
 	ctx = context.WithValue(ctx, repositoryOriginKey{}, origin)
 	ctx = model.WithSourceLocator(ctx, origin.locator)
 	var head bytes.Buffer
@@ -155,7 +156,7 @@ func RepositoryContext(ctx context.Context, dir string, opts CloneOpts) (context
 	if opts.Full || snapshotErr != nil {
 		commit = ""
 	}
-	ctx = model.WithProvenance(ctx, map[string]any{"source_url": origin.url, "url": "", "commit": commit})
+	ctx = model.WithProvenance(model.WithoutProvenance(ctx), map[string]any{"source_url": origin.url, "url": "", "commit": commit})
 	if snapshotErr != nil {
 		model.Note(ctx, "repository_revision_unavailable", origin.url, true)
 	}

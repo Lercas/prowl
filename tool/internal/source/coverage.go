@@ -22,6 +22,13 @@ func registerLocalScope(ctx context.Context, kind, target string, policy any) {
 		}{kind, policy})
 		return
 	}
+	if origin, ok := ctx.Value(bucketOriginKey{}).(bucketOrigin); ok {
+		model.CoverageFrom(ctx).RegisterScope("bucket-selection", origin.locator(target), struct {
+			Kind      string
+			Selection any
+		}{kind, policy})
+		return
+	}
 	model.CoverageFrom(ctx).RegisterScope(kind, target, policy)
 }
 

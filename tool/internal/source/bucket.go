@@ -45,6 +45,9 @@ func BucketBudget(maxSize int64) int64 {
 // Retried for transient failures, each attempt bounded by its own timeout; the CLI resumes from disk,
 // so a retry reuses the partial download. Ctx cancellation aborts immediately and is never retried.
 func SyncBucket(ctx context.Context, uri, destDir string, budget int64, timeout time.Duration) error {
+	if err := ValidateBucketTarget(uri); err != nil {
+		return err
+	}
 	if budget <= 0 {
 		budget = DefaultBucketBudget
 	}
@@ -110,7 +113,7 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 		}()
 
 		cmd := exec.CommandContext(actx, bin, args...)
-		out, err := runOwnedCommand(cmd)
+		_, err := runOwnedCommand(cmd)
 		cancel()    // stop the watcher promptly
 		<-watchDone // and wait for it to exit before reading measureFailed
 		select {
@@ -125,7 +128,7 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 			if actx.Err() == context.DeadlineExceeded {
 				return fmt.Errorf("%s download timed out after %s", bin, perAttempt)
 			}
-			return fmt.Errorf("%s download failed: %v: %s", bin, err, strings.TrimSpace(out))
+			return &bucketCommandFailure{program: bin, cause: err}
 		}
 		// Post-run cap check: a sync that starts and finishes within one poll window never trips a tick,
 		// so re-measure the final size here. Final traversal errors are terminal as well.
@@ -136,6 +139,25 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 	})
 	return err
 }
+
+// Cloud CLIs may print credential-bearing request URLs, headers or environment diagnostics.
+// Preserve failure classification without copying their stdout/stderr into user-visible errors.
+type bucketCommandFailure struct {
+	program string
+	cause   error
+}
+
+func (e *bucketCommandFailure) Error() string {
+	var exit *exec.ExitError
+	if errors.As(e.cause, &exit) {
+		if code := exit.ExitCode(); code >= 0 {
+			return fmt.Sprintf("%s download failed (exit status %d)", e.program, code)
+		}
+		return e.program + " download failed (terminated by signal)"
+	}
+	return e.program + " download failed"
+}
+func (e *bucketCommandFailure) Unwrap() error { return e.cause }
 
 // measureBucketDir stops at the budget and propagates traversal errors. Only vanished paths may be
 // ignored during an active sync; its final measurement must succeed with the destination present.

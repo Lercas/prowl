@@ -74,6 +74,7 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	if origin, ok := ctx.Value(repositoryOriginKey{}).(repositoryOrigin); ok {
 		it.ArtifactURI = origin.artifact(it.Path)
 	}
+	attachBucketOrigin(ctx, &it)
 	select {
 	case ch <- it:
 		return true

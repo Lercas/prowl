@@ -253,6 +253,16 @@
       `wiki/evidence/1.5.0-repository-contract-20261114.json`.
       Forge inventory и доказательство remote absence остаются открыты.
 
+    - [x] `bucket`: стабильные acquisition/selection scopes, source URL и SHA-256
+      исходных байтов объекта, включая UTF-16 и содержимое архивов. Контейнерный
+      digest не подменяется digest члена; новые acquisition boundaries не наследуют
+      чужую revision metadata. Ошибки cloud CLI скрывают stdout/stderr, сохраняют
+      exit status и частичный текст; baseline при неполной загрузке защищён.
+      Нативная матрица — 113/113; repo/org nonregression — 99/99;
+      полный Go-набор/race/lint/Go 1.26.11 проходят.
+      `wiki/evidence/1.5.0-bucket-contract-20261114.json`.
+      Cloud inventory/identity/version и remote absence не подтверждаются.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

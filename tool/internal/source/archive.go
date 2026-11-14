@@ -52,6 +52,9 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 			return true
 		}
 	}
+	if depth == 0 {
+		ctx = bucketObjectContext(ctx, itemPath, data)
+	}
 	if depth >= maxEmbeddedPayloadDepth {
 		model.Note(ctx, "embedded_depth_limit", itemPath, true)
 		logx.Warn("embedded payload depth limit reached", "path", itemPath, "limit", maxEmbeddedPayloadDepth)

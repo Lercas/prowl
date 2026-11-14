@@ -51,6 +51,30 @@ Because the entire prefix is downloaded to local disk before scanning, **mind la
 
 A downloaded bucket is untrusted input, so `prowl bucket` runs with `noAutoConfig`: it **does not auto-discover a `.prowl.yaml` inside the download**. A `.prowl.yaml` that happens to sit under the prefix cannot disable detectors or extend the allowlist to blind the scan of its own contents. This matches the trust boundary `repo`/`org` apply to a cloned tree. Only a config you pass **explicitly with `--config FILE` is trusted**. See [Security Model](Security-Model.md).
 
+## Provenance и полнота в 1.5.0
+
+Отчёт сохраняет стабильный scope `bucket` с выбранным URI и лимитами, а также
+`bucket-selection` с локальной политикой отбора. Временный каталог загрузки не
+становится идентификатором источника. `source_url` указывает на загруженный объект;
+`digest` — SHA-256 его исходных байтов, до декодирования UTF-16 и разбора содержимого.
+У вложений и членов архива сохраняются URL и digest внешнего объекта: путь члена
+не выдаётся за отдельный объект в облаке. JSON и SARIF используют одну provenance.
+
+Символы `#`, `?` и `%20` после имени bucket считаются буквальными байтами ключа.
+Для URI-потребителей они кодируются без предварительного URL-декодирования.
+Credentials и URL-параметры в authority отклоняются до запуска cloud CLI.
+
+Scope описывает наблюдаемую локальную загрузку. Он не подтверждает cloud identity,
+полноту удалённого inventory, object version или ETag. Отсутствие находки не доказывает
+удаление секрета из облака. Успешная пустая загрузка сохраняет прежний complete-empty
+контракт. При ошибке sync уже загруженный текст сканируется, отчёт остаётся неполным,
+а `--write-baseline` не заменяет существующий baseline. Вывод stdout/stderr cloud CLI
+не попадает в сообщения об ошибках и логи Prowl; код завершения сохраняется.
+
+Локальная квалификация использует собственные fake `aws`/`gcloud`, синтетические
+объекты и sparse-файл для лимита загрузки. Она не обращается к реальным bucket или
+provider API. Доказательства: [bucket contract](evidence/1.5.0-bucket-contract-20261114.json).
+
 ## Flags
 
 Every [`prowl scan`](Scanning-Files.md) flag applies unchanged: detection (`--rules-dir`, `--rules`, `--tags`, `--exclude-tags`, `--rule-severity`), verification (`--verify`, `--verified-only`), gating and output (`--fail-on`, `--format`, `-o`/`--output`), baselines (`--baseline`, `--write-baseline`), sizing/concurrency (`--max-size`, `--workers`, `--timeout`), and the logging flags. The bucket is a single scan target, so it emits **one report**, exactly like `scan`/`repo`/`image`. See [Output Formats](Output-Formats.md).
