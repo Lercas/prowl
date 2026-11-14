@@ -91,9 +91,10 @@ type Windows struct {
 }
 
 type winState struct {
-	lastLineEnd int  // literals before this offset are on a line already covered
-	full        bool // regions unusable for this regex — run on the whole text
-	wanted      bool
+	coveredUntil int  // literal starts before this offset are covered by a complete line/separator region
+	full         bool // regions unusable for this regex — run on the whole text
+	wanted       bool
+	byteEdges    bool // artificial byte boundaries require checking every touching match
 }
 
 // Prepare locates the required literals of the wanted regexes in text and builds their regions.
@@ -236,8 +237,8 @@ func (w *Windows) locate(hay string, unicodePass bool) {
 				if o.exact != "" && text[start:end] != o.exact {
 					continue
 				}
-				if !unicodePass && start < st.lastLineEnd {
-					continue // same line as the previous occurrence: already covered
+				if !unicodePass && start < st.coveredUntil {
+					continue // complete line or separator-delimited segment already covered
 				}
 				w.add(int(o.re), start, end, unicodePass)
 			}
@@ -248,19 +249,27 @@ func (w *Windows) locate(hay string, unicodePass bool) {
 // add records the region for a literal occurrence at [start,end).
 func (w *Windows) add(re, start, end int, unordered bool) {
 	text := w.text
-	gaps := w.set.plans[re].Gaps
-	ws := lineStart(text, start)
-	we := lineEnd(text, end)
+	plan := w.set.plans[re]
 	st := &w.state[re]
-	if !unordered {
-		st.lastLineEnd = we
-	}
-	for g := 0; g < gaps; g++ {
-		ws = prevLine(text, ws)
-		we = nextLine(text, we)
+	ws, we, covered, bounded := plan.byteWindow(text, start, end)
+	if bounded {
+		st.byteEdges = true
+		if !unordered {
+			st.coveredUntil = covered
+		}
+	} else {
+		ws, we = lineStart(text, start), lineEnd(text, end)
+		if !unordered {
+			st.coveredUntil = we
+		}
+		for g := 0; g < plan.Gaps; g++ {
+			ws = prevLine(text, ws)
+			we = nextLine(text, we)
+		}
 	}
 	wins := w.wins[re]
 	if n := len(wins); n > 0 && !unordered && ws <= wins[n-1][1]+1 {
+		wins[n-1][0] = min(wins[n-1][0], ws)
 		if we > wins[n-1][1] {
 			wins[n-1][1] = we
 		}
@@ -345,7 +354,7 @@ func (w *Windows) FindAll(i int, re *regexp.Regexp, text string, n int) [][]int 
 	if w == nil || w.state[i].full {
 		return re.FindAllStringSubmatchIndex(text, n)
 	}
-	edge := w.set.plans[i].EdgeCheck
+	edge := w.set.plans[i].EdgeCheck || w.state[i].byteEdges
 	var out [][]int
 	for _, r := range w.wins[i] {
 		want := -1
@@ -375,7 +384,7 @@ func (w *Windows) Match(i int, re *regexp.Regexp, text string) bool {
 	if w == nil || w.state[i].full {
 		return re.MatchString(text)
 	}
-	edge := w.set.plans[i].EdgeCheck
+	edge := w.set.plans[i].EdgeCheck || w.state[i].byteEdges
 	for _, r := range w.wins[i] {
 		m := re.FindStringIndex(text[r[0]:r[1]])
 		if m == nil {

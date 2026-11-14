@@ -1,0 +1,136 @@
+{
+  "scope": "proof-based byte regex windows for minified input; no publication",
+  "base_commit": "b0e9f85563d294d364e4efbb32ec78663c8cb8ad",
+  "proofs": [
+    "finite upper bound on consumed UTF-8 bytes, including all alternatives and fold partners",
+    "otherwise complete segments bounded by ASCII bytes no expression node can consume",
+    "original line proof remains mandatory; unsupported expressions keep the whole-text path",
+    "unproven byte boundaries use original line windows",
+    "artificial-edge hits are rechecked on the entire text",
+    "valid UTF-8 boundaries, invalid bytes, longest matches, captures, offsets, limits preserved"
+  ],
+  "window_budget_bytes": 8192,
+  "budget_scope": "per literal occurrence before merging; overlapping windows can grow; dense coverage uses full text",
+  "microbenchmark": {
+    "name": "BenchmarkMinifiedRuleSearch",
+    "bytes": 525792,
+    "regexes": 32,
+    "go": "go1.27.4",
+    "platform": "darwin/arm64",
+    "cpu": "Apple M4 Max",
+    "results": {
+      "before": {
+        "false": {
+          "median_ns": 217670847,
+          "samples_ns": [
+            220180847,
+            217670847,
+            211713569
+          ]
+        },
+        "true": {
+          "median_ns": 213937250,
+          "samples_ns": [
+            213937250,
+            223692458,
+            206271167
+          ]
+        }
+      },
+      "after": {
+        "false": {
+          "median_ns": 213138069,
+          "samples_ns": [
+            213138069,
+            209366903,
+            224084764
+          ]
+        },
+        "true": {
+          "median_ns": 739708,
+          "samples_ns": [
+            731181,
+            739708,
+            804514
+          ]
+        }
+      }
+    },
+    "limitation": "synthetic one-line input and case-insensitive provider-shaped patterns; not general scanner speed"
+  },
+  "pipeline_benchmark": {
+    "name": "BenchmarkFindingsCorpus",
+    "corpus": "go1.27.4 GOROOT/src",
+    "bytes": 132407542,
+    "source": "clean isolated before and after trees; L1 plus bundled rules; one worker",
+    "results": {
+      "before": {
+        "median_ns": 11051557666.5,
+        "samples_ns": [
+          11167492333,
+          10935623000
+        ]
+      },
+      "after": {
+        "median_ns": 10606427333.5,
+        "samples_ns": [
+          10609559417,
+          10603295250
+        ]
+      }
+    },
+    "limitation": "two samples each; non-regression evidence, not a universal speed claim"
+  },
+  "validation": {
+    "full_go_suite": "passed in original worktree and clean isolated candidate",
+    "race": "linewin short suite, rules and scan passed; edge/UTF-8/longest cases also passed",
+    "minimum_go": "go1.26.11 linewin short suite passed",
+    "vet": "passed",
+    "lint": "0 issues (v2.15.0)",
+    "minified_fuzz": {
+      "executions": 4673,
+      "seconds": 6.247,
+      "target": "FuzzMinifiedWindowParity"
+    },
+    "random_equivalence": "200000 short cases and 1000 minified cases against Go regexp",
+    "corpus_parity": {
+      "files": 12044,
+      "rules": {
+        "regexes": 421,
+        "planned": 406,
+        "hits": 3,
+        "differences": 0
+      },
+      "detector": {
+        "matches": 1129,
+        "differences": 0
+      },
+      "source": "original worktree including concurrent decoder work"
+    },
+    "clean_cli_parity": {
+      "prowlbench": {
+        "exact_findings_equal": true,
+        "findings": 2246,
+        "seconds_before_after": [
+          0.15459766700223554,
+          0.1274542909959564
+        ]
+      },
+      "minified": {
+        "exact_findings_equal": true,
+        "findings": 2,
+        "seconds_before_after": [
+          0.24956933400244452,
+          0.08781687500595581
+        ],
+        "bytes": 960114
+      }
+    }
+  },
+  "limitations": [
+    "regexes without a bounded-width or separator proof may still scan a whole minified line",
+    "concurrent decoder changes excluded from clean candidate and commit",
+    "historical ProwlBench false-positive threshold remains open",
+    "release not published"
+  ]
+}

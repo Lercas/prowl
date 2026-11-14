@@ -1,13 +1,14 @@
-// Package linewin runs a regex over only the lines that can contain a match instead of the whole text,
-// with results identical to a whole-text run.
+// Package linewin runs a regex over proven literal-anchored regions instead of
+// the whole text, with results identical to a whole-text run.
 //
 // For each regex, Analyze proves two things from the parsed syntax tree, or declines:
 //
 //  1. a set of required literals — every match contains at least one of them;
 //  2. a bound on how many line breaks a match can cross (its "gaps").
 //
-// At scan time one Aho-Corasick pass locates the literals; each occurrence yields a window made of its
-// line plus `gaps` neighbouring non-blank lines on each side, and the regex runs on those windows.
+// At scan time one Aho-Corasick pass locates the literals. Finite match widths or
+// non-consuming separators allow byte-bounded windows even on minified lines.
+// Otherwise a window uses the literal's line plus `gaps` neighboring non-blank lines.
 // Regexes that cannot be proven (no usable literal, an unbounded newline-capable construct) keep the
 // whole-text path, so adopting the package never changes what is reported.
 package linewin
@@ -46,6 +47,11 @@ type Plan struct {
 	// foldS / foldK: a case-insensitive literal contains 's' / 'k', which also match U+017F (ſ) and
 	// U+212A (K) — runes an ASCII-lowered literal search can't see.
 	foldS, foldK bool
+	// Byte windows use either a finite match-width proof or ASCII separators
+	// that cannot be consumed anywhere in the expression.
+	maxBytes int
+	cuts     [128]bool
+	hasCuts  bool
 }
 
 // Analyze returns the windowing plan for re, or nil when windowed matching can't be proven equivalent.
@@ -88,6 +94,7 @@ func Analyze(re *regexp.Regexp) *Plan {
 		}
 	}
 	p.Lits = dedupe(lits)
+	p.prepareByteWindows(tree)
 	return p
 }
 
