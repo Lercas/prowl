@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
 	"sort"
 	"strings"
 	"sync"
@@ -20,6 +21,9 @@ import (
 
 // sendItem delivers an item unless ctx is cancelled; returns false when discovery should stop.
 func sendItem(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
+	if it.Error != nil {
+		model.Note(ctx, "web_source_error", it.Path, true)
+	}
 	// Only this source knows its paths are web locators; URL-looking local filenames stay literal.
 	if u, err := url.Parse(it.Path); err == nil && (u.Scheme == "http" || u.Scheme == "https") {
 		it.ArtifactURI = it.Path
@@ -47,6 +51,11 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 	if opts.MaxAssets == 0 {
 		opts.MaxAssets = 300
 	}
+	model.CoverageFrom(ctx).RegisterScope("domain", target, struct {
+		Revision, Target string
+		Recon            bool
+		MaxAssets        int
+	}{"1.5.0-source-maps-v1", target, opts.Recon, opts.MaxAssets})
 	ch := make(chan model.Item, 64)
 	reached := &atomic.Bool{} // set once the root page is fetched, so the caller can exit non-zero on an unreachable host
 	go func() {
@@ -230,14 +239,50 @@ func (s *contentSeen) firstTime(text string) bool {
 }
 
 func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls []string, source string, b *budget, conc int, bodyDedup *contentSeen, required map[string]bool) {
+	if required == nil {
+		required = map[string]bool{}
+	}
 	if conc < 1 {
 		conc = 1
 	}
 	var wg sync.WaitGroup
 	redirectedMaps := map[string]bool{}
 	scheduled := map[string]bool{}
+	depths := map[string]int{}
+	mapURLs, processed, mapParsed := map[string]bool{}, map[string]bool{}, map[string]bool{}
+	unavailable := map[string]bool{}
 	for _, u := range urls {
 		scheduled[u] = true
+		if parsed, err := url.Parse(u); err == nil && strings.HasSuffix(strings.ToLower(parsed.Path), ".map") {
+			mapURLs[u] = true
+		}
+	}
+	schedule := func(u string, depth int, mandatory, isMap bool) {
+		if isMap {
+			mapURLs[u] = true
+		}
+		if scheduled[u] {
+			if mandatory {
+				required[u] = true
+				if processed[u] && unavailable[u] {
+					model.Note(ctx, "web_required_reference_late", u, true)
+				}
+			}
+			if isMap && processed[u] && !mapParsed[u] {
+				model.Note(ctx, "source_map_late_reference", u, true)
+			}
+			return
+		}
+		if depth > 4 || len(scheduled) >= 2048 {
+			model.Note(ctx, "web_reference_limit", u, true)
+			return
+		}
+		scheduled[u] = true
+		depths[u] = depth
+		if mandatory {
+			required[u] = true
+		}
+		urls = append(urls, u)
 	}
 	type result struct {
 		content fetchedText
@@ -277,6 +322,8 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 	}
 	emit := func(u string, fetched result) bool {
 		content := fetched.content
+		processed[u] = true
+		unavailable[u] = fetched.err != nil || !content.present
 		if fetched.err != nil {
 			if !sendItem(ctx, ch, model.Item{Source: source, Path: content.url, Error: fetched.err}) {
 				return false
@@ -300,8 +347,53 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 				}
 			}
 		}
-		if content.present && content.text != "" && bodyDedup.firstTime(content.text) {
-			return sendItem(ctx, ch, model.Item{Text: content.text, Source: source, Path: content.url})
+		if content.present && content.text == "" && mapURLs[u] && required[u] {
+			model.Note(ctx, "source_map_invalid", content.url, true)
+		}
+		if content.present && content.text != "" {
+			if bodyDedup.firstTime(content.text) && !sendItem(ctx, ch, model.Item{Text: content.text, Source: source, Path: content.url}) {
+				return false
+			}
+			parsed, _ := url.Parse(content.url)
+			isMap := mapURLs[u] || parsed != nil && strings.HasSuffix(strings.ToLower(parsed.Path), ".map")
+			if isMap {
+				if required[u] || sourceMapVersion(content.text) == 3 {
+					mapParsed[u] = true
+					emitSourceMap(ctx, ch, content.url, content.text, b)
+				} else {
+					model.Note(ctx, "optional_map_not_found", content.url, false)
+				}
+			}
+			if parsed != nil && (strings.ToLower(path.Ext(parsed.Path)) == ".js" || strings.ToLower(path.Ext(parsed.Path)) == ".mjs" || strings.ToLower(path.Ext(parsed.Path)) == ".cjs") {
+				refs := mappingRef.FindAllStringSubmatch(content.text, 33)
+				if len(refs) > 32 {
+					model.Note(ctx, "web_reference_limit", content.url, true)
+					refs = refs[:32]
+				}
+				for _, ref := range refs {
+					if strings.HasPrefix(ref[1], "data:") {
+						if decoded, ok := decodeInlineMap(ref[1]); ok {
+							emitSourceMap(ctx, ch, content.url+"!/inline.map", decoded, b)
+						} else {
+							model.Note(ctx, "source_map_invalid", content.url, true)
+						}
+					} else if nextURL, ok := sameOriginRef(content.url, ref[1]); ok {
+						schedule(nextURL, depths[u]+1, true, true)
+					}
+				}
+				importsFound := imports.FindAllStringSubmatch(content.text, 257)
+				if len(importsFound) > 256 {
+					model.Note(ctx, "web_reference_limit", content.url, true)
+					importsFound = importsFound[:256]
+				}
+				for _, ref := range importsFound {
+					if strings.HasPrefix(ref[1], ".") || strings.HasPrefix(ref[1], "/") || strings.HasPrefix(ref[1], "https://") || strings.HasPrefix(ref[1], "http://") {
+						if nextURL, ok := sameOriginRef(content.url, ref[1]); ok {
+							schedule(nextURL, depths[u]+1, true, false)
+						}
+					}
+				}
+			}
 		}
 		return true
 	}
@@ -320,7 +412,8 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 			wg.Wait()
 			return
 		}
-		admit()
+		for len(pending) < conc && admit() {
+		}
 	}
 	wg.Wait()
 	if len(redirectedMaps) > 0 && ctx.Err() == nil {

@@ -213,6 +213,14 @@
       `wiki/evidence/1.5.0-offline-contract-20261114.json`. Это smoke,
       не измерение точности ML или доступности реальных провайдеров.
 
+    - [x] Восстановлены source maps и строковые module imports в `domain` через
+      существующий bounded ordered fetcher, с retry/redirect и общим бюджетом.
+      Inline/внешние карты дают исходный текст и безопасное provenance; ошибки
+      обязательных карт и лимиты делают отчёт неполным и блокируют baseline.
+      Матрица CLI JSON/SARIF ±L2 и MCP четырёх версий — 135/135;
+      `wiki/evidence/1.5.0-source-map-contract-20261114.json`.
+      Indexed maps/VLQ не разворачиваются; полный аудит remote adapters остаётся открыт.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,
