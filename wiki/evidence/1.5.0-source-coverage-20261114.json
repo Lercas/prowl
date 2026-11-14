@@ -232,5 +232,14 @@
     "local scope policy is selection, not immutable revision proof",
     "remote adapter scopes and immutable provenance remain open",
     "MCP/LSP remains open"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "4ba4210",
+    "full_go_suite_passed": true,
+    "lint_passed": true,
+    "native_passed": 36,
+    "native_total": 36,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-source-coverage-native-p6a6qjph/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained"
+  }
 }
