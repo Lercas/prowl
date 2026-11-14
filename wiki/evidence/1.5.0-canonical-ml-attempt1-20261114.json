@@ -1,0 +1,483 @@
+{
+  "tooling_revision": "cec1b0dac687cea2788bf3f60ed20e6647cb8bf7",
+  "status": "rejected: original heldout precision and F1 regress beyond 0.005; no model exported or activated",
+  "base_corpus_sha256": "3cbc6f659dcf94ec734f587e8c617feb74df476d4c75444e991730e166882ae3",
+  "base_corpus_rows": 525102,
+  "base_password_coverage": {
+    "positive_passwords": 20294,
+    "non_ascii": 15,
+    "newlines": 0,
+    "angle_brackets": 10,
+    "mixed_dollar_braces": 3,
+    "mixed_double_braces": 1,
+    "failing_evaluation_values_present": 0
+  },
+  "augmentation": {
+    "sha256": "c1f4d59dc8b5afa10d879d8939ccc03d939678e8f43f73944ec361e0418220f6",
+    "n": 19200,
+    "excluded_cross_bucket_rows": 0,
+    "original_n": 525102,
+    "original_split": {
+      "train": 174391,
+      "val": 37075,
+      "test": 313636
+    },
+    "policy": "original partitions frozen; linked augmentation follows its bucket; bridges excluded"
+  },
+  "captured_rows": {
+    "positive": 9600,
+    "negative": 9600,
+    "by_type": {
+      "generic_password": 9600,
+      "neg_canonical_ui": 9600
+    }
+  },
+  "training_report": "/Users/sugar/dev/prowl/data/processed/models-canonical-v1-20261114/qualification.json",
+  "training": {
+    "corpus_sha256": "3cbc6f659dcf94ec734f587e8c617feb74df476d4c75444e991730e166882ae3",
+    "seed": 13,
+    "numpy": "2.4.6",
+    "sklearn": "1.9.0",
+    "extractor_sha256": "80ac780acc5778605f7cc41056752f543eb4bd84bdf43fc325400061ec5ba968",
+    "n": 544302,
+    "split": {
+      "train": 187174,
+      "val": 40309,
+      "test": 316819
+    },
+    "threshold": 0.3,
+    "max_regression": 0.005,
+    "models": {
+      "zlib_control": {
+        "val": {
+          "pr_auc": 0.9992816935632749,
+          "precision": 0.9891472335748875,
+          "recall": 0.9880274442538594,
+          "f1": 0.9885870218133763
+        },
+        "test": {
+          "pr_auc": 0.9558792593667697,
+          "precision": 0.6071167003090334,
+          "recall": 0.9840465574150211,
+          "f1": 0.7509362675239453
+        },
+        "original_val": {
+          "pr_auc": 0.9992502352544181,
+          "precision": 0.9885028197198472,
+          "recall": 0.9873173922523439,
+          "f1": 0.9879097503772521
+        },
+        "augmentation_val": {
+          "pr_auc": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "original_test": {
+          "pr_auc": 0.9524437398776647,
+          "precision": 0.5956762321451551,
+          "recall": 0.9832797232505918,
+          "f1": 0.7419033554281004
+        },
+        "augmentation_test": {
+          "pr_auc": 0.9999999999999999,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "go_flate": {
+        "val": {
+          "pr_auc": 0.9993043297287115,
+          "precision": 0.9893664459918362,
+          "recall": 0.9894682675814751,
+          "f1": 0.989417354167024
+        },
+        "test": {
+          "pr_auc": 0.9582130227014697,
+          "precision": 0.6329196481812761,
+          "recall": 0.9834095778562743,
+          "f1": 0.7701639418607288
+        },
+        "original_val": {
+          "pr_auc": 0.9993306137409447,
+          "precision": 0.9887358744231678,
+          "recall": 0.9888436659640962,
+          "f1": 0.9887897672559458
+        },
+        "augmentation_val": {
+          "pr_auc": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "original_test": {
+          "pr_auc": 0.9548255815804956,
+          "precision": 0.6217549923195085,
+          "recall": 0.9826121259938095,
+          "f1": 0.7616012418561987
+        },
+        "augmentation_test": {
+          "pr_auc": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      }
+    },
+    "selection": "smallest max_leaf_nodes in [31,63,127] within 0.0001 of best validation F1 at threshold 0.3",
+    "augmentation": {
+      "sha256": "c1f4d59dc8b5afa10d879d8939ccc03d939678e8f43f73944ec361e0418220f6",
+      "n": 19200,
+      "excluded_cross_bucket_rows": 0,
+      "original_n": 525102,
+      "original_split": {
+        "train": 174391,
+        "val": 37075,
+        "test": 313636
+      },
+      "policy": "original partitions frozen; linked augmentation follows its bucket; bridges excluded"
+    },
+    "validation_candidates": {
+      "31": {
+        "pr_auc": 0.9993004027771829,
+        "precision": 0.9893912864352662,
+        "recall": 0.9886106346483705,
+        "f1": 0.9890008064931276
+      },
+      "63": {
+        "pr_auc": 0.9992588386574579,
+        "precision": 0.9894303363074811,
+        "recall": 0.9890909090909091,
+        "f1": 0.9892605935838051
+      },
+      "127": {
+        "pr_auc": 0.9993043297287115,
+        "precision": 0.9893664459918362,
+        "recall": 0.9894682675814751,
+        "f1": 0.989417354167024
+      }
+    },
+    "selected_max_leaf_nodes": 127,
+    "qualified": false,
+    "reference_model_sha256": "c399a4e04288a7ce3a715d701e7dc7bfac544e6c0bd65f1e76de375e32788f0d",
+    "original_quality_gate": false
+  },
+  "reference_original_test": {
+    "pr_auc": 0.9545343554401535,
+    "precision": 0.6438883924138615,
+    "recall": 0.9838866298476664,
+    "f1": 0.7783792867517315
+  },
+  "deployed_model_sha256": "c399a4e04288a7ce3a715d701e7dc7bfac544e6c0bd65f1e76de375e32788f0d",
+  "model_exported": false,
+  "model_activated": false,
+  "native_baseline_explicit_model_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-structured-native-tf0j7xdg/qualification.json",
+  "native_baseline_result": {
+    "passed": 174,
+    "total": 204,
+    "unchanged": true
+  },
+  "before_training_canonical_probabilities": [
+    {
+      "case": "canonical-fixture:json-0",
+      "probability": 0.54646944992887,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-0",
+      "probability": 0.54646944992887,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-0",
+      "probability": 0.54646944992887,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-1",
+      "probability": 0.022072912448676058,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 0,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-1",
+      "probability": 0.022072912448676058,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 0,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-1",
+      "probability": 0.022072912448676058,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 0,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-2",
+      "probability": 0.10652438310571954,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-2",
+      "probability": 0.10652438310571954,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-2",
+      "probability": 0.10652438310571954,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-3",
+      "probability": 0.018295855636802513,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-3",
+      "probability": 0.018295855636802513,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-3",
+      "probability": 0.018295855636802513,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-4",
+      "probability": 0.022110152820484893,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-4",
+      "probability": 0.022110152820484893,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-4",
+      "probability": 0.022110152820484893,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-5",
+      "probability": 0.009667022026524396,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-5",
+      "probability": 0.009667022026524396,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-5",
+      "probability": 0.009667022026524396,
+      "kept": false,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-6",
+      "probability": 0.9993710909131054,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-6",
+      "probability": 0.9993710909131054,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-6",
+      "probability": 0.9993710909131054,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:json-7",
+      "probability": 0.9993746587256812,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:yaml-canonical-7",
+      "probability": 0.9993746587256812,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    },
+    {
+      "case": "canonical-fixture:toml-canonical-7",
+      "probability": 0.9993746587256812,
+      "kept": true,
+      "context_flags": {
+        "ctx_name_has_secret_kw": 1,
+        "ctx_is_assignment": 0,
+        "ctx_in_quotes": 1,
+        "ctx_test_path": 0,
+        "ctx_source_code": 1
+      }
+    }
+  ],
+  "validation": {
+    "python_tests": 7,
+    "go_corpus_capture_tests": "passed on Go 1.27.4 and 1.26.11",
+    "go_model_and_feature_tests": "passed",
+    "golangci_lint": "0 issues"
+  },
+  "notes": [
+    "No native score is claimed for the rejected candidate because it was not exported.",
+    "Training output predates additional upfront reference checks and augmentation parity-fixture coverage; fitting, selection and the rejection criterion are unchanged.",
+    "The reference gate is additional to comparison with a retrained zlib control; validation alone selected model complexity.",
+    "Raw annotations, captured corpus and features remain in ignored local data directories."
+  ]
+}

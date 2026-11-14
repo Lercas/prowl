@@ -49,3 +49,46 @@ Prowl должен отклонять
 ```sh
 python -m unittest discover -s scripts/ml -p 'test_*.py'
 ```
+
+Для канонических JSON/YAML/TOML-значений есть отдельная генерация аннотаций и
+захват фактических ML-records через Pipeline. Аннотация содержит документ, логический
+`path`, ожидаемое значение и метку. `prowl-ml-corpus` не открывает `path`: сканирует
+переданный текст, требует ровно одного соответствующего кандидата и переносит его
+реальный контекст. Уже подавленные L1 отрицательные примеры пропускаются. Исходные
+byte offsets переводятся в символьные `span`, которыми пользуется Python splitter.
+
+```sh
+set -e
+canonical_dir="$(mktemp -d /tmp/prowl-canonical.XXXXXX)"
+(cd tool && GOTOOLCHAIN=go1.27.4 CGO_ENABLED=0 go build -o /tmp/prowl-ml-corpus ./cmd/prowl-ml-corpus)
+python3 scripts/ml/canonical_fixtures.py --out "$canonical_dir/annotations.jsonl"
+/tmp/prowl-ml-corpus < "$canonical_dir/annotations.jsonl" > "$canonical_dir/corpus.jsonl"
+OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 .venv/bin/python scripts/ml/train_portable.py \
+  --corpus data/processed/corpus_flywheel.jsonl \
+  --augmentation "$canonical_dir/corpus.jsonl" \
+  --reference-report tool/internal/mlmodel/testdata/portable_qualification.json \
+  --extractor /tmp/prowl-ml-features --out "$canonical_dir/model"
+```
+
+При `--augmentation` исходное разбиение сохраняется. Связанные значением или
+шаблоном новые записи следуют исходной части; группа, связывающая разные исходные
+части, целиком исключается. Независимые группы делятся отдельно. Отчёт содержит
+метрики общего набора, исходных val/test и augmentation. `--reference-report`
+проверяет hash корпуса, seed, threshold и размеры исходных частей, затем требует
+отсутствия регрессии более 0,005 относительно ранее квалифицированной модели по
+PR-AUC, precision, recall и F1. Порог 0,3 не меняется; test не выбирает сложность модели.
+
+Аннотации и corpus содержат значения и остаются локально вне Git. Генератор
+использует только синтетические строки; пять проваленных проверочных значений
+не включаются в дополнение. Файлы метрик, features и prediction-golden значений
+не содержат. При провале любого гейта модель не экспортируется.
+
+Экспортированного кандидата можно проверить без замены установленной модели:
+
+```sh
+python3 scripts/check_structured_literals.py /path/to/prowl \
+  --model /path/to/candidate/model_binary_go.json
+```
+
+Это отдельная нативная матрица. Успех обучения сам по себе не заменяет её, Go parity,
+проверку исходного ProwlBench и остальные релизные гейты.
