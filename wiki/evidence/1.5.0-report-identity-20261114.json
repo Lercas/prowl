@@ -1,5 +1,13 @@
 {
   "status": "locally qualified identity and provenance restoration; not published",
+  "main_integration": {
+    "source_commit": "2ca8189",
+    "full_go_suite_passed": true,
+    "identity_passed": 39,
+    "identity_total": 39,
+    "identity_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-report-identity-99ab3b5y/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained; identity added to its setup command group"
+  },
   "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
   "identity": {
     "binary_sha256": "de21df728c5861ca636ff813dadbf394bd959b50f0627f0a8fcc508dbcee193a",
