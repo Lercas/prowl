@@ -1,0 +1,73 @@
+{
+  "scope": "do not reclassify complete bcrypt hashes as plaintext generic passwords",
+  "base_commit": "d549aa68fd0038c23260b6f1aad48ac3a2feb147",
+  "filter_scope": {
+    "type": "generic_password",
+    "formats": [
+      "2a",
+      "2b",
+      "2y"
+    ],
+    "encoded_length": 60,
+    "cost_min": 4,
+    "cost_max": 31,
+    "alphabet": "./A-Za-z0-9",
+    "constraint": "entire extracted value, not a marker anywhere on the line"
+  },
+  "safety": "Typed secrets and neighboring plaintext credentials are preserved; malformed, truncated, extended, or unsupported-format values remain candidates.",
+  "validation": {
+    "source": "isolated clean HEAD plus only the three-file bcrypt change",
+    "tests": [
+      "internal/detect",
+      "internal/scan",
+      "cmd/prowl"
+    ],
+    "race": "targeted bcrypt and generic-password integration tests passed",
+    "minimum_go": "go1.26.11 targeted bcrypt and generic-password tests passed",
+    "lint": "0 issues in internal/detect",
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "secrets": 2094,
+      "hardnegs": 982
+    },
+    "epsilon": 0.005,
+    "subset_sha256": "c8de0a5b15d3f360c50b387d1869158ef32d43fa1c9ddce26e4ff4174667db9e",
+    "baseline_sha256": "2d52ab757db0ccc90cbda2badfc3273f35873fe88f358b1b2970d81bb6b2aa6f",
+    "before": {
+      "secret_hits": 1580,
+      "secret_total": 2094,
+      "false_positive_files": 63,
+      "negative_total": 982,
+      "findings": 2246
+    },
+    "after": {
+      "secret_hits": 1580,
+      "secret_total": 2094,
+      "false_positive_files": 61,
+      "negative_total": 982,
+      "findings": 2244
+    },
+    "exact_cli_diff": {
+      "removed": 2,
+      "added": 0,
+      "removed_types": [
+        "generic_password"
+      ],
+      "removed_labels": [
+        0,
+        0
+      ],
+      "positive_findings_unchanged": true
+    },
+    "ci_gate": {
+      "status": "passed",
+      "command": "python3 benchmark/ci_gate.py /tmp/prowl-bcrypt-clean-150-20261114",
+      "runtime": "go1.27.4 CGO_ENABLED=0 darwin/arm64",
+      "environment": "empty temporary PROWL_HOME; embedded portable model; pinned bundled rule directory",
+      "harness_adjustment": "only fixture cleanup disabled to retain generated files; scoring and thresholds unchanged"
+    },
+    "default_profile_attempt": "correctly aborted with exit 2 because a user-installed legacy model has an incompatible feature schema; no user model changed"
+  },
+  "qualification": "local historical subset gate only; does not establish live verification, full-dataset business lift, or release publication readiness"
+}

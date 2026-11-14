@@ -432,6 +432,9 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				continue
 			}
 			if st.ID == "generic_password" {
+				if isBcryptHash(val) {
+					continue
+				}
 				// A quoted value (`password = "Winter(2024"`) is the common leak form and may legitimately
 				// contain brackets, so the looksLikeIdentifier / bracket-balance heuristics apply only to
 				// UNQUOTED values, where `bytes)` / `get_auth_from_url(proxy)` really are swept-up code.
