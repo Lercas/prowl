@@ -1,0 +1,78 @@
+{
+  "source_revision": "7ee00f03fe2e0c884718fadc8b6dc215ad102c0f",
+  "reference_revision": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "status": "partial: structured L1 restored; L2 compatibility and overall 1.5.0 release qualification remain incomplete",
+  "binary": "/private/tmp/prowl-structured-qualified-20261114",
+  "binary_sha256": "89de785ff944cbc259703ee8a7fc0e55dd249a7d6fe49bbf4126888f7ba07736",
+  "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-structured-native-6_gdwtot/qualification.json",
+  "native_fixtures": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-structured-native-6_gdwtot/fixtures.json",
+  "native_matrix": {
+    "fixture_count": 51,
+    "passed": 174,
+    "total": 204,
+    "by_mode": {
+      "L1": {
+        "passed": 102,
+        "total": 102
+      },
+      "L1_L2": {
+        "passed": 72,
+        "total": 102
+      }
+    },
+    "failed_case_names": [
+      "json-1",
+      "json-2",
+      "json-3",
+      "json-4",
+      "json-5",
+      "toml-canonical-1",
+      "toml-canonical-2",
+      "toml-canonical-3",
+      "toml-canonical-4",
+      "toml-canonical-5",
+      "yaml-canonical-1",
+      "yaml-canonical-2",
+      "yaml-canonical-3",
+      "yaml-canonical-4",
+      "yaml-canonical-5"
+    ],
+    "all_failures_require_ml": true,
+    "failure_count": 30
+  },
+  "validation": {
+    "full_go_suite_1_27_4": "passed",
+    "race_scan_verify": "passed",
+    "targeted_minimum_go_1_26_11": "passed",
+    "golangci_lint": "0 issues",
+    "local_http_binding_scenarios": 18,
+    "fuzz_yaml": {
+      "executions": 32134,
+      "seconds": 6.405,
+      "result": "passed"
+    },
+    "fuzz_toml": {
+      "executions": 9908,
+      "seconds": 6.393,
+      "result": "passed"
+    }
+  },
+  "limitations": [
+    "No external provider verification, publishing, deployment or installed model replacement.",
+    "No claim of full released 1.4.0 contract restoration.",
+    "The L2 model still drops five classes of canonical passwords across JSON, YAML and TOML; thresholds and ProwlBench baseline were not loosened.",
+    "Native matrix runner intentionally returns a nonzero exit status until every expected result passes."
+  ],
+  "source_blobs": {
+    "scripts/check_structured_literals.py": "82762370538351494d1694e8316376dba6b6fb7f",
+    "tool/internal/detect/scalars.go": "03a1f28a1fab23b8327ce6d7c625b6fa411cbf19",
+    "tool/internal/scan/json_literals.go": "dea4de78ad55976a12287ec5e4be06a4066ae577",
+    "tool/internal/scan/literal_pipeline.go": "fdd5150657a5cf7f011c10ea6b7547b2268acc2c",
+    "tool/internal/scan/literal_pragmas.go": "10128618dc26e432f4767981797fb92f16138bfd",
+    "tool/internal/scan/scan.go": "bf972c7f0cdbd91519e52bcaf646d69dab976cff",
+    "tool/internal/scan/toml_budget.go": "881827c9c2bc5dc9bd045fe487ea01270e4e53ae",
+    "tool/internal/scan/toml_literals.go": "47cbb64a6b4630d5c587a4fec7a3e2da8f714060",
+    "tool/internal/scan/yaml_literals.go": "7b6ec9b1f83f4c97ea13764267b3c338f2cf6966",
+    "tool/internal/scan/yaml_source.go": "c71f2023d1b86ff59bdf68d4ff6b8b22e7e2b31e"
+  }
+}
