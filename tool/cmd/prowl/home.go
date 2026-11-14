@@ -14,6 +14,8 @@ import (
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/verify"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
+	bundledverifiers "github.com/Lercas/prowl/tool/verifiers"
 )
 
 // prowlHome resolves the install dir from PROWL_HOME, then $XDG_CONFIG_HOME/prowl, then ~/.prowl.
@@ -96,28 +98,42 @@ func installedVersion(dir string) (string, int, error) {
 }
 
 // printVersions reports the binary version plus installed rule/verifier provenance.
-func printVersions() int {
+func printVersions(mode ...bool) int {
 	fmt.Printf("prowl %s\n", version)
-	rv, rc, rerr := installedVersion(installedRulesDir())
-	vv, vc, verr := installedVersion(installedVerifiersDir())
-	if rerr != nil || verr != nil {
-		if rerr != nil {
-			fmt.Fprintln(os.Stderr, "rules metadata error:", rerr)
+	rv, rc, vv, vc := "", 0, "", 0
+	if len(mode) == 0 || !mode[0] {
+		var rerr, verr error
+		rv, rc, rerr = installedVersion(installedRulesDir())
+		vv, vc, verr = installedVersion(installedVerifiersDir())
+		if rerr != nil || verr != nil {
+			if rerr != nil {
+				fmt.Fprintln(os.Stderr, "rules metadata error:", rerr)
+			}
+			if verr != nil {
+				fmt.Fprintln(os.Stderr, "verifiers metadata error:", verr)
+			}
+			return 2
 		}
-		if verr != nil {
-			fmt.Fprintln(os.Stderr, "verifiers metadata error:", verr)
-		}
-		return 2
 	}
 	if rc > 0 {
 		fmt.Printf("rules:     %d installed (version %s) at %s\n", rc, orNone(rv), logx.SanitizeTerminal(installedRulesDir()))
 	} else {
-		fmt.Printf("rules:     not installed — run 'prowl rules update'\n")
+		eng, err := rules.LoadEmbedded(bundledrules.Files)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rules embedded integrity error:", err)
+			return 2
+		}
+		fmt.Printf("rules:     %d bundled (offline)\n", eng.Len())
 	}
 	if vc > 0 {
 		fmt.Printf("verifiers: %d installed (version %s) at %s\n", vc, orNone(vv), logx.SanitizeTerminal(installedVerifiersDir()))
 	} else {
-		fmt.Printf("verifiers: not installed — run 'prowl verifiers update'\n")
+		set, err := verify.LoadEmbedded(0, bundledverifiers.Files)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "verifiers embedded integrity error:", err)
+			return 2
+		}
+		fmt.Printf("verifiers: %d bundled (offline)\n", set.Count())
 	}
 	return 0
 }

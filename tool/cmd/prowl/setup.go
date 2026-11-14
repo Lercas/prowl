@@ -19,6 +19,8 @@ import (
 	"github.com/Lercas/prowl/tool/internal/source"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
+	bundledverifiers "github.com/Lercas/prowl/tool/verifiers"
 )
 
 // loadDetector builds the detector from the taxonomy, external --rules, and config overrides.
@@ -101,47 +103,55 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 	return detect.New(tax), tax, nil
 }
 
-// loadEngine builds the template engine from --rules-dir, or nil if none was given. --rules-only
-// isolates it too: only an explicit --rules-dir is loaded, never the auto-discovered ~/.prowl/rules.
+// loadEngine preserves explicit isolation and otherwise falls back to the immutable snapshot.
 func loadEngine(c commonFlags) (*rules.Engine, error) {
 	dirs := c.rulesDir
-	if !c.rulesOnly && !c.noAutoPolicy {
-		var err error
-		dirs, err = discoverRulesDirs(c.rulesDir)
+	var err error
+	if !c.rulesOnly && !c.noAutoPolicy && !c.bundled {
+		dirs, err = discoverRulesDirs(dirs)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if len(dirs) == 0 {
-		return nil, nil
+	if c.bundled && !c.rulesOnly {
+		dirs = nil
 	}
-	eng, err := rules.Load(dirs...)
+	var eng *rules.Engine
+	if len(dirs) == 0 {
+		if c.rulesOnly || c.noAutoPolicy && !c.bundled {
+			return nil, nil
+		}
+		eng, err = rules.LoadEmbedded(bundledrules.Files)
+	} else {
+		eng, err = rules.Load(dirs...)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("incomplete rule template set: %w", err)
 	}
-	eng.Filter(rules.FilterOpts{
-		Tags:        splitCSV(c.tags),
-		ExcludeTags: splitCSV(c.excludeTags),
-		Severities:  splitCSV(c.ruleSeverity),
-	})
+	eng.Filter(rules.FilterOpts{Tags: splitCSV(c.tags), ExcludeTags: splitCSV(c.excludeTags), Severities: splitCSV(c.ruleSeverity)})
 	logx.Info("loaded rule templates", "count", eng.Len())
 	return eng, nil
 }
 
-// loadVerifySet builds the verifier set from --verifiers dirs when --verify is on. --verify with no
-// verifiers installed is an error (a silent unverified scan + --verified-only would drop everything).
+// loadVerifySet compiles only the selected policy; verification remains explicitly opt-in.
 func loadVerifySet(c commonFlags) (*verify.Set, error) {
 	if !c.verify {
 		return nil, nil
 	}
-	dirs, err := discoverVerifierDirs(c.verifiers)
-	if err != nil {
-		return nil, err
+	var dirs []string
+	var err error
+	if !c.bundled {
+		dirs, err = discoverVerifierDirs(c.verifiers)
+		if err != nil {
+			return nil, err
+		}
 	}
+	var vs *verify.Set
 	if len(dirs) == 0 {
-		return nil, fmt.Errorf("--verify needs verifiers, but none are installed — run 'prowl verifiers update' (or pass --verifiers DIR)")
+		vs, err = verify.LoadEmbedded(c.verifyTimeout, bundledverifiers.Files)
+	} else {
+		vs, err = verify.Load(c.verifyTimeout, dirs...)
 	}
-	vs, err := verify.Load(c.verifyTimeout, dirs...)
 	if err != nil {
 		return nil, fmt.Errorf("--verify needs a complete verifier set: %w", err)
 	}

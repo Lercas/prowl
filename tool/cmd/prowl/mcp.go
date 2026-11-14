@@ -84,6 +84,7 @@ func mcpTools() []mcpTool {
 	for i := range result {
 		result[i].InputSchema["additionalProperties"] = false
 		props := result[i].InputSchema["properties"].(map[string]any)
+		props["bundled"] = boolProp("использовать встроенные rules/verifiers релиза, сохранив текущий identity key")
 		props["reconstruct"] = boolProp("статическое восстановление JS/TS")
 		if _, supportsVerify := props["verify"]; supportsVerify {
 			props["verified_only"] = boolProp("проверить секреты у провайдеров и оставить подтверждённые находки")
@@ -199,7 +200,7 @@ func mcpArgv(name string, a map[string]any) ([]string, error) {
 		}
 	}
 	appendFlags := func(argv []string) []string {
-		for _, k := range []string{"reconstruct"} {
+		for _, k := range []string{"reconstruct", "bundled"} {
 			if v, _ := a[k].(bool); v {
 				argv = append(argv, "--"+k)
 			}

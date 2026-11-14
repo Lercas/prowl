@@ -1,6 +1,6 @@
 # Rules
 
-Prowl detection rules are nuclei-style YAML templates: one file per provider, an `info` block, `matchers` combined with AND/OR, and `extractors` that pull the secret out of the match. Templates live **outside the binary** in `~/.prowl/rules` and are installed from [github.com/Lercas/prowl-templates](https://github.com/Lercas/prowl-templates) via `prowl rules update`. The default library ships ~159 templates across cloud, payment, messaging, AI, VCS, SaaS, DB, observability, auth, and CI categories.
+Prowl detection rules are nuclei-style YAML templates: one file per provider, an `info` block, `matchers` combined with AND/OR, and `extractors` that pull the secret out of the match. В бинарник встроены 175 шаблонов (159 YAML-файлов) с SHA-256 manifest. Установленный набор в `~/.prowl/rules` можно обновлять через `prowl rules update` из [github.com/Lercas/prowl-templates](https://github.com/Lercas/prowl-templates). Категории включают cloud, payment, messaging, AI, VCS, SaaS, DB, observability, auth и CI.
 
 ```sh
 prowl rules update                 # install/refresh the template library into ~/.prowl/rules
@@ -12,7 +12,7 @@ prowl rules validate rules/        # lint templates (parse / RE2 / fields)
 prowl rules stats rules/           # counts by category / severity / tag
 ```
 
-Templates supplement the built-in detector taxonomy. They run during a scan only when you point at a directory with `--rules-dir`, or automatically when installed in `~/.prowl/rules`. See [Scanning Files](Scanning-Files.md) for how rules feed the scan and [Architecture](Architecture.md) for the pipeline.
+Шаблоны дополняют встроенную таксономию. Приоритет: явный `--rules-dir`, затем установленный набор, затем встроенный снимок. Ошибка выбранного установленного набора завершает скан; она не запускает fallback. `--bundled` выбирает встроенный снимок без чтения установленных rules/verifiers и без учёта `--rules-dir`/`--verifiers`; конфигурация и identity key сохраняются. `--rules-only` сохраняет изоляцию: используются только явно переданные правила, встроенные шаблоны не добавляются. Для `agents` автоматические правила по-прежнему отключены; `--bundled` является явным выбором снимка. See [Scanning Files](Scanning-Files.md) for how rules feed the scan and [Architecture](Architecture.md) for the pipeline.
 
 ## prowl rules workflow
 

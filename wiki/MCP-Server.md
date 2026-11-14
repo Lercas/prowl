@@ -67,8 +67,9 @@ high/critical типов без верификатора. Полное опис�
 Дубли полей и lossy Unicode отклоняются строгим JSON-декодером.
 
 `prowl mcp` запускается без scan flags; параметры передаются в `tools/call`.
-Возврат аргументов `bundled`, `strict`, `semantic` из 1.4.0 ещё не завершён:
-их CLI-реализации остаются отдельными пунктами миграции и сейчас не рекламируются.
+`bundled: true` в `tools/call` выбирает встроенные rules/verifiers релиза,
+сохраняя текущие конфигурацию и identity key. `strict` и `semantic` остаются
+отдельными пунктами миграции и сейчас не рекламируются.
 
 Локальная проверка: `python3 scripts/check_mcp_contract.py /path/to/prowl`.
 Матрица использует отдельный PROWL_HOME, только собственные файлы/APK и stdio;

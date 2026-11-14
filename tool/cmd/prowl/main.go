@@ -21,10 +21,11 @@ func runCLI(args []string) int {
 	safehttp.AllowPrivate.Store(os.Getenv("PROWL_ALLOW_PRIVATE_IPS") != "")
 	cmd := args[0]
 	if cmd == "version" || cmd == "--version" || cmd == "-V" {
-		if _, _, err := parseCommand("version", args[1:]); err != nil {
+		c, _, err := parseCommand("version", args[1:])
+		if err != nil {
 			return commandParseError(err)
 		}
-		return printVersions()
+		return printVersions(c.bundled)
 	}
 	if cmd == "help" || cmd == "-h" || cmd == "--help" {
 		topic := ""
@@ -83,10 +84,11 @@ func runCLI(args []string) int {
 	case "verifiers":
 		return cmdVerifiers(args[1:])
 	case "lsp":
-		if _, _, err := parseCommand("lsp", args[1:]); err != nil {
+		c, _, err := parseCommand("lsp", args[1:])
+		if err != nil {
 			return commandParseError(err)
 		}
-		if err := lsp.Serve(); err != nil {
+		if err := lsp.ServeWithBundled(c.bundled); err != nil {
 			if errors.Is(err, lsp.ErrExitWithoutShutdown) {
 				return 1
 			}

@@ -1,0 +1,295 @@
+{
+  "status": "locally qualified bundled policy restoration; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "inventory": {
+    "rules": 175,
+    "rule_yaml_files": 159,
+    "verifiers": 84
+  },
+  "native": {
+    "binary_sha256": "5e211031cc81198b8f75306da0f38eebebc458daa09e059879c49c8a21e0b373",
+    "passed": 64,
+    "total": 64,
+    "checks": [
+      {
+        "case": "absent/identity-init",
+        "passed": true
+      },
+      {
+        "case": "absent/False/json/typed",
+        "passed": true
+      },
+      {
+        "case": "absent/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "absent/False/sarif/typed",
+        "passed": true
+      },
+      {
+        "case": "absent/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "absent/False/verify-empty",
+        "passed": true
+      },
+      {
+        "case": "absent/True/json/typed",
+        "passed": true
+      },
+      {
+        "case": "absent/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "absent/True/sarif/typed",
+        "passed": true
+      },
+      {
+        "case": "absent/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "absent/True/verify-empty",
+        "passed": true
+      },
+      {
+        "case": "absent/same-identity",
+        "passed": true
+      },
+      {
+        "case": "absent/version-bundled",
+        "passed": true
+      },
+      {
+        "case": "absent/rules/list",
+        "passed": true
+      },
+      {
+        "case": "absent/rules/validate",
+        "passed": true
+      },
+      {
+        "case": "absent/rules/stats",
+        "passed": true
+      },
+      {
+        "case": "absent/verifiers/list",
+        "passed": true
+      },
+      {
+        "case": "absent/verifiers/validate",
+        "passed": true
+      },
+      {
+        "case": "broken-path/identity-init",
+        "passed": true
+      },
+      {
+        "case": "broken-path/False/json/fail-closed",
+        "passed": true
+      },
+      {
+        "case": "broken-path/False/sarif/fail-closed",
+        "passed": true
+      },
+      {
+        "case": "broken-path/False/verify-fail-closed",
+        "passed": true
+      },
+      {
+        "case": "broken-path/True/json/typed",
+        "passed": true
+      },
+      {
+        "case": "broken-path/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "broken-path/True/sarif/typed",
+        "passed": true
+      },
+      {
+        "case": "broken-path/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "broken-path/True/verify-empty",
+        "passed": true
+      },
+      {
+        "case": "broken-path/same-identity",
+        "passed": true
+      },
+      {
+        "case": "broken-path/version-bundled",
+        "passed": true
+      },
+      {
+        "case": "broken-path/rules/list",
+        "passed": true
+      },
+      {
+        "case": "broken-path/rules/validate",
+        "passed": true
+      },
+      {
+        "case": "broken-path/rules/stats",
+        "passed": true
+      },
+      {
+        "case": "broken-path/verifiers/list",
+        "passed": true
+      },
+      {
+        "case": "broken-path/verifiers/validate",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/schema",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/call/False",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/call/True",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/typed-identity",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/call/False",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/call/True",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/typed-identity",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/call/False",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/call/True",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/typed-identity",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/schema",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/call/False",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/call/True",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/typed-identity",
+        "passed": true
+      },
+      {
+        "case": "lsp/bundled-broken-overlay",
+        "passed": true
+      },
+      {
+        "case": "overlay/identity-init",
+        "passed": true
+      },
+      {
+        "case": "overlay/False/json/typed",
+        "passed": true
+      },
+      {
+        "case": "overlay/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "overlay/False/sarif/typed",
+        "passed": true
+      },
+      {
+        "case": "overlay/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "overlay/False/verify-empty",
+        "passed": true
+      },
+      {
+        "case": "overlay/True/json/typed",
+        "passed": true
+      },
+      {
+        "case": "overlay/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "overlay/True/sarif/typed",
+        "passed": true
+      },
+      {
+        "case": "overlay/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "overlay/True/verify-empty",
+        "passed": true
+      },
+      {
+        "case": "overlay/same-identity",
+        "passed": true
+      },
+      {
+        "case": "overlay/version-bundled",
+        "passed": true
+      }
+    ],
+    "scope": "local CLI, MCP and LSP; verification enabled only for empty fixtures; no live provider calls",
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-bundled-native-xgmpmby4"
+  },
+  "mcp_non_regression": {
+    "passed": 80,
+    "total": 80,
+    "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mcp-native-tj6q79kx/qualification.json"
+  },
+  "checks": {
+    "full_go": "passed",
+    "targeted_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11": "passed"
+  },
+  "semantics": [
+    "Explicit rules-only and agents automatic policy isolation retained",
+    "Bundled ignores installed and explicit rule/verifier directories while preserving config and identity key",
+    "Malformed selected overlays fail closed without fallback",
+    "Verifier loading compiles policy without provider requests"
+  ],
+  "limits": [
+    "No live provider or remote-source qualification",
+    "strict and semantic remain separate TODO items"
+  ]
+}

@@ -145,6 +145,7 @@ var commandSubcommands = map[string][]string{
 }
 
 var cliFlags = []flagSpec{
+	boolFlag("--bundled", detectorCommands+" lsp version", "использовать встроенные rules/verifiers релиза, сохранив конфигурацию и identity key", func(c *commonFlags) *bool { return &c.bundled }),
 	enumFlag("--protocol", "guard", "протокол хука (по умолчанию raw)", []string{"raw", "claude", "cursor-prompt", "cursor-tool"}, func(c *commonFlags) *string { return &c.cmd.guardProtocol }),
 	stringFlag("--agent-home", "agents", "DIR", "явно проверить пользовательские конфиги и транскрипты агентов", func(c *commonFlags) *string { return &c.cmd.agentHome }),
 	boolFlag("--shell-history", "agents", "включить историю оболочки из явного --agent-home", func(c *commonFlags) *bool { return &c.cmd.shellHistory }),
@@ -529,6 +530,7 @@ type commonFlags struct {
 	staged, history, gitTimeline             bool
 	ci                                       bool
 	silence, quiet, verbose, noColor         bool
+	bundled                                  bool
 	rulesOnly                                bool
 	noAutoPolicy                             bool // agents: only explicit rule and suppression inputs
 	noAutoConfig                             bool // repo/org: don't honor the scanned tree's own .prowl.yaml

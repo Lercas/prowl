@@ -23,6 +23,25 @@ requests:
 
 A finding is verified **live** if any of the verifier's requests matches. Here, a `200` from `https://api.github.com/user` means the token is valid.
 
+## Встроенный снимок
+
+В бинарник включены 84 верификатора с SHA-256 manifest. При `--verify` используются
+явные `--verifiers`, затем установленный набор или локальный `./verifiers`; если
+набор отсутствует, загружается встроенный снимок. Ошибка выбранного набора
+завершает запуск. `--bundled` выбирает встроенные rules/verifiers без чтения этих
+каталогов, сохраняя конфигурацию и identity key. Проверка провайдера остаётся
+отдельным opt-in: загрузка и компиляция снимка сетевых запросов не делают.
+
+`prowl verifiers list` и `validate` работают с бинарником без установки файлов;
+`prowl version --bundled` показывает встроенный инвентарь. В MCP выбор передаётся
+как `bundled: true` в `tools/call`; startup-флаги сканирования не принимаются.
+`prowl lsp --bundled` сохраняет конфигурацию workspace и игнорирует установленные
+шаблоны. LSP не запускает live-верификацию при вводе текста.
+
+Локальная матрица: `scripts/check_bundled_contract.py /path/to/prowl`.
+В ней верификация включается только для пустых входов без кандидатов;
+доступность и корректность ответов реальных провайдеров она не проверяет.
+
 ## Schema
 
 | Field | Required | Meaning |

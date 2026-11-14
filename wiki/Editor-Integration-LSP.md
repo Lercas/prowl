@@ -156,7 +156,8 @@ JSON/TOML/YAML разбираются как значения, pragmas и allowl
 
 Evidence: `evidence/1.5.0-lsp-contract-20261114.json`. Это проверка локального
 stdio-контракта; совместимость конкретных плагинов редакторов отдельно не проверена.
-CLI/MCP-флаги `bundled`, `strict`, `semantic` остаются отдельным этапом TODO.
+`prowl lsp --bundled` выбирает встроенные шаблоны, сохраняя workspace config.
+CLI/MCP-флаги `strict` и `semantic` остаются отдельным этапом TODO.
 
 ## Wiring it into an editor
 

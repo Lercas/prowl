@@ -14,6 +14,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 func rulesColor() bool { return os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout) }
@@ -90,6 +91,9 @@ func loadRulesForQuery(paths ...string) (*rules.Engine, error) {
 		paths, err = defaultQueryRulePaths()
 		if err != nil {
 			return nil, err
+		}
+		if len(paths) == 0 {
+			return rules.LoadEmbedded(bundledrules.Files)
 		}
 	}
 	return rules.Load(paths...)

@@ -9,6 +9,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
+	bundledverifiers "github.com/Lercas/prowl/tool/verifiers"
 )
 
 func cmdDetectors() int {
@@ -68,7 +69,7 @@ func cmdRules(args []string) int {
 		return 0
 
 	case "list":
-		eng, err := rules.Load(templatePaths...)
+		eng, err := loadRulesForQuery(templatePaths...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "rule load error:", err)
 			return 2
@@ -132,7 +133,7 @@ func cmdRules(args []string) int {
 				nwarn++
 			}
 		}
-		eng, loadErr := rules.Load(templatePaths...)
+		eng, loadErr := loadRulesForQuery(templatePaths...)
 		if loadErr != nil && nerr == 0 {
 			fmt.Fprintln(os.Stderr, "rule load error:", loadErr)
 			nerr++
@@ -150,7 +151,7 @@ func cmdRules(args []string) int {
 		return rulesManifestCmd(dirs[0], len(userPos) > 0)
 
 	case "stats":
-		eng, err := rules.Load(templatePaths...)
+		eng, err := loadRulesForQuery(templatePaths...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "rule load error:", err)
 			return 2
@@ -185,7 +186,7 @@ func cmdVerifiers(args []string) int {
 			}
 			return 2
 		}
-		if len(dirs) == 0 {
+		if len(dirs) == 0 && sub == "manifest" {
 			dirs = []string{"verifiers"}
 		}
 	}
@@ -200,7 +201,12 @@ func cmdVerifiers(args []string) int {
 	}
 	// list/validate load with bundled trust, honouring --allow-unsigned so an operator can inspect an
 	// unsigned set without it being silently trusted.
-	set, err := verify.LoadWithPolicy(0, verify.LoadPolicy{AllowUnsigned: allowUnsigned}, dirs...)
+	var set *verify.Set
+	if len(dirs) == 0 {
+		set, err = verify.LoadEmbedded(0, bundledverifiers.Files)
+	} else {
+		set, err = verify.LoadWithPolicy(0, verify.LoadPolicy{AllowUnsigned: allowUnsigned}, dirs...)
+	}
 	switch sub {
 	case "validate":
 		if err != nil {

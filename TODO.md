@@ -151,7 +151,7 @@
       Строгий JSON отказывает при неоднозначности до subprocess, пути сохраняются
       буквально; доступны `reconstruct` и `verified_only`. Нативная stdio-матрица
       четырёх версий — 80/80, `wiki/evidence/1.5.0-mcp-contract-20261114.json`.
-      Остались CLI/MCP `bundled`, `strict`, `semantic`, а также аудит LSP.
+      Остались CLI/MCP `strict` и `semantic`; этапы LSP и `bundled` описаны ниже.
     - [x] Восстановлены линейные Base64 source spans, padding, цепочки evidence
       и несколько внутренних вхождений, в том числе повтор одного значения.
       Сохранены текущие gzip/zlib/hex и их fail-closed проверки; baseline не
@@ -167,7 +167,14 @@
       вместо прежнего entropy-only типа при том же точном диапазоне.
       Настоящий LSP stdio: 2258/2258; полный Go-набор, targeted race, lint и
       Go 1.26.11. Evidence: `wiki/evidence/1.5.0-lsp-contract-20261114.json`.
-      Конкретные редакторные плагины и CLI/MCP `bundled/strict/semantic` ещё открыты.
+      Конкретные редакторные плагины и CLI/MCP `strict/semantic` ещё открыты.
+
+    - [x] Восстановлен встроенный rules/verifiers snapshot и `--bundled` в CLI,
+      MCP tools/call, LSP и version. Без установленных наборов используются
+      175 шаблонов и 84 верификатора; ошибки выбранных overlays не скрываются
+      fallback. Сохранены `--rules-only`, изоляция agents, конфигурация и identity key.
+      Локальная нативная матрица — 64/64; provider calls в ней не выполняются.
+      Evidence: `wiki/evidence/1.5.0-bundled-contract-20261114.json`.
 
 ### P1 — архитектура CLI
 
