@@ -42,7 +42,7 @@ prowl serve [--addr :8080] [--max-concurrent N]
 
 | Flag | Default | Purpose |
 |------|---------|---------|
-| `--addr` | `:8080` | Listen address (`host:port`). |
+| `--addr` | `127.0.0.1:8080` | Адрес прослушивания (`host:port`). |
 | `--max-concurrent` | `2 × NumCPU` | Size of the in-flight concurrency semaphore. Requests beyond this are rejected with `503` (backpressure). |
 
 The worker uses the same detection engine, taxonomy, external rules, and config (`.prowl.yaml` allowlist) as the CLI — see [Configuration](Configuration.md). The detector and allowlist are loaded once at startup; the worker is safe for concurrent use.
@@ -73,6 +73,22 @@ Response:
 { "count": <int>, "findings": [ <Finding>, … ] }
 ```
 
+Это сокращённая форма. Полный ответ использует envelope `schema_version: "1.4"`:
+`complete`, `completion_reason`, `truncated`, `stats`, `diagnostics`, `scope`,
+`filtered`, `secrets_revealed` и необязательный `identity_scope`.
+HTTP 200 означает, что отчёт сформирован; при `complete: false` он не доказывает
+отсутствие других секретов. Parser errors, пропуск слишком большого batch item,
+лимит ответа и отмена сохраняют неполноту. Общий ledger создаётся отдельно
+для каждого запроса, производные structured literals не увеличивают счётчики
+исходных Item. Семантика полей описана в [Scan Coverage](Scan-Coverage.md).
+
+`content` обязателен и должен быть строкой; явная пустая строка допустима.
+Дубли `content/source/path`, включая case-insensitive и Unicode-escaped алиасы,
+`null`, повреждённый UTF-8, одиночные surrogate escapes и лишнее JSON-значение
+после тела дают HTTP 400. Поля `verify`, `ml`, `ocr`, `show_secrets` также дают
+400: клиент не может менять этапы или раскрытие данных. Другие неизвестные поля
+допустимы для расширений и не заменяют содержимое.
+
 Each `Finding` carries `detector`, `type`, `confidence`, `severity`, `source`, `path`, `line`, `col`, `redacted`, `stage`, and a stable `fingerprint`; `verified` and `rationale` appear when present. Secret values are always **redacted** — the raw value never leaves the worker. See [Output Formats](Output-Formats.md) for the full finding shape.
 
 ```sh
@@ -102,6 +118,19 @@ The response is a single aggregated object — findings from all items are flatt
 
 If the client disconnects mid-batch, the worker stops promptly rather than finishing the remaining items.
 
+### `GET /capabilities`
+
+Возвращает `schema_version`, `request_fields`, `required_fields`, `redacted`
+и карту `stages`. Значения берутся из immutable Pipeline. Обычный `prowl serve`
+исполняет L1 и загруженные rules без ML, live verification, OCR, semantic discovery
+или реконструкции. Для встроенного Go API ответ отражает фактически переданный
+Pipeline, включая явно настроенную политику раскрытия.
+
+Пустой batch `[]` возвращает полный пустой отчёт со scope detection policy и
+rules. Каждый input добавляет scope своего caller-supplied content boundary.
+Digest active taxonomy и templates различает наборы правил; callback allowlist
+и изменяемые внешние сервисы не становятся доказательством immutable revision.
+
 ### `GET /healthz`
 
 Liveness/readiness probe. Returns `200` with body `ok`. Use it for load-balancer health checks and Kubernetes `livenessProbe`/`readinessProbe`.
@@ -129,10 +158,10 @@ Returns a JSON snapshot of process counters (atomic, cumulative since start):
 | Counter | Meaning |
 |---------|---------|
 | `scanned` | Items scanned (each batch item counts once). |
-| `findings` | Total findings returned. |
+| `findings` | Число находок до применения общего лимита ответа. |
 | `errors` | Decode failures, oversized/over-cap rejections, client-disconnect aborts. |
 | `rejected` | Requests turned away by backpressure (`503`). |
-| `truncated` | Items whose content was truncated before scanning. |
+| `truncated` | Число возвращённых неполных отчётов, включая ledger-only неполноту. |
 | `inflight` | Requests currently being processed. |
 | `capacity` | Concurrency limit (`--max-concurrent`). |
 

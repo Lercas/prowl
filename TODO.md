@@ -140,6 +140,12 @@
   - [ ] Проверить остальные разошедшиеся компоненты: MCP/LSP, источники, отчёты,
     correlation, integrity шаблонов и release checks. Намеренные замены ML/cgo
     не откатывать: сохранить квалифицированную Go-flate-v2 модель и security-обновления.
+    - [x] HTTP worker вновь возвращает полный coverage envelope и `/capabilities`,
+      сохраняя immutable Pipeline 1.5.0. Неподдерживаемые request stage/disclosure
+      поля отклоняются, batch count ограничен до материализации всей коллекции.
+      Пустой batch сохраняет policy scope; отмена, parser failure и лимиты не
+      сертифицируются как complete. Нативный worker на loopback — 55/55;
+      `wiki/evidence/1.5.0-http-contract-20261114.json`. MCP/LSP остаются открыты.
 
 ### P1 — архитектура CLI
 

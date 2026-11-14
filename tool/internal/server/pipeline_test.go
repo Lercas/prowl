@@ -26,8 +26,7 @@ func TestConcurrentServersKeepIndependentPrivacyPolicies(t *testing.T) {
 		go func() {
 			defer workers.Done()
 			for _, path := range []string{"/scan", "/scan/batch"} {
-				// A client-controlled extra field cannot override the pipeline's policy.
-				body := `{"content":"AWS=\"` + key + `\"","show_secrets":true}`
+				body := `{"content":"AWS=\"` + key + `\""}`
 				if path == "/scan/batch" {
 					body = "[" + body + "]"
 				}
@@ -51,6 +50,9 @@ func TestConcurrentServersKeepIndependentPrivacyPolicies(t *testing.T) {
 				}
 				if server == revealed && (finding.Redacted != key || finding.Context == nil) {
 					t.Error("another server masked explicitly disclosed output")
+				}
+				if result.SecretsRevealed != (server == revealed) {
+					t.Error("disclosure metadata differs from the immutable pipeline policy")
 				}
 			}
 		}()

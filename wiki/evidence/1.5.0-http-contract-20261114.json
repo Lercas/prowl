@@ -1,0 +1,299 @@
+{
+  "status": "locally qualified HTTP worker contracts; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "native": {
+    "binary_sha256": "fb508bbc4f029170481a194c4b9198c371aebd079e9823e0195001981550fab9",
+    "passed": 55,
+    "total": 55,
+    "checks": [
+      {
+        "case": "capabilities",
+        "passed": true
+      },
+      {
+        "case": "invalid-0",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-0",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-1",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-1",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-2",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-2",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-3",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-3",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-4",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-4",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-5",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-5",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-6",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-6",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-7",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-7",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-8",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-8",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-9",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-9",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-10",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-10",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-11",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-11",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-12",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-12",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-13",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-13",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-14",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-14",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-15",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-15",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-16",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-16",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "invalid-17",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "invalid-17",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "empty",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "empty",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "plain",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "plain",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "unicode",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "unicode",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "parser-error",
+        "batch": false,
+        "passed": true
+      },
+      {
+        "case": "parser-error",
+        "batch": true,
+        "passed": true
+      },
+      {
+        "case": "empty-batch",
+        "passed": true
+      },
+      {
+        "case": "batch-item-limit",
+        "passed": true
+      },
+      {
+        "case": "item-limit",
+        "passed": true
+      },
+      {
+        "case": "batch-item-limit-ledger",
+        "passed": true
+      },
+      {
+        "case": "response-limit-ledger",
+        "passed": true
+      },
+      {
+        "case": "released-slots",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite_passed": true,
+    "minimum_go_1_26_11_targeted_passed": true,
+    "lint_passed": true,
+    "race_server_scan_passed": true,
+    "race_detector": "passed"
+  },
+  "implementation": [
+    "per-request full model.ScanResult envelope",
+    "immutable Pipeline capabilities",
+    "request stage/disclosure controls rejected",
+    "bounded batch materialization",
+    "active taxonomy and rules policy digests",
+    "cancelled empty batch cannot certify completeness"
+  ],
+  "limits": [
+    "CLI serve keeps L1/rules only; Go API capabilities reflect its configured Pipeline",
+    "scope is configured selection/profile, not immutable callback or remote service contents",
+    "MCP/LSP and remaining release contracts remain open"
+  ]
+}

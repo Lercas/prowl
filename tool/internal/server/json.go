@@ -43,6 +43,8 @@ func (item *scanItem) UnmarshalJSON(raw []byte) error {
 			field = &parsed.Source
 		case "path":
 			field = &parsed.Path
+		case "verify", "ml", "ocr", "show_secrets":
+			return errors.New("scan stages and disclosure are configured by the operator")
 		default:
 			var ignored json.RawMessage
 			if err := dec.Decode(&ignored); err != nil {
