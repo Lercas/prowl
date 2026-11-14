@@ -29,7 +29,11 @@ func skipByExtension(ctx context.Context, path string) bool {
 	if engine := ocrEngine(ctx); engine != nil && ocr.MaybeImage(path) {
 		return false
 	}
-	return skipExt[ext] && !unpack.MaybeArchive(path) && !pdftext.MaybeDocument(path, nil)
+	skip := skipExt[ext] && !unpack.MaybeArchive(path) && !pdftext.MaybeDocument(path, nil)
+	if skip {
+		model.Note(ctx, "unsupported_extension", path, false)
+	}
+	return skip
 }
 
 // emitPayload sends one normal text file, or recursively expands a supported archive/mail export and
@@ -41,6 +45,7 @@ func emitPayload(ctx context.Context, ch chan<- model.Item, itemPath string, dat
 func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string, data []byte, maxBytes int64, exclude []string, meta map[string]any, depth int) bool {
 	for _, pattern := range exclude {
 		if config.PathMatch(pattern, itemPath) {
+			model.Note(ctx, "excluded_path", itemPath, false)
 			return true
 		}
 	}
@@ -51,7 +56,11 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 
 	limits := unpack.BoundedLimits(maxBytes, maxBytes)
 	stats, recognized, err := unpack.WalkFiltered(itemPath, data, limits, func(path string) bool {
-		return excludedSourcePath(path, exclude)
+		excluded := excludedSourcePath(path, exclude)
+		if excluded {
+			model.Note(ctx, "excluded_path", path, false)
+		}
+		return excluded
 	}, func(entry unpack.Entry) error {
 		if !emitPayloadDepth(ctx, ch, entry.Path, entry.Data, maxBytes, exclude, meta, depth+1) {
 			return ctx.Err()
@@ -76,7 +85,13 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 		itemPath,
 		data,
 		mailbox.BoundedLimits(maxBytes),
-		func(path string) bool { return excludedSourcePath(path, exclude) },
+		func(path string) bool {
+			excluded := excludedSourcePath(path, exclude)
+			if excluded {
+				model.Note(ctx, "excluded_path", path, false)
+			}
+			return excluded
+		},
 		func(part mailbox.Part) error {
 			if !emitPayloadDepth(ctx, ch, part.Path, part.Data, maxBytes, exclude, meta, depth+1) {
 				return ctx.Err()
@@ -191,6 +206,7 @@ func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string
 	text, ok := scannableText(data)
 	if !ok {
 		logx.Debug("skipped: binary file", "path", itemPath)
+		model.Note(ctx, "binary", itemPath, false)
 		return true
 	}
 	return send(ctx, ch, model.Item{Text: string(text), Source: sourceForPath(itemPath), Path: itemPath, Meta: meta})

@@ -31,6 +31,16 @@ var homeAgentTargets = []agentTarget{{".claude", "claude"}, {".cursor", "cursor"
 // directory. Missing optional targets are normal; an unreadable requested root
 // or selected file remains an incomplete-source diagnostic.
 func AgentSurface(ctx context.Context, o AgentOptions) <-chan model.Item {
+	projects := o.Projects
+	if len(projects) == 0 && o.Home == "" {
+		projects = []string{"."}
+	}
+	for _, project := range projects {
+		registerLocalScope(ctx, "agent-project", project, o)
+	}
+	if o.Home != "" {
+		registerLocalScope(ctx, "agent-home", o.Home, o)
+	}
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)

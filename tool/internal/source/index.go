@@ -28,6 +28,7 @@ func excludedGitPath(ctx context.Context, path string, exclude []string) bool {
 	}
 	for _, pattern := range exclude {
 		if config.PathMatch(pattern, path) {
+			model.Note(ctx, "excluded_path", path, false)
 			return true
 		}
 	}
@@ -41,6 +42,7 @@ func GitWorktreeFiles(ctx context.Context, paths, exclude []string, maxBytes int
 
 // GitWorktreeFilesIn scans diff paths in an explicitly selected repository.
 func GitWorktreeFilesIn(ctx context.Context, dir string, paths, exclude []string, maxBytes int64) <-chan model.Item {
+	registerGitScope(ctx, "git-worktree", dir, paths, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
@@ -66,6 +68,7 @@ func GitIndexFiles(ctx context.Context, paths, exclude []string, maxBytes int64)
 
 // GitIndexFilesIn scans staged objects in an explicitly selected repository.
 func GitIndexFilesIn(ctx context.Context, dir string, paths, exclude []string, maxBytes int64) <-chan model.Item {
+	registerGitScope(ctx, "git-index", dir, paths, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
@@ -144,6 +147,7 @@ func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, sele
 			continue
 		}
 		if fields[0] == "160000" {
+			model.Note(ctx, "git_submodule", path, false)
 			continue // submodule commit, not file content
 		}
 		if _, err := io.WriteString(in, fields[1]+"\n"); err != nil {

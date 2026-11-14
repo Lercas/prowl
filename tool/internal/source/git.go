@@ -85,6 +85,7 @@ func GitChangedFilesIn(ctx context.Context, dir, mode, rev string) ([]string, er
 // than maxBytes before it lands in RAM. dir selects the repository (like `git -C dir`; empty = current
 // dir), so a cloned checkout can be scanned without chdir-ing the process (lets `org` parallelise).
 func GitHistoryBlobs(ctx context.Context, dir string, exclude []string, maxBytes int64) <-chan model.Item {
+	registerGitScope(ctx, "git-history", dir, nil, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
@@ -209,6 +210,7 @@ func processBlob(ctx context.Context, ch chan<- model.Item, br *bufio.Reader, ca
 	}
 	for _, ex := range exclude {
 		if config.PathMatch(ex, path) {
+			model.Note(ctx, "excluded_path", path, false)
 			return true
 		}
 	}
@@ -293,6 +295,7 @@ func FilesFromList(ctx context.Context, paths []string, maxBytes int64) <-chan m
 // FilesFromListFiltered is FilesFromList with the filesystem/archive path exclusions used by staged
 // and since scans. Keeping the unfiltered wrapper preserves the small source API for direct callers.
 func FilesFromListFiltered(ctx context.Context, paths, exclude []string, maxBytes int64) <-chan model.Item {
+	registerGitScope(ctx, "file-list", "", paths, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)
@@ -304,7 +307,10 @@ func FilesFromListFiltered(ctx context.Context, paths, exclude []string, maxByte
 					}
 				}
 			},
-			func(r any) { logx.Warn("recovered file-list panic", "err", r) },
+			func(r any) {
+				logx.Warn("recovered file-list panic", "err", r)
+				emitSourceError(ctx, ch, "", fmt.Errorf("file-list reader failed"))
+			},
 		)
 	}()
 	return ch

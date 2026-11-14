@@ -95,6 +95,7 @@ func Extract(ctx context.Context, p string, opts MobileOptions) (<-chan model.It
 	if opts.MaxBytes <= 0 {
 		opts.MaxBytes = maxMobileEntryBytes
 	}
+	registerLocalScope(ctx, "mobile", p, opts)
 	zr, err := zip.OpenReader(p)
 	if err != nil {
 		return nil, fmt.Errorf("open mobile archive %q: %w", p, err)
@@ -140,10 +141,12 @@ func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, a
 			return
 		}
 		if excludedMobile(name, opts.Exclude) || excludedMobile(reportPath, opts.Exclude) {
+			model.Note(ctx, "excluded_path", reportPath, false)
 			continue
 		}
 		cls := classifyEntry(name)
 		if cls == clsSkip || (cls == clsBinStrings && !opts.Strings) {
+			model.Note(ctx, "unsupported_mobile_entry", reportPath, false)
 			continue
 		}
 		usize := int64(math.MaxInt64)

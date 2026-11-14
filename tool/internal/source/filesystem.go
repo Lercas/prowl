@@ -128,9 +128,11 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 	for _, root := range roots {
 		rootCtx := ctx
 		if stateDirectoryExcluded(ctx, root) {
+			model.Note(ctx, "state_directory", root, false)
 			continue
 		}
 		if excludedSourcePath(root, exclude) {
+			model.Note(ctx, "excluded_path", root, false)
 			continue
 		}
 		info, statErr := os.Stat(root)
@@ -196,6 +198,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				return filepath.SkipAll
 			}
 			if stateDirectoryExcluded(ctx, path) {
+				model.Note(ctx, "state_directory", path, false)
 				if err == nil && d.IsDir() {
 					return filepath.SkipDir
 				}
@@ -210,6 +213,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				path = displaySourcePath(root, rel)
 			}
 			if excludedSourcePath(path, exclude) {
+				model.Note(ctx, "excluded_path", path, false)
 				if err == nil && d.IsDir() {
 					return filepath.SkipDir
 				}
@@ -225,6 +229,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				// Prune default-skip dirs (generated/vendored noise), unless one is named explicitly as
 				// the scan root (the override). Log the prune at Debug so the dropped subtree isn't silent.
 				if defaultSkipDirs[d.Name()] && path != root {
+					model.Note(ctx, "excluded_directory", path, false)
 					logx.Debug("skipped: default-skip dir (name it explicitly as a root to scan it)", "path", path)
 					return filepath.SkipDir
 				}
@@ -233,6 +238,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 			// Never follow an in-tree symlink: one discovered during the walk can point outside the
 			// scanned root (-> /etc/shadow) and escape scope. A named symlink root is handled above.
 			if d.Type()&fs.ModeSymlink != 0 {
+				model.Note(ctx, "symlink", path, false)
 				return nil
 			}
 			if skipByExtension(ctx, path) {
@@ -246,6 +252,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				return nil
 			}
 			if !info.Mode().IsRegular() {
+				model.Note(ctx, "special_file", path, false)
 				return nil // special files discovered in a tree are outside the regular-file scan policy
 			}
 			if info.Size() > maxBytes {
@@ -294,6 +301,7 @@ func emitFile(ctx context.Context, ch chan<- model.Item, path string, maxBytes i
 func emitSymlinkRoot(ctx context.Context, ch chan<- model.Item, path string, exclude []string, maxBytes int64) bool {
 	for _, ex := range exclude {
 		if config.PathMatch(ex, path) {
+			model.Note(ctx, "excluded_path", path, false)
 			return true
 		}
 	}
@@ -305,10 +313,12 @@ func emitSymlinkRoot(ctx context.Context, ch chan<- model.Item, path string, exc
 // Returns false only when the consumer stopped.
 func emitListedTarget(ctx context.Context, ch chan<- model.Item, path, reportPath string, maxBytes int64, exclude []string) bool {
 	if stateDirectoryExcluded(ctx, path) {
+		model.Note(ctx, "state_directory", reportPath, false)
 		return true
 	}
 	for _, pattern := range exclude {
 		if config.PathMatch(pattern, reportPath) {
+			model.Note(ctx, "excluded_path", reportPath, false)
 			return true
 		}
 	}

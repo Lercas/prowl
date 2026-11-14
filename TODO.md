@@ -122,8 +122,14 @@
       Item считается один раз до производных представлений; неполнота источника
       без находок даёт код 2 и блокирует baseline. Нативная матрица — 76/76;
       [контракт и границы](wiki/Scan-Coverage.md), отчёт —
-      `wiki/evidence/1.5.0-coverage-20261114.json`. Полные acquisition scopes
-      остальных источников и аудит MCP/LSP остаются открыты.
+      `wiki/evidence/1.5.0-coverage-20261114.json`.
+    - [x] Локальные acquisition scopes восстановлены для Git worktree/index/history/
+      timeline, явного списка файлов, mobile, image и agent surface. Пустая
+      выбранная область сохраняет профиль, policy-пропуски получают диагностику
+      без ложной неполноты. Panic file-list теперь даёт source error вместо
+      успешного пустого результата. Нативная локальная матрица — 36/36;
+      `wiki/evidence/1.5.0-source-coverage-20261114.json`. Remote adapters,
+      immutable revision provenance и аудит MCP/LSP остаются открыты.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

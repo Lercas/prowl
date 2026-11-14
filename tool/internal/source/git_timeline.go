@@ -163,6 +163,7 @@ func parseTimelineChanges(raw []byte) (map[string]string, error) {
 // GitTimelineBlobs scans each (path,blob) pair once. Unlike rev-list --objects,
 // it preserves aliases and a graph of every reachable commit's first-parent diff.
 func GitTimelineBlobs(ctx context.Context, dir string, exclude []string, maxBytes int64) <-chan model.Item {
+	registerGitScope(ctx, "git-timeline", dir, nil, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
 	go func() {
 		defer close(ch)

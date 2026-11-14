@@ -88,6 +88,12 @@ func (b *imageBudget) addBytes(bodyBytes int64) bool {
 // config and EVERY layer's files as Items — a secret COPYd then rm'd survives in the earlier layer. Only
 // remote refs hit the network (SSRF-guarded); one anti-bomb budget is shared across all images.
 func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, timeout time.Duration, exclude []string) (<-chan model.Item, *FinalIndex, error) {
+	model.CoverageFrom(ctx).RegisterScope("image", arg, struct {
+		Kind     ImageInput
+		MaxBytes int64
+		Timeout  time.Duration
+		Exclude  []string
+	}{kind, maxBytes, timeout, exclude})
 	imgs, cleanup, err := resolveImages(ctx, arg, kind, timeout)
 	if err != nil {
 		return nil, nil, err

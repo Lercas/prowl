@@ -21,12 +21,24 @@ UTF-8 текста перед нормализацией, разбором liter
 сохранением occurrences сама по себе фильтрацией не считается.
 
 CLI регистрирует scope запрошенной команды и эффективной конфигурации pipeline.
-Filesystem и stdin добавляют собственный scope. Policy хранится как digest,
+Filesystem, stdin, явный список файлов, Git worktree/index/history/timeline,
+mobile, image и agent surface добавляют собственный scope. Он регистрируется
+до чтения, поэтому пустая выбранная область не теряет профиль. Policy хранится как digest,
 с identity key используется HMAC. Формат отчёта и путь выходного файла policy
 не меняют. Command scope описывает запрошенный профиль, а не доказывает
-неизменность удалённого источника или ревизии. Полный аудит acquisition scope
-и provenance остальных источников остаётся открытым.
+неизменность удалённого источника или ревизии. Policy-пропуски (расширение,
+бинарное содержимое, symlink, исключённый путь/каталог, submodule) отражаются
+диагностикой без признака неполноты. Они не увеличивают `stats.skipped` и не
+поднимают `filtered`, который относится к подавлению находок.
+
+Полный аудит remote adapters (domain, CI/CD, SaaS, repo/org и bucket), immutable
+revision provenance и MCP/LSP остаётся открытым. Scope локального Git-источника
+описывает выбранные пути/режим, а не атомарный снимок всех изменяемых refs.
 
 Локальная проверка: `python3 scripts/check_coverage.py /path/to/prowl`.
 Матрица использует приватный временный PROWL_HOME, локальные фикстуры,
 JSON/SARIF, файл/stdin и stdout/атомарный файл отчёта. Внешних провайдеров нет.
+
+`python3 scripts/check_source_coverage.py /path/to/prowl` проверяет 36 сочетаний
+локальных Git, APK, Docker tar и agent-фикстур с JSON/SARIF и stdout/файлом.
+Docker daemon, registry, облачные credentials и установленный runtime не нужны.

@@ -1,0 +1,236 @@
+{
+  "status": "locally qualified local acquisition scope restoration; not published",
+  "native": {
+    "binary_sha256": "42df54bfe3d08a144b46386c5796204072d94e937f204d8db7be646515c0d7c9",
+    "passed": 36,
+    "total": 36,
+    "checks": [
+      {
+        "case": "filesystem-policy",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "source_scan_cli_suites_passed": true,
+    "source_race_passed": true,
+    "lint_passed": true
+  },
+  "limits": [
+    "local scope policy is selection, not immutable revision proof",
+    "remote adapter scopes and immutable provenance remain open",
+    "MCP/LSP remains open"
+  ]
+}
