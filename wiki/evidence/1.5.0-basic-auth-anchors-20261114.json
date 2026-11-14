@@ -1,0 +1,166 @@
+{
+  "scope": "selective mandatory at-sign instead of common slash pair for URL credentials",
+  "candidate_commit": "e063e171221fce89c12a2b3830219eeb74768ec5",
+  "proof": "Each URL branch match contains @ and each HTTP-header branch match contains Authorization:. Literal ranking is an explicit performance heuristic; AST byte/line proofs and fallback remain unchanged.",
+  "inventory": {
+    "regexes_compared": 453,
+    "changed_plans": [
+      "builtin basic_auth_header"
+    ],
+    "template_regexes_planned": 421
+  },
+  "validation": {
+    "source": "isolated clean checkout with only the scoped linewin change",
+    "full_go_suite": "passed",
+    "race": "basic-auth and at-sign tests plus fuzz seeds passed",
+    "minimum_go": "go1.26.11 basic-auth and at-sign tests plus fuzz seeds passed",
+    "lint": "0 issues in linewin",
+    "fuzz": {
+      "executions": 409641,
+      "seconds": 21.302,
+      "differences": 0
+    },
+    "randomized_at_sign_trials": 3000,
+    "edge_cases": [
+      "Unicode credentials",
+      "invalid UTF-8",
+      "multiline HTTP Basic header",
+      "dense at-sign input",
+      "URL credential length over 20000 bytes",
+      "exact capture groups and FindAll limits including zero",
+      "optional and empty regex branches"
+    ],
+    "corpus_equivalence": {
+      "corpus": "go1.27.4 GOROOT/src",
+      "files": 12044,
+      "detector_matches": 1129,
+      "rule_hits": 3,
+      "differences": 0
+    },
+    "cli_parity": {
+      "fixture": "retained ProwlBench subset",
+      "findings": 2246,
+      "exact_findings_equal": true,
+      "ml": true,
+      "previous_binary_revision": "05681ca"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9564996417.0,
+            "B/op": 578444840.0,
+            "allocs/op": 1161452.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9644259500.0,
+            "B/op": 585063672.0,
+            "allocs/op": 1161708.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9613770375.0,
+            "B/op": 576905408.0,
+            "allocs/op": 1161554.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 9142168042.0,
+            "B/op": 590129800.0,
+            "allocs/op": 1161787.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9135341542.0,
+            "B/op": 583042728.0,
+            "allocs/op": 1162119.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 9230924167.0,
+            "B/op": 576473872.0,
+            "allocs/op": 1161881.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "bde49eea8e2d1c87b75f1dc6e838d8c34c11c2b1",
+        "candidate": "e063e171221fce89c12a2b3830219eeb74768ec5"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 9613770375.0,
+          "B/op": 578444840.0,
+          "allocs/op": 1161554.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        "candidate": {
+          "ns/op": 9142168042.0,
+          "B/op": 583042728.0,
+          "allocs/op": 1161881.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      },
+      "ratios": {
+        "ns/op": 0.9509451219860241,
+        "B/op": 1.0079487060512113,
+        "allocs/op": 1.0002815194127868
+      },
+      "regressions": []
+    },
+    "performance_reference_note": "Explicit local override --reference bde49ee measures this change against its immediate parent. Policy reference remains pinned to e0f05cd for CI.",
+    "microbenchmark": {
+      "scope": "single basic-auth regex over comments and one URL; includes window preparation",
+      "input_bytes": 1056016,
+      "whole_ns_median": 28289260,
+      "windowed_ns_median": 2619272,
+      "samples": 3,
+      "benchtime": "300ms",
+      "claim": "not overall scanner throughput"
+    }
+  },
+  "qualification": "local correctness and performance evidence only; historical ProwlBench false-positive gate and release publication remain open"
+}
