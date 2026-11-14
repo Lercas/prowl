@@ -344,6 +344,25 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
+	if !isJSONItem(it) {
+		return p.findings(ctx, it, nil)
+	}
+	coverage := model.NewCoverage()
+	result = p.findings(model.WithCoverage(ctx, coverage), it, nil)
+	complete, _, diagnostics := coverage.Snapshot()
+	for _, d := range diagnostics {
+		model.Note(ctx, d.Code, d.Path, d.Incomplete)
+	}
+	if !complete {
+		result = append(result, processingError(it, "structured content could not be completely interpreted; results are incomplete"))
+		if record, _ := it.Meta["git_history"].(*model.GitRecord); record != nil {
+			record.Graph.Inspected.Store(record.Object, false)
+		}
+	}
+	return result
+}
+
+func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *literalDocument) (result []model.Finding) {
 	gitRecord, _ := it.Meta["git_history"].(*model.GitRecord)
 	if record := gitRecord; record != nil {
 		defer func() {
@@ -376,11 +395,24 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			Rationale: "source content could not be read; scan results are incomplete",
 		}}
 	}
+	if literalDoc == nil && isJSONItem(it) {
+		if doc := jsonLiterals(ctx, it); doc != nil {
+			return p.literalFindings(ctx, it, doc)
+		}
+		// A failed parser cannot establish a value safe for provider submission.
+		vset = nil
+	}
 	var ms []detect.Match
 	truncated := false
 	failed := false
 	resilience.Guard(
-		func() { ms, truncated = det.ScanCtxWithStatus(ctx, it.Text) },
+		func() {
+			if literalDoc != nil {
+				ms, truncated = det.ScanWithScalars(ctx, it.Text, literalDoc.scalars)
+			} else {
+				ms, truncated = det.ScanCtxWithStatus(ctx, it.Text)
+			}
+		},
 		func(r any) {
 			logx.Warn("recovered scan panic", "path", it.Path, "err", r)
 			failed = true
@@ -410,6 +442,17 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
 	dedup := map[string]int{} // value+line key -> index in out, avoids cascade/template double-reporting
 	li := newLineIndex(it.Text)
+	hasPragma := li.hasPragma
+	if literalDoc != nil {
+		hasPragma = func(start int) bool {
+			v := literalDoc.locate(start, start)
+			if v == nil {
+				return false
+			}
+			original, _ := literalDoc.sourceSpan(v, start, start+1)
+			return literalDoc.hasPragma(original)
+		}
+	}
 	pathIsFile := pathIsFilesystem(it.Source)
 	itemURL, _ := it.Meta["url"].(string)
 	itemInstr, _ := it.Meta["instruction"].(string) // image: the Dockerfile step that built the layer
@@ -419,13 +462,16 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 
 			break
 		}
+		if literalDoc != nil && !literalDoc.accepts(m.Type, m.Start, m.End) {
+			continue
+		}
 		if gitRecord != nil {
 			observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
 		}
 		if allow != nil && allow(m.Value, it.Path) {
 			continue
 		}
-		if !p.options.IgnorePragmas && li.hasPragma(m.Start) {
+		if !p.options.IgnorePragmas && hasPragma(m.Start) {
 			continue
 		}
 		// in a lockfile a generic entropy/api-key hit is almost always a package integrity hash; drop
@@ -436,12 +482,13 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
-		ver, why := applyVerify(ctx, vset, m.Type, m.Value, it.Text)
+		ver, why := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, it.Text)
 		out = append(out, model.Finding{
 			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
-			UTF16Col:    li.utf16Col(m.Start),
+			UTF16Col:  li.utf16Col(m.Start),
+			ByteStart: m.Start, ByteEnd: m.End,
 			ArtifactURI: it.ArtifactURI,
 			Redacted:    p.redactValue(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint:      model.ComputeFingerprint(m.Type, it.Path, m.Value),
@@ -452,7 +499,11 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			Context:    p.revealMatchContext(it, m),
 		})
 		if ml != nil {
-			reqs = append(reqs, recordForMatch(m, it))
+			record := recordForMatch(m, it)
+			if literalDoc != nil {
+				record = literalDoc.recordFor(m.Value, it, m.Start)
+			}
+			reqs = append(reqs, record)
 		}
 	}
 	// external templates (opt-in via --rules-dir)
@@ -492,6 +543,9 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			if i&1023 == 0 && ctx.Err() != nil {
 				break
 			}
+			if literalDoc != nil && !literalDoc.accepts(h.RuleID, h.Start, h.End) {
+				continue
+			}
 			// backstop the combined cap during accumulation (collisions update in place; distinct hits grow out)
 			if len(out) >= maxMatches {
 				truncated = true
@@ -509,7 +563,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 				detect.IsExampleOrPlaceholder(h.Value) {
 				continue
 			}
-			if !p.options.IgnorePragmas && li.hasPragma(h.Start) {
+			if !p.options.IgnorePragmas && hasPragma(h.Start) {
 				continue
 			}
 			line, col := li.cols(h.Start)
@@ -519,12 +573,13 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			if sev == "" {
 				sev = severityFor(h.Category, 0.9)
 			}
-			ver, why := applyVerify(ctx, vset, h.RuleID, h.Value, it.Text)
+			ver, why := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, it.Text)
 			f := model.Finding{
 				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
-				UTF16Col:    li.utf16Col(h.Start),
+				UTF16Col:  li.utf16Col(h.Start),
+				ByteStart: h.Start, ByteEnd: h.End,
 				ArtifactURI: it.ArtifactURI,
 				Redacted:    p.redactValue(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint:      model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
@@ -544,13 +599,28 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 				out[idx] = f
 				if ml != nil {
 					reqs[idx] = recordFor(h.Value, it, h.Start)
+					if literalDoc != nil {
+						reqs[idx] = literalDoc.recordFor(h.Value, it, h.Start)
+					}
 				}
 				continue
 			}
 			dedup[key] = len(out)
 			out = append(out, f)
 			if ml != nil {
-				reqs = append(reqs, recordFor(h.Value, it, h.Start))
+				record := recordFor(h.Value, it, h.Start)
+				if literalDoc != nil {
+					record = literalDoc.recordFor(h.Value, it, h.Start)
+				}
+				reqs = append(reqs, record)
+			}
+		}
+	}
+	if literalDoc != nil {
+		p.mapLiteralFindings(out, it, literalDoc)
+		if p.options.ValueFingerprint != nil {
+			for _, v := range literalDoc.values {
+				indexValues = append(indexValues, v.value, literalDoc.original[v.start:v.end])
 			}
 		}
 	}
@@ -797,6 +867,10 @@ func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context str
 		return nil, ""
 	}
 	r := vset.Verify(ctx, typeID, raw, context, detect.IsExampleOrPlaceholder(raw))
+	return verificationResult(r)
+}
+
+func verificationResult(r verify.Result) (*bool, string) {
 	switch r.Status {
 	case verify.Verified:
 		t := true

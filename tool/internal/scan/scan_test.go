@@ -270,7 +270,7 @@ func TestLockfileKeepsCredentialGeneric(t *testing.T) {
 	}
 
 	// basic_auth_header (URL userinfo form) carries a REAL credential — kept in a lockfile.
-	fs := run("\"registry\": \"https://deploy:s3cr3tD3pl0yT0k3nXYZ9q@registry.example.com/r\"\n", "dir/package-lock.json")
+	fs := run("{\"registry\": \"https://deploy:s3cr3tD3pl0yT0k3nXYZ9q@registry.example.com/r\"}\n", "dir/package-lock.json")
 	if len(fs) != 1 || fs[0].Type != "basic_auth_header" {
 		t.Fatalf("basic_auth_header in package-lock.json should be FOUND, got %+v", fs)
 	}
@@ -286,7 +286,7 @@ func TestLockfileKeepsCredentialGeneric(t *testing.T) {
 	}
 
 	// The same credential URL in a NON-lockfile is unaffected (sanity: it's a real basic_auth_header).
-	if fs := run("url = \"https://deploy:s3cr3tD3pl0yT0k3nXYZ9q@registry.example.com/r\"\n", "src/config.json"); len(fs) != 1 || fs[0].Type != "basic_auth_header" {
+	if fs := run("{\"url\": \"https://deploy:s3cr3tD3pl0yT0k3nXYZ9q@registry.example.com/r\"}\n", "src/config.json"); len(fs) != 1 || fs[0].Type != "basic_auth_header" {
 		t.Errorf("basic_auth_header in a normal file should be found, got %+v", fs)
 	}
 }

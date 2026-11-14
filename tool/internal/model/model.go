@@ -52,6 +52,9 @@ type Finding struct {
 	Path       string           `json:"path"`
 	Line       int              `json:"line"`
 	Col        int              `json:"col"`
+	// ByteStart/ByteEnd refer to the original source snapshot, never a normalized view.
+	ByteStart int `json:"-"`
+	ByteEnd   int `json:"-"`
 	// UTF16Col is derived from the scanned snapshot for SARIF; Col remains byte-based for JSON/pretty.
 	// Zero means no derived column is available (e.g. an intake diagnostic).
 	UTF16Col int `json:"-"`
@@ -88,7 +91,33 @@ type Finding struct {
 	// ImageEntry is internal provenance; it is deliberately absent from report formats.
 	ImageEntry int `json:"-"`
 	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
-	Instruction string `json:"instruction,omitempty"`
+	Instruction   string            `json:"instruction,omitempty"`
+	SecretID      string            `json:"secret_id,omitempty"`
+	IdentityScope string            `json:"identity_scope,omitempty"`
+	Occurrences   []Occurrence      `json:"occurrences,omitempty"`
+	OccurrenceID  string            `json:"occurrence_id,omitempty"`
+	Evidence      []Evidence        `json:"evidence,omitempty"`
+	Provenance    map[string]string `json:"provenance,omitempty"`
+	Verification  *Verification     `json:"verification,omitempty"`
+	MLScore       *float64          `json:"ml_score,omitempty"`
+}
+
+// Evidence points at observed source spans without retaining plaintext fragments.
+type Evidence struct {
+	Path      string `json:"path"`
+	Start     int    `json:"start"`
+	End       int    `json:"end"`
+	Line      int    `json:"line"`
+	Col       int    `json:"col"`
+	Transform string `json:"transform"`
+}
+
+type Verification struct {
+	Status       string   `json:"status"`
+	Verifier     string   `json:"verifier,omitempty"`
+	CheckedAt    string   `json:"checked_at,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	Reason       string   `json:"reason,omitempty"`
 }
 
 // FindingContext mirrors mlscore.Context's value-dependent fields (path/source are already on Finding).

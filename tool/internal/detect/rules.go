@@ -193,6 +193,10 @@ func (d *Detector) ScanCtx(ctx context.Context, text string) []Match {
 // The flag survives filtering and overlap deduplication, which can shrink the returned slice.
 // Cancellation is represented by ctx.Err(), independently of this candidate-cap flag.
 func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match, bool) {
+	return d.scanCtxWithScalars(ctx, text, nil)
+}
+
+func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars map[int]PasswordScalar) ([]Match, bool) {
 	lb := d.lowerPool.Get().(*[]byte)
 	lower := lowerScratch(lb, text)
 	pp := d.presentPool.Get().(*[]bool)
@@ -242,6 +246,11 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	all = discardLiteralArgumentGuesses(all, literalSpans)
 	all = append(all, viewMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
+	if scalars != nil {
+		var scalarLimited bool
+		all, scalarLimited = d.scalarMatches(ctx, text, all, scalars)
+		candidateCapped = candidateCapped || scalarLimited
+	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
 	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped
 	if truncated && !collectCapped {

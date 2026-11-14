@@ -262,6 +262,19 @@ func copyResult(r Result) Result { r.Access = append([]string(nil), r.Access...)
 // duplicates share one probe; canceled callers can leave without canceling another caller's probe.
 // Inconclusive errors are removed so a later attempt can recover from transient provider failures.
 func (s *Set) Verify(ctx context.Context, typeID, value, context string, isExample bool) Result {
+	return s.verify(ctx, typeID, value, context, nil, isExample)
+}
+
+// VerifyLiteral uses parser-established sibling bindings instead of extracting
+// companion credentials from text which could itself be untrusted string data.
+func (s *Set) VerifyLiteral(ctx context.Context, typeID, value string, bindings map[string]string, isExample bool) Result {
+	if bindings == nil {
+		bindings = map[string]string{}
+	}
+	return s.verify(ctx, typeID, value, "", bindings, isExample)
+}
+
+func (s *Set) verify(ctx context.Context, typeID, value, text string, bindings map[string]string, isExample bool) Result {
 	if isExample {
 		return Result{Status: Skipped}
 	}
@@ -272,7 +285,14 @@ func (s *Set) Verify(ctx context.Context, typeID, value, context string, isExamp
 	if v == nil {
 		return Result{Status: Unsupported}
 	}
-	vars := extractedVars(v, value, context)
+	vars := extractedVars(v, value, text)
+	if bindings != nil {
+		var ok bool
+		vars, ok = literalVars(v, typeID, value, bindings)
+		if !ok {
+			return Result{Status: Errored, Verifier: v.ID, Note: "structured companion binding is missing, ambiguous or invalid"}
+		}
+	}
 	key := makeVerificationKey(v, vars)
 	pending := &cachedVerification{done: make(chan struct{}), result: Result{Status: Errored, Verifier: v.ID, Note: "request failed"}}
 	actual, loaded := s.cache.LoadOrStore(key, pending)
