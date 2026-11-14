@@ -648,5 +648,638 @@
         "passed": true
       }
     ]
+  },
+  "main_integration": {
+    "source_commit": "48eaba2",
+    "full_go": "passed",
+    "native": {
+      "binary_sha256": "9115cf88553b2ee7098c9357da6e070040adfc5c46ceafeacdc78dce4999039a",
+      "passed": 99,
+      "total": 99,
+      "checks": [
+        {
+          "case": "identity",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/False/False/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/False/True/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "repo/False/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/True/False/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "repo/True/True/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "repo/True/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "org/False/False/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "org/False/True/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "org/False/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "org/True/False/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/json/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/sarif/no-local-scope",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "org/True/True/sarif/uri",
+          "passed": true
+        },
+        {
+          "case": "org/True/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "warning/repo/json",
+          "passed": true
+        },
+        {
+          "case": "warning/repo/sarif",
+          "passed": true
+        },
+        {
+          "case": "warning/org/json",
+          "passed": true
+        },
+        {
+          "case": "warning/org/sarif",
+          "passed": true
+        },
+        {
+          "case": "invalid/repo/json",
+          "passed": true
+        },
+        {
+          "case": "invalid/repo/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "invalid/repo/sarif",
+          "passed": true
+        },
+        {
+          "case": "invalid/repo/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "invalid/org/json",
+          "passed": true
+        },
+        {
+          "case": "invalid/org/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "invalid/org/sarif",
+          "passed": true
+        },
+        {
+          "case": "invalid/org/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "empty/False",
+          "passed": true
+        },
+        {
+          "case": "empty/True",
+          "passed": true
+        },
+        {
+          "case": "history-refset",
+          "passed": true
+        },
+        {
+          "case": "history-tag-only",
+          "passed": true
+        },
+        {
+          "case": "history-selected-branch",
+          "passed": true
+        },
+        {
+          "case": "history-selected-tag",
+          "passed": true
+        },
+        {
+          "case": "2024-11-05/repo",
+          "passed": true
+        },
+        {
+          "case": "2025-03-26/repo",
+          "passed": true
+        },
+        {
+          "case": "2025-06-18/repo",
+          "passed": true
+        },
+        {
+          "case": "2026-07-28/repo",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-native-d3xdo03d",
+      "scope": "local Git clone wrapper, owned Git objects and loopback org inventory only; no real remote repository or provider use"
+    },
+    "source_coverage_nonregression": {
+      "binary_sha256": "9115cf88553b2ee7098c9357da6e070040adfc5c46ceafeacdc78dce4999039a",
+      "passed": 36,
+      "total": 36,
+      "checks": [
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        }
+      ]
+    },
+    "preserved_unrelated_dirty_work": true
   }
 }
