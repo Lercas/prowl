@@ -133,3 +133,14 @@ func TestReleasedKeyedIdentityKeepsSuppressedGitObservations(t *testing.T) {
 		t.Fatal("keyed report identity turned ML suppression into a Git removal")
 	}
 }
+
+func TestReportOccurrenceSeparatesRepeatedPhysicalImageEntries(t *testing.T) {
+	p := New(Options{Detector: detector(t), IdentityKey: []byte(strings.Repeat("k", 32))})
+	it := model.Item{Source: "code", Path: "owned|layer0:prod.env", Text: "AWS=AKIANAFGYOEYPXU1DSYP", ImageEntry: 1}
+	a := p.Findings(t.Context(), it)[0]
+	it.ImageEntry = 2
+	b := p.Findings(t.Context(), it)[0]
+	if a.SecretID != b.SecretID || a.Fingerprint != b.Fingerprint || a.OccurrenceID == b.OccurrenceID {
+		t.Fatal("physical TAR entries did not retain separate opaque occurrence identities")
+	}
+}

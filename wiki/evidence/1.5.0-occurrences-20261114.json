@@ -1,0 +1,584 @@
+{
+  "status": "locally qualified occurrence aggregation and SARIF result metadata; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "native": {
+    "binary_sha256": "3d8247c303844a52f1a05ff48f75e23367a3f0504d4a927c1317a9b07d22df2b",
+    "passed": 71,
+    "total": 71,
+    "checks": [
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.env",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.json",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "production.yaml",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "bundle.js",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeated-image-entry",
+        "keyed": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeated-image-entry",
+        "keyed": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeated-image-entry",
+        "keyed": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeated-image-entry",
+        "keyed": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "overflow",
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "overflow",
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "overflow-preserves-baseline",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite": true,
+    "affected_race": true,
+    "minimum_go_1_26_11": true,
+    "golangci_lint_issues": 0
+  },
+  "contracts": [
+    "default aggregation retains source evidence and existing nested occurrence groups",
+    "final image entry represents the group without losing overwritten physical entries",
+    "summary preserves any live verdict and strongest severity/confidence",
+    "repeated aggregation preserves source verification instead of propagating a summary verdict",
+    "up to 2048 retained occurrences; overflow is explicitly incomplete and cannot replace baseline",
+    "anonymous observations are not identified solely by equal visible coordinates",
+    "opaque keyed report occurrence identity distinguishes physical image entry ordinal",
+    "SARIF result properties preserve JSON identity, occurrences, provenance, evidence and available verification",
+    "existing SARIF keyed value identity test retained; alert identity and UTF16 columns unchanged"
+  ],
+  "remaining": [
+    "Complete coverage envelope and SARIF run-level metadata",
+    "Transport of detailed verification results from provider stage",
+    "Full source provenance population and remaining released contracts",
+    "External release qualification and publication"
+  ]
+}

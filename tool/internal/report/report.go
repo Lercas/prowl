@@ -330,6 +330,7 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 		if f.Agent != nil {
 			res["properties"].(map[string]any)["agent"] = f.Agent
 		}
+		addIdentityProperties(res["properties"].(map[string]any), f)
 		if f.Git != nil {
 			res["properties"].(map[string]any)["git"] = f.Git
 		}

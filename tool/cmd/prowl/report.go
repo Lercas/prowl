@@ -311,23 +311,49 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 	return out
 }
 
-// dedupeFingerprints drops findings whose Fingerprint was already emitted, collapsing the same secret
-// across occurrences. A surviving image entry wins over its overwritten copy. Findings without a
-// fingerprint are always kept (no stable identity to dedupe).
+// dedupeFingerprints groups equal fingerprints while preserving source occurrences.
+// A surviving image entry represents the group; any live verdict remains visible.
 func dedupeFingerprints(fs []model.Finding) []model.Finding {
 	seen := make(map[string]int, len(fs))
+	groups := make(map[int]*occurrenceAccumulator)
+	limited, hasMarker := false, false
 	out := fs[:0]
 	for _, f := range fs {
-		if f.Fingerprint != "" {
+		hasMarker = hasMarker || f.Type == "response_truncated" && f.Stage == occurrenceAggregationStage
+		if f.Fingerprint != "" && !model.IsIncompleteFinding(f) {
 			if idx, exists := seen[f.Fingerprint]; exists {
-				if f.InFinalImage != nil && *f.InFinalImage && (out[idx].InFinalImage == nil || !*out[idx].InFinalImage) {
-					out[idx] = f
+				previous := out[idx]
+				a := groups[idx]
+				if a == nil {
+					a = &occurrenceAccumulator{}
+					a.addFinding(previous)
+					groups[idx] = a
 				}
+				a.addFinding(f)
+				if f.InFinalImage != nil && *f.InFinalImage && (previous.InFinalImage == nil || !*previous.InFinalImage) {
+					out[idx] = f
+					combineFindingSummary(&out[idx], previous)
+				} else {
+					combineFindingSummary(&out[idx], f)
+				}
+				out[idx].Occurrences = a.items
+				limited = limited || a.limited
 				continue
 			}
 			seen[f.Fingerprint] = len(out)
 		}
+		if len(f.Occurrences) > 0 {
+			a := &occurrenceAccumulator{}
+			a.addFinding(f)
+			groups[len(out)] = a
+			f.Occurrences = a.items
+			limited = limited || a.limited
+		}
 		out = append(out, f)
+	}
+	if limited && !hasMarker {
+		out = append(out, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info", Stage: occurrenceAggregationStage,
+			Rationale: "occurrence metadata exceeded the report limit; results are incomplete"})
 	}
 	return out
 }

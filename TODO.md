@@ -93,10 +93,18 @@
       Git observations сохраняются до ML. Нативная JSON-матрица — 39/39,
       [контракт и границы](wiki/Report-Identity.md), отчёт —
       `wiki/evidence/1.5.0-report-identity-20261114.json`. Полный coverage envelope,
-      SARIF и заполнение всех метаданных источниками остаются открыты.
-    - [ ] Вернуть `occurrences` при стандартной дедупликации: в 1.4.0 сохранялись
-      позиции/evidence подавленных дублей, текущий `dedupeFingerprints` оставляет
-      только основную находку. Матрица identity пока квалифицирует `--no-dedupe`.
+      run-level SARIF и заполнение всех метаданных источниками остаются открыты.
+    - [x] Возвращены `occurrences` при стандартной дедупликации. Сохраняются
+      вложенные группы и evidence; финальный entry образа представляет группу,
+      live-вердикт и наиболее сильные severity/confidence не теряются. Лимит 2048
+      даёт явную неполноту и не позволяет перезаписать baseline. Без ID одинаковые
+      координаты не доказывают общую физическую запись; keyed ID различает
+      повторные TAR-entry без раскрытия внутреннего номера. Нативная матрица
+      JSON/SARIF, файл/stdin, keyless/keyed, ML и локальный image tar — 71/71;
+      `wiki/evidence/1.5.0-occurrences-20261114.json`.
+    - [x] SARIF result properties сохраняют report identity, occurrences, evidence,
+      provenance и имеющийся verification; alert fingerprint и UTF-16 координаты
+      сохранены. Полный coverage envelope и run-level metadata остаются открыты.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

@@ -59,6 +59,11 @@ func (p *Pipeline) annotateOccurrence(f *model.Finding) {
 	for _, k := range []string{"blob", "commit", "digest", "layer_digest", "run_id", "artifact_id"} {
 		_, _ = fmt.Fprintf(mac, "\x00%s\x00%s", k, f.Provenance[k])
 	}
+	// Repeated TAR entries share visible coordinates but are distinct physical
+	// observations. Keep their ordinal private while separating report IDs.
+	if f.ImageEntry > 0 {
+		_, _ = fmt.Fprintf(mac, "\x00image-entry\x00%d", f.ImageEntry)
+	}
 	// A shared physical alias can expand into different logical occurrences. Its original-source
 	// proof distinguishes those paths without storing any credential or synthetic document bytes.
 	for _, e := range f.Evidence {

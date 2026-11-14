@@ -49,7 +49,35 @@ Runner использует новый приватный `PROWL_HOME`, собс
 минимальный Go 1.26.11, lint и шесть CGO=0-сборок проходят. Отчёт —
 `evidence/1.5.0-report-identity-20261114.json`.
 
-Это восстановление JSON Finding и Pipeline. Полный coverage envelope, свойства
-SARIF и остальные контракты выпущенной базы остаются открытыми в TODO.
-Матрица координат использует `--no-dedupe`: перенос `occurrences` при стандартном
-объединении повторных находок ещё требуется восстановить отдельно из 1.4.0.
+Стандартная дедупликация теперь сохраняет `occurrences`, включая уже собранные
+вложенные группы. Финальный entry образа представляет группу; summary сохраняет
+live-вердикт и максимальные severity/confidence, чтобы выбор позиции не ослаблял
+фильтр или gate. Вердикт отдельной позиции берётся из её occurrence, а не из
+сводного вердикта группы. Повторная дедупликация не меняет сохранённое evidence.
+
+Без report ID одинаковых видимых координат недостаточно, чтобы считать наблюдения
+одной физической записью. Повторные TAR-entry сохраняются отдельно. При включённом
+ключе их occurrence ID дополнительно различает внутренний ordinal, который не
+раскрывается в отчёте; secret ID и fingerprint остаются прежними.
+
+Сохраняется до 2048 occurrences на группу. Превышение даёт диагностическую запись,
+`truncated=true` и код 2. Диагностика переживает фильтры отчёта и baseline suppression;
+из такого результата нельзя записать новый baseline. Неполнота этого этапа означает
+потерю метаданных отчёта, а не доказанное отсутствие дополнительных секретов.
+
+SARIF result properties зеркалируют `secret_id`, `identity_scope`, `occurrence_id`,
+`occurrences`, `evidence`, `provenance` и имеющийся `verification`. Сохраняются также
+локальный value fingerprint, alert fingerprint и UTF-16 physical location.
+
+```sh
+python3 scripts/check_occurrences.py /path/to/prowl
+```
+
+Нативная матрица 71/71 сравнивает полную инвентаризацию `--no-dedupe` с обычным
+JSON/SARIF-отчётом. Проверены файл/stdin, keyless/keyed, ML, repeated image entries
+в локальном Docker tar и отказ замены baseline при переполнении. Docker daemon,
+реестр и live provider для этой проверки не используются. Evidence —
+`evidence/1.5.0-occurrences-20261114.json`.
+
+Полный coverage envelope, run-level свойства SARIF, транспорт подробных verdicts
+из верификатора и остальные контракты выпущенной базы остаются открытыми в TODO.
