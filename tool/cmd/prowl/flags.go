@@ -17,6 +17,7 @@ import (
 )
 
 type commandOptions struct {
+	selftestProfile                                                                                                        string
 	guardProtocol, agentHome                                                                                               string
 	shellHistory                                                                                                           bool
 	sub, branch, targetsFile, addr, baseURL, source                                                                        string
@@ -146,6 +147,7 @@ var commandSubcommands = map[string][]string{
 }
 
 var cliFlags = []flagSpec{
+	enumFlag("--profile", "selftest", "профиль офлайн-самопроверки (по умолчанию all)", []string{"all", "web", "mobile", "enterprise"}, func(c *commonFlags) *string { return &c.cmd.selftestProfile }),
 	boolFlag("--bundled", detectorCommands+" lsp version", "использовать встроенные rules/verifiers релиза, сохранив конфигурацию и identity key", func(c *commonFlags) *bool { return &c.bundled }),
 	enumFlag("--protocol", "guard", "протокол хука (по умолчанию raw)", []string{"raw", "claude", "cursor-prompt", "cursor-tool"}, func(c *commonFlags) *string { return &c.cmd.guardProtocol }),
 	stringFlag("--agent-home", "agents", "DIR", "явно проверить пользовательские конфиги и транскрипты агентов", func(c *commonFlags) *string { return &c.cmd.agentHome }),
@@ -182,7 +184,7 @@ var cliFlags = []flagSpec{
 	boolFlag("--verify-all", scanCommands, "проверить все принятые L1-кандидаты до ML (включает --verify)", func(c *commonFlags) *bool { return &c.verifyAll }),
 	boolFlag("--verified-only", scanCommands, "report only provider-confirmed live findings (implies --verify)", func(c *commonFlags) *bool { return &c.verifiedOnly }),
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
-	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
+	listFlag("--verifiers", scanCommands+" doctor", "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
 	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff identity.init", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
 	stringFlag("--identity-key-file", scanCommands, "FILE", "ключ HMAC для идентичности секретов и позиций в отчёте", func(c *commonFlags) *string { return &c.identityKeyFile }),
@@ -221,7 +223,7 @@ var cliFlags = []flagSpec{
 	enumFlag("--min-severity", scanCommands, "minimum reported severity", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.minSeverity }),
 	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
 	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
-	boolFlag("--ml", scanCommands, "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
+	boolFlag("--ml", scanCommands+" selftest", "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
 	boolFlag("--semantic", indexedCommands, "искать source-backed кандидаты opt-in моделью (по умолчанию loopback)", func(c *commonFlags) *bool { return &c.semantic }),
 	stringFlag("--semantic-url", indexedCommands, "URL", "endpoint модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticURL }),
 	stringFlag("--semantic-model", indexedCommands, "MODEL", "имя модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticModel }),
@@ -428,6 +430,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		if err != nil {
 			return c, nil, fmt.Errorf("semantic setup: %w", err)
 		}
+	}
+	if err := validateTemplateSelection(c); err != nil {
+		return c, nil, err
 	}
 	c.mlURL = strings.TrimRight(c.mlURL, "/")
 	c.ocrURL = strings.TrimRight(c.ocrURL, "/")

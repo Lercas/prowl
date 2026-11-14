@@ -1,0 +1,202 @@
+{
+  "status": "locally qualified offline selftest and active policy diagnostics; not published",
+  "native": {
+    "binary_sha256": "3ffeaeb81cf75606deea0a6d6b7fc9fd9604eb329a630ed14332ee39acb5444b",
+    "passed": 43,
+    "total": 43,
+    "checks": [
+      {
+        "case": "all/ml=False/passed",
+        "passed": true
+      },
+      {
+        "case": "all/ml=False/complete",
+        "passed": true
+      },
+      {
+        "case": "all/ml=False/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "all/ml=True/passed",
+        "passed": true
+      },
+      {
+        "case": "all/ml=True/complete",
+        "passed": true
+      },
+      {
+        "case": "all/ml=True/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "web/ml=False/passed",
+        "passed": true
+      },
+      {
+        "case": "web/ml=False/complete",
+        "passed": true
+      },
+      {
+        "case": "web/ml=False/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "web/ml=True/passed",
+        "passed": true
+      },
+      {
+        "case": "web/ml=True/complete",
+        "passed": true
+      },
+      {
+        "case": "web/ml=True/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=False/passed",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=False/complete",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=False/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=True/passed",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=True/complete",
+        "passed": true
+      },
+      {
+        "case": "mobile/ml=True/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=False/passed",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=False/complete",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=False/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=True/passed",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=True/complete",
+        "passed": true
+      },
+      {
+        "case": "enterprise/ml=True/negative-controls",
+        "passed": true
+      },
+      {
+        "case": "selftest-no-files-created",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/--verify",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/--ocr",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/--semantic",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/--ml-model=owned",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/--profile=unknown",
+        "passed": true
+      },
+      {
+        "case": "selftest-rejected/unexpected-path",
+        "passed": true
+      },
+      {
+        "case": "selftest-help",
+        "passed": true
+      },
+      {
+        "case": "doctor-bundled-inventory",
+        "passed": true
+      },
+      {
+        "case": "doctor-selected-overlay",
+        "passed": true
+      },
+      {
+        "case": "doctor-corrupt-overlay-fails",
+        "passed": true
+      },
+      {
+        "case": "doctor-bundled-ignores-unselected-overlay",
+        "passed": true
+      },
+      {
+        "case": "doctor-explicit-selection",
+        "passed": true
+      },
+      {
+        "case": "conflicting-selection/--rules-only",
+        "passed": true
+      },
+      {
+        "case": "conflicting-selection/--rules-dir=missing",
+        "passed": true
+      },
+      {
+        "case": "conflicting-selection/--verifiers=missing",
+        "passed": true
+      },
+      {
+        "case": "selftest-selected-bad-model-fails",
+        "passed": true
+      },
+      {
+        "case": "selftest-disabled-ML-ignores-model",
+        "passed": true
+      },
+      {
+        "case": "doctor-no-provider-requests",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-offline-native-8hepkuux",
+    "scope": "synthetic offline CLI smoke and owned policy files; no provider or remote source qualification"
+  },
+  "checks": {
+    "full_go": "passed",
+    "targeted_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11": "passed"
+  },
+  "selection_correction": "The released validateTemplateSelection guard was absent from the earlier bundled restoration. CLI now rejects bundled combined with rules-only, rules-dir or verifiers before source/report operations. Direct loader priority semantics remain unchanged.",
+  "semantics": [
+    "Selftest profiles use synthetic memory carriers and shared Pipeline; no verifier/OCR/semantic dependency attached",
+    "ML selftest uses threshold 0.3 and the standard selected local model resolver",
+    "Incomplete finding markers participate in selftest completion",
+    "Doctor compiles actual selected libraries without exercising providers",
+    "Tool/config/token presence is not described as proof of remote permissions"
+  ],
+  "limits": [
+    "Native test covers the local CGO=0 host artifact only; other operating systems are not executed",
+    "Smoke cases do not qualify precision/recall, actual providers or production deployment"
+  ]
+}

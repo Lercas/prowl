@@ -12,7 +12,7 @@ prowl rules validate rules/        # lint templates (parse / RE2 / fields)
 prowl rules stats rules/           # counts by category / severity / tag
 ```
 
-Шаблоны дополняют встроенную таксономию. Приоритет: явный `--rules-dir`, затем установленный набор, затем встроенный снимок. Ошибка выбранного установленного набора завершает скан; она не запускает fallback. `--bundled` выбирает встроенный снимок без чтения установленных rules/verifiers и без учёта `--rules-dir`/`--verifiers`; конфигурация и identity key сохраняются. `--rules-only` сохраняет изоляцию: используются только явно переданные правила, встроенные шаблоны не добавляются. Для `agents` автоматические правила по-прежнему отключены; `--bundled` является явным выбором снимка. See [Scanning Files](Scanning-Files.md) for how rules feed the scan and [Architecture](Architecture.md) for the pipeline.
+Шаблоны дополняют встроенную таксономию. Приоритет: явный `--rules-dir`, затем установленный набор, затем встроенный снимок. Ошибка выбранного установленного набора завершает скан; она не запускает fallback. `--bundled` выбирает встроенный снимок без чтения установленных rules/verifiers; конфигурация и identity key сохраняются. CLI отклоняет сочетание `--bundled` с `--rules-only`, `--rules-dir` или `--verifiers`: выбирается один источник шаблонов. `--rules-only` сохраняет изоляцию: используются только явно переданные правила, встроенные шаблоны не добавляются. Для `agents` автоматические правила по-прежнему отключены; `--bundled` является явным выбором снимка. See [Scanning Files](Scanning-Files.md) for how rules feed the scan and [Architecture](Architecture.md) for the pipeline.
 
 ## prowl rules workflow
 

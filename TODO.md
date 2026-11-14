@@ -204,6 +204,15 @@
       Контракт — `wiki/Report-Correlation.md`, evidence:
       `wiki/evidence/1.5.0-correlation-contract-20261114.json`.
 
+    - [x] Восстановлены офлайн `selftest` и проверка выбранных rules/verifiers в
+      `doctor`, без provider requests. Selftest использует общий in-memory intake
+      и Pipeline, все 7 синтетических carriers/controls; `--ml` использует локальный
+      resolver с порогом 0,3 и отказывается скрывать повреждённую выбранную модель.
+      Восстановлен пропущенный CLI guard: `--bundled` несовместим с явными
+      `--rules-only/--rules-dir/--verifiers`. Нативная матрица — 43/43;
+      `wiki/evidence/1.5.0-offline-contract-20261114.json`. Это smoke,
+      не измерение точности ML или доступности реальных провайдеров.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

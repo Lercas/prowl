@@ -4,10 +4,12 @@
 
 `prowl doctor` self-diagnoses an install end to end: it loads the taxonomy, exercises the checksum validators, runs representative detections, confirms example filtering, validates the active config, and checks for git. It exits `0` when nothing failed (warnings are tolerated) and `1` if any critical check fails — suitable as a smoke test in CI.
 
+Ниже — пример формата: число детекторов и runtime зависят от артефакта.
+
 ```console
 $ prowl doctor
 prowl doctor
-  ✓ taxonomy                   31 detectors loaded
+  ✓ taxonomy                   N detectors loaded
   ✓ regex RE2 compatibility    all detector regexes compile
   ✓ checksum validators        github CRC + jwt structural pass
   ✓ detection self-test        5/5 representative secrets detected
@@ -16,9 +18,11 @@ prowl doctor
   ✓ git                        available (git source modes enabled)
   ! aws CLI                    not found — 'prowl bucket s3://…' unavailable (install & configure credentials)
   ! gcloud CLI                 not found — 'prowl bucket gs://…' unavailable (install & authenticate)
-  ✓ docker config              ~/.docker/config.json present ('prowl image' can reach your private registries)
+  ✓ docker config              ~/.docker/config.json present; registry authentication not checked
   ! forge tokens               none set — 'prowl org' scans public repos only (set GITHUB_TOKEN/GITLAB_TOKEN/BITBUCKET_TOKEN for private repos & rate limits)
-  ✓ runtime                    go1.25.0, 16 CPU (default --workers)
+  ✓ runtime                    go1.27.4, 16 CPU (default --workers)
+  ✓ active rule templates      175 selected templates loaded
+  ✓ active verifiers           84 selected verifiers loaded; no provider requests made
 
 all checks passed — scanner is healthy
 ```
@@ -45,6 +49,43 @@ What each check verifies:
 The last four checks are **optional source tooling/auth** — each is needed only for one source mode, so they only ever `WARN`, never `FAIL`. They double as a quick answer to *"how do I authenticate source X?"*: run `prowl doctor` and read the row for the source you want — `aws CLI`/`gcloud CLI` for [bucket scanning](Bucket-Scanning.md), `docker config` for private-registry [image scanning](Container-Scanning.md), `forge tokens` for private-repo [org scanning](Org-Scanning.md).
 
 `doctor` honors `--config FILE` and `--rules`/`--taxonomy`, so you can diagnose a specific configuration rather than the auto-discovered one.
+
+В 1.5 `doctor` также компилирует **выбранные** rule templates и verifiers и
+проверяет их integrity/schema. `--rules-dir` и `--verifiers` выбирают явные наборы;
+`--bundled` выбирает 175 встроенных шаблонов и 84 верификатора. Повреждённый
+выбранный набор даёт fail; установленный overlay отмечается предупреждением,
+потому что он заменяет снимок релиза. Верификаторы только загружаются: provider
+requests не выполняются. Наличие CLI/config/token в окружении не доказывает
+доступ к bucket, registry или приватному репозиторию.
+
+`--bundled` нельзя сочетать с `--rules-only`, `--rules-dir` или `--verifiers`:
+противоречивый выбор отклоняется до чтения источника и записи отчёта.
+
+## prowl selftest
+
+```sh
+prowl selftest --profile all
+prowl selftest --profile web --ml
+```
+
+Профили: `all` (7 примеров), `web` (3), `mobile` (2), `enterprise` (2).
+Проверяются bounded JS reconstruction, Base64, MIME mail, DEX strings и
+отрицательные placeholder/public-identifier controls через фактический Pipeline.
+ZIP/mail carriers создаются в памяти; команда не создаёт временных файлов.
+В stdout возвращается JSON с profile, passed, network=false и результатами cases.
+Неполный пример не считается прошедшим. Возврат: 0 при успехе, 1 при failed case,
+2 при ошибке конфигурации/модели/аргументов.
+
+Самопроверка использует встроенные taxonomy/rules. `--ml` применяет локальный L2
+с порогом 0,3: выбранный стандартным resolver установленный model_binary.json,
+если он есть, иначе встроенную модель. Повреждённый выбранный файл не скрывается
+fallback. Без `--ml` этот файл не читается. Модели/ключи/config не изменяются;
+`--verify`, OCR, semantic и произвольные пользовательские источники не включаются.
+
+Это офлайн smoke, а не precision/recall benchmark или проверка авторизации
+реальных сервисов. Локальная квалификация:
+`python3 scripts/check_offline_contract.py /path/to/prowl` — 43/43;
+`evidence/1.5.0-offline-contract-20261114.json`.
 
 ## prowl detectors
 
@@ -79,14 +120,19 @@ This lists the built-in taxonomy only. Rule templates installed by `prowl rules 
 
 ### "No secrets found, but I expected some"
 
-Most often the rule library is not installed. A fresh binary ships the built-in taxonomy (run `prowl doctor` — `taxonomy` should report dozens of detectors), but the full nuclei-style rule set lives outside the binary and is fetched on first use:
+В 1.5 свежий бинарник содержит 175 шаблонов: отсутствие установленного каталога
+само по себе не убирает template coverage. Сначала проверьте выбранную политику:
 
 ```sh
-prowl rules update          # fetch + validate + install ~/.prowl/rules
-prowl version               # shows binary + installed rule/verifier versions
+prowl doctor
+prowl doctor --bundled
+prowl version --bundled
 ```
 
-`prowl version` reporting `rules: not installed` confirms this is the cause.
+Установленный overlay, фильтры правил, allowlist, ML и лимиты могут менять результат.
+Повреждённая выбранная библиотека должна завершать подготовку с ошибкой. Для
+обновления установленной копии оператор отдельно запускает `prowl rules update`.
+
 
 Second, check for a kill-switch config. A `.prowl.yaml` in the scanned tree can disable detectors or add an allowlist that suppresses your finding. Prowl warns when an auto-discovered config suppresses detection:
 

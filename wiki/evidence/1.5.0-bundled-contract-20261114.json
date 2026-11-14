@@ -566,5 +566,11 @@
       "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mcp-native-irhfv8nu/qualification.json"
     },
     "unrelated_dirty_changes_preserved": true
-  }
+  },
+  "followups": [
+    {
+      "contract": "CLI rejects bundled combined with rules-only/rules-dir/verifiers; prior direct loader priority tests do not replace this CLI guard",
+      "evidence": "1.5.0-offline-contract-20261114.json"
+    }
+  ]
 }

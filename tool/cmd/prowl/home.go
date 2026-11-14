@@ -36,6 +36,13 @@ func prowlHome() string {
 func installedRulesDir() string     { return filepath.Join(prowlHome(), "rules") }
 func installedVerifiersDir() string { return filepath.Join(prowlHome(), "verifiers") }
 
+func validateTemplateSelection(c commonFlags) error {
+	if c.bundled && (c.rulesOnly || len(c.rulesDir) > 0 || len(c.verifiers) > 0) {
+		return fmt.Errorf("--bundled несовместим с --rules-only/--rules-dir/--verifiers: выберите один источник шаблонов")
+	}
+	return nil
+}
+
 func dirExists(p string) bool {
 	info, err := os.Stat(p)
 	return err == nil && info.IsDir()

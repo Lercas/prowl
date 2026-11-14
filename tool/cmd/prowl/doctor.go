@@ -28,6 +28,7 @@ func cmdDoctor(args []string) int {
 		return 2
 	}
 	checks := doctor.Run(det, tax, cfg)
+	checks = append(checks, doctorTemplateChecks(c)...)
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout)
 	fmt.Println("prowl doctor")
 	for _, ch := range checks {

@@ -76,6 +76,8 @@ func runCLI(args []string) int {
 		return cmdServe(args[1:])
 	case "config":
 		return cmdConfig(args[1:])
+	case "selftest":
+		return cmdSelftest(args[1:])
 	case "doctor":
 		return cmdDoctor(args[1:])
 	case "detectors":

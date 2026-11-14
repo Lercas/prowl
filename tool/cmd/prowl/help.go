@@ -10,6 +10,7 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"selftest", "офлайн-проверка синтетических web/mobile/mail примеров", "prowl selftest [--profile all|web|mobile|enterprise] [--ml]"},
 	{"correlate", "сопоставить JSON-наблюдения по HMAC identity", "prowl correlate REPORT.json REPORT.json [...]"},
 	{"remediation-check", "сравнить наличие и provider-вердикты в двух отчётах", "prowl remediation-check BEFORE.json AFTER.json"},
 	{"identity", "создать приватный ключ идентичности секретов", "prowl identity init [-o FILE]"},

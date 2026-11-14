@@ -146,14 +146,14 @@ func awsCheck() Check {
 	if _, err := exec.LookPath("aws"); err != nil {
 		return Check{"aws CLI", StatusWarn, "not found — 'prowl bucket s3://…' unavailable (install & configure credentials)"}
 	}
-	return Check{"aws CLI", StatusOK, "on PATH ('prowl bucket s3://…' enabled — auth via your AWS config)"}
+	return Check{"aws CLI", StatusOK, "on PATH; AWS credentials and bucket access not checked"}
 }
 
 func gcloudCheck() Check {
 	if _, err := exec.LookPath("gcloud"); err != nil {
 		return Check{"gcloud CLI", StatusWarn, "not found — 'prowl bucket gs://…' unavailable (install & authenticate)"}
 	}
-	return Check{"gcloud CLI", StatusOK, "on PATH ('prowl bucket gs://…' enabled — auth via your gcloud config)"}
+	return Check{"gcloud CLI", StatusOK, "on PATH; Google credentials and bucket access not checked"}
 }
 
 // dockerConfigCheck reports whether ~/.docker/config.json exists. It is needed only to pull from
@@ -167,7 +167,7 @@ func dockerConfigCheck() Check {
 	if _, err := os.Stat(path); err != nil {
 		return Check{"docker config", StatusWarn, "no ~/.docker/config.json — 'prowl image' can pull public images, but private registries need 'docker login'"}
 	}
-	return Check{"docker config", StatusOK, "~/.docker/config.json present ('prowl image' can reach your private registries)"}
+	return Check{"docker config", StatusOK, "~/.docker/config.json present; registry authentication not checked"}
 }
 
 // forgeTokenCheck reports which forge tokens are set among GITHUB_TOKEN/GITLAB_TOKEN/BITBUCKET_TOKEN.
@@ -184,5 +184,5 @@ func forgeTokenCheck() Check {
 		return Check{"forge tokens", StatusWarn,
 			"none set — 'prowl org' scans public repos only (set GITHUB_TOKEN/GITLAB_TOKEN/BITBUCKET_TOKEN for private repos & rate limits)"}
 	}
-	return Check{"forge tokens", StatusOK, "set: " + strings.Join(set, ", ") + " ('prowl org' can reach matching private repos)"}
+	return Check{"forge tokens", StatusOK, "set: " + strings.Join(set, ", ") + "; token validity and repo permissions not checked"}
 }

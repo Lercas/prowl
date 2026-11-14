@@ -119,6 +119,10 @@ func Extract(ctx context.Context, p string, opts MobileOptions) (<-chan model.It
 // emitMobile walks every zip entry, classifies it, and sends its scannable text (or its extracted
 // printable strings for binaries) as an Item. It stops early on ctx cancel or a blown budget.
 func emitMobile(ctx context.Context, ch chan<- model.Item, zr *zip.ReadCloser, archiveBase string, opts MobileOptions) {
+	emitMobileReader(ctx, ch, &zr.Reader, archiveBase, opts)
+}
+
+func emitMobileReader(ctx context.Context, ch chan<- model.Item, zr *zip.Reader, archiveBase string, opts MobileOptions) {
 	if len(zr.File) > maxMobileEntries {
 		logx.Error("mobile extraction aborted: too many entries (possible zip bomb)",
 			"entries", len(zr.File), "limit", maxMobileEntries)
