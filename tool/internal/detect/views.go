@@ -422,6 +422,11 @@ func (d *Detector) scanViews(ctx context.Context, text string) []Match {
 }
 
 func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, bool) {
+	matches, limited, _ := d.scanViewsWithLiterals(ctx, text)
+	return matches, limited
+}
+
+func (d *Detector) scanViewsWithLiterals(ctx context.Context, text string) ([]Match, bool, [][2]int) {
 	v, limited := buildViewStatus(ctx, text)
 	out, collectLimited := d.scanMappedView(ctx, text, v, false)
 	remainingBytes, remainingConstructs := maxViewBytes, maxViewConstructs
@@ -435,9 +440,9 @@ func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, b
 		remainingBytes -= len(encoded.text)
 		remainingConstructs -= encoded.constructs
 	}
-	numeric, numericLimited := d.charCodeSecrets(ctx, text, remainingBytes, remainingConstructs)
+	numeric, numericLimited, spans := d.charCodeDetails(ctx, text, remainingBytes, remainingConstructs)
 	out = append(out, extra...)
-	return append(out, numeric...), limited || collectLimited || encodedLimited || extraLimited || numericLimited
+	return append(out, numeric...), limited || collectLimited || encodedLimited || extraLimited || numericLimited, spans
 }
 
 func (d *Detector) scanMappedView(ctx context.Context, text string, v *view, typedOnly bool) ([]Match, bool) {

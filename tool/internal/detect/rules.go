@@ -238,7 +238,8 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
 	all = append(all, authMatches...)
 	// Secrets written through an escaping, concatenation or YAML block-scalar layer (see views.go).
-	viewMatches, viewCapped := d.scanViewsStatus(ctx, text)
+	viewMatches, viewCapped, literalSpans := d.scanViewsWithLiterals(ctx, text)
+	all = discardLiteralArgumentGuesses(all, literalSpans)
 	all = append(all, viewMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)

@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/big"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -262,9 +263,15 @@ func charCodeField(text string, call charCodeCall) tableField {
 }
 
 func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget, constructBudget int) ([]Match, bool) {
+	matches, limited, _ := d.charCodeDetails(ctx, text, byteBudget, constructBudget)
+	return matches, limited
+}
+
+func (d *Detector) charCodeDetails(ctx context.Context, text string, byteBudget, constructBudget int) ([]Match, bool, [][2]int) {
 	if uint64(len(text)) > 1<<31-1 {
-		return nil, true
+		return nil, true, nil
 	}
+	var literalSpans [][2]int
 	var calls []charCodeCall
 	var rewrites []rewrite
 	var regions [][2]int
@@ -285,6 +292,7 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 		}
 		step := len("String")
 		if call.end > start {
+			literalSpans = append(literalSpans, [2]int{start, call.end})
 			step = call.end - start
 			if len(call.value) > byteBudget-decodedBytes {
 				limited = true
@@ -351,5 +359,24 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 			}
 		}
 	}
-	return out, limited
+	return out, limited, literalSpans
+}
+
+// Numeric arguments of a proven literal conversion are not themselves passwords.
+// Keep typed and exact matches; discard only the loose per-line password guess.
+func discardLiteralArgumentGuesses(matches []Match, spans [][2]int) []Match {
+	if len(spans) == 0 {
+		return matches
+	}
+	kept := matches[:0]
+	for _, m := range matches {
+		if m.Stage == "L1-context-pw" {
+			i := sort.Search(len(spans), func(i int) bool { return spans[i][0] > m.Start }) - 1
+			if i >= 0 && m.End <= spans[i][1] {
+				continue
+			}
+		}
+		kept = append(kept, m)
+	}
+	return kept
 }

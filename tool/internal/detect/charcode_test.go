@@ -233,3 +233,31 @@ func TestQuotedConnectionURIExcludesLiteralDelimiters(t *testing.T) {
 		t.Fatal("converted URI absorbed surrounding statement syntax")
 	}
 }
+
+func TestCharCodeArgumentsAreNotContextualPasswordValues(t *testing.T) {
+	d := newDetector(t)
+	for _, value := range []string{"Kx7;mPq2", "changeme"} {
+		args := make([]string, len(value))
+		for i, c := range []byte(value) {
+			args[i] = fmt.Sprintf("0xffff%04x", c)
+		}
+		text := "password=String.fromCharCode(" + strings.Join(args, ",") + ")"
+		ms := d.Scan(text)
+		if value == "changeme" {
+			if len(ms) != 0 {
+				t.Fatal("placeholder conversion produced numeric password arguments")
+			}
+		} else if m := namedMatch(ms, "generic_password", value); len(ms) != 1 || m == nil {
+			t.Fatal("numeric argument displaced the decoded password")
+		}
+	}
+	meta := "password_type=String.fromCharCode(0xffff004b,0xffff0078,0xffff0037,0xffff003b,0xffff006d,0xffff0050,0xffff0071,0xffff0032)"
+	if len(d.Scan(meta)) != 0 {
+		t.Fatal("metadata conversion produced numeric password arguments")
+	}
+	// A real contextual password on a separate line remains unaffected.
+	text := "password=String.fromCharCode(75,120);\nПароль стенда: Kx7#mPq2"
+	if namedMatch(d.Scan(text), "generic_password", "Kx7#mPq2") == nil {
+		t.Fatal("literal range suppressed an unrelated credential")
+	}
+}
