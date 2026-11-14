@@ -699,5 +699,694 @@
         "passed": true
       }
     ]
+  },
+  "main_integration": {
+    "source_commit": "6e98c5f",
+    "full_go": "passed",
+    "native": {
+      "binary_sha256": "0bddd2c74d69840239c97064b53557ce83bda4c52f57f7b1de937c165ad1ac50",
+      "passed": 113,
+      "total": 113,
+      "checks": [
+        {
+          "case": "identity",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/json/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/bang!/prod.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/bundle.zip/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/utf16.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/False/sarif/\u041a\u043b\u044e\u0447 #?%20.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/json/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/bang!/prod.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/bundle.zip/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/utf16.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "s3/True/sarif/\u041a\u043b\u044e\u0447 #?%20.env/uri",
+          "passed": true
+        },
+        {
+          "case": "s3/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/json/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/partial/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/json/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "s3/budget/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "s3/console/visible-logs-safe",
+          "passed": true
+        },
+        {
+          "case": "s3/console/exit-classification",
+          "passed": true
+        },
+        {
+          "case": "s3/json/visible-logs-safe",
+          "passed": true
+        },
+        {
+          "case": "s3/json/exit-classification",
+          "passed": true
+        },
+        {
+          "case": "s3/empty",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/json/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/bang!/prod.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/bundle.zip/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/utf16.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/False/sarif/\u041a\u043b\u044e\u0447 #?%20.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/json/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/bang!/prod.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/bang!/prod.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/bundle.zip/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/bundle.zip/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/utf16.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/utf16.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/\u041a\u043b\u044e\u0447 #?%20.env/object",
+          "passed": true
+        },
+        {
+          "case": "gs/True/sarif/\u041a\u043b\u044e\u0447 #?%20.env/uri",
+          "passed": true
+        },
+        {
+          "case": "gs/stable-scope",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/json/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/partial/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/json/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "gs/budget/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "gs/console/visible-logs-safe",
+          "passed": true
+        },
+        {
+          "case": "gs/console/exit-classification",
+          "passed": true
+        },
+        {
+          "case": "gs/json/visible-logs-safe",
+          "passed": true
+        },
+        {
+          "case": "gs/json/exit-classification",
+          "passed": true
+        },
+        {
+          "case": "gs/empty",
+          "passed": true
+        },
+        {
+          "case": "invalid/s3",
+          "passed": true
+        },
+        {
+          "case": "invalid/gs",
+          "passed": true
+        },
+        {
+          "case": "invalid/s3",
+          "passed": true
+        },
+        {
+          "case": "invalid/https",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-bucket-native-fyjkw9u5",
+      "scope": "owned fake aws/gcloud commands and synthetic local object bytes only; no cloud credentials, APIs or live providers exercised"
+    },
+    "source_coverage_nonregression": {
+      "binary_sha256": "0bddd2c74d69840239c97064b53557ce83bda4c52f57f7b1de937c165ad1ac50",
+      "passed": 36,
+      "total": 36,
+      "checks": [
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        }
+      ]
+    },
+    "unrelated_dirty_work_preserved": true
   }
 }
