@@ -235,6 +235,15 @@
       Добавлен CI gate; `wiki/evidence/1.5.0-precommit-contract-20261114.json`.
       Docker hook закреплён на будущем v1.5.0, его итоговый образ ещё не квалифицирован.
 
+    - [x] CI/CD: восстановлены acquisition scope и commit/run/artifact provenance,
+      добавлен digest исходных байтов member/log. Ошибки/expired/empty collection
+      остаются неполными до baseline; binary policy skips не считаются потерей текста.
+      Читаемый prefix сохраняется при ошибке HTTP; JSON/rows/ID/request bounds
+      блокируют неоднозначные или бесконечные листинги. CLI JSON/SARIF ±L2 и MCP
+      четырёх версий — 192/192; полный Go-набор, race, lint и Go 1.26.11 проходят.
+      `wiki/evidence/1.5.0-cicd-contract-20261114.json`. Scope описывает выбранное
+      CI-окно; remote absence/remediation и остальные remote adapters остаются открыты.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

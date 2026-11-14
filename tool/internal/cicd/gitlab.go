@@ -12,6 +12,7 @@ import (
 type gitlabPipeline struct {
 	ID     int64  `json:"id"`
 	Ref    string `json:"ref"`
+	SHA    string `json:"sha"`
 	WebURL string `json:"web_url"`
 }
 
@@ -41,6 +42,10 @@ func (c *collector) collectGitLab(ctx context.Context, out chan<- model.Item, re
 			c.fail(result, err)
 			return
 		}
+		if pipelines == nil {
+			c.fail(result, fmt.Errorf("invalid GitLab pipelines list"))
+			return
+		}
 		if len(pipelines) == 0 {
 			return
 		}
@@ -48,9 +53,12 @@ func (c *collector) collectGitLab(ctx context.Context, out chan<- model.Item, re
 			if result.Runs >= c.opts.MaxRuns || ctx.Err() != nil {
 				return
 			}
+			if !c.claimID(ctx, "pipeline", pipeline.ID, result) {
+				return
+			}
 			result.Runs++
 			prefix := "gitlab:" + c.target.repo + "/pipelines/" + runLabel(pipeline.Ref, pipeline.ID)
-			c.collectGitLabJobs(ctx, out, result, basePath, prefix, pipeline)
+			c.collectGitLabJobs(runContext(ctx, pipeline.ID, pipeline.SHA), out, result, basePath, prefix, pipeline)
 		}
 		if len(pipelines) < 100 {
 			return
@@ -71,11 +79,18 @@ func (c *collector) collectGitLabJobs(ctx context.Context, out chan<- model.Item
 			c.fail(result, fmt.Errorf("pipeline %d jobs: %w", pipeline.ID, err))
 			return
 		}
+		if jobs == nil {
+			c.fail(result, fmt.Errorf("invalid GitLab jobs list"))
+			return
+		}
 		if len(jobs) == 0 {
 			return
 		}
 		for _, job := range jobs {
 			if ctx.Err() != nil {
+				return
+			}
+			if !c.claimID(ctx, "job", job.ID, result) {
 				return
 			}
 			jobPath := prefix + "/jobs/" + runLabel(job.Name, job.ID)
@@ -84,8 +99,11 @@ func (c *collector) collectGitLabJobs(ctx context.Context, out chan<- model.Item
 				raw, err := c.download(ctx, traceURL)
 				if err != nil {
 					c.fail(result, fmt.Errorf("job %d trace: %w", job.ID, err))
-				} else if err := c.emitPayload(ctx, out, jobPath+"/trace.log", job.WebURL, raw, result); err != nil {
-					c.fail(result, fmt.Errorf("job %d trace: %w", job.ID, err))
+				}
+				if len(raw) > 0 || err == nil {
+					if emitErr := c.emitPayload(ctx, out, jobPath+"/trace.log", job.WebURL, raw, result); emitErr != nil {
+						c.fail(result, fmt.Errorf("job %d trace: %w", job.ID, emitErr))
+					}
 				}
 			}
 			if c.opts.IncludeArtifacts && job.ArtifactsFile.Filename != "" {
@@ -97,7 +115,9 @@ func (c *collector) collectGitLabJobs(ctx context.Context, out chan<- model.Item
 				raw, err := c.download(ctx, artifactURL)
 				if err != nil {
 					c.fail(result, fmt.Errorf("job %d artifact: %w", job.ID, err))
-					continue
+					if len(raw) == 0 {
+						continue
+					}
 				}
 				if err := c.emitPayload(ctx, out, jobPath+"/artifacts", job.WebURL, raw, result); err != nil {
 					c.fail(result, fmt.Errorf("job %d artifact: %w", job.ID, err))

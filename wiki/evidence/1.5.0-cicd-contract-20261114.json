@@ -1,0 +1,804 @@
+{
+  "status": "locally qualified CI collection provenance and completeness; not published",
+  "native": {
+    "binary_sha256": "7a585c8f6ae3dd696e9bdab9610dc821251f5e4973153146015da8c4c467e2b9",
+    "passed": 192,
+    "total": 192,
+    "checks": [
+      {
+        "case": "identity-init",
+        "passed": true
+      },
+      {
+        "case": "github/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "github/False/json/immutable",
+        "passed": true
+      },
+      {
+        "case": "github/False/json/artifact",
+        "passed": true
+      },
+      {
+        "case": "github/False/json/scope",
+        "passed": true
+      },
+      {
+        "case": "github/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "github/False/sarif/immutable",
+        "passed": true
+      },
+      {
+        "case": "github/False/sarif/artifact",
+        "passed": true
+      },
+      {
+        "case": "github/False/sarif/scope",
+        "passed": true
+      },
+      {
+        "case": "github/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "github/True/json/immutable",
+        "passed": true
+      },
+      {
+        "case": "github/True/json/artifact",
+        "passed": true
+      },
+      {
+        "case": "github/True/json/scope",
+        "passed": true
+      },
+      {
+        "case": "github/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "github/True/sarif/immutable",
+        "passed": true
+      },
+      {
+        "case": "github/True/sarif/artifact",
+        "passed": true
+      },
+      {
+        "case": "github/True/sarif/scope",
+        "passed": true
+      },
+      {
+        "case": "github/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/duplicate/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/trailing/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/null/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/null/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/null/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/null/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/null/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/null/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/shape/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/shape/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/shape/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/shape/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/shape/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/shape/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/empty/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/empty/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/empty/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/empty/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/empty/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/empty/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/missing/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/missing/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/missing/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/missing/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/missing/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/missing/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/json/partial",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/prefix/sarif/partial",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/json/partial",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/oversize/sarif/partial",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/row-limit/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/repeated-id/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/expired/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/expired/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/expired/json/safe",
+        "passed": true
+      },
+      {
+        "case": "github/expired/json/partial",
+        "passed": true
+      },
+      {
+        "case": "github/expired/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "github/expired/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "github/expired/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "github/expired/sarif/partial",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/json/immutable",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/json/artifact",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/json/scope",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/sarif/immutable",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/sarif/artifact",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/sarif/scope",
+        "passed": true
+      },
+      {
+        "case": "gitlab/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/json/immutable",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/json/artifact",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/json/scope",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/sarif/immutable",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/sarif/artifact",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/sarif/scope",
+        "passed": true
+      },
+      {
+        "case": "gitlab/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/duplicate/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/trailing/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/null/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/shape/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/empty/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/missing/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/json/partial",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/prefix/sarif/partial",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/json/partial",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/oversize/sarif/partial",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/row-limit/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/json/safe",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "gitlab/repeated-id/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "scope-policy-change",
+        "passed": true
+      },
+      {
+        "case": "bounded-provider-pagination",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/github",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/gitlab",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/incomplete",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/github",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/gitlab",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/incomplete",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/github",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/gitlab",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/incomplete",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/github",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/gitlab",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/incomplete",
+        "passed": true
+      },
+      {
+        "case": "forge-header-boundary",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cicd-native-zj71c29h",
+    "scope": "owned GitHub/GitLab-shaped loopback APIs and asset server only; no live forge/provider use",
+    "requests": {
+      "api_calls": 4262,
+      "asset_calls": 60,
+      "auth_bad": 0
+    }
+  },
+  "checks": {
+    "full_go": "passed",
+    "cicd_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11_cicd_cli": "passed"
+  },
+  "semantics": [
+    "Acquisition scope captures endpoint/selection/limits and excludes token",
+    "Validated immutable revision, run and GitHub artifact IDs propagated; member digest is SHA-256 of original bytes",
+    "Published source URLs are sanitized; signed download auth boundary retained",
+    "Expired or entirely empty collection is incomplete; binary policy skips are explicit non-fatal diagnostics",
+    "Strict complete JSON with pre-allocation listing row budget; positive unique source IDs and 4096-call budget",
+    "Read/close failure keeps readable download bytes while retaining incomplete result and baseline guard"
+  ],
+  "limits": [
+    "Owned loopback fixtures only; no real forge, credentials, remote permissions or provider verification qualification",
+    "CI scope represents a recent selected window; remote absence/remediation remains conservative",
+    "Other remote adapters and final Docker artifacts remain separate open work"
+  ]
+}

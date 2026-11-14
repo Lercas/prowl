@@ -16,6 +16,7 @@ type githubRuns struct {
 		Name       string `json:"name"`
 		HTMLURL    string `json:"html_url"`
 		HeadBranch string `json:"head_branch"`
+		HeadSHA    string `json:"head_sha"`
 	} `json:"workflow_runs"`
 }
 
@@ -44,6 +45,10 @@ func (c *collector) collectGitHub(ctx context.Context, out chan<- model.Item, re
 			c.fail(result, err)
 			return
 		}
+		if payload.Runs == nil {
+			c.fail(result, fmt.Errorf("invalid GitHub workflow_runs list"))
+			return
+		}
 		if len(payload.Runs) == 0 {
 			return
 		}
@@ -51,7 +56,11 @@ func (c *collector) collectGitHub(ctx context.Context, out chan<- model.Item, re
 			if result.Runs >= c.opts.MaxRuns || ctx.Err() != nil {
 				return
 			}
+			if !c.claimID(ctx, "run", run.ID, result) {
+				return
+			}
 			result.Runs++
+			runCtx := runContext(ctx, run.ID, run.HeadSHA)
 			label := runLabel(run.Name, run.ID)
 			prefix := "github:" + repo + "/actions/" + label
 			if c.opts.IncludeLogs {
@@ -59,12 +68,15 @@ func (c *collector) collectGitHub(ctx context.Context, out chan<- model.Item, re
 				raw, err := c.download(ctx, rawURL)
 				if err != nil {
 					c.fail(result, fmt.Errorf("run %d logs: %w", run.ID, err))
-				} else if err := c.emitPayload(ctx, out, prefix+"/logs", run.HTMLURL, raw, result); err != nil {
-					c.fail(result, fmt.Errorf("run %d logs: %w", run.ID, err))
+				}
+				if len(raw) > 0 || err == nil {
+					if emitErr := c.emitPayload(runCtx, out, prefix+"/logs", run.HTMLURL, raw, result); emitErr != nil {
+						c.fail(result, fmt.Errorf("run %d logs: %w", run.ID, emitErr))
+					}
 				}
 			}
 			if c.opts.IncludeArtifacts && result.Artifacts < c.opts.MaxArtifacts {
-				c.collectGitHubArtifacts(ctx, out, result, basePath, prefix, run.ID, run.HTMLURL)
+				c.collectGitHubArtifacts(runCtx, out, result, basePath, prefix, run.ID, run.HTMLURL)
 			}
 		}
 		if len(payload.Runs) < 100 {
@@ -82,6 +94,10 @@ func (c *collector) collectGitHubArtifacts(ctx context.Context, out chan<- model
 			c.fail(result, fmt.Errorf("run %d artifacts: %w", runID, err))
 			return
 		}
+		if payload.Artifacts == nil {
+			c.fail(result, fmt.Errorf("invalid GitHub artifacts list"))
+			return
+		}
 		if len(payload.Artifacts) == 0 {
 			return
 		}
@@ -89,7 +105,12 @@ func (c *collector) collectGitHubArtifacts(ctx context.Context, out chan<- model
 			if result.Artifacts >= c.opts.MaxArtifacts || ctx.Err() != nil {
 				return
 			}
+			if !c.claimID(ctx, "artifact", artifact.ID, result) {
+				return
+			}
 			if artifact.Expired {
+				model.Note(ctx, "ci_artifact_expired", prefix+"/artifacts/"+strconv.FormatInt(artifact.ID, 10), true)
+				c.fail(result, fmt.Errorf("artifact %d is expired", artifact.ID))
 				result.Skipped++
 				continue
 			}
@@ -98,10 +119,13 @@ func (c *collector) collectGitHubArtifacts(ctx context.Context, out chan<- model
 			raw, err := c.download(ctx, downloadURL)
 			if err != nil {
 				c.fail(result, fmt.Errorf("artifact %d: %w", artifact.ID, err))
-				continue
+				if len(raw) == 0 {
+					continue
+				}
 			}
 			artifactPath := prefix + "/artifacts/" + runLabel(artifact.Name, artifact.ID)
-			if err := c.emitPayload(ctx, out, artifactPath, runURL, raw, result); err != nil {
+			artifactCtx := model.WithProvenance(ctx, map[string]any{"artifact_id": strconv.FormatInt(artifact.ID, 10)})
+			if err := c.emitPayload(artifactCtx, out, artifactPath, runURL, raw, result); err != nil {
 				c.fail(result, fmt.Errorf("artifact %d: %w", artifact.ID, err))
 			}
 		}

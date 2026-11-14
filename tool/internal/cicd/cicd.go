@@ -2,7 +2,10 @@
 package cicd
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"github.com/Lercas/prowl/tool/internal/source"
@@ -25,6 +29,8 @@ const (
 	defaultMaxArtifacts = 100
 	defaultMaxDownload  = int64(100 << 20)
 	maxJSONBody         = int64(32 << 20)
+	maxCollectionCalls  = 4096
+	maxListingRows      = 100 // every listing requests per_page=100
 )
 
 // Options bounds one CI collection. BaseURL and Token are supplied by the command from environment
@@ -58,10 +64,12 @@ type target struct {
 }
 
 type collector struct {
-	target target
-	opts   Options
-	api    *http.Client
-	direct *http.Client
+	target  target
+	opts    Options
+	api     *http.Client
+	direct  *http.Client
+	calls   int // collection is serial; includes authenticated and signed download calls
+	seenIDs map[string]map[int64]bool
 }
 
 // Collect starts a bounded read-only collection for github:owner/repo or gitlab:group/project.
@@ -97,6 +105,12 @@ func Collect(ctx context.Context, rawTarget string, opts Options) (<-chan model.
 		},
 		direct: safehttp.Client(45 * time.Second),
 	}
+	model.CoverageFrom(ctx).RegisterScope("cicd", t.platform+":"+t.repo, struct {
+		Revision, API, Branch           string
+		MaxRuns, MaxArtifacts, MaxCalls int
+		MaxDownload, MaxItem            int64
+		Logs, Artifacts                 bool
+	}{"1.5.0-cicd-v1", opts.BaseURL, opts.Branch, opts.MaxRuns, opts.MaxArtifacts, maxCollectionCalls, opts.MaxDownload, opts.MaxItem, opts.IncludeLogs, opts.IncludeArtifacts})
 	items := make(chan model.Item, 32)
 	done := make(chan Result, 1)
 	go func() {
@@ -108,7 +122,14 @@ func Collect(ctx context.Context, rawTarget string, opts Options) (<-chan model.
 		case "gitlab":
 			c.collectGitLab(ctx, items, &result)
 		}
+		if result.Items == 0 && ctx.Err() == nil {
+			model.Note(ctx, "ci_empty", rawTarget, true)
+			if result.Failures == 0 {
+				c.fail(&result, errors.New("no CI text items were collected"))
+			}
+		}
 		if result.Failures > 0 {
+			model.Note(ctx, "ci_collection_failed", rawTarget, true)
 			// Completeness must reach the scan before reporting or baseline generation.
 			select {
 			case items <- model.Item{Source: "ci", Path: rawTarget, Error: result.LastError}:
@@ -191,7 +212,38 @@ func (e *httpError) Error() string {
 	return fmt.Sprintf("%s returned HTTP %d", safehttp.RedactURL(e.URL), e.Status)
 }
 
+func (c *collector) claimID(ctx context.Context, kind string, id int64, result *Result) bool {
+	if c.seenIDs == nil {
+		c.seenIDs = map[string]map[int64]bool{}
+	}
+	if c.seenIDs[kind] == nil {
+		c.seenIDs[kind] = map[int64]bool{}
+	}
+	if id <= 0 || c.seenIDs[kind][id] {
+		model.Note(ctx, "ci_listing_invalid", c.target.platform+":"+c.target.repo, true)
+		c.fail(result, errors.New("CI listing contains a missing or repeated "+kind+" ID"))
+		return false
+	}
+	c.seenIDs[kind][id] = true
+	return true
+}
+
+func (c *collector) chargeRequest(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if c.calls >= maxCollectionCalls {
+		model.Note(ctx, "ci_request_limit", c.target.platform+":"+c.target.repo, true)
+		return errors.New("CI collection request limit reached; select fewer runs or a narrower branch")
+	}
+	c.calls++
+	return nil
+}
+
 func (c *collector) request(ctx context.Context, rawURL string, auth bool) (*http.Response, error) {
+	if err := c.chargeRequest(ctx); err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
@@ -209,33 +261,103 @@ func (c *collector) request(ctx context.Context, rawURL string, auth bool) (*htt
 	return c.api.Do(req)
 }
 
-func (c *collector) getJSON(ctx context.Context, rawURL string, out any) error {
+func (c *collector) getJSON(ctx context.Context, rawURL string, out any) (err error) {
 	resp, err := c.request(ctx, rawURL, true)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); err == nil && closeErr != nil {
+			err = errors.New("close CI listing body failed")
+		}
+	}()
 	if resp.StatusCode != http.StatusOK {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4<<10))
 		return &httpError{Status: resp.StatusCode, URL: rawURL}
 	}
-	if err := json.NewDecoder(io.LimitReader(resp.Body, maxJSONBody)).Decode(out); err != nil {
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, maxJSONBody+1))
+	if err != nil {
+		return fmt.Errorf("read CI listing: %w", err)
+	}
+	if int64(len(raw)) > maxJSONBody {
+		return errors.New("CI listing exceeds JSON size limit")
+	}
+	if err := boundListingRows(raw, out); err != nil {
+		return err
+	}
+	if err := jsonstrict.UnmarshalContext(ctx, raw, out); err != nil {
 		return fmt.Errorf("decode %s: %w", safehttp.RedactURL(rawURL), err)
 	}
 	return nil
 }
 
+// Bound row count before allocating API structs: a small array of empty objects can otherwise
+// amplify into a much larger typed slice. Unknown fields are skipped one raw value at a time.
+func boundListingRows(raw []byte, out any) error {
+	field := ""
+	switch out.(type) {
+	case *githubRuns:
+		field = "workflow_runs"
+	case *githubArtifacts:
+		field = "artifacts"
+	case *[]gitlabPipeline, *[]gitlabJob:
+	default:
+		return errors.New("unsupported CI listing schema")
+	}
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	if field != "" {
+		start, err := dec.Token()
+		if err != nil || start != json.Delim('{') {
+			return errors.New("invalid CI listing object")
+		}
+		found := false
+		for dec.More() {
+			key, err := dec.Token()
+			if err != nil {
+				return errors.New("invalid CI listing field")
+			}
+			if name, ok := key.(string); ok && strings.EqualFold(name, field) {
+				found = true
+				break
+			}
+			var ignored json.RawMessage
+			if dec.Decode(&ignored) != nil {
+				return errors.New("invalid CI listing value")
+			}
+		}
+		if !found {
+			return errors.New("missing CI listing array")
+		}
+	}
+	start, err := dec.Token()
+	if err != nil || start != json.Delim('[') {
+		return errors.New("invalid CI listing array")
+	}
+	for rows := 0; dec.More(); rows++ {
+		if rows >= maxListingRows {
+			return errors.New("CI listing exceeds requested page size")
+		}
+		var row json.RawMessage
+		if dec.Decode(&row) != nil {
+			return errors.New("invalid CI listing row")
+		}
+	}
+	return nil // strict decoding below validates the complete document, duplicates and Unicode
+}
+
 // download fetches an API download endpoint. A forge may redirect to a signed object-store URL; the
 // second request is built from scratch with no Authorization/PRIVATE-TOKEN headers, preventing a
 // cross-origin credential leak.
-func (c *collector) download(ctx context.Context, rawURL string) ([]byte, error) {
+func (c *collector) download(ctx context.Context, rawURL string) (raw []byte, err error) {
 	resp, err := c.request(ctx, rawURL, true)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode >= 300 && resp.StatusCode < 400 {
 		loc := resp.Header.Get("Location")
-		_ = resp.Body.Close()
+		if err := resp.Body.Close(); err != nil {
+			return nil, errors.New("close CI redirect body failed")
+		}
 		if loc == "" {
 			return nil, fmt.Errorf("download redirect from %s has no Location", safehttp.RedactURL(rawURL))
 		}
@@ -249,6 +371,9 @@ func (c *collector) download(ctx context.Context, rawURL string) ([]byte, error)
 		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, next.String(), nil)
 		if err != nil {
+			return nil, err
+		}
+		if err := c.chargeRequest(ctx); err != nil {
 			return nil, err
 		}
 		resp, err = c.direct.Do(req)
@@ -266,7 +391,11 @@ func (c *collector) download(ctx context.Context, rawURL string) ([]byte, error)
 			return nil, fmt.Errorf("signed CI download from %s failed: %s", next.Hostname(), reason)
 		}
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); err == nil && closeErr != nil {
+			err = errors.New("close CI download body failed")
+		}
+	}()
 	if resp.StatusCode != http.StatusOK {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4<<10))
 		return nil, &httpError{Status: resp.StatusCode, URL: rawURL}
@@ -274,21 +403,30 @@ func (c *collector) download(ctx context.Context, rawURL string) ([]byte, error)
 	if resp.ContentLength > c.opts.MaxDownload {
 		return nil, fmt.Errorf("download exceeds --max-download (%d > %d)", resp.ContentLength, c.opts.MaxDownload)
 	}
-	raw, err := io.ReadAll(io.LimitReader(resp.Body, c.opts.MaxDownload+1))
-	if err != nil {
-		return nil, err
-	}
+	raw, err = io.ReadAll(io.LimitReader(resp.Body, c.opts.MaxDownload+1))
 	if int64(len(raw)) > c.opts.MaxDownload {
-		return nil, fmt.Errorf("download exceeds --max-download (%d bytes)", c.opts.MaxDownload)
+		return raw[:c.opts.MaxDownload], fmt.Errorf("download exceeds --max-download (%d bytes)", c.opts.MaxDownload)
+	}
+	if err != nil {
+		return raw, errors.New("CI download body could not be read fully")
 	}
 	return raw, nil
 }
 
 func (c *collector) emitPayload(ctx context.Context, out chan<- model.Item, prefix, itemURL string, raw []byte, result *Result) error {
-	stats, recognized, err := unpack.Walk(prefix, raw, unpack.BoundedLimits(c.opts.MaxItem, c.opts.MaxDownload), func(entry unpack.Entry) error {
+	stats, recognized, err := unpack.WalkContext(ctx, prefix, raw, unpack.BoundedLimits(c.opts.MaxItem, c.opts.MaxDownload), func(entry unpack.Entry) error {
 		return c.emitFile(ctx, out, entry.Path, itemURL, entry.Data, result)
 	})
 	result.Skipped += stats.Skipped
+	if stats.Skipped > stats.Limited {
+		model.Note(ctx, "ci_policy_skipped", prefix, false)
+	}
+	if stats.DepthLimited > 0 {
+		model.Note(ctx, "ci_archive_depth_limit", prefix, true)
+	}
+	if stats.Oversized > 0 {
+		model.Note(ctx, "ci_archive_entry_size_limit", prefix, true)
+	}
 	if recognized {
 		if err == nil && stats.Limited > 0 {
 			return fmt.Errorf("artifact content omitted at extraction limits")
@@ -306,14 +444,20 @@ func (c *collector) emitFile(ctx context.Context, out chan<- model.Item, itemPat
 	text, ok := source.ScannableText(raw)
 	if !ok || len(text) == 0 {
 		result.Skipped++
+		model.Note(ctx, "ci_policy_skipped", itemPath, false)
 		return nil
 	}
+	itemURL = safeItemURL(itemURL)
+	sum := sha256.Sum256(raw)
 	item := model.Item{
 		Text:   string(text),
 		Source: "ci",
 		Path:   itemPath,
-		Meta:   map[string]any{"url": itemURL},
+		Meta:   map[string]any{"url": itemURL, "source_url": itemURL, "digest": hex.EncodeToString(sum[:])},
 	}
+	model.AttachProvenance(ctx, &item)
+	// This digest identifies the acquired member bytes, never a parent context override.
+	item.Meta["digest"] = hex.EncodeToString(sum[:])
 	select {
 	case out <- item:
 		result.Items++
@@ -321,6 +465,14 @@ func (c *collector) emitFile(ctx context.Context, out chan<- model.Item, itemPat
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func safeItemURL(raw string) string {
+	u, err := url.Parse(raw)
+	if len(raw) > 2048 || err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") {
+		return ""
+	}
+	return model.SafeLocator(raw)
 }
 
 func (c *collector) fail(result *Result, err error) {
@@ -339,9 +491,19 @@ func apiURL(base, suffix string, q url.Values) string {
 	return u
 }
 
+func runContext(ctx context.Context, id int64, revision string) context.Context {
+	if !model.ValidImmutableMetadata("commit", revision) {
+		if revision != "" {
+			model.Note(ctx, "ci_revision_unavailable", "run/"+strconv.FormatInt(id, 10), false)
+		}
+		revision = ""
+	}
+	return model.WithProvenance(ctx, map[string]any{"run_id": strconv.FormatInt(id, 10), "commit": strings.ToLower(revision)})
+}
+
 func runLabel(name string, id int64) string {
 	name = strings.TrimSpace(name)
-	if name == "" {
+	if name == "" || len(name) > 256 {
 		name = "run"
 	}
 	name = strings.Map(func(r rune) rune {
