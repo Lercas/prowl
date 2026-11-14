@@ -80,5 +80,6 @@ func (p *Pipeline) mapReconstructed(fs []model.Finding, it model.Item) {
 			line, col := origin.lines.cols(span.Start)
 			f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: line, Col: col, Transform: origin.value.Transform})
 		}
+		p.annotateOccurrence(f)
 	}
 }

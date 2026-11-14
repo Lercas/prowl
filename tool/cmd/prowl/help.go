@@ -10,6 +10,7 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"identity", "создать приватный ключ идентичности секретов", "prowl identity init [-o FILE]"},
 	{"agents", "проверить конфиги и текстовые транскрипты AI-агентов", "prowl agents [PROJECT...] [--agent-home DIR] [--shell-history] [scan flags]"},
 	{"guard", "проверить stdin перед передачей промпта или вызовом инструмента", "prowl guard [--protocol raw|claude|cursor-prompt|cursor-tool] [--max-size BYTES] [--timeout DUR]"},
 	{"index", "локальный индекс: места обнаружения и проверенные состояния", "prowl index --index DIR [--scope NAME] [--format json]"},

@@ -86,6 +86,14 @@
       Флаг не включает ML, OCR или проверку у провайдера.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
+    - [x] Producer provenance передаётся в Item/Finding; восстановлены report HMAC
+      `secret_id`, `identity_scope`, `occurrence_id`, keyed fingerprint и
+      `identity init` / `--identity-key-file`. Ключ snapshot-копируется в Pipeline,
+      occurrence пересчитывается после отображения исходных координат; keyed
+      Git observations сохраняются до ML. Нативная JSON-матрица — 39/39,
+      [контракт и границы](wiki/Report-Identity.md), отчёт —
+      `wiki/evidence/1.5.0-report-identity-20261114.json`. Полный coverage envelope,
+      SARIF и заполнение всех метаданных источниками остаются открыты.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

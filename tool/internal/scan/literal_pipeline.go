@@ -113,5 +113,6 @@ func (p *Pipeline) mapLiteralFindings(fs []model.Finding, it model.Item, doc *li
 				f.Evidence = append(f.Evidence, *declarationMatch)
 			}
 		}
+		p.annotateOccurrence(f)
 	}
 }

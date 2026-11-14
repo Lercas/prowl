@@ -350,9 +350,6 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
-	if literalFormat(it) == "" && !(p.options.Reconstruct && reconstructable(it)) {
-		return p.findings(ctx, it, nil)
-	}
 	coverage := model.NewCoverage()
 	if p.options.Reconstruct && reconstructable(it) {
 		options := p.options
@@ -499,7 +496,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			continue
 		}
 		if gitRecord != nil {
-			observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
+			p.observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
 		}
 		if allow != nil && allow(m.Value, it.Path) {
 			continue
@@ -531,6 +528,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			ImageEntry: it.ImageEntry,
 			Context:    p.revealMatchContext(it, m),
 		})
+		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
 			record := recordForMatch(m, it)
 			if literalDoc != nil {
@@ -585,7 +583,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				break
 			}
 			if gitRecord != nil {
-				observeGitCandidate(gitRecord, h.RuleID, it.Path, h.Value)
+				p.observeGitCandidate(gitRecord, h.RuleID, it.Path, h.Value)
 			}
 			if allow != nil && allow(h.Value, it.Path) {
 				continue
@@ -622,6 +620,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				ImageEntry: it.ImageEntry,
 				Context:    p.revealContext(it, h.Start),
 			}
+			p.annotateIdentity(ctx, &f, h.Value, it)
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
 			// builtin — a cryptographic L1-checksum hit must never be rewritten by a template's self-declared severity.

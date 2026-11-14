@@ -66,6 +66,7 @@ func stdinNamedFrom(ctx context.Context, input io.ReadCloser, maxBytes int64, na
 
 // send delivers an item unless ctx is cancelled; returns false when the consumer should stop.
 func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
+	model.AttachProvenance(ctx, &it)
 	if origin, ok := ctx.Value(filesystemOriginKey{}).(filesystemOrigin); ok && it.ArtifactURI == "" {
 		it.ArtifactURI = origin.uri(it.Path)
 	}

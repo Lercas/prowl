@@ -141,10 +141,10 @@ func gitObserved(graph *model.GitHistoryGraph, fingerprint string, object model.
 
 const maxGitObservations = 1000000
 
-func observeGitCandidate(record *model.GitRecord, typ, path, value string) {
+func (p *Pipeline) observeGitCandidate(record *model.GitRecord, typ, path, value string) {
 	if record.Graph.ObservationCount.Add(1) > maxGitObservations {
 		record.Graph.ObservationLimited.Store(true)
 		return
 	}
-	record.Graph.Observations.Store(model.GitObservation{Fingerprint: model.ComputeFingerprint(typ, path, value), Object: record.Object}, true)
+	record.Graph.Observations.Store(model.GitObservation{Fingerprint: p.reportFingerprint(typ, path, value), Object: record.Object}, true)
 }

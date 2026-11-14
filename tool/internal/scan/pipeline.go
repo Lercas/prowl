@@ -18,6 +18,8 @@ type Options struct {
 	Allow         func(value, path string) bool
 	Workers       int
 	RevealSecrets bool
+	// IdentityKey scopes the released report identities; it is independent of the local index.
+	IdentityKey []byte
 	// Reconstruct enables bounded static string reconstruction for JS/TS sources.
 	Reconstruct bool
 	// reconstruction maps a child scan to its original expression before observers.
@@ -40,7 +42,10 @@ type Options struct {
 type Pipeline struct{ options Options }
 
 // New takes a value snapshot of options, including the disclosure policy.
-func New(options Options) *Pipeline { return &Pipeline{options: options} }
+func New(options Options) *Pipeline {
+	options.IdentityKey = append([]byte(nil), options.IdentityKey...)
+	return &Pipeline{options: options}
+}
 
 // WithRevealSecrets returns a separate configuration sharing only the read-only
 // dependencies. It never changes an existing or currently running scan.

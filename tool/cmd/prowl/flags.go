@@ -141,6 +141,7 @@ var commandSubcommands = map[string][]string{
 	"rules":     {"list", "show", "test", "search", "validate", "stats", "update", "manifest", "export"},
 	"verifiers": {"list", "validate", "update", "manifest"},
 	"config":    {"validate"},
+	"identity":  {"init"},
 }
 
 var cliFlags = []flagSpec{
@@ -175,7 +176,8 @@ var cliFlags = []flagSpec{
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
 	listFlag("--verifiers", scanCommands, "load provider verifiers from a directory", false, func(c *commonFlags) *[]string { return &c.verifiers }),
 	stringFlag("--config", detectorCommands, "FILE", "load trusted scanner configuration", func(c *commonFlags) *string { return &c.config }),
-	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
+	stringFlag("--output -o", scanCommands+" rules.export hermes-audit index diff identity.init", "FILE", "write the report to this file", func(c *commonFlags) *string { return &c.output }),
+	stringFlag("--identity-key-file", scanCommands, "FILE", "ключ HMAC для идентичности секретов и позиций в отчёте", func(c *commonFlags) *string { return &c.identityKeyFile }),
 	stringFlag("--stdin-name", "scan", "NAME", "логическое имя stdin для выбора формата; файл не открывается", func(c *commonFlags) *string { return &c.stdinName }),
 	boolFlag("--staged", "scan compare repo", "scan the Git index", func(c *commonFlags) *bool { return &c.staged }),
 	boolFlag("--git-timeline", "scan repo org", "построить хронологию наблюдений Git (включает --history)", func(c *commonFlags) *bool { return &c.gitTimeline }),
@@ -306,10 +308,13 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		c.cmd.active = true
 		c.cmd.passive = true
 	}
-	if command == "rules" || command == "verifiers" || command == "config" {
+	if command == "rules" || command == "verifiers" || command == "config" || command == "identity" {
 		c.cmd.sub = "list"
 		if command == "config" {
 			c.cmd.sub = "validate"
+		}
+		if command == "identity" {
+			c.cmd.sub = "init"
 		}
 		if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
 			c.cmd.sub, args = args[0], args[1:]
@@ -437,6 +442,16 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.indexDir != "" && command != "index" && command != "diff" {
 		c.indexEvidence = &indexEvidence{}
 	}
+	for _, scanCommand := range strings.Fields(scanCommands) {
+		if command == scanCommand {
+			var err error
+			c.identityKey, err = loadIdentityKey(c.identityKeyFile)
+			if err != nil {
+				return c, nil, fmt.Errorf("identity key: %w", err)
+			}
+			break
+		}
+	}
 	return c, rest, nil
 }
 
@@ -492,6 +507,8 @@ func splitCSV(s string) []string {
 }
 
 type commonFlags struct {
+	identityKeyFile                          string
+	identityKey                              []byte
 	indexDir, indexScope                     string
 	indexEvidence                            *indexEvidence
 	indexCoverageComplete                    func() bool // optional source-specific completion evidence (e.g. OCR)

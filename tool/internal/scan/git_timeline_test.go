@@ -117,7 +117,7 @@ func TestGitTimelineResourceLimitCannotConfirmAbsence(t *testing.T) {
 	g, fs := timelineFixture()
 	g.Head = "c3"
 	g.ObservationCount.Store(maxGitObservations)
-	observeGitCandidate(fs[0].GitRecord, "owned", "prod.env", "opaque")
+	New(Options{}).observeGitCandidate(fs[0].GitRecord, "owned", "prod.env", "opaque")
 	fs = FinalizeGitTimeline(fs)
 	if fs[0].Git.Complete || fs[0].Git.InHEAD != nil || len(fs[0].Git.Removals) != 0 || !model.IsIncompleteFinding(fs[len(fs)-1]) {
 		t.Fatal("observation limit became confirmed removal")
