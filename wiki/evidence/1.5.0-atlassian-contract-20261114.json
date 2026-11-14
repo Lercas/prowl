@@ -660,5 +660,871 @@
     "job": "native-acquisition",
     "command": "python3 scripts/check_atlassian_contract.py \"$RUNNER_TEMP/prowl-acquisition\"",
     "external_run": "not executed"
+  },
+  "main_integration": {
+    "source_commit": "bbf7e6d",
+    "full_go": "passed",
+    "actionlint": "passed",
+    "native": {
+      "binary_sha256": "094de7cbaf338f6e4a1efb8df71a7a089f971e83e644b81da8ed97f05364f421",
+      "passed": 157,
+      "total": 157,
+      "checks": [
+        {
+          "case": "jira/False/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/json/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/False/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/json/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/False/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/False/stable-scopes",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/json/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/True/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/json/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "jira/True/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/True/stable-scopes",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/json/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/json/preserved",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/partial/sarif/preserved",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/json/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/empty/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/json/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/connect/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/json/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/json/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/json/preserved",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "jira/budget/sarif/preserved",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/json/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/json/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/False/stable-scopes",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/json/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/json/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/False/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/json/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/json/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/json/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/sarif/complete",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/sarif/provenance",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/sarif/ids",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/True/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/True/stable-scopes",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/json/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/json/preserved",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/partial/sarif/preserved",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/json/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/empty/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/json/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/connect/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/json/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/json/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/json/preserved",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/sarif/safe",
+          "passed": true
+        },
+        {
+          "case": "confluence/budget/sarif/preserved",
+          "passed": true
+        },
+        {
+          "case": "jira/index/complete/0",
+          "passed": true
+        },
+        {
+          "case": "jira/index/complete/1",
+          "passed": true
+        },
+        {
+          "case": "jira/index/empty",
+          "passed": true
+        },
+        {
+          "case": "jira/index/empty/stored-incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/index/empty/diff-blocked",
+          "passed": true
+        },
+        {
+          "case": "jira/index/connect",
+          "passed": true
+        },
+        {
+          "case": "jira/index/connect/stored-incomplete",
+          "passed": true
+        },
+        {
+          "case": "jira/index/connect/diff-blocked",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/complete/0",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/complete/1",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/empty",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/empty/stored-incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/empty/diff-blocked",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/connect",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/connect/stored-incomplete",
+          "passed": true
+        },
+        {
+          "case": "confluence/index/connect/diff-blocked",
+          "passed": true
+        },
+        {
+          "case": "auth",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-atlassian-native-gsdv_1s1",
+      "scope": "owned loopback Jira/Confluence Cloud-shaped APIs and synthetic values only; no external tenant or live provider"
+    },
+    "source_coverage_nonregression": {
+      "binary_sha256": "094de7cbaf338f6e4a1efb8df71a7a089f971e83e644b81da8ed97f05364f421",
+      "passed": 36,
+      "total": 36,
+      "checks": [
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        }
+      ]
+    },
+    "unrelated_dirty_work_preserved": true
   }
 }
