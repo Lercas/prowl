@@ -41,7 +41,7 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 	ruleFiles := c.rules
 	// gitleaks migration: with no explicit --rules, auto-load a .gitleaks.toml from the working dir so
 	// its rules join the taxonomy and their IDs line up with any .gitleaksignore.
-	if len(ruleFiles) == 0 && !c.rulesOnly {
+	if len(ruleFiles) == 0 && !c.rulesOnly && !c.noAutoPolicy {
 		name, err := taxonomy.DiscoverGitleaks()
 		if err != nil {
 			return nil, nil, err
@@ -104,7 +104,7 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 // isolates it too: only an explicit --rules-dir is loaded, never the auto-discovered ~/.prowl/rules.
 func loadEngine(c commonFlags) (*rules.Engine, error) {
 	dirs := c.rulesDir
-	if !c.rulesOnly {
+	if !c.rulesOnly && !c.noAutoPolicy {
 		var err error
 		dirs, err = discoverRulesDirs(c.rulesDir)
 		if err != nil {

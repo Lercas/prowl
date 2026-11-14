@@ -416,7 +416,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		if allow != nil && allow(m.Value, it.Path) {
 			continue
 		}
-		if li.hasPragma(m.Start) {
+		if !p.options.IgnorePragmas && li.hasPragma(m.Start) {
 			continue
 		}
 		// in a lockfile a generic entropy/api-key hit is almost always a package integrity hash; drop
@@ -429,7 +429,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
 		ver, why := applyVerify(ctx, vset, m.Type, m.Value, it.Text)
 		out = append(out, model.Finding{
-			Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
+			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
 			UTF16Col:    li.utf16Col(m.Start),
@@ -500,7 +500,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 				detect.IsExampleOrPlaceholder(h.Value) {
 				continue
 			}
-			if li.hasPragma(h.Start) {
+			if !p.options.IgnorePragmas && li.hasPragma(h.Start) {
 				continue
 			}
 			line, col := li.cols(h.Start)
@@ -512,7 +512,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			}
 			ver, why := applyVerify(ctx, vset, h.RuleID, h.Value, it.Text)
 			f := model.Finding{
-				Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
+				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
 				UTF16Col:    li.utf16Col(h.Start),

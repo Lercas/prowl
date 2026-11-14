@@ -10,7 +10,7 @@ import (
 )
 
 func TestForeignFlagsAreRejectedByEveryCommandSchema(t *testing.T) {
-	for _, command := range []string{"scan", "compare", "repo", "org", "cicd", "image", "mobile", "bucket", "domain", "jira", "confluence", "serve", "doctor", "mcp", "lsp", "hermes-audit"} {
+	for _, command := range []string{"agents", "guard", "scan", "compare", "repo", "org", "cicd", "image", "mobile", "bucket", "domain", "jira", "confluence", "serve", "doctor", "mcp", "lsp", "hermes-audit"} {
 		for _, spec := range cliFlags {
 			if spec.applies(command) {
 				continue

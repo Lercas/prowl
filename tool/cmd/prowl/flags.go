@@ -16,6 +16,8 @@ import (
 )
 
 type commandOptions struct {
+	guardProtocol, agentHome                                                                                               string
+	shellHistory                                                                                                           bool
 	sub, branch, targetsFile, addr, baseURL, source                                                                        string
 	depth, concurrency, maxAssets, maxConcurrent, maxItems, maxRuns, maxArtifacts, minRun, maxRetries                      int
 	maxDownload                                                                                                            int64
@@ -128,8 +130,8 @@ func enumFlag(name, commands, description string, allowed []string, field func(*
 	})
 }
 
-const scanCommands = "scan compare repo org cicd image mobile bucket domain jira confluence"
-const indexedCommands = "scan repo org cicd image mobile bucket domain jira confluence"
+const scanCommands = "scan compare repo org cicd image mobile bucket domain jira confluence agents"
+const indexedCommands = "scan repo org cicd image mobile bucket domain jira confluence agents"
 
 const detectorCommands = scanCommands + " serve doctor"
 
@@ -142,6 +144,9 @@ var commandSubcommands = map[string][]string{
 }
 
 var cliFlags = []flagSpec{
+	enumFlag("--protocol", "guard", "протокол хука (по умолчанию raw)", []string{"raw", "claude", "cursor-prompt", "cursor-tool"}, func(c *commonFlags) *string { return &c.cmd.guardProtocol }),
+	stringFlag("--agent-home", "agents", "DIR", "явно проверить пользовательские конфиги и транскрипты агентов", func(c *commonFlags) *string { return &c.cmd.agentHome }),
+	boolFlag("--shell-history", "agents", "включить историю оболочки из явного --agent-home", func(c *commonFlags) *bool { return &c.cmd.shellHistory }),
 	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
 	stringFlag("--index", indexedCommands+" index diff", "DIR", "локальный приватный индекс секретов (явное включение)", func(c *commonFlags) *string { return &c.indexDir }),
 	stringFlag("--scope", indexedCommands+" index diff", "NAME", "стабильное имя области скана для индекса", func(c *commonFlags) *string { return &c.indexScope }),
@@ -176,9 +181,9 @@ var cliFlags = []flagSpec{
 	stringFlag("--since", "scan compare repo", "REV", "scan Git changes since this revision", func(c *commonFlags) *string { return &c.since }),
 	stringFlag("--baseline", scanCommands, "FILE", "suppress findings recorded in this baseline", func(c *commonFlags) *string { return &c.baseline }),
 	stringFlag("--write-baseline", scanCommands, "FILE", "write a baseline from complete scan results", func(c *commonFlags) *string { return &c.writeBaseline }),
-	sizeFlag("--max-size", scanCommands, "maximum input/member size (default 10MB)", func(c *commonFlags) *int64 { return &c.maxSize }),
+	sizeFlag("--max-size", scanCommands+" guard", "maximum input/member size (scan: 10MB; guard: 1MiB, max 8MiB)", func(c *commonFlags) *int64 { return &c.maxSize }),
 	intFlag("--workers", scanCommands, "scan concurrency; 0 selects the runtime default", 0, func(c *commonFlags) *int { return &c.workers }),
-	durationFlag("--timeout", scanCommands+" serve hermes-audit", "total scan or request timeout", func(c *commonFlags) *time.Duration { return &c.timeout }),
+	durationFlag("--timeout", scanCommands+" serve hermes-audit guard", "total scan/request timeout (guard: default 3s, max 30s)", func(c *commonFlags) *time.Duration { return &c.timeout }),
 	boolFlag("--silence --silent -s", detectorCommands, "suppress human output and logging", func(c *commonFlags) *bool { return &c.silence }),
 	boolFlag("--quiet -q", detectorCommands, "log errors only", func(c *commonFlags) *bool { return &c.quiet }),
 	boolFlag("--verbose -v", detectorCommands, "enable debug logging", func(c *commonFlags) *bool { return &c.verbose }),
@@ -286,6 +291,11 @@ func commandParseError(err error) int {
 func parseCommand(command string, args []string) (commonFlags, []string, error) {
 	c := commonFlags{format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: .3, ocrMaxPages: 20, ocrTimeout: 2 * time.Minute}
 	c.cmd = commandOptions{maxAssets: 300, addr: "127.0.0.1:8080", maxRuns: 20, maxArtifacts: 100, maxDownload: 100 << 20, minRun: minRunDefault}
+	if command == "guard" {
+		c.maxSize = 1 << 20
+		c.timeout = 3 * time.Second
+		c.cmd.guardProtocol = "raw"
+	}
 	if command == "hermes-audit" {
 		c.timeout = 12 * time.Second
 		c.cmd.maxRetries = 2
@@ -370,6 +380,12 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		return c, nil, &commandHelpRequest{command}
 	}
 	c.explicitFlags = seen
+	if command == "guard" && (c.maxSize > 8<<20 || c.timeout <= 0 || c.timeout > 30*time.Second) {
+		return c, nil, errors.New("guard: размер не более 8 МиБ; таймаут должен быть положительным и не более 30 с")
+	}
+	if command == "agents" && c.cmd.shellHistory && c.cmd.agentHome == "" {
+		return c, nil, errors.New("--shell-history требует явный --agent-home DIR")
+	}
 	if c.gitTimeline {
 		c.history = true
 	}
@@ -403,7 +419,7 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		return c, nil, errors.New("domain accepts a target or --targets, not both")
 	}
 	switch command {
-	case "serve", "doctor", "mcp", "lsp", "detectors", "version":
+	case "serve", "doctor", "mcp", "lsp", "detectors", "version", "guard":
 		if len(rest) > 0 {
 			return c, nil, fmt.Errorf("%s does not accept positional arguments", command)
 		}
@@ -481,6 +497,7 @@ type commonFlags struct {
 	staged, history, gitTimeline             bool
 	silence, quiet, verbose, noColor         bool
 	rulesOnly                                bool
+	noAutoPolicy                             bool              // agents: only explicit rule and suppression inputs
 	noAutoConfig                             bool              // repo/org: don't honor the scanned tree's own .prowl.yaml
 	dedupe                                   bool              // collapse the same secret found repeatedly in one file (default on)
 	maxPerFile                               int               // cap generic findings per file (data-file guard; 0 = off)

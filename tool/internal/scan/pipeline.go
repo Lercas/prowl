@@ -18,6 +18,8 @@ type Options struct {
 	Allow         func(value, path string) bool
 	Workers       int
 	RevealSecrets bool
+	// IgnorePragmas is for untrusted in-flight payloads which cannot grant themselves exceptions.
+	IgnorePragmas bool
 	// ValueFingerprint is optional and must be safe for concurrent calls. It
 	// receives a raw value in memory, before redaction, but must never retain it.
 	ValueFingerprint    func(string) string

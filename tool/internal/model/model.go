@@ -8,8 +8,15 @@ import (
 	"strings"
 )
 
+// AgentProvenance labels a selected agent configuration or text export.
+type AgentProvenance struct {
+	Product string `json:"product"`
+	Kind    string `json:"kind"`
+}
+
 // Item is a unit of content from a Source (a file, a Jira ticket, a Confluence page).
 type Item struct {
+	Agent  *AgentProvenance
 	Text   string
 	Source string // code | jira | confluence | slack | log
 	Path   string
@@ -34,16 +41,17 @@ func IsIncompleteFinding(f Finding) bool {
 
 // Finding is a single detected secret.
 type Finding struct {
-	Git        *GitTimeline `json:"git,omitempty"`
-	GitRecord  *GitRecord   `json:"-"`
-	Detector   string       `json:"detector"`
-	Type       string       `json:"type"`
-	Confidence float64      `json:"confidence"`
-	Severity   string       `json:"severity"`
-	Source     string       `json:"source"`
-	Path       string       `json:"path"`
-	Line       int          `json:"line"`
-	Col        int          `json:"col"`
+	Agent      *AgentProvenance `json:"agent,omitempty"`
+	Git        *GitTimeline     `json:"git,omitempty"`
+	GitRecord  *GitRecord       `json:"-"`
+	Detector   string           `json:"detector"`
+	Type       string           `json:"type"`
+	Confidence float64          `json:"confidence"`
+	Severity   string           `json:"severity"`
+	Source     string           `json:"source"`
+	Path       string           `json:"path"`
+	Line       int              `json:"line"`
+	Col        int              `json:"col"`
 	// UTF16Col is derived from the scanned snapshot for SARIF; Col remains byte-based for JSON/pretty.
 	// Zero means no derived column is available (e.g. an intake diagnostic).
 	UTF16Col int `json:"-"`

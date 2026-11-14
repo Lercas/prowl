@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "/absolute/path/to/prowl guard --protocol cursor-prompt",
+        "failClosed": true,
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "/absolute/path/to/prowl guard --protocol cursor-tool",
+        "failClosed": true,
+        "timeout": 10
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "/absolute/path/to/prowl guard --protocol cursor-tool",
+        "failClosed": true,
+        "timeout": 10
+      }
+    ]
+  }
+}

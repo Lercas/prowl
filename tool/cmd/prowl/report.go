@@ -204,7 +204,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 		return 0
 	}
 	blPath := c.baseline
-	if blPath == "" {
+	if blPath == "" && !c.noAutoPolicy {
 		var err error
 		blPath, err = localfile.FirstExisting(".prowl-baseline.json")
 		if err != nil {
@@ -221,7 +221,11 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 			return 2
 		}
 	}
-	ignorePath, err := localfile.FirstExisting(".gitleaksignore")
+	var ignorePath string
+	var err error
+	if !c.noAutoPolicy {
+		ignorePath, err = localfile.FirstExisting(".gitleaksignore")
+	}
 	if err != nil {
 		logx.Error("gitleaksignore discovery failed", "err", err)
 		return 2

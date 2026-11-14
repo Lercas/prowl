@@ -17,7 +17,7 @@ prowl index --index "$HOME/.prowl/index" --format json -o index-report.json
 индекс; они не создают новый каталог, ключ или базу при ошибке пути.
 
 Индекс поддерживают `scan`, `repo`, `org`, `cicd`, `image`, `mobile`, `bucket`, `domain`,
-`jira`, `confluence`. Сетевые команды сохраняют свои обычные требования авторизации.
+`jira`, `confluence`, `agents`. Сетевые команды сохраняют свои обычные требования авторизации.
 `compare`, HTTP worker, MCP и LSP не включают постоянное хранение через этот флаг.
 
 ## Что хранится

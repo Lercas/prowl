@@ -327,6 +327,9 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 			// Mirror confidence/stage for downstream tooling that reads result properties.
 			"properties": map[string]any{"confidence": safeConfidence(f.Confidence), "stage": f.Stage},
 		}
+		if f.Agent != nil {
+			res["properties"].(map[string]any)["agent"] = f.Agent
+		}
 		if f.Git != nil {
 			res["properties"].(map[string]any)["git"] = f.Git
 		}

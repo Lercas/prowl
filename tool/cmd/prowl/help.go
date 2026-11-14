@@ -10,6 +10,8 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"agents", "проверить конфиги и текстовые транскрипты AI-агентов", "prowl agents [PROJECT...] [--agent-home DIR] [--shell-history] [scan flags]"},
+	{"guard", "проверить stdin перед передачей промпта или вызовом инструмента", "prowl guard [--protocol raw|claude|cursor-prompt|cursor-tool] [--max-size BYTES] [--timeout DUR]"},
 	{"index", "локальный индекс: места обнаружения и проверенные состояния", "prowl index --index DIR [--scope NAME] [--format json]"},
 	{"diff", "новые и не наблюдавшиеся секреты между сканами", "prowl diff [FROM TO] --index DIR [--scope NAME] [--format json]"},
 	{"compare", "compare cascade and ML results on a repeatable source", "prowl compare [path...] — compare cascade and portable ML findings"},
