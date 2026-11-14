@@ -42,8 +42,11 @@
   - [x] Чужой флаг отклоняется до чтения источника и записи отчёта; подсказки ограничены командой.
   - [x] Парсер возвращает `error`; единственный `os.Exit` — в `main`, после `runCLI`.
     Явные CLI-дефолты сохраняют приоритет над конфигом. CLI-suite пройден, покрытие — 60,8%.
-- [ ] **Разнести `cmd/prowl/main.go`** (2436 строк) по файлам: `org.go`, `domain.go`,
-  `rules_cmd.go`, `report.go`. Поднять покрытие `cmd/prowl` с 55,6%.
+- [x] **Разнести `cmd/prowl/main.go`**: входная точка и диспетчеризация занимают 98 строк;
+  обработчики вынесены в `org.go`, `domain.go`, `repo.go`, `rules_cmd.go`, `report.go`,
+  `scan_cmd.go`, `serve.go`, `doctor.go`, `setup.go`. Покрытие CLI — 61,0% против 55,6%.
+  CLI race-тесты, vet, lint и 80/80 E2E на Go 1.25 прошли. Help сохраняет описания и
+  подкоманды, а имена и области флагов генерируются из схемы. См. `wiki/Command-Line.md`.
 - [ ] **`scan.Pipeline` вместо длинных сигнатур.** `runPreparedScan` принимает 9 параметров плюс
   variadic `finalize`, `scan.Run` — 8; набор `det, eng, vset, ml, allow, workers` везде ходит
   вместе.

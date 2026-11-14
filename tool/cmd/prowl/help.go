@@ -312,7 +312,7 @@ Examples:
 // helpFor derives the accepted flags from the same schema used by the parser.
 func helpFor(name string) {
 	if name == "" {
-		fmt.Print(usage)
+		fmt.Print(usageText())
 		return
 	}
 	parent, _, nested := strings.Cut(name, ".")
@@ -328,21 +328,29 @@ func helpFor(name string) {
 		} else {
 			fmt.Printf("prowl %s — %s\n", name, command.summary)
 		}
+		if !nested {
+			_, notes, _ := strings.Cut(command.detail, "\n")
+			for _, paragraph := range strings.Split(notes, "\n\n") {
+				manualFlags := false
+				for _, line := range strings.Split(paragraph, "\n") {
+					trimmed := strings.TrimSpace(line)
+					manualFlags = manualFlags || strings.HasPrefix(trimmed, "--") || strings.HasPrefix(trimmed, "-o ") || strings.HasPrefix(trimmed, "+ all scan flags")
+				}
+				if !manualFlags && strings.TrimSpace(paragraph) != "" {
+					fmt.Println("\n" + strings.TrimSpace(paragraph))
+				}
+			}
+		}
+		if children := commandSubcommands[parent]; !nested && len(children) > 0 {
+			fmt.Printf("\nSubcommands: %s\n", strings.Join(children, ", "))
+		}
 		fmt.Println("\nFlags:")
 		fmt.Print(commandFlagHelp(name))
 		fmt.Println("\nUse -- to end flag parsing; use --flag=VALUE for values starting with --.")
-		if !nested {
-			examples := strings.Index(command.detail, "\nExamples:")
-			if examples < 0 {
-				examples = strings.Index(command.detail, "\nExample:")
-			}
-			if examples >= 0 {
-				fmt.Println(command.detail[examples:])
-			}
-		}
+
 		return
 	}
-	fmt.Print(usage)
+	fmt.Print(usageText())
 }
 
 func commandNames() []string {
@@ -403,4 +411,14 @@ func min3(a, b, c int) int {
 		a = c
 	}
 	return a
+}
+
+func usageText() string {
+	var output strings.Builder
+	output.WriteString("prowl — configurable secret scanner\n\nUsage: prowl <command> [flags] [targets]\n\nCommands:\n")
+	for _, command := range commands {
+		fmt.Fprintf(&output, "  %-15s %s\n", command.name, command.summary)
+	}
+	output.WriteString("\nRun 'prowl <command> --help' for accepted flags and examples.\nFlags are command-scoped; -- ends flag parsing.\n")
+	return output.String()
 }

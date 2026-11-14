@@ -1,0 +1,450 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/Lercas/prowl/tool/internal/config"
+	"github.com/Lercas/prowl/tool/internal/detect"
+	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/mlscore"
+	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/ocr"
+	"github.com/Lercas/prowl/tool/internal/rules"
+	"github.com/Lercas/prowl/tool/internal/scan"
+	"github.com/Lercas/prowl/tool/internal/source"
+	"github.com/Lercas/prowl/tool/internal/verify"
+)
+
+func cmdScan(args []string) int {
+	c, rest, err := parseCommand("scan", args)
+	if err != nil {
+		return commandParseError(err)
+	}
+	if code := checkSourceModes(c, rest); code != 0 {
+		return code
+	}
+	ctx, stop := rootContext(c)
+	defer stop()
+	return scanItems(ctx, c, rest)
+}
+
+// cmdCompare shows the false-positive reduction over a regex-only scanner on the user's own tree: it
+// runs the regex/cascade detectors alone, then the same scan with Prowl's ML context filter, and
+// reports how many findings the model suppresses as not-a-secret.
+func cmdCompare(args []string) int {
+	c, rest, err := parseCommand("compare", args)
+	if err != nil {
+		return commandParseError(err)
+	}
+	if code := checkSourceModes(c, rest); code != 0 {
+		return code
+	}
+	if len(rest) == 1 && rest[0] == "-" {
+		fmt.Fprintln(os.Stderr, "compare needs a repeatable source; stdin cannot be scanned twice")
+		return 2
+	}
+	if c.ocrEnabled {
+		fmt.Fprintln(os.Stderr, "compare does not support --ocr: it would OCR every image twice")
+		return 2
+	}
+	ctx, stop := rootContext(c)
+	defer stop()
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
+	setupLogging(c)
+	det, _, err := loadDetector(c, cfg)
+	if err != nil {
+		logx.Error("failed to load detector", "err", err)
+		return 2
+	}
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+
+	// With no explicit mode, compare defaults to the current tree even when stdin is not a TTY.
+	if len(rest) == 0 && !c.staged && c.since == "" && !c.history {
+		rest = []string{"."}
+	}
+
+	// Pass 1: regex/cascade only — the noisy set a regex scanner reports. No ML, no per-file cap.
+	rawC := c
+	rawC.mlEmbed, rawC.mlModel, rawC.mlURL = false, "", ""
+	rawC.verifiedOnly, rawC.maxPerFile = false, 0
+	rawItems, err := scanInput(ctx, c, rest)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	raw := collectFindings(ctx, rawC, cfg, det, eng, nil, rawItems, c.dedupe)
+	if code := failClosedIfIncomplete(ctx, gate(raw, "", false)); code != 0 {
+		return code
+	}
+
+	// Pass 2: the same scan + Prowl's in-process ML context filter (isolated from the per-file cap).
+	mlC := c
+	mlC.mlEmbed = true
+	mlC.verifiedOnly, mlC.maxPerFile = false, 0
+	// compare requires the in-process model — fail closed rather than run cascade-only and report a
+	// misleading "0% suppressed by ML" (e.g. on a nocgo binary or a bad --ml-model).
+	if code := mlC.mlPreflight(); code != 0 {
+		return code
+	}
+	keptItems, err := scanInput(ctx, c, rest)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	kept := collectFindings(ctx, mlC, cfg, det, eng, nil, keptItems, c.dedupe)
+	if code := failClosedIfIncomplete(ctx, gate(kept, "", false)); code != 0 {
+		return code
+	}
+
+	printCompare(raw, kept)
+	return 0
+}
+
+func compareKey(f model.Finding) string {
+	if f.Fingerprint != "" {
+		return f.Fingerprint
+	}
+	return f.Path + "\x00" + f.Type + "\x00" + strconv.Itoa(f.Line)
+}
+
+// printCompare renders the regex-baseline -> Prowl funnel and a breakdown of what the ML suppressed.
+func printCompare(raw, kept []model.Finding) {
+	keptSet := make(map[string]bool, len(kept))
+	for _, f := range kept {
+		keptSet[compareKey(f)] = true
+	}
+	byType := map[string]int{}
+	var sample []model.Finding
+	suppressed := 0
+	for _, f := range raw {
+		if keptSet[compareKey(f)] {
+			continue
+		}
+		suppressed++
+		byType[f.Type]++
+		if len(sample) < 8 {
+			sample = append(sample, f)
+		}
+	}
+	n, m := len(raw), len(kept)
+	pct := 0.0
+	if n > 0 {
+		pct = 100 * float64(suppressed) / float64(n)
+	}
+	fmt.Printf("\nProwl compare — detector candidates vs the ML-confirmed set\n\n")
+	fmt.Printf("  detectors (regex + cascade, no ML):  %6d findings\n", n)
+	fmt.Printf("  after Prowl's ML context filter:     %6d findings\n", m)
+	fmt.Printf("  -----------------------------------------------------\n")
+	fmt.Printf("  suppressed by ML as not-a-secret:    %6d  (%.0f%%)\n", suppressed, pct)
+	fmt.Printf("\n  (the cascade already rejects hashes/UUIDs/placeholders before the ML runs, so the\n")
+	fmt.Printf("   gap vs a raw-regex tool like gitleaks is larger than the ML delta shown here. In a\n")
+	fmt.Printf("   repo with a .gitleaks.toml, those rules are auto-loaded into the baseline above.)\n")
+	if suppressed == 0 {
+		fmt.Printf("\n  The ML kept every candidate here — nothing the cascade surfaced looked like noise.\n\n")
+		return
+	}
+	type tc struct {
+		typ string
+		n   int
+	}
+	tcs := make([]tc, 0, len(byType))
+	for t, c := range byType {
+		tcs = append(tcs, tc{t, c})
+	}
+	sort.Slice(tcs, func(i, j int) bool { return tcs[i].n > tcs[j].n })
+	fmt.Printf("\n  suppressed by detector type (a regex scanner would report these):\n")
+	for i, t := range tcs {
+		if i >= 8 {
+			fmt.Printf("    %6d  … and %d more types\n", 0, len(tcs)-8)
+			break
+		}
+		fmt.Printf("    %6d  %s\n", t.n, logx.SanitizeTerminal(t.typ))
+	}
+	fmt.Printf("\n  examples Prowl silenced:\n")
+	for _, f := range sample {
+		// f.Path/Type/Redacted come from a (possibly hostile) scanned repo — strip terminal escapes.
+		fmt.Printf("    %s:%d  %s  %s\n", logx.SanitizeTerminal(f.Path), f.Line,
+			logx.SanitizeTerminal(f.Type), logx.SanitizeTerminal(f.Redacted))
+	}
+	fmt.Println()
+}
+
+// checkSourceModes rejects mutually-exclusive scan inputs (--staged / --since / --history / '-' stdin /
+// paths) with a clear message instead of letting one silently win.
+func checkSourceModes(c commonFlags, rest []string) int {
+	var modes []string
+	if c.staged {
+		modes = append(modes, "--staged")
+	}
+	if c.since != "" {
+		modes = append(modes, "--since")
+	}
+	if c.history {
+		modes = append(modes, "--history")
+	}
+	if len(rest) == 1 && rest[0] == "-" {
+		modes = append(modes, "- (stdin)")
+	} else if len(rest) > 0 {
+		modes = append(modes, "paths")
+	}
+	if len(modes) > 1 {
+		logx.Error("scan input modes are mutually exclusive — use only one", "given", strings.Join(modes, " + "))
+		return 2
+	}
+	return 0
+}
+
+// scanItems runs the full scan pipeline (config, detector, source, report) for the given roots under
+// the caller's context. It is shared by `scan`, `repo`, and `org` (which clone and scan in ".").
+func scanItems(ctx context.Context, c commonFlags, rest []string) int {
+	return scanItemStream(ctx, c, func(ctx context.Context, c commonFlags) (<-chan model.Item, error) {
+		return scanInput(ctx, c, rest)
+	})
+}
+
+// scanItemStream resolves operator configuration before acquiring a source, keeping relative
+// report/config paths anchored to the caller's directory and applying configured acquisition limits.
+func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Context, commonFlags) (<-chan model.Item, error)) int {
+	if code := c.mlPreflight(); code != 0 {
+		return code
+	}
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
+	setupLogging(c)
+	ocrEngine, err := setupOCR(c)
+	if err != nil {
+		logx.Error("OCR setup failed", "err", err)
+		return 2
+	}
+	if ocrEngine != nil {
+		ctx = source.WithOCR(ctx, ocrEngine)
+		logx.Info("OCR enabled", "model", firstNonEmpty(c.ocrModel, ocr.DefaultModel),
+			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
+			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
+	}
+	det, tax, err := loadDetector(c, cfg)
+	if err != nil {
+		logx.Error("failed to load detector", "err", err)
+		return 2
+	}
+	if len(tax.Skipped) > 0 {
+		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
+	}
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, err := loadVerifySet(c)
+	if err != nil {
+		logx.Error("verify setup failed", "err", err)
+		return 2
+	}
+
+	items, err := acquire(ctx, c)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	code := runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	return finalizeOCR(ocrEngine, code)
+}
+
+// scanInput selects the same source for scan and compare, including Git's staged blob content.
+func scanInput(ctx context.Context, c commonFlags, rest []string) (<-chan model.Item, error) {
+	return scanInputAt(ctx, c, rest, "")
+}
+
+func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir string) (<-chan model.Item, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	switch {
+	case c.staged || c.since != "":
+		mode, rev := "staged", ""
+		if c.since != "" {
+			mode, rev = "since", c.since
+		}
+		files, err := source.GitChangedFilesIn(ctx, repoDir, mode, rev)
+		if err != nil {
+			return nil, err
+		}
+		if len(files) == 0 {
+			logx.Info("no changed files to scan")
+		}
+		if c.staged {
+			return source.GitIndexFilesIn(ctx, repoDir, files, c.exclude, c.maxSize), nil
+		}
+		return source.GitWorktreeFilesIn(ctx, repoDir, files, c.exclude, c.maxSize), nil
+	case c.history:
+		if !source.IsGitRepo(repoDir) { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
+			return nil, fmt.Errorf("--history needs a git repository, but this is not one")
+		}
+		return source.GitHistoryBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
+	case len(rest) == 1 && rest[0] == "-":
+		return source.StdinLimited(ctx, c.maxSize), nil
+	case len(rest) == 0 && !isTTY(os.Stdin):
+		return source.StdinLimited(ctx, c.maxSize), nil // input is piped and no path was given — read stdin
+	default:
+		roots := rest
+		if len(roots) == 0 {
+			roots = []string{"."}
+		}
+		// The source emits per-root diagnostics so one missing root preserves the others' findings.
+		return source.Filesystem(ctx, roots, c.exclude, c.maxSize), nil
+	}
+}
+
+func setupOCR(c commonFlags) (*ocr.Engine, error) {
+	if !c.ocrEnabled {
+		return nil, nil
+	}
+	return ocr.New(ocr.Config{
+		URL:         c.ocrURL,
+		Model:       c.ocrModel,
+		APIKey:      os.Getenv("PROWL_OCR_API_KEY"),
+		AllowRemote: c.ocrAllowRemote,
+		AllPDFPages: c.ocrAllPages,
+		MaxPDFPages: c.ocrMaxPages,
+		Timeout:     c.ocrTimeout,
+	})
+}
+
+func rejectUnsupportedOCR(c commonFlags, command string) int {
+	if !c.ocrEnabled {
+		return 0
+	}
+	fmt.Fprintf(os.Stderr, "%s does not support --ocr; use scan, repo, or org\n", command)
+	return 2
+}
+
+func finalizeOCR(engine *ocr.Engine, code int) int {
+	if engine == nil {
+		return code
+	}
+	stats := engine.Stats()
+	logx.Info("OCR complete", "calls", stats.Calls, "empty", stats.Empty,
+		"failures", stats.Failures, "skipped", stats.Skipped)
+	if stats.Failures > 0 || stats.Skipped > 0 {
+		logx.Error("OCR coverage incomplete — failing closed", "failures", stats.Failures,
+			"skipped", stats.Skipped)
+		return 2
+	}
+	return code
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+// runPreparedScan consumes an item stream using the detector, rules and verifiers loaded by the caller.
+func runPreparedScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool, finalize ...func([]model.Finding) []model.Finding) int {
+	start := time.Now()
+	collectFlags := c
+	collectDedupe := dedupe
+	if len(finalize) > 0 {
+		// Final-image provenance must be known before selecting a duplicate or capping occurrences.
+		collectFlags.maxPerFile = 0
+		collectDedupe = false
+	}
+	findings := collectFindings(ctx, collectFlags, cfg, det, eng, vset, items, collectDedupe)
+	for _, fz := range finalize { // image scans pass a final-FS marker; other sources pass nothing
+		findings = fz(findings)
+	}
+	if len(finalize) > 0 {
+		if dedupe {
+			findings = dedupeFingerprints(findings)
+		}
+		findings = capGenericPerFile(findings, c.maxPerFile)
+	}
+	return reportScan(ctx, c, findings, time.Since(start))
+}
+
+// failClosedIfIncomplete raises a clean exit to non-zero when the scan didn't finish (timeout or
+// signal): an incomplete scan can't certify "no secrets". Partial results are still written.
+func failClosedIfIncomplete(ctx context.Context, code int) int {
+	if ctx.Err() != nil {
+		logx.Error("scan did not complete (timeout/interrupt) — failing closed; partial results may miss secrets")
+		return 2
+	}
+	return code
+}
+
+// mlPreflight fails closed: if --ml/--ml-model was requested but can't load (a nocgo binary, a bad
+// --ml-model path), abort rather than return cascade-only results that look ML-filtered.
+func (c *commonFlags) mlPreflight() int {
+	if !c.mlEmbed && c.mlModel == "" {
+		c.mlPrepared = nil
+		return 0
+	}
+	if c.mlPrepared != nil && c.mlPreparedPath == c.mlModel {
+		return 0
+	}
+	c.mlPrepared = nil
+	prepared, err := mlscore.NewEmbedded(c.mlThreshold, c.mlModel)
+	if err != nil {
+		logx.Error("ml: --ml was requested but the model cannot load — aborting rather than silently "+
+			"scanning without the ML stage", "err", err)
+		return 2
+	}
+	c.mlPrepared, c.mlPreparedPath = prepared, c.mlModel
+	return 0
+}
+
+// mlScorer builds the L2 ML scorer: the in-process model (--ml), the sidecar (--ml-url), or nil.
+func (c commonFlags) mlScorer() (mlscore.Scorer, error) {
+	switch {
+	case c.mlEmbed || c.mlModel != "":
+		if c.mlPrepared == nil || c.mlPreparedPath != c.mlModel {
+			return nil, fmt.Errorf("in-process ML model has not passed preflight for the selected model")
+		}
+		return c.mlPrepared.WithThreshold(c.mlThreshold), nil
+	case c.mlURL != "":
+		return mlscore.New(c.mlURL, c.mlThreshold), nil
+	default:
+		return nil, nil
+	}
+}
+
+// collectFindings runs the detector + rule engine (+ optional live-verification) over an item stream,
+// applying --verified-only and (for image scans) fingerprint dedupe. The "scan" half of runScan; org
+// calls it once per repo on a worker pool.
+func collectFindings(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool) []model.Finding {
+	ml, mlErr := c.mlScorer()
+	findings := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, ml)
+	if mlErr != nil {
+		logx.Error("ML setup failed; scan results are incomplete", "err", mlErr)
+		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
+			Path: "scan", Stage: "ML setup", Rationale: "requested ML model was not prepared; scan results are incomplete"})
+	}
+	if c.verifiedOnly {
+		findings = keepVerified(findings)
+	}
+	if dedupe {
+		findings = dedupeFingerprints(findings)
+	}
+	findings = capGenericPerFile(findings, c.maxPerFile)
+	return findings
+}

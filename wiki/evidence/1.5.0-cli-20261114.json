@@ -1,0 +1,31 @@
+{
+  "scope": "CLI parser and source refactor; no publication",
+  "source_head": "954cc7c302e89141ce4825ac07cbd0e3d15dbc89",
+  "source_worktree": "CLI refactor plus concurrent detector changes",
+  "parser_commit": "954cc7c",
+  "main_go_lines": 98,
+  "cli_statement_coverage_percent": 61.0,
+  "validation": {
+    "full_go_suite": "go test -p 2 ./... passed before final help-only adjustments",
+    "final_cli_race": "go test -race ./cmd/prowl passed",
+    "vet": "passed",
+    "golangci_lint": "0 issues",
+    "e2e": {
+      "go": "go1.25.14",
+      "passed": 80,
+      "failed": 0
+    },
+    "release_style_static_build": "go1.25.14 CGO_ENABLED=0 passed",
+    "static_ml_smoke": "typed finding, masked output and legacy-model rejection passed"
+  },
+  "contracts": [
+    "command-scoped and subcommand-scoped flag validation",
+    "foreign flags rejected before acquisition or report write",
+    "explicit false authorization retained; invalid booleans rejected",
+    "repeatable CSV options and last-wins scalar options",
+    "end-of-flags separator and inline values",
+    "explicit defaults override operator configuration",
+    "single os.Exit after runCLI returns",
+    "canonical generated flag help with retained command descriptions"
+  ]
+}

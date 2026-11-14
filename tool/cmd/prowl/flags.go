@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
@@ -128,8 +129,16 @@ func enumFlag(name, commands, description string, allowed []string, field func(*
 }
 
 const scanCommands = "scan compare repo org cicd image mobile bucket domain jira confluence"
+
 const detectorCommands = scanCommands + " serve doctor"
+
 const ocrCommands = "scan compare repo org"
+
+var commandSubcommands = map[string][]string{
+	"rules":     {"list", "show", "test", "search", "validate", "stats", "update", "manifest", "export"},
+	"verifiers": {"list", "validate", "update", "manifest"},
+	"config":    {"validate"},
+}
 
 var cliFlags = []flagSpec{
 	boolFlag("--help -h", "*", "show this command's flags and examples", func(c *commonFlags) *bool { return &c.cmd.help }),
@@ -289,14 +298,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 			c.cmd.sub, args = args[0], args[1:]
 		}
 		command += "." + c.cmd.sub
-		subcommands := map[string][]string{
-			"rules":     {"list", "show", "test", "search", "validate", "stats", "update", "manifest", "export"},
-			"verifiers": {"list", "validate", "update", "manifest"},
-			"config":    {"validate"},
-		}
 		parent, _, _ := strings.Cut(command, ".")
 		valid := false
-		for _, sub := range subcommands[parent] {
+		for _, sub := range commandSubcommands[parent] {
 			valid = valid || sub == c.cmd.sub
 		}
 		if !valid {
@@ -407,8 +411,12 @@ func commandFlagHelp(command string) string {
 	var output strings.Builder
 	for _, flag := range cliFlags {
 		applies := flag.applies(command)
+		var scopes []string
 		for _, scope := range flag.commands {
 			applies = applies || strings.HasPrefix(scope, command+".")
+			if strings.HasPrefix(scope, command+".") {
+				scopes = append(scopes, strings.ReplaceAll(scope, ".", " "))
+			}
 		}
 		if !applies {
 			continue
@@ -417,7 +425,94 @@ func commandFlagHelp(command string) string {
 		if flag.value != "" {
 			label += " " + flag.value
 		}
-		fmt.Fprintf(&output, "  %-34s %s\n", label, flag.description)
+		description := flag.description
+		if !flag.applies(command) && len(scopes) > 0 {
+			description += " [" + strings.Join(scopes, ", ") + "]"
+		}
+		fmt.Fprintf(&output, "  %-34s %s\n", label, description)
 	}
 	return output.String()
+}
+
+func splitCSV(s string) []string {
+	if s == "" {
+		return nil
+	}
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+type commonFlags struct {
+	cmd                                      commandOptions
+	explicitFlags                            map[string]bool // immutable after parsing; explicit defaults override configuration
+	format, failOn, taxonomy, config, output string
+	since, baseline, writeBaseline           string
+	logFormat, logLevel                      string
+	staged, history                          bool
+	silence, quiet, verbose, noColor         bool
+	rulesOnly                                bool
+	noAutoConfig                             bool              // repo/org: don't honor the scanned tree's own .prowl.yaml
+	dedupe                                   bool              // collapse the same secret found repeatedly in one file (default on)
+	maxPerFile                               int               // cap generic findings per file (data-file guard; 0 = off)
+	mlEmbed                                  bool              // run the L2 model in-process (embedded), no sidecar
+	mlModel                                  string            // load the in-process model from this file (implies --ml)
+	mlURL                                    string            // ML sidecar URL for the L2 secret/not-secret stage (off if empty)
+	mlThreshold                              float64           // drop a non-checksum finding the ML scores below this
+	mlThresholdSet                           bool              // user passed --ml-threshold (so config must not override it)
+	mlPrepared                               *mlscore.Embedded // immutable model snapshot from early preflight
+	mlPreparedPath                           string            // selector that produced the snapshot
+	minConfidence                            float64           // report-time: drop findings below this confidence (0 = off)
+	minSeverity                              string            // report-time: drop findings below this severity (incl. built-ins)
+	disable                                  string            // report-time: comma-separated detector types to drop
+	rules                                    []string
+	rulesDir                                 []string
+	tags, excludeTags, ruleSeverity          string
+	verify, verifiedOnly                     bool
+	showSecrets                              bool // --show-secrets: emit the full unredacted value
+	failOnVerified                           bool // gate (exit 1) only on a provider-confirmed-LIVE secret
+	verifiers                                []string
+	verifyTimeout                            time.Duration
+	exclude                                  []string
+	maxSize                                  int64
+	workers                                  int
+	timeout                                  time.Duration
+	imageInput                               string // force the image source kind: ref|tar|oci-dir|stdin (empty = auto)
+	ocrEnabled                               bool
+	ocrURL, ocrModel                         string
+	ocrAllowRemote, ocrAllPages              bool
+	ocrMaxPages                              int
+	ocrTimeout                               time.Duration
+}
+
+// parseByteSize parses a byte size: a plain integer, or an integer with a KB/MB/GB (or K/M/G, optional
+// trailing B) base-1024 suffix, case-insensitive. It rejects trailing garbage (fmt.Sscan would
+// partial-parse "10MB" to 10 bytes, skipping every file and exiting 0).
+func parseByteSize(s string) (int64, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0, fmt.Errorf("empty")
+	}
+	mult := int64(1)
+	for _, u := range []struct { // longest suffix first so "KB" wins over a trailing "B"
+		suf string
+		m   int64
+	}{{"KB", 1 << 10}, {"MB", 1 << 20}, {"GB", 1 << 30}, {"K", 1 << 10}, {"M", 1 << 20}, {"G", 1 << 30}, {"B", 1}} {
+		if len(s) >= len(u.suf) && strings.EqualFold(s[len(s)-len(u.suf):], u.suf) {
+			mult, s = u.m, strings.TrimSpace(s[:len(s)-len(u.suf)])
+			break
+		}
+	}
+	n, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	if n < 0 || (mult > 1 && n > math.MaxInt64/mult) {
+		return 0, fmt.Errorf("size out of range")
+	}
+	return n * mult, nil
 }
