@@ -10,9 +10,9 @@ import (
 // mlPasswordCues are multilingual credential cue roots (lowercased) that flag a nearby token as a
 // likely password without an adjacent `=`/`:` anchor.
 var mlPasswordCues = []string{
-	"password", "passphrase", "passwort", "pwd", "kennwort", "mot de passe", "motdepasse", "contraseña", "contrasena", "wachtwoord",
+	"password", "passwd", "passphrase", "passwort", "pwd", "kennwort", "mot de passe", "motdepasse", "contraseña", "contrasena", "wachtwoord",
 	"salasana", "lösenord", "adgangskode", "geslo", "heslo", "пароль", "geheim",
-	"senha", "parola", "mdp", "credential", "zugangsdaten",
+	"senha", "parola", "mdp", "credential", "zugangsdaten", "パスワード", "密码", "密碼",
 }
 
 var passwordCueRE = regexp.MustCompile(`(?i)(?:` + strings.Join(mlPasswordCues, "|") + `)`)
@@ -26,8 +26,8 @@ var passwordConnectives = map[string]bool{
 	"это": true, "будет": true, "стенда": true,
 }
 
-var contextualAssignment = regexp.MustCompile(`(?:^|[^\pL\pN_])([\pL\pN_]+)=([A-Za-z0-9!@#$%^&*_+.=\-]{8,24})(?:$|[^A-Za-z0-9!@#$%^&*_+.=\-])`)
-var reversePassword = regexp.MustCompile(`(?i)([A-Za-z0-9!@#$%^&*_+.=\-]{8,24})\s+is\s+the\s+password\b`)
+var contextualAssignment = regexp.MustCompile(`(?:^|[^\pL\pN_])([\pL\pN_]+)=([A-Za-z0-9!@#$%^&*_+.=\-]{8,64})(?:$|[^A-Za-z0-9!@#$%^&*_+.=\-])`)
+var reversePassword = regexp.MustCompile(`(?i)(?:^|[^A-Za-z0-9!@#$%^&*_+.=\-])([A-Za-z0-9!@#$%^&*_+.=\-]{8,64})\s+is\s+the\s+password\b`)
 
 func cueWordBoundary(line string, start, end int) bool {
 	word := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' }
@@ -47,7 +47,7 @@ func cueWordBoundary(line string, start, end int) bool {
 }
 
 func isLikelyPasswordToken(t string) bool {
-	if len(t) < 8 || len(t) > 24 {
+	if len(t) < 8 || len(t) > 64 {
 		return false
 	}
 	var lo, dg bool
@@ -61,7 +61,12 @@ func isLikelyPasswordToken(t string) bool {
 			return false // a path or ref (vault:…, http://…), not a password
 		}
 	}
-	if !dg || !lo { // require both a digit and a lowercase letter
+	if !lo {
+		return false
+	}
+	// Generated alphabetic passwords are valid credentials too. Require a long, densely
+	// mixed-case run to distinguish them from ordinary prose and code identifiers.
+	if !dg && !(len(t) >= 12 && partIsRandom(t) && classSwitchRate(t) >= .45 && ShannonEntropy(t) >= 3.5) {
 		return false
 	}
 	if IsExampleOrPlaceholder(t) || isVersionOrNumber(t) || isHexRun(t) || looksLikeIdentifier(t) || looksLikeJSCode(t) {
@@ -180,10 +185,31 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 		lineStart = i + 1
 		beforeCount := len(out)
 		for _, cue := range passwordCueRE.FindAllStringIndex(line, maxScanMatches) {
-			if !cueWordBoundary(line, cue[0], cue[1]) && !cueEndsIdentifier(line, cue[0], cue[1]) {
-				continue
-			}
 			j := cue[1]
+			switch line[cue[0]:cue[1]] {
+			case "パスワード", "密码", "密碼":
+				// CJK prose has no word-spacing boundary. Require its value-introducing
+				// particle instead, so cryptography terms such as 密码学 are not cues.
+				tail := strings.TrimLeft(line[j:], " \t")
+				matched := false
+				for _, particle := range []string{"は", "是", "为", "為", ":", "：", "="} {
+					if strings.HasPrefix(tail, particle) {
+						j += len(line[j:]) - len(tail) + len(particle)
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					continue
+				}
+			default:
+				if !cueWordBoundary(line, cue[0], cue[1]) && !cueEndsIdentifier(line, cue[0], cue[1]) {
+					continue
+				}
+			}
+			if strings.HasPrefix(strings.TrimLeft(line[j:], " \t"), "- ") {
+				j += len(line[j:]) - len(strings.TrimLeft(line[j:], " \t")) + 2
+			}
 			freeWords := 0
 			for words := 0; words < 6 && j < len(line) && j-cue[1] < 96; words++ {
 				j += skipCueSeparators(line[j:], words == 0)
@@ -193,7 +219,7 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 				}
 				// Unicode connectives are words too ("für", "сервиса"); byte offsets always refer to
 				// the original source. An ASCII run continues only into letters, never out of a value.
-				for k < len(line) && line[k] >= utf8.RuneSelf {
+				for k < len(line) && line[k] >= utf8.RuneSelf && (k == j || isProseWord(line[j:k])) {
 					r, n := utf8.DecodeRuneInString(line[k:])
 					if !unicode.IsLetter(r) {
 						break

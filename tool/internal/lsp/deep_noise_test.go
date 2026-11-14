@@ -19,7 +19,7 @@ func TestEditorNoiseCorporaAndExactSourceRanges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, fixture := range []string{"noise-1.4.0.json", "noise-deep-1.4.0.json"} {
+	for _, fixture := range []string{"noise-1.4.0.json", "noise-deep-1.4.0.json", "noise-prose-1.5.0.json"} {
 		raw, err := os.ReadFile("testdata/" + fixture)
 		if err != nil {
 			t.Fatal(err)

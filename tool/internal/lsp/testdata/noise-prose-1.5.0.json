@@ -1,0 +1,192 @@
+[
+  {
+    "name": "prose-v2-long",
+    "path": "production.md",
+    "text": "🔐 The password is Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz.",
+    "truth": "positive",
+    "value": "Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-letters",
+    "path": "production.md",
+    "text": "Your password is qMnRpTvKxNcWbYsFhLaDzGuE.",
+    "truth": "positive",
+    "value": "qMnRpTvKxNcWbYsFhLaDzGuE",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-passwd",
+    "path": "production.md",
+    "text": "Le passwd actuel est Cedar286.",
+    "truth": "positive",
+    "value": "Cedar286",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-dash",
+    "path": "production.md",
+    "text": "Passwort - Cedar286 und weitere Angaben.",
+    "truth": "positive",
+    "value": "Cedar286",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-zh",
+    "path": "production.md",
+    "text": "他的密码是Cedar286。",
+    "truth": "positive",
+    "value": "Cedar286",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-traditional",
+    "path": "production.md",
+    "text": "密碼：Cedar286。",
+    "truth": "positive",
+    "value": "Cedar286",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-ja",
+    "path": "production.md",
+    "text": "パスワードはCedar286です。",
+    "truth": "positive",
+    "value": "Cedar286",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-api-label",
+    "path": "production.md",
+    "text": "🔐 The api_key used for authentication is Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz.",
+    "truth": "positive",
+    "value": "Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz",
+    "types": [
+      "generic_high_entropy"
+    ]
+  },
+  {
+    "name": "prose-v2-markdown",
+    "path": "production.md",
+    "text": "**API Key**: Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz",
+    "truth": "positive",
+    "value": "Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz",
+    "types": [
+      "generic_high_entropy"
+    ]
+  },
+  {
+    "name": "prose-v2-api-short",
+    "path": "production.md",
+    "text": "The api_key is Q7mR3vK8pT2xN6cW4bY9.",
+    "truth": "positive",
+    "value": "Q7mR3vK8pT2xN6cW4bY9",
+    "types": [
+      "generic_api_key"
+    ]
+  },
+  {
+    "name": "prose-v2-reverse",
+    "path": "production.md",
+    "text": "Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz is the password",
+    "truth": "positive",
+    "value": "Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz",
+    "types": [
+      "generic_password"
+    ]
+  },
+  {
+    "name": "prose-v2-negative-0",
+    "path": "production.md",
+    "text": "The api_key was rotated yesterday and the build is now Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-1",
+    "path": "production.md",
+    "text": "The public_key is Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-2",
+    "path": "production.md",
+    "text": "The tokenId is Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-3",
+    "path": "production.md",
+    "text": "The sort_key is Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-4",
+    "path": "production.md",
+    "text": "The token_ttl is Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-5",
+    "path": "production.md",
+    "text": "The api_key used for authentication. The build is Q7mR3vK8pT2xN6cW4bY9",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-6",
+    "path": "production.md",
+    "text": "密码学讨论 Cedar286",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-7",
+    "path": "production.md",
+    "text": "密码长度 Cedar286",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-8",
+    "path": "production.md",
+    "text": "パスワードの長さ Cedar286",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  },
+  {
+    "name": "prose-v2-negative-9",
+    "path": "production.md",
+    "text": "Your password is ThisIsAnOrdinaryPropertyName.",
+    "truth": "negative",
+    "value": null,
+    "types": []
+  }
+]

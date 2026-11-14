@@ -39,13 +39,15 @@ var (
 	reNamedKey = regexp.MustCompile("(?i)((?:token|secret|api[_\\- ]?key|apikey|key|credential)[A-Za-z0-9_\\-]*)" +
 		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*" +
 		"(?:[bru]?\"([^\"\\s]{16,200})\"|[bru]?'([^'\\s]{16,200})'|`([^`\\s]{16,200})`|([A-Za-z0-9_\\-+/=.]{16,200}))")
+	// 1 = a generated key in a bounded, explicit prose binding.
+	reProseKey = regexp.MustCompile("(?i)(?:api[_\\- ]?key|apikey|[A-Za-z0-9_]*_key|[A-Za-z0-9_]*secret|[A-Za-z0-9_]*token)[A-Za-z0-9_]*(?:\\*\\*)?[\"'`]?(?:[ \\t]+(?:is|was|equals|lautet|ist|est|actuel|actual|atual|é|è|es|to|now|used|for|authentication|access)){0,4}[ \\t]*(?:[(:（：]|[—–-][ \\t]+|[ \\t]+)[ \\t]*[\"'`(]?([A-Za-z0-9_\\-+/=.]{16,200})")
 	// 1 = base64 credentials after the Basic scheme.
 	reBasicScheme = regexp.MustCompile(`(?i)\bbasic\s+([A-Za-z0-9+/]{8,512}={0,2})`)
 	// 1 = what follows the cue in the name, 2 = double-quoted value, 3 = single-quoted value.
 	reQuotedPassword = regexp.MustCompile("(?i)(?:pass(?:word|wd|phrase)?|pwd)([A-Za-z0-9_]{0,24})" +
 		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*[bru]?(?:\"([^\"\\s]{6,64})\"|'([^'\\s]{6,64})')")
 
-	namedBuiltins = []*regexp.Regexp{reNamedKey, reBasicScheme, reQuotedPassword, reComparisonRight, reComparisonLeft}
+	namedBuiltins = []*regexp.Regexp{reNamedKey, reBasicScheme, reQuotedPassword, reComparisonRight, reComparisonLeft, reProseKey}
 )
 
 // nonSecretNameParts mark a name that holds a description of a secret rather than the secret: a
@@ -287,7 +289,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 	hasBasic := strings.Contains(lower, "basic")
 	hasPass := strings.Contains(lower, "pass") || strings.Contains(lower, "pw")
 	wantComparison := d.genericKey && hasKey || d.genericPwd && hasPass
-	want := []bool{d.genericKey && hasKey, d.basicAuth && hasBasic, d.genericPwd && hasPass, wantComparison, wantComparison}
+	want := []bool{d.genericKey && hasKey, d.basicAuth && hasBasic, d.genericPwd && hasPass, wantComparison, wantComparison, d.genericKey && hasKey}
 	if !want[0] && !want[1] && !want[2] {
 		return nil, false
 	}
@@ -332,6 +334,26 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			}
 			out = append(out, Match{Type: "generic_api_key", Value: val, Start: vs, End: vs + len(val),
 				Confidence: 0.6, Category: d.genericKeyCat, Stage: stageContextKey})
+		}
+	}
+	if want[5] {
+		for _, ix := range indices(5, reProseKey) {
+			if full() {
+				break
+			}
+			vs, ve := ix[2], ix[3]
+			// A length ceiling or unsupported token suffix must not mint a prefix identity.
+			if ve < len(text) && (isTokenChar(text[ve]) || text[ve] == '/') {
+				continue
+			}
+			val := strings.TrimRight(text[vs:ve], ".=")
+			name := proseSecretName(lineBefore(text, vs))
+			ok, hexOnly := nameIsSecretLike(name)
+			// Keep the existing entropy type/identity for the long base64-shaped prose path.
+			if BindingName(text, vs) != "" || !ok || !namedKeyValueOK(val, hexOnly) || d.genericEntropy && len(val) >= 32 && !strings.ContainsAny(val, "_-") {
+				continue
+			}
+			out = append(out, Match{Type: "generic_api_key", Value: val, Start: vs, End: vs + len(val), Confidence: .6, Category: d.genericKeyCat, Stage: stageContextKey, ContextName: name})
 		}
 	}
 	if want[1] {

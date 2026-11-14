@@ -78,13 +78,14 @@ type compiledType struct {
 
 // Detector runs the taxonomy L1 layer (regex + checksum + entropy + example filter).
 type Detector struct {
-	types       []compiledType
-	allKW       []string
-	ac          *ahocorasick.Matcher
-	cueIdx      []int // indices in allKW of the multilingual password cues
-	presentPool sync.Pool
-	lowerPool   sync.Pool
-	genericPwd  bool // taxonomy declares generic_password — gates the contextual-password builtin
+	types          []compiledType
+	allKW          []string
+	ac             *ahocorasick.Matcher
+	cueIdx         []int // indices in allKW of the multilingual password cues
+	presentPool    sync.Pool
+	lowerPool      sync.Pool
+	genericEntropy bool // preserve the entropy type when the taxonomy declares that path
+	genericPwd     bool // taxonomy declares generic_password — gates the contextual-password builtin
 	// basicAuth: taxonomy declares basic_auth_header — gates the encoded user:password builtin.
 	basicAuth    bool
 	basicAuthCat string
@@ -128,6 +129,9 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 			idx = append(idx, id)
 		}
 		d.types[i] = compiledType{st: st, kws: kws, kwIdx: idx, pf: structuralPrefilter[st.ID]}
+		if st.ID == "generic_high_entropy" {
+			d.genericEntropy = true
+		}
 		if st.ID == "generic_password" {
 			d.genericPwd = true
 		}
@@ -459,8 +463,12 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				if !HasSecretNameContext(text, r[0]) { // require a secret-like name nearby
 					continue
 				}
+				name := ""
+				if BindingName(text, r[0]) == "" {
+					name = proseSecretName(lineBefore(text, r[0]))
+				}
 				all = append(all, Match{Type: st.ID, Value: val, Start: r[0], End: r[1],
-					Confidence: 0.55, Category: st.Category, Stage: "L1-entropy"})
+					Confidence: 0.55, Category: st.Category, Stage: "L1-entropy", ContextName: name})
 			}
 			continue
 		}

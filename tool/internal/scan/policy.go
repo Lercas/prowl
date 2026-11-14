@@ -7,7 +7,7 @@ import (
 )
 
 // DetectionRevision changes when source interpretation or suppression semantics change.
-const DetectionRevision = "1.5.0-source-noise-v1"
+const DetectionRevision = "1.5.0-prose-credentials-v2"
 
 // Capabilities reports configured stages; request fields cannot change this snapshot.
 func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {

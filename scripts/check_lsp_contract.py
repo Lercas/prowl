@@ -92,7 +92,7 @@ def main():
         check('initialize', msg.get('id') == 1 and msg['result']['capabilities']['textDocumentSync']['change'] == 1)
         send('initialized', {})
         corpus_counts = {'positive': 0, 'negative': 0, 'ambiguous': 0}
-        for fixture in ('noise-1.4.0.json', 'noise-deep-1.4.0.json'):
+        for fixture in ('noise-1.4.0.json', 'noise-deep-1.4.0.json', 'noise-prose-1.5.0.json'):
             for i, case in enumerate(json.loads((repo / 'tool/internal/lsp/testdata' / fixture).read_text())):
                 truth = case['truth']
                 corpus_counts[truth] += 1
