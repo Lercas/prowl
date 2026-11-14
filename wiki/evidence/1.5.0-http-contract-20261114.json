@@ -16,7 +16,8 @@
     "bounded batch materialization",
     "active taxonomy and rules policy digests",
     "cancelled empty batch cannot certify completeness",
-    "effective extractor groups participate in rules policy digest"
+    "effective extractor groups participate in rules policy digest",
+    "policy encoding errors cannot certify even an empty batch"
   ],
   "limits": [
     "CLI serve keeps L1/rules only; Go API capabilities reflect its configured Pipeline",
@@ -582,5 +583,21 @@
         "passed": true
       }
     ]
+  },
+  "main_integration": {
+    "source_commits": [
+      "0856d3c",
+      "a5d5db9",
+      "e15a643"
+    ],
+    "full_go_suite_final_passed": true,
+    "lint_final_passed": true,
+    "native_passed": 57,
+    "native_total": 57,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-http-native-57gyh3ah/qualification.json",
+    "native_binary_sha256": "7ed070b79e1e15528d330c22c3445ca229e18df6cd2ac3d56b30dff281ffedd4",
+    "final_policy_race_server_and_rules_passed": true,
+    "final_policy_minimum_go_1_26_11_passed": true,
+    "working_copy": "existing uncommitted CLI work retained"
   }
 }
