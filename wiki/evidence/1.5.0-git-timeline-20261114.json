@@ -1,0 +1,257 @@
+{
+  "scope": "Opt-in --git-timeline for scan/repo/org; per-path detection-observation lifecycle over all reachable commits, with first-parent edges and frozen HEAD",
+  "candidate_commit": "7751d452ae757a21e7b83fdb25c0b1f37df0936f",
+  "reference_commit": "034e99ab9d356a6b98ec64075b5e29d62e7af20e",
+  "source_isolation": "Clean parent export plus explicit feature manifest; unrelated uncommitted decode.go and chance-header test excluded and preserved",
+  "qualified_file_manifest": [
+    {
+      "path": "tool/cmd/prowl/flags.go",
+      "sha256": "b95cc7e508f5043a385bd46af14ff47266d88534e25225156e51b7a828bb5ba3"
+    },
+    {
+      "path": "tool/cmd/prowl/prepared_scan.go",
+      "sha256": "538a649a9aa21488ef80bfc9d8b54d80873598295b8b0b32c44bd39c40d4cba7"
+    },
+    {
+      "path": "tool/cmd/prowl/scan_cmd.go",
+      "sha256": "9c8d99a3166d4e01a80b0e7c8fb7c2dabda20db0610f4d2afd3d93e78798dde9"
+    },
+    {
+      "path": "tool/internal/model/model.go",
+      "sha256": "11b802d12c146ab2f57a30a4872c2274a8c53d3a4fcd6629ce402f4b0658732d"
+    },
+    {
+      "path": "tool/internal/report/report.go",
+      "sha256": "322f9b0cf5bcba56ffee81f6a34369f14b01b508f456e90c7db8997a8626f5dc"
+    },
+    {
+      "path": "tool/internal/scan/scan.go",
+      "sha256": "ea27e9020af05746878b6ed141bd5b423e9fda109d1aa9a01376b90035bc1d01"
+    },
+    {
+      "path": "tool/cmd/prowl/org.go",
+      "sha256": "1c7cbf926c5342c0bdda07dfcbee29f0ac4420c60199a1f5c3e7b580cb10fb20"
+    },
+    {
+      "path": "tool/cmd/prowl/source_paths.go",
+      "sha256": "e6a08c66aed56131d143a6d9c8ac0da061ffcd46b4d1b2f8dc7fd1483c4c6f5e"
+    },
+    {
+      "path": "wiki/Command-Line.md",
+      "sha256": "4325424192955f7692ab92e517e3f713f46246eb3ae4544af16f70dd3714337c"
+    },
+    {
+      "path": "TODO.md",
+      "sha256": "a453284d351e27dd923d53e795809d26503b096a2558f508ea100e319d064f8b"
+    },
+    {
+      "path": "tool/internal/model/git.go",
+      "sha256": "a0ecd0b0de75be8c88506cca0f62a773c86f56cc2c9ba7772630cbe9c7963498"
+    },
+    {
+      "path": "tool/internal/source/git_timeline.go",
+      "sha256": "dc5cf318477665f025d34a4a728843e4591f2a1af482a9508de7471d9e72b784"
+    },
+    {
+      "path": "tool/internal/source/git_timeline_test.go",
+      "sha256": "0f7f4504fc81cfeb3ef422fe911845120b18a2505aeadeb99c1d4d9447232133"
+    },
+    {
+      "path": "tool/internal/scan/git_timeline.go",
+      "sha256": "86be83c0f28b14a63355e6cd08959602b4f9d0a667bd4c6e7d720130f94db100"
+    },
+    {
+      "path": "tool/internal/scan/git_timeline_test.go",
+      "sha256": "19ce5cfd747d01313c44230709cdfafd3177f77588a2b48aed6f8516ac9b71e9"
+    },
+    {
+      "path": "tool/cmd/prowl/git_timeline_test.go",
+      "sha256": "7131d9ca4adc42ac44e463a70a340b67f579ea741a56b99d51135197fb44a1a1"
+    },
+    {
+      "path": "tool/internal/report/git_timeline_test.go",
+      "sha256": "52cb86f01fd7726dd1478104232fea7f48ed83fb361152126cec62ae86a502a4"
+    },
+    {
+      "path": "wiki/Git-Timeline.md",
+      "sha256": "39d6c5f486dde0ef333202af4cb9a5837e677b0278efec95c71dd7c4c39a913b"
+    }
+  ],
+  "limits": {
+    "commits": 10000,
+    "path_change_records": 1000000,
+    "graph_metadata_bytes": 67108864,
+    "candidate_observations": 1000000,
+    "finding_commit_steps": 10000000,
+    "blob_bytes": "existing explicit --max-size"
+  },
+  "validation": {
+    "full_go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test ./... passed before final raw-diff framing/object-identity guards; final focused source/scan/CLI/report tests and lint passed after guards",
+    "race": "Go1.27.4 focused native source/scan/CLI GitTimeline and TimelineRaw tests passed, repeated on final source",
+    "minimum_go": "Go1.26.11 CGO_ENABLED=0 focused source/scan/CLI/report tests passed, repeated on final source",
+    "lint": "golangci-lint v2.15.0: zero issues in model/source/scan/report/cmd-prowl",
+    "native_end_to_end": {
+      "exit": 0,
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-git-native-e2e-j601eykq",
+      "report_sha256": "d87ddd33c091c6aea69b3732d63df53c1244c810036dcc75db83b24328620bd1",
+      "complete": true,
+      "in_head": false,
+      "appearances": 1,
+      "removals": 1,
+      "index_enabled": true,
+      "no_raw_value_in_report_or_sqlite": true
+    },
+    "native_binary_sha256": "0efc6b48942642502f785cd37c36db90dab9f718d1e9d3152f7107def36c86a4",
+    "prowlbench_subset": {
+      "run": {
+        "exit": 0,
+        "stdout": "Retained fixture: /var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-498jduec\nProwlBench(subset): recall=0.768 (1608/2094) T4-FP=0.062 (61/982)\n  OK vs baseline (recall 0.747, T4-FP 0.058)\n",
+        "stderr": ""
+      },
+      "secret_hits": 1608,
+      "secret_total": 2094,
+      "false_positive_files": 61,
+      "negative_total": 982,
+      "unchanged_from_reference": true,
+      "baseline_unchanged": true,
+      "thresholds_unchanged": true,
+      "profile": "Empty temporary PROWL_HOME, bundled rules, native CGO0 binary; only harness fixture cleanup disabled"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9815894542.0,
+            "B/op": 613709192.0,
+            "allocs/op": 1241309.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 9947634416.0,
+            "B/op": 614490224.0,
+            "allocs/op": 1241005.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10005877833.0,
+            "B/op": 622434880.0,
+            "allocs/op": 1241153.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 9865706292.0,
+            "B/op": 610859280.0,
+            "allocs/op": 1241004.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 9988221084.0,
+            "B/op": 622699216.0,
+            "allocs/op": 1241147.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10099743292.0,
+            "B/op": 620460656.0,
+            "allocs/op": 1241092.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "034e99ab9d356a6b98ec64075b5e29d62e7af20e",
+        "candidate": "7751d452ae757a21e7b83fdb25c0b1f37df0936f"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 9947634416.0,
+          "B/op": 614490224.0,
+          "allocs/op": 1241153.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        },
+        "candidate": {
+          "ns/op": 9988221084.0,
+          "B/op": 620460656.0,
+          "allocs/op": 1241092.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        }
+      },
+      "ratios": {
+        "ns/op": 1.0040800321265042,
+        "B/op": 1.0097160732047707,
+        "allocs/op": 0.9999508521511852
+      },
+      "regressions": []
+    },
+    "performance_scope": "Default pipeline with timeline disabled, three alternating parent/candidate pairs; thresholds from existing policy, explicit parent comparison rather than global release-baseline qualification. Does not measure enabled timeline acquisition cost.",
+    "behavioral_checks": [
+      "Literal blob edits preserve the same value exposure period",
+      "Removal and reappearance across versions",
+      "First-parent merge edges preserve branch context",
+      "Graph ordering independent of commit clock order; negative duration omitted",
+      "Unique path/blob aliases and newline path framing",
+      "Organization report namespace mapping preserves immutable graph paths",
+      "ML-suppressed candidate still contributes presence before display policies",
+      "Shallow histories, uninspected snapshots, diagnostics, cancellation and observation limits do not prove absence",
+      "Malformed/unterminated raw diffs rejected; requested cat-file object identity checked",
+      "JSON and SARIF carry optional lifecycle metadata, omit private graph",
+      "Native static CLI combines timeline with HMAC index without raw value in report/database"
+    ]
+  },
+  "semantics": {
+    "basis": "detector_observations_first_parent",
+    "identity": "existing finding fingerprint: type + report path + full value",
+    "removal": "cessation of detector observation on a supported snapshot, relative to first parent; not exact-byte erasure proof or provider revocation",
+    "in_head": "tracked path in frozen HEAD; distinct from verified live credential",
+    "exposure_seconds": "nonnegative difference of commit timestamps, not publication or credential-revocation time",
+    "incomplete": "complete=false; suppress removals and negative HEAD claims; preserve diagnostics and CLI exit 2"
+  },
+  "boundaries": [
+    "Not a published release; no push, deploy or provider verification performed",
+    "Local Git fixtures and local forge HTTP fixture only; native Windows Git runtime not exercised",
+    "Archives preserve positive observations; unsupported intermediate container versions do not prove inner-path absence",
+    "No reflog/unreachable-object coverage or cross-path rename identity; rename yields separate path histories",
+    "Other 1.5.0 TODO items remain open"
+  ]
+}
