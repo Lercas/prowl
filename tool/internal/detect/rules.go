@@ -48,14 +48,15 @@ func hasNonASCII(s string) bool {
 
 // Match is one L1 detection in a text block.
 type Match struct {
-	ContextName   string // semantic source label when the value is in a table column
-	Type          string
-	Value         string
-	Start, End    int
-	Confidence    float64
-	ChecksumValid bool
-	Category      string
-	Stage         string
+	ContextName    string // semantic source label when the value is in a table column
+	Type           string
+	Value          string
+	Start, End     int
+	Confidence     float64
+	ChecksumValid  bool
+	LiteralContext bool // source span is a decoded constant expression for ML context
+	Category       string
+	Stage          string
 	// needsStrong marks a decode candidate with no secret-like name on its line: only a precise typed
 	// hit inside it is reported. Internal to the decode stage; never set on a returned Match.
 	needsStrong bool

@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"unicode/utf16"
+	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -48,8 +50,8 @@ func TestCharCodePipelineIdentityOriginalContextAndDisclosure(t *testing.T) {
 		if strings.Contains(f.IndexPath, c.value) || strings.Contains(f.IndexPath, expr) {
 			t.Fatal("decoded or observed expression leaked into private index metadata")
 		}
-		if len(scorer.records) != 1 || scorer.records[0].Value != c.value || scorer.records[0].Context.Line != line {
-			t.Fatal("charcode ML value or original context lost")
+		if len(scorer.records) != 1 || scorer.records[0].Value != c.value || scorer.records[0].Context.Line != "const "+c.field+"="+strconv.Quote(c.value)+";" {
+			t.Fatal("charcode ML value or literal context lost")
 		}
 		if c.typ == "generic_password" && scorer.records[0].Context.Name != c.field {
 			t.Fatal("charcode generic ML name lost")
@@ -62,7 +64,7 @@ func TestCharCodePipelineIdentityOriginalContextAndDisclosure(t *testing.T) {
 			t.Fatal("charcode secret disclosed without explicit flag")
 		}
 		shown := p.WithRevealSecrets(true).Findings(t.Context(), it)
-		if len(shown) != 1 || shown[0].Redacted != c.value || shown[0].Context == nil || shown[0].Context.Line != line {
+		if len(shown) != 1 || shown[0].Redacted != c.value || shown[0].Context == nil || shown[0].Context.OriginalLine != line || shown[0].Context.Line != scorer.records[0].Context.Line {
 			t.Fatal("explicit charcode disclosure lost logical value or original line")
 		}
 	}
@@ -74,5 +76,45 @@ func TestCharCodeBrokenUTF16SurvivesPipelineFiltering(t *testing.T) {
 	fs := p.Findings(t.Context(), model.Item{Source: "code", Path: "prod/config.js", Text: "payload=" + expr})
 	if len(fs) != 1 || fs[0].Type != ResultsTruncatedType {
 		t.Fatal("broken UTF-16 uncertainty was lost after ML suppressed the typed candidate")
+	}
+}
+
+func TestCharCodeEmbeddedMLUsesLogicalLiteralContext(t *testing.T) {
+	t.Setenv("PROWL_HOME", t.TempDir())
+	scorer, err := mlscore.NewEmbedded(.3, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const uri = "postgresql://svc:Kx7\ufffdmPq2@prod.internal"
+	p := New(Options{Detector: detector(t), ML: scorer})
+	var fingerprint string
+	for _, text := range []string{"blob=" + strconv.Quote(uri), "blob=" + scanCharCodeFixture(uri)} {
+		fs := p.Findings(t.Context(), model.Item{Source: "code", Path: "prod/config.js", Text: text})
+		if len(fs) != 1 || fs[0].Type != "db_connection_string" {
+			t.Fatal("ML filtered logical URI because of source encoding")
+		}
+		if fingerprint != "" && fs[0].Fingerprint != fingerprint {
+			t.Fatal("plain/numeric logical identity changed under ML")
+		}
+		fingerprint = fs[0].Fingerprint
+	}
+}
+
+func TestCharCodeModelContextIsBoundedAndDoesNotExpandPayload(t *testing.T) {
+	const value = "Kx7;mPq2"
+	const unseen = "DO_NOT_SEND_NEXT_STATEMENT"
+	text := strings.Repeat("界", 150) + ";password=" + scanCharCodeFixture(value) + ";extra=" + strconv.Quote(unseen)
+	scorer := &tableRecordScorer{}
+	p := New(Options{Detector: detector(t), ML: scorer})
+	fs := p.Findings(t.Context(), model.Item{Source: "code", Path: "prod/config.js", Text: text})
+	if len(fs) != 1 || len(scorer.records) != 1 {
+		t.Fatal("bounded context fixture lost candidate")
+	}
+	line := scorer.records[0].Context.Line
+	if len(line) > 400 || !utf8.ValidString(line) || !strings.Contains(line, value) || strings.Contains(line, unseen) {
+		t.Fatal("model context exceeded bounds or exposed extra source")
+	}
+	if fs[0].Context != nil {
+		t.Fatal("scoring context disclosed without explicit flag")
 	}
 }

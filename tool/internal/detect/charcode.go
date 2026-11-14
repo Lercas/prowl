@@ -293,7 +293,7 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 			if call.value != "" {
 				decodedBytes += len(call.value)
 				calls = append(calls, call)
-				rewrites = append(rewrites, rewrite{pos: start, end: call.end, repl: call.value})
+				rewrites = append(rewrites, rewrite{pos: start, end: call.end, repl: " " + call.value + " "})
 				lo, hi := max(0, start-viewContext), min(len(text), call.end+viewContext)
 				if nl := strings.LastIndexByte(text[lo:start], '\n'); nl >= 0 {
 					lo += nl + 1
@@ -332,6 +332,7 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 				continue
 			}
 			m.Start, m.End, m.Confidence = lo, hi, m.Confidence*.95
+			m.LiteralContext = true
 			out = append(out, m)
 		}
 	}
@@ -345,6 +346,7 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 		if field := charCodeField(text, call); field.kind != "" {
 			if m, ok := d.fieldValue(call.value, call.start, call.end, field, stageCharCode); ok {
 				m.Confidence *= .95
+				m.LiteralContext = true
 				out = append(out, m)
 			}
 		}

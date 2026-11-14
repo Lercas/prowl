@@ -304,7 +304,13 @@ func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBu
 					break
 				}
 				for _, sp := range markupAt(text, i) {
-					rewrites = append(rewrites, rewrite{pos: sp[0], end: sp[1]})
+					rw := rewrite{pos: sp[0], end: sp[1]}
+					// Inline value wrappers remain token boundaries; deleting
+					// them must not glue a credential to following code syntax.
+					if sp[0] > i && sp[1]-sp[0] == 1 && text[sp[0]] == '`' {
+						rw.repl = " "
+					}
+					rewrites = append(rewrites, rw)
 					around(sp[0], sp[1])
 				}
 				next := strings.IndexAny(text[i+1:], ":=")

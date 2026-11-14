@@ -95,6 +95,8 @@ type Finding struct {
 type FindingContext struct {
 	Name string `json:"name,omitempty"`
 	Line string `json:"line,omitempty"`
+	// OriginalLine preserves physical source when Line projects a decoded literal for ML.
+	OriginalLine string `json:"original_line,omitempty"`
 }
 
 // ComputeFingerprint derives a finding's stable identity from the FULL raw secret value (not the

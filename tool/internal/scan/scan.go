@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -601,7 +602,39 @@ func recordForMatch(m detect.Match, it model.Item) mlscore.Record {
 	if m.ContextName != "" {
 		record.Context.Name = m.ContextName
 	}
+	if m.LiteralContext {
+		record.Context.Line = literalModelLine(m, it.Text, record.Context.Line, record.Value)
+	}
 	return record
+}
+
+// literalModelLine projects only the already disclosed scoring value into the
+// existing bounded context. It never decodes or sends additional payload data.
+func literalModelLine(m detect.Match, text, original, value string) string {
+	if m.Start < 0 || m.End < m.Start || m.End > len(text) {
+		return original
+	}
+	prefix, suffix := original, ""
+	lo := max(0, m.Start-400)
+	nl := strings.LastIndexByte(text[lo:m.Start], '\n')
+	if nl >= 0 || lo == 0 {
+		pos := m.Start - (lo + nl + 1)
+		if pos <= len(original) {
+			prefix = original[:pos]
+			end := pos + m.End - m.Start
+			if end < len(original) {
+				suffix = original[end:]
+			}
+		}
+	}
+	if len(prefix) > 128 {
+		prefix = prefix[:128]
+	}
+	line := prefix + strconv.Quote(value) + suffix
+	if len(line) > 400 {
+		line = line[:400]
+	}
+	return strings.ToValidUTF8(line, "")
 }
 
 func (p *Pipeline) revealMatchContext(it model.Item, m detect.Match) *model.FindingContext {
@@ -609,7 +642,14 @@ func (p *Pipeline) revealMatchContext(it model.Item, m detect.Match) *model.Find
 		return nil
 	}
 	record := recordForMatch(m, it)
-	return &model.FindingContext{Name: record.Context.Name, Line: record.Context.Line}
+	context := &model.FindingContext{Name: record.Context.Name, Line: record.Context.Line}
+	if m.LiteralContext {
+		original := lineText(it.Text, m.Start)
+		if original != context.Line {
+			context.OriginalLine = original
+		}
+	}
+	return context
 }
 
 // recordFor builds the ML scoring record for a candidate: the raw value plus the context the model was

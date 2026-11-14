@@ -216,3 +216,20 @@ func TestCharCodePreservesPlainTypedWinnerBeforeSourceMapping(t *testing.T) {
 		t.Fatal("outer source mapping changed overlapping typed winner or logical identity")
 	}
 }
+
+func TestQuotedConnectionURIExcludesLiteralDelimiters(t *testing.T) {
+	const uri = "postgresql://svc:Kx7$mPq2@prod.internal:5432"
+	d := newDetector(t)
+	for _, quote := range []string{"\"", "'", "`"} {
+		text := "connection=" + quote + uri + quote + ";"
+		m := findType(d.Scan(text), "db_connection_string")
+		if m == nil || m.Value != uri || text[m.Start:m.End] != uri {
+			t.Fatalf("quoted connection URI retained its source delimiter: quote=%q match=%+v", quote, m)
+		}
+	}
+	expr := charCodeFixture(uri, "decimal")
+	m := findType(d.Scan("connection="+expr+";"), "db_connection_string")
+	if m == nil || m.Value != uri {
+		t.Fatal("converted URI absorbed surrounding statement syntax")
+	}
+}
