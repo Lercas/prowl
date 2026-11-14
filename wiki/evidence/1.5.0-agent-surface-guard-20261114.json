@@ -1,0 +1,432 @@
+{
+  "scope": "Agent configuration/text-export audit with explicit home/history selection; local stdin guard for raw, Claude Code, Cursor prompt/tool/file-content events",
+  "candidate_commit": "f8450061f714c475d8d26ddf3f0f3d89f4302ea1",
+  "reference_commit": "73e57618a94cde79b89023861e4c6b79703e4a64",
+  "source_isolation": "Clean parent export plus explicit feature manifest; unrelated pending decompression changes excluded and preserved",
+  "qualified_file_manifest": [
+    {
+      "path": "tool/cmd/prowl/flags.go",
+      "sha256": "2e97f473bfb33b692800d40a1cc1f2dfb6bda370787e78929f1cc76a49156398"
+    },
+    {
+      "path": "tool/cmd/prowl/help.go",
+      "sha256": "1483cd5a2cb6682c0f850d98702f4791bc3e7929ade16c7ac51bc63ab9e3e66a"
+    },
+    {
+      "path": "tool/cmd/prowl/main.go",
+      "sha256": "dfe8f8e810687522c295b207305d218d99da60a95408624b2ed7674c51d4e91a"
+    },
+    {
+      "path": "tool/cmd/prowl/prepared_scan.go",
+      "sha256": "dd49bbb1e0513fd3b6899530cd68ea816a35095d28bd16bcce8572eb090b1c6c"
+    },
+    {
+      "path": "tool/cmd/prowl/report.go",
+      "sha256": "a9b48fa4dbe78c0f4e2e8dbee7f098ed3073c3e89e41916ae15f39e6969081b9"
+    },
+    {
+      "path": "tool/cmd/prowl/setup.go",
+      "sha256": "f4c024f3cfb218bf302634c17ed77fc454085abee0f94babdabd64370bd1913a"
+    },
+    {
+      "path": "tool/internal/model/model.go",
+      "sha256": "3005d645fa475805f961236e3fd5560a5e99c1a449fbe74c83df6f0a65a12a4a"
+    },
+    {
+      "path": "tool/internal/report/report.go",
+      "sha256": "70865a8254ffcbd79d408dc0a376beb832dda02f00099f64d95beab3a42c2669"
+    },
+    {
+      "path": "tool/internal/scan/pipeline.go",
+      "sha256": "652b118f3658f98f6b18d266d49997ffbdbc3769cc7e3202f8a5716062cb8815"
+    },
+    {
+      "path": "tool/internal/scan/scan.go",
+      "sha256": "8df0f15b86e5115086f7cc349989c20d4012c9cd597d72264945ec01c9777952"
+    },
+    {
+      "path": "wiki/Command-Line.md",
+      "sha256": "c0f1db8d7acdf45db140ec9189c003cedd4a2924376f40a2ddc3801a4408bbe2"
+    },
+    {
+      "path": "wiki/Secret-Index.md",
+      "sha256": "f010f5b2b6f16ca0c5c2f4166da283908f1e940045a183be2815914e5c4e4a08"
+    },
+    {
+      "path": "tool/cmd/prowl/flags_test.go",
+      "sha256": "17c89159bdb0f923dbeaf04bdd93064c62821ef36de81a537fe1f17012d1d241"
+    },
+    {
+      "path": "TODO.md",
+      "sha256": "9d8498e6580f577c39f727d306b1f8350e91f6f8696383fa2eea222c45986600"
+    },
+    {
+      "path": "tool/cmd/prowl/agents.go",
+      "sha256": "dc7980f8d8a007f57cee4c6694d23decf5aab1a51ea559c9bbae969f94d2acf7"
+    },
+    {
+      "path": "tool/cmd/prowl/agents_test.go",
+      "sha256": "cdf8691e74afd2816166486c074226585c134273aafa913c73fc15c173923c80"
+    },
+    {
+      "path": "tool/cmd/prowl/guard.go",
+      "sha256": "5c601ef860e8b18d66d3593f8f8b9b2a80c37d9031f7b46c53c687466f8f6226"
+    },
+    {
+      "path": "tool/cmd/prowl/guard_test.go",
+      "sha256": "ff756549a00e74ef1af2a689c604ec82675194688af80f2d5f552eb9797f4880"
+    },
+    {
+      "path": "tool/internal/agentguard/guard.go",
+      "sha256": "29e3e45c0c70d63b69a0f3a13e7e66324bdd238bdeb66b15e9c48553d892bd8c"
+    },
+    {
+      "path": "tool/internal/agentguard/guard_test.go",
+      "sha256": "49a6aed54bd76659850bfd617563c417d1fa6d6513fbd7803ed89c9756fc05b4"
+    },
+    {
+      "path": "tool/internal/source/agents.go",
+      "sha256": "b7b607aa708aa245ec19ee4b4560f6dafc7de0a824e20400b8c95b9dd6566e4a"
+    },
+    {
+      "path": "tool/internal/source/agents_test.go",
+      "sha256": "f8dbf696730d8eb483bc999c5fe8fe3f7a2714a80994f2585200e7cd312dc24f"
+    },
+    {
+      "path": "tool/internal/report/agents_test.go",
+      "sha256": "a93050736df775af7eed366cae3d0f15c56efb1b103017869727be0f37be21ba"
+    },
+    {
+      "path": "wiki/Agent-Security.md",
+      "sha256": "a0c5b61051c59c7c06638322172f476931a8fa12a27e37e8167a22eab5d7da8f"
+    },
+    {
+      "path": "integrations/agent-hooks/claude.settings.json",
+      "sha256": "6fcd134676c80020e461c54b254525b18c5aca05f011822cb3027b2279b7f4bd"
+    },
+    {
+      "path": "integrations/agent-hooks/cursor.hooks.json",
+      "sha256": "12356ccec3f0063ed5ee4e7cf0270c1c8bf8f4e3c70d728c2969b20d175a299e"
+    }
+  ],
+  "validation": {
+    "full_go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test ./... passed after removing duplicate schema entries. Final additional file-budget/fuzz targets separately passed; no runtime edits afterward.",
+    "race": "Go1.27.4 focused agentguard/source/CLI Guard, AgentSurface, AgentsCLI and ForeignFlags suites passed",
+    "minimum_go": "Go1.26.11 CGO_ENABLED=0 focused guard, source, CLI and optional JSON/SARIF provenance suites passed",
+    "lint": "golangci-lint v2.15.0, affected packages: 0 issues, repeated after final tests",
+    "fuzz": {
+      "target": "FuzzGuardParts",
+      "requested_seconds": 5,
+      "actual_seconds": 6.734,
+      "executions": 116604,
+      "status": "passed",
+      "scope": "Bounded structured-payload parsing/expansion, not exhaustive detector correctness"
+    },
+    "static_builds": [
+      {
+        "goos": "linux",
+        "goarch": "amd64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-linux-amd64",
+        "sha256": "f219ccf631059e1f73dce1bb4b1136b9e67c968f1dfae87b1a2d9ae54757bbe1",
+        "bytes": 27157333
+      },
+      {
+        "goos": "linux",
+        "goarch": "arm64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-linux-arm64",
+        "sha256": "8363d53f96a355637b0fc1a953d2ff01ca99df43f93246760962e0f33ee1f424",
+        "bytes": 25607551
+      },
+      {
+        "goos": "darwin",
+        "goarch": "amd64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-darwin-amd64",
+        "sha256": "6ffbb61f72f6ae7970ca0a35c212f02f6a2d9f6628cc492e0267e8b158e22720",
+        "bytes": 27345536
+      },
+      {
+        "goos": "darwin",
+        "goarch": "arm64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-darwin-arm64",
+        "sha256": "dc37eac3f03de31037566a3212729a6365628d4fc7b96c3c13d09418590af49b",
+        "bytes": 26004546
+      },
+      {
+        "goos": "windows",
+        "goarch": "amd64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-windows-amd64.exe",
+        "sha256": "89718fe9c9cde98dfd6eff4700b17fe64db82e88af49a86e8f10ddeae94d4fa7",
+        "bytes": 27350528
+      },
+      {
+        "goos": "windows",
+        "goarch": "arm64",
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-static-xbm8t4x7/prowl-windows-arm64.exe",
+        "sha256": "663943cf5c0ad9b5858f0891c31e03e0c22c80536d9ddc6dd9d5d457ff53e870",
+        "bytes": 25481216
+      }
+    ],
+    "native_build_profile": "Go1.27.4 CGO_ENABLED=0; native darwin/arm64 SHA matches six-target manifest; embedded-ML/redaction/legacy-model rejection smoke passed",
+    "native_end_to_end": {
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-agent-native-ztr7o70a",
+      "guard_cases": [
+        {
+          "case": "raw-clean",
+          "exit": 0,
+          "no_raw_echo": true
+        },
+        {
+          "case": "raw-secret",
+          "exit": 1,
+          "no_raw_echo": true
+        },
+        {
+          "case": "raw-pragma",
+          "exit": 1,
+          "no_raw_echo": true
+        },
+        {
+          "case": "claude-clean",
+          "exit": 0,
+          "no_raw_echo": true
+        },
+        {
+          "case": "claude-prompt",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "claude-tool",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "claude-malformed",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "cursor-clean",
+          "exit": 0,
+          "no_raw_echo": true
+        },
+        {
+          "case": "cursor-prompt",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "cursor-attachment",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "cursor-mcp",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "cursor-file",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "invalid-utf8",
+          "exit": 2,
+          "no_raw_echo": true
+        },
+        {
+          "case": "stdin-withheld-eof",
+          "exit": 2,
+          "seconds": 0.046770125001785345
+        },
+        {
+          "case": "command-is-data",
+          "exit": 0,
+          "no_raw_echo": true
+        },
+        {
+          "case": "metadata-path-is-not-content",
+          "exit": 0,
+          "no_raw_echo": true
+        }
+      ],
+      "guard_did_not_create_cwd_files": true,
+      "agent_audit": {
+        "exit": 0,
+        "findings": 2,
+        "same_key_hmac": true,
+        "no_raw_value_in_report_or_sqlite": true
+      },
+      "command_payload_not_executed": true,
+      "metadata_path_not_read_as_content": true
+    },
+    "prowlbench_subset": {
+      "run": {
+        "exit": 0,
+        "stdout": "Retained fixture: /var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-rub2pj2d\nProwlBench(subset): recall=0.768 (1608/2094) T4-FP=0.062 (61/982)\n  OK vs baseline (recall 0.747, T4-FP 0.058)\n",
+        "stderr": ""
+      },
+      "secret_hits": 1608,
+      "secret_total": 2094,
+      "false_positive_files": 61,
+      "negative_total": 982,
+      "unchanged_from_parent": true,
+      "baseline_unchanged": true,
+      "thresholds_unchanged": true,
+      "profile": "Ordinary --ml scan; empty temporary PROWL_HOME and bundled rules; only research-harness fixture cleanup disabled"
+    },
+    "paired_corpus_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9854717667.0,
+            "B/op": 613686688.0,
+            "allocs/op": 1240939.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10008670292.0,
+            "B/op": 609807568.0,
+            "allocs/op": 1240928.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10037490333.0,
+            "B/op": 612110880.0,
+            "allocs/op": 1241057.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 9911305708.0,
+            "B/op": 608959456.0,
+            "allocs/op": 1241179.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10003023500.0,
+            "B/op": 617508552.0,
+            "allocs/op": 1240882.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10147473875.0,
+            "B/op": 612170632.0,
+            "allocs/op": 1240688.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "73e57618a94cde79b89023861e4c6b79703e4a64",
+        "candidate": "f8450061f714c475d8d26ddf3f0f3d89f4302ea1"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 10008670292.0,
+          "B/op": 612110880.0,
+          "allocs/op": 1240939.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        },
+        "candidate": {
+          "ns/op": 10003023500.0,
+          "B/op": 612170632.0,
+          "allocs/op": 1240882.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        }
+      },
+      "ratios": {
+        "ns/op": 0.999435809969231,
+        "B/op": 1.0000976163011512,
+        "allocs/op": 0.9999540670411681
+      },
+      "regressions": []
+    },
+    "performance_scope": "Ordinary pipeline with new modes off; three alternating explicit parent/candidate pairs under existing thresholds. Not enabled agent-audit/hook throughput or release-baseline qualification.",
+    "behavioral_evidence": [
+      "Typed candidates and inline-pragma attempts blocked before transmission",
+      "Nested decoded JSON strings and supported host events inspected",
+      "Duplicate/folded fields, malformed Unicode, unknown events, attachment references, size/depth limits and timeout fail closed",
+      "Guard does not accept ML/provider/config/disclosure options",
+      "Guard does not read transcript_path metadata or execute supplied shell command; marker file absent",
+      "Host-specific exit 2 and Cursor deny/continue=false responses; no raw value echo",
+      "Missing stdin EOF terminates with blocking exit within native timeout",
+      "Template onFailure/failClosed flags and outer timeout checked",
+      "Scoped agent roots, text exports, explicit history, missing/oversized/binary files and symlink refusal",
+      "Implicit config/rule/baseline/ignore policies cannot suppress an audited transcript; explicit operator policy remains available",
+      "Agent provenance optional in ordinary JSON/SARIF; same secret links across transcript/history in HMAC index without raw database/report values"
+    ]
+  },
+  "host_contract_sources": [
+    {
+      "url": "https://code.claude.com/docs/en/hooks",
+      "checked": "2026-11-14",
+      "facts_used": "UserPromptSubmit/PreToolUse payloads, exit 2, exec command/args, onFailure block requires 2.1.295+"
+    },
+    {
+      "url": "https://cursor.com/docs/hooks",
+      "checked": "2026-11-14",
+      "facts_used": "Prompt/tool/read-content payloads, permission/continue responses, failClosed and timeout seconds"
+    }
+  ],
+  "limits": {
+    "default_payload_bytes": 1048576,
+    "hard_payload_bytes": 8388608,
+    "expanded_bytes": 8388608,
+    "parts": 8192,
+    "depth": 32,
+    "default_timeout_seconds": 3,
+    "max_timeout_seconds": 30,
+    "selected_agent_files": 10000
+  },
+  "boundaries": [
+    "No actual Claude/Cursor hook installed, no real private transcript/history audited; native protocol fixtures are not host acceptance",
+    "Unknown obfuscation, unseen tool results, file references without supplied content and binary SQLite/VSCDB editor stores are outside current inspection",
+    "Cursor prompt attachment references block as uninspectable; no cross-call authorization cache",
+    "Guard checks possible detected candidates without ML/provider confirmation; false positives and undetected patterns remain possible",
+    "No publication, push, deployment or production activation",
+    "Native Windows runtime not exercised; six-target compilation is separate evidence",
+    "Remaining 1.5.0 TODO items and release gates are still open"
+  ]
+}
