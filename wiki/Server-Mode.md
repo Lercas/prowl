@@ -128,7 +128,8 @@ Pipeline, включая явно настроенную политику рас
 
 Пустой batch `[]` возвращает полный пустой отчёт со scope detection policy и
 rules. Каждый input добавляет scope своего caller-supplied content boundary.
-Digest active taxonomy и templates различает наборы правил; callback allowlist
+Digest active taxonomy и templates различает наборы правил, включая различие
+между неуказанным extractor group и явным `group: 0`; callback allowlist
 и изменяемые внешние сервисы не становятся доказательством immutable revision.
 
 ### `GET /healthz`

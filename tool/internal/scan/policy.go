@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Lercas/prowl/tool/internal/model"
-	"github.com/Lercas/prowl/tool/internal/rules"
 )
 
 // Capabilities reports configured stages; request fields cannot change this snapshot.
@@ -35,9 +34,9 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 		"revision": "literals-go-v2", "taxonomy": taxonomy, "stages": stages,
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 	})
-	templates := []*rules.Template{}
+	rulePolicy := ""
 	if o.Rules != nil {
-		templates = o.Rules.Templates()
+		rulePolicy = o.Rules.PolicyDigest()
 	}
-	c.RegisterScope("rules", "", templates)
+	c.RegisterScope("rules", "", rulePolicy)
 }

@@ -144,7 +144,7 @@
       сохраняя immutable Pipeline 1.5.0. Неподдерживаемые request stage/disclosure
       поля отклоняются, batch count ограничен до материализации всей коллекции.
       Пустой batch сохраняет policy scope; отмена, parser failure и лимиты не
-      сертифицируются как complete. Нативный worker на loopback — 55/55;
+      сертифицируются как complete. Нативный worker на loopback — 57/57;
       `wiki/evidence/1.5.0-http-contract-20261114.json`. MCP/LSP остаются открыты.
 
 ### P1 — архитектура CLI

@@ -20,6 +20,9 @@ def main():
     binary = parser.parse_args().binary.resolve(strict=True)
     root = Path(tempfile.mkdtemp(prefix="prowl-http-native-"))
     (root / "home").mkdir()
+    rules = root / "rules"
+    rules.mkdir()
+    (rules / "owned.yaml").write_text("id: owned-custom\ninfo:\n  name: Owned custom rule\n  severity: high\nmatchers:\n  - type: word\n    words: ['CUSTOM=']\nextractors:\n  - type: regex\n    regex: ['CUSTOM=([A-Z0-9]+)']\n")
     with socket.socket() as selected:
         selected.bind(("127.0.0.1", 0))
         port = selected.getsockname()[1]
@@ -36,7 +39,7 @@ def main():
             return response.status, json.loads(raw) if path != "/healthz" else raw, raw
 
     with (root / "worker.log").open("wb") as log:
-        worker = subprocess.Popen([str(binary), "serve", "--addr=127.0.0.1:" + str(port)],
+        worker = subprocess.Popen([str(binary), "serve", "--addr=127.0.0.1:" + str(port), "--rules-dir=" + str(rules)],
                                   cwd=root, env=env, stdout=log, stderr=log)
         try:
             deadline = time.monotonic() + 20
@@ -55,7 +58,7 @@ def main():
             status, caps, _ = request("/capabilities")
             checks.append(dict(case="capabilities", passed=status == 200 and caps["schema_version"] == "1.4"
                                and caps["redacted"] and caps["required_fields"] == ["content"]
-                               and caps["stages"]["l1"] and not any(caps["stages"][k] for k in
+                               and caps["stages"]["l1"] and caps["stages"]["rules"] and not any(caps["stages"][k] for k in
                                                                       ["ml", "verification", "ocr", "semantic", "reconstruction"])))
             invalid = [b"null", b"{}", b'{"content":null}', b'{"content":1}',
                        b'{"content":"clean","content":"other"}', b'{"content":"clean","CONTENT":"other"}',
@@ -75,6 +78,7 @@ def main():
             cases = [
                 ("empty", "", "production.env", True, False, 0),
                 ("plain", "AWS=" + value, "production.env", True, False, 1),
+                ("custom-rule", "CUSTOM=OWNEDVALUE42", "production.env", True, False, 1),
                 ("structured", '{"key":"\\u0041' + value[1:] + '"}', "production.json", True, False, 1),
                 ("unicode", "Пароль🚀\nAWS=" + value, "Конфиг.env", True, False, 1),
                 ("pragma", "AWS=" + value + " # prowl:allow", "production.env", True, True, 0),
@@ -91,6 +95,8 @@ def main():
                           and {s["kind"] for s in data["scope"]} == {"detection_policy", "rules", "http-input"}
                           and (count is None or data["count"] == count) and value.encode() not in raw
                           and (complete or data["diagnostics"] and data["truncated"]))
+                    if name == "custom-rule":
+                        ok = ok and b"OWNEDVALUE42" not in raw and data["findings"][0]["type"] == "owned-custom"
                     checks.append(dict(case=name, batch=batch, passed=bool(ok)))
             status, data, _ = request("/scan/batch", b"[]")
             checks.append(dict(case="empty-batch", passed=status == 200 and data["complete"]
