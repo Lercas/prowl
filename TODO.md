@@ -286,9 +286,13 @@
       защищают baseline и записываются incomplete в индекс.
       Cloud-shaped native CLI ±L2 — 157/157; доказательства:
       `wiki/evidence/1.5.0-atlassian-contract-20261114.json`.
-    - [ ] Atlassian tenant-qualified occurrence/index: одинаковые локальные issue/page
-      IDs на разных tenant должны разделяться до fingerprint/location identity;
-      нужны проверки совместимости baseline и отдельных event IDs при одинаковой дате.
+    - [x] Atlassian tenant-qualified occurrence/index: логический URI до детекции
+      разделяет продукт, transport, origin/context и экранированную локальную метку.
+      History event ID отделяет одинаковые даты; неизвестные event/comment IDs
+      сохраняют текст с неполнотой и baseline guard. Legacy обычные/keyed baseline
+      не подавляют новый namespace; совпадающее value сохраняет общий secret/value ID.
+      Нативная Cloud-shaped матрица — 230/230, включая повторный scan и один индекс
+      с двумя tenant. `wiki/evidence/1.5.0-atlassian-identity-20261114.json`.
 
 ### P1 — архитектура CLI
 

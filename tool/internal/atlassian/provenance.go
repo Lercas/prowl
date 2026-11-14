@@ -23,7 +23,7 @@ func registerScope(ctx context.Context, base, product string, opts Options) {
 		Projects, Spaces, Fields                          []string
 		MaxItems, Workers, Pages, Versions, ResponseBytes int
 		Timeout                                           int64
-	}{base, "1.5.0-atlassian-v1", opts.CurrentOnly, sortedSelection(opts.Projects), sortedSelection(opts.Spaces), sortedSelection(opts.Fields), opts.MaxItems, workerCount(opts), maxPages, maxVersionsPerPage, maxResponseBytes, int64(opts.Timeout)})
+	}{base, "1.5.0-atlassian-v2", opts.CurrentOnly, sortedSelection(opts.Projects), sortedSelection(opts.Spaces), sortedSelection(opts.Fields), opts.MaxItems, workerCount(opts), maxPages, maxVersionsPerPage, maxResponseBytes, int64(opts.Timeout)})
 }
 
 // These are producer labels, not immutable revision proofs. In particular Jira changelogs contain
@@ -48,4 +48,10 @@ func scopeOrigin(base string) string {
 		return "[atlassian]"
 	}
 	return (&url.URL{Scheme: u.Scheme, Host: u.Host}).String()
+}
+
+// The logical URI is namespaced by product, transport and the normalized tenant context. The
+// original browse URL remains in metadata; escaped local labels are not invented HTTP endpoints.
+func qualifiedPath(base, product, local string) string {
+	return product + "+" + base + "/" + url.PathEscape(local)
 }

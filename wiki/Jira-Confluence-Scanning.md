@@ -99,6 +99,34 @@ JSON/SARIF envelope; `--write-baseline` не заменяет baseline. С ин�
 `native-acquisition`; внешний CI не запускался. Доказательства:
 [Atlassian contract](evidence/1.5.0-atlassian-contract-20261114.json).
 
+## Tenant identity и переход baseline
+
+В 1.5.0 логический путь содержит продукт, transport, нормализованный tenant context
+и экранированную локальную метку, например
+`jira+https://jira.acme.com/jira/P-1%23comment-11`. Browse/page URL остаётся отдельной
+ссылкой на настоящий HTTP endpoint. `#`, `?`, `%` и `/` внутри локальной метки не
+становятся разделителями URI. Namespace назначается до детекции, поэтому различаются
+fingerprint, keyed occurrence и index location, включая два context path одного
+хоста. `secret_id` и index value fingerprint одинакового значения сохраняются.
+
+Jira history path содержит event ID: одинаковые даты двух событий не объединяют
+их наблюдения. Comment ID также входит в путь; неизвестный комментарий отделяется
+от current issue. Если API не вернул ID события/комментария, читаемый текст
+сохраняется, но ledger отмечает `atlassian_observation_unidentified` и не разрешает
+записать baseline полного скана. Это не превращает event ID в immutable revision.
+
+Baseline по старым локальным путям (`P-1`, `Runbook…@v3`) остаётся читаемым, но не
+подавляет новые qualified paths. Автоматического fallback к старому fingerprint
+нет: иначе один baseline мог бы скрыть секрет другого tenant. После полного
+повторного сканирования создайте новый baseline явным `--write-baseline FILE`.
+Существующие baseline, строки индекса и ключи не переписываются автоматически.
+В прежнем индексе это смена идентификатора места, а не доказательство отзыва секрета.
+
+Проверены обычные и keyed legacy baseline, повторный scan, два tenant context,
+два origin, разные события одной даты и комментарии, а также один индекс с одним
+value и двумя location IDs. Доказательства:
+[Atlassian identity](evidence/1.5.0-atlassian-identity-20261114.json).
+
 ## Notes & limits
 
 - **Курсоры Confluence и ссылки Jira.** Из `_links.next` читается ровно один непустой query-параметр `cursor`; фрагмент URL не входит в его значение. Некорректный URL, ошибочное percent-encoding, отсутствующий или повторный курсор дают диагностику неполного сбора; уже прочитанный контент сохраняется. Сканер повторяет исходный API-путь на настроенном хосте, используя только курсор, а не переходит по адресу из ответа. Ключ задачи Jira экранируется как один сегмент пути, а `focusedCommentId` — как одно query-значение. Исходные идентификаторы в пути находки и fingerprint не изменяются.

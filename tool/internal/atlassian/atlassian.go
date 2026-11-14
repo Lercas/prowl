@@ -88,6 +88,10 @@ func Collect(ctx context.Context, baseURL, product string, auth Auth, opts Optio
 				model.Note(ctx, "atlassian_coverage_incomplete", it.Path, true)
 			}
 			if it.Error == nil {
+				if (it.Meta["version"] == "history" && it.Meta["history_id"] == "") || (it.Meta["version"] == "comment" && it.Meta["comment_id"] == "") {
+					model.Note(ctx, "atlassian_observation_unidentified", it.Path, true)
+				}
+				it.Path = qualifiedPath(c.base, product, it.Path)
 				for {
 					n := emitted.Load()
 					if n >= max {

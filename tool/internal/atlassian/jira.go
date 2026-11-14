@@ -569,7 +569,7 @@ func jiraEmitComment(dep Deployment, key, commentID string, body any, emit func(
 	// Discriminate the Path by comment id so two DISTINCT comments on one issue that contain the same
 	// secret value don't collapse to one Fingerprint (type|path|value) — which a --baseline / SARIF /
 	// DefectDojo dedupe would otherwise treat as one, hiding the second comment's leak.
-	path, version := key, "comment"
+	path, version := key+"#comment-unknown", "comment"
 	link := jiraBrowseURL(dep, key)
 	if commentID != "" {
 		path = key + "#comment-" + commentID
@@ -674,9 +674,13 @@ func jiraEmitHistory(dep Deployment, key string, h jiraHistory, emit func(model.
 	if text == "" {
 		return
 	}
+	path := key + "@" + h.Created
+	if h.ID != "" {
+		path += "#history-" + h.ID
+	}
 	emit(model.Item{
 		Source: "jira",
-		Path:   key + "@" + h.Created,
+		Path:   path,
 		Text:   text,
 		Meta: map[string]any{
 			"url":        jiraBrowseURL(dep, key),
