@@ -27,8 +27,11 @@ func (p *positionIndex) build() {
 			p.checkpoints = append(p.checkpoints, positionCheckpoint{i, line, character})
 		}
 		r, size := utf8.DecodeRuneInString(p.text[i:])
-		if r == '\n' {
+		if r == '\n' || r == '\r' {
 			line, character = line+1, 0
+			if r == '\r' && i+1 < len(p.text) && p.text[i+1] == '\n' {
+				size = 2
+			}
 		} else if r > 0xFFFF {
 			character += 2
 		} else {
@@ -51,8 +54,11 @@ func (p *positionIndex) at(off int) (int, int) {
 	c := p.checkpoints[i]
 	for pos := c.offset; pos < off; {
 		r, size := utf8.DecodeRuneInString(p.text[pos:])
-		if r == '\n' {
+		if r == '\n' || r == '\r' {
 			c.line, c.character = c.line+1, 0
+			if r == '\r' && pos+1 < len(p.text) && p.text[pos+1] == '\n' {
+				size = 2
+			}
 		} else if r > 0xFFFF {
 			c.character += 2
 		} else {
@@ -61,4 +67,14 @@ func (p *positionIndex) at(off int) (int, int) {
 		pos += size
 	}
 	return c.line, c.character
+}
+
+func offsetPositions(text string, offsets []int) map[int][2]int {
+	index := positionIndex{text: text}
+	positions := make(map[int][2]int, len(offsets))
+	for _, off := range offsets {
+		line, col := index.at(off)
+		positions[off] = [2]int{line, col}
+	}
+	return positions
 }

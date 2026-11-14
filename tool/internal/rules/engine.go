@@ -20,6 +20,7 @@ import (
 // Engine holds compiled templates and runs them over text. Read-only after Load/Filter; the
 // Aho-Corasick keyword index is built lazily on first Match.
 type Engine struct {
+	bundled   bool
 	templates []*Template
 
 	index     sync.Once
@@ -33,6 +34,9 @@ type Engine struct {
 	win    *linewin.Set
 	tplRes [][]int32
 }
+
+// Bundled identifies templates verified against the binary's immutable embedded snapshot.
+func (e *Engine) Bundled() bool { return e.bundled }
 
 type matchScratch struct {
 	present []bool

@@ -16,11 +16,11 @@ matchers:
     condition: or
   - type: regex
     regex:
-      - '(?i)vultr[a-z0-9_\-]{0,16}(?:api[_\-]?key|token)?["'' :=]{1,5}["'']?([A-Z2-7]{36})["'']?'
+      - '(?i)(?:^|[^a-z0-9])vultr(?:[_-]?(?:api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([A-Z2-7]{36})(?:[^A-Za-z0-9_-]|$)'
   - type: entropy
     min: 3.5
 extractors:
   - type: regex
     regex:
-      - '(?i)vultr[a-z0-9_\-]{0,16}(?:api[_\-]?key|token)?["'' :=]{1,5}["'']?([A-Z2-7]{36})["'']?'
+      - '(?i)(?:^|[^a-z0-9])vultr(?:[_-]?(?:api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([A-Z2-7]{36})(?:[^A-Za-z0-9_-]|$)'
     group: 1

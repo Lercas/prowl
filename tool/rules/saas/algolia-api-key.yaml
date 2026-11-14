@@ -16,11 +16,11 @@ matchers:
     condition: or
   - type: regex
     regex:
-      - '(?i)algolia[a-z0-9_\- "'':=]{0,20}\b([a-f0-9]{32})\b'
+      - '(?i)(?:^|[^a-z0-9])algolia(?:[_-]?(?:search[_-]?(?:api[_-]?)?key|admin[_-]?(?:api[_-]?)?key|api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([a-f0-9]{32})(?:[^A-Za-z0-9_-]|$)'
   - type: entropy
     min: 3.3
 extractors:
   - type: regex
     regex:
-      - '(?i)algolia[a-z0-9_\- "'':=]{0,20}\b([a-f0-9]{32})\b'
+      - '(?i)(?:^|[^a-z0-9])algolia(?:[_-]?(?:search[_-]?(?:api[_-]?)?key|admin[_-]?(?:api[_-]?)?key|api[_-]?key|key|token))?["'']?\s*[:=]\s*["'']?([a-f0-9]{32})(?:[^A-Za-z0-9_-]|$)'
     group: 1

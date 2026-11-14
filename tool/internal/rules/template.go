@@ -80,6 +80,7 @@ func (e *Extractor) UnmarshalYAML(node *yaml.Node) error {
 
 // Template is one nuclei-style rule.
 type Template struct {
+	Sensitive *bool `yaml:"sensitive"`
 	ID                string      `yaml:"id"`
 	Info              Info        `yaml:"info"`
 	Category          string      `yaml:"category"` // optional Prowl category override (severity mapping)
@@ -97,7 +98,7 @@ func (t *Template) isZero() bool {
 	i := t.Info
 	infoEmpty := i.Name == "" && i.Author == "" && i.Severity == "" &&
 		i.Description == "" && i.Tags == "" && len(i.Reference) == 0
-	return t.ID == "" && t.Category == "" && t.MatchersCondition == "" &&
+	return t.ID == "" && t.Sensitive == nil && t.Category == "" && t.MatchersCondition == "" &&
 		infoEmpty && len(t.Matchers) == 0 && len(t.Extractors) == 0
 }
 
@@ -275,6 +276,9 @@ type evaluation struct {
 // yields nothing. Engine evaluation supplies shared word flags and regex windows;
 // standalone Template.Match uses the caller's lowercase text and whole regexes.
 func (t *Template) matchN(in evaluation, limit int) ([]Hit, bool) {
+	if t.Sensitive != nil && !*t.Sensitive {
+		return nil, false
+	}
 	if limit <= 0 {
 		return nil, false
 	}

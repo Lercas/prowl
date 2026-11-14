@@ -24,7 +24,10 @@ func (e *Engine) PolicyDigest() (string, error) {
 		}
 		templates = append(templates, policyTemplate{t, groups})
 	}
-	b, err := json.Marshal(templates)
+	b, err := json.Marshal(struct {
+		Bundled   bool
+		Templates []policyTemplate
+	}{e.bundled, templates})
 	if err != nil {
 		return "", err
 	}

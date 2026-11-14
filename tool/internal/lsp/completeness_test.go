@@ -97,7 +97,8 @@ func TestDiagnosticBudgetSharedBetweenProducers(t *testing.T) {
 	e := completenessEngine(t, "both")
 	text := strings.Repeat("OWNED_G7hJ9kL2mN5p ", 3)
 	for i := 0; i < 20; i++ {
-		text += fmt.Sprintf("TEMPLATE_R%011d ", i)
+		// Use credential-shaped values; the shared pipeline suppresses zero-filled placeholders.
+		text += fmt.Sprintf("TEMPLATE_R4tV8w%06d ", i+1)
 	}
 	diags := scanDiagnostics(e, "file:///caps.env", text)
 	if len(diags) != 8 || diagnosticCodeCount(diags, "results_truncated") != 1 {

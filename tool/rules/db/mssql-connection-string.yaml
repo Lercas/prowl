@@ -17,9 +17,9 @@ matchers:
     condition: and
   - type: regex
     regex:
-      - '(?i)Server=[^;\s]+;[^\n]*?Password=([^;\s"'']{4,})'
+      - '(?i)(?:^|[;"''])Server=[^;\s"'']+;[^\r\n"'']*?Password=([^;\s"'']{4,})'
 extractors:
   - type: regex
     regex:
-      - '(?i)Server=[^;\s]+;[^\n]*?Password=([^;\s"'']{4,})'
+      - '(?i)(?:^|[;"''])Server=[^;\s"'']+;[^\r\n"'']*?Password=([^;\s"'']{4,})'
     group: 1

@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Pipeline) findingDedupKey(line, col int, value string) string {
-	if p.options.ValueFingerprint != nil {
+	if p.options.ValueFingerprint != nil || p.options.AllOccurrences {
 		return fmt.Sprintf("%d:%d:%s", line, col, value)
 	}
 	return fmt.Sprintf("%d:%s", line, value)

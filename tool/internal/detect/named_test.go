@@ -136,13 +136,14 @@ func TestQuotedPasswordWithSeparators(t *testing.T) {
 		{`password = "Kx7;mP,q2'vL"` + "\n", `Kx7;mP,q2'vL`},
 		{`DB_PASSWORD: 'p4ss;w0rd,"x"'` + "\n", `p4ss;w0rd,"x"`},
 		{`$cfg['passwd'] = "a1;b2,c3;d4";` + "\n", "a1;b2,c3;d4"},
+		// A quoted function-shaped string is still a literal credential, unlike an unquoted call.
+		{`password = "func(a, b);"` + "\n", "func(a, b);"},
 	} {
 		if namedMatch(d.Scan(c.text), "generic_password", c.value) == nil {
 			t.Errorf("%q: the whole quoted password was not reported", c.text)
 		}
 	}
 	for _, text := range []string{
-		`password = "func(a, b);"` + "\n",
 		`password_rules = "min:8,max:64;required"` + "\n",
 		`password: "<enter;your,password1>"` + "\n",
 	} {

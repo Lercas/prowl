@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"unicode/utf8"
 	"unsafe"
 
 	"github.com/Lercas/prowl/tool/internal/ahocorasick"
@@ -48,6 +49,7 @@ func hasNonASCII(s string) bool {
 
 // Match is one L1 detection in a text block.
 type Match struct {
+	Transform        string
 	DecodedText      string
 	DecodedStart     int
 	DecodeSpans      []Base64Span
@@ -200,7 +202,27 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	return d.scanCtxWithScalars(ctx, text, nil)
 }
 
+type ScanOptions struct {
+	BarePasswordLiterals bool
+	PasswordScalars      map[int]PasswordScalar
+	YAML                 bool
+}
+
+type ScanResult struct {
+	Matches                         []Match
+	Base64Limited, CandidateLimited bool
+}
+
+func (d *Detector) ScanWithOptions(ctx context.Context, text string, opts ScanOptions) []Match {
+	return d.ScanWithStatus(ctx, text, opts).Matches
+}
+
 func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars map[int]PasswordScalar) ([]Match, bool) {
+	result := d.ScanWithStatus(ctx, text, ScanOptions{PasswordScalars: scalars})
+	return result.Matches, result.Base64Limited || result.CandidateLimited
+}
+
+func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOptions) ScanResult {
 	lb := d.lowerPool.Get().(*[]byte)
 	lower := lowerScratch(lb, text)
 	pp := d.presentPool.Get().(*[]bool)
@@ -222,7 +244,7 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 	// (collect/contextualPassword and the independent decode-candidate collector) bounds its own output.
 	// unmaskBase64 retains at most one decoded winner per outer candidate; the final overlap pass
 	// sorts confidence-first and truncates last.
-	all, collectCapped := d.collect(ctx, text, lower, uniLower, present, sig)
+	all, collectCapped := d.collect(ctx, text, lower, uniLower, present, sig, opts)
 	// contextualPassword honors the remaining budget internally (one match per cue line)
 	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
 	all = append(all, cp...)
@@ -252,9 +274,9 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 	all = discardLiteralArgumentGuesses(all, literalSpans)
 	all = append(all, viewMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
-	if scalars != nil {
+	if opts.PasswordScalars != nil {
 		var scalarLimited bool
-		all, scalarLimited = d.scalarMatches(ctx, text, all, scalars)
+		all, scalarLimited = d.scalarMatches(ctx, text, all, opts.PasswordScalars)
 		candidateCapped = candidateCapped || scalarLimited
 	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
@@ -263,7 +285,7 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
 		logx.Warn("detect: scan limits reached — some encoded candidates or matches may not have been inspected")
 	}
-	return kept, truncated
+	return ScanResult{Matches: kept, CandidateLimited: truncated, Base64Limited: base64Capped || decodeCandidateCapped || decodedCapped || occurrenceLimited || authCapped}
 }
 
 // acAndStructure fuses the Aho-Corasick keyword pass and the structural byte-scan into one loop.
@@ -375,7 +397,11 @@ func extractSpan(ix []int, extract int) (start, end int) {
 
 // collect runs the regex/checksum/entropy rules over text, skipping a type's regex when the keyword
 // pre-filter finds none of its keywords present.
-func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, present []bool, sig structSignals) ([]Match, bool) {
+func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, present []bool, sig structSignals, options ...ScanOptions) ([]Match, bool) {
+	var opts ScanOptions
+	if len(options) > 0 {
+		opts = options[0]
+	}
 	var all []Match
 	capped := false
 	// Decide up front which types' regexes will run, so one literal pass can build the line regions
@@ -456,8 +482,56 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				break
 			}
 			vs, ve := extractSpan(ix, st.Extract)
+			if scalar, ok := opts.PasswordScalars[vs]; ok && scalar.Name != "" && st.ID == "generic_password" {
+				continue // The parser nominates the complete value after regex collection.
+			}
+			// A capped generic regex must not mint an identity for a prefix of a longer credential.
+			// The entropy producer can still report its full adjacent run when supported.
+			if st.ID == "generic_api_key" && ve < len(text) {
+				c := text[ve]
+				if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == '-' {
+					continue
+				}
+			}
+			quoted := vs > 0 && strings.ContainsRune("\"'`", rune(text[vs-1]))
+			literalPassword := st.ID == "generic_password" && BindingName(text, vs) != "" && (quoted || opts.BarePasswordLiterals)
+			if literalPassword && opts.YAML && !quoted && vs < len(text) && strings.ContainsRune("*&!|>{[#", rune(text[vs])) {
+				continue // collections, references, tags, block indicators and comments are not scalars
+			}
+			if literalPassword {
+				var complete bool
+				ve, complete = literalPasswordEnd(text, vs)
+				if !complete {
+					continue
+				}
+			} else if st.ID == "generic_password" {
+				// Unknown/code sources retain the former single-token grammar. Quoted literals may
+				// start with whitespace or punctuation and are instead read as complete scalars above.
+				ve = vs
+				for count := 0; ve < len(text) && count < 64; count++ {
+					r, size := utf8.DecodeRuneInString(text[ve:])
+					if strings.ContainsRune("\"' \t\v\f\r\n,;", r) {
+						break
+					}
+					ve += size
+				}
+			}
 			val := text[vs:ve]
-			if IsExampleOrPlaceholder(val) {
+			transform := ""
+			if literalPassword {
+				if scalar, ok := opts.PasswordScalars[vs]; ok && scalar.End >= vs && scalar.End <= len(text) && len(scalar.Value) <= 4096 {
+					ve, val = scalar.End, scalar.Value
+					transform = "yaml-scalar"
+				}
+			}
+			if st.ID == "generic_password" && utf8.RuneCountInString(val) < 6 {
+				continue
+			}
+			placeholder := IsExampleOrPlaceholder(val)
+			if literalPassword {
+				placeholder = IsLiteralPasswordPlaceholder(val)
+			}
+			if placeholder {
 				continue
 			}
 			// connection URI whose password segment is an unresolved variable ref is not a literal
@@ -475,28 +549,17 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				continue
 			}
 			if st.ID == "generic_password" {
-				if isBcryptHash(val) {
-					continue
-				}
 				// A quoted value (`password = "Winter(2024"`) is the common leak form and may legitimately
 				// contain brackets, so the looksLikeIdentifier / bracket-balance heuristics apply only to
 				// UNQUOTED values, where `bytes)` / `get_auth_from_url(proxy)` really are swept-up code.
-				quoted := vs > 0 && (text[vs-1] == '"' || text[vs-1] == '\'' || text[vs-1] == '`')
-				if isVersionOrNumber(val) || hasJSOperator(val) || looksLikeUnicodeEscaped(val) || (!quoted && (looksLikeJSCode(val) || looksLikeIdentifier(val))) {
+				primitive := !quoted && (val == "string" || val == "String" || val == "boolean" || val == "Boolean" || val == "number" || val == "Number" || val == "object" || val == "Object")
+				codeShape := !literalPassword && (primitive || isVersionOrNumber(val) || hasJSOperator(val) || looksLikeUnicodeEscaped(val) || (!quoted && (looksLikeJSCode(val) || looksLikeIdentifier(val))))
+				if codeShape || IsEncodedPasswordHash(passwordLiteral(text, vs, ve)) || strings.HasPrefix(val, "data:") {
 					continue
 				}
-				// Look back for a pass/pwd/pw cue, bounded to pwdCueLookback bytes: on a pathological single
-				// long line an unbounded line-prefix scan+lowercase is O(vs) per match (O(N^2)). The cue sits
-				// in the immediate `name =` prefix, and the window never crosses a newline.
-				lo := vs - pwdCueLookback
-				if lo < 0 {
-					lo = 0
-				}
-				if nl := strings.LastIndexByte(text[lo:vs], '\n'); nl >= 0 {
-					lo += nl + 1
-				}
-				before := strings.ToLower(text[lo:vs])
-				explicit := strings.Contains(before, "pass") || strings.Contains(before, "pwd") || strings.Contains(before, "pw")
+				// An explicit credential assignment is sufficient even for a weak lowercase password in
+				// any supported language. The bounded adjacent binding also supports multiline JSON.
+				explicit := BindingName(text, vs) != ""
 				if !explicit && !looksLikePassword(val) {
 					continue
 				}
@@ -534,7 +597,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				conf = 0.6
 			}
 			all = append(all, Match{Type: st.ID, Value: val, Start: vs, End: ve,
-				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage})
+				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage, Transform: transform})
 		}
 	}
 	capped = capped || len(all) >= maxScanMatches

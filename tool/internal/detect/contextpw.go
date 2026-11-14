@@ -1,6 +1,7 @@
 package detect
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -9,9 +10,40 @@ import (
 // mlPasswordCues are multilingual credential cue roots (lowercased) that flag a nearby token as a
 // likely password without an adjacent `=`/`:` anchor.
 var mlPasswordCues = []string{
-	"pass", "pwd", "kennwort", "mot de passe", "motdepasse", "contrase", "wachtwoord",
+	"password", "passphrase", "passwort", "pwd", "kennwort", "mot de passe", "motdepasse", "contraseña", "contrasena", "wachtwoord",
 	"salasana", "lösenord", "adgangskode", "geslo", "heslo", "пароль", "geheim",
-	"zugangsdaten", " mdp ", "credential",
+	"senha", "parola", "mdp", "credential", "zugangsdaten",
+}
+
+var passwordCueRE = regexp.MustCompile(`(?i)(?:` + strings.Join(mlPasswordCues, "|") + `)`)
+
+// These connectives support credential prose without borrowing context across arbitrary text or a
+// sentence boundary. Assignments are handled independently by the anchored taxonomy rule.
+var passwordConnectives = map[string]bool{
+	"is": true, "was": true, "ist": true, "lautet": true, "est": true, "temporaire": true,
+	"temporary": true, "new": true, "equals": true, "es": true, "temporal": true, "token": true,
+	"é": true, "e": true, "для": true, "доступа": true, "временный": true, "равен": true,
+	"это": true, "будет": true, "стенда": true,
+}
+
+var contextualAssignment = regexp.MustCompile(`(?:^|[^\pL\pN_])([\pL\pN_]+)=([A-Za-z0-9!@#$%^&*_+.=\-]{8,24})(?:$|[^A-Za-z0-9!@#$%^&*_+.=\-])`)
+var reversePassword = regexp.MustCompile(`(?i)([A-Za-z0-9!@#$%^&*_+.=\-]{8,24})\s+is\s+the\s+password\b`)
+
+func cueWordBoundary(line string, start, end int) bool {
+	word := func(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' }
+	if start > 0 {
+		r, _ := utf8.DecodeLastRuneInString(line[:start])
+		if word(r) {
+			return false
+		}
+	}
+	if end < len(line) {
+		r, _ := utf8.DecodeRuneInString(line[end:])
+		if word(r) {
+			return false
+		}
+	}
+	return true
 }
 
 func isLikelyPasswordToken(t string) bool {
@@ -32,7 +64,7 @@ func isLikelyPasswordToken(t string) bool {
 	if !dg || !lo { // require both a digit and a lowercase letter
 		return false
 	}
-	if IsExampleOrPlaceholder(t) || isVersionOrNumber(t) || isHexRun(t) {
+	if IsExampleOrPlaceholder(t) || isVersionOrNumber(t) || isHexRun(t) || looksLikeIdentifier(t) || looksLikeJSCode(t) {
 		return false
 	}
 	return true
@@ -42,43 +74,6 @@ func isTokenChar(c byte) bool {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ||
 		c == '!' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '&' ||
 		c == '*' || c == '_' || c == '-' || c == '+' || c == '=' || c == '.'
-}
-
-func anyCue(s string) bool {
-	for _, kw := range mlPasswordCues {
-		if strings.Contains(s, kw) {
-			return true
-		}
-	}
-	return false
-}
-
-// firstPasswordCue maps the first folded cue back to the original line. Folded byte lengths can
-// differ (for example, Kelvin sign or dotted I), while candidate spans always use original bytes.
-func firstPasswordCue(line, folded string) (start, end int) {
-	start, end = -1, -1
-	for _, cue := range mlPasswordCues {
-		if pos := strings.Index(folded, cue); pos >= 0 && (start < 0 || pos < start) {
-			start, end = pos, pos+len(cue)
-		}
-	}
-	if start < 0 || !hasNonASCII(line) {
-		return start, end
-	}
-	foldedStart, foldedEnd := start, end
-	start, end = len(line), len(line)
-	foldedPos := 0
-	for pos, r := range line {
-		if foldedPos == foldedStart {
-			start = pos
-		}
-		if foldedPos == foldedEnd {
-			end = pos
-			break
-		}
-		foldedPos += utf8.RuneLen(unicode.ToLower(r))
-	}
-	return start, end
 }
 
 // contextualPassword finds a password token in any line carrying a credential cue but no adjacent
@@ -112,43 +107,72 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 		if uniLower != "" && hasNonASCII(line) {
 			cueSrc = strings.ToLower(line)
 		}
-		if len(line) < 12 || !anyCue(cueSrc) {
+		if len(line) < 12 || !passwordCueRE.MatchString(cueSrc) {
 			lineStart = i + 1
 			continue
 		}
-		cueStart, cueEnd := firstPasswordCue(line, cueSrc)
 		lineStart = i + 1
-		for j := 0; j < len(line); {
-			if !isTokenChar(line[j]) {
-				j++
+		beforeCount := len(out)
+		for _, cue := range passwordCueRE.FindAllStringIndex(line, maxScanMatches) {
+			if !cueWordBoundary(line, cue[0], cue[1]) {
 				continue
 			}
-			k := j
-			for k < len(line) && isTokenChar(line[k]) {
-				k++
-			}
-			tok := line[j:k]
-			valueStart := j
-			if eq := strings.IndexByte(tok, '='); eq >= 0 &&
-				(anyCue(strings.ToLower(tok[:eq])) || (cueEnd > j && cueStart < j+eq && cueEnd <= j+eq)) {
-				// Contextual names such as credential or lösenord are not all covered by the regex.
-				// Keep their value, including any later '=' characters, instead of suppressing the leak.
-				valueStart = j + eq + 1
-				tok = line[valueStart:k]
-			}
-			if isLikelyPasswordToken(tok) {
-				// A token cannot supply its own credential context. Only tokens intersecting the first
-				// cue need another line search; this keeps dense single-line inputs linear in size.
-				if valueStart < cueEnd && cueStart < k && !anyCue(strings.ToLower(line[:valueStart])) && !anyCue(strings.ToLower(line[k:])) {
-					j = k
-					continue
+			j := cue[1]
+			for words := 0; words < 6 && j < len(line) && j-cue[1] < 96; words++ {
+				for j < len(line) && strings.ContainsRune(" \t:=\"'`", rune(line[j])) {
+					j++
 				}
-				out = append(out, Match{Type: "generic_password", Value: tok,
-					Start: base + valueStart, End: base + k, Confidence: 0.6,
-					Category: "generic", Stage: "L1-context-pw"})
+				k := j
+				for k < len(line) && isTokenChar(line[k]) {
+					k++
+				}
+				if k == j {
+					// Unicode connectives are words too; byte offsets always refer to the original source.
+					for k < len(line) {
+						r, n := utf8.DecodeRuneInString(line[k:])
+						if !unicode.IsLetter(r) {
+							break
+						}
+						k += n
+					}
+				}
+				tok := line[j:k]
+				if isLikelyPasswordToken(tok) && (k == len(line) || !strings.ContainsRune("([.=", rune(line[k]))) {
+					out = append(out, Match{Type: "generic_password", Value: tok,
+						Start: base + j, End: base + k, Confidence: 0.6,
+						Category: "generic", Stage: "L1-context-pw"})
+					break
+				}
+				if !passwordConnectives[strings.ToLower(tok)] {
+					break
+				}
+				j = k
+			}
+			if len(out) > 0 && out[len(out)-1].Start >= base {
 				break
 			}
-			j = k
+		}
+		if len(out) == beforeCount {
+			for _, ix := range contextualAssignment.FindAllStringSubmatchIndex(line, maxScanMatches) {
+				name := strings.ToLower(line[ix[2]:ix[3]])
+				value := line[ix[4]:ix[5]]
+				if (strings.Contains(name, "password") || strings.Contains(name, "credential") || strings.Contains(name, "lösenord")) && isLikelyPasswordToken(value) {
+					out = append(out, Match{Type: "generic_password", Value: value, Start: base + ix[4], End: base + ix[5], Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
+					break
+				}
+			}
+		}
+		if len(out) == beforeCount {
+			if ix := reversePassword.FindStringSubmatchIndex(line); ix != nil && isLikelyPasswordToken(line[ix[2]:ix[3]]) {
+				out = append(out, Match{Type: "generic_password", Value: line[ix[2]:ix[3]], Start: base + ix[2], End: base + ix[3], Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
+			}
+		}
+		if len(out) == beforeCount && strings.HasPrefix(strings.ToLower(strings.TrimSpace(line)), "credentials ") {
+			fields := strings.Fields(line)
+			if len(fields) == 2 && isLikelyPasswordToken(fields[1]) {
+				start := strings.LastIndex(line, fields[1])
+				out = append(out, Match{Type: "generic_password", Value: fields[1], Start: base + start, End: base + start + len(fields[1]), Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
+			}
 		}
 	}
 	return out

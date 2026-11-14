@@ -10,7 +10,9 @@ It reads JSON-RPC from **stdin** and writes to **stdout**, so you point your edi
 
 Политика загружается из каталога запуска: `.prowl.yaml` (либо `.prowl.yml`/`prowl.yaml`),
 автоматический импорт `.gitleaks.toml` (либо `gitleaks.toml`) с allowlist и установленные
-шаблоны. Список `detectors.enable/disable` применяется к таксономии после импорта, как в
+шаблоны. Если установленных правил нет, загружается встроенный набор из 175 шаблонов
+с проверкой встроенного SHA-256 manifest. Повреждённый установленный набор
+завершает запуск с ошибкой. Список `detectors.enable/disable` применяется к таксономии после импорта, как в
 CLI. Запускайте процесс из корня нужного проекта. Ошибка выбранной конфигурации или
 правил завершает `prowl lsp` с кодом `2` до обработки документов; частичная политика
 или переход к дефолтам при ошибке не допускаются.
@@ -21,10 +23,10 @@ When you open or edit a document, Prowl scans the buffer's text and publishes di
 
 ```
 possible secret: slack_token (conf 0.90, L1-regex)
-possible secret: aws-access-key-id (rule)
+possible secret: assemblyai-api-key (conf 0.90, rule)
 ```
 
-Built-in taxonomy detectors carry their confidence and detection stage (`conf 0.90, L1-regex`), while findings from nuclei-style rule templates are tagged `(rule)`.
+Диагностика показывает тип, confidence и этап общего Pipeline. Шаблонные находки используют этап `rule`. Значение секрета в сообщение не включается.
 
 Diagnostics carry `source: "prowl"` so you can filter Prowl's findings from other language servers in your editor.
 
@@ -35,15 +37,14 @@ Diagnostics carry `source: "prowl"` so you can filter Prowl's findings from othe
 
 ### Severity mapping
 
-Diagnostic severity is derived from the finding's category and confidence:
+Диагностика использует итоговую severity общего Pipeline, включая понижение для
+примеров и комментариев:
 
-| Condition | LSP severity |
-|-----------|--------------|
-| High-impact categories (`pki`, `payment`, `db`, `cloud`, `vcs`, `ai`, `comms`, `messaging`, `ci`, `saas`, `observability`, `auth`) | Error (1) |
-| `generic` category, or anything unrecognised | Warning (2) |
-| Confidence `< 0.70` (unverified/generic) | Warning (2) |
-
-So a confirmed cloud or database credential surfaces as an Error, while a low-confidence generic match surfaces as a Warning.
+| Severity находки | LSP severity |
+|---|---|
+| `critical`, `high` | Error (1) |
+| `medium` | Warning (2) |
+| `low`, `info` | Information (3) |
 
 ## Protocol support
 
@@ -133,6 +134,29 @@ Hover, code actions и completion не реализованы.
 при неоднозначной длине надёжно восстановить границы сообщений невозможно.
 Обычный EOF между кадрами остаётся корректным завершением. Паника обработчика
 перехватывается без записи исходных значений в журнал.
+
+## Общий Pipeline и локальная проверка 1.5.0
+
+LSP использует тот же immutable `scan.Pipeline`, что и сканирование файлов:
+JSON/TOML/YAML разбираются как значения, pragmas и allowlist применяются совместно,
+одна находка не дублируется детектором и встроенным шаблоном. Все отдельные вхождения
+в редакторе сохраняются. Диапазоны декодированных значений указывают на исходный
+текст, включая JSON escapes, YAML aliases и Base64; CR, LF и CRLF поддерживаются.
+Лексический фильтр отличает выражения кода от строк и комментариев.
+
+Проверка документа в редакторе не включает ML, OCR и live-верификацию провайдера.
+Изменение буфера не отправляет его в эти сервисы.
+
+Локальная проверка `scripts/check_lsp_contract.py /path/to/prowl` запускает настоящий
+процесс по stdio в отдельном `PROWL_HOME`. Корпус содержит 308 положительных и
+334 отрицательных примера; два неоднозначных примера не участвуют в утверждениях.
+В десяти положительных случаях новый named-assignment detector 1.5 заменяет старый
+тип `generic_high_entropy` на более точный `generic_api_key` с этапом `L1-context-key`;
+точный диапазон обязателен в обоих случаях. Корпусные файлы сохранены без изменений.
+
+Evidence: `evidence/1.5.0-lsp-contract-20261114.json`. Это проверка локального
+stdio-контракта; совместимость конкретных плагинов редакторов отдельно не проверена.
+CLI/MCP-флаги `bundled`, `strict`, `semantic` остаются отдельным этапом TODO.
 
 ## Wiring it into an editor
 

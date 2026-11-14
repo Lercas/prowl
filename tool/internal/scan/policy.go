@@ -7,7 +7,7 @@ import (
 )
 
 // DetectionRevision changes when source interpretation or suppression semantics change.
-const DetectionRevision = "1.5.0-decoded-occurrences-v1"
+const DetectionRevision = "1.5.0-source-noise-v1"
 
 // Capabilities reports configured stages; request fields cannot change this snapshot.
 func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
@@ -40,6 +40,7 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 	c.RegisterScope("detection_policy", "1.5.0", map[string]any{
 		"revision": DetectionRevision, "taxonomy": taxonomy, "stages": stages,
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
+		"all_occurrences": o.AllOccurrences,
 	})
 	rulePolicy := ""
 	if o.Rules != nil {

@@ -42,7 +42,7 @@ func TestDenseDiagnosticsShareCorrectPositionsAcrossBothEngines(t *testing.T) {
 	const count = 2000
 	var document strings.Builder
 	for i := 0; i < count; i++ {
-		fmt.Fprintf(&document, "Ключ😀 CASCADE_G7hJ9kL2mN5p TEMPLATE_R%011d\n", i)
+		fmt.Fprintf(&document, "Ключ😀 CASCADE_G7hJ9kL2mN5p TEMPLATE_R4tV8w%06d\n", i+1)
 	}
 	diags := scanDiagnostics(e, "file:///owned/prod.env", document.String())
 	if len(diags) != count*2 {

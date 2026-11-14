@@ -23,6 +23,8 @@ type Options struct {
 	IdentityKey []byte
 	// Reconstruct enables bounded static string reconstruction for JS/TS sources.
 	Reconstruct bool
+	// AllOccurrences retains distinct spans of repeated values for editor diagnostics.
+	AllOccurrences bool
 	// reconstruction maps a child scan to its original expression before observers.
 	reconstruction  *reconstructionOrigin
 	matchLimit      int

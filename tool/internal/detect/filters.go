@@ -6,6 +6,8 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 // exampleValues are well-known documentation values that must never score as a real secret.
@@ -132,15 +134,15 @@ func lineBefore(text string, start int) string {
 	return strings.ToLower(text[ls:start])
 }
 
-// IsHashNotSecret rejects pure-hex digests posing as high-entropy secrets: 40/56/64/96/128-hex are
-// always digests; 32-hex is a hash unless the line names it like a secret.
+// IsHashNotSecret rejects digest-shaped hex without adjacent credential evidence. A token/key binding
+// can legitimately contain the same number of hex characters as a checksum.
 func IsHashNotSecret(text string, start int, val string) bool {
 	if !isHexRun(val) {
 		return false
 	}
 	switch len(val) {
 	case 40, 56, 64, 96, 128: // sha1 / sha224 / sha256 / sha384 / sha512
-		return true
+		return !HasSecretNameContext(text, start)
 	case 32:
 		before := lineBefore(text, start)
 		for _, kw := range hexCtxSecretKw {
@@ -358,28 +360,93 @@ func isVersionOrNumber(v string) bool {
 	return true
 }
 
-// secretNameContext are line cues that mark a high-entropy run as a likely secret.
-var secretNameContext = []string{
-	"secret", "password", "passwd", "passwort", "pwd", "token", "apikey", "api_key", "api-key",
-	"accesskey", "access_key", "access-key", "auth", "credential", "private", "signing", "bearer",
-	"client_secret", "encryption", "session_key", "_key", "-key", "key=", "key:", "key ",
+var reProseSecretContext = regexp.MustCompile(`(?:^|\s)(?:secret|token|password|api[_ -]?key)\s+(?:is|equals|lautet|ist|est)\s*["']?$`)
+
+// BindingName returns the immediately adjacent assignment/attribute name. Earlier properties on a
+// minified line must not lend their credential context to an unrelated value.
+func BindingName(text string, start int) string {
+	if start < 0 || start > len(text) {
+		return ""
+	}
+	lo := start - lineCtxWindow
+	if lo < 0 {
+		lo = 0
+	}
+	// Walk only the adjacent syntax backwards. Searching the whole 2KB window with a Unicode regex
+	// per match is bounded but prohibitively expensive on dense minified files.
+	i := start
+	if i > lo && strings.ContainsRune("\"'`", rune(text[i-1])) {
+		i--
+	}
+	skipSpace := func() {
+		for i > lo {
+			r, n := utf8.DecodeLastRuneInString(text[lo:i])
+			if !unicode.IsSpace(r) {
+				break
+			}
+			i -= n
+		}
+	}
+	skipSpace()
+	if i <= lo || (text[i-1] != ':' && text[i-1] != '=') {
+		return ""
+	}
+	i--
+	skipSpace()
+	if i > lo && strings.ContainsRune("\"'`", rune(text[i-1])) {
+		i--
+	}
+	end := i
+	for count := 0; i > lo; count++ {
+		r, n := utf8.DecodeLastRuneInString(text[lo:i])
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' && r != '-' && r != '.' {
+			break
+		}
+		if count >= 128 {
+			return ""
+		}
+		i -= n
+	}
+	if end == i {
+		return ""
+	}
+	r, _ := utf8.DecodeRuneInString(text[i:end])
+	if !unicode.IsLetter(r) && r != '_' {
+		return ""
+	}
+	return strings.ToLower(text[i:end])
 }
 
-// HasSecretNameContext reports whether the line containing `start` names the value like a secret.
+// HasSecretNameContext requires an adjacent secret binding or an Authorization/Bearer value.
 func HasSecretNameContext(text string, start int) bool {
-	before := lineBefore(text, start)
-	for _, kw := range secretNameContext {
-		if strings.Contains(before, kw) {
+	name := BindingName(text, start)
+	if name == "" {
+		before := lineBefore(text, start)
+		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || reProseSecretContext.MatchString(before)
+	}
+	return IsSecretBindingName(name)
+}
+
+// IsSecretBindingName classifies the adjacent name, shared with ML's evidence guard.
+func IsSecretBindingName(name string) bool {
+	name = strings.ToLower(name)
+	if strings.HasSuffix(name, "public_key") || strings.HasSuffix(name, "publickey") || strings.HasSuffix(name, "_id") || strings.HasSuffix(name, "-id") ||
+		strings.HasSuffix(name, "hash") || strings.HasSuffix(name, "checksum") || strings.HasSuffix(name, "digest") {
+		return false
+	}
+	name = strings.TrimSuffix(strings.TrimSuffix(name, "_value"), "-value")
+	for _, cue := range []string{"password", "passwd", "passwort", "pwd", "secret", "token", "apikey", "accesskey", "credential"} {
+		if strings.HasSuffix(name, cue) {
 			return true
 		}
 	}
-	return false
+	return name == "auth" || name == "key" || strings.HasSuffix(name, "_key") || strings.HasSuffix(name, "-key")
 }
 
 var nonSecretBlobMarkers = []string{
 	"ssh-rsa", "ssh-ed25519", "ssh-dss", "ecdsa-sha2", // public keys
 	"data:", ";base64,", // data URIs
-	"$2a$", "$2b$", "$2y$", // bcrypt
+	"$2a$", "$2b$", "$2y$", "$argon2", "$scrypt$", "$pbkdf2", // password hashes
 	"-----begin public", "-----begin certificate", // public material
 	"integrity=", "sha384-", "sha512-", // SRI hashes
 }
@@ -388,6 +455,12 @@ var nonSecretBlobMarkers = []string{
 // (public key, data URI, bcrypt hash, SRI integrity).
 func IsKnownNonSecretBlob(text string, start int) bool {
 	before := lineBefore(text, start)
+	// Inspect only the current literal/statement, not other values earlier on the same line.
+	if q := strings.LastIndexAny(before, "\"'`"); q >= 0 {
+		before = before[q+1:]
+	} else if sep := strings.LastIndexAny(before, ";,{}"); sep >= 0 {
+		before = before[sep+1:]
+	}
 	for _, m := range nonSecretBlobMarkers {
 		if strings.Contains(before, m) {
 			return true

@@ -23,11 +23,14 @@ import (
 	"github.com/Lercas/prowl/tool/internal/forge"
 	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/resilience"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 // maxMessageBytes caps a single JSON-RPC frame so a hostile Content-Length (negative -> makeslice
@@ -54,7 +57,12 @@ type engine struct {
 // Serve runs the LSP loop on stdin/stdout until the client exits, building the same detector + rule
 // engine + allowlist a workspace `prowl scan` would so in-editor diagnostics match the CLI.
 func Serve() error {
-	e, err := build()
+	return ServeWithBundled(false)
+}
+
+// ServeWithBundled selects the immutable rules snapshot while retaining workspace config.
+func ServeWithBundled(bundled bool) error {
+	e, err := buildWithBundled(bundled)
 	if err != nil {
 		return err
 	}
@@ -114,6 +122,10 @@ func serve(input io.Reader, output io.Writer, e *engine) (resultErr error) {
 // would: auto-discovered .prowl.yaml, its enable/disable/custom/tuning, and ~/.prowl/rules
 // templates — so editor findings line up with the CLI.
 func build() (*engine, error) {
+	return buildWithBundled(false)
+}
+
+func buildWithBundled(bundled bool) (*engine, error) {
 	cfg, err := config.Discover() // honor the workspace's own .prowl.yaml (same trust model as `prowl scan`)
 	if err != nil {
 		return nil, err
@@ -155,19 +167,26 @@ func build() (*engine, error) {
 		maxBytes = int(cfg.Performance.MaxSize)
 	}
 	e := &engine{det: detect.New(tax), allow: cfg.Allowed, maxBytes: maxBytes}
-	dir, err := installedRulesDir()
-	if err != nil {
-		return nil, err
+	var dir string
+	if !bundled {
+		dir, err = installedRulesDir()
+		if err != nil {
+			return nil, err
+		}
 	}
 	if dir != "" {
-		eng, err := rules.Load(dir)
+		e.eng, err = rules.Load(dir)
 		if err != nil {
 			return nil, fmt.Errorf("lsp: incomplete rule template set: %w", err)
 		}
-		if eng != nil && eng.Len() > 0 {
-			e.eng = eng
-			logx.Info("lsp: loaded rule templates", "count", eng.Len(), "dir", dir)
+	} else {
+		e.eng, err = rules.LoadEmbedded(bundledrules.Files)
+		if err != nil {
+			return nil, fmt.Errorf("lsp: embedded rule templates failed to load: %w", err)
 		}
+	}
+	if e.eng != nil && e.eng.Len() > 0 {
+		logx.Info("lsp: loaded rule templates", "count", e.eng.Len(), "dir", dir)
 	}
 	return e, nil
 }
@@ -543,54 +562,42 @@ func collectDiagnostics(e *engine, uri, text string) []map[string]any {
 			fmt.Sprintf("Документ не проверен: размер %d байт превышает лимит %d байт.", len(text), e.maxBytes))}
 	}
 	path := uriToPath(uri) // allowlist path-substring matching needs a filesystem path, not a file:// URI
-	positions := positionIndex{text: text}
-	maxMatches := detect.MaxScanMatches()
-	matches, truncated := e.det.ScanCtxWithStatus(context.Background(), text)
-	for _, m := range matches {
-		if e.allow != nil && e.allow(m.Value, path) {
+	// Share final suppression and collision handling with CLI. No verifier or ML is attached here,
+	// so typing a document cannot make provider calls or send its contents to a sidecar.
+	coverage := model.NewCoverage()
+	findings := scan.New(scan.Options{Detector: e.det, Rules: e.eng, Allow: e.allow, AllOccurrences: true}).Findings(model.WithCoverage(context.Background(), coverage), model.Item{Path: path, Text: text, Source: "code"})
+	offsets := make([]int, 0, len(findings)*2)
+	for _, f := range findings {
+		offsets = append(offsets, f.ByteStart, f.ByteEnd)
+	}
+	positions := offsetPositions(text, offsets)
+	for _, f := range findings {
+		if model.IsIncompleteFinding(f) {
+			diags = append(diags, incompleteDiagnostic(f.Type, "Проверка неполная: "+f.Rationale))
 			continue
 		}
-		sl, sc := positions.at(m.Start)
-		el, ec := positions.at(m.End)
+		if f.ByteEnd <= f.ByteStart {
+			continue // truncation markers have no literal source span
+		}
+		start, end := positions[f.ByteStart], positions[f.ByteEnd]
 		diags = append(diags, map[string]any{
 			"range": map[string]any{
-				"start": map[string]any{"line": sl, "character": sc},
-				"end":   map[string]any{"line": el, "character": ec},
+				"start": map[string]any{"line": start[0], "character": start[1]},
+				"end":   map[string]any{"line": end[0], "character": end[1]},
 			},
-			"severity": lspSeverity(m.Category, m.Confidence),
+			"severity": ruleLSPSeverity(f.Severity, ""),
 			"source":   "prowl",
-			"message":  fmt.Sprintf("possible secret: %s (conf %.2f, %s)", m.Type, m.Confidence, m.Stage),
+			"message":  fmt.Sprintf("possible secret: %s (conf %.2f, %s)", f.Type, f.Confidence, f.Stage),
 		})
 	}
-	if e.eng != nil { // installed ~/.prowl/rules templates, same as a flagless CLI scan
-		var hits []rules.Hit
-		if budget := maxMatches - len(diags); budget > 0 {
-			var limited bool
-			hits, limited = e.eng.MatchN(text, budget)
-			truncated = truncated || limited
-		} else {
-			truncated = true
+	if complete, _, _ := coverage.Snapshot(); !complete {
+		hasIncomplete := false
+		for _, f := range findings {
+			hasIncomplete = hasIncomplete || model.IsIncompleteFinding(f)
 		}
-		for _, h := range hits {
-			if e.allow != nil && e.allow(h.Value, path) {
-				continue
-			}
-			sl, sc := positions.at(h.Start)
-			el, ec := positions.at(h.End)
-			diags = append(diags, map[string]any{
-				"range": map[string]any{
-					"start": map[string]any{"line": sl, "character": sc},
-					"end":   map[string]any{"line": el, "character": ec},
-				},
-				"severity": ruleLSPSeverity(h.Severity, h.Category),
-				"source":   "prowl",
-				"message":  fmt.Sprintf("possible secret: %s (rule)", h.RuleID),
-			})
+		if !hasIncomplete {
+			diags = append(diags, incompleteDiagnostic("scan_incomplete", "Проверка неполная: достигнут лимит или произошла ошибка."))
 		}
-	}
-	if truncated {
-		diags = append(diags, incompleteDiagnostic("results_truncated",
-			fmt.Sprintf("Проверка неполная: достигнут лимит кандидатов (%d); часть секретов может быть не показана.", maxMatches)))
 	}
 	return diags
 }
@@ -648,9 +655,12 @@ func offsetPos(text string, off int) (int, int) {
 	line, col := 0, 0
 	for i := 0; i < off; {
 		r, size := utf8.DecodeRuneInString(text[i:])
-		if r == '\n' {
+		if r == '\n' || r == '\r' {
 			line++
 			col = 0
+			if r == '\r' && i+1 < len(text) && text[i+1] == '\n' {
+				i++
+			}
 			i++
 			continue
 		}

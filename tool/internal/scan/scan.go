@@ -436,11 +436,15 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	failed := false
 	resilience.Guard(
 		func() {
-			if literalDoc != nil {
-				ms, truncated = det.ScanWithScalars(ctx, it.Text, literalDoc.scalars)
-			} else {
-				ms, truncated = det.ScanCtxWithStatus(ctx, it.Text)
+			opts := detect.ScanOptions{}
+			if pathIsFilesystem(it.Source) {
+				opts = DetectionOptions(it.Path)
 			}
+			if literalDoc != nil {
+				opts.PasswordScalars = literalDoc.scalars
+			}
+			result := det.ScanWithStatus(ctx, it.Text, opts)
+			ms, truncated = result.Matches, result.CandidateLimited || result.Base64Limited
 		},
 		func(r any) {
 			logx.Warn("recovered scan panic", "path", it.Path, "err", r)
@@ -492,6 +496,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}
 	}
 	pathIsFile := pathIsFilesystem(it.Source)
+	codeValues := NewCodeValueFilter(it.Path, it.Text)
 	itemURL, _ := it.Meta["url"].(string)
 	itemInstr, _ := it.Meta["instruction"].(string) // image: the Dockerfile step that built the layer
 	verificationText := it.Text
@@ -516,6 +521,10 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			continue
 		}
 		if !p.options.IgnorePragmas && hasPragma(m.Start) {
+			model.CoverageFrom(ctx).Filtered()
+			continue
+		}
+		if pathIsFile && taxonomy.GenericLast[m.Type] && codeValues.NonLiteral(m.Start, m.End) {
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
@@ -550,6 +559,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			sl, sc := li.cols(span.Start)
 			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: sl, Col: sc, Transform: transform})
 		}
+		if m.Transform != "" {
+			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: m.Start, End: m.End, Line: line, Col: col, Transform: m.Transform})
+		}
 		if vset != nil {
 			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})
 		}
@@ -573,7 +585,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		if budget > 0 {
 			resilience.Guard(
 				func() {
-					if p.options.ValueFingerprint != nil {
+					if p.options.ValueFingerprint != nil || p.options.AllOccurrences {
 						hits, engTrunc = eng.MatchOccurrencesN(it.Text, budget)
 					} else {
 						hits, engTrunc = eng.MatchN(it.Text, budget)
@@ -651,7 +663,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
 			// builtin — a cryptographic L1-checksum hit must never be rewritten by a template's self-declared severity.
 			if collided {
-				if prev := out[idx]; prev.Stage == "rule" || isChecksumProven(prev) || stronger(prev, f) {
+				if prev := out[idx]; prev.Stage == "rule" || isChecksumProven(prev) || stronger(prev, f) || eng.Bundled() && !taxonomy.GenericLast[prev.Type] {
 					continue
 				}
 				out[idx] = f
