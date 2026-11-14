@@ -89,7 +89,7 @@ func Analyze(re *regexp.Regexp) *Plan {
 			lits[i].S = safeFoldPiece(lits[i].S)
 		}
 		l := lits[i]
-		if (len(l.S) < minLitLen && len(p.triggers) == 0) || strings.IndexByte(l.S, '\n') >= 0 {
+		if (literalScore(l.S) < minLitLen && len(p.triggers) == 0) || strings.IndexByte(l.S, '\n') >= 0 {
 			return nil // too short to filter, or spans lines (no single "line of the literal")
 		}
 		for j := 0; j < len(l.S); j++ {
@@ -288,30 +288,41 @@ type litInfo struct {
 	req   []Lit
 }
 
-// usable reports whether a set works as a pre-filter: non-empty and every member long enough.
+// literalScore ranks proved anchors by expected selectivity, not match width.
+// The at-sign is uncommon in source text and a more useful URL-credential
+// anchor than the ubiquitous comment prefix "//". This heuristic only selects
+// between necessary literals; byte and line bounds are proved independently.
+func literalScore(s string) int {
+	if s == "@" {
+		return 3
+	}
+	return len(s)
+}
+
+// usable reports whether every member is selective enough for a pre-filter.
 func usable(set []Lit) bool {
 	if len(set) == 0 || len(set) > maxLitSet {
 		return false
 	}
 	for _, l := range set {
-		if len(l.S) < minLitLen {
+		if literalScore(l.S) < minLitLen {
 			return false
 		}
 	}
 	return true
 }
 
-func minLen(set []Lit) int {
+func minScore(set []Lit) int {
 	m := -1
 	for _, l := range set {
-		if m < 0 || len(l.S) < m {
-			m = len(l.S)
+		if score := literalScore(l.S); m < 0 || score < m {
+			m = score
 		}
 	}
 	return m
 }
 
-// better prefers the set whose shortest member is longest (rarer hits), then the smaller set.
+// better prefers the set whose least selective member scores highest, then the smaller set.
 func better(a, b []Lit) []Lit {
 	ua, ub := usable(a), usable(b)
 	switch {
@@ -322,7 +333,7 @@ func better(a, b []Lit) []Lit {
 	case !ua:
 		return b
 	}
-	if la, lb := minLen(a), minLen(b); la != lb {
+	if la, lb := minScore(a), minScore(b); la != lb {
 		if la > lb {
 			return a
 		}
