@@ -172,7 +172,7 @@ func NewResult(fs []Finding, c *Coverage) ScanResult {
 	if !complete {
 		reason = "incomplete"
 	}
-	var scopes []Scope
+	scopes := []Scope{}
 	filtered := false
 	identityScope := ""
 	revealed := false

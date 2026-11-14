@@ -20,11 +20,16 @@ func sanitizeTerminal(s string) string { return logx.SanitizeTerminal(s) }
 
 // Write dispatches by format. color enables ANSI styling in the pretty format.
 func Write(w io.Writer, findings []model.Finding, format string, color bool) error {
+	return WriteWithCoverage(w, findings, format, color, nil)
+}
+
+// WriteWithCoverage preserves the released machine envelope for one scan ledger.
+func WriteWithCoverage(w io.Writer, findings []model.Finding, format string, color bool, coverage *model.Coverage) error {
 	switch format {
 	case "json":
-		return writeJSON(w, findings)
+		return writeJSON(w, findings, coverage)
 	case "sarif":
-		return writeSARIF(w, findings)
+		return writeSARIF(w, findings, coverage)
 	case "defectdojo", "dojo":
 		return writeDefectDojo(w, findings)
 	case "pretty", "":
@@ -32,16 +37,6 @@ func Write(w io.Writer, findings []model.Finding, format string, color bool) err
 	default:
 		return fmt.Errorf("unsupported report format %q", format)
 	}
-}
-
-// anyTruncated reports whether the scan includes a cap or a source failure indicating incomplete results.
-func anyTruncated(fs []model.Finding) bool {
-	for _, f := range fs {
-		if model.IsIncompleteFinding(f) {
-			return true
-		}
-	}
-	return false
 }
 
 func sortFindings(fs []model.Finding) {
@@ -262,7 +257,7 @@ func plural(n int) string {
 	return "s"
 }
 
-func writeJSON(w io.Writer, fs []model.Finding) error {
+func writeJSON(w io.Writer, fs []model.Finding, coverage *model.Coverage) error {
 	sortFindings(fs)
 	// Coerce nil to an empty slice so the field is always `[]`, never `null` (a null breaks consumers
 	// that iterate findings).
@@ -279,11 +274,11 @@ func writeJSON(w io.Writer, fs []model.Finding) error {
 	// Don't HTML-escape so paths like <stdin> aren't mangled to <stdin>.
 	enc.SetEscapeHTML(false)
 	// `truncated` surfaces the global match cap so a CI consumer knows results are incomplete.
-	return enc.Encode(map[string]any{"findings": fs, "count": len(fs), "truncated": anyTruncated(fs)})
+	return enc.Encode(model.NewResult(fs, coverage))
 }
 
 // writeSARIF emits SARIF 2.1.0 for GitHub/GitLab code-scanning tabs, with a rule per secret type.
-func writeSARIF(w io.Writer, fs []model.Finding) error {
+func writeSARIF(w io.Writer, fs []model.Finding, coverage *model.Coverage) error {
 	sortFindings(fs)
 	ruleIndex := map[string]int{}
 	rules := make([]map[string]any, 0)
@@ -351,9 +346,12 @@ func writeSARIF(w io.Writer, fs []model.Finding) error {
 	}
 	// Surface the global match cap, mirroring the JSON envelope's `truncated` field (run-level
 	// properties is the SARIF-valid place for tool-specific metadata).
-	if anyTruncated(fs) {
-		run["properties"] = map[string]any{"truncated": true}
-	}
+	result := model.NewResult(fs, coverage)
+	run["properties"] = map[string]any{"schema_version": result.SchemaVersion, "truncated": result.Truncated,
+		"complete": result.Complete, "completion_reason": result.CompletionReason, "diagnostics": result.Diagnostics,
+		"scope": result.Scope, "stats": result.Stats, "filtered": result.Filtered,
+		"identity_scope": result.IdentityScope, "secrets_revealed": result.SecretsRevealed}
+	run["invocations"] = []map[string]any{{"executionSuccessful": result.Complete}}
 	doc := map[string]any{
 		"$schema": "https://json.schemastore.org/sarif-2.1.0.json",
 		"version": "2.1.0",

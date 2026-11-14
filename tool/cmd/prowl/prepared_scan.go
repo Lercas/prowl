@@ -22,6 +22,13 @@ type preparedScan struct {
 }
 
 func prepareScan(flags commonFlags, options scan.Options) preparedScan {
+	flags.coverage.SetIdentityScope(flags.identityKey)
+	if flags.showSecrets {
+		flags.coverage.RevealSecrets()
+	}
+	flags.coverage.RegisterScope("pipeline", "1.5", map[string]any{"version": version, "ml": flags.mlEmbed || flags.mlURL != "", "ml_model": flags.mlModel,
+		"ml_url": flags.mlURL, "ml_threshold": flags.mlThreshold, "verify": flags.verify, "verify_all": flags.verifyAll || flags.failOnVerified,
+		"index": flags.indexDir != "", "reconstruct": flags.reconstruct, "disable": flags.disable, "rules_only": flags.rulesOnly, "max_per_file": flags.maxPerFile})
 	ml, err := flags.mlScorer()
 	options.ML, options.Workers, options.RevealSecrets = ml, flags.workers, flags.showSecrets
 	options.IgnorePragmas = flags.noAutoPolicy
@@ -73,7 +80,7 @@ func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []mo
 		findings = scan.FinalizeGitTimeline(findings)
 	}
 	if p.flags.verifiedOnly && p.flags.indexDir == "" {
-		findings = keepVerified(findings)
+		findings = keepVerifiedWithCoverage(p.flags, findings)
 	}
 	if p.dedupe && p.flags.indexDir == "" {
 		findings = dedupeFingerprints(findings)
@@ -81,7 +88,7 @@ func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []mo
 	if p.flags.indexDir != "" {
 		return findings
 	}
-	return capGenericPerFile(findings, p.flags.maxPerFile)
+	return capWithCoverage(p.flags, findings)
 }
 
 func (p preparedScan) Run(ctx context.Context, items <-chan model.Item) int {
@@ -100,7 +107,7 @@ func (p preparedScan) Run(ctx context.Context, items <-chan model.Item) int {
 		if p.dedupe {
 			findings = dedupeFingerprints(findings)
 		}
-		findings = capGenericPerFile(findings, p.flags.maxPerFile)
+		findings = capWithCoverage(p.flags, findings)
 	}
 	return reportScan(ctx, p.flags, findings, time.Since(start))
 }

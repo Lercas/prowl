@@ -51,7 +51,7 @@ func keepVerified(fs []model.Finding) []model.Finding {
 // than leave an empty report CI would read as "clean".
 func writeReport(c commonFlags, findings []model.Finding) error {
 	if c.output != "" {
-		if err := writeReportFile(c.output, findings, c.format); err != nil {
+		if err := writeReportFile(c.output, findings, c.format, c.coverage); err != nil {
 			logx.Error("cannot write output file", "path", c.output, "err", err)
 			return err
 		}
@@ -62,7 +62,7 @@ func writeReport(c commonFlags, findings []model.Finding) error {
 		return nil // --silence suppresses the human report; an explicit --format json/sarif still writes for CI
 	}
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout)
-	if err := report.Write(os.Stdout, findings, c.format, color); err != nil {
+	if err := report.WriteWithCoverage(os.Stdout, findings, c.format, color, c.coverage); err != nil {
 		logx.Error("cannot write report to stdout", "err", err)
 		return err
 	}
@@ -71,9 +71,13 @@ func writeReport(c commonFlags, findings []model.Finding) error {
 
 // writeReportFile commits a complete report without changing the previous inode on failure.
 // Every report is private because --show-secrets can put full credential values into its output.
-func writeReportFile(path string, findings []model.Finding, format string) error {
+func writeReportFile(path string, findings []model.Finding, format string, coverage ...*model.Coverage) error {
+	var c *model.Coverage
+	if len(coverage) > 0 {
+		c = coverage[0]
+	}
 	return localfile.WriteAtomic(path, 0o600, func(w io.Writer) error {
-		return report.Write(w, findings, format, false)
+		return report.WriteWithCoverage(w, findings, format, false, c)
 	})
 }
 
@@ -150,6 +154,13 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 
 // reportScan carries lifecycle cancellation through suppression, baseline commit and the gate.
 func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	if c.indexCoverageComplete != nil {
+		complete := c.indexCoverageComplete()
+		c.indexCoverageComplete = func() bool { return complete }
+		if !complete {
+			c.coverage.Note("source_incomplete", "", true)
+		}
+	}
 	if c.indexDir != "" {
 		if err := recordIndexedScan(ctx, c, findings); err != nil {
 			logx.Error("запись индекса не удалась", "err", err)
@@ -157,12 +168,12 @@ func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, el
 			return 2
 		}
 		if c.verifiedOnly {
-			findings = keepVerified(findings)
+			findings = keepVerifiedWithCoverage(c, findings)
 		}
 		if c.dedupe {
 			findings = dedupeFingerprints(findings)
 		}
-		findings = capGenericPerFile(findings, c.maxPerFile)
+		findings = capWithCoverage(c, findings)
 	}
 	return failClosedIfIncomplete(ctx, reportFindingsContext(ctx, c, findings, elapsed))
 }
@@ -182,6 +193,9 @@ func markInterrupted(ctx context.Context, findings []model.Finding) []model.Find
 
 func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
 	findings = markInterrupted(ctx, findings)
+	if !model.NewResult(findings, c.coverage).Complete && !containsIncomplete(findings) {
+		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info", Stage: "coverage", Rationale: "requested scan coverage is incomplete"})
+	}
 	findings = applyReportFilters(c, findings)
 	summarize(findings, elapsed)
 
@@ -252,6 +266,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 		before := len(findings)
 		findings = baseline.Suppress(findings)
 		if n := before - len(findings); n > 0 {
+			c.coverage.Filtered()
 			logx.Warn("baseline suppressed findings", "count", n, "baseline", blPath)
 		}
 	}
@@ -262,6 +277,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 		before := len(findings)
 		findings = ignore.Suppress(findings)
 		if n := before - len(findings); n > 0 {
+			c.coverage.Filtered()
 			logx.Warn("gitleaksignore suppressed findings", "count", n, "path", ".gitleaksignore")
 		}
 	}
@@ -307,6 +323,9 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 			continue
 		}
 		out = append(out, f)
+	}
+	if len(out) < len(fs) {
+		c.coverage.Filtered()
 	}
 	return out
 }

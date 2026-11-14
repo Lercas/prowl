@@ -350,6 +350,9 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
+	if it.Error == nil && ctx.Err() == nil {
+		model.CoverageFrom(ctx).Processed(len(it.Text))
+	}
 	coverage := model.NewCoverage()
 	if p.options.Reconstruct && reconstructable(it) {
 		options := p.options
@@ -364,6 +367,14 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	if p.options.Reconstruct && reconstructable(it) && it.Error == nil && ctx.Err() == nil {
 		result = p.appendReconstructed(model.WithCoverage(ctx, coverage), it, result)
 	}
+	complete, _, _ := coverage.Snapshot()
+	if complete {
+		for _, f := range result {
+			if model.IsIncompleteFinding(f) {
+				coverage.Note(f.Type, f.Path, true)
+			}
+		}
+	}
 	complete, _, diagnostics := coverage.Snapshot()
 	for _, d := range diagnostics {
 		model.Note(ctx, d.Code, d.Path, d.Incomplete)
@@ -371,7 +382,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	if model.NewResult(nil, coverage).Filtered {
 		model.CoverageFrom(ctx).Filtered()
 	}
-	if !complete {
+	if !complete && !hasIncompleteFinding(result) {
 		result = append(result, processingError(it, "scan could not complete all requested checks; results are incomplete"))
 		if record, _ := it.Meta["git_history"].(*model.GitRecord); record != nil {
 			record.Graph.Inspected.Store(record.Object, false)
@@ -501,9 +512,11 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			p.observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
 		}
 		if allow != nil && allow(m.Value, it.Path) {
+			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
 		if !p.options.IgnorePragmas && hasPragma(m.Start) {
+			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
 		// in a lockfile a generic entropy/api-key hit is almost always a package integrity hash; drop
@@ -590,6 +603,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				p.observeGitCandidate(gitRecord, h.RuleID, it.Path, h.Value)
 			}
 			if allow != nil && allow(h.Value, it.Path) {
+				model.CoverageFrom(ctx).Filtered()
 				continue
 			}
 			// drop unresolved $VAR refs and doc examples/placeholders, as the cascade does, so installed
@@ -599,6 +613,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				continue
 			}
 			if !p.options.IgnorePragmas && hasPragma(h.Start) {
+				model.CoverageFrom(ctx).Filtered()
 				continue
 			}
 			line, col := li.cols(h.Start)
@@ -887,6 +902,8 @@ func mlFilterSelected(ctx context.Context, ml mlscore.Scorer, out []model.Findin
 		if mlExempt(f) || results[i].Score >= threshold {
 			kept = append(kept, f)
 			indices = append(indices, i)
+		} else {
+			model.CoverageFrom(ctx).Filtered()
 		}
 	}
 	return kept, indices

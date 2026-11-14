@@ -116,8 +116,14 @@
       сохраняет время исходной попытки; unsupported/skipped не получают ложный
       timestamp. Ошибка провайдера или обязательного binding даёт неполноту и
       код 2, новый baseline не записывается. Нативная loopback-матрица — 49/49;
-      `wiki/evidence/1.5.0-verdicts-20261114.json`. Полный coverage envelope
-      остаётся отдельным открытым пунктом.
+      `wiki/evidence/1.5.0-verdicts-20261114.json`.
+    - [x] CLI передаёт общий coverage ledger в JSON и run-level SARIF: полнота,
+      диагностика, stats, scope, filtered и reveal/identity metadata. Исходный
+      Item считается один раз до производных представлений; неполнота источника
+      без находок даёт код 2 и блокирует baseline. Нативная матрица — 76/76;
+      [контракт и границы](wiki/Scan-Coverage.md), отчёт —
+      `wiki/evidence/1.5.0-coverage-20261114.json`. Полные acquisition scopes
+      остальных источников и аудит MCP/LSP остаются открыты.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

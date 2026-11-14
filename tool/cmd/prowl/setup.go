@@ -12,6 +12,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/forge"
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
@@ -177,7 +178,8 @@ func setupLogging(c commonFlags) {
 // rootContext returns a context cancelled on Ctrl-C / SIGTERM and, with --timeout, after that
 // deadline. Caller must defer the stop func.
 func rootContext(c commonFlags) (context.Context, context.CancelFunc) {
-	ctx, stop := signal.NotifyContext(context.Background(), scanSignals()...)
+	c.coverage.SetIdentityScope(c.identityKey)
+	ctx, stop := signal.NotifyContext(model.WithCoverage(context.Background(), c.coverage), scanSignals()...)
 	ctx = source.WithStateDirectory(ctx, c.indexDir)
 	if c.timeout > 0 {
 		tctx, cancel := context.WithTimeout(ctx, c.timeout)

@@ -1,0 +1,551 @@
+{
+  "status": "locally qualified CLI coverage envelope restoration; not published",
+  "native": {
+    "binary_sha256": "6b900cf5f6dd34708fbe5da8fc8ee30781ca545834c84d12f22f05f3cbe4657f",
+    "passed": 76,
+    "total": 76,
+    "checks": [
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite": true,
+    "race_scan_source_report_cli": true
+  },
+  "limits": [
+    "command scope is requested selection, not immutable source revision",
+    "source-specific acquisition scope/provenance beyond filesystem and stdin remains open",
+    "MCP/LSP integration remains open"
+  ]
+}

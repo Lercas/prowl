@@ -50,7 +50,7 @@ func recordIndexedScan(ctx context.Context, c commonFlags, findings []model.Find
 		return err
 	}
 	defer func() { err = errors.Join(err, store.Close()) }()
-	complete := ctx.Err() == nil
+	complete := ctx.Err() == nil && model.NewResult(nil, c.coverage).Complete
 	if c.indexCoverageComplete != nil {
 		complete = complete && c.indexCoverageComplete()
 	}

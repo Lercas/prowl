@@ -295,7 +295,7 @@ func commandParseError(err error) int {
 }
 
 func parseCommand(command string, args []string) (commonFlags, []string, error) {
-	c := commonFlags{format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: .3, ocrMaxPages: 20, ocrTimeout: 2 * time.Minute}
+	c := commonFlags{coverage: model.NewCoverage(), format: "pretty", maxSize: 10 << 20, dedupe: true, maxPerFile: 30, mlThreshold: .3, ocrMaxPages: 20, ocrTimeout: 2 * time.Minute}
 	c.cmd = commandOptions{maxAssets: 300, addr: "127.0.0.1:8080", maxRuns: 20, maxArtifacts: 100, maxDownload: 100 << 20, minRun: minRunDefault}
 	if command == "guard" {
 		c.maxSize = 1 << 20
@@ -450,6 +450,11 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 			if err != nil {
 				return c, nil, fmt.Errorf("identity key: %w", err)
 			}
+			c.coverage.SetIdentityScope(c.identityKey)
+			c.coverage.RegisterScope("command", command, map[string]any{
+				"targets": rest, "command_options": fmt.Sprintf("%#v", c.cmd), "stdin_name": c.stdinName,
+				"history": c.history, "staged": c.staged, "since": c.since, "git_timeline": c.gitTimeline,
+			})
 			break
 		}
 	}
@@ -508,6 +513,7 @@ func splitCSV(s string) []string {
 }
 
 type commonFlags struct {
+	coverage                                 *model.Coverage
 	identityKeyFile                          string
 	identityKey                              []byte
 	verifyAll                                bool

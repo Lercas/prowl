@@ -47,6 +47,7 @@ func stdinFrom(ctx context.Context, input io.ReadCloser, maxBytes int64) <-chan 
 }
 
 func stdinNamedFrom(ctx context.Context, input io.ReadCloser, maxBytes int64, name string) <-chan model.Item {
+	model.CoverageFrom(ctx).RegisterScope("stdin", name, struct{ MaxSize int64 }{maxBytes})
 	ch := make(chan model.Item, 1)
 	go func() {
 		defer close(ch)
@@ -98,6 +99,16 @@ var skipExt = map[string]bool{
 
 // Filesystem walks roots and yields text Items, skipping binaries/large files/excluded paths.
 func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-chan model.Item {
+	for _, root := range roots {
+		target, err := filepath.Abs(root)
+		if err != nil {
+			target = root
+		}
+		model.CoverageFrom(ctx).RegisterScope("filesystem", target, struct {
+			Exclude  []string
+			MaxBytes int64
+		}{exclude, maxBytes})
+	}
 	ch := make(chan model.Item, 128)
 	go func() {
 		defer close(ch)
