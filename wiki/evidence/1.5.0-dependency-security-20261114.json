@@ -1,0 +1,180 @@
+{
+  "scope": "dependency/security update and portable ML v2 migration; no publication",
+  "base_commit": "2a5b4692108427e25c7f63b01e416d5451df823f",
+  "candidate_patch_sha256": "667bb019798b0658afc91be26c952ac96ca59e37ebc460091540fd623b374bc6",
+  "govulncheck": {
+    "version": "v1.9.0",
+    "database_last_modified": "2026-11-11T02:51:11Z",
+    "before_reachable_vulnerabilities": 21,
+    "after_configurations": [
+      {
+        "go": "go1.27.4",
+        "os": "linux",
+        "arch": "amd64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.27.4",
+        "os": "linux",
+        "arch": "arm64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "amd64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.27.4",
+        "os": "windows",
+        "arch": "amd64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.27.4",
+        "os": "windows",
+        "arch": "arm64",
+        "exit_code": 0
+      },
+      {
+        "go": "go1.26.11",
+        "os": "linux",
+        "arch": "amd64",
+        "exit_code": 0
+      }
+    ],
+    "after_findings": 0,
+    "six_snapshot_binary_scans": "passed"
+  },
+  "dependencies": {
+    "github.com/danieljoos/wincred": {
+      "before": "v1.2.2",
+      "after": "v1.2.3"
+    },
+    "github.com/docker/cli": {
+      "before": "v29.5.3+incompatible",
+      "after": "v29.9.3+incompatible"
+    },
+    "github.com/docker/docker-credential-helpers": {
+      "before": "v0.9.3",
+      "after": "v0.9.13"
+    },
+    "github.com/google/go-containerregistry": {
+      "before": "v0.21.7",
+      "after": "v0.22.1"
+    },
+    "github.com/klauspost/compress": {
+      "before": "v1.18.6",
+      "after": "v1.20.4"
+    },
+    "github.com/ledongthuc/pdf": {
+      "before": "v0.0.0-20250511090121-5959a4027728",
+      "after": "v0.0.0-20261020125853-5e46805f718e"
+    },
+    "github.com/moby/moby/api": {
+      "before": "v1.54.2",
+      "after": "v1.55.0"
+    },
+    "github.com/moby/moby/client": {
+      "before": "v0.4.1",
+      "after": "v0.5.1"
+    },
+    "github.com/sirupsen/logrus": {
+      "before": "v1.9.4",
+      "after": "v1.10.2"
+    },
+    "github.com/stretchr/testify": {
+      "before": "v1.10.0",
+      "after": "v1.12.1"
+    },
+    "go.yaml.in/yaml/v3": {
+      "before": "v3.0.4",
+      "after": "v3.0.5"
+    },
+    "golang.org/x/crypto": {
+      "before": "v0.49.0",
+      "after": "v0.58.0"
+    },
+    "golang.org/x/mod": {
+      "before": "v0.37.0",
+      "after": "v0.42.0"
+    },
+    "golang.org/x/net": {
+      "before": "v0.52.0",
+      "after": "v0.62.0"
+    },
+    "golang.org/x/sync": {
+      "before": "v0.21.0",
+      "after": "v0.25.0"
+    },
+    "golang.org/x/sys": {
+      "before": "v0.46.0",
+      "after": "v0.50.0"
+    },
+    "golang.org/x/term": {
+      "before": "v0.41.0",
+      "after": "v0.47.0"
+    },
+    "golang.org/x/text": {
+      "before": "v0.35.0",
+      "after": "v0.44.0"
+    },
+    "golang.org/x/tools": {
+      "before": "v0.46.0",
+      "after": "v0.52.0"
+    }
+  },
+  "minimum_go": "1.26.11",
+  "release_go": "1.27.4",
+  "golangci_lint": "v2.15.0",
+  "ml": {
+    "schema": "compression_ratio_go_flate_v2",
+    "changed_compression_rows": 12735,
+    "other_features_changed": 0,
+    "rows": 525102,
+    "feature_parity_sha256": "5aedd4f88c77c86ee983d46277afead9eaf07a09bec7411e9c0a751df71d0c24",
+    "qualified_report": "tool/internal/mlmodel/testdata/portable_qualification.json",
+    "legacy_zlib_and_flate_v1_rejection": "passed"
+  },
+  "validation": {
+    "clean_isolated_candidate_full_go_suite": "passed",
+    "clean_vet_lint": "passed",
+    "e2e": {
+      "passed": 80,
+      "failed": 0,
+      "source": "clean isolated candidate"
+    },
+    "race": "ML, CLI, domain, source passed in original worktree",
+    "minimum_go": "ML, CLI, domain, source passed",
+    "snapshot": "six archives, six SBOMs and checksums verified; snapshot includes concurrent detector edits",
+    "static_ml_smoke": "passed"
+  },
+  "benchmark": {
+    "before": {
+      "secrets": 1565,
+      "hardnegs": 64
+    },
+    "after": {
+      "secrets": 1580,
+      "hardnegs": 63
+    },
+    "secrets": 2094,
+    "hardnegs": 982,
+    "historical_fp_baseline": 0.058,
+    "slack": 0.005,
+    "historical_gate_passed": false,
+    "baseline_raised": false
+  },
+  "limitations": [
+    "historical ProwlBench FP threshold still fails; baseline data is outside Git",
+    "snapshot publication and signing not run",
+    "Docker base manifest inspected; Docker build not rerun"
+  ]
+}

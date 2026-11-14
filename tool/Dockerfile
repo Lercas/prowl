@@ -1,7 +1,7 @@
 # Tiny self-contained prowl image (taxonomy + models embedded; no runtime deps).
 # Multi-arch: the build stage is pinned to the native build platform and cross-compiles to the
 # target arch via Go's GOARCH, so neither the Go compiler nor the final stage needs QEMU emulation.
-FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine AS build
 WORKDIR /src
 COPY . .
 ARG VERSION=dev

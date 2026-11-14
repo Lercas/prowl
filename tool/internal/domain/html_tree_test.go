@@ -14,7 +14,8 @@ func TestExtractAssetsUsesDocumentTree(t *testing.T) {
 	}{
 		{"svg-base", `<svg><base href="/ignored/"/></svg><script src="app.js"></script>`, "/app.js"},
 		{"math-base", `<math><base href="/ignored/"/></math><script src="app.js"></script>`, "/app.js"},
-		{"select-base", `<select><base href="/ignored/"></select><script src="app.js"></script>`, "/app.js"},
+		// Current HTML tree construction retains arbitrary select descendants.
+		{"select-base", `<select><base href="/release/"></select><script src="app.js"></script>`, "/release/app.js"},
 		{"svg-template", `<svg><template/></svg><base href="/release/"><script src="app.js"></script>`, "/release/app.js"},
 		{"math-template", `<math><template/></math><base href="/release/"><script src="app.js"></script>`, "/release/app.js"},
 		{"svg-html-integration", `<svg><foreignObject><base href="/release/"></foreignObject></svg><script src="app.js"></script>`, "/release/app.js"},
@@ -90,7 +91,6 @@ func BenchmarkExtractAssetsDenseDocument(b *testing.B) {
 
 func TestExtractAssetsIgnoresDiscardedElements(t *testing.T) {
 	for _, markup := range []string{
-		`<select><a href="/ignored.js"></select><script src="/app.js"></script>`,
 		`<svg><![CDATA[<script src="/ignored.js"></script>]]></svg><script src="/app.js"></script>`,
 	} {
 		got, err := extractAssets(markup, "https://tree.owned.test/")
@@ -101,5 +101,20 @@ func TestExtractAssetsIgnoresDiscardedElements(t *testing.T) {
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("discarded markup became a resource: got=%v want=%v", got, want)
 		}
+	}
+}
+
+func TestExtractAssetsRetainsSelectDescendants(t *testing.T) {
+	// HTML's customizable-select parsing no longer discards these descendants.
+	// See https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody.
+	markup := `<select><a href="/select.js"></a></select><script src="/app.js"></script>`
+	got, err := extractAssets(markup, "https://tree.owned.test/")
+	want := []string{"https://tree.owned.test/select.js", "https://tree.owned.test/app.js"}
+	if err != nil || !reflect.DeepEqual(got, want) {
+		t.Fatalf("select resources: got=%v want=%v err=%v", got, want, err)
+	}
+	foreign := `<select><base href="https://outside.invalid/"></select><script src="app.js"></script>`
+	if got, err := extractAssets(foreign, "https://tree.owned.test/"); err != nil || len(got) != 0 {
+		t.Fatalf("select base expanded authorized scope: %v %v", got, err)
 	}
 }

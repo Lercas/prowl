@@ -371,7 +371,7 @@ make e2e            # 50 end-to-end scenarios
 make ci             # fmt + vet + build + race + e2e
 ```
 
-Требуется Go 1.25+. Никаких внешних сервисов. `tool/` - это сканер (Go). Правила детектирования и
+Требуется Go 1.26.11+. Никаких внешних сервисов. `tool/` - это сканер (Go). Правила детектирования и
 живые верификаторы лежат в отдельном репозитории [Lercas/prowl-templates](https://github.com/Lercas/prowl-templates)
 (устанавливаются командой `prowl rules update`); бенчмарк - [Lercas/prowlbench](https://github.com/Lercas/prowlbench).
 

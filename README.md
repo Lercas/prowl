@@ -380,7 +380,7 @@ make e2e            # 50 end-to-end scenarios
 make ci             # fmt + vet + build + race + e2e
 ```
 
-Requires Go 1.25+. No external services. `tool/` is the scanner (Go). The detection rules and live
+Requires Go 1.26.11+. No external services. `tool/` is the scanner (Go). The detection rules and live
 verifiers live in a separate repo, [Lercas/prowl-templates](https://github.com/Lercas/prowl-templates)
 (installed by `prowl rules update`); the benchmark is [Lercas/prowlbench](https://github.com/Lercas/prowlbench).
 

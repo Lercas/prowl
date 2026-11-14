@@ -1,8 +1,9 @@
 BIN := prowl
 PKGS := ./internal/... ./cmd/...   # explicit: avoids transient corpus_* dirs at module root
 FUZZTIME ?= 10s
+GOVULNCHECK ?= govulncheck
 
-.PHONY: build test race bench vet fmt-check fuzz install docker clean e2e ci
+.PHONY: build test race bench vet vuln fmt-check fuzz install docker clean e2e ci
 
 build:
 	go build -trimpath -ldflags="-s -w" -o $(BIN) ./cmd/prowl
@@ -18,6 +19,9 @@ bench:
 
 vet:
 	go vet $(PKGS)
+
+vuln: ## install govulncheck@v1.9.0 before running; honors GOOS/GOARCH
+	$(GOVULNCHECK) ./...
 
 fmt-check:
 	@test -z "$$(gofmt -l internal cmd)" || { gofmt -l internal cmd; exit 1; }

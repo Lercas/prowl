@@ -3,7 +3,7 @@
 Сборку, архивы, SPDX SBOM и `checksums.txt` описывает `tool/.goreleaser.yaml`.
 Workflow `.github/workflows/release.yml` использует этот конфиг, подписывает результаты
 и обновляет Homebrew. Actions закреплены по SHA; инструменты — GoReleaser 2.20.2,
-Syft 1.57.1, cosign 3.1.4 и Go 1.25.14.
+Syft 1.57.1, cosign 3.1.4 и Go 1.27.4.
 
 ## До публикации
 
@@ -25,7 +25,7 @@ Syft 1.57.1, cosign 3.1.4 и Go 1.25.14.
 
 ```sh
 snapshot_root=$(mktemp -d /tmp/prowl-release.XXXXXX)
-GOTOOLCHAIN=go1.25.14 python3 scripts/release/snapshot.py \
+GOTOOLCHAIN=go1.27.4 python3 scripts/release/snapshot.py \
   --dist "$snapshot_root/artifacts" --version 1.5.0-dev
 python3 scripts/release/verify_artifacts.py "$snapshot_root/artifacts"
 python3 scripts/release/homebrew.py --tag v1.5.0-dev \

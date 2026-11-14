@@ -18,7 +18,7 @@ prowl version
 
 ### go install
 
-Requires Go 1.25+. Installs the `prowl` binary into `$(go env GOPATH)/bin` (ensure it is on your `PATH`).
+Requires Go 1.26.11+. Installs the `prowl` binary into `$(go env GOPATH)/bin` (ensure it is on your `PATH`).
 
 ```bash
 go install github.com/Lercas/prowl/tool/cmd/prowl@latest
@@ -51,7 +51,7 @@ prowl version
 
 ### From source
 
-Requires Go 1.25+. The `Makefile` builds a trimmed, stripped binary into the current directory.
+Requires Go 1.26.11+. The `Makefile` builds a trimmed, stripped binary into the current directory.
 
 ```bash
 git clone https://github.com/Lercas/prowl.git

@@ -8,7 +8,7 @@ import (
 
 // The versioned feature name prevents old zlib-trained external models from
 // silently scoring a different feature distribution.
-const CompressionFeature = "compression_ratio_go_flate_v1"
+const CompressionFeature = "compression_ratio_go_flate_v2"
 
 type compressionCounter struct{ n int }
 

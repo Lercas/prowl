@@ -3,7 +3,7 @@
   "seed": 13,
   "numpy": "2.4.6",
   "sklearn": "1.9.0",
-  "extractor_sha256": "10afc44e83cc3a5f3881c00f0a167207a03ba4905d887c70da064a1a7d42412c",
+  "extractor_sha256": "3af9d2b83b4a71c92b6965b4f48bc91373dd01c1f03a0b9cb7fb38f318b71cb5",
   "n": 525102,
   "split": {
     "train": 174391,
@@ -29,51 +29,76 @@
     },
     "go_flate": {
       "val": {
-        "pr_auc": 0.9993200218644354,
-        "precision": 0.9891608773142254,
-        "recall": 0.9882622283596192,
-        "f1": 0.988711348639363
+        "pr_auc": 0.9993231082702367,
+        "precision": 0.9885282799680535,
+        "recall": 0.9895341231194128,
+        "f1": 0.9890309458085137
       },
       "test": {
-        "pr_auc": 0.9550855282470203,
-        "precision": 0.6399344042044534,
-        "recall": 0.9828548886326395,
-        "f1": 0.7751624445056062
+        "pr_auc": 0.9545343554401535,
+        "precision": 0.6438883924138615,
+        "recall": 0.9838866298476664,
+        "f1": 0.7783792867517315
       }
     }
   },
-  "selection": "portable max_leaf_nodes in [31,63,127] selected by validation F1 at threshold 0.3",
+  "selection": "smallest max_leaf_nodes in [31,63,127] within 0.0001 of best validation F1 at threshold 0.3",
   "validation_candidates": {
     "31": {
-      "pr_auc": 0.9992676331998225,
-      "precision": 0.9884050596103519,
-      "recall": 0.9881895486590595,
-      "f1": 0.9882972923859713
+      "pr_auc": 0.9992773526515856,
+      "precision": 0.9885078372186057,
+      "recall": 0.9877534704557017,
+      "f1": 0.988130509860947
     },
     "63": {
-      "pr_auc": 0.9993200218644354,
-      "precision": 0.9891608773142254,
-      "recall": 0.9882622283596192,
-      "f1": 0.988711348639363
+      "pr_auc": 0.9993231082702367,
+      "precision": 0.9885282799680535,
+      "recall": 0.9895341231194128,
+      "f1": 0.9890309458085137
     },
     "127": {
-      "pr_auc": 0.9993025541399823,
-      "precision": 0.9891248999781771,
-      "recall": 0.9882622283596192,
-      "f1": 0.988693375990693
+      "pr_auc": 0.9993125203512017,
+      "precision": 0.9888836415156028,
+      "recall": 0.9892070644668944,
+      "f1": 0.9890453265510037
     }
   },
   "selected_max_leaf_nodes": 63,
   "qualified": true,
-  "compression_implementation": "github.com/klauspost/compress/flate@v1.18.6; level=6",
+  "model_sha256": "c399a4e04288a7ce3a715d701e7dc7bfac544e6c0bd65f1e76de375e32788f0d",
+  "compression_implementation": "github.com/klauspost/compress/flate@v1.20.4; level=6",
   "feature_parity": {
     "rows": 525102,
     "go_versions": [
-      "go1.25.14",
-      "go1.27.1"
+      "go1.26.11",
+      "go1.27.4"
     ],
-    "sha256": "bcf6d1d3180aa4c0185a22876b5be0e893dc6846f99c303b55e31db270b31b34",
+    "sha256": "5aedd4f88c77c86ee983d46277afead9eaf07a09bec7411e9c0a751df71d0c24",
     "platform": "darwin/arm64"
   },
-  "model_sha256": "f102160456355fde938a8b8e532792099c0842a69a772a9f13c7f190b89df4b4"
+  "migration": {
+    "previous_feature": "compression_ratio_go_flate_v1",
+    "current_feature": "compression_ratio_go_flate_v2",
+    "changed_compression_rows": 12735,
+    "other_features_changed": 0
+  },
+  "rejected_candidate": {
+    "selected_max_leaf_nodes": 127,
+    "qualified": false,
+    "metrics": {
+      "val": {
+        "pr_auc": 0.9993125203512017,
+        "precision": 0.9888836415156028,
+        "recall": 0.9892070644668944,
+        "f1": 0.9890453265510037
+      },
+      "test": {
+        "pr_auc": 0.9493526632854902,
+        "precision": 0.5966326248964946,
+        "recall": 0.9839169751775202,
+        "f1": 0.7428263783090299
+      }
+    },
+    "reason": "validation F1 gain over 63 leaves was 0.00001438; test precision regression failed gate"
+  }
 }

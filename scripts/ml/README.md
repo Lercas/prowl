@@ -1,8 +1,8 @@
 # Переносимая L2-модель
 
 Модель обучается на признаках из того же Go-экстрактора, который работает в Prowl.
-Признак `compression_ratio_go_flate_v1` — отношение длины закрытого потока raw
-DEFLATE уровня 6 из закреплённого `github.com/klauspost/compress/flate` к длине
+Признак `compression_ratio_go_flate_v2` — отношение длины закрытого потока raw
+DEFLATE уровня 6 из закреплённого `github.com/klauspost/compress/flate` v1.20.4 к длине
 UTF-8-значения; для пустой строки — 0. Стандартный `compress/flate` меняет длину
 потоков между Go 1.25 и 1.27, поэтому его версия не подходит для стабильного признака.
 Системная zlib и Python-экстрактор для этого признака не используются.
@@ -10,7 +10,7 @@ UTF-8-значения; для пустой строки — 0. Стандарт
 ```sh
 python3 -m venv /tmp/prowl-ml-training
 /tmp/prowl-ml-training/bin/pip install -r scripts/ml/requirements.txt
-(cd tool && GOTOOLCHAIN=go1.25.14 CGO_ENABLED=0 go build -o /tmp/prowl-ml-features ./cmd/prowl-ml-features)
+(cd tool && GOTOOLCHAIN=go1.27.4 CGO_ENABLED=0 go build -o /tmp/prowl-ml-features ./cmd/prowl-ml-features)
 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 /tmp/prowl-ml-training/bin/python \
   scripts/ml/train_portable.py \
   --corpus /path/to/corpus.jsonl --extractor /tmp/prowl-ml-features \
@@ -27,7 +27,8 @@ OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 /tmp/prowl-ml-training/bin/python \
 группах фактические размеры частей отличаются от указанных долей.
 Контрольная zlib-модель обучается на тех же данных. Сложность переносимой модели
 выбирается из 31, 63 и 127 листьев по F1 validation-части при пороге 0,3.
-Test-часть не участвует в выборе модели.
+Разница F1 до 0,0001 считается ничьей: выбирается меньшая модель, чтобы микроскопический
+выигрыш не увеличивал её сложность. Test-часть не участвует в выборе модели.
 
 Гейт допускает снижение PR-AUC, precision, recall и F1 максимум на 0,005 относительно
 контрольной модели. При неуспехе остаётся отчёт, но кандидат не экспортируется.
@@ -37,7 +38,10 @@ prediction-parity, идентичность признаков поддержи�
 сборку с `--ml`. Числа отчёта описывают перенос L2 на данном корпусе, а не качество
 на произвольных пользовательских источниках.
 
-Старые модели с признаком `compression_ratio` несовместимы. Prowl должен отклонять
+Старые модели с признаками `compression_ratio` и `compression_ratio_go_flate_v1`
+несовместимы. Обновление compress с v1.18.6 до v1.20.4 изменило 12735 из 525102
+значений признака на квалификационном корпусе; поэтому модель переобучается.
+Prowl должен отклонять
 их с сообщением о переобучении; переименование поля в старом JSON недопустимо.
 
 Проверка splitter:

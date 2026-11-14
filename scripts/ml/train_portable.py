@@ -90,6 +90,17 @@ def metrics(y, probabilities, threshold=.3):
             "f1": float(f1_score(y, predicted, zero_division=0))}
 
 
+def select_candidate(validation_metrics):
+    """Prefer a smaller tree when validation F1 differs by at most 0.0001.
+
+    Tiny validation differences should not select a much more complex model.
+    This function receives no test labels, predictions or metrics.
+    """
+    best = max(row["f1"] for row in validation_metrics.values())
+    return min(leaves for leaves, row in validation_metrics.items()
+               if row["f1"] >= best - .0001)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--corpus", type=Path, required=True)
@@ -99,7 +110,7 @@ def main():
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
     names = json.loads(subprocess.check_output([str(args.extractor), "--names"]))
-    assert names[7] == "compression_ratio_go_flate_v1"
+    assert names[7] == "compression_ratio_go_flate_v2"
     print("Extracting canonical Go features", flush=True)
     with args.corpus.open("rb") as corpus, (args.out / "features.jsonl").open("wb") as features:
         subprocess.run([str(args.extractor)], stdin=corpus, stdout=features, check=True)
@@ -118,7 +129,7 @@ def main():
               "extractor_sha256": hashlib.sha256(args.extractor.read_bytes()).hexdigest(),
               "n": len(records), "split": {k: len(v) for k, v in split.items()},
               "threshold": .3, "max_regression": .005, "models": {},
-              "selection": "portable max_leaf_nodes in [31,63,127] selected by validation F1 at threshold 0.3"}
+              "selection": "smallest max_leaf_nodes in [31,63,127] within 0.0001 of best validation F1 at threshold 0.3"}
     portable = None
     for name in ("zlib_control", "go_flate"):
         print(f"Training {name}: {len(split['train'])} records", flush=True)
@@ -133,6 +144,7 @@ def main():
         threshold = .3
         if name == "go_flate":
             candidates = {31: metrics(y[split["val"]], clf.predict_proba(data[split["val"]])[:, 1])}
+            models = {31: clf}
             for leaves in (63, 127):
                 print(f"Training portable validation candidate: {leaves} leaves", flush=True)
                 candidate = HistGradientBoostingClassifier(
@@ -141,8 +153,8 @@ def main():
                     class_weight="balanced")
                 candidate.fit(data[split["train"]], y[split["train"]])
                 candidates[leaves] = metrics(y[split["val"]], candidate.predict_proba(data[split["val"]])[:, 1])
-                if candidates[leaves]["f1"] > max(v["f1"] for k, v in candidates.items() if k != leaves):
-                    clf = candidate
+                models[leaves] = candidate
+            clf = models[select_candidate(candidates)]
             report["validation_candidates"] = candidates
             report["selected_max_leaf_nodes"] = clf.max_leaf_nodes
         report["models"][name] = {bucket: metrics(y[indices], clf.predict_proba(data[indices])[:, 1], threshold)
