@@ -1,0 +1,20 @@
+{
+  "schema_version": "prowl-quality-v1",
+  "dataset": {
+    "repository": "Lercas/prowlbench",
+    "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+    "file": "prowlbench.jsonl",
+    "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+    "rows": 24603,
+    "selection_stride": 8,
+    "selected_rows": 3076,
+    "secrets": 2094,
+    "hard_negatives": 982
+  },
+  "baseline": {
+    "recall": 0.7469,
+    "t4_fp_rate": 0.058,
+    "tolerance": 0.005,
+    "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+  }
+}

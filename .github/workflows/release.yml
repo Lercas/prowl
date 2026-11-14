@@ -51,8 +51,20 @@ jobs:
           for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
             GOOS="${target%/*}" GOARCH="${target#*/}" CGO_ENABLED=0 make vuln
           done
+      - name: checkout pinned quality corpus
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Lercas/prowlbench
+          ref: 53d6fc1e2006185c0fadd5cd761af3f1aacfd025
+          path: .quality-corpus
+          persist-credentials: false
       - name: static ML qualification
         run: python3 scripts/ml/smoke_static.py --binary "$RUNNER_TEMP/prowl-static" --legacy-model tool/internal/mlmodel/model_binary.json
+
+      - name: pinned detection quality qualification
+        run: >-
+          python3 scripts/quality/gate.py --binary "$RUNNER_TEMP/prowl-static"
+          --dataset .quality-corpus/prowlbench.jsonl --output "$RUNNER_TEMP/prowl-quality.json"
 
   binaries:
     needs: qualify

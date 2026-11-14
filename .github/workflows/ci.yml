@@ -187,12 +187,24 @@ jobs:
         env:
           CGO_ENABLED: '0'
         run: go test ./internal/mlfeatures ./internal/mlmodel ./internal/mlscore
+      - name: checkout pinned quality corpus
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Lercas/prowlbench
+          ref: 53d6fc1e2006185c0fadd5cd761af3f1aacfd025
+          path: .quality-corpus
+          persist-credentials: false
       - name: release-style ML smoke
         env:
           CGO_ENABLED: '0'
         run: |
           (cd tool && go build -trimpath -ldflags='-s -w' -o "$RUNNER_TEMP/prowl-static" ./cmd/prowl)
           python3 scripts/ml/smoke_static.py --binary "$RUNNER_TEMP/prowl-static" --legacy-model tool/internal/mlmodel/model_binary.json
+
+      - name: pinned detection quality gate
+        run: >-
+          python3 scripts/quality/gate.py --binary "$RUNNER_TEMP/prowl-static"
+          --dataset .quality-corpus/prowlbench.jsonl --output "$RUNNER_TEMP/prowl-quality.json"
 
   test:
     runs-on: ubuntu-latest
@@ -253,6 +265,8 @@ jobs:
           ruff check --select E9,F821,F811,F823,F706 .  # respects .gitignore -> only tracked Python
       - name: release contract tests
         run: python -m unittest discover -s scripts/release -p 'test_*.py'
+      - name: detection quality gate tests
+        run: python -m unittest discover -s scripts/quality -p 'test_*.py'
       - name: performance gate tests
         run: python -m unittest discover -s scripts/perf -p 'test_*.py'
       - name: portable training split tests
