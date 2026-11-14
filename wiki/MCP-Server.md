@@ -70,7 +70,8 @@ high/critical типов без верификатора. Полное опис�
 `bundled: true` в `tools/call` выбирает встроенные rules/verifiers релиза,
 сохраняя текущие конфигурацию и identity key. `strict` сохранён для совместимости с 1.4: неполный результат всегда
 возвращается с `isError: true`, включая `strict: false`.
-`semantic` остаётся отдельным пунктом миграции и пока не рекламируется.
+`semantic: true` включает opt-in поиск кандидатов моделью через настроенный endpoint.
+Это не подтверждение действительности секрета; [контракт и границы](Semantic-Discovery.md).
 
 Локальная проверка: `python3 scripts/check_mcp_contract.py /path/to/prowl`.
 Матрица использует отдельный PROWL_HOME, только собственные файлы/APK и stdio;

@@ -454,6 +454,27 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	if failed {
 		return []model.Finding{processingError(it, "detector failed; scan results are incomplete")}
 	}
+	if p.options.Semantic {
+		if p.options.SemanticEngine == nil {
+			model.Note(ctx, "semantic_failed", it.Path, true)
+		} else {
+			resilience.Guard(func() {
+				candidates, limited, err := p.options.SemanticEngine.Discover(ctx, it.Text)
+				if err != nil {
+					model.Note(ctx, "semantic_failed", it.Path, true)
+				}
+				if limited {
+					model.Note(ctx, "semantic_limit", it.Path, true)
+				}
+				for _, c := range candidates {
+					if detect.IsExampleOrPlaceholder(c.Value) {
+						continue
+					}
+					ms = append(ms, detect.Match{Type: "generic_semantic_secret", Value: c.Value, Start: c.Start, End: c.End, Confidence: .75, Category: "generic", Stage: "semantic-candidate", Transform: "literal-semantic-span"})
+				}
+			}, func(any) { model.Note(ctx, "semantic_failed", it.Path, true) })
+		}
+	}
 	// maxMatches is the global cap shared across both producers (cascade and template engine below).
 	// truncated records when either producer hit the cap so the output can carry a truncation marker.
 	maxMatches := detect.MaxScanMatches()
@@ -524,7 +545,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
-		if pathIsFile && taxonomy.GenericLast[m.Type] && codeValues.NonLiteral(m.Start, m.End) {
+		if pathIsFile && taxonomy.GenericLast[m.Type] && m.Stage != "semantic-candidate" && codeValues.NonLiteral(m.Start, m.End) {
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
@@ -535,6 +556,11 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
+		if m.Stage == "semantic-candidate" {
+			if _, exists := dedup[p.findingDedupKey(line, col, m.Value)]; exists {
+				continue
+			}
+		}
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
 		out = append(out, model.Finding{
 			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
@@ -561,6 +587,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}
 		if m.Transform != "" {
 			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: m.Start, End: m.End, Line: line, Col: col, Transform: m.Transform})
+		}
+		if m.Stage == "semantic-candidate" {
+			out[len(out)-1].Rationale = "Кандидат модели с точным совпадением в исходном тексте; действительность не подтверждена"
 		}
 		if vset != nil {
 			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})

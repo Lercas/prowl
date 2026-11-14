@@ -13,6 +13,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/semantic"
 )
 
 type commandOptions struct {
@@ -221,6 +222,10 @@ var cliFlags = []flagSpec{
 	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
 	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
 	boolFlag("--ml", scanCommands, "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
+	boolFlag("--semantic", indexedCommands, "искать source-backed кандидаты opt-in моделью (по умолчанию loopback)", func(c *commonFlags) *bool { return &c.semantic }),
+	stringFlag("--semantic-url", indexedCommands, "URL", "endpoint модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticURL }),
+	stringFlag("--semantic-model", indexedCommands, "MODEL", "имя модели (включает semantic)", func(c *commonFlags) *string { return &c.semanticModel }),
+	boolFlag("--semantic-allow-remote", indexedCommands, "разрешить отправку исходного текста модели по HTTPS", func(c *commonFlags) *bool { return &c.semanticAllowRemote }),
 	boolFlag("--reconstruct", scanCommands, "восстанавливать ограниченные статические строки JS/TS без выполнения кода", func(c *commonFlags) *bool { return &c.reconstruct }),
 	stringFlag("--ml-model", scanCommands, "FILE", "load a compatible external model (implies ML)", func(c *commonFlags) *string { return &c.mlModel }),
 	stringFlag("--ml-url", scanCommands, "URL", "score candidates through an external sidecar", func(c *commonFlags) *string { return &c.mlURL }),
@@ -410,6 +415,20 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.verifiedOnly || c.verifyAll {
 		c.verify = true
 	}
+	if c.semantic || seen["--semantic-url"] || seen["--semantic-model"] || c.semanticAllowRemote {
+		c.semantic = true
+		if c.semanticURL == "" {
+			c.semanticURL = os.Getenv("PROWL_SEMANTIC_URL")
+		}
+		if c.semanticModel == "" {
+			c.semanticModel = os.Getenv("PROWL_SEMANTIC_MODEL")
+		}
+		var err error
+		c.semanticEngine, err = semantic.New(semantic.Config{URL: c.semanticURL, Model: c.semanticModel, APIKey: os.Getenv("PROWL_SEMANTIC_API_KEY"), AllowRemote: c.semanticAllowRemote})
+		if err != nil {
+			return c, nil, fmt.Errorf("semantic setup: %w", err)
+		}
+	}
 	c.mlURL = strings.TrimRight(c.mlURL, "/")
 	c.ocrURL = strings.TrimRight(c.ocrURL, "/")
 	if c.ocrAllowRemote || c.ocrAllPages || seen["--ocr-url"] || seen["--ocr-model"] || seen["--ocr-max-pages"] || seen["--ocr-timeout"] {
@@ -542,6 +561,10 @@ type commonFlags struct {
 	dedupe                                   bool // collapse the same secret found repeatedly in one file (default on)
 	maxPerFile                               int  // cap generic findings per file (data-file guard; 0 = off)
 	mlEmbed                                  bool // run the L2 model in-process (embedded), no sidecar
+	semantic                                 bool
+	semanticURL, semanticModel               string
+	semanticAllowRemote                      bool
+	semanticEngine                           *semantic.Engine
 	reconstruct                              bool
 	mlModel                                  string            // load the in-process model from this file (implies --ml)
 	mlURL                                    string            // ML sidecar URL for the L2 secret/not-secret stage (off if empty)

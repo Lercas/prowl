@@ -1,0 +1,437 @@
+{
+  "status": "locally qualified opt-in semantic transport and source-span restoration; actual model quality unqualified; not published",
+  "native": {
+    "binary_sha256": "f10a0871a08299c8418ab8ca1fb5d90cfa219c96edb82ce85d27444d0a97f53c",
+    "passed": 101,
+    "total": 101,
+    "checks": [
+      {
+        "case": "identity-init",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "production.txt/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "production.txt/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.json/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.json/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.toml/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.toml/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/False/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/json/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/json/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/json/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/json/redaction",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/sarif/candidate",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/sarif/one-request",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/sarif/source-proof",
+        "passed": true
+      },
+      {
+        "case": "config.yaml/True/sarif/redaction",
+        "passed": true
+      },
+      {
+        "case": "opt-out",
+        "passed": true
+      },
+      {
+        "case": "compare-rejected",
+        "passed": true
+      },
+      {
+        "case": "remote-refused-before-output",
+        "passed": true
+      },
+      {
+        "case": "invented/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "invented/json/safe-error",
+        "passed": true
+      },
+      {
+        "case": "invented/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "invented/sarif/safe-error",
+        "passed": true
+      },
+      {
+        "case": "duplicate/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "duplicate/json/safe-error",
+        "passed": true
+      },
+      {
+        "case": "duplicate/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "duplicate/sarif/safe-error",
+        "passed": true
+      },
+      {
+        "case": "missing/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "missing/json/safe-error",
+        "passed": true
+      },
+      {
+        "case": "missing/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "missing/sarif/safe-error",
+        "passed": true
+      },
+      {
+        "case": "length/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "length/json/safe-error",
+        "passed": true
+      },
+      {
+        "case": "length/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "length/sarif/safe-error",
+        "passed": true
+      },
+      {
+        "case": "error/json/incomplete",
+        "passed": true
+      },
+      {
+        "case": "error/json/safe-error",
+        "passed": true
+      },
+      {
+        "case": "error/sarif/incomplete",
+        "passed": true
+      },
+      {
+        "case": "error/sarif/safe-error",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/schema",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/candidate",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/failed-model",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/candidate",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/failed-model",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/candidate",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/failed-model",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/schema",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/candidate",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/failed-model",
+        "passed": true
+      },
+      {
+        "case": "model-auth",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-semantic-native-el5378mf",
+    "scope": "owned loopback stub only; no actual model quality or live-provider qualification"
+  },
+  "checks": {
+    "full_go": "passed",
+    "targeted_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11": "passed",
+    "final_cli_scope_tests": "passed",
+    "final_candidate_cap_test": "passed"
+  },
+  "decisions": [
+    "Immutable Pipeline carries an opt-in engine; no stage enabled by endpoint environment alone",
+    "Structured candidate evidence is projected to original source spans",
+    "Semantic does not rescan generated reconstruction expressions",
+    "Loopback host and port are pinned without changing provider SSRF policy",
+    "Model output rejects duplicate JSON, malformed Unicode, invented/ambiguous values and non-stop finish reasons"
+  ],
+  "limits": [
+    "Only an owned loopback stub was exercised; no actual model precision/recall or customer lift evidence",
+    "Joint retention under the actual L2 model is not qualified",
+    "compare --semantic is rejected until one bounded candidate snapshot can feed both reports",
+    "No external endpoint or live-provider qualification"
+  ]
+}

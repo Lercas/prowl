@@ -128,7 +128,7 @@ func capGenericPerFile(fs []model.Finding, max int) []model.Finding {
 			continue
 		}
 		limit := specificLimit
-		if f.Type == "generic_high_entropy" || f.Type == "generic_password" {
+		if f.Type == "generic_high_entropy" || f.Type == "generic_password" || f.Type == "generic_semantic_secret" {
 			limit = max
 		}
 		k := key{f.Path, f.Type}

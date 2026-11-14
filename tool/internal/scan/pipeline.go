@@ -5,20 +5,23 @@ import (
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
+	"github.com/Lercas/prowl/tool/internal/semantic"
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
 // Options groups one scan's dependencies and privacy policy. Dependency objects
 // and the allow callback must be safe for concurrent reads after construction.
 type Options struct {
-	Detector      *detect.Detector
-	Rules         *rules.Engine
-	Verifiers     *verify.Set
-	VerifyAll     bool // verify before ML; observers also retain this mode for index evidence
-	ML            mlscore.Scorer
-	Allow         func(value, path string) bool
-	Workers       int
-	RevealSecrets bool
+	Semantic       bool
+	SemanticEngine *semantic.Engine
+	Detector       *detect.Detector
+	Rules          *rules.Engine
+	Verifiers      *verify.Set
+	VerifyAll      bool // verify before ML; observers also retain this mode for index evidence
+	ML             mlscore.Scorer
+	Allow          func(value, path string) bool
+	Workers        int
+	RevealSecrets  bool
 	// IdentityKey scopes the released report identities; it is independent of the local index.
 	IdentityKey []byte
 	// Reconstruct enables bounded static string reconstruction for JS/TS sources.

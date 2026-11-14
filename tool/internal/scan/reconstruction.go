@@ -47,6 +47,8 @@ func (p *Pipeline) appendReconstructed(ctx context.Context, it model.Item, out [
 		}
 		options := p.options
 		options.Reconstruct = false
+		// Semantic discovery inspects the original source, never each generated expression.
+		options.Semantic = false
 		options.matchLimit = remaining
 		options.reconstruction = &reconstructionOrigin{value: value, lines: li}
 		child := it

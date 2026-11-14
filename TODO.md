@@ -151,7 +151,8 @@
       Строгий JSON отказывает при неоднозначности до subprocess, пути сохраняются
       буквально; доступны `reconstruct` и `verified_only`. Нативная stdio-матрица
       четырёх версий — 80/80, `wiki/evidence/1.5.0-mcp-contract-20261114.json`.
-      Остался CLI/MCP `semantic`; этапы LSP, `bundled` и `strict` описаны ниже.
+      Этапы LSP, `bundled`, `strict` и opt-in `semantic` описаны ниже;
+      semantic в compare требует отдельного фиксированного набора кандидатов.
     - [x] Восстановлены линейные Base64 source spans, padding, цепочки evidence
       и несколько внутренних вхождений, в том числе повтор одного значения.
       Сохранены текущие gzip/zlib/hex и их fail-closed проверки; baseline не
@@ -167,7 +168,7 @@
       вместо прежнего entropy-only типа при том же точном диапазоне.
       Настоящий LSP stdio: 2258/2258; полный Go-набор, targeted race, lint и
       Go 1.26.11. Evidence: `wiki/evidence/1.5.0-lsp-contract-20261114.json`.
-      Конкретные редакторные плагины и CLI/MCP `semantic` ещё открыты.
+      Конкретные редакторные плагины ещё не проверены.
 
     - [x] Восстановлен встроенный rules/verifiers snapshot и `--bundled` в CLI,
       MCP tools/call, LSP и version. Без установленных наборов используются
@@ -181,6 +182,18 @@
       `--strict=false`. `--ci` сохраняет severity default high, явный `--fail-on`
       имеет приоритет. Локальная CLI/MCP-матрица — 79/79, targeted CLI tests и lint.
       Evidence: `wiki/evidence/1.5.0-strict-contract-20261114.json`.
+
+    - [x] Восстановлен opt-in `semantic` в CLI сканирования и MCP tools/call,
+      immutable Pipeline и source-backed evidence, включая JSON/TOML/YAML.
+      Local endpoint pinning, remote opt-in + HTTPS, запрет redirects и строгий
+      ответ модели; ошибки/лимиты сохраняют неполноту и baseline guard.
+      Локальная transport/span-матрица со stub — 101/101; полный Go-набор,
+      targeted race, lint и Go 1.26.11. Качество реальной модели и retention с L2
+      не квалифицированы. Контракт: `wiki/Semantic-Discovery.md`, evidence:
+      `wiki/evidence/1.5.0-semantic-contract-20261114.json`.
+    - [ ] `compare --semantic`: фиксировать один bounded набор кандидатов для
+      сравнения L2. Пока флаг отклоняется, чтобы два независимых model inference
+      не представлялись как подавление шума одним и тем же L2.
 
 ### P1 — архитектура CLI
 

@@ -15,7 +15,7 @@ func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
 	return !o.RevealSecrets, map[string]bool{
 		"l1": o.Detector != nil, "rules": o.Rules != nil,
 		"ml": o.ML != nil, "verification": o.Verifiers != nil,
-		"reconstruction": o.Reconstruct, "semantic": false, "ocr": false,
+		"reconstruction": o.Reconstruct, "semantic": o.Semantic, "ocr": false,
 	}
 }
 
@@ -42,6 +42,9 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 		"all_occurrences": o.AllOccurrences,
 	})
+	if o.Semantic && o.SemanticEngine != nil {
+		c.RegisterScope("semantic", "literal-span-v1", o.SemanticEngine.Policy())
+	}
 	rulePolicy := ""
 	if o.Rules != nil {
 		var err error

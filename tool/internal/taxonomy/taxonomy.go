@@ -89,6 +89,7 @@ func Load(path string) (*Taxonomy, error) {
 
 // GenericLast holds catch-all types scored lower and tried after structured ones.
 var GenericLast = map[string]bool{
-	"generic_api_key": true, "generic_high_entropy": true,
+	"generic_semantic_secret": true,
+	"generic_api_key":         true, "generic_high_entropy": true,
 	"generic_password": true, "basic_auth_header": true,
 }
