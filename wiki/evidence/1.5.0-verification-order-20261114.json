@@ -1,5 +1,13 @@
 {
   "status": "locally qualified verification ordering restoration; not published",
+  "main_integration": {
+    "source_commit": "ad65c15",
+    "full_go_suite_passed": true,
+    "native_passed": 48,
+    "native_total": 48,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-verification-order-96wy2c3_/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained"
+  },
   "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
   "native": {
     "binary_sha256": "5fa89b0546c91420f033f72cfab50bfd5d12d3700b4d89856bccb54f47de7128",
