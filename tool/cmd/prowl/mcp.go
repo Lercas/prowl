@@ -4,14 +4,37 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/Lercas/prowl/tool/internal/checkedio"
 )
 
 const mcpProtocolVersion = "2024-11-05"
+const maxMCPMessageBytes = 16 << 20
+
+var errMCPOutput = errors.New("mcp: не удалось записать сообщение")
+
+type mcpWriter struct {
+	*bufio.Writer
+	err error
+}
+
+func newMCPWriter(output io.Writer) *mcpWriter {
+	return &mcpWriter{Writer: bufio.NewWriter(checkedio.NewWriter(output))}
+}
+
+func (w *mcpWriter) flush() error {
+	if w.err == nil && w.Flush() != nil {
+		w.err = errMCPOutput
+	}
+	return w.err
+}
 
 type mcpRequest struct {
 	JSONRPC string          `json:"jsonrpc"`
@@ -60,19 +83,35 @@ func mcpTools() []mcpTool {
 }
 
 func cmdMCP(args []string) int {
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Buffer(make([]byte, 0, 64*1024), 16*1024*1024) // cap one JSON-RPC line at 16 MiB
-	w := bufio.NewWriter(os.Stdout)
+	return serveMCP(os.Stdin, os.Stdout, os.Stderr)
+}
+
+func serveMCP(input io.Reader, output, stderr io.Writer) int {
+	sc := bufio.NewScanner(input)
+	// Allow the optional newline in addition to the 16 MiB JSON-RPC body.
+	sc.Buffer(make([]byte, 0, 64*1024), maxMCPMessageBytes+1)
+	w := newMCPWriter(output)
 	for sc.Scan() {
+		if len(sc.Bytes()) > maxMCPMessageBytes {
+			fmt.Fprintln(stderr, "mcp: превышен лимит входного сообщения")
+			return 2
+		}
 		if s := strings.TrimSpace(sc.Text()); s != "" {
 			handleMCP(s, w)
-			w.Flush()
+			if w.flush() != nil {
+				fmt.Fprintln(stderr, errMCPOutput)
+				return 2
+			}
 		}
+	}
+	if sc.Err() != nil {
+		fmt.Fprintln(stderr, "mcp: не удалось прочитать входной поток")
+		return 2
 	}
 	return 0 // stdin closed by the client
 }
 
-func handleMCP(line string, w *bufio.Writer) {
+func handleMCP(line string, w *mcpWriter) {
 	var req mcpRequest
 	if json.Unmarshal([]byte(line), &req) != nil {
 		return
@@ -96,7 +135,7 @@ func handleMCP(line string, w *bufio.Writer) {
 	}
 }
 
-func mcpCall(w *bufio.Writer, req mcpRequest) {
+func mcpCall(w *mcpWriter, req mcpRequest) {
 	var p struct {
 		Name string         `json:"name"`
 		Args map[string]any `json:"arguments"`
@@ -111,11 +150,32 @@ func mcpCall(w *bufio.Writer, req mcpRequest) {
 		return
 	}
 	out, runErr := runSelf(argv)
-	if strings.TrimSpace(out) == "" && runErr != nil {
-		mcpToolResult(w, req.ID, "scan failed: "+runErr.Error(), true)
-		return
+	text, isError := mcpRunResult(out, runErr)
+	mcpToolResult(w, req.ID, text, isError)
+}
+
+// mcpRunResult preserves partial JSON while distinguishing findings (exit 1) from scan failures.
+func mcpRunResult(out string, runErr error) (string, bool) {
+	if strings.TrimSpace(out) == "" {
+		if runErr != nil {
+			return "scan failed: " + runErr.Error(), true
+		}
+		return "scan produced no result", true
 	}
-	mcpToolResult(w, req.ID, out, false)
+	var envelope struct {
+		Findings  []json.RawMessage `json:"findings"`
+		Truncated bool              `json:"truncated"`
+	}
+	if err := json.Unmarshal([]byte(out), &envelope); err != nil || envelope.Findings == nil {
+		return "scan returned an invalid JSON findings envelope", true
+	}
+	if runErr != nil {
+		var exitErr *exec.ExitError
+		if !errors.As(runErr, &exitErr) || exitErr.ExitCode() != 1 || len(envelope.Findings) == 0 {
+			return out, true
+		}
+	}
+	return out, envelope.Truncated
 }
 
 // notDashLed rejects a positional value that starts with '-', which the prowl parser would otherwise
@@ -231,15 +291,15 @@ func runSelf(argv []string) (string, error) {
 	return string(out), err
 }
 
-func mcpReply(w *bufio.Writer, id json.RawMessage, result any) {
+func mcpReply(w *mcpWriter, id json.RawMessage, result any) {
 	writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(id), "result": result})
 }
 
-func mcpError(w *bufio.Writer, id json.RawMessage, code int, msg string) {
+func mcpError(w *mcpWriter, id json.RawMessage, code int, msg string) {
 	writeMCP(w, map[string]any{"jsonrpc": "2.0", "id": rawID(id), "error": map[string]any{"code": code, "message": msg}})
 }
 
-func mcpToolResult(w *bufio.Writer, id json.RawMessage, text string, isError bool) {
+func mcpToolResult(w *mcpWriter, id json.RawMessage, text string, isError bool) {
 	mcpReply(w, id, map[string]any{"content": []any{map[string]any{"type": "text", "text": text}}, "isError": isError})
 }
 
@@ -250,13 +310,20 @@ func rawID(id json.RawMessage) any {
 	return id
 }
 
-func writeMCP(w *bufio.Writer, msg map[string]any) {
+func writeMCP(w *mcpWriter, msg map[string]any) {
+	if w.err != nil {
+		return
+	}
 	b, err := json.Marshal(msg)
 	if err != nil {
+		w.err = errMCPOutput
 		return
 	}
 	if _, err := w.Write(b); err != nil {
+		w.err = errMCPOutput
 		return
 	}
-	_ = w.WriteByte('\n')
+	if w.WriteByte('\n') != nil {
+		w.err = errMCPOutput
+	}
 }

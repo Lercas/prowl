@@ -3,7 +3,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"math"
 	"os"
@@ -12,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/config"
@@ -20,6 +21,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/doctor"
 	"github.com/Lercas/prowl/tool/internal/domain"
 	"github.com/Lercas/prowl/tool/internal/forge"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/lsp"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
@@ -33,6 +35,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/server"
 	"github.com/Lercas/prowl/tool/internal/source"
+	"github.com/Lercas/prowl/tool/internal/targetlist"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
@@ -151,8 +154,7 @@ func main() {
 	safehttp.AllowPrivate.Store(os.Getenv("PROWL_ALLOW_PRIVATE_IPS") != "")
 	cmd := args[0]
 	if cmd == "version" || cmd == "--version" || cmd == "-V" {
-		printVersions()
-		return
+		os.Exit(printVersions())
 	}
 	if cmd == "help" || cmd == "-h" || cmd == "--help" {
 		topic := ""
@@ -205,6 +207,9 @@ func main() {
 		os.Exit(cmdVerifiers(args[1:]))
 	case "lsp":
 		if err := lsp.Serve(); err != nil {
+			if errors.Is(err, lsp.ErrExitWithoutShutdown) {
+				os.Exit(1)
+			}
 			fmt.Fprintln(os.Stderr, "lsp error:", err)
 			os.Exit(2)
 		}
@@ -230,23 +235,29 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 	if err != nil {
 		return nil, nil, err
 	}
+	if err := taxonomy.RequireComplete(tax); err != nil {
+		return nil, nil, fmt.Errorf("taxonomy: %w", err)
+	}
 	ruleFiles := c.rules
 	// gitleaks migration: with no explicit --rules, auto-load a .gitleaks.toml from the working dir so
 	// its rules join the taxonomy and their IDs line up with any .gitleaksignore.
 	if len(ruleFiles) == 0 && !c.rulesOnly {
-		for _, name := range []string{".gitleaks.toml", "gitleaks.toml"} {
-			if _, err := os.Stat(name); err == nil {
-				ruleFiles = append(ruleFiles, name)
-				logx.Info("auto-loaded gitleaks config", "file", name)
-				break
-			}
+		name, err := taxonomy.DiscoverGitleaks()
+		if err != nil {
+			return nil, nil, err
+		}
+		if name != "" {
+			ruleFiles = append(ruleFiles, name)
+			logx.Info("auto-loaded gitleaks config", "file", name)
 		}
 	}
 	for _, rp := range ruleFiles {
 		ext, al, err := taxonomy.LoadAny(rp)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "rules %q: %v\n", rp, err)
-			continue
+			return nil, nil, fmt.Errorf("rules %q: %w", rp, err)
+		}
+		if err := taxonomy.RequireComplete(ext); err != nil {
+			return nil, nil, fmt.Errorf("rules %q: %w", rp, err)
 		}
 		tax.Types = append(tax.Types, ext.Types...)
 		if cfg != nil && al != nil {
@@ -274,8 +285,7 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 			// regexp.Compile would let a packed bomb OOM the scan before any finding).
 			re, err := saferegex.Compile(cr.Regex)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "custom rule %q: bad regex: %v\n", cr.ID, err)
-				continue
+				return nil, nil, fmt.Errorf("custom rule %q: bad regex: %w", cr.ID, err)
 			}
 			cat := cr.Category
 			if cat == "" {
@@ -305,17 +315,21 @@ func splitCSV(s string) []string {
 
 // loadEngine builds the template engine from --rules-dir, or nil if none was given. --rules-only
 // isolates it too: only an explicit --rules-dir is loaded, never the auto-discovered ~/.prowl/rules.
-func loadEngine(c commonFlags) *rules.Engine {
-	dirs := discoverRulesDirs(c.rulesDir)
-	if c.rulesOnly {
-		dirs = c.rulesDir // ONLY what the user passed; never the auto-discovered installed dir
+func loadEngine(c commonFlags) (*rules.Engine, error) {
+	dirs := c.rulesDir
+	if !c.rulesOnly {
+		var err error
+		dirs, err = discoverRulesDirs(c.rulesDir)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if len(dirs) == 0 {
-		return nil
+		return nil, nil
 	}
 	eng, err := rules.Load(dirs...)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rules-dir: %v\n", err)
+		return nil, fmt.Errorf("incomplete rule template set: %w", err)
 	}
 	eng.Filter(rules.FilterOpts{
 		Tags:        splitCSV(c.tags),
@@ -323,7 +337,7 @@ func loadEngine(c commonFlags) *rules.Engine {
 		Severities:  splitCSV(c.ruleSeverity),
 	})
 	logx.Info("loaded rule templates", "count", eng.Len())
-	return eng
+	return eng, nil
 }
 
 // loadVerifySet builds the verifier set from --verifiers dirs when --verify is on. --verify with no
@@ -332,13 +346,16 @@ func loadVerifySet(c commonFlags) (*verify.Set, error) {
 	if !c.verify {
 		return nil, nil
 	}
-	dirs := discoverVerifierDirs(c.verifiers)
+	dirs, err := discoverVerifierDirs(c.verifiers)
+	if err != nil {
+		return nil, err
+	}
 	if len(dirs) == 0 {
 		return nil, fmt.Errorf("--verify needs verifiers, but none are installed — run 'prowl verifiers update' (or pass --verifiers DIR)")
 	}
 	vs, err := verify.Load(c.verifyTimeout, dirs...)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "verifiers: %v\n", err) // a partial parse failure: warn but use what loaded
+		return nil, fmt.Errorf("--verify needs a complete verifier set: %w", err)
 	}
 	if vs == nil || vs.Count() == 0 {
 		return nil, fmt.Errorf("--verify needs verifiers, but the loaded set is empty — run 'prowl verifiers update'")
@@ -353,6 +370,8 @@ func keepVerified(fs []model.Finding) []model.Finding {
 	inconclusive, unverifiable := 0, 0
 	for _, f := range fs {
 		switch {
+		case model.IsIncompleteFinding(f):
+			out = append(out, f)
 		case f.Verified != nil && *f.Verified: // provider-confirmed live
 			out = append(out, f)
 		case f.Verified == nil && strings.HasPrefix(f.Rationale, "verification inconclusive"):
@@ -384,17 +403,19 @@ type commonFlags struct {
 	staged, history                          bool
 	silence, quiet, verbose, noColor         bool
 	rulesOnly                                bool
-	noAutoConfig                             bool    // repo/org: don't honor the scanned tree's own .prowl.yaml
-	dedupe                                   bool    // collapse the same secret found repeatedly in one file (default on)
-	maxPerFile                               int     // cap generic findings per file (data-file guard; 0 = off)
-	mlEmbed                                  bool    // run the L2 model in-process (embedded), no sidecar
-	mlModel                                  string  // load the in-process model from this file (implies --ml)
-	mlURL                                    string  // ML sidecar URL for the L2 secret/not-secret stage (off if empty)
-	mlThreshold                              float64 // drop a non-checksum finding the ML scores below this
-	mlThresholdSet                           bool    // user passed --ml-threshold (so config must not override it)
-	minConfidence                            float64 // report-time: drop findings below this confidence (0 = off)
-	minSeverity                              string  // report-time: drop findings below this severity (incl. built-ins)
-	disable                                  string  // report-time: comma-separated detector types to drop
+	noAutoConfig                             bool              // repo/org: don't honor the scanned tree's own .prowl.yaml
+	dedupe                                   bool              // collapse the same secret found repeatedly in one file (default on)
+	maxPerFile                               int               // cap generic findings per file (data-file guard; 0 = off)
+	mlEmbed                                  bool              // run the L2 model in-process (embedded), no sidecar
+	mlModel                                  string            // load the in-process model from this file (implies --ml)
+	mlURL                                    string            // ML sidecar URL for the L2 secret/not-secret stage (off if empty)
+	mlThreshold                              float64           // drop a non-checksum finding the ML scores below this
+	mlThresholdSet                           bool              // user passed --ml-threshold (so config must not override it)
+	mlPrepared                               *mlscore.Embedded // immutable model snapshot from early preflight
+	mlPreparedPath                           string            // selector that produced the snapshot
+	minConfidence                            float64           // report-time: drop findings below this confidence (0 = off)
+	minSeverity                              string            // report-time: drop findings below this severity (incl. built-ins)
+	disable                                  string            // report-time: comma-separated detector types to drop
 	rules                                    []string
 	rulesDir                                 []string
 	tags, excludeTags, ruleSeverity          string
@@ -441,7 +462,7 @@ func setupLogging(c commonFlags) {
 // rootContext returns a context cancelled on Ctrl-C / SIGTERM and, with --timeout, after that
 // deadline. Caller must defer the stop func.
 func rootContext(c commonFlags) (context.Context, context.CancelFunc) {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), scanSignals()...)
 	if c.timeout > 0 {
 		tctx, cancel := context.WithTimeout(ctx, c.timeout)
 		return tctx, func() { cancel(); stop() }
@@ -451,48 +472,32 @@ func rootContext(c commonFlags) (context.Context, context.CancelFunc) {
 
 // writeReport sends findings to the --output file or stdout. A write failure exits non-zero rather
 // than leave an empty report CI would read as "clean".
-func writeReport(c commonFlags, findings []model.Finding) {
+func writeReport(c commonFlags, findings []model.Finding) error {
 	if c.output != "" {
 		if err := writeReportFile(c.output, findings, c.format); err != nil {
 			logx.Error("cannot write output file", "path", c.output, "err", err)
-			os.Exit(2)
+			return err
 		}
 		logx.Info("report written", "findings", len(findings), "path", c.output)
-		return
+		return nil
 	}
 	if c.silence && c.format == "pretty" {
-		return // --silence suppresses the human report; an explicit --format json/sarif still writes for CI
+		return nil // --silence suppresses the human report; an explicit --format json/sarif still writes for CI
 	}
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && isTTY(os.Stdout)
 	if err := report.Write(os.Stdout, findings, c.format, color); err != nil {
 		logx.Error("cannot write report to stdout", "err", err)
-		os.Exit(2)
-	}
-}
-
-// writeReportFile writes the report to path, returning any error. It opens with O_NOFOLLOW so a
-// symlink planted at the target isn't followed, and removes the file if the write fails after
-// create/truncate so a stale empty report can't be mistaken for "no findings".
-func writeReportFile(path string, findings []model.Finding, format string) error {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC|oNoFollow, 0o644)
-	if err != nil {
-		return err
-	}
-	if err := writeAndClose(f, findings, format); err != nil {
-		_ = os.Remove(path) // best-effort: drop the truncated file we just created
 		return err
 	}
 	return nil
 }
 
-// writeAndClose renders the report into f and closes f, surfacing whichever error comes first (a
-// buffered flush can fail on a full disk only at Close).
-func writeAndClose(f *os.File, findings []model.Finding, format string) error {
-	if err := report.Write(f, findings, format, false); err != nil { // never colour a file
-		_ = f.Close()
-		return err
-	}
-	return f.Close()
+// writeReportFile commits a complete report without changing the previous inode on failure.
+// Every report is private because --show-secrets can put full credential values into its output.
+func writeReportFile(path string, findings []model.Finding, format string) error {
+	return localfile.WriteAtomic(path, 0o600, func(w io.Writer) error {
+		return report.Write(w, findings, format, false)
+	})
 }
 
 // summarize logs a one-line scan summary grouped by severity (suppressed by --silence).
@@ -522,11 +527,10 @@ func summarize(findings []model.Finding, dur time.Duration) {
 
 // loadConfig resolves the config file (--config or auto-discovered) and applies its defaults for
 // any value not set on the command line.
-func loadConfig(c *commonFlags) *config.Config {
+func loadConfig(c *commonFlags) (*config.Config, error) {
 	if c.failOnVerified && !c.verify {
 		// Without --verify nothing is ever confirmed live, so the gate would always pass — require it.
-		fmt.Fprintln(os.Stderr, "--fail-on-verified needs --verify (it gates on provider-confirmed-live secrets)")
-		os.Exit(2)
+		return nil, fmt.Errorf("--fail-on-verified needs --verify (it gates on provider-confirmed-live secrets)")
 	}
 	var cfg *config.Config
 	if c.config != "" {
@@ -534,8 +538,7 @@ func loadConfig(c *commonFlags) *config.Config {
 		if cfg, err = config.Load(c.config); err != nil {
 			// An explicit --config that fails to load must abort, not fall through to an auto-discovered
 			// (possibly untrusted) in-repo .prowl.yaml.
-			fmt.Fprintln(os.Stderr, "config error:", err)
-			os.Exit(2)
+			return nil, err
 		}
 	}
 	if cfg == nil && c.noAutoConfig {
@@ -543,7 +546,11 @@ func loadConfig(c *commonFlags) *config.Config {
 		cfg = &config.Config{}
 	}
 	if cfg == nil {
-		cfg = config.Discover()
+		var err error
+		cfg, err = config.Discover()
+		if err != nil {
+			return nil, err
+		}
 		// A scanned repo's own .prowl.yaml is attacker-controlled (a fork PR, a dependency). Warn if it
 		// suppresses detection so a kill-switch can't silently blind the scan; pass --config to vouch.
 		if p := cfg.LoadedFrom(); p != "" {
@@ -594,7 +601,7 @@ func loadConfig(c *commonFlags) *config.Config {
 	if d, err := time.ParseDuration(cfg.Limits.CloneTimeout); err == nil && d > 0 {
 		source.SetCloneTimeout(d)
 	}
-	return cfg
+	return cfg, nil
 }
 
 // parseByteSize parses a byte size: a plain integer, or an integer with a KB/MB/GB (or K/M/G, optional
@@ -871,41 +878,54 @@ func cmdScan(args []string) int {
 // reports how many findings the model suppresses as not-a-secret.
 func cmdCompare(args []string) int {
 	c, rest := parseCommon(args)
+	if code := checkSourceModes(c, rest); code != 0 {
+		return code
+	}
+	if len(rest) == 1 && rest[0] == "-" {
+		fmt.Fprintln(os.Stderr, "compare needs a repeatable source; stdin cannot be scanned twice")
+		return 2
+	}
 	if c.ocrEnabled {
 		fmt.Fprintln(os.Stderr, "compare does not support --ocr: it would OCR every image twice")
 		return 2
 	}
 	ctx, stop := rootContext(c)
 	defer stop()
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	setupLogging(c)
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
-	eng := loadEngine(c)
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
 
-	mkItems := func() <-chan model.Item {
-		if c.staged {
-			files, ferr := source.GitChangedFiles(ctx, "staged", "")
-			if ferr != nil {
-				logx.Error("git error", "err", ferr)
-			}
-			return source.FilesFromListFiltered(ctx, files, c.exclude, c.maxSize)
-		}
-		roots := rest
-		if len(roots) == 0 {
-			roots = []string{"."}
-		}
-		return source.Filesystem(ctx, roots, c.exclude, c.maxSize)
+	// With no explicit mode, compare defaults to the current tree even when stdin is not a TTY.
+	if len(rest) == 0 && !c.staged && c.since == "" && !c.history {
+		rest = []string{"."}
 	}
 
 	// Pass 1: regex/cascade only — the noisy set a regex scanner reports. No ML, no per-file cap.
 	rawC := c
 	rawC.mlEmbed, rawC.mlModel, rawC.mlURL = false, "", ""
 	rawC.verifiedOnly, rawC.maxPerFile = false, 0
-	raw := collectFindings(ctx, rawC, cfg, det, eng, nil, mkItems(), c.dedupe)
+	rawItems, err := scanInput(ctx, c, rest)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	raw := collectFindings(ctx, rawC, cfg, det, eng, nil, rawItems, c.dedupe)
+	if code := failClosedIfIncomplete(ctx, gate(raw, "", false)); code != 0 {
+		return code
+	}
 
 	// Pass 2: the same scan + Prowl's in-process ML context filter (isolated from the per-file cap).
 	mlC := c
@@ -916,7 +936,15 @@ func cmdCompare(args []string) int {
 	if code := mlC.mlPreflight(); code != 0 {
 		return code
 	}
-	kept := collectFindings(ctx, mlC, cfg, det, eng, nil, mkItems(), c.dedupe)
+	keptItems, err := scanInput(ctx, c, rest)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	kept := collectFindings(ctx, mlC, cfg, det, eng, nil, keptItems, c.dedupe)
+	if code := failClosedIfIncomplete(ctx, gate(kept, "", false)); code != 0 {
+		return code
+	}
 
 	printCompare(raw, kept)
 	return 0
@@ -1019,10 +1047,22 @@ func checkSourceModes(c commonFlags, rest []string) int {
 // scanItems runs the full scan pipeline (config, detector, source, report) for the given roots under
 // the caller's context. It is shared by `scan`, `repo`, and `org` (which clone and scan in ".").
 func scanItems(ctx context.Context, c commonFlags, rest []string) int {
+	return scanItemStream(ctx, c, func(ctx context.Context, c commonFlags) (<-chan model.Item, error) {
+		return scanInput(ctx, c, rest)
+	})
+}
+
+// scanItemStream resolves operator configuration before acquiring a source, keeping relative
+// report/config paths anchored to the caller's directory and applying configured acquisition limits.
+func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Context, commonFlags) (<-chan model.Item, error)) int {
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	setupLogging(c)
 	ocrEngine, err := setupOCR(c)
 	if err != nil {
@@ -1043,50 +1083,69 @@ func scanItems(ctx context.Context, c commonFlags, rest []string) int {
 	if len(tax.Skipped) > 0 {
 		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
 	}
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, err := loadVerifySet(c)
+	if err != nil {
+		logx.Error("verify setup failed", "err", err)
+		return 2
+	}
 
-	var items <-chan model.Item
+	items, err := acquire(ctx, c)
+	if err != nil {
+		logx.Error("scan source failed", "err", err)
+		return 2
+	}
+	code := runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	return finalizeOCR(ocrEngine, code)
+}
+
+// scanInput selects the same source for scan and compare, including Git's staged blob content.
+func scanInput(ctx context.Context, c commonFlags, rest []string) (<-chan model.Item, error) {
+	return scanInputAt(ctx, c, rest, "")
+}
+
+func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir string) (<-chan model.Item, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	switch {
 	case c.staged || c.since != "":
 		mode, rev := "staged", ""
 		if c.since != "" {
 			mode, rev = "since", c.since
 		}
-		files, err := source.GitChangedFiles(ctx, mode, rev)
+		files, err := source.GitChangedFilesIn(ctx, repoDir, mode, rev)
 		if err != nil {
-			logx.Error("git error", "err", err)
-			return 2
+			return nil, err
 		}
 		if len(files) == 0 {
 			logx.Info("no changed files to scan")
-			return 0
 		}
-		items = source.FilesFromListFiltered(ctx, files, c.exclude, c.maxSize)
+		if c.staged {
+			return source.GitIndexFilesIn(ctx, repoDir, files, c.exclude, c.maxSize), nil
+		}
+		return source.GitWorktreeFilesIn(ctx, repoDir, files, c.exclude, c.maxSize), nil
 	case c.history:
-		if !source.IsGitRepo("") { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
-			logx.Error("--history needs a git repository, but this is not one")
-			return 2
+		if !source.IsGitRepo(repoDir) { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
+			return nil, fmt.Errorf("--history needs a git repository, but this is not one")
 		}
-		items = source.GitHistoryBlobs(ctx, "", c.exclude, c.maxSize)
+		return source.GitHistoryBlobs(ctx, repoDir, c.exclude, c.maxSize), nil
 	case len(rest) == 1 && rest[0] == "-":
-		items = source.Stdin(ctx)
+		return source.StdinLimited(ctx, c.maxSize), nil
 	case len(rest) == 0 && !isTTY(os.Stdin):
-		items = source.Stdin(ctx) // input is piped and no path was given — read stdin
+		return source.StdinLimited(ctx, c.maxSize), nil // input is piped and no path was given — read stdin
 	default:
 		roots := rest
 		if len(roots) == 0 {
 			roots = []string{"."}
 		}
-		for _, r := range roots { // a typo'd path must error, not silently scan nothing and exit 0
-			if _, err := os.Stat(r); err != nil {
-				logx.Error("scan path not found", "path", r)
-				return 2
-			}
-		}
-		items = source.Filesystem(ctx, roots, c.exclude, c.maxSize)
+		// The source emits per-root diagnostics so one missing root preserves the others' findings.
+		return source.Filesystem(ctx, roots, c.exclude, c.maxSize), nil
 	}
-
-	code := runScan(ctx, c, cfg, det, items, c.dedupe)
-	return finalizeOCR(ocrEngine, code)
 }
 
 func setupOCR(c commonFlags) (*ocr.Engine, error) {
@@ -1136,23 +1195,27 @@ func firstNonEmpty(values ...string) string {
 	return ""
 }
 
-// runScan executes the scan pipeline over an already-built item stream, composing collectFindings
-// (scan -> findings) and reportFindings (findings -> report + exit code). Shared by scan/repo/image;
-// org drives the two halves separately so it can collect per-repo on a worker pool.
-func runScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, items <-chan model.Item, dedupe bool, finalize ...func([]model.Finding) []model.Finding) int {
+// runPreparedScan consumes an item stream using the detector, rules and verifiers loaded by the caller.
+func runPreparedScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool, finalize ...func([]model.Finding) []model.Finding) int {
 	start := time.Now()
-	eng := loadEngine(c)
-	vset, err := loadVerifySet(c)
-	if err != nil {
-		logx.Error("verify setup failed", "err", err)
-		return 2
+	collectFlags := c
+	collectDedupe := dedupe
+	if len(finalize) > 0 {
+		// Final-image provenance must be known before selecting a duplicate or capping occurrences.
+		collectFlags.maxPerFile = 0
+		collectDedupe = false
 	}
-	findings := collectFindings(ctx, c, cfg, det, eng, vset, items, dedupe)
+	findings := collectFindings(ctx, collectFlags, cfg, det, eng, vset, items, collectDedupe)
 	for _, fz := range finalize { // image scans pass a final-FS marker; other sources pass nothing
 		findings = fz(findings)
 	}
-	code := reportFindings(c, findings, time.Since(start))
-	return failClosedIfIncomplete(ctx, code)
+	if len(finalize) > 0 {
+		if dedupe {
+			findings = dedupeFingerprints(findings)
+		}
+		findings = capGenericPerFile(findings, c.maxPerFile)
+	}
+	return reportScan(ctx, c, findings, time.Since(start))
 }
 
 // failClosedIfIncomplete raises a clean exit to non-zero when the scan didn't finish (timeout or
@@ -1160,41 +1223,44 @@ func runScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect
 func failClosedIfIncomplete(ctx context.Context, code int) int {
 	if ctx.Err() != nil {
 		logx.Error("scan did not complete (timeout/interrupt) — failing closed; partial results may miss secrets")
-		if code == 0 {
-			return 2
-		}
+		return 2
 	}
 	return code
 }
 
 // mlPreflight fails closed: if --ml/--ml-model was requested but can't load (a nocgo binary, a bad
 // --ml-model path), abort rather than return cascade-only results that look ML-filtered.
-func (c commonFlags) mlPreflight() int {
+func (c *commonFlags) mlPreflight() int {
 	if !c.mlEmbed && c.mlModel == "" {
+		c.mlPrepared = nil
 		return 0
 	}
-	if _, err := mlscore.NewEmbedded(c.mlThreshold, c.mlModel); err != nil {
+	if c.mlPrepared != nil && c.mlPreparedPath == c.mlModel {
+		return 0
+	}
+	c.mlPrepared = nil
+	prepared, err := mlscore.NewEmbedded(c.mlThreshold, c.mlModel)
+	if err != nil {
 		logx.Error("ml: --ml was requested but the model cannot load — aborting rather than silently "+
 			"scanning without the ML stage", "err", err)
 		return 2
 	}
+	c.mlPrepared, c.mlPreparedPath = prepared, c.mlModel
 	return 0
 }
 
 // mlScorer builds the L2 ML scorer: the in-process model (--ml), the sidecar (--ml-url), or nil.
-func (c commonFlags) mlScorer() mlscore.Scorer {
+func (c commonFlags) mlScorer() (mlscore.Scorer, error) {
 	switch {
 	case c.mlEmbed || c.mlModel != "":
-		s, err := mlscore.NewEmbedded(c.mlThreshold, c.mlModel)
-		if err != nil { // unreachable after mlPreflight aborts; kept as defense
-			logx.Error("ml: cannot load model — scanning without the ML stage", "err", err)
-			return nil
+		if c.mlPrepared == nil || c.mlPreparedPath != c.mlModel {
+			return nil, fmt.Errorf("in-process ML model has not passed preflight for the selected model")
 		}
-		return s
+		return c.mlPrepared.WithThreshold(c.mlThreshold), nil
 	case c.mlURL != "":
-		return mlscore.New(c.mlURL, c.mlThreshold)
+		return mlscore.New(c.mlURL, c.mlThreshold), nil
 	default:
-		return nil
+		return nil, nil
 	}
 }
 
@@ -1202,7 +1268,13 @@ func (c commonFlags) mlScorer() mlscore.Scorer {
 // applying --verified-only and (for image scans) fingerprint dedupe. The "scan" half of runScan; org
 // calls it once per repo on a worker pool.
 func collectFindings(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool) []model.Finding {
-	findings := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, c.mlScorer())
+	ml, mlErr := c.mlScorer()
+	findings := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, ml)
+	if mlErr != nil {
+		logx.Error("ML setup failed; scan results are incomplete", "err", mlErr)
+		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
+			Path: "scan", Stage: "ML setup", Rationale: "requested ML model was not prepared; scan results are incomplete"})
+	}
 	if c.verifiedOnly {
 		findings = keepVerified(findings)
 	}
@@ -1221,12 +1293,20 @@ func capGenericPerFile(fs []model.Finding, max int) []model.Finding {
 		return fs
 	}
 	const specificMult = 8 // specific detectors cap at max*mult to clip only an extreme flood
+	specificLimit := math.MaxInt
+	if max <= math.MaxInt/specificMult {
+		specificLimit = max * specificMult
+	}
 	type key struct{ path, typ string }
 	seen := map[key]int{}
 	dropped := map[string]int{}
 	out := fs[:0]
 	for _, f := range fs {
-		limit := max * specificMult
+		if model.IsIncompleteFinding(f) {
+			out = append(out, f)
+			continue
+		}
+		limit := specificLimit
 		if f.Type == "generic_high_entropy" || f.Type == "generic_password" {
 			limit = max
 		}
@@ -1245,15 +1325,48 @@ func capGenericPerFile(fs []model.Finding, max int) []model.Finding {
 	return out
 }
 
-// reportFindings is the "report" half of runScan: it logs the summary, writes/updates a baseline,
+// reportFindings is the report stage: it logs the summary, writes/updates a baseline,
 // emits the report, and returns the --fail-on exit code. Shared by scan/repo/image and org.
 func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	return reportFindingsContext(context.Background(), c, findings, elapsed)
+}
+
+// reportScan carries lifecycle cancellation through suppression, baseline commit and the gate.
+func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	return failClosedIfIncomplete(ctx, reportFindingsContext(ctx, c, findings, elapsed))
+}
+
+func markInterrupted(ctx context.Context, findings []model.Finding) []model.Finding {
+	if ctx.Err() == nil {
+		return findings
+	}
+	for _, f := range findings {
+		if model.IsIncompleteFinding(f) {
+			return findings
+		}
+	}
+	return append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
+		Path: "scan", Stage: "post-processing", Rationale: "scan interrupted; results are incomplete"})
+}
+
+func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	findings = markInterrupted(ctx, findings)
 	findings = applyReportFilters(c, findings)
 	summarize(findings, elapsed)
 
 	if c.writeBaseline != "" {
-		if err := post.WriteBaseline(c.writeBaseline, findings); err != nil {
+		for _, f := range findings {
+			if model.IsIncompleteFinding(f) {
+				logx.Error("cannot write a baseline from an incomplete scan")
+				_ = writeReport(c, findings) // the incomplete result already requires exit 2
+				return 2
+			}
+		}
+		if err := post.WriteBaselineContext(ctx, c.writeBaseline, findings); err != nil {
 			logx.Error("baseline write failed", "err", err)
+			if ctx.Err() != nil {
+				_ = writeReport(c, markInterrupted(ctx, findings))
+			}
 			return 2
 		}
 		logx.Info("baseline written", "findings", len(findings), "path", c.writeBaseline)
@@ -1261,8 +1374,33 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 	}
 	blPath := c.baseline
 	if blPath == "" {
-		if _, e := os.Stat(".prowl-baseline.json"); e == nil {
-			blPath = ".prowl-baseline.json"
+		var err error
+		blPath, err = localfile.FirstExisting(".prowl-baseline.json")
+		if err != nil {
+			logx.Error("baseline discovery failed", "err", err)
+			return 2
+		}
+	}
+	var baseline *post.Baseline
+	if blPath != "" {
+		var err error
+		baseline, err = post.LoadBaseline(blPath)
+		if err != nil {
+			logx.Error("baseline load failed", "path", blPath, "err", err)
+			return 2
+		}
+	}
+	ignorePath, err := localfile.FirstExisting(".gitleaksignore")
+	if err != nil {
+		logx.Error("gitleaksignore discovery failed", "err", err)
+		return 2
+	}
+	var ignore *post.GitleaksIgnore
+	if ignorePath != "" {
+		ignore, err = post.LoadGitleaksIgnore(ignorePath)
+		if err != nil {
+			logx.Error("gitleaksignore load failed", "path", ignorePath, "err", err)
+			return 2
 		}
 	}
 	// Under --fail-on-verified, snapshot confirmed-live findings so an in-tree (possibly attacker-shipped)
@@ -1277,7 +1415,7 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 	}
 	if blPath != "" {
 		before := len(findings)
-		findings = post.LoadBaseline(blPath).Suppress(findings)
+		findings = baseline.Suppress(findings)
 		if n := before - len(findings); n > 0 {
 			logx.Warn("baseline suppressed findings", "count", n, "baseline", blPath)
 		}
@@ -1285,9 +1423,9 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 
 	// Honor a gitleaks .gitleaksignore in the working dir, so a repo already triaged with gitleaks
 	// keeps those exact findings suppressed under Prowl — zero-friction migration off gitleaks.
-	if _, e := os.Stat(".gitleaksignore"); e == nil {
+	if ignore != nil {
 		before := len(findings)
-		findings = post.LoadGitleaksIgnore(".gitleaksignore").Suppress(findings)
+		findings = ignore.Suppress(findings)
 		if n := before - len(findings); n > 0 {
 			logx.Warn("gitleaksignore suppressed findings", "count", n, "path", ".gitleaksignore")
 		}
@@ -1297,7 +1435,10 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 		findings = restoreMissingLive(findings, liveGuard)
 		escalateLive(findings)
 	}
-	writeReport(c, findings)
+	findings = markInterrupted(ctx, findings)
+	if err := writeReport(c, findings); err != nil {
+		return 2
+	}
 	return gate(findings, c.failOn, c.failOnVerified)
 }
 
@@ -1317,6 +1458,10 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 	}
 	out := fs[:0]
 	for _, f := range fs {
+		if model.IsIncompleteFinding(f) {
+			out = append(out, f)
+			continue
+		}
 		if c.minConfidence > 0 && f.Confidence < c.minConfidence {
 			continue
 		}
@@ -1332,16 +1477,20 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 }
 
 // dedupeFingerprints drops findings whose Fingerprint was already emitted, collapsing the same secret
-// across image layers. Findings without a fingerprint are always kept (no stable identity to dedupe).
+// across occurrences. A surviving image entry wins over its overwritten copy. Findings without a
+// fingerprint are always kept (no stable identity to dedupe).
 func dedupeFingerprints(fs []model.Finding) []model.Finding {
-	seen := make(map[string]bool, len(fs))
+	seen := make(map[string]int, len(fs))
 	out := fs[:0]
 	for _, f := range fs {
 		if f.Fingerprint != "" {
-			if seen[f.Fingerprint] {
+			if idx, exists := seen[f.Fingerprint]; exists {
+				if f.InFinalImage != nil && *f.InFinalImage && (out[idx].InFinalImage == nil || !*out[idx].InFinalImage) {
+					out[idx] = f
+				}
 				continue
 			}
-			seen[f.Fingerprint] = true
+			seen[f.Fingerprint] = len(out)
 		}
 		out = append(out, f)
 	}
@@ -1357,6 +1506,9 @@ func cmdRepo(args []string) int {
 		depth = mustInt("--depth", d, 1)
 	}
 	c, rest := parseCommon(stripValueFlags(args, "--branch", "--depth"))
+	if code := checkSourceModes(c, nil); code != 0 {
+		return code
+	}
 	setupLogging(c)
 	if len(rest) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: prowl repo <git-url> [--branch B] [--history] [--depth N] [scan flags]")
@@ -1371,37 +1523,41 @@ func cmdRepo(args []string) int {
 	return scanCheckout(ctx, c, source.CloneOpts{URL: rest[0], Branch: branch, Full: c.history, Depth: depth})
 }
 
-// scanCheckout clones a repository into a temp dir, scans the checkout in place, then removes it and
-// restores the working directory. Returns the scan exit code (2 on clone failure).
+// scanCheckout scans a cloned repository without changing the caller's directory. The checkout's
+// source paths remain repository-relative, and acquisition failures enter the incomplete report.
 func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
-	logx.Info("cloning repository", "url", redactURL(o.URL), "history", o.Full)
-	dir, cleanup, err := source.CloneRepo(ctx, o)
-	if err != nil {
-		logx.Error("clone failed", "url", redactURL(o.URL), "err", err)
-		return 2
-	}
-	defer cleanup()
-	saved, _ := os.Getwd()
-	if err := os.Chdir(dir); err != nil {
-		logx.Error("cannot enter checkout", "err", err)
-		return 2
-	}
-	if saved != "" {
-		defer func() {
-			if err := os.Chdir(saved); err != nil {
-				logx.Error("cannot restore working directory", "path", saved, "err", err)
-			}
-		}()
-	}
+	cleanup := func() {}
+	defer func() { cleanup() }()
 	c.noAutoConfig = true // ignore the cloned repo's own .prowl.yaml (only an explicit --config is trusted)
-	return scanItems(ctx, c, []string{"."})
+	return scanItemStream(ctx, c, func(ctx context.Context, c commonFlags) (<-chan model.Item, error) {
+		logx.Info("cloning repository", "url", redactURL(o.URL), "history", o.Full)
+		if o.Timeout == 0 {
+			o.Timeout = c.timeout
+		}
+		dir, release, err := source.CloneRepo(ctx, o)
+		cleanup = release
+		if err != nil {
+			logx.Error("clone failed", "url", redactURL(o.URL), "err", err)
+			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: redactURL(o.URL), Error: err}), nil
+		}
+		items, err := scanInputAt(ctx, c, []string{dir}, dir)
+		if err != nil {
+			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: redactURL(o.URL), Error: err}), nil
+		}
+		return mapSourcePaths(ctx, items, func(p string) (string, error) {
+			if c.history || c.staged || c.since != "" {
+				return p, nil // Git sources already carry repository-relative locators
+			}
+			return relativeSourcePath(dir, p)
+		}), nil
+	})
 }
 
 // cmdOrg lists every repo under a GitHub org/user, GitLab group, or Bitbucket workspace, then clones
 // and scans them on a worker pool, building the detector/engine/verifier once and merging findings into
 // one report. Target is "<platform>:<name>"; auth via GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN.
-// --concurrency N caps the pool (default min(4, #repos)); a failed repo is logged and skipped. Exit is
-// 2 only when the listing fails or no repo could be scanned.
+// --concurrency N caps the pool (default min(4, #repos)); a failed repo remains a diagnostic. Exit is
+// 2 whenever repository acquisition or scanning is incomplete.
 func cmdOrg(args []string) int {
 	conc := 0
 	if v := flagVal(args, "--concurrency"); v != "" {
@@ -1410,7 +1566,27 @@ func cmdOrg(args []string) int {
 	excludeRepo := splitCSV(flagVal(args, "--exclude-repo"))
 	c, rest := parseCommon(stripValueFlags(args, "--branch", "--depth", "--concurrency", "--exclude-repo"))
 	setupLogging(c)
-	target := firstNonFlag(rest)
+	if code := checkSourceModes(c, nil); code != 0 {
+		return code
+	}
+	if c.staged || c.since != "" || flagVal(args, "--branch") != "" || flagVal(args, "--depth") != "" {
+		logx.Error("org supports --history, but not --staged, --since, --branch or --depth")
+		return 2
+	}
+	if code := c.mlPreflight(); code != 0 {
+		return code
+	}
+	target := ""
+	for _, arg := range rest {
+		if arg == "--gists" || strings.HasPrefix(arg, "--gists=") {
+			continue
+		}
+		if strings.HasPrefix(arg, "-") || target != "" {
+			logx.Error("org requires exactly one target and supported scan flags")
+			return 2
+		}
+		target = arg
+	}
 	if target == "" {
 		fmt.Fprintln(os.Stderr, "usage: prowl org <github|gitlab|bitbucket>:<name> [--gists] [--history] [--concurrency N] [--exclude-repo S,…] [scan flags]")
 		fmt.Fprintln(os.Stderr, "  auth via GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN env (for private repos)")
@@ -1422,7 +1598,11 @@ func cmdOrg(args []string) int {
 	// Load config before listing so limits.org_max_pages bounds ListRepos. noAutoConfig is set first so
 	// a cloned repo's own untrusted .prowl.yaml can never apply — only an explicit --config.
 	c.noAutoConfig = true
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	ocrEngine, err := setupOCR(c)
 	if err != nil {
 		logx.Error("OCR setup failed", "err", err)
@@ -1434,6 +1614,27 @@ func cmdOrg(args []string) int {
 			"endpoint", redactURL(firstNonEmpty(c.ocrURL, ocr.DefaultURL)),
 			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
 	}
+	// Build the detector + rule engine + verifier set once and share them across workers (read-only
+	// after construction; scan.Run/verify serialise their own internal state).
+	det, tax, err := loadDetector(c, cfg)
+	if err != nil {
+		logx.Error("failed to load detector", "err", err)
+		return 2
+	}
+	if len(tax.Skipped) > 0 {
+		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
+	}
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, verr := loadVerifySet(c)
+	if verr != nil {
+		logx.Error("verify setup failed", "err", verr)
+		return 2
+	}
+
 	var urls []string
 	if gists {
 		logx.Info("listing gists", "target", target)
@@ -1442,9 +1643,10 @@ func cmdOrg(args []string) int {
 		logx.Info("listing repositories", "target", target)
 		urls, err = forge.ListRepos(ctx, target)
 	}
+	var listingDiagnostics []model.Finding
 	if err != nil {
 		logx.Error("listing failed", "err", err)
-		return 2
+		listingDiagnostics = append(listingDiagnostics, orgDiagnostic(target, "repository listing is incomplete"))
 	}
 	if len(excludeRepo) > 0 { // skip repos matching any --exclude-repo substring (e.g. a vendored fork)
 		kept := urls[:0]
@@ -1458,41 +1660,20 @@ func cmdOrg(args []string) int {
 		}
 		urls = kept
 	}
-	if len(urls) == 0 {
-		logx.Warn("nothing to scan", "target", target, "gists", gists)
-		return 0
-	}
-
-	// Build the detector + rule engine + verifier set once and share them across workers (read-only
-	// after construction; scan.Run/verify serialise their own internal state).
-	det, tax, err := loadDetector(c, cfg)
-	if err != nil {
-		logx.Error("failed to load detector", "err", err)
-		return 2
-	}
-	if len(tax.Skipped) > 0 {
-		logx.Debug("some detector regexes not RE2-compatible, skipped", "count", len(tax.Skipped))
-	}
-	eng := loadEngine(c)
-	vset, verr := loadVerifySet(c)
-	if verr != nil {
-		logx.Error("verify setup failed", "err", verr)
-		return 2
-	}
 
 	workers := conc
 	if workers == 0 {
 		workers = 4
-		if len(urls) < workers {
-			workers = len(urls)
-		}
+	}
+	if len(urls) < workers {
+		workers = len(urls)
 	}
 	logx.Info("scanning repositories", "count", len(urls), "concurrency", workers)
 
 	start := time.Now()
 	var (
 		mu      sync.Mutex
-		all     []model.Finding
+		all     = listingDiagnostics
 		scanned int // repos that completed (clone+scan) without a fatal error
 		failed  int // repos skipped due to a clone/scan error
 		jobs    = make(chan string)
@@ -1508,10 +1689,10 @@ func cmdOrg(args []string) int {
 				}
 				fs, ok := scanOrgRepo(ctx, c, cfg, det, eng, vset, u)
 				mu.Lock()
+				all = append(all, fs...)
 				if ok {
-					all = append(all, fs...)
 					scanned++
-					logx.Info("scanned", "repo", u, "findings", len(fs))
+					logx.Info("scanned", "repo", redactURL(u), "findings", len(fs))
 				} else {
 					failed++
 				}
@@ -1535,70 +1716,56 @@ func cmdOrg(args []string) int {
 	if failed > 0 {
 		logx.Warn("some repositories could not be scanned", "failed", failed, "scanned", scanned, "total", len(urls))
 	}
-	// Nothing scanned (every repo errored): fail hard rather than report a misleading clean exit.
-	if scanned == 0 {
-		logx.Error("no repositories could be scanned", "total", len(urls))
-		return 2
+	if ctx.Err() != nil {
+		all = append(all, orgDiagnostic(target, "organization scan interrupted; results are incomplete"))
 	}
 	// A timeout/interrupt mid-sweep leaves repos unscanned — fail closed rather than gate over partial.
-	code := failClosedIfIncomplete(ctx, reportFindings(c, all, time.Since(start)))
+	code := reportScan(ctx, c, all, time.Since(start))
 	return finalizeOCR(ocrEngine, code)
 }
 
-// orgPerRepoTimeout bounds a single repo's clone (the smaller of a sane default and the run budget) so
-// one slow/hung repo can't consume the whole org sweep; --timeout still bounds the overall run.
-func orgPerRepoTimeout(run time.Duration) time.Duration {
-	const cap = 10 * time.Minute
-	if run > 0 && run < cap {
-		return run
-	}
-	return cap
-}
-
-// scanOrgRepo clones one repo into a unique temp dir, scans it without chdir (so workers run in
-// parallel), prefixes each finding's Path with the repo, and removes the dir. ok=false on clone
-// failure, so the caller can log and skip without aborting the sweep.
+// scanOrgRepo uses a repository-qualified locator before allowlisting and fingerprinting.
+// Failed clones remain diagnostics in the aggregate rather than silently skipped repositories.
 func scanOrgRepo(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, url string) (findings []model.Finding, ok bool) {
-	dir, cleanup, err := source.CloneRepo(ctx, source.CloneOpts{URL: url, Full: c.history, Timeout: orgPerRepoTimeout(c.timeout)})
+	label := repoLabel(url)
+	dir, cleanup, err := source.CloneRepo(ctx, source.CloneOpts{URL: url, Full: c.history, Timeout: c.timeout})
 	if err != nil {
-		logx.Error("clone failed (skipping repo)", "url", redactURL(url), "err", err)
-		return nil, false
+		logx.Error("clone failed", "url", redactURL(url), "err", err)
+		return []model.Finding{orgDiagnostic(label, "repository clone failed; scan results are incomplete")}, false
 	}
 	defer cleanup()
-
 	var items <-chan model.Item
 	if c.history {
 		items = source.GitHistoryBlobs(ctx, dir, c.exclude, c.maxSize)
 	} else {
 		items = source.Filesystem(ctx, []string{dir}, c.exclude, c.maxSize)
 	}
-	fs := collectFindings(ctx, c, cfg, det, eng, vset, items, c.dedupe)
-
-	label := repoLabel(url)
-	prefix := dir + string(os.PathSeparator)
-	for i := range fs {
-		fs[i].Path = label + ": " + strings.TrimPrefix(fs[i].Path, prefix)
-	}
-	return fs, true
-}
-
-// repoLabel derives a stable "<owner>/<repo>" label from a clone URL (dropping the transport+host and
-// any ".git" suffix) for prefixing aggregated findings.
-func repoLabel(url string) string {
-	s := strings.TrimSuffix(url, ".git")
-	if i := strings.Index(s, "://"); i >= 0 { // scheme://host/owner/repo -> owner/repo
-		s = s[i+3:]
-		if j := strings.IndexByte(s, '/'); j >= 0 {
-			s = s[j+1:]
+	items = mapSourcePaths(ctx, items, func(p string) (string, error) {
+		if !c.history {
+			var err error
+			p, err = relativeSourcePath(dir, p)
+			if err != nil {
+				return label, err
+			}
 		}
-	} else if i := strings.LastIndexByte(s, ':'); i >= 0 { // git@host:owner/repo -> owner/repo
-		s = s[i+1:]
+		return label + ": " + p, nil
+	})
+	fs := collectFindings(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	complete := true
+	for _, f := range fs {
+		if model.IsIncompleteFinding(f) {
+			complete = false
+		}
 	}
-	if s == "" {
-		return url // fall back to the raw URL rather than an empty prefix
-	}
-	return s
+	return fs, complete
 }
+
+func orgDiagnostic(path, reason string) model.Finding {
+	return model.Finding{Detector: "source", Type: "source_error", Severity: "info", Source: "code", Path: path, Stage: "intake", Rationale: reason}
+}
+
+// Keep the host in identities so equally named repositories on different forges cannot collide.
+func repoLabel(url string) string { return strings.TrimSuffix(redactURL(url), ".git") }
 
 // stripValueFlags removes the named value-flags (and their values, in both "--k v" and "--k=v" forms)
 // so a subcommand can pre-consume its own flags before handing the remainder to parseCommon.
@@ -1662,14 +1829,34 @@ func cmdDomain(args []string) int {
 			"(the scan fetches each host's published pages/JS).")
 		return 2
 	}
+	for i, target := range targets {
+		address, err := domain.ParseTarget(target)
+		if err != nil {
+			logx.Error("invalid domain target", "entry", i+1, "err", err)
+			return 2
+		}
+		if opts.Recon && !address.ReconEligible {
+			logx.Error("recon requires DNS hostnames without explicit ports", "entry", i+1)
+			return 2
+		}
+		targets[i] = address.Canonical
+	}
 
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
-	eng := loadEngine(c)
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
 	vset, verr := loadVerifySet(c)
 	if verr != nil {
 		logx.Error("verify setup failed", "err", verr)
@@ -1705,13 +1892,12 @@ func cmdDomain(args []string) int {
 				}
 				logx.Info("scanning domain", "target", target, "recon", opts.Recon)
 				items, reached := domain.Discover(ctx, target, opts)
-				fs := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, c.mlScorer())
-				if !reached.Load() { // a dead/typo'd host is skipped, not a whole-run abort
-					logx.Warn("host not reachable — skipped", "target", target)
-					continue
+				fs := collectFindings(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+				if !reached.Load() {
+					logx.Warn("root page could not be read completely", "target", target)
 				}
 				mu.Lock()
-				reachedAny = true
+				reachedAny = reachedAny || reached.Load()
 				findings = append(findings, fs...)
 				mu.Unlock()
 			}
@@ -1730,36 +1916,16 @@ func cmdDomain(args []string) int {
 	wg.Wait()
 
 	if !reachedAny && ctx.Err() == nil { // every host unreachable must error, not exit-0 "clean"
-		logx.Error("no host was reachable — nothing was scanned")
-		return 2
+		logx.Error("no root page could be read completely — results are incomplete")
 	}
-	if c.verifiedOnly {
-		findings = keepVerified(findings)
+	if err := ctx.Err(); err != nil {
+		findings = append(findings, orgDiagnostic("domain", err.Error()))
 	}
-	if c.failOnVerified {
-		escalateLive(findings)
-	}
-	summarize(findings, time.Since(start))
-	writeReport(c, findings)
-	return failClosedIfIncomplete(ctx, gate(findings, c.failOn, c.failOnVerified))
+	return reportScan(ctx, c, findings, time.Since(start))
 }
 
 func readTargetList(path string) ([]string, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	seen := map[string]bool{}
-	var out []string
-	for _, line := range strings.Split(string(data), "\n") {
-		t := strings.TrimSpace(line)
-		if t == "" || strings.HasPrefix(t, "#") || seen[t] {
-			continue
-		}
-		seen[t] = true
-		out = append(out, t)
-	}
-	return out, nil
+	return targetlist.Read(path)
 }
 
 func cmdServe(args []string) int {
@@ -1768,6 +1934,10 @@ func cmdServe(args []string) int {
 		return code
 	}
 	setupLogging(c)
+	if c.verify || c.verifiedOnly || c.failOnVerified {
+		logx.Error("verify setup failed", "err", "serve does not support live verification (--verify/--verified-only/--fail-on-verified); use scan --verify")
+		return 2
+	}
 	// Default to loopback: the server is unauthenticated, so the operator must opt into network
 	// exposure with an explicit --addr 0.0.0.0:PORT (behind auth/a proxy).
 	addr, maxConc := "127.0.0.1:8080", 0
@@ -1783,7 +1953,11 @@ func cmdServe(args []string) int {
 	if c.mlEmbed || c.mlModel != "" || c.mlURL != "" {
 		logx.Warn("serve does not run the ML stage or live-verification — ignoring --ml/--ml-model/--ml-url (cascade + rule templates only)")
 	}
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
@@ -1791,7 +1965,11 @@ func cmdServe(args []string) int {
 	}
 	// Load the rule templates too (as scan and lsp do) so the HTTP worker has the same coverage as the
 	// CLI, not just the embedded taxonomy detectors.
-	eng := loadEngine(c)
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
 	ctx, stop := rootContext(c)
 	defer stop()
 	if err := server.Serve(ctx, addr, server.New(det, eng, cfg.Allowed, maxConc)); err != nil {
@@ -1807,7 +1985,11 @@ func cmdDoctor(args []string) int {
 		return code
 	}
 	setupLogging(c)
-	cfg := loadConfig(&c)
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
@@ -1907,25 +2089,39 @@ func cmdRules(args []string) int {
 	if len(dirs) == 0 {
 		dirs = []string{"rules"}
 	}
-	templatePaths := append(append([]string{}, dirs...), ruleFiles...)
+	templatePaths := append(append([]string{}, userPos...), ruleFiles...)
+	if len(templatePaths) == 0 && (sub == "list" || sub == "validate" || sub == "stats") {
+		var err error
+		templatePaths, err = defaultQueryRulePaths()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule discovery error:", err)
+			if sub == "validate" {
+				return 1
+			}
+			return 2
+		}
+	}
 
 	switch sub {
 	case "export":
 		data := taxonomy.DefaultYAML()
-		if out == "" {
-			os.Stdout.Write(data)
-			return 0
-		}
 		// Exported taxonomy contains public detector definitions, not credentials.
-		if err := os.WriteFile(out, data, 0o644); err != nil { //nolint:gosec
+		if err := writeArtifactBytes(out, data, 0o644); err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
 			return 2
+		}
+		if out == "" {
+			return 0
 		}
 		fmt.Fprintf(os.Stderr, "exported built-in taxonomy to %s — edit and use with --taxonomy %s\n", out, out)
 		return 0
 
 	case "list":
-		eng, _ := rules.Load(templatePaths...)
+		eng, err := rules.Load(templatePaths...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule load error:", err)
+			return 2
+		}
 		if eng == nil || eng.Len() == 0 {
 			fmt.Fprintln(os.Stderr, "no rule templates found; run 'prowl rules update'")
 			return 0
@@ -1939,21 +2135,36 @@ func cmdRules(args []string) int {
 			fmt.Fprintln(os.Stderr, "usage: prowl rules show <rule-id>   (see 'prowl rules list')")
 			return 2
 		}
-		return renderRuleShow(loadRulesForQuery(ruleFiles...), userPos[0])
+		eng, err := loadRulesForQuery(ruleFiles...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule load error:", err)
+			return 2
+		}
+		return renderRuleShow(eng, userPos[0])
 
 	case "test":
 		if len(userPos) == 0 {
 			fmt.Fprintln(os.Stderr, "usage: prowl rules test <text>   (which rules fire on this string)")
 			return 2
 		}
-		return renderRulesTest(loadRulesForQuery(ruleFiles...), strings.Join(userPos, " "))
+		eng, err := loadRulesForQuery(ruleFiles...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule load error:", err)
+			return 2
+		}
+		return renderRulesTest(eng, strings.Join(userPos, " "))
 
 	case "search":
 		if len(userPos) == 0 {
 			fmt.Fprintln(os.Stderr, "usage: prowl rules search <term>   (id / tag / description, built-ins + templates)")
 			return 2
 		}
-		return renderRulesSearch(strings.Join(userPos, " "))
+		eng, err := loadRulesForQuery(ruleFiles...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule load error:", err)
+			return 2
+		}
+		return renderRulesSearch(strings.Join(userPos, " "), eng)
 
 	case "validate":
 		issues := rules.ValidateDir(templatePaths...)
@@ -1970,7 +2181,11 @@ func cmdRules(args []string) int {
 				nwarn++
 			}
 		}
-		eng, _ := rules.Load(templatePaths...)
+		eng, loadErr := rules.Load(templatePaths...)
+		if loadErr != nil && nerr == 0 {
+			fmt.Fprintln(os.Stderr, "rule load error:", loadErr)
+			nerr++
+		}
 		fmt.Fprintf(os.Stderr, "\n%d templates, %d error(s), %d warning(s)\n", eng.Len(), nerr, nwarn)
 		if nerr > 0 {
 			return 1
@@ -1984,7 +2199,11 @@ func cmdRules(args []string) int {
 		return rulesManifestCmd(dirs[0], len(userPos) > 0)
 
 	case "stats":
-		eng, _ := rules.Load(templatePaths...)
+		eng, err := rules.Load(templatePaths...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "rule load error:", err)
+			return 2
+		}
 		renderRulesStats(eng)
 		return 0
 
@@ -2025,7 +2244,16 @@ func cmdVerifiers(args []string) int {
 		return updateInto("verifiers", source, installedVerifiersDir(), time.Now().UTC().Format(time.RFC3339), check, allowUnsigned)
 	}
 	if len(dirs) == 0 {
-		if dirs = discoverVerifierDirs(nil); len(dirs) == 0 {
+		var err error
+		dirs, err = discoverVerifierDirs(nil)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "verifier discovery error:", err)
+			if sub == "validate" || sub == "manifest" {
+				return 1
+			}
+			return 2
+		}
+		if len(dirs) == 0 {
 			dirs = []string{"verifiers"}
 		}
 	}
@@ -2051,7 +2279,8 @@ func cmdVerifiers(args []string) int {
 		return 0
 	case "list":
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "warning:", err)
+			fmt.Fprintln(os.Stderr, "verifier load error:", err)
+			return 2
 		}
 		fmt.Printf("%-16s %-28s %s\n", "VERIFIER", "MATCHES", "ENDPOINT")
 		for _, v := range set.Verifiers() {
@@ -2105,6 +2334,12 @@ func escalateLive(fs []model.Finding) {
 }
 
 func gate(fs []model.Finding, failOn string, failOnVerified bool) int {
+	for _, f := range fs {
+		if model.IsIncompleteFinding(f) {
+			logx.Error("scan results are incomplete — failing closed")
+			return 2
+		}
+	}
 	if failOnVerified {
 		// Fail only on a provider-confirmed-live secret (the near-zero-FP gate); a firewalled CI that
 		// can't verify should combine this with --fail-on.

@@ -29,10 +29,25 @@ func cmdImage(args []string) int {
 	ctx, stop := rootContext(c)
 	defer stop()
 
-	cfg := loadConfig(&c) // no scanned tree, so no untrusted in-repo .prowl.yaml
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
 	det, _, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
+		return 2
+	}
+
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, verr := loadVerifySet(c)
+	if verr != nil {
+		logx.Error("verify setup failed", "err", verr)
 		return 2
 	}
 
@@ -63,6 +78,11 @@ func cmdImage(args []string) int {
 			if err != nil {
 				logx.Error("image load failed", "arg", arg, "err", err)
 				rc.Store(2)
+				select {
+				case merged <- model.Item{Source: "code", Path: arg, Error: err}:
+				case <-ctx.Done():
+					return
+				}
 				continue
 			}
 			finalMu.Lock()
@@ -77,7 +97,7 @@ func cmdImage(args []string) int {
 			}
 		}
 	}()
-	code := runScan(ctx, c, cfg, det, merged, c.dedupe, func(fs []model.Finding) []model.Finding {
+	code := runPreparedScan(ctx, c, cfg, det, eng, vset, merged, c.dedupe, func(fs []model.Finding) []model.Finding {
 		if ctx.Err() != nil { // cancelled: the flatten map is partial — don't assert in_final verdicts
 			return fs
 		}

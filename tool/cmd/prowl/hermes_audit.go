@@ -9,10 +9,10 @@ import (
 	"os/signal"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/hermesaudit"
+	"github.com/Lercas/prowl/tool/internal/targetlist"
 )
 
 type hermesAuditList []string
@@ -64,17 +64,12 @@ func cmdHermesAudit(args []string) int {
 		return 2
 	}
 	if targetsFile != "" {
-		data, err := os.ReadFile(targetsFile)
+		loaded, err := targetlist.Read(targetsFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "read --targets: %v\n", err)
 			return 2
 		}
-		for _, line := range strings.Split(string(data), "\n") {
-			line = strings.TrimSpace(line)
-			if line != "" && !strings.HasPrefix(line, "#") {
-				targets = append(targets, line)
-			}
-		}
+		targets = append(targets, loaded...)
 	}
 	targets = append(targets, fs.Args()...)
 	if len(targets) == 0 {
@@ -86,7 +81,7 @@ func cmdHermesAudit(args []string) int {
 	}
 	sort.Strings(providers)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), scanSignals()...)
 	defer stop()
 	reports, err := hermesaudit.Audit(ctx, targets, hermesaudit.Options{
 		Timeout:        timeout,
@@ -119,11 +114,7 @@ func cmdHermesAudit(args []string) int {
 		return 2
 	}
 	data = append(data, '\n')
-	if output == "" {
-		_, _ = os.Stdout.Write(data)
-		return 0
-	}
-	if err := os.WriteFile(output, data, 0o600); err != nil {
+	if err := writeArtifactBytes(output, data, 0o600); err != nil {
 		fmt.Fprintf(os.Stderr, "write hermes report: %v\n", err)
 		return 2
 	}

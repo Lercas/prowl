@@ -2,4 +2,4 @@
 
 package main
 
-const oNoFollow = 0
+// Destination type checks and atomic writes are shared through internal/localfile.

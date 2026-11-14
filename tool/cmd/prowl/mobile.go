@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -38,6 +39,30 @@ func cmdMobile(args []string) int {
 	}
 	ctx, stop := rootContext(c)
 	defer stop()
+	// Load trusted explicit config before deriving download and extraction limits.
+	c.noAutoConfig = true
+	cfg, err := loadConfig(&c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config error:", err)
+		return 2
+	}
+
+	det, _, err := loadDetector(c, cfg)
+	if err != nil {
+		logx.Error("failed to load detector", "err", err)
+		return 2
+	}
+
+	eng, err := loadEngine(c)
+	if err != nil {
+		logx.Error("rule setup failed", "err", err)
+		return 2
+	}
+	vset, verr := loadVerifySet(c)
+	if verr != nil {
+		logx.Error("verify setup failed", "err", verr)
+		return 2
+	}
 
 	localPath := target
 	if isURL(target) {
@@ -55,15 +80,6 @@ func cmdMobile(args []string) int {
 		localPath = p
 	} else if _, err := os.Stat(localPath); err != nil {
 		logx.Error("mobile file not found", "path", localPath)
-		return 2
-	}
-
-	// The app archive is UNTRUSTED — ignore any .prowl.yaml it might bundle (mirrors bucket/repo).
-	c.noAutoConfig = true
-	cfg := loadConfig(&c)
-	det, _, err := loadDetector(c, cfg)
-	if err != nil {
-		logx.Error("failed to load detector", "err", err)
 		return 2
 	}
 
@@ -85,7 +101,7 @@ func cmdMobile(args []string) int {
 	}
 	// dedupe on by default: the same key often shows up in several entries (raw resource + dex strings);
 	// report it once. Same as cmdImage.
-	return runScan(ctx, c, cfg, det, items, c.dedupe)
+	return runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
 }
 
 // minRunDefault mirrors source's default min printable-run length (kept here so the flag default reads
@@ -122,14 +138,28 @@ func downloadToTemp(ctx context.Context, rawURL, dir string, maxBytes int64, tim
 		return "", err
 	}
 	defer f.Close()
-	limit := maxBytes * 4
-	if limit <= 0 {
-		limit = 64 << 20
+	limit := mobileDownloadLimit(maxBytes)
+	n, err := io.Copy(f, io.LimitReader(resp.Body, limit+1))
+	if err != nil {
+		return "", err
 	}
-	if _, err := io.Copy(f, io.LimitReader(resp.Body, limit)); err != nil {
+	if n > limit {
+		return "", fmt.Errorf("mobile download exceeds the %d-byte size limit", limit)
+	}
+	if err := f.Close(); err != nil {
 		return "", err
 	}
 	return dst, nil
+}
+
+func mobileDownloadLimit(maxBytes int64) int64 {
+	if maxBytes <= 0 {
+		return 64 << 20
+	}
+	if maxBytes > (math.MaxInt64-1)/4 {
+		return math.MaxInt64 - 1 // reserve one byte for overflow detection
+	}
+	return maxBytes * 4
 }
 
 // downloadName derives a safe local filename from a URL's path. zip.OpenReader ignores the extension
