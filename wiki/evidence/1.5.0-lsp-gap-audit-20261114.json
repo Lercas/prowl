@@ -1,0 +1,45 @@
+{
+  "status": "unqualified LSP restoration prototype; NOT integrated or published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "worktree": "/tmp/prowl-lsp-contract-20261114",
+  "branch": "codex/lsp-contract-20261114",
+  "main_source_untouched": true,
+  "fixtures": [
+    {
+      "name": "noise-1.4.0.json",
+      "sha256": "d030d08dd14ba1fbcc36f3ce087d4cecc08fa84fb1379425120c9099e1ff1be0",
+      "total": 402,
+      "positive": 146,
+      "negative": 254,
+      "ambiguous": 2
+    },
+    {
+      "name": "noise-deep-1.4.0.json",
+      "sha256": "79ed1475c880a238d2ed7684332a51011b287ab206ba23c2170acaa1f73dac84",
+      "total": 242,
+      "positive": 162,
+      "negative": 80,
+      "ambiguous": 0
+    }
+  ],
+  "corpus": {
+    "initial_failing_subcases": 324,
+    "after_code_value_filter_failing_subcases": 290,
+    "unasserted_ambiguous": 2,
+    "initial_log": "/tmp/prowl-lsp-first-20261114.log",
+    "current_log": "/tmp/prowl-lsp-second-20261114.log"
+  },
+  "progress": [
+    "LSP prototype uses immutable scan.Pipeline with distinct editor occurrences",
+    "released lexical code value filter restored; scan package tests pass",
+    "focused LSP candidate budgets, CR/CRLF, BOM, UTF16 and dense range checks pass"
+  ],
+  "open": [
+    "remaining released noise and provider namespace/context regressions",
+    "base64 source span ends at 27 encoded characters instead of 28 including padding",
+    "two repeated decoded values yield one diagnostic instead of two",
+    "bundled LSP templates and full CLI parity still need qualification"
+  ],
+  "model_changed": false,
+  "native_lsp_qualified": false
+}
