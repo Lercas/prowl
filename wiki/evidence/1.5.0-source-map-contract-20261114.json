@@ -568,5 +568,559 @@
     "Dynamic imports without literal URLs and bare package specifiers are not resolved",
     "Native matrix uses owned loopback fixtures only, not recon or real provider verification",
     "Remote-adapter provenance and cross-origin policy audit remain separate open work"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "f680cc6",
+    "full_go": "passed",
+    "native": {
+      "binary_sha256": "3c68620ca881c98b35125d7aabaf4a3e1ff13356f603e27eb49b09af27e29fd8",
+      "passed": 135,
+      "total": 135,
+      "checks": [
+        {
+          "case": "identity",
+          "passed": true
+        },
+        {
+          "case": "authorization-before-network",
+          "passed": true
+        },
+        {
+          "case": "basic/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "basic/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "basic/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "basic/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "basic/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "basic/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "basic/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "basic/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "basic/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "basic/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "basic/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "basic/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "basic/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "basic/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "basic/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "basic/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "inline/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "inline/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "inline/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "inline/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "inline/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "inline/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "inline/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "inline/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "inline/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "inline/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "inline/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "inline/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "inline/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "inline/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "inline/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "inline/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "percent/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "percent/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "percent/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "percent/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "percent/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "percent/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "percent/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "percent/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "percent/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "percent/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "percent/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "percent/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "percent/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "percent/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "percent/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "percent/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "opaque/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "opaque/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "redirect/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "redirect/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/json/digest",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/json/scope",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "uppercase/False/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/json/mapped",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/json/digest",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/json/scope",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/json/redacted",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/sarif/mapped",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/sarif/digest",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/sarif/scope",
+          "passed": true
+        },
+        {
+          "case": "uppercase/True/sarif/redacted",
+          "passed": true
+        },
+        {
+          "case": "missing/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "missing/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "missing/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "missing/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "invalid/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "invalid/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "invalid/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "invalid/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "duplicate/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "duplicate/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "duplicate/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "duplicate/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "null/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "null/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "null/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "null/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "empty/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "empty/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "empty/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "empty/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "bad-inline/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "bad-inline/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "bad-inline/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "bad-inline/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "depth/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "depth/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "depth/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "depth/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "budget/json/incomplete",
+          "passed": true
+        },
+        {
+          "case": "budget/json/baseline",
+          "passed": true
+        },
+        {
+          "case": "budget/sarif/incomplete",
+          "passed": true
+        },
+        {
+          "case": "budget/sarif/baseline",
+          "passed": true
+        },
+        {
+          "case": "outside-origin-not-fetched",
+          "passed": true
+        },
+        {
+          "case": "2024-11-05/native-domain",
+          "passed": true
+        },
+        {
+          "case": "2025-03-26/native-domain",
+          "passed": true
+        },
+        {
+          "case": "2025-06-18/native-domain",
+          "passed": true
+        },
+        {
+          "case": "2026-07-28/native-domain",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-maps-native-kc632ve1",
+      "scope": "owned loopback web surface, no recon, external hosts or live provider verification"
+    },
+    "preserved_unrelated_dirty_work": true
+  }
 }
