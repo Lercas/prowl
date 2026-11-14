@@ -1,0 +1,18 @@
+# Raw leaked-key research outputs — NEVER commit (these hold third-party LIVE secrets).
+# Scripts default to /tmp, but this is the safety net so a stray `git add -A` can't leak keys into history.
+candidates/
+findings/
+findings_test/
+pkg_corpus/
+docker_scan/
+hist_scan/
+cand*/
+*.json
+manifest.jsonl
+repos.txt
+live_*.jsonl
+live_*.json
+*.log
+*.err
+*.done
+prowl
