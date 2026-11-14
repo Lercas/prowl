@@ -519,17 +519,16 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding 
 	return out
 }
 
-// ResultsTruncatedType is the synthetic finding Type marking that a file's findings were capped at the
-// global match limit, so a consumer knows results are incomplete. It carries no secret material.
+// ResultsTruncatedType marks a file whose candidate, decoding or normalization
+// limits made completeness uncertain. It carries no secret material.
 const ResultsTruncatedType = "results_truncated"
 
-// truncationMarker builds the synthetic info finding appended when a file hit the global match cap.
+// truncationMarker builds the synthetic info finding appended when a scan limit was reached.
 func truncationMarker(it model.Item) model.Finding {
 	return model.Finding{
 		Detector: "scan", Type: ResultsTruncatedType, Severity: "info",
 		Source: it.Source, Path: it.Path, ArtifactURI: it.ArtifactURI, Stage: "intake",
-		Rationale: fmt.Sprintf("findings for this file were capped at the global match limit (%d); "+
-			"some secrets may not be reported", detect.MaxScanMatches()),
+		Rationale: "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported",
 	}
 }
 

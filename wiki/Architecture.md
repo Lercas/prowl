@@ -56,7 +56,11 @@ A checksum-validated finding is reported at the highest confidence (0.99) with s
 - pure-hex digests (40/56/64/96/128-hex are always sha1…sha512; 32-hex unless cued as a secret);
 - known non-secret blobs by context: SSH public keys (`ssh-rsa`, `ssh-ed25519`), data URIs, bcrypt hashes (`$2a$`/`$2b$`/`$2y$`), certificates and public-key PEM, and SRI integrity hashes (`sha384-`, `integrity=`).
 
-**Base64 unmasking.** Any high-entropy base64 run that decodes to printable text is re-scanned for structured secrets hidden inside it (e.g. a token embedded in a JS source map or a config blob). A structured hit inside reports the outer blob's position with stage `L1-base64`; generic-inside-generic is dropped.
+**Декодирование.** Base64/URL-base64, hex, вложенные и сжатые blobs проверяются на
+типизированные секреты; нормализованное представление раскрывает escapes, склейку строк,
+YAML block scalars и markdown-выделение. Исходные позиции и маскирование сохраняются.
+Лимиты распаковки и нормализации передают признак неполного результата.
+Поддерживаемые формы и ограничения описаны в [декодировании](Decoding.md).
 
 **Multilingual password context.** For passwords with no `=`/`:` anchor, Stage 1 scans any line carrying a credential cue — `pass`, `pwd`, plus non-English roots `kennwort`, `mot de passe`, `contrase`, `wachtwoord`, `пароль`, `salasana`, and more — for a plausible password token (length, mixed character classes, not a path/version/hash). These land as `generic_password`, stage `L1-context-pw`.
 

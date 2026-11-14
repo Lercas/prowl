@@ -55,6 +55,9 @@ type Match struct {
 	ChecksumValid bool
 	Category      string
 	Stage         string
+	// needsStrong marks a decode candidate with no secret-like name on its line: only a precise typed
+	// hit inside it is reported. Internal to the decode stage; never set on a returned Match.
+	needsStrong bool
 }
 
 // compiledType pairs a secret type with its keyword pre-filter.
@@ -74,6 +77,13 @@ type Detector struct {
 	presentPool sync.Pool
 	lowerPool   sync.Pool
 	genericPwd  bool // taxonomy declares generic_password — gates the contextual-password builtin
+	// basicAuth: taxonomy declares basic_auth_header — gates the encoded user:password builtin.
+	basicAuth    bool
+	basicAuthCat string
+	// genericKey: taxonomy declares generic_api_key — gates the named-assignment builtins (named.go).
+	genericKey    bool
+	genericKeyCat string
+	namedWin      *linewin.Set
 	// win runs each type's regex over only the lines around its required literals (see linewin);
 	// indexed like types. Types it can't prove equivalent keep the whole-text pass.
 	win      *linewin.Set
@@ -113,6 +123,12 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 		if st.ID == "generic_password" {
 			d.genericPwd = true
 		}
+		if st.ID == "basic_auth_header" {
+			d.basicAuth, d.basicAuthCat = true, st.Category
+		}
+		if st.ID == "generic_api_key" {
+			d.genericKey, d.genericKeyCat = true, st.Category
+		}
 	}
 	// fold password cues into the keyword set so the single AC pass covers them too
 	for _, kw := range mlPasswordCues {
@@ -134,6 +150,7 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 		}
 	}
 	d.win = linewin.New(res)
+	d.namedWin = linewin.New(namedBuiltins)
 	d.wantPool = sync.Pool{New: func() any { s := make([]bool, len(d.types)); return &s }}
 	return d
 }
@@ -199,6 +216,10 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	// contextualPassword honors the remaining budget internally (one match per cue line)
 	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
 	all = append(all, cp...)
+	// Named-assignment builtins (named.go) are implemented and measured but not wired in yet: enabling
+	// them changes the winning type in three pinned tests (see TODO.md, "Движок детекта").
+	// all = append(all, d.namedSecrets(ctx, text, lower, maxScanMatches-len(all))...)
+	_ = d.namedSecrets
 	candidateCapped := collectCapped || len(all) >= maxScanMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
@@ -212,13 +233,17 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
 	decodedMatches, decodedCapped := d.unmaskBase64(ctx, decodeCandidates)
 	all = append(all, decodedMatches...)
+	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
+	all = append(all, authMatches...)
+	// Secrets written through an escaping, concatenation or YAML block-scalar layer (see views.go).
+	viewMatches, viewCapped := d.scanViewsStatus(ctx, text)
+	all = append(all, viewMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
-	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped
+	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
-		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
-			"cap", maxScanMatches)
+		logx.Warn("detect: scan limits reached — some encoded candidates or matches may not have been inspected")
 	}
 	return kept, truncated
 }
@@ -503,6 +528,9 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 	return all, capped
 }
 
+// isContextStage marks the builtins that infer a secret from the name around it.
+func isContextStage(stage string) bool { return stage == "L1-context-pw" || stage == stageContextKey }
+
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.
 // Confidence-first ordering lets a precise token (checksum-valid github_pat_classic, 0.99) win over a
 // wider low-confidence run (generic_high_entropy, 0.55) that contains it, even when the run starts earlier.
@@ -518,13 +546,25 @@ func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 		}
 		// A contextual guess must not replace an equally confident exact regex/checksum span with
 		// a larger token containing its assignment name. This priority precedes position for all types.
-		if ci, cj := ms[i].Stage == "L1-context-pw", ms[j].Stage == "L1-context-pw"; ci != cj {
+		if ci, cj := isContextStage(ms[i].Stage), isContextStage(ms[j].Stage); ci != cj {
 			return !ci
 		}
 		if ms[i].Start != ms[j].Start {
 			return ms[i].Start < ms[j].Start
 		}
-		return ms[i].End > ms[j].End // on ties prefer the wider span
+		if ms[i].End != ms[j].End {
+			return ms[i].End > ms[j].End // on ties prefer the wider span
+		}
+		// Same span and confidence: order by content so the survivor does not depend on sort internals.
+		// The shorter value wins — for one span read both raw and through an unescaping view, that is
+		// the unescaped secret itself rather than its escaped spelling.
+		if ms[i].Type != ms[j].Type {
+			return ms[i].Type < ms[j].Type
+		}
+		if len(ms[i].Value) != len(ms[j].Value) {
+			return len(ms[i].Value) < len(ms[j].Value)
+		}
+		return ms[i].Value < ms[j].Value
 	})
 	out := make([]Match, 0, len(ms)) // kept spans, maintained sorted by Start
 	for _, m := range ms {

@@ -68,7 +68,9 @@ func TestBase64URLSurvivesGenericCandidateCap(t *testing.T) {
 func TestBase64URLRetainsContextAndNonSecretFilters(t *testing.T) {
 	d := newDetector(t)
 	blob := base64.RawURLEncoding.EncodeToString([]byte("aws_secret??=" + base64URLTestKey))
-	for _, prefix := range []string{"blob = \"", "secret = \"data:application/octet-stream;base64,", "auth ssh-rsa "} {
+	// A blob with no secret-like name is still decoded for precise typed hits (see
+	// TestUnnamedBlobNeedsPreciseTypedHit); the known non-secret contexts keep rejecting it.
+	for _, prefix := range []string{"secret = \"data:application/octet-stream;base64,", "auth ssh-rsa "} {
 		for _, m := range d.Scan(prefix + blob + "\"") {
 			if m.Stage == "L1-base64" {
 				t.Fatalf("URL candidate bypassed a non-secret context filter: %s", prefix)

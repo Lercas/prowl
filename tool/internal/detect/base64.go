@@ -3,9 +3,6 @@ package detect
 import (
 	"context"
 	"encoding/base64"
-	"strings"
-
-	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
 
 const (
@@ -13,7 +10,8 @@ const (
 	maxBase64CandidateBytes = 8192
 )
 
-// unmaskBase64 finds structured secrets hidden inside base64 blobs. Findings report the outer blob
+// unmaskBase64 finds structured secrets hidden inside encoded blobs: base64 or hex, optionally
+// compressed, optionally nested (see decodeBlob / bestDecoded). Findings report the outer blob
 // position; generic hits inside are dropped.
 func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Match, bool) {
 	var out []Match
@@ -25,25 +23,19 @@ func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Matc
 		if len(c.Value) < minBase64CandidateBytes || len(c.Value) > maxBase64CandidateBytes {
 			continue
 		}
-		dec, ok := tryB64Decode(c.Value)
-		if !ok || !printableText(dec) {
+		decoded, ok, decodeLimited := decodeBlobStatus(c.Value)
+		capped = capped || decodeLimited
+		if !ok {
 			continue
 		}
-		decoded := string(dec)
-		matches, limited := d.collect(ctx, decoded, "", "", d.keywordsPresent(strings.ToLower(decoded)), scanStructure(decoded, 32))
-		capped = capped || limited
 		// All decoded findings use the same outer span, so only its highest-confidence
 		// typed match can survive the final overlap pass. Choose that winner here instead
 		// of retaining candidates * decoded matches entries until the global sort.
-		var best Match
-		found := false
-		for _, m := range matches {
-			if taxonomy.GenericLast[m.Type] {
-				continue
-			}
-			if !found || m.Confidence > best.Confidence {
-				best, found = m, true
-			}
+		best, found, limited := d.bestDecoded(ctx, decoded, 1)
+		capped = capped || limited
+		if found && c.needsStrong && best.Confidence < 0.9 {
+			// No secret-like name vouches for this blob, so only a precise typed hit may speak for it.
+			found = false
 		}
 		if found {
 			best.Start, best.End = c.Start, c.End
@@ -55,34 +47,49 @@ func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Matc
 	return out, capped
 }
 
-// base64Candidates retains whole standard/URL blobs for typed decoding only. Keep the entropy net's
-// context and non-secret filters, without changing its existing generic finding spans. Short encoded
-// access keys must be eligible even when no generic rule collects their outer value.
+// base64Candidates retains whole encoded blobs (base64 std/URL, hex) for typed decoding only, without
+// changing the entropy net's generic finding spans. Short encoded access keys must be eligible even
+// when no generic rule collects their outer value.
+//
+// The gate is the decode itself: only a blob that decodes to printable text can hold anything the
+// typed rules look for, so opaque entropy noise never consumes the candidate budget. A blob with a
+// secret-like name on its line is a full candidate; one without is kept too, but marked needsStrong
+// so unmaskBase64 accepts only a precise typed hit from it (a ConfigMap value, a cookie, a CI
+// variable named "payload" carry encoded credentials just as often as one named "secret").
 func base64Candidates(ctx context.Context, text string, runs [][2]int) ([]Match, bool) {
 	var candidates []Match
+	capped := false
 	for _, r := range runs {
 		if ctx.Err() != nil {
 			break
 		}
 		val := text[r[0]:r[1]]
-		if len(val) < minBase64CandidateBytes || len(val) > maxBase64CandidateBytes || !HasSecretNameContext(text, r[0]) ||
-			IsKnownNonSecretBlob(text, r[0]) || IsExampleOrPlaceholder(val) ||
-			ShannonEntropy(val) < genericEntropyMin || IsHashNotSecret(text, r[0], val) ||
-			looksLikeCodePath(val) || (reRecaptchaSiteKey.MatchString(val) && hasRecaptchaCue(text, r[0])) {
+		if len(val) < minBase64CandidateBytes || len(val) > maxBase64CandidateBytes {
 			continue
 		}
-		// Opaque entropy noise must not consume the independent decode-candidate budget. Only
-		// canonical, printable blobs can contain the typed text rules inspected by unmaskBase64.
-		decoded, ok := tryB64Decode(val)
-		if !ok || !printableText(decoded) {
+		if !(len(val) >= minHexBlobBytes && isHex(val)) && !b64PrefixLooksLikeText(val) {
 			continue
+		}
+		_, ok, limited := decodeBlobStatus(val)
+		capped = capped || limited
+		if !ok {
+			continue
+		}
+		if IsKnownNonSecretBlob(text, r[0]) || IsExampleOrPlaceholder(val) {
+			continue
+		}
+		named := HasSecretNameContext(text, r[0])
+		if named && (ShannonEntropy(val) < genericEntropyMin || IsHashNotSecret(text, r[0], val) ||
+			looksLikeCodePath(val) || (reRecaptchaSiteKey.MatchString(val) && hasRecaptchaCue(text, r[0]))) {
+			// the entropy net's own non-secret verdicts still hold, but only cost the name's vouching
+			named = false
 		}
 		if len(candidates) >= maxScanMatches {
 			return candidates, true
 		}
-		candidates = append(candidates, Match{Value: val, Start: r[0], End: r[1]})
+		candidates = append(candidates, Match{Value: val, Start: r[0], End: r[1], needsStrong: !named})
 	}
-	return candidates, false
+	return candidates, capped
 }
 
 // tryB64Decode handles padded/unpadded std and url alphabets (candidate spans strip '=' padding).
