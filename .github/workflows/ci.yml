@@ -2,7 +2,11 @@ name: ci
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -75,10 +79,4 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: tool/go.sum
       - name: fuzz (short)
-        run: |
-          set -e
-          go test ./internal/detect/ -run '^$' -fuzz '^FuzzScan$'          -fuzztime 30s
-          go test ./internal/detect/ -run '^$' -fuzz '^FuzzLowerScratch$'  -fuzztime 30s
-          go test ./internal/detect/ -run '^$' -fuzz '^FuzzScanStructure$' -fuzztime 20s
-          go test ./internal/rules/  -run '^$' -fuzz '^FuzzParseTemplate$' -fuzztime 20s
-          go test ./internal/verify/ -run '^$' -fuzz '^FuzzInterpolate$'   -fuzztime 20s
+        run: make fuzz
