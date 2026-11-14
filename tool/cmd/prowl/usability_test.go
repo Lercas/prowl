@@ -225,3 +225,21 @@ func TestInitNeverOverwrites(t *testing.T) {
 		t.Fatal("init accepted a positional argument")
 	}
 }
+
+func TestInstalledModelHint(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("PROWL_HOME", home)
+	if installedModelHint("") != "" {
+		t.Fatal("hint shown without an installed model")
+	}
+	path := filepath.Join(home, "model_binary.json")
+	if err := os.WriteFile(path, []byte("{}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if hint := installedModelHint(""); !strings.Contains(hint, path) {
+		t.Fatalf("hint does not name the installed model: %q", hint)
+	}
+	if installedModelHint("explicit.json") != "" {
+		t.Fatal("an explicitly chosen model is not the installed one")
+	}
+}

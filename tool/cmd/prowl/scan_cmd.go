@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -401,6 +402,9 @@ func (c *commonFlags) mlPreflight() int {
 	if err != nil {
 		logx.Error("ml: --ml was requested but the model cannot load — aborting rather than silently "+
 			"scanning without the ML stage", "err", err)
+		if hint := installedModelHint(c.mlModel); hint != "" {
+			fmt.Fprintln(os.Stderr, hint)
+		}
 		return 2
 	}
 	c.mlPrepared, c.mlPreparedPath = prepared, c.mlModel
@@ -420,4 +424,19 @@ func (c commonFlags) mlScorer() (mlscore.Scorer, error) {
 	default:
 		return nil, nil
 	}
+}
+
+// installedModelHint explains the one cause a user cannot guess from the error: no --ml-model was
+// given, yet a model file left in the install directory by an earlier version is picked up
+// automatically and no longer matches this version's feature extractor.
+func installedModelHint(explicit string) string {
+	if explicit != "" {
+		return ""
+	}
+	path := filepath.Join(prowlHome(), "model_binary.json")
+	if info, err := os.Stat(path); err != nil || !info.Mode().IsRegular() {
+		return ""
+	}
+	return "prowl: the model was loaded from " + path + ", installed by an earlier version.\n" +
+		"       Move that file away to use the model built into this release, or retrain it."
 }
