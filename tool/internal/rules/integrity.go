@@ -3,14 +3,13 @@ package rules
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
 )
 
@@ -73,7 +72,7 @@ func (e *integrityError) Error() string {
 
 // hashFileBytes returns the lowercase hex sha256 of a file's bytes.
 func hashFileBytes(path string) (string, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := localfile.ReadRegular(path, MaxTemplateSize)
 	if err != nil {
 		return "", err
 	}
@@ -81,88 +80,33 @@ func hashFileBytes(path string) (string, error) {
 	return hex.EncodeToString(sum[:]), nil
 }
 
-// integrityFiles returns the sorted slash-separated relpaths of every .yaml/.yml under dir (excluding
-// the manifest), giving a stable file list. It mirrors hashTree's selection, so a manifest-blessed
-// set is exactly the set Update syncs.
-func integrityFiles(dir string) ([]string, error) {
-	var rels []string
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
-			return err
-		}
-		if filepath.Base(path) == IntegrityManifestName {
-			return nil
-		}
-		if ext := strings.ToLower(filepath.Ext(path)); ext != ".yaml" && ext != ".yml" {
-			return nil
-		}
-		rel, rerr := filepath.Rel(dir, path)
-		if rerr != nil {
-			return rerr
-		}
-		rels = append(rels, filepath.ToSlash(rel))
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	sort.Strings(rels)
-	return rels, nil
-}
-
 // GenerateManifest (re)computes and writes MANIFEST.sha256 for the rule set in dir, blessing its
 // current contents (exposed via `prowl rules manifest` and used by `rules update` to re-bless what it
 // installed). Returns the number of files recorded.
-func GenerateManifest(dir string) (int, error) {
-	rels, err := integrityFiles(dir)
+func GenerateManifest(dir string) (n int, err error) {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { err = errors.Join(err, root.Close()) }()
+	snapshot, err := readLibrarySnapshotRoot(root, dir, false)
 	if err != nil {
 		return 0, err
 	}
 	var b strings.Builder
-	for _, rel := range rels {
-		sum, err := hashFileBytes(filepath.Join(dir, filepath.FromSlash(rel)))
-		if err != nil {
-			return 0, err
+	for _, file := range snapshot.files {
+		sum := sha256.Sum256(file.raw)
+		b.WriteString(localfile.SHA256ManifestLine(sum, file.rel))
+		if b.Len() > MaxIntegrityManifestSize {
+			return 0, fmt.Errorf("generated manifest exceeds %d bytes", MaxIntegrityManifestSize)
 		}
-		fmt.Fprintf(&b, "%s  %s\n", sum, rel)
 	}
 	// The manifest contains public checksums and must remain readable by non-owner scanner processes.
-	if err := os.WriteFile(filepath.Join(dir, IntegrityManifestName), []byte(b.String()), 0o644); err != nil { //nolint:gosec
+	if err := localfile.WriteRootAtomic(root, IntegrityManifestName, []byte(b.String()), 0o644); err != nil {
 		return 0, err
 	}
-	return len(rels), nil
+	return len(snapshot.files), nil
 }
-
-// readIntegrityManifest parses MANIFEST.sha256 from dir into relpath->sha256. The bool is false when
-// no manifest exists; a corrupt manifest is a real error (never silently treated as "unsigned").
-func readIntegrityManifest(dir string) (map[string]string, bool, error) {
-	raw, err := os.ReadFile(filepath.Join(dir, IntegrityManifestName))
-	if os.IsNotExist(err) {
-		return nil, false, nil
-	}
-	if err != nil {
-		return nil, false, err
-	}
-	out := map[string]string{}
-	for ln, line := range strings.Split(string(raw), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		// "<64-hex><spaces><relpath>" — sha256sum uses two spaces (or " *" for binary); accept any run.
-		fields := strings.Fields(line)
-		if len(fields) < 2 || !isHex64(fields[0]) {
-			return nil, true, fmt.Errorf("%s:%d: malformed manifest line %q", IntegrityManifestName, ln+1, line)
-		}
-		rel := strings.TrimPrefix(strings.Join(fields[1:], " "), "*") // tolerate the binary-mode '*'
-		out[filepath.ToSlash(rel)] = strings.ToLower(fields[0])
-	}
-	return out, true, nil
-}
-
-var reHex64 = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
-
-func isHex64(s string) bool { return reHex64.MatchString(s) }
 
 // CheckIntegrity verifies the rule set in dir against policy, returning an error that refuses the set
 // when it fails:
@@ -171,14 +115,16 @@ func isHex64(s string) bool { return reHex64.MatchString(s) }
 //   - TrustBundled: a present manifest is authoritative (mismatch/unlisted/missing fails); no manifest
 //     passes (hand-authored --rules-dir keeps working).
 func CheckIntegrity(dir string, policy IntegrityPolicy) error {
-	manifest, present, err := readIntegrityManifest(dir)
+	snapshot, err := readLibrarySnapshot(dir, true)
 	if err != nil {
-		return fmt.Errorf("%s: %w", dir, err) // corrupt manifest -> refuse, never silently downgrade
+		return fmt.Errorf("%s: %w", dir, err)
 	}
-	rels, err := integrityFiles(dir)
-	if err != nil {
-		return err
-	}
+	return checkLibrarySnapshot(dir, policy, snapshot)
+}
+
+// checkLibrarySnapshot checks the exact captured bytes available to the compiler.
+func checkLibrarySnapshot(dir string, policy IntegrityPolicy, snapshot *librarySnapshot) error {
+	manifest, present := snapshot.manifest, snapshot.manifest != nil
 	// An untrusted --source is trusted only by the explicit opt-in; a self-shipped manifest can't
 	// substitute for it, so refuse outright when AllowUnsigned is absent.
 	if policy.Trust == TrustUntrusted && !policy.AllowUnsigned {
@@ -187,25 +133,23 @@ func CheckIntegrity(dir string, policy IntegrityPolicy) error {
 	if !present {
 		if policy.Trust == TrustUntrusted { // AllowUnsigned: accept but make the trust downgrade loud
 			logx.Warn("installing UNSIGNED rule set (no "+IntegrityManifestName+"): integrity NOT verified, source NOT authenticated",
-				"dir", dir, "files", len(rels))
+				"dir", dir, "files", len(snapshot.files))
 		}
 		return nil
 	}
 
 	ie := &integrityError{dir: dir}
 	onDisk := map[string]bool{}
-	for _, rel := range rels {
+	for _, file := range snapshot.files {
+		rel := file.rel
 		onDisk[rel] = true
 		want, ok := manifest[rel]
 		if !ok {
 			ie.unlisted = append(ie.unlisted, rel)
 			continue
 		}
-		got, herr := hashFileBytes(filepath.Join(dir, filepath.FromSlash(rel)))
-		if herr != nil {
-			ie.mismatch = append(ie.mismatch, rel) // unreadable file == cannot prove integrity
-			continue
-		}
+		sum := sha256.Sum256(file.raw)
+		got := hex.EncodeToString(sum[:])
 		if got != want {
 			ie.mismatch = append(ie.mismatch, rel)
 		}

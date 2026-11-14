@@ -3,11 +3,15 @@
 package rules
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"math"
 	"regexp"
 	"strings"
 
+	"github.com/Lercas/prowl/tool/internal/linewin"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"gopkg.in/yaml.v3"
 )
@@ -36,6 +40,7 @@ type Matcher struct {
 	Negative  bool     `yaml:"negative"`
 
 	res []*regexp.Regexp
+	win []int // per res: its index in the engine's line-window set (set by Engine.buildIndex)
 }
 
 // Extractor pulls the secret value out of a match.
@@ -45,7 +50,8 @@ type Extractor struct {
 	Group int      `yaml:"group"` // capture group to extract; 0 (when explicitly set) == whole match
 
 	res      []*regexp.Regexp
-	groupSet bool // whether "group" appeared in the YAML (distinguishes unset from an explicit 0)
+	win      []int // per res: its index in the engine's line-window set (set by Engine.buildIndex)
+	groupSet bool  // whether "group" appeared in the YAML (distinguishes unset from an explicit 0)
 }
 
 // UnmarshalYAML decodes an Extractor, recording whether "group" was present so an unset group can
@@ -59,9 +65,12 @@ func (e *Extractor) UnmarshalYAML(node *yaml.Node) error {
 	*e = Extractor(r)
 	if node.Kind == yaml.MappingNode {
 		for i := 0; i+1 < len(node.Content); i += 2 {
+			key := node.Content[i].Value
+			if key != "type" && key != "regex" && key != "group" {
+				return fmt.Errorf("unknown extractor field %q", key)
+			}
 			if node.Content[i].Value == "group" {
 				e.groupSet = true
-				break
 			}
 		}
 	}
@@ -107,8 +116,23 @@ func ParseTemplate(raw []byte, path string) (*Template, error) {
 		return nil, fmt.Errorf("%s: template too large (%d bytes > %d limit)", path, len(raw), MaxTemplateSize)
 	}
 	var t Template
-	if err := yaml.Unmarshal(raw, &t); err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(raw))
+	dec.KnownFields(true)
+	if err := dec.Decode(&t); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	for {
+		var extra Template
+		err := dec.Decode(&extra)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+		if !extra.isZero() {
+			return nil, fmt.Errorf("%s: ParseTemplate accepts one template; use Load for multi-document files", path)
+		}
 	}
 	t.path = path
 	if err := t.compile(); err != nil {
@@ -124,6 +148,12 @@ func (t *Template) compile() error {
 	if len(t.Matchers) == 0 {
 		return fmt.Errorf("%s (%s): no matchers", t.path, t.ID)
 	}
+	if !validCombination(t.MatchersCondition) {
+		return fmt.Errorf("%s (%s): invalid matchers-condition %q", t.path, t.ID, t.MatchersCondition)
+	}
+	if t.Info.Severity != "" && !validSeverity[strings.ToLower(t.Info.Severity)] {
+		return fmt.Errorf("%s (%s): invalid severity %q", t.path, t.ID, t.Info.Severity)
+	}
 	for i := range t.Matchers {
 		m := &t.Matchers[i]
 		switch m.Type {
@@ -132,6 +162,15 @@ func (t *Template) compile() error {
 			m.Type = "regex"
 		default:
 			return fmt.Errorf("%s (%s): unknown matcher type %q", t.path, t.ID, m.Type)
+		}
+		if !validCombination(m.Condition) {
+			return fmt.Errorf("%s (%s): invalid matcher condition %q", t.path, t.ID, m.Condition)
+		}
+		if (m.Type == "word" && len(m.Words) == 0) || (m.Type == "regex" && len(m.Regex) == 0) {
+			return fmt.Errorf("%s (%s): empty %s matcher", t.path, t.ID, m.Type)
+		}
+		if m.Type == "entropy" && (math.IsNaN(m.Min) || math.IsInf(m.Min, 0) || m.Min < 0) {
+			return fmt.Errorf("%s (%s): invalid entropy minimum", t.path, t.ID)
 		}
 		for _, rx := range m.Regex {
 			re, err := saferegex.Compile(rx)
@@ -143,6 +182,12 @@ func (t *Template) compile() error {
 	}
 	for i := range t.Extractors {
 		e := &t.Extractors[i]
+		if e.Type == "" {
+			e.Type = "regex"
+		}
+		if e.Type != "regex" || len(e.Regex) == 0 {
+			return fmt.Errorf("%s (%s): extractor must contain regex patterns", t.path, t.ID)
+		}
 		for _, rx := range e.Regex {
 			re, err := saferegex.Compile(rx)
 			if err != nil {
@@ -168,6 +213,10 @@ func (t *Template) compile() error {
 		}
 	}
 	return nil
+}
+
+func validCombination(value string) bool {
+	return value == "" || strings.EqualFold(value, "and") || strings.EqualFold(value, "or")
 }
 
 // TagList returns the template's tags as a slice.
@@ -210,13 +259,14 @@ func (t *Template) Keywords() []string {
 // Match evaluates the template against text (lower is a lowercased copy for word matchers) and
 // returns hits with extracted values, bounded by MaxEngineMatches.
 func (t *Template) Match(text, lower string) []Hit {
-	hits, _ := t.matchN(text, lower, MaxEngineMatches)
+	hits, _ := t.matchN(text, lower, nil, MaxEngineMatches)
 	return hits
 }
 
 // matchN is Match capped at limit hits, also reporting whether the cap truncated the template's
-// output. A limit <= 0 yields nothing (the combined cap is already exhausted upstream).
-func (t *Template) matchN(text, lower string, limit int) ([]Hit, bool) {
+// output. A limit <= 0 yields nothing (the combined cap is already exhausted upstream). wins, when
+// non-nil, restricts each regex to the lines that can hold a match (same results, less text).
+func (t *Template) matchN(text, lower string, wins *linewin.Windows, limit int) ([]Hit, bool) {
 	if limit <= 0 {
 		return nil, false
 	}
@@ -224,7 +274,7 @@ func (t *Template) matchN(text, lower string, limit int) ([]Hit, bool) {
 	var minEntropy float64
 	matchedAll, matchedAny := true, false
 	for i := range t.Matchers {
-		ok := t.Matchers[i].eval(text, lower, &minEntropy)
+		ok := t.Matchers[i].eval(text, lower, wins, &minEntropy)
 		if t.Matchers[i].Negative {
 			ok = !ok
 		}
@@ -234,10 +284,18 @@ func (t *Template) matchN(text, lower string, limit int) ([]Hit, bool) {
 	if (and && !matchedAll) || (!and && !matchedAny) {
 		return nil, false
 	}
-	return t.extract(text, minEntropy, limit)
+	return t.extract(text, wins, minEntropy, limit)
 }
 
-func (m *Matcher) eval(text, lower string, minEntropy *float64) bool {
+// winAt returns the line-window index recorded for regex i, or -1 when none was assigned.
+func winAt(win []int, i int) int {
+	if i < len(win) {
+		return win[i]
+	}
+	return -1
+}
+
+func (m *Matcher) eval(text, lower string, wins *linewin.Windows, minEntropy *float64) bool {
 	switch m.Type {
 	case "word":
 		return listMatch(len(m.Words), m.Condition, func(i int) bool {
@@ -245,6 +303,9 @@ func (m *Matcher) eval(text, lower string, minEntropy *float64) bool {
 		})
 	case "regex":
 		return listMatch(len(m.res), m.Condition, func(i int) bool {
+			if wi := winAt(m.win, i); wins != nil && wi >= 0 {
+				return wins.Match(wi, m.res[i], text)
+			}
 			return m.res[i].MatchString(text)
 		})
 	case "entropy":
@@ -278,12 +339,13 @@ func listMatch(n int, cond string, ok func(int) bool) bool {
 type extractRe struct {
 	re    *regexp.Regexp
 	group int // capture group index; 0 == whole match
+	win   int // index in the engine's line-window set, -1 when unassigned
 }
 
 // extract pulls values via the extractors (or regex matchers) and applies the entropy floor, bounded
 // at limit hits (the bool reports truncation). Each regex's FindAll is capped at the remaining budget
 // so a dense file never materializes the full submatch slice up front.
-func (t *Template) extract(text string, minEntropy float64, limit int) ([]Hit, bool) {
+func (t *Template) extract(text string, wins *linewin.Windows, minEntropy float64, limit int) ([]Hit, bool) {
 	if limit <= 0 {
 		return nil, false
 	}
@@ -297,12 +359,22 @@ func (t *Template) extract(text string, minEntropy float64, limit int) ([]Hit, b
 		return []Hit{t.hit(text, 0, len(text))}, false
 	}
 	var hits []Hit
+	truncated := false
 	seen := map[string]bool{}
 	for _, x := range res {
 		// Ask for at most (remaining budget + 1) so we stop early on a dense file yet can detect
 		// truncation; dedupe via seen, so the +1 is a safe over-fetch.
 		want := limit - len(hits) + 1
-		for _, loc := range x.re.FindAllStringSubmatchIndex(text, want) {
+		var locations [][]int
+		if wins != nil && x.win >= 0 {
+			locations = wins.FindAll(x.win, x.re, text, want)
+		} else {
+			locations = x.re.FindAllStringSubmatchIndex(text, want)
+		}
+		// Duplicate values or entropy filtering can leave fewer hits than the extraction budget.
+		// Reaching the bounded regex walk still makes later matches unknown.
+		truncated = truncated || len(locations) >= want
+		for _, loc := range locations {
 			s, e := loc[0], loc[1] // group 0 == whole match
 			if g := x.group; g > 0 && 2*g+1 < len(loc) {
 				if loc[2*g] < 0 { // requested group did not participate in this match
@@ -324,7 +396,7 @@ func (t *Template) extract(text string, minEntropy float64, limit int) ([]Hit, b
 			}
 		}
 	}
-	return hits, false
+	return hits, truncated
 }
 
 // extractRes returns the regexes (with their target capture group) used to pull values: the
@@ -338,8 +410,8 @@ func (t *Template) extractRes() []extractRe {
 		if g == 0 && !e.groupSet {
 			g = 1
 		}
-		for _, re := range e.res {
-			res = append(res, extractRe{re: re, group: g})
+		for j, re := range e.res {
+			res = append(res, extractRe{re: re, group: g, win: winAt(e.win, j)})
 		}
 	}
 	if len(res) > 0 {
@@ -347,8 +419,9 @@ func (t *Template) extractRes() []extractRe {
 	}
 	for i := range t.Matchers {
 		if t.Matchers[i].Type == "regex" {
-			for _, re := range t.Matchers[i].res {
-				res = append(res, extractRe{re: re, group: 1}) // matcher fallback: prefer group 1
+			for j, re := range t.Matchers[i].res {
+				// matcher fallback: prefer group 1
+				res = append(res, extractRe{re: re, group: 1, win: winAt(t.Matchers[i].win, j)})
 			}
 		}
 	}

@@ -3,9 +3,11 @@ package mlscore
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/mlfeatures"
 	"github.com/Lercas/prowl/tool/internal/mlmodel"
 )
@@ -43,6 +45,15 @@ func NewEmbedded(threshold float64, modelPath string) (*Embedded, error) {
 	if err != nil {
 		return nil, err
 	}
+	if names := m.FeatureNames(); len(names) != len(mlfeatures.FeatureNames) {
+		return nil, errors.New("ml: model feature count does not match the extractor")
+	} else {
+		for i, name := range names {
+			if name != mlfeatures.FeatureNames[i] {
+				return nil, fmt.Errorf("ml: model feature order does not match the extractor at index %d", i)
+			}
+		}
+	}
 	return &Embedded{model: m, threshold: threshold}, nil
 }
 
@@ -54,8 +65,12 @@ func resolveModel(modelPath string) (*mlmodel.Model, error) {
 		return mlmodel.LoadFile(modelPath)
 	}
 	if p := externalModelPath(); p != "" {
-		if _, err := os.Stat(p); err == nil {
-			return mlmodel.LoadFile(p)
+		selected, err := localfile.FirstExisting(p)
+		if err != nil {
+			return nil, err
+		}
+		if selected != "" {
+			return mlmodel.LoadFile(selected)
 		}
 	}
 	return mlmodel.Default()
@@ -74,6 +89,12 @@ func externalModelPath() string {
 }
 
 func (e *Embedded) Threshold() float64 { return e.threshold }
+
+// WithThreshold shares the immutable prepared model while applying the caller's finalized
+// configuration. It neither reloads files nor changes a scorer shared by other workers.
+func (e *Embedded) WithThreshold(threshold float64) *Embedded {
+	return &Embedded{model: e.model, threshold: threshold}
+}
 
 func (e *Embedded) Local() bool { return true }
 

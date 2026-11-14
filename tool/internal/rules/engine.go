@@ -5,13 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/Lercas/prowl/tool/internal/ahocorasick"
+	"github.com/Lercas/prowl/tool/internal/linewin"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"gopkg.in/yaml.v3"
 )
@@ -26,7 +27,15 @@ type Engine struct {
 	kwTpls  [][]int32 // keyword id -> template indices that anchor on it
 	always  []int32   // templates with no word anchor
 	present sync.Pool
+	// win runs each regex over only the lines around its required literals (see linewin); tplRes maps a
+	// template to its regexes' indices in it.
+	win    *linewin.Set
+	tplRes [][]int32
 }
+
+// wholeTextOnly disables line-windowed regex evaluation. Tests flip it to assert that windowing
+// reports exactly what a whole-text pass does.
+var wholeTextOnly atomic.Bool
 
 // Len reports how many templates are loaded.
 func (e *Engine) Len() int { return len(e.templates) }
@@ -41,13 +50,13 @@ func Load(paths ...string) (*Engine, error) {
 	e := &Engine{}
 	var errs []string
 	seen := map[string]string{} // rule id -> first path it was defined in, for duplicate detection
-	add := func(path string) {
-		raw, err := readTemplateFile(path)
+	add := func(path string, raw []byte, err error) {
 		if err != nil {
 			errs = append(errs, err.Error())
 			return
 		}
 		dec := yaml.NewDecoder(bytes.NewReader(raw))
+		dec.KnownFields(true)
 		for {
 			var t Template
 			if err := dec.Decode(&t); err != nil {
@@ -79,26 +88,7 @@ func Load(paths ...string) (*Engine, error) {
 			e.templates = append(e.templates, &t)
 		}
 	}
-	for _, p := range paths {
-		info, err := os.Stat(p)
-		if err != nil {
-			errs = append(errs, err.Error())
-			continue
-		}
-		if info.IsDir() {
-			_ = filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() {
-					return nil
-				}
-				if ext := strings.ToLower(filepath.Ext(path)); ext == ".yaml" || ext == ".yml" {
-					add(path)
-				}
-				return nil
-			})
-		} else {
-			add(p)
-		}
-	}
+	walk(paths, add)
 	if len(errs) > 0 {
 		return e, fmt.Errorf("%d template error(s):\n  %s", len(errs), strings.Join(errs, "\n  "))
 	}
@@ -108,14 +98,34 @@ func Load(paths ...string) (*Engine, error) {
 // readTemplateFile reads a template file, rejecting one over MaxTemplateSize so a giant file can't be
 // loaded and parsed.
 func readTemplateFile(path string) ([]byte, error) {
-	info, err := os.Stat(path)
+	f, err := os.OpenFile(path, os.O_RDONLY|oNonBlock, 0)
 	if err != nil {
 		return nil, err
+	}
+	return readRuleFile(f, path)
+}
+
+// readRuleFile enforces the limit on actual bytes and rejects pipes/devices before any read.
+func readRuleFile(f *os.File, path string) (raw []byte, err error) {
+	defer func() { err = errors.Join(err, f.Close()) }()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s: template must be a regular file", path)
 	}
 	if info.Size() > MaxTemplateSize {
 		return nil, fmt.Errorf("%s: template file too large (%d bytes > %d limit)", path, info.Size(), MaxTemplateSize)
 	}
-	return os.ReadFile(path)
+	raw, err = io.ReadAll(io.LimitReader(f, MaxTemplateSize+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(raw) > MaxTemplateSize {
+		return nil, fmt.Errorf("%s: template file too large (> %d limit)", path, MaxTemplateSize)
+	}
+	return raw, nil
 }
 
 // FilterOpts selects which templates run via include/exclude by tag, severity, and id.
@@ -153,6 +163,14 @@ func (e *Engine) Filter(o FilterOpts) *Engine {
 		kept = append(kept, t)
 	}
 	e.templates = kept
+	// Filter is a construction/sequential operation; invalidate indices from any earlier Match.
+	e.index = sync.Once{}
+	e.ac = nil
+	e.kwTpls = nil
+	e.always = nil
+	e.present = sync.Pool{}
+	e.win = nil
+	e.tplRes = nil
 	return e
 }
 
@@ -180,6 +198,28 @@ func (e *Engine) buildIndex() {
 	}
 	e.ac = ahocorasick.New(kws)
 	e.present = sync.Pool{New: func() any { s := make([]bool, len(kws)); return &s }}
+
+	// Give every compiled regex a slot in one shared line-window set.
+	var res []*regexp.Regexp
+	e.tplRes = make([][]int32, len(e.templates))
+	assign := func(ti int, list []*regexp.Regexp) []int {
+		win := make([]int, len(list))
+		for i, re := range list {
+			win[i] = len(res)
+			e.tplRes[ti] = append(e.tplRes[ti], int32(len(res))) //nolint:gosec // far below MaxInt32
+			res = append(res, re)
+		}
+		return win
+	}
+	for ti, t := range e.templates {
+		for i := range t.Matchers {
+			t.Matchers[i].win = assign(ti, t.Matchers[i].res)
+		}
+		for i := range t.Extractors {
+			t.Extractors[i].win = assign(ti, t.Extractors[i].res)
+		}
+	}
+	e.win = linewin.New(res)
 }
 
 // MaxEngineMatches caps a single Match call so a dense file matching a permissive template can't build
@@ -225,6 +265,25 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 	}
 	e.present.Put(pp)
 
+	// One literal pass builds the line regions for every regex of the active templates.
+	var wins *linewin.Windows
+	if !wholeTextOnly.Load() {
+		want := make([]bool, e.win.Len())
+		anyWanted := false
+		for ti, on := range active {
+			if on {
+				for _, ri := range e.tplRes[ti] {
+					want[ri] = true
+					anyWanted = true
+				}
+			}
+		}
+		if anyWanted {
+			wins = e.win.Prepare(text, "", lower, want)
+			defer wins.Release()
+		}
+	}
+
 	var hits []Hit
 	truncated := false
 	for ti, t := range e.templates {
@@ -233,9 +292,10 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 		}
 		// Cap each template's contribution to the remaining budget so no template can push the combined
 		// slice past the cap; matchN stops its FindAll walk early.
-		th, ttrunc := t.matchN(text, lower, limit-len(hits))
+		th, ttrunc := t.matchN(text, lower, wins, limit-len(hits))
 		hits = append(hits, th...)
-		if ttrunc || len(hits) >= limit {
+		truncated = truncated || ttrunc
+		if len(hits) >= limit {
 			truncated = true
 			if len(hits) > limit {
 				hits = hits[:limit]

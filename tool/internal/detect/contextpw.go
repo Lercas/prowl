@@ -1,6 +1,10 @@
 package detect
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
 
 // mlPasswordCues are multilingual credential cue roots (lowercased) that flag a nearby token as a
 // likely password without an adjacent `=`/`:` anchor.
@@ -49,6 +53,34 @@ func anyCue(s string) bool {
 	return false
 }
 
+// firstPasswordCue maps the first folded cue back to the original line. Folded byte lengths can
+// differ (for example, Kelvin sign or dotted I), while candidate spans always use original bytes.
+func firstPasswordCue(line, folded string) (start, end int) {
+	start, end = -1, -1
+	for _, cue := range mlPasswordCues {
+		if pos := strings.Index(folded, cue); pos >= 0 && (start < 0 || pos < start) {
+			start, end = pos, pos+len(cue)
+		}
+	}
+	if start < 0 || !hasNonASCII(line) {
+		return start, end
+	}
+	foldedStart, foldedEnd := start, end
+	start, end = len(line), len(line)
+	foldedPos := 0
+	for pos, r := range line {
+		if foldedPos == foldedStart {
+			start = pos
+		}
+		if foldedPos == foldedEnd {
+			end = pos
+			break
+		}
+		foldedPos += utf8.RuneLen(unicode.ToLower(r))
+	}
+	return start, end
+}
+
 // contextualPassword finds a password token in any line carrying a credential cue but no adjacent
 // assignment. lower is the per-line ASCII-lowercased text (offsets match); uniLower is the Unicode-correct
 // lowercase (empty when pure ASCII), used only to detect non-ASCII cues — spans always come from the
@@ -84,6 +116,7 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 			lineStart = i + 1
 			continue
 		}
+		cueStart, cueEnd := firstPasswordCue(line, cueSrc)
 		lineStart = i + 1
 		for j := 0; j < len(line); {
 			if !isTokenChar(line[j]) {
@@ -95,9 +128,23 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 				k++
 			}
 			tok := line[j:k]
+			valueStart := j
+			if eq := strings.IndexByte(tok, '='); eq >= 0 &&
+				(anyCue(strings.ToLower(tok[:eq])) || (cueEnd > j && cueStart < j+eq && cueEnd <= j+eq)) {
+				// Contextual names such as credential or lösenord are not all covered by the regex.
+				// Keep their value, including any later '=' characters, instead of suppressing the leak.
+				valueStart = j + eq + 1
+				tok = line[valueStart:k]
+			}
 			if isLikelyPasswordToken(tok) {
+				// A token cannot supply its own credential context. Only tokens intersecting the first
+				// cue need another line search; this keeps dense single-line inputs linear in size.
+				if valueStart < cueEnd && cueStart < k && !anyCue(strings.ToLower(line[:valueStart])) && !anyCue(strings.ToLower(line[k:])) {
+					j = k
+					continue
+				}
 				out = append(out, Match{Type: "generic_password", Value: tok,
-					Start: base + j, End: base + k, Confidence: 0.6,
+					Start: base + valueStart, End: base + k, Confidence: 0.6,
 					Category: "generic", Stage: "L1-context-pw"})
 				break
 			}

@@ -1,19 +1,23 @@
 package rules
 
 import (
+	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/Lercas/prowl/tool/internal/localfile"
+	"github.com/Lercas/prowl/tool/internal/ownedcmd"
 )
 
 // ManifestName is the version/provenance file written into a rules directory by `rules update`.
@@ -26,6 +30,10 @@ const cloneTimeout = 2 * time.Minute
 // `--filter=blob:limit` git already applies.
 const maxCloneBytes = 64 << 20 // 64 MiB
 
+// ErrSourceUnavailable allows the CLI to use a bundled source after a failed remote acquisition.
+// Validation, local I/O, installation and caller cancellation never carry this classification.
+var ErrSourceUnavailable = errors.New("remote template source unavailable")
+
 // Manifest records what rule set is installed and where it came from.
 type Manifest struct {
 	Source    string            `json:"source"`
@@ -35,16 +43,7 @@ type Manifest struct {
 	Files     map[string]string `json:"files"` // relpath -> sha256
 }
 
-// ReadManifest loads the manifest from a rules directory (zero value if absent).
-func ReadManifest(dir string) Manifest {
-	var m Manifest
-	if raw, err := os.ReadFile(filepath.Join(dir, ManifestName)); err == nil {
-		_ = json.Unmarshal(raw, &m)
-	}
-	return m
-}
-
-// UpdateOpts configures an update. When Check is true nothing is written — only the diff is reported.
+// UpdateOpts configures an update. Check reports the diff without writing to Target.
 type UpdateOpts struct {
 	Source   string // local directory or git URL
 	Target   string // where to install (default: the source if local, else required)
@@ -52,24 +51,68 @@ type UpdateOpts struct {
 	Check    bool
 	Subdir   string                 // subdir inside a cloned/checked-out source to install (e.g. "rules", "verifiers")
 	Validate func(dir string) error // nil -> default rule-template validation
-	// Ctx bounds and cancels a remote (git) fetch; nil means context.Background().
+	// Ctx cancels acquisition, capture and installation; nil means context.Background().
 	Ctx context.Context
 }
 
 // UpdateResult summarizes an update for the CLI.
 type UpdateResult struct {
-	Manifest  Manifest
-	Added     []string
-	Changed   []string
-	Removed   []string
-	Errors    []Issue
-	StagedDir string // populated on --check (a temp dir holding the fetched set)
-	NoChange  bool
+	Manifest        Manifest
+	Added           []string
+	Changed         []string
+	Removed         []string
+	Errors          []Issue
+	StagedDir       string // owned validation copy on --check; the caller must Close the result
+	NoChange        bool
+	MetadataChanged bool // provenance or integrity differs, excluding the update timestamp
+	cleanup         func() error
+	closeOnce       sync.Once
+	closeErr        error
+}
+
+// Close releases the owned --check validation copy. It never removes the public source or target.
+func (result *UpdateResult) Close() error {
+	if result == nil {
+		return nil
+	}
+	result.closeOnce.Do(func() {
+		if result.cleanup != nil {
+			result.closeErr = result.cleanup()
+		}
+	})
+	return result.closeErr
 }
 
 // Update fetches the rule set from Source, validates it (refusing a set with errors), diffs it
 // against Target, and — unless Check — syncs Target and writes the manifest.
-func Update(o UpdateOpts) (*UpdateResult, error) {
+func Update(o UpdateOpts) (result *UpdateResult, err error) {
+	selected, err := localfile.FirstDirectory(o.Target)
+	if err != nil {
+		return nil, err
+	}
+	var targetRoot *os.Root
+	defer func() {
+		if targetRoot != nil {
+			err = errors.Join(err, targetRoot.Close())
+		}
+	}()
+	oldManifest := Manifest{}
+	if selected != "" {
+		targetRoot, err = os.OpenRoot(selected)
+		if err != nil {
+			return nil, err
+		}
+		if err := localfile.CheckRootDestination(targetRoot, ManifestName); err != nil {
+			return nil, fmt.Errorf("installed provenance: %w", err)
+		}
+		if err := localfile.CheckRootDestination(targetRoot, IntegrityManifestName); err != nil {
+			return nil, fmt.Errorf("installed integrity destination: %w", err)
+		}
+		oldManifest, err = readManifestRoot(targetRoot, selected)
+		if err != nil {
+			return nil, fmt.Errorf("installed provenance: %w", err)
+		}
+	}
 	ctx := o.Ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -79,25 +122,67 @@ func Update(o UpdateOpts) (*UpdateResult, error) {
 		return nil, err
 	}
 	defer cleanup()
-	if v := readVersionFile(staged); v != "" {
+	snapshot, err := captureUpdate(ctx, staged)
+	if err != nil {
+		return nil, fmt.Errorf("capture update source: %w", err)
+	}
+	v, err := snapshot.version()
+	if err != nil {
+		return nil, fmt.Errorf("source VERSION: %w", err)
+	}
+	if v != "" {
 		version = v
 	}
-
+	validationDir, err := snapshot.validationCopy()
+	if err != nil {
+		return nil, err
+	}
+	keepValidation := false
+	defer func() {
+		if !keepValidation {
+			err = errors.Join(err, os.RemoveAll(validationDir))
+		}
+	}()
 	validate := o.Validate
 	if validate == nil {
 		validate = ValidateForUpdate
 	}
-	if err := validate(staged); err != nil {
+	if err := validate(validationDir); err != nil {
 		return &UpdateResult{}, fmt.Errorf("refusing to update: %w", err)
 	}
-
-	newFiles, err := hashTree(staged)
+	validated, err := captureUpdate(ctx, validationDir)
+	if err != nil {
+		return nil, fmt.Errorf("validation snapshot: %w", err)
+	}
+	if !snapshot.unchanged(validated) {
+		return nil, fmt.Errorf("refusing to update: validation snapshot changed")
+	}
+	if targetRoot != nil {
+		if err := snapshot.preflight(targetRoot); err != nil {
+			return nil, err
+		}
+	}
+	newFiles := snapshot.hashes()
+	managed := snapshot.managedHashes()
+	old := map[string]string{}
+	var oldIntegrity []byte
+	oldIntegrityPresent := false
+	if targetRoot != nil {
+		old, err = inventoryTarget(ctx, targetRoot)
+		if err != nil {
+			return nil, fmt.Errorf("installed inventory: %w", err)
+		}
+		oldIntegrity, oldIntegrityPresent, err = localfile.ReadOptionalRoot(targetRoot, IntegrityManifestName, MaxIntegrityManifestSize)
+		if err != nil {
+			return nil, fmt.Errorf("installed integrity: %w", err)
+		}
+	}
+	integrity, err := snapshot.integrityBytes()
 	if err != nil {
 		return nil, err
 	}
-	old := ReadManifest(o.Target).Files
 	res := &UpdateResult{}
-	for rel, sum := range newFiles {
+	for rel, sum := range managed {
 		switch {
 		case old[rel] == "":
 			res.Added = append(res.Added, rel)
@@ -106,29 +191,58 @@ func Update(o UpdateOpts) (*UpdateResult, error) {
 		}
 	}
 	for rel := range old {
-		if newFiles[rel] == "" {
+		if managed[rel] == "" {
 			res.Removed = append(res.Removed, rel)
 		}
 	}
 	sort.Strings(res.Added)
 	sort.Strings(res.Changed)
 	sort.Strings(res.Removed)
-	res.NoChange = len(res.Added)+len(res.Changed)+len(res.Removed) == 0
+	res.MetadataChanged = oldManifest.Source != o.Source || oldManifest.Version != version ||
+		!maps.Equal(oldManifest.Files, newFiles) || !oldIntegrityPresent || !bytes.Equal(oldIntegrity, integrity)
+	res.NoChange = len(res.Added)+len(res.Changed)+len(res.Removed) == 0 && !res.MetadataChanged
 
 	res.Manifest = Manifest{
 		Source: o.Source, Version: version, UpdatedAt: o.Now,
 		Count: len(newFiles), Files: newFiles,
 	}
-	if o.Check {
-		res.StagedDir = staged
-		return res, nil
-	}
-	if err := syncDir(staged, o.Target); err != nil {
+	raw, err := json.MarshalIndent(res.Manifest, "", "  ")
+	if err != nil {
 		return nil, err
 	}
-	raw, _ := json.MarshalIndent(res.Manifest, "", "  ")
-	// The manifest contains public provenance metadata, not credentials.
-	if err := os.WriteFile(filepath.Join(o.Target, ManifestName), raw, 0o644); err != nil { //nolint:gosec
+	if len(raw) > MaxProvenanceSize {
+		return nil, fmt.Errorf("generated provenance exceeds %d bytes", MaxProvenanceSize)
+	}
+	if o.Check {
+		res.StagedDir = validationDir
+		res.cleanup = func() error { return os.RemoveAll(validationDir) }
+		keepValidation = true
+		return res, nil
+	}
+	if targetRoot == nil {
+		if err := os.MkdirAll(o.Target, 0o755); err != nil {
+			return nil, err
+		}
+		targetRoot, err = os.OpenRoot(o.Target)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err := localfile.CheckRootDestination(targetRoot, ManifestName); err != nil {
+		return nil, err
+	}
+	if err := localfile.CheckRootDestination(targetRoot, IntegrityManifestName); err != nil {
+		return nil, err
+	}
+	if err := snapshot.install(ctx, targetRoot); err != nil {
+		return nil, err
+	}
+	// Seal the validated bytes directly; never bless a later reread of the installed directory.
+	if err := localfile.WriteRootAtomic(targetRoot, IntegrityManifestName, integrity, 0o644); err != nil {
+		return nil, err
+	}
+	// Replace the inode within the selected root; hardlink aliases retain the old public metadata.
+	if err := localfile.WriteRootAtomic(targetRoot, ManifestName, raw, 0o644); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -139,16 +253,22 @@ func Update(o UpdateOpts) (*UpdateResult, error) {
 // timeout, and a size cap so a hung or disk-filling `--source` can't wedge the command.
 func fetch(ctx context.Context, src, subdir string) (dir string, cleanup func(), version string, err error) {
 	noop := func() {}
+	if err := ctx.Err(); err != nil {
+		return "", noop, "", err
+	}
+	if subdir != "" && (!fs.ValidPath(filepath.ToSlash(subdir)) || !filepath.IsLocal(subdir)) {
+		return "", noop, "", fmt.Errorf("source subdir must be a relative path inside the source")
+	}
 	if src == "" {
 		return "", noop, "", fmt.Errorf("no --source given (local dir or git URL)")
 	}
-	if info, statErr := os.Stat(src); statErr == nil && info.IsDir() {
-		if subdir != "" { // a templates checkout: install its rules/ or verifiers/ subdir
-			if sub := filepath.Join(src, subdir); dirExists(sub) {
-				return sub, noop, "local", nil
-			}
-		}
-		return src, noop, "local", nil
+	selected, err := localfile.FirstDirectory(src)
+	if err != nil {
+		return "", noop, "", fmt.Errorf("source directory: %w", err)
+	}
+	if selected != "" {
+		dir, err := selectSourceDirectory(selected, subdir)
+		return dir, noop, "local", err
 	}
 	if isGitURL(src) {
 		tmp, err := os.MkdirTemp("", "prowl-rules-*")
@@ -166,48 +286,112 @@ func fetch(ctx context.Context, src, subdir string) (dir string, cleanup func(),
 		cmd := exec.CommandContext(cctx, "git",
 			"-c", "protocol.ext.allow=never", "-c", "protocol.file.allow=user",
 			"clone", "--depth", "1", "--filter=blob:limit=10m", "--", src, tmp)
-		if out, err := cmd.CombinedOutput(); err != nil {
+		if out, err := ownedcmd.Run(cmd); err != nil {
 			cleanup()
 			if ctx.Err() != nil { // parent cancelled (Ctrl-C / overall --timeout)
 				return "", noop, "", fmt.Errorf("git clone cancelled: %w", ctx.Err())
 			}
 			if cctx.Err() == context.DeadlineExceeded {
-				return "", noop, "", fmt.Errorf("git clone timed out after %s", cloneTimeout)
+				return "", noop, "", fmt.Errorf("%w: git clone timed out after %s", ErrSourceUnavailable, cloneTimeout)
 			}
-			return "", noop, "", fmt.Errorf("git clone: %v: %s", err, out)
+			return "", noop, "", fmt.Errorf("%w: git clone: %w: %s", ErrSourceUnavailable, err, out)
 		}
 		// Backstop the disk-fill guard: a server can ignore --filter and stream many small files.
 		// Reject a checkout over the size cap before reading/syncing any of it.
-		if n, serr := dirSize(tmp, maxCloneBytes); serr != nil {
+		if n, serr := dirSizeContext(cctx, tmp, maxCloneBytes); serr != nil {
 			cleanup()
 			return "", noop, "", serr
 		} else if n > maxCloneBytes {
 			cleanup()
 			return "", noop, "", fmt.Errorf("refusing rule source: clone exceeds %d bytes (got >%d) — looks hostile/oversized", maxCloneBytes, n)
 		}
-		ver := "unknown"
-		if b, err := exec.CommandContext(cctx, "git", "-C", tmp, "rev-parse", "--short", "HEAD").Output(); err == nil {
-			ver = strings.TrimSpace(string(b))
+		out, err := ownedcmd.Run(exec.CommandContext(cctx, "git", "-C", tmp, "rev-parse", "--short", "HEAD"))
+		if err != nil {
+			cleanup()
+			return "", noop, "", fmt.Errorf("read source revision: %w: %s", err, out)
+		}
+		ver := strings.TrimSpace(out)
+		if !validGitRevision(ver) {
+			cleanup()
+			return "", noop, "", fmt.Errorf("invalid source git revision")
 		}
 		if subdir == "" {
 			subdir = "rules"
 		}
-		if sub := filepath.Join(tmp, subdir); dirExists(sub) { // install the requested subdir
-			return sub, cleanup, ver, nil
+		selected, err := selectSourceDirectory(tmp, subdir)
+		if err != nil {
+			cleanup()
+			return "", noop, "", err
 		}
-		return tmp, cleanup, ver, nil
+		return selected, cleanup, ver, nil
 	}
 	return "", noop, "", fmt.Errorf("unsupported source %q (use a local directory or a git URL)", src)
+}
+
+// A missing optional subdir supports standalone libraries. A present wrong type, broken link,
+// access error or link escaping the source cannot silently choose the parent library instead.
+func selectSourceDirectory(dir, subdir string) (string, error) {
+	if subdir == "" {
+		return dir, nil
+	}
+	selected, err := localfile.FirstDirectory(filepath.Join(dir, subdir))
+	if err != nil {
+		return "", fmt.Errorf("source subdir: %w", err)
+	}
+	if selected == "" {
+		return dir, nil
+	}
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return "", err
+	}
+	child, openErr := root.OpenRoot(subdir)
+	closeErr := root.Close()
+	if openErr != nil {
+		return "", errors.Join(openErr, closeErr)
+	}
+	if err := errors.Join(closeErr, child.Close()); err != nil {
+		return "", err
+	}
+	return selected, nil
+}
+
+func validGitRevision(value string) bool {
+	if len(value) < 4 || len(value) > 64 {
+		return false
+	}
+	for _, r := range value {
+		if !(r >= '0' && r <= '9' || r >= 'a' && r <= 'f' || r >= 'A' && r <= 'F') {
+			return false
+		}
+	}
+	return true
 }
 
 // dirSize sums the size of every regular file under dir, stopping early once the total exceeds limit
 // (so a huge tree is rejected without a full walk). Symlinks are not followed. The result is exact
 // when <= limit and a lower bound (> limit) when the cap trips.
 func dirSize(dir string, limit int64) (int64, error) {
-	var total int64
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	return dirSizeContext(context.Background(), dir, limit)
+}
+
+func dirSizeContext(ctx context.Context, dir string, limit int64) (total int64, err error) {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { err = errors.Join(err, root.Close()) }()
+	entries := 0
+	err = fs.WalkDir(root.FS(), ".", func(_ string, d fs.DirEntry, err error) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if err != nil {
 			return err
+		}
+		entries++
+		if entries > MaxUpdateEntries {
+			return fmt.Errorf("clone exceeds %d entries", MaxUpdateEntries)
 		}
 		if d.IsDir() || d.Type()&fs.ModeSymlink != 0 {
 			return nil
@@ -216,20 +400,17 @@ func dirSize(dir string, limit int64) (int64, error) {
 		if ierr != nil {
 			return ierr
 		}
-		total += info.Size()
-		if total > limit {
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+		if info.Size() > limit-total {
+			total = limit + 1
 			return filepath.SkipAll // over budget — stop walking, the caller will refuse the set
 		}
+		total += info.Size()
 		return nil
 	})
 	return total, err
-}
-
-func readVersionFile(dir string) string {
-	if b, err := os.ReadFile(filepath.Join(dir, "VERSION")); err == nil {
-		return strings.TrimSpace(string(b))
-	}
-	return ""
 }
 
 // isGitURL accepts only explicit, encrypted transports (https://, ssh://, scp-like git@host:path),
@@ -272,42 +453,7 @@ func sshHostLeadingDash(authority string) bool {
 	return strings.HasPrefix(host, "-")
 }
 
-func dirExists(p string) bool {
-	info, err := os.Stat(p)
-	return err == nil && info.IsDir()
-}
-
-// hashTree returns relpath->sha256 for every .yaml/.yml under dir (excluding the manifest).
-func hashTree(dir string) (map[string]string, error) {
-	out := map[string]string{}
-	root, err := os.OpenRoot(dir)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = root.Close() }()
-	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
-			return err
-		}
-		if ext := strings.ToLower(filepath.Ext(path)); ext != ".yaml" && ext != ".yml" {
-			return nil
-		}
-		rel, err := filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-		raw, err := root.ReadFile(rel)
-		if err != nil {
-			return err
-		}
-		sum := sha256.Sum256(raw)
-		out[filepath.ToSlash(rel)] = hex.EncodeToString(sum[:])
-		return nil
-	})
-	return out, err
-}
-
-// managedFile reports whether path is a file syncDir may copy or delete: the rule templates
+// managedFile reports whether path is a file an update may copy or delete: the rule templates
 // (.yaml/.yml) plus SCHEMA.md. The manifest is never managed here — Update owns it separately.
 func managedFile(path string) bool {
 	if filepath.Base(path) == ManifestName {
@@ -317,197 +463,6 @@ func managedFile(path string) bool {
 		return true
 	}
 	return filepath.Base(path) == "SCHEMA.md"
-}
-
-// syncDir mirrors src into dst: it copies every template from src and deletes every managed file
-// under dst that src no longer contains, so the installed set exactly matches the staged set.
-//
-// Containment is enforced without trusting symlinks: dst is resolved with EvalSymlinks and every
-// directory is created component-by-component, refusing any pre-existing symlinked component
-// (mkdirAllNoSymlink), which closes the TOCTOU where a planted intermediate symlink would let a write
-// escape the target. The delete pass keeps the same discipline: it never follows a symlink, only
-// touches managed files, and stays within root.
-func syncDir(src, dst string) error {
-	if err := os.MkdirAll(dst, 0o755); err != nil { // ensure root exists so it can be resolved
-		return err
-	}
-	root, err := filepath.EvalSymlinks(dst)
-	if err != nil {
-		return err
-	}
-	root, err = filepath.Abs(root)
-	if err != nil {
-		return err
-	}
-	// kept records every copied managed file (resolved-absolute) so the mirror pass tells an orphan
-	// from a just-installed file.
-	kept := map[string]bool{}
-	err = filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		rel, _ := filepath.Rel(src, path)
-		if rel == "." || rel == ".git" || strings.HasPrefix(rel, ".git"+string(os.PathSeparator)) {
-			return nil
-		}
-		if d.Type()&fs.ModeSymlink != 0 { // never copy a symlink from an untrusted source
-			return fmt.Errorf("refusing symlink in source: %s", rel)
-		}
-		// Re-check containment against root (defense-in-depth vs a "../" sneaking through rel).
-		target := filepath.Join(root, rel)
-		if target != root && !strings.HasPrefix(target, root+string(os.PathSeparator)) {
-			return fmt.Errorf("refusing path escaping target dir: %s", rel)
-		}
-		if d.IsDir() {
-			return mkdirAllNoSymlink(root, target)
-		}
-		if !managedFile(path) {
-			return nil
-		}
-		if err := mkdirAllNoSymlink(root, filepath.Dir(target)); err != nil {
-			return err
-		}
-		if err := copyFile(path, target); err != nil {
-			return err
-		}
-		kept[target] = true
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-	return mirrorDelete(root, kept)
-}
-
-// mirrorDelete removes every managed file under root not in kept, then prunes emptied subdirs. It is
-// syncDir's deletion half and runs only on a real install. Safety mirrors the copy path: it never
-// descends into or follows a symlink, re-checks containment in root, and removes only managed files —
-// never the manifest, never root itself.
-func mirrorDelete(root string, kept map[string]bool) error {
-	var emptyCandidates []string // subdirs to try pruning, recorded so we can delete deepest-first
-	rootFS, err := os.OpenRoot(root)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = rootFS.Close() }()
-	err = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if path == root {
-			return nil
-		}
-		// Stay within root (defense-in-depth; WalkDir already yields only paths under root).
-		if !strings.HasPrefix(path, root+string(os.PathSeparator)) {
-			return filepath.SkipDir
-		}
-		if d.IsDir() {
-			if d.Type()&fs.ModeSymlink != 0 { // a symlinked dir: don't follow or delete it
-				return filepath.SkipDir
-			}
-			emptyCandidates = append(emptyCandidates, path)
-			return nil
-		}
-		if d.Type()&fs.ModeSymlink != 0 { // never unlink through/of a symlink we did not create
-			return nil
-		}
-		if !managedFile(path) || kept[path] {
-			return nil
-		}
-		rel, rerr := filepath.Rel(root, path)
-		if rerr != nil {
-			return rerr
-		}
-		// Root-scoped Lstat/Remove keep the operation inside root even if a component is raced.
-		fi, lerr := rootFS.Lstat(rel)
-		if lerr != nil {
-			if os.IsNotExist(lerr) {
-				return nil
-			}
-			return lerr
-		}
-		if fi.Mode()&os.ModeSymlink != 0 {
-			return nil
-		}
-		return rootFS.Remove(rel)
-	})
-	if err != nil {
-		return err
-	}
-	// Prune now-empty managed subdirs, deepest-first so a parent emptied by its children also goes.
-	sort.Sort(sort.Reverse(sort.StringSlice(emptyCandidates)))
-	for _, dir := range emptyCandidates {
-		entries, derr := os.ReadDir(dir)
-		if derr != nil || len(entries) != 0 {
-			continue // non-empty (e.g. still holds files) or unreadable — leave it
-		}
-		rel, rerr := filepath.Rel(root, dir)
-		if rerr == nil {
-			_ = rootFS.Remove(rel) // best-effort: a failed prune is harmless (an empty dir loads nothing)
-		}
-	}
-	return nil
-}
-
-// mkdirAllNoSymlink creates dir and any missing parents below root (which must already exist as a
-// real directory), refusing to traverse a pre-existing symlinked component. Unlike os.MkdirAll it
-// Lstat()s each existing component and fails on a symlink, so a planted symlink can't redirect a
-// later write outside root. dir must be lexically within root.
-func mkdirAllNoSymlink(root, dir string) error {
-	if dir == root {
-		return nil
-	}
-	if dir != root && !strings.HasPrefix(dir, root+string(os.PathSeparator)) {
-		return fmt.Errorf("refusing to create dir outside target: %s", dir)
-	}
-	rel, err := filepath.Rel(root, dir)
-	if err != nil {
-		return err
-	}
-	cur := root
-	for _, comp := range strings.Split(rel, string(os.PathSeparator)) {
-		if comp == "" || comp == "." {
-			continue
-		}
-		if comp == ".." { // should be impossible after the prefix check, but never walk upward
-			return fmt.Errorf("refusing to create dir outside target: %s", dir)
-		}
-		cur = filepath.Join(cur, comp)
-		fi, err := os.Lstat(cur)
-		switch {
-		case err == nil:
-			if fi.Mode()&os.ModeSymlink != 0 {
-				return fmt.Errorf("refusing symlinked path component in target: %s", cur)
-			}
-			if !fi.IsDir() {
-				return fmt.Errorf("path component is not a directory: %s", cur)
-			}
-		case os.IsNotExist(err):
-			// Mkdir fails if cur already exists, so a symlink raced into place is never followed.
-			if err := os.Mkdir(cur, 0o755); err != nil {
-				return err
-			}
-		default:
-			return err
-		}
-	}
-	return nil
-}
-
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	// O_NOFOLLOW: if a symlink was planted at dst by an earlier attack, fail rather than write through it.
-	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC|oNoFollow, 0o644)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, in)
-	return err
 }
 
 // ValidateForUpdate is the default pre-install lint: it refuses a set with any error-level issue. It

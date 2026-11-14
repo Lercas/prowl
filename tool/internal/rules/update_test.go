@@ -91,10 +91,9 @@ func TestUpdateMirrorsShrink(t *testing.T) {
 	if res.Manifest.Count != 1 {
 		t.Fatalf("shrink manifest count = %d, want 1", res.Manifest.Count)
 	}
-	// The diff should account for the removals (the old SCHEMA.md is not hashed, so Removed tracks the
-	// 3 orphaned yaml rules; the point of the test is that the *disk* is mirrored regardless).
-	if len(res.Removed) != 3 {
-		t.Errorf("Removed = %v, want 3 entries", res.Removed)
+	// The physical diff includes every managed file, including the orphaned SCHEMA.md.
+	if len(res.Removed) != 4 {
+		t.Errorf("Removed = %v, want 4 entries", res.Removed)
 	}
 
 	// Disk must now hold exactly the small set + manifest.
@@ -110,7 +109,10 @@ func TestUpdateMirrorsShrink(t *testing.T) {
 	}
 
 	// Manifest must not lie: its Count and Files match what is on disk.
-	m := ReadManifest(target)
+	m, err := ReadManifest(target)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if m.Count != 1 || len(m.Files) != 1 || m.Files["cloud/aws.yaml"] == "" {
 		t.Fatalf("manifest disagrees with disk: %+v", m)
 	}
@@ -165,6 +167,11 @@ func TestCheckWritesNothing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if err := res.Close(); err != nil {
+			t.Error(err)
+		}
+	})
 	if len(res.Removed) != 1 || res.Removed[0] != "keep.yaml" {
 		t.Errorf("check should report keep.yaml removed, got %v", res.Removed)
 	}
@@ -204,8 +211,17 @@ func TestMirrorDeleteLeavesSymlinksAndForeignFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Re-install the same single-file set; mirror runs its delete pass.
-	if _, err := Update(UpdateOpts{Source: src, Target: target, Now: "t1"}); err != nil {
+	// An unmeasurable managed alias refuses installation without removing the link or foreign files.
+	if _, err := Update(UpdateOpts{Source: src, Target: target, Now: "t1"}); err == nil {
+		t.Fatal("unmeasurable target alias accepted")
+	}
+	// The deletion primitive also preserves aliases when invoked with an already selected root.
+	root, err := os.OpenRoot(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = root.Close() }()
+	if err := mirrorDeleteRoot(root, map[string]bool{"real.yaml": true}); err != nil {
 		t.Fatal(err)
 	}
 

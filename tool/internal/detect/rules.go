@@ -2,12 +2,15 @@ package detect
 
 import (
 	"context"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"unsafe"
 
 	"github.com/Lercas/prowl/tool/internal/ahocorasick"
+	"github.com/Lercas/prowl/tool/internal/linewin"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
@@ -71,7 +74,15 @@ type Detector struct {
 	presentPool sync.Pool
 	lowerPool   sync.Pool
 	genericPwd  bool // taxonomy declares generic_password — gates the contextual-password builtin
+	// win runs each type's regex over only the lines around its required literals (see linewin);
+	// indexed like types. Types it can't prove equivalent keep the whole-text pass.
+	win      *linewin.Set
+	wantPool sync.Pool
 }
+
+// wholeTextOnly disables line-windowed regex evaluation. Tests flip it to assert that windowing
+// reports exactly what a whole-text pass does.
+var wholeTextOnly atomic.Bool
 
 // New orders types structured-first, generic-last and precomputes keyword pre-filters.
 func New(tax *taxonomy.Taxonomy) *Detector {
@@ -116,6 +127,14 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 	d.ac = ahocorasick.New(d.allKW)
 	d.presentPool = sync.Pool{New: func() any { s := make([]bool, len(d.allKW)); return &s }}
 	d.lowerPool = sync.Pool{New: func() any { s := make([]byte, 0, 4096); return &s }}
+	res := make([]*regexp.Regexp, len(d.types))
+	for i, ct := range d.types {
+		if ct.st.ID != "generic_high_entropy" { // served by the byte-scan runs, its regex never runs
+			res[i] = ct.st.RE
+		}
+	}
+	d.win = linewin.New(res)
+	d.wantPool = sync.Pool{New: func() any { s := make([]bool, len(d.types)); return &s }}
 	return d
 }
 
@@ -147,6 +166,14 @@ func (d *Detector) Scan(text string) []Match {
 
 // ScanCtx is Scan with a context that collect's match-building loops check.
 func (d *Detector) ScanCtx(ctx context.Context, text string) []Match {
+	matches, _ := d.ScanCtxWithStatus(ctx, text)
+	return matches
+}
+
+// ScanCtxWithStatus also reports whether a candidate limit made scan completeness uncertain.
+// The flag survives filtering and overlap deduplication, which can shrink the returned slice.
+// Cancellation is represented by ctx.Err(), independently of this candidate-cap flag.
+func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match, bool) {
 	lb := d.lowerPool.Get().(*[]byte)
 	lower := lowerScratch(lb, text)
 	pp := d.presentPool.Get().(*[]bool)
@@ -165,27 +192,35 @@ func (d *Detector) ScanCtx(ctx context.Context, text string) []Match {
 	}
 	// The cap is global to one Scan and applied AFTER the confidence-first sort, so high-confidence
 	// findings survive truncation rather than the 0.55 entropy net filling the budget first. Each producer
-	// (collect/contextualPassword) bounds its own output, unmaskBase64 runs over those bounded candidates,
-	// then dedupeOverlapsCap sorts confidence-first and truncates last.
-	all := d.collect(ctx, text, present, sig)
-	collectCapped := len(all) >= maxScanMatches // collect() already warned if IT filled the cap
+	// (collect/contextualPassword and the independent decode-candidate collector) bounds its own output.
+	// unmaskBase64 retains at most one decoded winner per outer candidate; the final overlap pass
+	// sorts confidence-first and truncates last.
+	all, collectCapped := d.collect(ctx, text, lower, uniLower, present, sig)
 	// contextualPassword honors the remaining budget internally (one match per cue line)
 	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
 	all = append(all, cp...)
+	candidateCapped := collectCapped || len(all) >= maxScanMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
 	// confidence in the sort below, not be starved by a cap full of 0.55 generic noise.
-	b64 := d.unmaskBase64(ctx, all)
+	b64, base64Capped := d.unmaskBase64(ctx, all)
 	all = append(all, b64...)
+	// Both alphabets must be decoded whole: the entropy net omits short blobs, '-'/'_' split it,
+	// and generic assignment regexes can truncate the value or exhaust their budget first.
+	// These independent candidates never become generic findings.
+	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
+	decodedMatches, decodedCapped := d.unmaskBase64(ctx, decodeCandidates)
+	all = append(all, decodedMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
+	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
 		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
 			"cap", maxScanMatches)
 	}
-	return kept
+	return kept, truncated
 }
 
 // acAndStructure fuses the Aho-Corasick keyword pass and the structural byte-scan into one loop.
@@ -196,6 +231,8 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 	var cur int32
 	n := len(lower)
 	b64start, digitRun, tokStart, tokDots := -1, 0, -1, 0
+	urlStart, urlSpecific := -1, false
+	decodeStart, decodeAlphabet := -1, byte(0)
 	for i := 0; i < n; i++ {
 		c := lower[i]
 		cur = next[cur<<8|int32(c)]
@@ -212,6 +249,33 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 				sig.b64runs = append(sig.b64runs, [2]int{b64start, i})
 			}
 			b64start = -1
+		}
+		if alnum || c == '-' || c == '_' {
+			if urlStart < 0 {
+				urlStart = i
+			}
+			urlSpecific = urlSpecific || c == '-' || c == '_'
+		} else {
+			if urlStart >= 0 && i-urlStart >= 32 && urlSpecific {
+				sig.b64urlruns = append(sig.b64urlruns, [2]int{urlStart, i})
+			}
+			urlStart, urlSpecific = -1, false
+		}
+		if alnum || c == '+' || c == '/' || c == '-' || c == '_' {
+			if decodeStart < 0 {
+				decodeStart = i
+			}
+			if c == '+' || c == '/' {
+				decodeAlphabet |= 1
+			}
+			if c == '-' || c == '_' {
+				decodeAlphabet |= 2
+			}
+		} else {
+			if decodeStart >= 0 && i-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+				sig.b64decodeRuns = append(sig.b64decodeRuns, [2]int{decodeStart, i})
+			}
+			decodeStart, decodeAlphabet = -1, 0
 		}
 		if c >= '0' && c <= '9' {
 			digitRun++
@@ -238,6 +302,12 @@ func (d *Detector) acAndStructure(lower string, present []bool) structSignals {
 	if b64start >= 0 && n-b64start >= 32 {
 		sig.b64runs = append(sig.b64runs, [2]int{b64start, n})
 	}
+	if urlStart >= 0 && n-urlStart >= 32 && urlSpecific {
+		sig.b64urlruns = append(sig.b64urlruns, [2]int{urlStart, n})
+	}
+	if decodeStart >= 0 && n-decodeStart >= minBase64CandidateBytes && decodeAlphabet != 3 {
+		sig.b64decodeRuns = append(sig.b64decodeRuns, [2]int{decodeStart, n})
+	}
 	if tokStart >= 0 && n-tokStart >= 50 && tokDots >= 2 {
 		sig.dottedToken = true
 	}
@@ -262,9 +332,33 @@ func extractSpan(ix []int, extract int) (start, end int) {
 
 // collect runs the regex/checksum/entropy rules over text, skipping a type's regex when the keyword
 // pre-filter finds none of its keywords present.
-func (d *Detector) collect(ctx context.Context, text string, present []bool, sig structSignals) []Match {
+func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, present []bool, sig structSignals) ([]Match, bool) {
 	var all []Match
-	for _, ct := range d.types {
+	capped := false
+	// Decide up front which types' regexes will run, so one literal pass can build the line regions
+	// for all of them. A text with no pre-filter hit (the common clean file) skips that pass entirely.
+	wp := d.wantPool.Get().(*[]bool)
+	want, anyWanted := *wp, false
+	for i, ct := range d.types {
+		switch {
+		case ct.st.ID == "generic_high_entropy":
+			want[i] = false
+		case ct.pf != nil:
+			want[i] = ct.pf(sig)
+		default:
+			want[i] = len(ct.kwIdx) == 0 || anyPresent(present, ct.kwIdx)
+		}
+		anyWanted = anyWanted || want[i]
+	}
+	var wins *linewin.Windows
+	if anyWanted && !wholeTextOnly.Load() {
+		wins = d.win.Prepare(text, lower, uniLower, want)
+	}
+	defer func() {
+		wins.Release()
+		d.wantPool.Put(wp)
+	}()
+	for ti, ct := range d.types {
 		// ctx/cap checks bound the match-building loops only; the core O(n) AC + structure scans aren't
 		// ctx-interruptible, so a single file is bounded by --max-size and --timeout bounds the whole run.
 		if ctx.Err() != nil || len(all) >= maxScanMatches {
@@ -301,15 +395,17 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 			}
 			continue
 		}
-		if ct.pf != nil {
-			if !ct.pf(sig) {
-				continue
-			}
-		} else if len(ct.kwIdx) > 0 && !anyPresent(present, ct.kwIdx) {
+		if !want[ti] {
 			continue
 		}
 		// cap the per-type FindAll so a pathological file can't build a huge slice up front (it isn't ctx-interruptible)
-		for n, ix := range st.RE.FindAllStringSubmatchIndex(text, maxScanMatches+1) {
+		indices := wins.FindAll(ti, st.RE, text, maxScanMatches+1)
+		if len(indices) > maxScanMatches {
+			// Filters can discard every extracted candidate, but the bounded regex walk may still
+			// have omitted a later real secret. Keep that uncertainty separate from accepted hits.
+			capped = true
+		}
+		for n, ix := range indices {
 			if n&4095 == 0 && ctx.Err() != nil {
 				break
 			}
@@ -395,12 +491,13 @@ func (d *Detector) collect(ctx context.Context, text string, present []bool, sig
 				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage})
 		}
 	}
-	if len(all) >= maxScanMatches {
+	capped = capped || len(all) >= maxScanMatches
+	if capped {
 		// surface that the dense input was truncated (a secret past the cap is dropped)
 		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
 			"cap", maxScanMatches)
 	}
-	return all
+	return all, capped
 }
 
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.
@@ -415,6 +512,11 @@ func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 	sort.Slice(ms, func(i, j int) bool {
 		if ms[i].Confidence != ms[j].Confidence {
 			return ms[i].Confidence > ms[j].Confidence
+		}
+		// A contextual guess must not replace an equally confident exact regex/checksum span with
+		// a larger token containing its assignment name. This priority precedes position for all types.
+		if ci, cj := ms[i].Stage == "L1-context-pw", ms[j].Stage == "L1-context-pw"; ci != cj {
+			return !ci
 		}
 		if ms[i].Start != ms[j].Start {
 			return ms[i].Start < ms[j].Start

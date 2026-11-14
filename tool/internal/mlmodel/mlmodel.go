@@ -10,23 +10,36 @@
 package mlmodel
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
-	"os"
+	"strings"
+
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
+	"github.com/Lercas/prowl/tool/internal/localfile"
 )
 
 // NumFeatures is the fixed feature-vector length Predict expects, matching
 // len(feature_names) in the dumped model.
 const NumFeatures = 49
 
+// These limits bound external model reads, decoding and flattening. The bundled export uses
+// approximately 1.2 MB, 400 trees and 24,400 nodes; larger valid retrains remain supported.
+const (
+	maxModelBytes = 16 << 20
+	maxModelTrees = 4096
+	maxModelNodes = 250_000
+)
+
 // embedded holds the model baked into the binary (default build) or nil (lean
 // -tags noml_embed build); declared in mlmodel_embed.go / mlmodel_noembed.go.
 
 // rawModel mirrors the on-disk JSON layout, used only while loading.
 type rawModel struct {
-	Baseline     float64   `json:"baseline"`
+	Baseline     *float64  `json:"baseline"`
 	FeatureNames []string  `json:"feature_names"`
 	Trees        []rawTree `json:"trees"`
 }
@@ -40,6 +53,32 @@ type rawTree struct {
 	Value       []float64 `json:"value"`
 	MissingLeft []int     `json:"missing_left"`
 	IsLeaf      []int     `json:"is_leaf"`
+}
+
+// UnmarshalJSON refuses null numeric array elements, which encoding/json otherwise turns into
+// zero. The ordinary numeric-array decoder rejects all other nonnumeric entries. Unknown metadata
+// may contain null; only the seven inference arrays have this non-null contract.
+func (t *rawTree) UnmarshalJSON(raw []byte) error {
+	if bytes.Contains(raw, []byte("null")) {
+		fields, err := jsonstrict.Object(raw, false)
+		if err != nil {
+			return err
+		}
+		for key, value := range fields {
+			for _, name := range []string{"feature_idx", "threshold", "left", "right", "value", "missing_left", "is_leaf"} {
+				if strings.EqualFold(key, name) && bytes.Contains(value, []byte("null")) {
+					return errors.New("mlmodel: numeric node arrays must not contain null")
+				}
+			}
+		}
+	}
+	type plainTree rawTree
+	var parsed plainTree
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return err
+	}
+	*t = rawTree(parsed)
+	return nil
 }
 
 // Model is the parsed, inference-ready classifier. All trees are flattened into
@@ -84,7 +123,7 @@ func Load() (*Model, error) {
 // LoadFile parses a dumped model_binary.json from disk, so the model can ship
 // beside the binary and be refreshed without a rebuild.
 func LoadFile(path string) (*Model, error) {
-	data, err := os.ReadFile(path)
+	data, err := localfile.ReadRegular(path, maxModelBytes)
 	if err != nil {
 		return nil, fmt.Errorf("mlmodel: read %s: %w", path, err)
 	}
@@ -94,15 +133,24 @@ func LoadFile(path string) (*Model, error) {
 // parse turns the dumped JSON into an inference-ready Model. It is expensive
 // (~1MB JSON + flattening 400 trees), so callers should cache the result (see Default).
 func parse(data []byte) (*Model, error) {
+	if len(data) > maxModelBytes {
+		return nil, fmt.Errorf("mlmodel: model exceeds the %d-byte limit", maxModelBytes)
+	}
 	var rm rawModel
-	if err := json.Unmarshal(data, &rm); err != nil {
+	if err := jsonstrict.UnmarshalContext(context.Background(), data, &rm); err != nil {
 		return nil, fmt.Errorf("mlmodel: parse model: %w", err)
+	}
+	if rm.Baseline == nil {
+		return nil, errors.New("mlmodel: model requires a numeric baseline")
 	}
 	if got := len(rm.FeatureNames); got != NumFeatures {
 		return nil, fmt.Errorf("mlmodel: model has %d feature names, want %d", got, NumFeatures)
 	}
 	if len(rm.Trees) == 0 {
 		return nil, fmt.Errorf("mlmodel: model has no trees")
+	}
+	if len(rm.Trees) > maxModelTrees {
+		return nil, fmt.Errorf("mlmodel: model exceeds the %d-tree limit", maxModelTrees)
 	}
 
 	// First pass: count nodes so the flat slices are allocated exactly once.
@@ -118,14 +166,17 @@ func parse(data []byte) (*Model, error) {
 			len(t.Right) != n || len(t.Value) != n || len(t.MissingLeft) != n {
 			return nil, fmt.Errorf("mlmodel: tree %d has ragged node arrays", ti)
 		}
-		if int64(total)+int64(n) > int64(1<<31-1) {
-			return nil, fmt.Errorf("mlmodel: flattened model exceeds int32 node limit")
+		if n > maxModelNodes-total {
+			return nil, fmt.Errorf("mlmodel: model exceeds the %d-node limit", maxModelNodes)
 		}
 		total += n
+		if err := validateTree(t); err != nil {
+			return nil, fmt.Errorf("mlmodel: tree %d: %w", ti, err)
+		}
 	}
 
 	m := &Model{
-		baseline:     rm.Baseline,
+		baseline:     *rm.Baseline,
 		featureNames: rm.FeatureNames,
 		treeStart:    make([]int32, len(rm.Trees)),
 		featIdx:      make([]int32, total),
@@ -180,9 +231,8 @@ func parse(data []byte) (*Model, error) {
 // their extractor matches. The slice is shared; do not mutate it.
 func (m *Model) FeatureNames() []string { return m.featureNames }
 
-// ErrCyclicModel is returned by Predict when a tree walk exceeds the node-count
-// bound, meaning a child index points back at an ancestor (a cycle a crafted or
-// corrupt model can encode). The bounded walk fails closed instead of hanging.
+// ErrCyclicModel is returned when loading a cyclic tree or when an internally corrupt model's
+// inference walk exceeds the node-count bound. The bounded walk fails closed instead of hanging.
 var ErrCyclicModel = errors.New("mlmodel: cyclic tree (child index revisits an ancestor) — model is malformed")
 
 // Predict returns the L2 probability for one feature vector: logistic(baseline +

@@ -2,4 +2,4 @@
 
 package rules
 
-const oNoFollow = 0
+const oNonBlock = 0

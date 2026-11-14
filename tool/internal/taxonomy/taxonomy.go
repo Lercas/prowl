@@ -3,10 +3,9 @@ package taxonomy
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"regexp"
 
+	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"gopkg.in/yaml.v3"
 )
@@ -20,23 +19,7 @@ const MaxFileSize = 16 << 20 // 16 MiB
 // file can't OOM the loader before parsing even begins. It uses Stat for the cheap up-front rejection
 // and a bounded io.LimitReader as a guard against a file that grows between Stat and read.
 func readCapped(path string) ([]byte, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	if fi, err := f.Stat(); err == nil && fi.Size() > MaxFileSize {
-		return nil, fmt.Errorf("file %s too large (%d bytes > %d limit)", path, fi.Size(), MaxFileSize)
-	}
-	// LimitReader to MaxFileSize+1 catches a file that grew past the cap after the Stat check.
-	raw, err := io.ReadAll(io.LimitReader(f, MaxFileSize+1))
-	if err != nil {
-		return nil, err
-	}
-	if int64(len(raw)) > MaxFileSize {
-		return nil, fmt.Errorf("file %s too large (> %d limit)", path, MaxFileSize)
-	}
-	return raw, nil
+	return localfile.ReadRegular(path, MaxFileSize)
 }
 
 type Detection struct {

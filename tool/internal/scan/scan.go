@@ -175,8 +175,9 @@ func pathIsFilesystem(source string) bool {
 // lineIndex precomputes every line-start offset once, so per-match position lookups (line/col, pragma,
 // comment) are O(log lines) binary searches, making a dense-match file O(matches·log lines), not O(matches²).
 type lineIndex struct {
-	text   string
-	starts []int // byte offset of each line's first char; starts[0] == 0
+	text             string
+	starts           []int             // byte offset of each line's first char; starts[0] == 0
+	utf16Checkpoints []utf16Checkpoint // lazy prefix counts shared by both finding producers
 	// pragmaCache/commentCache memoize hasPragma/isComment per line: the whole-line ToLower/TrimSpace
 	// runs once per line instead of once per match, collapsing the O(matches·lineLen) single-line time DoS.
 	pragmaCache  []int8 // -1 = unknown, 0 = no pragma, 1 = has pragma; len == len(starts)
@@ -304,16 +305,28 @@ func Run(ctx context.Context, items <-chan model.Item, det *detect.Detector, eng
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for it := range items {
+			for {
+				var it model.Item
+				select {
+				case <-ctx.Done():
+					return
+				case item, ok := <-items:
+					if !ok {
+						return
+					}
+					it = item
+				}
 				if ctx.Err() != nil {
 					return
 				}
 				// guard the whole per-item pipeline so one bad item can't crash the worker and abort the scan
 				var local []model.Finding
-				it := it
 				resilience.Guard(
 					func() { local = Findings(ctx, det, eng, vset, it, allow, ml) },
-					func(r any) { logx.Warn("recovered item-processing panic", "path", it.Path, "err", r) },
+					func(r any) {
+						logx.Warn("recovered item-processing panic", "path", it.Path, "err", r)
+						local = []model.Finding{processingError(it, "item processing failed; scan results are incomplete")}
+					},
 				)
 				if len(local) == 0 {
 					continue
@@ -325,21 +338,47 @@ func Run(ctx context.Context, items <-chan model.Item, det *detect.Detector, eng
 		}()
 	}
 	wg.Wait()
+	if ctx.Err() != nil {
+		findings = append(findings, processingError(model.Item{}, "scan interrupted; results are incomplete"))
+	}
 	return findings
+}
+
+func processingError(it model.Item, reason string) model.Finding {
+	return model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
+		Source: it.Source, Path: it.Path, ArtifactURI: it.ArtifactURI, Stage: "intake", Rationale: reason}
 }
 
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset *verify.Set, it model.Item, allow func(value, path string) bool, ml mlscore.Scorer) []model.Finding {
+	if ctx.Err() != nil {
+		return []model.Finding{processingError(it, "scan interrupted; results are incomplete")}
+	}
+	if it.Error != nil {
+		logx.Warn("source content could not be read", "path", it.Path, "err", it.Error)
+		return []model.Finding{{
+			Detector: "source", Type: "source_error", Severity: "info",
+			Source: it.Source, Path: it.Path, ArtifactURI: it.ArtifactURI, Stage: "intake",
+			Rationale: "source content could not be read; scan results are incomplete",
+		}}
+	}
 	var ms []detect.Match
+	truncated := false
+	failed := false
 	resilience.Guard(
-		func() { ms = det.ScanCtx(ctx, it.Text) },
-		func(r any) { logx.Warn("recovered scan panic", "path", it.Path, "err", r) },
+		func() { ms, truncated = det.ScanCtxWithStatus(ctx, it.Text) },
+		func(r any) {
+			logx.Warn("recovered scan panic", "path", it.Path, "err", r)
+			failed = true
+		},
 	)
+	if failed {
+		return []model.Finding{processingError(it, "detector failed; scan results are incomplete")}
+	}
 	// maxMatches is the global cap shared across both producers (cascade and template engine below).
 	// truncated records when either producer hit the cap so the output can carry a truncation marker.
 	maxMatches := detect.MaxScanMatches()
-	truncated := len(ms) >= maxMatches
 	out := make([]model.Finding, 0, len(ms))
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
 	dedup := map[string]int{} // value+line key -> index in out, avoids cascade/template double-reporting
@@ -372,10 +411,13 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
-			Redacted: redactValue(m.Value), Stage: m.Stage, URL: itemURL,
+			UTF16Col:    li.utf16Col(m.Start),
+			ArtifactURI: it.ArtifactURI,
+			Redacted:    redactValue(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			Verified:    ver, Rationale: why, Instruction: itemInstr,
-			Context: revealContext(it, m.Start),
+			ImageEntry: it.ImageEntry,
+			Context:    revealContext(it, m.Start),
 		})
 		if ml != nil {
 			reqs = append(reqs, recordFor(m.Value, it, m.Start))
@@ -392,7 +434,10 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 		if budget > 0 {
 			resilience.Guard(
 				func() { hits, engTrunc = eng.MatchN(it.Text, budget) },
-				func(r any) { logx.Warn("recovered rule-engine panic", "path", it.Path, "err", r) },
+				func(r any) {
+					logx.Warn("recovered rule-engine panic", "path", it.Path, "err", r)
+					failed = true
+				},
 			)
 		} else {
 			engTrunc = true
@@ -433,10 +478,13 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 				Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
-				Redacted: redactValue(h.Value), Stage: "rule", URL: itemURL,
+				UTF16Col:    li.utf16Col(h.Start),
+				ArtifactURI: it.ArtifactURI,
+				Redacted:    redactValue(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				Verified:    ver, Rationale: why, Instruction: itemInstr,
-				Context: revealContext(it, h.Start),
+				ImageEntry: it.ImageEntry,
+				Context:    revealContext(it, h.Start),
 			}
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
@@ -463,6 +511,12 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 	if ml != nil && len(out) > 0 && (ml.Local() || len(out) <= mlMaxItemFindings) {
 		out = mlFilter(ctx, ml, out, reqs)
 	}
+	if failed {
+		out = append(out, processingError(it, "rule engine failed; scan results are incomplete"))
+	}
+	if ctx.Err() != nil {
+		out = append(out, processingError(it, "scan interrupted; results are incomplete"))
+	}
 	// Surface the global match cap in the machine output: when either producer hit maxMatches a secret
 	// past the cap was dropped, so a CI consumer must see results were truncated. report.go lifts this
 	// into the JSON/SARIF envelope's `truncated` field.
@@ -480,7 +534,7 @@ const ResultsTruncatedType = "results_truncated"
 func truncationMarker(it model.Item) model.Finding {
 	return model.Finding{
 		Detector: "scan", Type: ResultsTruncatedType, Severity: "info",
-		Source: it.Source, Path: it.Path, Stage: "intake",
+		Source: it.Source, Path: it.Path, ArtifactURI: it.ArtifactURI, Stage: "intake",
 		Rationale: fmt.Sprintf("findings for this file were capped at the global match limit (%d); "+
 			"some secrets may not be reported", detect.MaxScanMatches()),
 	}
@@ -551,8 +605,8 @@ func leadingName(line string) string {
 }
 
 // mlFilter asks the sidecar to score every candidate and drops the ones it is confident are not
-// secrets (score below the threshold), EXCEPT structurally-proven (checksum) hits, which are never
-// dropped on a model miss. It fails open: any sidecar error keeps every finding.
+// secrets (score below the threshold), EXCEPT provider-confirmed and structurally-proven hits,
+// which are never dropped on a model miss. It fails open: any sidecar error keeps every finding.
 func mlFilter(ctx context.Context, ml mlscore.Scorer, out []model.Finding, reqs []mlscore.Record) []model.Finding {
 	results, err := ml.Score(ctx, reqs)
 	if err != nil {
@@ -560,11 +614,25 @@ func mlFilter(ctx context.Context, ml mlscore.Scorer, out []model.Finding, reqs 
 		return out
 	}
 	if len(results) != len(out) {
+		logx.Warn("ml scoring returned an incomplete batch — keeping all findings (fail-open)")
 		return out
+	}
+	threshold := ml.Threshold()
+	if !mlscore.ValidScore(threshold) {
+		logx.Warn("ml scoring has an invalid threshold — keeping all findings (fail-open)")
+		return out
+	}
+	// Validate the entire batch before reusing out's backing array; a later invalid result must
+	// preserve earlier candidates too, regardless of their otherwise-valid low scores.
+	for _, result := range results {
+		if !mlscore.ValidScore(result.Score) {
+			logx.Warn("ml scoring returned an invalid score — keeping all findings (fail-open)")
+			return out
+		}
 	}
 	kept := out[:0]
 	for i, f := range out {
-		if mlExempt(f) || results[i].Score >= ml.Threshold() {
+		if mlExempt(f) || results[i].Score >= threshold {
 			kept = append(kept, f)
 		}
 	}
@@ -578,10 +646,10 @@ var mlExemptTypes = map[string]bool{
 	"gcp_service_account": true,
 }
 
-// mlExempt shields findings with strong non-ML evidence (a checksum or key/credential-file type) from
-// the drop-gate: the model scores a real private key body near zero, which would otherwise delete it.
+// mlExempt shields provider-confirmed hits and findings with strong structural evidence from the
+// drop-gate: the model scores a real private key body near zero, which would otherwise delete it.
 func mlExempt(f model.Finding) bool {
-	if strings.Contains(f.Stage, "checksum") || mlExemptTypes[f.Type] {
+	if (f.Verified != nil && *f.Verified) || strings.Contains(f.Stage, "checksum") || mlExemptTypes[f.Type] {
 		return true
 	}
 	t := strings.ToLower(f.Type) // key/cert types: rsa-private-key, openssh-key, pgp-block, pkcs8, …
