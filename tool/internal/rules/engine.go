@@ -22,15 +22,22 @@ import (
 type Engine struct {
 	templates []*Template
 
-	index   sync.Once
-	ac      *ahocorasick.Matcher
-	kwTpls  [][]int32 // keyword id -> template indices that anchor on it
-	always  []int32   // templates with no word anchor
-	present sync.Pool
+	index     sync.Once
+	ac        *ahocorasick.Matcher
+	kwTpls    [][]int32 // keyword id -> template indices that anchor on it
+	always    []int32   // templates with no word anchor
+	scratch   sync.Pool
+	emptyWord int // -1 unless an empty word was indexed (strings.Contains(s, "") is true)
 	// win runs each regex over only the lines around its required literals (see linewin); tplRes maps a
 	// template to its regexes' indices in it.
 	win    *linewin.Set
 	tplRes [][]int32
+}
+
+type matchScratch struct {
+	present []bool
+	active  []bool
+	want    []bool
 }
 
 // wholeTextOnly disables line-windowed regex evaluation. Tests flip it to assert that windowing
@@ -168,7 +175,7 @@ func (e *Engine) Filter(o FilterOpts) *Engine {
 	e.ac = nil
 	e.kwTpls = nil
 	e.always = nil
-	e.present = sync.Pool{}
+	e.scratch = sync.Pool{}
 	e.win = nil
 	e.tplRes = nil
 	return e
@@ -178,26 +185,45 @@ func (e *Engine) Filter(o FilterOpts) *Engine {
 func (e *Engine) buildIndex() {
 	var kws []string
 	seen := map[string]int{}
+	e.emptyWord = -1
+	wordID := func(word string) int {
+		word = strings.ToLower(word)
+		if id, ok := seen[word]; ok {
+			return id
+		}
+		id := len(kws)
+		seen[word] = id
+		kws = append(kws, word)
+		e.kwTpls = append(e.kwTpls, nil)
+		if word == "" {
+			e.emptyWord = id
+		}
+		return id
+	}
 	for ti, t := range e.templates {
+		// Index every word, including negative and unanchored OR matchers. The
+		// activation index remains restricted to provably required positive words.
+		for mi := range t.Matchers {
+			m := &t.Matchers[mi]
+			if m.Type != "word" {
+				continue
+			}
+			m.wordIDs = make([]int, len(m.Words))
+			for wi, word := range m.Words {
+				m.wordIDs[wi] = wordID(word)
+			}
+		}
 		anchors := t.Keywords()
 		if len(anchors) == 0 {
 			e.always = append(e.always, int32(ti))
 			continue
 		}
 		for _, k := range anchors {
-			k = strings.ToLower(k)
-			id, ok := seen[k]
-			if !ok {
-				id = len(kws)
-				seen[k] = id
-				kws = append(kws, k)
-				e.kwTpls = append(e.kwTpls, nil)
-			}
+			id := wordID(k)
 			e.kwTpls[id] = append(e.kwTpls[id], int32(ti))
 		}
 	}
 	e.ac = ahocorasick.New(kws)
-	e.present = sync.Pool{New: func() any { s := make([]bool, len(kws)); return &s }}
 
 	// Give every compiled regex a slot in one shared line-window set.
 	var res []*regexp.Regexp
@@ -220,6 +246,10 @@ func (e *Engine) buildIndex() {
 		}
 	}
 	e.win = linewin.New(res)
+	wordCount, templateCount, regexCount := len(kws), len(e.templates), len(res)
+	e.scratch = sync.Pool{New: func() any {
+		return &matchScratch{present: make([]bool, wordCount), active: make([]bool, templateCount), want: make([]bool, regexCount)}
+	}}
 }
 
 // MaxEngineMatches caps a single Match call so a dense file matching a permissive template can't build
@@ -243,16 +273,18 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 		return nil, false
 	}
 	e.index.Do(e.buildIndex)
-	lower := strings.ToLower(text)
-
-	pp := e.present.Get().(*[]bool)
-	present := *pp
-	for i := range present {
-		present[i] = false
+	scratch := e.scratch.Get().(*matchScratch)
+	defer e.scratch.Put(scratch)
+	present, active := scratch.present, scratch.active
+	clear(present)
+	clear(active)
+	if e.emptyWord >= 0 {
+		present[e.emptyWord] = true
 	}
-	e.ac.MatchInto(lower, present)
+	if e.ac.PatternCount() > 0 {
+		e.ac.MatchLowerInto(text, present)
+	}
 
-	active := make([]bool, len(e.templates))
 	for _, ti := range e.always {
 		active[ti] = true
 	}
@@ -263,12 +295,12 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 			}
 		}
 	}
-	e.present.Put(pp)
 
 	// One literal pass builds the line regions for every regex of the active templates.
 	var wins *linewin.Windows
 	if !wholeTextOnly.Load() {
-		want := make([]bool, e.win.Len())
+		want := scratch.want
+		clear(want)
 		anyWanted := false
 		for ti, on := range active {
 			if on {
@@ -279,7 +311,7 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 			}
 		}
 		if anyWanted {
-			wins = e.win.Prepare(text, "", lower, want)
+			wins = e.win.Prepare(text, "", "", want)
 			defer wins.Release()
 		}
 	}
@@ -292,7 +324,7 @@ func (e *Engine) MatchN(text string, limit int) ([]Hit, bool) {
 		}
 		// Cap each template's contribution to the remaining budget so no template can push the combined
 		// slice past the cap; matchN stops its FindAll walk early.
-		th, ttrunc := t.matchN(text, lower, wins, limit-len(hits))
+		th, ttrunc := t.matchN(evaluation{text: text, wins: wins, words: present}, limit-len(hits))
 		hits = append(hits, th...)
 		truncated = truncated || ttrunc
 		if len(hits) >= limit {

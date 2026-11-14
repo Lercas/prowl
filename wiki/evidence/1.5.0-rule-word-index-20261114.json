@@ -1,0 +1,105 @@
+{
+  "scope": "rule word index and lowercase allocation optimization; no publication",
+  "base_commit": "7d1815734f9bf56988e4476a6c83f38de1013b2d",
+  "contracts": [
+    "Unicode lowercase matches strings.ToLower, including malformed UTF-8",
+    "all word conditions share one presence table, including negative and OR branches",
+    "only provably required positive anchors activate templates",
+    "standalone Template.Match remains available without the shared index",
+    "pooled flags are per-call and contain no source text",
+    "empty words match any text as strings.Contains does"
+  ],
+  "microbenchmark": {
+    "go": "go1.27.4",
+    "platform": "darwin/arm64",
+    "cpu": "Apple M4 Max",
+    "templates": 128,
+    "results": {
+      "before": {
+        "bytes=1024/active=false": {
+          "ns_per_op": 4797,
+          "bytes_per_op": 1152,
+          "allocs_per_op": 2,
+          "samples": 3
+        },
+        "bytes=1024/active=true": {
+          "ns_per_op": 135656,
+          "bytes_per_op": 52788,
+          "allocs_per_op": 522,
+          "samples": 3
+        },
+        "bytes=1048576/active=false": {
+          "ns_per_op": 4711252,
+          "bytes_per_op": 1049488,
+          "allocs_per_op": 3,
+          "samples": 3
+        },
+        "bytes=1048576/active=true": {
+          "ns_per_op": 67573417,
+          "bytes_per_op": 1109300,
+          "allocs_per_op": 523,
+          "samples": 3
+        }
+      },
+      "after": {
+        "bytes=1024/active=false": {
+          "ns_per_op": 2191,
+          "bytes_per_op": 0,
+          "allocs_per_op": 0,
+          "samples": 3
+        },
+        "bytes=1024/active=true": {
+          "ns_per_op": 12687,
+          "bytes_per_op": 48514,
+          "allocs_per_op": 264,
+          "samples": 3
+        },
+        "bytes=1048576/active=false": {
+          "ns_per_op": 2294389,
+          "bytes_per_op": 0,
+          "allocs_per_op": 0,
+          "samples": 3
+        },
+        "bytes=1048576/active=true": {
+          "ns_per_op": 2321060,
+          "bytes_per_op": 48526,
+          "allocs_per_op": 264,
+          "samples": 3
+        }
+      }
+    },
+    "limitation": "synthetic word-only rules; not whole-scanner throughput"
+  },
+  "validation": {
+    "full_go_suite": "passed in original and clean isolated candidate",
+    "race": "rules, ahocorasick, scan, server passed",
+    "minimum_go": "go1.26.11 rules and ahocorasick passed",
+    "vet": "passed",
+    "lint": "0 issues (v2.15.0)",
+    "fuzz": {
+      "target": "FuzzLowercaseMatchesStandardLibrary",
+      "executions": 135589,
+      "seconds": 5.926
+    },
+    "corpus_parity": {
+      "corpus": "go1.27.4 GOROOT/src, regular nonempty files up to 10 MiB",
+      "files": 12044,
+      "bytes": 132407542,
+      "hits": 3,
+      "differences": 0,
+      "result_digest": "f1980105e9b474c7b796d9a9c4117f3defd13e95abb5cc12de3820ed0b93631e",
+      "seconds": 466.35,
+      "reference": "standalone whole-text templates, bypassing word and regex-window indices"
+    },
+    "prowlbench_subset": {
+      "clean_before_after_exact_findings_equal": true,
+      "findings": 2246,
+      "model": "unchanged portable v2"
+    }
+  },
+  "limitations": [
+    "historical ProwlBench false-positive gate remains open from the dependency qualification",
+    "concurrent decoder work was excluded from the clean candidate and commit",
+    "release not published"
+  ]
+}

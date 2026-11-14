@@ -39,8 +39,9 @@ type Matcher struct {
 	Min       float64  `yaml:"min"`       // entropy floor
 	Negative  bool     `yaml:"negative"`
 
-	res []*regexp.Regexp
-	win []int // per res: its index in the engine's line-window set (set by Engine.buildIndex)
+	res     []*regexp.Regexp
+	win     []int // per res: its index in the engine's line-window set (set by Engine.buildIndex)
+	wordIDs []int // per Words: shared Aho-Corasick presence ID (set by Engine.buildIndex)
 }
 
 // Extractor pulls the secret value out of a match.
@@ -259,14 +260,20 @@ func (t *Template) Keywords() []string {
 // Match evaluates the template against text (lower is a lowercased copy for word matchers) and
 // returns hits with extracted values, bounded by MaxEngineMatches.
 func (t *Template) Match(text, lower string) []Hit {
-	hits, _ := t.matchN(text, lower, nil, MaxEngineMatches)
+	hits, _ := t.matchN(evaluation{text: text, lower: lower}, MaxEngineMatches)
 	return hits
 }
 
-// matchN is Match capped at limit hits, also reporting whether the cap truncated the template's
-// output. A limit <= 0 yields nothing (the combined cap is already exhausted upstream). wins, when
-// non-nil, restricts each regex to the lines that can hold a match (same results, less text).
-func (t *Template) matchN(text, lower string, wins *linewin.Windows, limit int) ([]Hit, bool) {
+type evaluation struct {
+	text, lower string
+	wins        *linewin.Windows
+	words       []bool // nil for standalone Template.Match, which uses the supplied lowercase text
+}
+
+// matchN is Match capped at limit hits, also reporting truncation. A limit <= 0
+// yields nothing. Engine evaluation supplies shared word flags and regex windows;
+// standalone Template.Match uses the caller's lowercase text and whole regexes.
+func (t *Template) matchN(in evaluation, limit int) ([]Hit, bool) {
 	if limit <= 0 {
 		return nil, false
 	}
@@ -274,7 +281,7 @@ func (t *Template) matchN(text, lower string, wins *linewin.Windows, limit int) 
 	var minEntropy float64
 	matchedAll, matchedAny := true, false
 	for i := range t.Matchers {
-		ok := t.Matchers[i].eval(text, lower, wins, &minEntropy)
+		ok := t.Matchers[i].eval(in, &minEntropy)
 		if t.Matchers[i].Negative {
 			ok = !ok
 		}
@@ -284,7 +291,7 @@ func (t *Template) matchN(text, lower string, wins *linewin.Windows, limit int) 
 	if (and && !matchedAll) || (!and && !matchedAny) {
 		return nil, false
 	}
-	return t.extract(text, wins, minEntropy, limit)
+	return t.extract(in.text, in.wins, minEntropy, limit)
 }
 
 // winAt returns the line-window index recorded for regex i, or -1 when none was assigned.
@@ -295,18 +302,21 @@ func winAt(win []int, i int) int {
 	return -1
 }
 
-func (m *Matcher) eval(text, lower string, wins *linewin.Windows, minEntropy *float64) bool {
+func (m *Matcher) eval(in evaluation, minEntropy *float64) bool {
 	switch m.Type {
 	case "word":
 		return listMatch(len(m.Words), m.Condition, func(i int) bool {
-			return strings.Contains(lower, strings.ToLower(m.Words[i]))
+			if in.words != nil {
+				return in.words[m.wordIDs[i]]
+			}
+			return strings.Contains(in.lower, strings.ToLower(m.Words[i]))
 		})
 	case "regex":
 		return listMatch(len(m.res), m.Condition, func(i int) bool {
-			if wi := winAt(m.win, i); wins != nil && wi >= 0 {
-				return wins.Match(wi, m.res[i], text)
+			if wi := winAt(m.win, i); in.wins != nil && wi >= 0 {
+				return in.wins.Match(wi, m.res[i], in.text)
 			}
-			return m.res[i].MatchString(text)
+			return m.res[i].MatchString(in.text)
 		})
 	case "entropy":
 		if m.Min > *minEntropy {

@@ -2,6 +2,11 @@
 // text in a single pass over the bytes, replacing N separate strings.Contains scans.
 package ahocorasick
 
+import (
+	"unicode"
+	"unicode/utf8"
+)
+
 // Matcher is a compiled pattern set, read-only and goroutine-safe after New.
 type Matcher struct {
 	next []int32   // flat goto table: node<<8 | byte -> next node
@@ -96,5 +101,36 @@ func (m *Matcher) MatchInto(text string, present []bool) {
 		for _, id := range out[cur] {
 			present[id] = true
 		}
+	}
+}
+
+// MatchLowerInto matches a Unicode-lowercased view without allocating that view.
+// Patterns must already be lowercase. Its semantics match strings.ToLower,
+// including replacement of invalid UTF-8; this is not Unicode case folding.
+func (m *Matcher) MatchLowerInto(text string, present []bool) {
+	var state int32
+	for i := 0; i < len(text); {
+		c := text[i]
+		if c < utf8.RuneSelf {
+			if c >= 'A' && c <= 'Z' {
+				c += 'a' - 'A'
+			}
+			state = m.next[state<<8|int32(c)]
+			for _, id := range m.out[state] {
+				present[id] = true
+			}
+			i++
+			continue
+		}
+		r, size := utf8.DecodeRuneInString(text[i:])
+		var encoded [utf8.UTFMax]byte
+		n := utf8.EncodeRune(encoded[:], unicode.ToLower(r))
+		for _, c := range encoded[:n] {
+			state = m.next[state<<8|int32(c)]
+			for _, id := range m.out[state] {
+				present[id] = true
+			}
+		}
+		i += size
 	}
 }

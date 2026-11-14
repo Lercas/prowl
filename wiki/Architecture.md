@@ -67,7 +67,21 @@ A checksum-validated finding is reported at the highest confidence (0.99) with s
 Fingerprint также вычисляется по самому значению; baseline, созданный прежней версией
 для ошибочно расширенного токена, потребуется обновить после полного сканирования.
 
-Stage 1's hot path is allocation-free: it folds the keyword scan and the structural byte scan into a single loop, lowercases into a pooled buffer with a zero-copy view, and reuses a pooled keyword-presence bitset per block.
+Stage 1 combines keyword and structural scanning and reuses pooled buffers. This reduces
+allocations; extraction, decoding, rule evaluation and finding construction still allocate.
+
+### Слова внешних правил
+
+`rules.Engine` индексирует все word-условия, включая отрицательные и OR-ветки.
+Один потоковый проход применяет Unicode lowercase без полной копии текста и заполняет
+таблицу присутствия слов. Matchers читают эту таблицу вместо повторного `Contains`.
+Правила активируются только по доказанно обязательным положительным якорям;
+остальные выполняются без такого ограничения. Отдельный `Template.Match` сохраняет
+прямой поиск по переданной lowercase-строке.
+
+Временные boolean-массивы переиспользуются через pool и принадлежат одному вызову;
+ссылки на текст скана в них не сохраняются. Unicode и повреждённый UTF-8 обрабатываются
+как `strings.ToLower`. Пустой word соответствует любому тексту, как в `strings.Contains`.
 
 ## L2 — optional ML candidate filter
 
@@ -101,10 +115,16 @@ positional order before optional report filters.
 
 ## Performance
 
-- **~310 MB/s single-thread** throughput.
-- **Allocation-free hot path** — pooled buffers, a zero-copy lowercase view, one fused keyword+structure scan per block.
-- **Linear scaling across cores** — files are sharded across `--workers` (default `NumCPU`); the detector is stateless per block.
-- The Aho-Corasick pre-filter means library size barely affects cost — a 159-rule set is one extra linear pass.
+Скорость зависит от корпуса, плотности совпадений, правил, декодирования и включённых
+L2/verification. `--workers` распределяет файлы между потоками; масштабирование также
+зависит от ввода-вывода и размеров файлов. Aho-Corasick сокращает число regex-проходов,
+но не устраняет стоимость активных правил и построения находок.
+
+Для word-условий синтетический микробенчмарк на Apple M4 Max, Go 1.27.4, файл около
+1 МиБ, 128 активных правил показал медиану 67,6 → 2,32 мс; память — около
+1,11 МБ → 48,5 КБ на вызов. Это результат конкретного микробенчмарка, а не общая
+пропускная способность сканера. Запуск: `go test ./internal/rules -run '^$'
+-bench '^BenchmarkWordMatchers$' -benchmem` из `tool/`.
 
 ## Benchmark
 
