@@ -418,5 +418,15 @@
     "native verified_only case has no findings; no live provider invoked",
     "domain repo CI acquisition and external clients not exercised",
     "LSP audit remains open"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "bacb1dd",
+    "full_go_suite_passed": true,
+    "lint_passed": true,
+    "native_passed": 80,
+    "native_total": 80,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mcp-native-gdiysrej/qualification.json",
+    "native_binary_sha256": "93707160250a9fbb0f09310866c9f5aba07f95f8d2cffbe5fdeb23d5b4b10e13",
+    "working_copy": "existing uncommitted CLI work retained"
+  }
 }
