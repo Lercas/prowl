@@ -1,5 +1,17 @@
 {
   "status": "locally qualified occurrence aggregation and SARIF result metadata; not published",
+  "main_integration": {
+    "source_commit": "4c1c16b",
+    "full_go_suite_passed": true,
+    "native_passed": 71,
+    "native_total": 71,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-occurrences-native-uq36hxsi/qualification.json",
+    "pretty_metadata_limit_exit": 2,
+    "pretty_metadata_limit_reason": true,
+    "pretty_does_not_claim_unread_input": true,
+    "pretty_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-occurrences-pretty-w65ewxol/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained; pretty coverage header adjusted for metadata-only gaps"
+  },
   "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
   "native": {
     "binary_sha256": "3d8247c303844a52f1a05ff48f75e23367a3f0504d4a927c1317a9b07d22df2b",
