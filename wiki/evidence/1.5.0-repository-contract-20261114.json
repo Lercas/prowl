@@ -1,0 +1,652 @@
+{
+  "status": "locally qualified repository snapshot provenance; not published",
+  "native": {
+    "binary_sha256": "734355be08a24694c53adbcabe7700cde75cd38aee469c4e34a4900564f5a669",
+    "passed": 99,
+    "total": 99,
+    "checks": [
+      {
+        "case": "identity",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/False/False/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/False/True/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "repo/False/stable-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/True/False/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "repo/True/True/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "repo/True/stable-scope",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "org/False/False/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "org/False/True/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "org/False/stable-scope",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/json/complete",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/json/safe",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "org/True/False/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/json/complete",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/json/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/json/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/json/safe",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/sarif/provenance",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/sarif/no-local-scope",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/sarif/safe",
+        "passed": true
+      },
+      {
+        "case": "org/True/True/sarif/uri",
+        "passed": true
+      },
+      {
+        "case": "org/True/stable-scope",
+        "passed": true
+      },
+      {
+        "case": "warning/repo/json",
+        "passed": true
+      },
+      {
+        "case": "warning/repo/sarif",
+        "passed": true
+      },
+      {
+        "case": "warning/org/json",
+        "passed": true
+      },
+      {
+        "case": "warning/org/sarif",
+        "passed": true
+      },
+      {
+        "case": "invalid/repo/json",
+        "passed": true
+      },
+      {
+        "case": "invalid/repo/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "invalid/repo/sarif",
+        "passed": true
+      },
+      {
+        "case": "invalid/repo/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "invalid/org/json",
+        "passed": true
+      },
+      {
+        "case": "invalid/org/json/baseline",
+        "passed": true
+      },
+      {
+        "case": "invalid/org/sarif",
+        "passed": true
+      },
+      {
+        "case": "invalid/org/sarif/baseline",
+        "passed": true
+      },
+      {
+        "case": "empty/False",
+        "passed": true
+      },
+      {
+        "case": "empty/True",
+        "passed": true
+      },
+      {
+        "case": "history-refset",
+        "passed": true
+      },
+      {
+        "case": "history-tag-only",
+        "passed": true
+      },
+      {
+        "case": "history-selected-branch",
+        "passed": true
+      },
+      {
+        "case": "history-selected-tag",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/repo",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/repo",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/repo",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/repo",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-native-ni9lkayq",
+    "scope": "local Git clone wrapper, owned Git objects and loopback org inventory only; no real remote repository or provider use"
+  },
+  "checks": {
+    "full_go": "passed",
+    "source_model_ownedcmd_cli_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11": "passed"
+  },
+  "semantics": [
+    "Snapshot pins validated HEAD and hashes full cloned ref inventory without retaining ref names",
+    "Repository-selection replaces temporary local acquisition scope; producer diagnostics and SARIF use stable locators",
+    "Worktree provenance has HEAD/source URL; historical blobs keep their own blob ID without falsely attaching collection HEAD",
+    "Default full history includes advertised tags; explicit branch/tag selection remains scoped",
+    "Metadata failure keeps readable files and incomplete marker before baseline decisions; legitimate empty unborn repository supported",
+    "Separate bounded stderr and bounded/streamed stdout retain process-group cancellation and pipe-wait guards",
+    "Transport credentials, query and fragment removed; SCP home-relative addressing remains distinct from absolute SSH URLs"
+  ],
+  "limits": [
+    "Local Git object fixtures and loopback inventory only; no real remote auth, forge service or live provider verification",
+    "Remote repository scopes remain unsupported as proof of absence by remediation-check",
+    "Forge inventory/pagination audit and other remote adapters remain open",
+    "Final Docker candidate is still blocked by read-only Docker storage; no restart performed without approval"
+  ],
+  "source_coverage_nonregression": {
+    "binary_sha256": "734355be08a24694c53adbcabe7700cde75cd38aee469c4e34a4900564f5a669",
+    "passed": 36,
+    "total": 36,
+    "checks": [
+      {
+        "case": "filesystem-policy",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "filesystem-policy",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "index",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "worktree",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "history",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "timeline",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "mobile-limit",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "image",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "agents",
+        "stored": true,
+        "format": "sarif",
+        "passed": true
+      }
+    ]
+  }
+}

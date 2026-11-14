@@ -56,7 +56,7 @@ func TestRepoFailureDiagnosticsAndBaselineRemainSafe(t *testing.T) {
 					t.Fatalf("unsafe or incomplete clone diagnostics: %s", data)
 				}
 				truncated, fs := readBucketReport(t, out)
-				if !truncated || len(fs) != 1 || !model.IsIncompleteFinding(fs[0]) || fs[0].Path != "https://***@owned.invalid?mail=a@b" {
+				if !truncated || len(fs) != 1 || !model.IsIncompleteFinding(fs[0]) || fs[0].Path != "https://owned.invalid" {
 					t.Fatalf("clone error lost provenance or completeness: truncated=%v findings=%+v", truncated, fs)
 				}
 				data, err = os.ReadFile(baseline)

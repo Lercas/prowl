@@ -1,6 +1,7 @@
 package ownedcmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -94,5 +95,13 @@ func TestRunCancellationAndStartFailure(t *testing.T) {
 	_, err = Run(exec.Command(t.TempDir() + "/absent-program"))
 	if err == nil {
 		t.Fatal("start failure was hidden")
+	}
+}
+
+func TestRunWithStdoutSeparatesDataAndBoundsDiagnostics(t *testing.T) {
+	var data bytes.Buffer
+	diagnostic, err := RunWithStdout(helperCommand(t, context.Background(), "output"), &data)
+	if err != nil || data.String() != strings.Repeat("x", MaxOutput*2) || diagnostic != "stderr drained" {
+		t.Fatal("stdout data was truncated or mixed with stderr")
 	}
 }

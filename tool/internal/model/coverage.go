@@ -48,7 +48,22 @@ func CoverageFrom(ctx context.Context) *Coverage {
 	c, _ := ctx.Value(coverageKey{}).(*Coverage)
 	return c
 }
+
+type sourceLocatorKey struct{}
+
+// WithSourceLocator maps physical producer diagnostics into an acquisition's logical namespace.
+// The callback is immutable and must be safe for concurrent calls.
+func WithSourceLocator(ctx context.Context, locate func(string) string) context.Context {
+	if locate == nil {
+		return ctx
+	}
+	return context.WithValue(ctx, sourceLocatorKey{}, locate)
+}
+
 func Note(ctx context.Context, code, path string, incomplete bool) {
+	if locate, ok := ctx.Value(sourceLocatorKey{}).(func(string) string); ok {
+		path = locate(path)
+	}
 	if c := CoverageFrom(ctx); c != nil {
 		c.Note(code, path, incomplete)
 	}

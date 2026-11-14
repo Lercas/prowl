@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/resilience"
-	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
 // defaultFetchTimeout bounds a single remote-fetch attempt (clone / image pull / bucket sync) when
@@ -49,7 +48,7 @@ type CloneOpts struct {
 func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), err error) {
 	noop := func() {}
 	if !isCloneURL(o.URL) {
-		return "", noop, fmt.Errorf("unsupported repo URL %q (use https://, ssh://, or git@host:path)", safehttp.RedactURL(o.URL))
+		return "", noop, errors.New("unsupported repo URL (use https://, ssh://, or git@host:path)")
 	}
 	tmp, err := os.MkdirTemp("", "prowl-repo-*")
 	if err != nil {
@@ -59,7 +58,12 @@ func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), er
 
 	args := []string{
 		"-c", "protocol.ext.allow=never", "-c", "protocol.file.allow=user",
-		"clone", "--quiet", "--no-tags",
+		"clone", "--quiet",
+	}
+	if o.Full && o.Branch == "" {
+		args = append(args, "--tags")
+	} else {
+		args = append(args, "--no-tags")
 	}
 	if !o.Full {
 		depth := o.Depth

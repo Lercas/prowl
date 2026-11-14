@@ -28,7 +28,7 @@ Value flags accept both `--flag value` and `--flag=value`.
 | Mode | What it clones | What it scans |
 |------|----------------|---------------|
 | default | A shallow clone (depth `--depth`, default 1) of the default branch (or `--branch`). | The checked-out working tree — the files as they exist at the tip of that branch. |
-| `--history` | A full clone (all refs, full depth). | Every blob ever committed across all refs. Catches secrets that were removed from `HEAD` but still live in history. |
+| `--history` | A full clone of advertised branches and tags; `--branch` restricts the selection. | Every blob ever committed across all refs. Catches secrets that were removed from `HEAD` but still live in history. |
 
 Use the default mode for a quick "is there anything live in the current tree" pass; use `--history` when you need to know whether a secret was ever committed (the case that requires rotation even after a "fix" commit). A full-history scan is slower and downloads the whole repository, so combine it with `--timeout` on large repositories — partial results are still reported.
 
@@ -44,20 +44,48 @@ Use the default mode for a quick "is there anything live in the current tree" pa
 
 - **Credential helper** — an HTTPS clone uses your configured git credential helper (the OS keychain, `gh auth`, a `.git-credentials` store, etc.), exactly as `git clone` would.
 
-- **Token in the URL** — embed a personal access token / deploy token directly:
-
-  ```bash
-  prowl repo https://<token>@github.com/org/private-repo.git
-  prowl repo https://oauth2:<token>@gitlab.com/group/private-repo.git
-  ```
+- **Совместимые transport credentials** — Git принимает URL userinfo. Для обычной
+  работы используйте SSH agent или credential helper: token не требуется передавать
+  в аргументах команды.
 
 No prowl-specific credential configuration exists; if `git clone <url>` works in your shell, `prowl repo <url>` works.
 
-В сообщениях и путях отчёта userinfo (`user:token@`) заменяется на `***@`;
-`@` в пути, query и fragment не меняет адрес источника. Ошибка клонирования сообщает
+В сообщениях, metadata и путях отчёта URL userinfo, query и fragment удаляются.
+SCP-адрес `git@host:path` сохраняет свою форму: home-relative SCP и абсолютный
+`ssh://host/path` обозначают разные ресурсы. Ошибка клонирования сообщает
 стадию или код завершения Git. Его stdout/stderr не включается в сообщение ошибки:
 credential helper и сервер могут вывести пароль отдельно от URL. Сбой сохраняет
 `source_error`, `truncated: true` и код `2`; создание или обновление baseline блокируется.
+
+## Снимок и provenance в 1.5.0
+
+Успешный checkout получает scope `repository`: безопасный locator, наблюдавшийся
+HEAD, branch/depth/history и digest набора refs для полного history-обхода.
+Вложенный `repository-selection` фиксирует режим чтения, исключения и размер items.
+Временный каталог не становится локальным filesystem scope; диагностические пути
+и SARIF URI относятся к репозиторию. Повторное клонирование того же состояния даёт
+стабильный scope. Эти remote scopes пока не используются `remediation-check`
+как доказательство отсутствия секрета.
+
+Для снимка рабочего дерева в provenance передаётся `commit` и `source_url`.
+Исторические находки сохраняют собственный `blob`; HEAD всего checkout им не
+приписывается. `--git-timeline` продолжает показывать commit-level appearances/removals
+отдельно. Default `--history` включает объявленные branches и tags, поэтому находит
+и commit, достижимый только из tag. Явный `--branch` выбирает соответствующий
+branch/tag; служебные refs forge, которые Git не клонирует, не входят в это окно.
+
+Metadata читается через отдельный stdout с ограничениями и отменой процесса;
+stderr Git не попадает в metadata или сообщение ошибки. Не удалось закрепить HEAD
+или полностью прочитать refs — доступное содержимое сканируется с диагностикой
+`repository_revision_unavailable`, кодом `2` и запретом обновления baseline.
+Корректный пустой unborn-репозиторий фиксируется как явно пустой снимок.
+
+Локальная матрица CLI JSON/SARIF ±L2, `repo`/`org` и MCP четырёх версий проходит
+99/99 проверок. Git clone wrapper сохраняет clone flags и использует только
+собственные Git objects; org inventory обслуживается loopback API. Реальные remote
+репозитории, credentials и provider verification не проверялись.
+Воспроизведение: `python3 scripts/check_repository_contract.py /path/to/prowl`.
+Evidence: `wiki/evidence/1.5.0-repository-contract-20261114.json`.
 
 ## Transport security
 

@@ -42,25 +42,30 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 	defer func() { cleanup() }()
 	c.noAutoConfig = true // ignore the cloned repo's own .prowl.yaml (only an explicit --config is trusted)
 	return scanItemStream(ctx, c, func(ctx context.Context, c commonFlags) (<-chan model.Item, error) {
-		logx.Info("cloning repository", "url", redactURL(o.URL), "history", o.Full)
+		logx.Info("cloning repository", "url", source.RepositoryLocator(o.URL), "history", o.Full)
 		if o.Timeout == 0 {
 			o.Timeout = c.timeout
 		}
 		dir, release, err := source.CloneRepo(ctx, o)
 		cleanup = release
 		if err != nil {
-			logx.Error("clone failed", "url", redactURL(o.URL), "err", err)
-			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: redactURL(o.URL), Error: err}), nil
+			logx.Error("clone failed", "url", source.RepositoryLocator(o.URL), "err", err)
+			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: err}), nil
 		}
+		ctx, revisionErr := source.RepositoryContext(ctx, dir, o)
 		items, err := scanInputAt(ctx, c, []string{dir}, dir)
 		if err != nil {
-			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: redactURL(o.URL), Error: err}), nil
+			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: err}), nil
+		}
+		var initial []model.Item
+		if revisionErr != nil {
+			initial = append(initial, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: revisionErr})
 		}
 		return mapSourcePaths(ctx, items, func(p string) (string, error) {
 			if c.history || c.staged || c.since != "" {
 				return p, nil // Git sources already carry repository-relative locators
 			}
 			return relativeSourcePath(dir, p)
-		}), nil
+		}, initial...), nil
 	})
 }

@@ -244,6 +244,15 @@
       `wiki/evidence/1.5.0-cicd-contract-20261114.json`. Scope описывает выбранное
       CI-окно; remote absence/remediation и остальные remote adapters остаются открыты.
 
+    - [x] `repo`/`org`: общий repository snapshot с HEAD/ref-set digest,
+      безопасным source URL и стабильными selection scopes вместо временного checkout.
+      HEAD не приписывается историческим blobs. Default full history включает tags;
+      выбранный branch/tag сохраняет свою область. Ошибка metadata сохраняет текст
+      и блокирует baseline; URL credentials/query исключены из вывода и scopes.
+      Нативная матрица — 99/99, полный Go-набор/race/lint/Go 1.26.11 проходят.
+      `wiki/evidence/1.5.0-repository-contract-20261114.json`.
+      Forge inventory и доказательство remote absence остаются открыты.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

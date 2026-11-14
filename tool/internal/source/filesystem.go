@@ -71,6 +71,9 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	if origin, ok := ctx.Value(filesystemOriginKey{}).(filesystemOrigin); ok && it.ArtifactURI == "" {
 		it.ArtifactURI = origin.uri(it.Path)
 	}
+	if origin, ok := ctx.Value(repositoryOriginKey{}).(repositoryOrigin); ok {
+		it.ArtifactURI = origin.artifact(it.Path)
+	}
 	select {
 	case ch <- it:
 		return true
@@ -104,7 +107,7 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 		if err != nil {
 			target = root
 		}
-		model.CoverageFrom(ctx).RegisterScope("filesystem", target, struct {
+		registerLocalScope(ctx, "filesystem", target, struct {
 			Exclude  []string
 			MaxBytes int64
 		}{exclude, maxBytes})

@@ -113,3 +113,15 @@ GITLAB_TOKEN=glpat-xxx \
 - [Scanning Files](Scanning-Files.md)
 - [CI/CD Integration](CI-CD-Integration.md)
 - [Home](README.md)
+
+## Provenance отдельных репозиториев в 1.5.0
+
+Каждый успешно клонированный репозиторий получает собственный `repository` snapshot
+и `repository-selection`, с безопасным `source_url` и HEAD для рабочего дерева.
+History-blobs сохраняют blob IDs; общий HEAD не выдаётся за commit каждого blob.
+Пути отчёта остаются repository-qualified, а metadata/диагностика/SARIF URI
+не зависят от временного checkout. Ошибка закрепления revision сохраняет доступные
+находки и делает общий отчёт неполным до записи baseline.
+
+Контракт и локальное воспроизведение — [Repository Scanning](Repository-Scanning.md).
+Полный аудит forge inventory, pagination и remote absence остаётся отдельной задачей.

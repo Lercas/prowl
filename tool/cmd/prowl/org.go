@@ -149,7 +149,7 @@ func cmdOrg(args []string) int {
 				all = append(all, fs...)
 				if ok {
 					scanned++
-					logx.Info("scanned", "repo", redactURL(u), "findings", len(fs))
+					logx.Info("scanned", "repo", source.RepositoryLocator(u), "findings", len(fs))
 				} else {
 					failed++
 				}
@@ -188,10 +188,15 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 	label := repoLabel(url)
 	dir, cleanup, err := source.CloneRepo(ctx, source.CloneOpts{URL: url, Full: c.history, Timeout: c.timeout})
 	if err != nil {
-		logx.Error("clone failed", "url", redactURL(url), "err", err)
+		logx.Error("clone failed", "url", source.RepositoryLocator(url), "err", err)
 		return []model.Finding{orgDiagnostic(label, "repository clone failed; scan results are incomplete")}, false
 	}
 	defer cleanup()
+	ctx, revisionErr := source.RepositoryContext(ctx, dir, source.CloneOpts{URL: url, Full: c.history, Timeout: c.timeout})
+	var initial []model.Item
+	if revisionErr != nil {
+		initial = append(initial, model.Item{Source: "code", Path: label, Error: revisionErr})
+	}
 	var items <-chan model.Item
 	if c.history {
 		if c.gitTimeline {
@@ -211,7 +216,7 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 			}
 		}
 		return label + ": " + p, nil
-	})
+	}, initial...)
 	fs := prepared.Collect(ctx, items)
 	complete := true
 	for _, f := range fs {
@@ -227,4 +232,4 @@ func orgDiagnostic(path, reason string) model.Finding {
 }
 
 // Keep the host in identities so equally named repositories on different forges cannot collide.
-func repoLabel(url string) string { return strings.TrimSuffix(redactURL(url), ".git") }
+func repoLabel(url string) string { return strings.TrimSuffix(source.RepositoryLocator(url), ".git") }

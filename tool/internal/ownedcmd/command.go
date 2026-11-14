@@ -2,6 +2,7 @@
 package ownedcmd
 
 import (
+	"io"
 	"os/exec"
 	"strings"
 	"sync"
@@ -43,11 +44,20 @@ func (out *Output) String() string {
 // Run bounds diagnostics and inherited-pipe waits. Unix commands use a fresh process
 // group so cancellation and completion also stop workers spawned by this acquisition command.
 func Run(cmd *exec.Cmd) (string, error) {
+	return RunWithStdout(cmd, nil)
+}
+
+// RunWithStdout separates data stdout from bounded stderr; callers bound their data writer.
+// A nil writer retains the combined diagnostic behavior of Run.
+func RunWithStdout(cmd *exec.Cmd, stdout io.Writer) (string, error) {
 	configureOwnedCommand(cmd)
 	defer finishOwnedCommand(cmd)
 	cmd.WaitDelay = time.Second
 	out := &Output{}
 	cmd.Stdout, cmd.Stderr = out, out
+	if stdout != nil {
+		cmd.Stdout = stdout
+	}
 	err := cmd.Run()
 	return out.String(), err
 }
