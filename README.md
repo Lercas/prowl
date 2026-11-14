@@ -77,12 +77,10 @@ docker run --rm -v "$PWD:/src" ghcr.io/lercas/prowl scan /src
 # binary - download from the GitHub Releases page (linux/macos/windows, amd64/arm64)
 ```
 
-> **ML support in released binaries.** The Homebrew, Docker, and GitHub Release binaries are built
-> static (`CGO_ENABLED=0`) and run the **cascade by default**. The in-process ML stage (`--ml`) needs
-> a cgo build - a static release binary **refuses `--ml`** and exits with a message pointing you to
-> `--ml-url` or a source build. To get ML, either run the model as a sidecar and pass `--ml-url`, or
-> build from source with cgo (`cd tool && make build`, which sets `CGO_ENABLED=1`). The cascade,
-> rule templates, and live `--verify` work in every build.
+> **ML support from 1.5.0.** Static binaries (`CGO_ENABLED=0`) support the in-process `--ml`
+> filter, including Docker and release builds. Training and inference use the same versioned Go
+> extractor. Legacy external models using Python zlib must be retrained; they are rejected with
+> an actionable error. See [portable model training](scripts/ml/README.md).
 
 ### Pre-commit
 
@@ -194,13 +192,18 @@ One scanner, many sources - every one runs the same detection cascade and the sa
 - **Rules live outside the binary.** 159 YAML rule files you can edit, disable, or
   extend, and your existing **gitleaks** `.toml` and **trufflehog** `.yaml` rulesets drop in
   unchanged.
-- **Fast.** ~310 MB/s single-threaded, zero-allocation hot path, scales linearly across cores. An
-  Aho-Corasick pre-filter means a 159-rule library costs almost nothing.
+- **Workload-dependent performance.** Aho-Corasick pre-filtering and literal windows reduce regex
+  work. Throughput depends on keyword density, input format, enabled rules, decoding and ML;
+  keyword-free microbenchmarks do not represent a real repository or minified bundle.
 - **Built for pipelines.** CLI, pre-commit, GitHub Action, SARIF output, exit-code gating, an LSP
   mode for editor highlighting, a `serve` mode for horizontal scaling, and an `mcp` mode that exposes
   scans as Model Context Protocol tools for AI agents.
 
 ## Benchmark
+
+The comparison tables below are historical measurements. They have not been rerun for the
+portable 1.5.0 L2 model; its migration qualification is recorded separately in
+[`portable_qualification.json`](tool/internal/mlmodel/testdata/portable_qualification.json).
 
 [ProwlBench](https://github.com/Lercas/prowlbench) is a 24,603-case (16,552 positive / 8,051 negative),
 leakage-safe benchmark spanning structured tokens, generic high-entropy keys, multilingual free-form
@@ -260,7 +263,7 @@ the box).
   providers they have no rule for (a coverage gap, not lower quality).
 - **On real clean code (B), gitleaks is the cleanest (4) and strongest tool overall here.** Prowl's
   zero-dependency cascade reports 18 (was 50 before this release tightened asset/expression FPs); its
-  **ML L2 filter (`--ml`, needs a cgo build or the sidecar) cuts that to 9** without losing any of the
+  **historical ML L2 filter cut that to 9** without losing any of the
   34 corpus positives - that's the "do we clean FPs with the ML?" answer: yes, half the remaining cascade
   noise, recall unchanged (the L2 was retrained on hard-negatives mined from real clean repos, gated on a
   held-out real-data split - not synthetic). Even so Prowl is ~2× gitleaks on real code. Prowl trades
@@ -294,11 +297,9 @@ The published multilingual encoder remains an experimental research/integration 
 custom scorer, but it is not an automatic third runtime stage in the shipped binary.
 
 **Running ML.** L1 ships in every binary and needs nothing. L2 does not run by default. The in-process
-model (`--ml`) is available only in a **cgo build**;
-the static release binaries (Homebrew/Docker/Releases, `CGO_ENABLED=0`) refuse `--ml` and tell you to
-use `--ml-url` or build from source. To run the ML stage without a cgo build, host the model as a
-sidecar and pass `--ml-url`. In short: a released binary runs the cascade by default (ML via
-`--ml-url`), and a source build with cgo runs `--ml` in-process.
+model (`--ml`) runs in both static and source builds from 1.5.0. No cgo, Python or sidecar is needed.
+`--ml-url` remains available for an external scorer. Old zlib-trained external models are
+incompatible with the versioned portable extractor and require retraining.
 
 ## Rules and verifiers
 

@@ -1,0 +1,47 @@
+# Переносимая L2-модель
+
+Модель обучается на признаках из того же Go-экстрактора, который работает в Prowl.
+Признак `compression_ratio_go_flate_v1` — отношение длины закрытого потока raw
+DEFLATE уровня 6 из закреплённого `github.com/klauspost/compress/flate` к длине
+UTF-8-значения; для пустой строки — 0. Стандартный `compress/flate` меняет длину
+потоков между Go 1.25 и 1.27, поэтому его версия не подходит для стабильного признака.
+Системная zlib и Python-экстрактор для этого признака не используются.
+
+```sh
+python3 -m venv /tmp/prowl-ml-training
+/tmp/prowl-ml-training/bin/pip install -r scripts/ml/requirements.txt
+(cd tool && GOTOOLCHAIN=go1.25.14 CGO_ENABLED=0 go build -o /tmp/prowl-ml-features ./cmd/prowl-ml-features)
+OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 /tmp/prowl-ml-training/bin/python \
+  scripts/ml/train_portable.py \
+  --corpus /path/to/corpus.jsonl --extractor /tmp/prowl-ml-features \
+  --out /path/to/new-candidate-directory
+```
+
+Вход — JSONL-записи с `value`, `context`, `text`, `label_binary`, `label_type`
+и необязательным `span`. Корпус хранится отдельно от Git и не публикуется.
+Каталог результата должен быть новым: обучение не заменяет установленную модель.
+В признаки, отчёт и prediction-fixture сырые значения не записываются.
+
+Разбиение 70/15/15 проводится по связным группам значений и шаблонов: ни одинаковое
+значение, ни шаблон носителя не могут пересекать части. При больших связанных
+группах фактические размеры частей отличаются от указанных долей.
+Контрольная zlib-модель обучается на тех же данных. Сложность переносимой модели
+выбирается из 31, 63 и 127 листьев по F1 validation-части при пороге 0,3.
+Test-часть не участвует в выборе модели.
+
+Гейт допускает снижение PR-AUC, precision, recall и F1 максимум на 0,005 относительно
+контрольной модели. При неуспехе остаётся отчёт, но кандидат не экспортируется.
+При успехе создаются `model_binary_go.json`, `prediction_golden.json` и
+`qualification.json`. До подключения кандидата необходимо проверить Go/Python
+prediction-parity, идентичность признаков поддерживаемых Go-toolchain и статическую
+сборку с `--ml`. Числа отчёта описывают перенос L2 на данном корпусе, а не качество
+на произвольных пользовательских источниках.
+
+Старые модели с признаком `compression_ratio` несовместимы. Prowl должен отклонять
+их с сообщением о переобучении; переименование поля в старом JSON недопустимо.
+
+Проверка splitter:
+
+```sh
+python -m unittest discover -s scripts/ml -p 'test_*.py'
+```

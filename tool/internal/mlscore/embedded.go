@@ -31,16 +31,9 @@ type Embedded struct {
 // NewEmbedded builds an in-process scorer, resolving which model to load (see resolveModel).
 // threshold is the score below which a non-checksum candidate is treated as not-a-secret.
 //
-// It refuses on a nocgo build: the compression_ratio feature only matches the trained model under the
-// cgo (system-zlib) path, so a nocgo binary would score secrets DIFFERENTLY from the validated model
-// — fail closed with a clear message rather than ship a silently-divergent scorer. The cascade, rule
-// templates, and live verification are unaffected; --ml-url (the sidecar) is the nocgo alternative.
+// Training uses this same Go extractor. Feature names are versioned so legacy
+// zlib models cannot silently change scores after the portable extractor migration.
 func NewEmbedded(threshold float64, modelPath string) (*Embedded, error) {
-	if !mlfeatures.BuiltWithCgo() {
-		return nil, errors.New("--ml: the in-process model needs a cgo build for feature parity with " +
-			"the trained model (compression_ratio uses the system zlib); this binary was built without " +
-			"cgo. Rebuild with CGO_ENABLED=1 (the default for `go install`/`make build`), or use --ml-url")
-	}
 	m, err := resolveModel(modelPath)
 	if err != nil {
 		return nil, err
@@ -50,7 +43,7 @@ func NewEmbedded(threshold float64, modelPath string) (*Embedded, error) {
 	} else {
 		for i, name := range names {
 			if name != mlfeatures.FeatureNames[i] {
-				return nil, fmt.Errorf("ml: model feature order does not match the extractor at index %d", i)
+				return nil, fmt.Errorf("ml: model feature order does not match the extractor at index %d; retrain the model with the current Go extractor", i)
 			}
 		}
 	}

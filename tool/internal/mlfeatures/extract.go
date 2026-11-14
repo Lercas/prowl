@@ -16,8 +16,8 @@ type Context struct {
 	Source string
 }
 
-// FeatureNames is the stable feature order (matching FEATURE_NAMES in
-// src/features/extract.py); Extract returns values in exactly this order.
+// FeatureNames is the stable feature order. It preserves the Python feature
+// layout while versioning the portable Go compression feature at index 7.
 var FeatureNames = []string{
 	// string-intrinsic
 	"length",
@@ -27,7 +27,7 @@ var FeatureNames = []string{
 	"base64_entropy",
 	"hex_entropy",
 	"bigram_entropy",
-	"compression_ratio",
+	CompressionFeature,
 	"char_diversity",
 	// _char_class_stats
 	"frac_lower",
@@ -147,8 +147,7 @@ func boolf(b bool) float64 {
 	return 0.0
 }
 
-// Extract returns the 49 features for one candidate (value + optional context)
-// in FeatureNames order. It is an exact port of extract_features().
+// Extract returns the 49 canonical training/inference features in FeatureNames order.
 func Extract(value string, ctx Context) []float64 {
 	s := value
 

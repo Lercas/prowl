@@ -27,9 +27,6 @@ func writeSnapshotModel(t *testing.T, path string, baseline float64) {
 }
 
 func TestMLPreflightSnapshotSurvivesFileReplacement(t *testing.T) {
-	if !mlfeatures.BuiltWithCgo() {
-		t.Skip("in-process ML requires cgo")
-	}
 	for _, installed := range []bool{false, true} {
 		t.Run(map[bool]string{false: "explicit", true: "installed"}[installed], func(t *testing.T) {
 			home := t.TempDir()

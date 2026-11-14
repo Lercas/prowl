@@ -7,6 +7,7 @@ package mlfeatures
 
 import (
 	"math"
+	"sort"
 )
 
 // Alphabets, mirroring src/features/entropy.py. These are sets of runes.
@@ -38,7 +39,7 @@ func shannonEntropy(s string) float64 {
 	}
 	h := 0.0
 	fn := float64(n)
-	for _, c := range counts {
+	for _, c := range sortedCounts(counts) {
 		p := float64(c) / fn
 		h -= p * math.Log2(p)
 	}
@@ -78,7 +79,7 @@ func alphabetEntropy(s string, alphabet map[rune]struct{}) float64 {
 	}
 	h := 0.0
 	fn := float64(n)
-	for _, c := range counts {
+	for _, c := range sortedCounts(counts) {
 		p := float64(c) / fn
 		h -= p * math.Log2(p)
 	}
@@ -105,19 +106,31 @@ func bigramEntropy(s string) float64 {
 		total += c
 	}
 	ftotal := float64(total)
-	h := 0.0
+	terms := make([]float64, 0, len(bigrams))
 	for bg, c := range bigrams {
 		pBg := float64(c) / ftotal
 		pFirst := float64(firsts[bg[0]]) / ftotal
-		h -= pBg * math.Log2(pBg/pFirst)
+		terms = append(terms, -pBg*math.Log2(pBg/pFirst))
+	}
+	sort.Float64s(terms)
+	h := 0.0
+	for _, term := range terms {
+		h += term
 	}
 	return h
 }
 
-// compressionRatio returns len(zlib(s)) / len(s) over UTF-8, mirroring
-// compression_ratio() (Python zlib.compress at level 6). The compressed length
-// comes from zlibCompressedLen: the cgo build (system zlib) is byte-exact; the
-// nocgo build (Go compress/zlib) only approximates Python. See zlib_nocgo.go.
+// Stable summation is necessary for reproducible histogram bin boundaries during training.
+func sortedCounts(counts map[rune]int) []int {
+	out := make([]int, 0, len(counts))
+	for _, count := range counts {
+		out = append(out, count)
+	}
+	sort.Ints(out)
+	return out
+}
+
+// compressionRatio uses the same Go DEFLATE stream in training and inference.
 func compressionRatio(s string) float64 {
 	if s == "" {
 		return 0.0
@@ -127,7 +140,7 @@ func compressionRatio(s string) float64 {
 	if denom < 1 {
 		denom = 1
 	}
-	return float64(zlibCompressedLen(raw)) / float64(denom)
+	return float64(flateCompressedLen(raw)) / float64(denom)
 }
 
 // charDiversity is distinct chars / length. Mirrors char_diversity().

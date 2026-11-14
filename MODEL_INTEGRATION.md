@@ -109,9 +109,10 @@ The Go reference inference is `tool/internal/mlmodel` (`Load` / `Predict`); the 
 `prowl scan --ml-model path/to/model_binary.json` or `~/.prowl/model_binary.json` if you want the scanner
 to use an externally-trained model.
 
-**Caveat - `compression_ratio` parity:** one of the 49 features uses zlib. A cgo build matches the
-Python trainer's zlib byte-for-byte; a pure-Go (nocgo) build differs by a few bytes on that single
-feature, shifting the score slightly. Match the trainer's zlib if you reimplement the feature extractor.
+**Portable compression from 1.5.0:** feature 7 is `compression_ratio_go_flate_v1`, computed with
+the pinned Go DEFLATE implementation used by both training and inference. Legacy models with
+`compression_ratio` are rejected and must be retrained; renaming the field is insufficient.
+See [the reproducible training procedure and qualification gate](scripts/ml/README.md).
 
 This path gives you the **L2 binary classifier only** - not the L1 rules or the type classifier (those
 live in the scanner and the private training code). It answers "does this look like a real secret?", not

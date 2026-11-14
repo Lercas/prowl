@@ -9,6 +9,29 @@ permissions:
   contents: read
 
 jobs:
+  static-ml:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.25.x', '1.27.x']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache-dependency-path: tool/go.sum
+      - name: portable feature and model parity
+        working-directory: tool
+        env:
+          CGO_ENABLED: '0'
+        run: go test ./internal/mlfeatures ./internal/mlmodel ./internal/mlscore
+      - name: release-style ML smoke
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          (cd tool && go build -trimpath -ldflags='-s -w' -o "$RUNNER_TEMP/prowl-static" ./cmd/prowl)
+          python3 scripts/ml/smoke_static.py --binary "$RUNNER_TEMP/prowl-static" --legacy-model tool/internal/mlmodel/model_binary.json
+
   test:
     runs-on: ubuntu-latest
     defaults:

@@ -52,8 +52,8 @@ const scanHelp = `prowl scan [path...] — scan files/dirs/archives/docs/mail fo
   --max-per-file N            cap generic findings per file (data-file guard; default 30, 0=off)
   --ml                        score candidates with the in-process ML model (no sidecar) and drop
                               ones it judges not-a-secret; --ml-threshold F (default 0.3) is the cutoff.
-                              Needs a cgo build (default for go install/make build); a static release
-                              binary refuses --ml — use --ml-url, or build from source.
+                              Available in static release binaries, Docker and source builds;
+                              features and the embedded model are computed entirely in Go.
   --ml-model FILE             load that model file instead of the embedded one (implies --ml); else
                               $PROWL_HOME/model_binary.json is auto-used, else the embedded model
   --ml-url URL                same, but via an external sidecar (src/serve.py) instead of the embed

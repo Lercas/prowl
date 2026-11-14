@@ -11,12 +11,7 @@ builds:
   - id: prowl
     main: ./cmd/prowl
     binary: prowl
-    # CGO_ENABLED=0 keeps cross-compilation toolchain-free, so these static binaries run the full
-    # cascade + rule templates + live verification on every platform. The in-process --ml model is the
-    # ONE thing that needs cgo: its compression_ratio feature must use the system zlib to match the
-    # trained model byte-for-byte, so a nocgo binary REFUSES --ml (fail-closed, clear message) rather
-    # than score secrets differently from the validated model. For --ml, build from source with cgo
-    # (the default for `go install` / `make build`) or run the --ml-url sidecar.
+    # The canonical Go extractor and portable embedded model support --ml without cgo.
     env:
       - CGO_ENABLED=0
     flags:

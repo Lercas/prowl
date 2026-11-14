@@ -1,0 +1,79 @@
+{
+  "corpus_sha256": "3cbc6f659dcf94ec734f587e8c617feb74df476d4c75444e991730e166882ae3",
+  "seed": 13,
+  "numpy": "2.4.6",
+  "sklearn": "1.9.0",
+  "extractor_sha256": "10afc44e83cc3a5f3881c00f0a167207a03ba4905d887c70da064a1a7d42412c",
+  "n": 525102,
+  "split": {
+    "train": 174391,
+    "val": 37075,
+    "test": 313636
+  },
+  "threshold": 0.3,
+  "max_regression": 0.005,
+  "models": {
+    "zlib_control": {
+      "val": {
+        "pr_auc": 0.9992402835739032,
+        "precision": 0.988356014846081,
+        "recall": 0.9870630133003852,
+        "f1": 0.9877090909090909
+      },
+      "test": {
+        "pr_auc": 0.9523759217399165,
+        "precision": 0.6315912499756511,
+        "recall": 0.9839169751775202,
+        "f1": 0.769334804427519
+      }
+    },
+    "go_flate": {
+      "val": {
+        "pr_auc": 0.9993200218644354,
+        "precision": 0.9891608773142254,
+        "recall": 0.9882622283596192,
+        "f1": 0.988711348639363
+      },
+      "test": {
+        "pr_auc": 0.9550855282470203,
+        "precision": 0.6399344042044534,
+        "recall": 0.9828548886326395,
+        "f1": 0.7751624445056062
+      }
+    }
+  },
+  "selection": "portable max_leaf_nodes in [31,63,127] selected by validation F1 at threshold 0.3",
+  "validation_candidates": {
+    "31": {
+      "pr_auc": 0.9992676331998225,
+      "precision": 0.9884050596103519,
+      "recall": 0.9881895486590595,
+      "f1": 0.9882972923859713
+    },
+    "63": {
+      "pr_auc": 0.9993200218644354,
+      "precision": 0.9891608773142254,
+      "recall": 0.9882622283596192,
+      "f1": 0.988711348639363
+    },
+    "127": {
+      "pr_auc": 0.9993025541399823,
+      "precision": 0.9891248999781771,
+      "recall": 0.9882622283596192,
+      "f1": 0.988693375990693
+    }
+  },
+  "selected_max_leaf_nodes": 63,
+  "qualified": true,
+  "compression_implementation": "github.com/klauspost/compress/flate@v1.18.6; level=6",
+  "feature_parity": {
+    "rows": 525102,
+    "go_versions": [
+      "go1.25.14",
+      "go1.27.1"
+    ],
+    "sha256": "bcf6d1d3180aa4c0185a22876b5be0e893dc6846f99c303b55e31db270b31b34",
+    "platform": "darwin/arm64"
+  },
+  "model_sha256": "f102160456355fde938a8b8e532792099c0842a69a772a9f13c7f190b89df4b4"
+}

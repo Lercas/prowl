@@ -22,10 +22,7 @@ func ownedModelJSON(t *testing.T, names []string) []byte {
 }
 
 func TestEmbeddedRejectsIncompatibleFeatureOrder(t *testing.T) {
-	if !mlfeatures.BuiltWithCgo() {
-		t.Skip("in-process scorer requires cgo")
-	}
-	for _, mode := range []string{"reordered", "unknown", "duplicate", "empty"} {
+	for _, mode := range []string{"reordered", "unknown", "duplicate", "empty", "legacy-zlib"} {
 		t.Run(mode, func(t *testing.T) {
 			names := append([]string(nil), mlfeatures.FeatureNames...)
 			switch mode {
@@ -37,6 +34,8 @@ func TestEmbeddedRejectsIncompatibleFeatureOrder(t *testing.T) {
 				names[0] = names[1]
 			case "empty":
 				names[0] = ""
+			case "legacy-zlib":
+				names[7] = "compression_ratio"
 			}
 			path := filepath.Join(t.TempDir(), "model.json")
 			if err := os.WriteFile(path, ownedModelJSON(t, names), 0o600); err != nil {

@@ -74,7 +74,8 @@ func TestPredictRejectsWrongLength(t *testing.T) {
 func TestParity(t *testing.T) {
 	const tol = 1e-6
 
-	m, err := Load()
+	// Preserve evaluation coverage for the historical Python fixture and its original model.
+	m, err := LoadFile("model_binary.json")
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
