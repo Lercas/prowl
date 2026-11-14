@@ -350,17 +350,32 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
-	if literalFormat(it) == "" {
+	if literalFormat(it) == "" && !(p.options.Reconstruct && reconstructable(it)) {
 		return p.findings(ctx, it, nil)
 	}
 	coverage := model.NewCoverage()
+	if p.options.Reconstruct && reconstructable(it) {
+		options := p.options
+		budget := detect.MaxScanMatches()
+		if options.matchLimit > 0 {
+			budget = min(budget, options.matchLimit)
+		}
+		options.candidateBudget = &budget
+		p = New(options)
+	}
 	result = p.findings(model.WithCoverage(ctx, coverage), it, nil)
+	if p.options.Reconstruct && reconstructable(it) && it.Error == nil && ctx.Err() == nil {
+		result = p.appendReconstructed(model.WithCoverage(ctx, coverage), it, result)
+	}
 	complete, _, diagnostics := coverage.Snapshot()
 	for _, d := range diagnostics {
 		model.Note(ctx, d.Code, d.Path, d.Incomplete)
 	}
+	if model.NewResult(nil, coverage).Filtered {
+		model.CoverageFrom(ctx).Filtered()
+	}
 	if !complete {
-		result = append(result, processingError(it, "structured content could not be completely interpreted; results are incomplete"))
+		result = append(result, processingError(it, "source content could not be completely interpreted; results are incomplete"))
 		if record, _ := it.Meta["git_history"].(*model.GitRecord); record != nil {
 			record.Graph.Inspected.Store(record.Object, false)
 		}
@@ -430,6 +445,13 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	// maxMatches is the global cap shared across both producers (cascade and template engine below).
 	// truncated records when either producer hit the cap so the output can carry a truncation marker.
 	maxMatches := detect.MaxScanMatches()
+	if p.options.matchLimit > 0 && p.options.matchLimit < maxMatches {
+		maxMatches = p.options.matchLimit
+	}
+	if len(ms) > maxMatches {
+		ms = ms[:maxMatches]
+		truncated = true
+	}
 	out := make([]model.Finding, 0, len(ms))
 	var indexValues []string
 	if p.options.ValueFingerprint != nil {
@@ -462,7 +484,12 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	pathIsFile := pathIsFilesystem(it.Source)
 	itemURL, _ := it.Meta["url"].(string)
 	itemInstr, _ := it.Meta["instruction"].(string) // image: the Dockerfile step that built the layer
-	examplePath := imageFileName(it.Path)           // strip the image label/layer prefix so the arg can't trip isExamplePath
+	verificationText := it.Text
+	if p.options.reconstruction != nil {
+		// Companion extraction observes the source, never synthetic decoded text.
+		verificationText = p.options.reconstruction.lines.text
+	}
+	examplePath := imageFileName(it.Path) // strip the image label/layer prefix so the arg can't trip isExamplePath
 	for i, m := range ms {
 		if i&1023 == 0 && ctx.Err() != nil { // let --timeout / Ctrl-C abort mid-file, not only between files
 
@@ -488,7 +515,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		line, col := li.cols(m.Start)
 		sev := adjustSeverity(severityFor(m.Category, m.Confidence), m, li, examplePath, pathIsFile)
 		dedup[p.findingDedupKey(line, col, m.Value)] = len(out) // index of the finding appended next
-		ver, why := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, it.Text)
+		ver, why := applyLiteralVerify(ctx, vset, literalDoc, m.Type, m.Value, m.Start, m.End, verificationText)
 		out = append(out, model.Finding{
 			Agent: it.Agent, Detector: m.Type, Type: m.Type, Confidence: m.Confidence,
 			Severity: sev,
@@ -579,7 +606,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if sev == "" {
 				sev = severityFor(h.Category, 0.9)
 			}
-			ver, why := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, it.Text)
+			ver, why := applyLiteralVerify(ctx, vset, literalDoc, h.RuleID, h.Value, h.Start, h.End, verificationText)
 			f := model.Finding{
 				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
 				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
@@ -628,6 +655,18 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			for _, v := range literalDoc.values {
 				indexValues = append(indexValues, v.value, literalDoc.original[v.start:v.end])
 			}
+		}
+	}
+	if p.options.candidateBudget != nil {
+		*p.options.candidateBudget -= len(out)
+	}
+	if p.options.reconstruction != nil {
+		p.mapReconstructed(out, it)
+		origin := p.options.reconstruction
+		span := origin.value.Expression
+		indexValues = append(indexValues, origin.lines.text[span.Start:span.End])
+		for _, span := range origin.value.Spans {
+			indexValues = append(indexValues, origin.lines.text[span.Start:span.End])
 		}
 	}
 	p.sanitizeIndexMetadata(out, indexValues)

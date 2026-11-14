@@ -18,6 +18,12 @@ type Options struct {
 	Allow         func(value, path string) bool
 	Workers       int
 	RevealSecrets bool
+	// Reconstruct enables bounded static string reconstruction for JS/TS sources.
+	Reconstruct bool
+	// reconstruction maps a child scan to its original expression before observers.
+	reconstruction  *reconstructionOrigin
+	matchLimit      int
+	candidateBudget *int
 	// IgnorePragmas is for untrusted in-flight payloads which cannot grant themselves exceptions.
 	IgnorePragmas bool
 	// ValueFingerprint is optional and must be safe for concurrent calls. It

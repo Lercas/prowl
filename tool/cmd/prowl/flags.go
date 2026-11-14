@@ -212,6 +212,7 @@ var cliFlags = []flagSpec{
 	stringFlag("--disable", scanCommands, "CSV", "disable listed detector types", func(c *commonFlags) *string { return &c.disable }),
 	intFlag("--max-per-file", scanCommands, "generic findings per file; 0 disables the cap (default 30)", 0, func(c *commonFlags) *int { return &c.maxPerFile }),
 	boolFlag("--ml", scanCommands, "run the portable in-process L2 model", func(c *commonFlags) *bool { return &c.mlEmbed }),
+	boolFlag("--reconstruct", scanCommands, "восстанавливать ограниченные статические строки JS/TS без выполнения кода", func(c *commonFlags) *bool { return &c.reconstruct }),
 	stringFlag("--ml-model", scanCommands, "FILE", "load a compatible external model (implies ML)", func(c *commonFlags) *string { return &c.mlModel }),
 	stringFlag("--ml-url", scanCommands, "URL", "score candidates through an external sidecar", func(c *commonFlags) *string { return &c.mlURL }),
 	floatFlag("--ml-threshold", scanCommands, "L2 suppression threshold (default 0.3)", func(c *commonFlags) *float64 { return &c.mlThreshold }),
@@ -504,11 +505,12 @@ type commonFlags struct {
 	ci                                       bool
 	silence, quiet, verbose, noColor         bool
 	rulesOnly                                bool
-	noAutoPolicy                             bool              // agents: only explicit rule and suppression inputs
-	noAutoConfig                             bool              // repo/org: don't honor the scanned tree's own .prowl.yaml
-	dedupe                                   bool              // collapse the same secret found repeatedly in one file (default on)
-	maxPerFile                               int               // cap generic findings per file (data-file guard; 0 = off)
-	mlEmbed                                  bool              // run the L2 model in-process (embedded), no sidecar
+	noAutoPolicy                             bool // agents: only explicit rule and suppression inputs
+	noAutoConfig                             bool // repo/org: don't honor the scanned tree's own .prowl.yaml
+	dedupe                                   bool // collapse the same secret found repeatedly in one file (default on)
+	maxPerFile                               int  // cap generic findings per file (data-file guard; 0 = off)
+	mlEmbed                                  bool // run the L2 model in-process (embedded), no sidecar
+	reconstruct                              bool
 	mlModel                                  string            // load the in-process model from this file (implies --ml)
 	mlURL                                    string            // ML sidecar URL for the L2 secret/not-secret stage (off if empty)
 	mlThreshold                              float64           // drop a non-checksum finding the ML scores below this

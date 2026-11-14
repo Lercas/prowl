@@ -1,0 +1,1050 @@
+{
+  "seed": 1400,
+  "reference": "v22.15.1",
+  "rows": [
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAAR33D0ZSLUcUESLDCO9fWYRG\";key;",
+      "value": "AKIAAR33D0ZSLUcUESLDCO9fWYRG"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c8cE9G11QeFJXAbTE9RTK9WX1\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c8cE9G11QeFJXAbTE9RTK9WX1"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11XV0\";const key=[\"\\ud83d\\udd11XV0\",\"V0Y2P39AfB1JFIUJ6TTeO\"].join('');key;",
+      "value": "\ud83d\udd11XV0V0Y2P39AfB1JFIUJ6TTeO"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfVjFZSTNiMVFIUUVaWDVCOE5PZWVNMUk3\");key;",
+      "value": "demo_key_V1YI3b1QHQEZX5B8NOeeM1I7"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVRD VkpJ VmQ4 UDEx RFBa NExM NDEx V01Y UA==\");key;",
+      "value": "AKIATCVJIVd8P11DPZ4LL411WMXP"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8Cd1RAKX3LZDJA0GPXfGNXSPaT\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cd1RAKX3LZDJA0GPXfGNXSPaT"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11506\";const key=`\ud83d\udd11506G21R3KSSAeCUGWSRQ8Df2`;key;",
+      "value": "\ud83d\udd11506G21R3KSSAeCUGWSRQ8Df2"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_EWQ7NDeZBaHWWFb46DMWGf3G`;key;",
+      "value": "demo_key_EWQ7NDeZBaHWWFb46DMWGf3G"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIA8eQ7f53ONFJDMbJNIT7dQWMf\";key;",
+      "value": "AKIA8eQ7f53ONFJDMbJNIT7dQWMf"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cbWOUE8DKaLBTZO860eUHRRNR\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cbWOUE8DKaLBTZO860eUHRRNR"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11dQG\";const key=[\"\\ud83d\\udd11dQG\",\"ae7fNLT2SdKcb06V8LSAL\"].join('');key;",
+      "value": "\ud83d\udd11dQGae7fNLT2SdKcb06V8LSAL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfQmUzVWFCY2NZTUVFQ2NiSVcxVWNTVzdF\");key;",
+      "value": "demo_key_Be3UaBccYMEECcbIW1UcSW7E"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUo0 UlhC WWZU ZlJL UERZ S0ha ZklM Mkw2 Sw==\");key;",
+      "value": "AKIAJ4RXBYfTfRKPDYKHZfIL2L6K"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CZ1Y9XeHaNZQFaZONAG0LSE6W\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cZ1Y9XeHaNZQFaZONAG0LSE6W"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11feT\";const key=`\ud83d\udd11feT6ZRbDYf73eUEXKfT3WA0O`;key;",
+      "value": "\ud83d\udd11feT6ZRbDYf73eUEXKfT3WA0O"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_TecdG8BLd5DBJ6EXG6HcQ72F`;key;",
+      "value": "demo_key_TecdG8BLd5DBJ6EXG6HcQ72F"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAKYOGVf59fdSbCE2AAYV5SOG9\";key;",
+      "value": "AKIAKYOGVf59fdSbCE2AAYV5SOG9"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cEf43EDAfLH8AMB8L51eC3XY5\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cEf43EDAfLH8AMB8L51eC3XY5"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11JRC\";const key=[\"\\ud83d\\udd11JRC\",\"5C1MMSLYcQF4P92SEa047\"].join('');key;",
+      "value": "\ud83d\udd11JRC5C1MMSLYcQF4P92SEa047"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfREhEOGUwTFZPZDJGSDBZMFA0OTlTYlRH\");key;",
+      "value": "demo_key_DHD8e0LVOd2FH0Y0P499SbTG"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUta RURM Zlpi OERV SkE4 WkhO UTJa ODAy Yw==\");key;",
+      "value": "AKIAKZEDLfZb8DUJA8ZHNQ2Z802c"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C1F486MIeIVQ64MZ1DIDFNXYR\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c1F486MIeIVQ64MZ1DIDFNXYR"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11HE0\";const key=`\ud83d\udd11HE0L8DIUBGT961QRFG0Q5R4b`;key;",
+      "value": "\ud83d\udd11HE0L8DIUBGT961QRFG0Q5R4b"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_VXA71M3I457GD10GMbQYRWFd`;key;",
+      "value": "demo_key_VXA71M3I457GD10GMbQYRWFd"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIATOMQSLMZaPVH1KObD7YbddQ3\";key;",
+      "value": "AKIATOMQSLMZaPVH1KObD7YbddQ3"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cHE4GE0VW9HNKW1XWJZSNUIKO\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cHE4GE0VW9HNKW1XWJZSNUIKO"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd110Qa\";const key=[\"\\ud83d\\udd110Qa\",\"GXFaSWILO0NcK5fZ6KLI1\"].join('');key;",
+      "value": "\ud83d\udd110QaGXFaSWILO0NcK5fZ6KLI1"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfWWNZU0U3ZTQ4UUZTUkZOYkhNN0kxTFFY\");key;",
+      "value": "demo_key_YcYSE7e48QFSRFNbHM7I1LQX"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVA3 UTBa NVI4 S1gz ZjU5 Nk44 Szc1 ZUNm Tg==\");key;",
+      "value": "AKIAP7Q0Z5R8KX3f596N8K75eCfN"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CM6H1J2VDQC8cbZDfCSSTbebI\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cM6H1J2VDQC8cbZDfCSSTbebI"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11HE9\";const key=`\ud83d\udd11HE9Xa13MWU6DfON327FIfVKa`;key;",
+      "value": "\ud83d\udd11HE9Xa13MWU6DfON327FIfVKa"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_26b6faL0NUNQXIb2Q0eD6LHP`;key;",
+      "value": "demo_key_26b6faL0NUNQXIb2Q0eD6LHP"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAAEXHMIWSeKIDGaI0S5BbPOCU\";key;",
+      "value": "AKIAAEXHMIWSeKIDGaI0S5BbPOCU"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c9XVKbK3cGRdD38P3OfaCPUcQ\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c9XVKbK3cGRdD38P3OfaCPUcQ"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11FIX\";const key=[\"\\ud83d\\udd11FIX\",\"PNGDOWK1IQ33AYL9CfTea\"].join('');key;",
+      "value": "\ud83d\udd11FIXPNGDOWK1IQ33AYL9CfTea"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfZmZDTEpJWjRjVzViRVpVTU43MllkNGNK\");key;",
+      "value": "demo_key_ffCLJIZ4cW5bEZUMN72Yd4cJ"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUc1 UU5M QU0y MVJL STlT MlFR OFBE NVZN QQ==\");key;",
+      "value": "AKIAG5QNLAM21RKI9S2QQ8PD5VMA"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C2SJeeeBHIGABWLM5VLCJIMeI\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c2SJeeeBHIGABWLM5VLCJIMeI"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11KN9\";const key=`\ud83d\udd11KN939E3fW65eWI4NVCKF2eRG`;key;",
+      "value": "\ud83d\udd11KN939E3fW65eWI4NVCKF2eRG"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_cMVQZJH2X26NE2MWBbRX2bMP`;key;",
+      "value": "demo_key_cMVQZJH2X26NE2MWBbRX2bMP"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAXeJQ2OE1fTb8TFVIcLOYNM91\";key;",
+      "value": "AKIAXeJQ2OE1fTb8TFVIcLOYNM91"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cC90MUQ8dO6AQ5J2TfA4477df\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cC90MUQ8dO6AQ5J2TfA4477df"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11LTH\";const key=[\"\\ud83d\\udd11LTH\",\"7EGcH1KYG3KI1RI9F3T9L\"].join('');key;",
+      "value": "\ud83d\udd11LTH7EGcH1KYG3KI1RI9F3T9L"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfQkpCYUtJMzVmMVRJWDNDWEJIUVpaVDlD\");key;",
+      "value": "demo_key_BJBaKI35f1TIX3CXBHQZZT9C"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVpT T0xm T0VK TVhV NVI0 VkI1 ZTg5 QTBY MA==\");key;",
+      "value": "AKIAZSOLfOEJMXU5R4VB5e89A0X0"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C7797X3B19cVE2MZQId7d8QW2\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c7797X3B19cVE2MZQId7d8QW2"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11XYB\";const key=`\ud83d\udd11XYBXZ3CYNTZJUSVa68T40d5c`;key;",
+      "value": "\ud83d\udd11XYBXZ3CYNTZJUSVa68T40d5c"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_9F6FOD8DMHWZ2S2319FSIaIN`;key;",
+      "value": "demo_key_9F6FOD8DMHWZ2S2319FSIaIN"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAENdW93AEfRe1cAW6URHcXBK9\";key;",
+      "value": "AKIAENdW93AEfRe1cAW6URHcXBK9"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cRRM4J5ZGJSQVe8Q6K0ZPaYFd\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cRRM4J5ZGJSQVe8Q6K0ZPaYFd"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11278\";const key=[\"\\ud83d\\udd11278\",\"XH21B808aQMKZeTAR2ICL\"].join('');key;",
+      "value": "\ud83d\udd11278XH21B808aQMKZeTAR2ICL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfNVpDU0tRQjVaQjAzRjAyQWJJVVE5RDc2\");key;",
+      "value": "demo_key_5ZCSKQB5ZB03F02AbIUQ9D76"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTNO T05E Y1VJ RWZU M1JZ U2JH NmVX S1FN Qw==\");key;",
+      "value": "AKIA3NONDcUIEfT3RYSbG6eWKQMC"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CF0MXP5DcKROKAKI8DLbaEDYC\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cF0MXP5DcKROKAKI8DLbaEDYC"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11A0K\";const key=`\ud83d\udd11A0KJdAJMPVZH1BFG8URNA68I`;key;",
+      "value": "\ud83d\udd11A0KJdAJMPVZH1BFG8URNA68I"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_dSCIPeM34cBJN9TH0MPeTE7b`;key;",
+      "value": "demo_key_dSCIPeM34cBJN9TH0MPeTE7b"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIADGS80CCASVJL94R1TfCSCUd5\";key;",
+      "value": "AKIADGS80CCASVJL94R1TfCSCUd5"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cFY5F0KPPEMYJEW72NHTbKbIa\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cFY5F0KPPEMYJEW72NHTbKbIa"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd111LD\";const key=[\"\\ud83d\\udd111LD\",\"4AQ2S46PMF1LDMTfbDY4I\"].join('');key;",
+      "value": "\ud83d\udd111LD4AQ2S46PMF1LDMTfbDY4I"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfRjk1Uk5SRDNFTGI5TEkyR2Y3Sk9kNEUz\");key;",
+      "value": "demo_key_F95RNRD3ELb9LI2Gf7JOd4E3"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVQw Sk9Z QUhV TkRX M09R UWVG V1Q1 N01Z Yw==\");key;",
+      "value": "AKIAT0JOYAHUNDW3OQQeFWT57MYc"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CFOBTL5deCdHLEORXN4T75XUc\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cFOBTL5deCdHLEORXN4T75XUc"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11UEa\";const key=`\ud83d\udd11UEaQFU3ZHQL2GePb77aOMfK6`;key;",
+      "value": "\ud83d\udd11UEaQFU3ZHQL2GePb77aOMfK6"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_B61692L1Vf2fKCZQSDfISNO4`;key;",
+      "value": "demo_key_B61692L1Vf2fKCZQSDfISNO4"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIA7ZTFbRfUPGebWLGBBO9ZCKP1\";key;",
+      "value": "AKIA7ZTFbRfUPGebWLGBBO9ZCKP1"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c9dMF4d1L5NLNYDbbON2E5FXM\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c9dMF4d1L5NLNYDbbON2E5FXM"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11GK6\";const key=[\"\\ud83d\\udd11GK6\",\"MUVaWAQFabPKGfMIcXQEf\"].join('');key;",
+      "value": "\ud83d\udd11GK6MUVaWAQFabPKGfMIcXQEf"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfNjlKYUQ0SE03M1VVVjRYRkRNWVdBQ0tP\");key;",
+      "value": "demo_key_69JaD4HM73UUV4XFDMYWACKO"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTky YUtI Y2NV SkNk UklC UkdP SmJk MmE4 Wg==\");key;",
+      "value": "AKIA92aKHccUJCdRIBRGOJbd2a8Z"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CM0Ae4Y50e6Y5eYf9eUcK5IZB\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cM0Ae4Y50e6Y5eYf9eUcK5IZB"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11ERY\";const key=`\ud83d\udd11ERY36cU701PUKc3VOOcOEGU3`;key;",
+      "value": "\ud83d\udd11ERY36cU701PUKc3VOOcOEGU3"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_C5FBM3eDE2bfAaXI1B2K3GEc`;key;",
+      "value": "demo_key_C5FBM3eDE2bfAaXI1B2K3GEc"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIALGP6AVO0CICEMODTIXUWIXQc\";key;",
+      "value": "AKIALGP6AVO0CICEMODTIXUWIXQc"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cIAUH5IOH2RE1URPDI5WeJG5C\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cIAUH5IOH2RE1URPDI5WeJG5C"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd118A2\";const key=[\"\\ud83d\\udd118A2\",\"30WT9VQeWWaEGRQ5M5P1D\"].join('');key;",
+      "value": "\ud83d\udd118A230WT9VQeWWaEGRQ5M5P1D"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfV1VFVFIyU05GM0g4VDdGSzVGWldGTVRL\");key;",
+      "value": "demo_key_WUETR2SNF3H8T7FK5FZWFMTK"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUxS UzBL STE1 NUE5 WlBh U2I3 NVJK RUdX Vg==\");key;",
+      "value": "AKIALRS0KI155A9ZPaSb75RJEGWV"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CUOK9JNX5QJf478W91KcOUWfZ\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cUOK9JNX5QJf478W91KcOUWfZ"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd114Rf\";const key=`\ud83d\udd114RfEIL35KZKG2HDeKP65aZIN`;key;",
+      "value": "\ud83d\udd114RfEIL35KZKG2HDeKP65aZIN"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_IZZD1R8cYE5FF54M2EaDHTL9`;key;",
+      "value": "demo_key_IZZD1R8cYE5FF54M2EaDHTL9"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAEYENdUVa6SZdWQRALCM5NDJ4\";key;",
+      "value": "AKIAEYENdUVa6SZdWQRALCM5NDJ4"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044ceZVWGX220Y6E3bNeTJ6P8aPG\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044ceZVWGX220Y6E3bNeTJ6P8aPG"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11UPR\";const key=[\"\\ud83d\\udd11UPR\",\"NGVf7C26ES3GS5XYGUBWK\"].join('');key;",
+      "value": "\ud83d\udd11UPRNGVf7C26ES3GS5XYGUBWK"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfQ0JPRlZiWkZmZE1FTTlCRFA3TmNlUU05\");key;",
+      "value": "demo_key_CBOFVbZFfdMEM9BDP7NceQM9"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUox ZEs4 WE4w Q1lE QWYx WkIw V1JV M0oz Nw==\");key;",
+      "value": "AKIAJ1dK8XN0CYDAf1ZB0WRU3J37"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CTUTSCd03cRGV4HGVQ503aLM6\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cTUTSCd03cRGV4HGVQ503aLM6"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11EN5\";const key=`\ud83d\udd11EN56Ceb7PV0BO9bK073EPfaU`;key;",
+      "value": "\ud83d\udd11EN56Ceb7PV0BO9bK073EPfaU"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_4JTOCV1PCDG7NNV9IdLLEeNC`;key;",
+      "value": "demo_key_4JTOCV1PCDG7NNV9IdLLEeNC"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIA9CVb7K8S2Ad4Uf2Ue1LKHT7A\";key;",
+      "value": "AKIA9CVb7K8S2Ad4Uf2Ue1LKHT7A"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044ce2FcN4MfR8AE0a5YbU64CdbC\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044ce2FcN4MfR8AE0a5YbU64CdbC"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd116PD\";const key=[\"\\ud83d\\udd116PD\",\"0J8ZRF9cXHCDJTJeQV24W\"].join('');key;",
+      "value": "\ud83d\udd116PD0J8ZRF9cXHCDJTJeQV24W"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfOFBVVDNjQ2VmR05NM05VREliU1k3WFNa\");key;",
+      "value": "demo_key_8PUT3cCefGNM3NUDIbSY7XSZ"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUhk Nk0z V0gz MThO RWVI TmZK T1lK RTdm SQ==\");key;",
+      "value": "AKIAHd6M3WH318NEeHNfJOYJE7fI"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C02I2J77KVA0GHXeeRQaZeS5K\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c02I2J77KVA0GHXeeRQaZeS5K"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd114bB\";const key=`\ud83d\udd114bBb8Bc2PUUTAS13N0GfQ54H`;key;",
+      "value": "\ud83d\udd114bBb8Bc2PUUTAS13N0GfQ54H"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_fETISFRFVIeAf3SK3XbWTRW5`;key;",
+      "value": "demo_key_fETISFRFVIeAf3SK3XbWTRW5"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAYIXER14KKECX2SIR0I9LN42N\";key;",
+      "value": "AKIAYIXER14KKECX2SIR0I9LN42N"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cNBJ8AfKUCG8YVaRVBRJHCdGW\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cNBJ8AfKUCG8YVaRVBRJHCdGW"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11dSI\";const key=[\"\\ud83d\\udd11dSI\",\"40ZH8dPKWY6HReFZT6FcL\"].join('');key;",
+      "value": "\ud83d\udd11dSI40ZH8dPKWY6HReFZT6FcL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfWWFaQ0gxNE1VTGY4ZUI5SEI0NERiZlgw\");key;",
+      "value": "demo_key_YaZCH14MULf8eB9HB44DbfX0"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVhV QU5Y TDRD OTEx UVRN OU1I Nlg5 WDFP VA==\");key;",
+      "value": "AKIAXUANXL4C911QTM9MH6X9X1OT"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CfC7D99GSUMGP0WY7X6f8N2W4\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cfC7D99GSUMGP0WY7X6f8N2W4"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11IFa\";const key=`\ud83d\udd11IFaBO7VBJaVUaLCA8VDcFSQa`;key;",
+      "value": "\ud83d\udd11IFaBO7VBJaVUaLCA8VDcFSQa"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_8c3T3ESW1eDV05XY2Vf91QRX`;key;",
+      "value": "demo_key_8c3T3ESW1eDV05XY2Vf91QRX"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAea6RQe1Z53UdUBXWLUUPNKRL\";key;",
+      "value": "AKIAea6RQe1Z53UdUBXWLUUPNKRL"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c1MKKTFOMOVETFbUB9bOQBD8e\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c1MKKTFOMOVETFbUB9bOQBD8e"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11VD8\";const key=[\"\\ud83d\\udd11VD8\",\"cQ0d2JU0KX5cNS42OPMJK\"].join('');key;",
+      "value": "\ud83d\udd11VD8cQ0d2JU0KX5cNS42OPMJK"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfVURlVmVGZEIzOFdSMEtiQ01TMExGTDVH\");key;",
+      "value": "demo_key_UDeVeFdB38WR0KbCMS0LFL5G"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QWYy WDVN Zjcx YVJI N0Qw YzBO WEc5 TDdk Sg==\");key;",
+      "value": "AKIAf2X5Mf71aRH7D0c0NXG9L7dJ"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C6E5QT5ANJDGXJGLBRX46e7Kb\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c6E5QT5ANJDGXJGLBRX46e7Kb"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11eXF\";const key=`\ud83d\udd11eXF8UOP2dXLV3LcVOM3ICJKb`;key;",
+      "value": "\ud83d\udd11eXF8UOP2dXLV3LcVOM3ICJKb"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_aU8eRR747LSN6MSceFOUZGIB`;key;",
+      "value": "demo_key_aU8eRR747LSN6MSceFOUZGIB"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAD8JOYYVE2e5PfEVVcUJaGZPU\";key;",
+      "value": "AKIAD8JOYYVE2e5PfEVVcUJaGZPU"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cI8Y1cX1eWZeDXeedUXa69Kb0\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cI8Y1cX1eWZeDXeedUXa69Kb0"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11BK6\";const key=[\"\\ud83d\\udd11BK6\",\"9e3VeHHdZAQCN4OAL7GER\"].join('');key;",
+      "value": "\ud83d\udd11BK69e3VeHHdZAQCN4OAL7GER"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfV0tXUkc4VEwyUzhTV2VLQzhLWWJSYWZN\");key;",
+      "value": "demo_key_WKWRG8TL2S8SWeKC8KYbRafM"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUFD M0w0 TzBQ U0g5 UlFV TEFP MEVD OUJN Wg==\");key;",
+      "value": "AKIAAC3L4O0PSH9RQULAO0EC9BMZ"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CXTb24LZTb642UPAXIUdF6Qee\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cXTb24LZTb642UPAXIUdF6Qee"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11DcX\";const key=`\ud83d\udd11DcX089Y7aaELAHOR28C8EMKR`;key;",
+      "value": "\ud83d\udd11DcX089Y7aaELAHOR28C8EMKR"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_HPECEFfbSNMFUc4NOJ8e8C40`;key;",
+      "value": "demo_key_HPECEFfbSNMFUc4NOJ8e8C40"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAaR2MeOSHVbTHJf1EW1SN74bH\";key;",
+      "value": "AKIAaR2MeOSHVbTHJf1EW1SN74bH"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c2EKFA6IM49a2U7DLYaCGH42Z\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c2EKFA6IM49a2U7DLYaCGH42Z"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11dbR\";const key=[\"\\ud83d\\udd11dbR\",\"G9S8TeE6eB91BeTQTF3HX\"].join('');key;",
+      "value": "\ud83d\udd11dbRG9S8TeE6eB91BeTQTF3HX"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfNExLVmQyYmMwSkVDM2RHOWFBSThXZTJI\");key;",
+      "value": "demo_key_4LKVd2bc0JEC3dG9aAI8We2H"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVpE QThS Qjlh UThK ZFBQ TFNh NjdU Ykg5 ZA==\");key;",
+      "value": "AKIAZDA8RB9aQ8JdPPLSa67TbH9d"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CL1DOT8PV6FAeIGYR2SHL9P4G\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cL1DOT8PV6FAeIGYR2SHL9P4G"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd117SQ\";const key=`\ud83d\udd117SQJ9KCbeVfZdDD8V92Pa8N0`;key;",
+      "value": "\ud83d\udd117SQJ9KCbeVfZdDD8V92Pa8N0"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_f3PaJMTN1U9B87RJaMV4FUfL`;key;",
+      "value": "demo_key_f3PaJMTN1U9B87RJaMV4FUfL"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAYJD1f8M16NTDW0AOACeP3HFZ\";key;",
+      "value": "AKIAYJD1f8M16NTDW0AOACeP3HFZ"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cQWBK1FbVWGaMFFMGYS0LNRbD\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cQWBK1FbVWGaMFFMGYS0LNRbD"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd110UV\";const key=[\"\\ud83d\\udd110UV\",\"36QC8dNW6DS12fWBI8Q0d\"].join('');key;",
+      "value": "\ud83d\udd110UV36QC8dNW6DS12fWBI8Q0d"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfWENkV2JVYjJlN0lFUVJKZjNPSURkYUtS\");key;",
+      "value": "demo_key_XCdWbUb2e7IEQRJf3OIDdaKR"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUNS SFpj RlpQ VEJF V2I4 UkdS YmJj YVBa Uw==\");key;",
+      "value": "AKIACRHZcFZPTBEWb8RGRbbcaPZS"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CSeXaTWJD69BEM7RDV63P4HYH\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cSeXaTWJD69BEM7RDV63P4HYH"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd116QF\";const key=`\ud83d\udd116QFMVGUaYGc4CU8MO2O0B4ZY`;key;",
+      "value": "\ud83d\udd116QFMVGUaYGc4CU8MO2O0B4ZY"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_KY6OW8OVR4HH2B73WWOW7e05`;key;",
+      "value": "demo_key_KY6OW8OVR4HH2B73WWOW7e05"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIANGGE1c1SCGGfSJKecPI7TGcX\";key;",
+      "value": "AKIANGGE1c1SCGGfSJKecPI7TGcX"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cLKUFE7RBa07CQK49B0FZfFOJ\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cLKUFE7RBa07CQK49B0FZfFOJ"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11FTQ\";const key=[\"\\ud83d\\udd11FTQ\",\"TTPNERCeVIFcfAXJZ8d6f\"].join('');key;",
+      "value": "\ud83d\udd11FTQTTPNERCeVIFcfAXJZ8d6f"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfZllISTZXM1FKMlJWRUNPUUE5NVhEMzI0\");key;",
+      "value": "demo_key_fYHI6W3QJ2RVECOQA95XD324"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTVE TTlW WkZW V2NQ TDJI Y1VO VUNX U2RS Tw==\");key;",
+      "value": "AKIA5DM9VZFVWcPL2HcUNUCWSdRO"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CFTLLdf3ZTWf150AFJH7TFRH8\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cFTLLdf3ZTWf150AFJH7TFRH8"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11dUa\";const key=`\ud83d\udd11dUa8QX13H8ReCcKRZH8a1OBY`;key;",
+      "value": "\ud83d\udd11dUa8QX13H8ReCcKRZH8a1OBY"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_ZRSXS7IVS3cdFEQ42VPRY69K`;key;",
+      "value": "demo_key_ZRSXS7IVS3cdFEQ42VPRY69K"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAIIWUf5MMZMUFD14NOPdT8T65\";key;",
+      "value": "AKIAIIWUf5MMZMUFD14NOPdT8T65"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cOX5dP9PG25LBdWJ9Ra8ZH4e5\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cOX5dP9PG25LBdWJ9Ra8ZH4e5"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11I1H\";const key=[\"\\ud83d\\udd11I1H\",\"cVaJRMR7QefIZVIKCVfE3\"].join('');key;",
+      "value": "\ud83d\udd11I1HcVaJRMR7QefIZVIKCVfE3"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfZGM4UFZOYjRBQlpVUlRURjVMWjU2QVo2\");key;",
+      "value": "demo_key_dc8PVNb4ABZURTTF5LZ56AZ6"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QU8y OEs5 TE82 WWFZ Mk8x RzNV T0tX N0ta Wg==\");key;",
+      "value": "AKIAO28K9LO6YaY2O1G3UOKW7KZZ"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8C11SQE7DfX3YcMGXYCAWMADSe\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c11SQE7DfX3YcMGXYCAWMADSe"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11X7O\";const key=`\ud83d\udd11X7OWEJSM4D8PTMVCRbb5HB7H`;key;",
+      "value": "\ud83d\udd11X7OWEJSM4D8PTMVCRbb5HB7H"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_fHBPWO266DIDMAR4N585aDBL`;key;",
+      "value": "demo_key_fHBPWO266DIDMAR4N585aDBL"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAG15QH6SSCQQ7D34Q8PQCBKR2\";key;",
+      "value": "AKIAG15QH6SSCQQ7D34Q8PQCBKR2"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c6bL9LDfRKID97NEOdPCP4SR1\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c6bL9LDfRKID97NEOdPCP4SR1"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11Ea2\";const key=[\"\\ud83d\\udd11Ea2\",\"TfUUGIM8fZCSNGFPXeHKI\"].join('');key;",
+      "value": "\ud83d\udd11Ea2TfUUGIM8fZCSNGFPXeHKI"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfVWJCSFU0MjZZSFAyTkE5SjRIZEdVTldM\");key;",
+      "value": "demo_key_UbBHU426YHP2NA9J4HdGUNWL"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUY2 SzRV OFhN VjJJ MUtQ YTg0 SFBL RWUw UA==\");key;",
+      "value": "AKIAF6K4U8XMV2I1KPa84HPKEe0P"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CRWAZW70fc06QEcdGaZ3dSIEH\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cRWAZW70fc06QEcdGaZ3dSIEH"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11L3X\";const key=`\ud83d\udd11L3X30VZRGBG1MaC2CHWb1Dfe`;key;",
+      "value": "\ud83d\udd11L3X30VZRGBG1MaC2CHWb1Dfe"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_eaU4KCe6Yf2X5aYZHHLGTFQO`;key;",
+      "value": "demo_key_eaU4KCe6Yf2X5aYZHHLGTFQO"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAJ93IMa1EJ88B5QbL9YbZ8UO4\";key;",
+      "value": "AKIAJ93IMa1EJ88B5QbL9YbZ8UO4"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044caa1Y60RMbDY7SMfVV2UO1GK2\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044caa1Y60RMbDY7SMfVV2UO1GK2"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd1145e\";const key=[\"\\ud83d\\udd1145e\",\"Qc38ETE30fcK9XG5eKbGA\"].join('');key;",
+      "value": "\ud83d\udd1145eQc38ETE30fcK9XG5eKbGA"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfOVZKTFVWOEgzTVdUNU9FNUZjSlZFUWFU\");key;",
+      "value": "demo_key_9VJLUV8H3MWT5OE5FcJVEQaT"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTA2 VEVU U00y TVVM T2NL UlUy TTNh MzhI Qg==\");key;",
+      "value": "AKIA06TETSM2MULOcKRU2M3a38HB"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CC7LW74X9OEKbTc8D90FUZSJE\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cC7LW74X9OEKbTc8D90FUZSJE"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd1169V\";const key=`\ud83d\udd1169VJ7KWNffRD4FU0VTBTU0KP`;key;",
+      "value": "\ud83d\udd1169VJ7KWNffRD4FU0VTBTU0KP"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_XPCbKSKeV3UP98LRFUUGE3VI`;key;",
+      "value": "demo_key_XPCbKSKeV3UP98LRFUUGE3VI"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIATKDYB1VH0FSCdX2UUTCe5MBG\";key;",
+      "value": "AKIATKDYB1VH0FSCdX2UUTCe5MBG"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c1XeDNefTPePRB3cQICG2QYTQ\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c1XeDNefTPePRB3cQICG2QYTQ"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11S4U\";const key=[\"\\ud83d\\udd11S4U\",\"MCEOcOEHbJ6GFZfFIM4TI\"].join('');key;",
+      "value": "\ud83d\udd11S4UMCEOcOEHbJ6GFZfFIM4TI"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfQVZMTTNkUE1GZjVPYTNWM0RXMFkzV1pO\");key;",
+      "value": "demo_key_AVLM3dPMFf5Oa3V3DW0Y3WZN"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QWE2 VEky NjlK Q1BS T0xQ WWQ1 Qlpi MVFk YQ==\");key;",
+      "value": "AKIAa6TI269JCPROLPYd5BZb1Qda"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CUVb00BbbBWAL349bJ2FRdVFF\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cUVb00BbbBWAL349bJ2FRdVFF"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11K9A\";const key=`\ud83d\udd11K9ACH5Q0aTSGBKXZDCPFR4SD`;key;",
+      "value": "\ud83d\udd11K9ACH5Q0aTSGBKXZDCPFR4SD"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_68XRbBBJN53HZ61eTBHRDeee`;key;",
+      "value": "demo_key_68XRbBBJN53HZ61eTBHRDeee"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIADFIVPMNaPQYQZBaPFJB01Q04\";key;",
+      "value": "AKIADFIVPMNaPQYQZBaPFJB01Q04"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cNeK2aVfFZT2UU7f6QDT8GUZ4\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cNeK2aVfFZT2UU7f6QDT8GUZ4"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11dAV\";const key=[\"\\ud83d\\udd11dAV\",\"XG3HNXQ6SUUfK9LY59OFF\"].join('');key;",
+      "value": "\ud83d\udd11dAVXG3HNXQ6SUUfK9LY59OFF"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfUUZDWlYzZUtQSzg2NktZUlVDZVgzVDhT\");key;",
+      "value": "demo_key_QFCZV3eKPK866KYRUCeX3T8S"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTFW TElM V0pW NDNT Sk1U ZDVl S0Za TVdI Ug==\");key;",
+      "value": "AKIA1VLILWJV43SJMTd5eKFZMWHR"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CMcBXU0BcQaMU6Pb3cb8HROdH\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cMcBXU0BcQaMU6Pb3cb8HROdH"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd111N7\";const key=`\ud83d\udd111N7QY2AF9SXTeF5HIbDHJ71F`;key;",
+      "value": "\ud83d\udd111N7QY2AF9SXTeF5HIbDHJ71F"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_7UNZQN22SdROMKAKIIF8KMbX`;key;",
+      "value": "demo_key_7UNZQN22SdROMKAKIIF8KMbX"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIADFMRKVN0de69J955HVS1DLIE\";key;",
+      "value": "AKIADFMRKVN0de69J955HVS1DLIE"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cHW3cCVISZKY0A3WMHKZ5aTeH\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cHW3cCVISZKY0A3WMHKZ5aTeH"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11UY1\";const key=[\"\\ud83d\\udd11UY1\",\"P77RICbZCPUWUPU2ZbA9L\"].join('');key;",
+      "value": "\ud83d\udd11UY1P77RICbZCPUWUPU2ZbA9L"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfYzdTUUs5ODZWRFAzQ2U5Vk8zM0pNU1VV\");key;",
+      "value": "demo_key_c7SQK986VDP3Ce9VO33JMSUU"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QUxS UkdX VDZO ODIx SU9l TkNh S2JR YVEz Ng==\");key;",
+      "value": "AKIALRRGWT6N821IOeNCaKbQaQ36"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CAYUVAcNfZ2YRT4MB302HF5XK\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cAYUVAcNfZ2YRT4MB302HF5XK"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd115UT\";const key=`\ud83d\udd115UTCIK5IL5L9ESZ8ICMfB37P`;key;",
+      "value": "\ud83d\udd115UTCIK5IL5L9ESZ8ICMfB37P"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_JIaTWSeRD7HFFe1J1b0Yb3dJ`;key;",
+      "value": "demo_key_JIaTWSeRD7HFFe1J1b0Yb3dJ"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAIF5S3BOK5JXIE6QSOeJCYQGf\";key;",
+      "value": "AKIAIF5S3BOK5JXIE6QSOeJCYQGf"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cIUFd1E4W7TMaFZDaUJSeH5U9\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cIUFd1E4W7TMaFZDaUJSeH5U9"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11c63\";const key=[\"\\ud83d\\udd11c63\",\"NARd6LGJLXMK8Q6PVfVUD\"].join('');key;",
+      "value": "\ud83d\udd11c63NARd6LGJLXMK8Q6PVfVUD"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfYTE3TTlaTEEzV001SGJYWDFLVVNjT1ZI\");key;",
+      "value": "demo_key_a17M9ZLA3WM5HbXX1KUScOVH"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTda OGVK YzJC RVQy WGJG U1U3 MjE4 TUQ4 MQ==\");key;",
+      "value": "AKIA7Z8eJc2BET2XbFSU7218MD81"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CPDTcWME9A27WIYSECbVcIAZC\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cPDTcWME9A27WIYSECbVcIAZC"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11IZG\";const key=`\ud83d\udd11IZGURDTAI9C6dRLSMJTXWW1J`;key;",
+      "value": "\ud83d\udd11IZGURDTAI9C6dRLSMJTXWW1J"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_EWTALddYZ2PKV50I8I645SWb`;key;",
+      "value": "demo_key_EWTALddYZ2PKV50I8I645SWb"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAR2CJdfTS0T6RZBK6V7AN3Sce\";key;",
+      "value": "AKIAR2CJdfTS0T6RZBK6V7AN3Sce"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cANA7bO5NRbAVfNILcATLZW93\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cANA7bO5NRbAVfNILcATLZW93"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11UZC\";const key=[\"\\ud83d\\udd11UZC\",\"MIc6Y5S0L29TFTUVKOWdE\"].join('');key;",
+      "value": "\ud83d\udd11UZCMIc6Y5S0L29TFTUVKOWdE"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfRkhSZWZlWEpIZEplY1BCZks5YzhOVTY2\");key;",
+      "value": "demo_key_FHRefeXJHdJecPBfK9c8NU66"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVU4 RWRX ZVBM TFBm VkFk ZmZY R2E5 QTA3 MA==\");key;",
+      "value": "AKIAU8EdWePLLPfVAdffXGa9A070"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CIYUP9eZ8727PCVZ22T2dSSW7\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cIYUP9eZ8727PCVZ22T2dSSW7"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11EYX\";const key=`\ud83d\udd11EYX1SN6PCZ780I36W286fZP8`;key;",
+      "value": "\ud83d\udd11EYX1SN6PCZ780I36W286fZP8"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_OSB6BDF21F4LEFF37RcN4a0c`;key;",
+      "value": "demo_key_OSB6BDF21F4LEFF37RcN4a0c"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAJc7RYYK1U1Sf9C3OXGYUYFG1\";key;",
+      "value": "AKIAJc7RYYK1U1Sf9C3OXGYUYFG1"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cUIbRLIQIEaFBNUV72C1QTESF\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cUIbRLIQIEaFBNUV72C1QTESF"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11RP9\";const key=[\"\\ud83d\\udd11RP9\",\"f1AT80TKU27F92SEBF7NQ\"].join('');key;",
+      "value": "\ud83d\udd11RP9f1AT80TKU27F92SEBF7NQ"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfOFhSZmExM1dVMUZPODRKQVVCMkVZZWNB\");key;",
+      "value": "demo_key_8XRfa13WU1FO84JAUB2EYecA"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTJH V05T MTk1 ZjUy S2Qy MmJD Y0c0 MExD RA==\");key;",
+      "value": "AKIA2GWNS195f52Kd22bCcG40LCD"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CVV2bIcNKTeSG5Pc3eTCC90TE\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cVV2bIcNKTeSG5Pc3eTCC90TE"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11UGD\";const key=`\ud83d\udd11UGDIOIFH4HM0XP0DaUePKKTL`;key;",
+      "value": "\ud83d\udd11UGDIOIFH4HM0XP0DaUePKKTL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_c9fK5GTRESaJbXG6TT8F6N0A`;key;",
+      "value": "demo_key_c9fK5GTRESaJbXG6TT8F6N0A"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAVWH0X3J7YUdaV9cD3bX8adT4\";key;",
+      "value": "AKIAVWH0X3J7YUdaV9cD3bX8adT4"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c4b5aC94G6S6aQD1HPACadYE0\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c4b5aC94G6S6aQD1HPACadYE0"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11JaD\";const key=[\"\\ud83d\\udd11JaD\",\"NJW02DRBDT8MCAXAERVDL\"].join('');key;",
+      "value": "\ud83d\udd11JaDNJW02DRBDT8MCAXAERVDL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfSFRZVFhjRWJFWkpTQmFmWlBGUlVHVU9X\");key;",
+      "value": "demo_key_HTYTXcEbEZJSBafZPFRUGUOW"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QTlS YVFF Slkz YlFL QTky STdV QWY1 SEU1 MA==\");key;",
+      "value": "AKIA9RaQEJY3bQKA92I7UAf5HE50"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CIGGN4XTGV65LW28DE4HdKQ8I\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cIGGN4XTGV65LW28DE4HdKQ8I"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11BCW\";const key=`\ud83d\udd11BCWMafKf7aKGRL5VGZ7bfBND`;key;",
+      "value": "\ud83d\udd11BCWMafKf7aKGRL5VGZ7bfBND"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_dKaecC1MeH7EUVb2HcDcCZbK`;key;",
+      "value": "demo_key_dKaecC1MeH7EUVb2HcDcCZbK"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAWbZf2N6TNeAMM23f2VR2QUEQ\";key;",
+      "value": "AKIAWbZf2N6TNeAMM23f2VR2QUEQ"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cOHA50RU6PBGeHFAdNa9ZHFY9\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cOHA50RU6PBGeHFAdNa9ZHFY9"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11X74\";const key=[\"\\ud83d\\udd11X74\",\"3cW7TMJVAXHO4WUYfUAA4\"].join('');key;",
+      "value": "\ud83d\udd11X743cW7TMJVAXHO4WUYfUAA4"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfSFU2TEc5NVJSYllYNWY2UFJWRkdERkxE\");key;",
+      "value": "demo_key_HU6LG95RRbYX5f6PRVFGDFLD"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVdl SFNX NFI4 UGFK M0s3 NDFa V0pa MUZS WA==\");key;",
+      "value": "AKIAWeHSW4R8PaJ3K741ZWJZ1FRX"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CMQRZAQVBLQEc66TKbFcUIR5F\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cMQRZAQVBLQEc66TKbFcUIR5F"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11CP9\";const key=`\ud83d\udd11CP9KE7NMC4c44GXERdJV186D`;key;",
+      "value": "\ud83d\udd11CP9KE7NMC4c44GXERdJV186D"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_PWFKOVSGOKXW7LJ8Z5E5JcZ6`;key;",
+      "value": "demo_key_PWFKOVSGOKXW7LJ8Z5E5JcZ6"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIA0QX67JVKQ5Q5SDb0cZ8GRHeA\";key;",
+      "value": "AKIA0QX67JVKQ5Q5SDb0cZ8GRHeA"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044ccWIYXNbf11a7ZYFBfEfKAQAA\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044ccWIYXNbf11a7ZYFBfEfKAQAA"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11ecK\";const key=[\"\\ud83d\\udd11ecK\",\"aO2V36ZBUG2CVINSJ91NL\"].join('');key;",
+      "value": "\ud83d\udd11ecKaO2V36ZBUG2CVINSJ91NL"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfSDNVTzBjTjdUWkxjSlFaVWFiSTMxTlVE\");key;",
+      "value": "demo_key_H3UO0cN7TZLcJQZUabI31NUD"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVND YkRY SEVN TUkz TGNB Njcx Y0tT WkMx Ug==\");key;",
+      "value": "AKIASCbDXHEMMI3LcA671cKSZC1R"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CbRP4ZOdcNePdQfEc9bSSHSZS\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cbRP4ZOdcNePdQfEc9bSSHSZS"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11MT3\";const key=`\ud83d\udd11MT3X6d2fEU7YTJOeWaMW94JE`;key;",
+      "value": "\ud83d\udd11MT3X6d2fEU7YTJOeWaMW94JE"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_X6H867bECDQEFGS536PMIYUe`;key;",
+      "value": "demo_key_X6H867bECDQEFGS536PMIYUe"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAFQDY11QD1AJ0LETaAVVbOQdY\";key;",
+      "value": "AKIAFQDY11QD1AJ0LETaAVVbOQdY"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044cdEHCLH9fSMbHYE79dI5cFAKO\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cdEHCLH9fSMbHYE79dI5cFAKO"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11Ya5\";const key=[\"\\ud83d\\udd11Ya5\",\"6eQXRDSFKJOZVCE7WDZV1\"].join('');key;",
+      "value": "\ud83d\udd11Ya56eQXRDSFKJOZVCE7WDZV1"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfRklBTEVaQU9LTE9GMDEzT0ZkMU82N1la\");key;",
+      "value": "demo_key_FIALEZAOKLOF013OFd1O67YZ"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVBE UVdQ MmFW VUJN UEtC VE9l TFlm V0JC WQ==\");key;",
+      "value": "AKIAPDQWP2aVUBMPKBTOeLYfWBBY"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CWMYGLWKbHd2RLM4YRTKI83e1\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cWMYGLWKbHd2RLM4YRTKI83e1"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11QRB\";const key=`\ud83d\udd11QRBW3LKHTJ3T0Cf02UTCL8Z5`;key;",
+      "value": "\ud83d\udd11QRBW3LKHTJ3T0Cf02UTCL8Z5"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_2FPTFaVYGU39c5e9aVBDT4Ha`;key;",
+      "value": "demo_key_2FPTFaVYGU39c5e9aVBDT4Ha"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=\"AKIAa276acTK3K5NG08X575aBfSB\";key;",
+      "value": "AKIAa276acTK3K5NG08X575aBfSB"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=\"\\u041f\\u0430\\u0440\\u043e\"+\"\\u043b\\u044c92Qd3bQVIJI5eQ2RMcRUK6JP\";key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044c92Qd3bQVIJI5eQ2RMcRUK6JP"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd11HLV\";const key=[\"\\ud83d\\udd11HLV\",\"D3K8MXUJPQ7dTIS0NGRLR\"].join('');key;",
+      "value": "\ud83d\udd11HLVD3K8MXUJPQ7dTIS0NGRLR"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=atob(\"ZGVtb19rZXlfN0NVRlU0UFRMMlIwNjNWS2VRN01jTjg3\");key;",
+      "value": "demo_key_7CUFU4PTL2R063VKeQ7McN87"
+    },
+    {
+      "code": "const prefix=\"AKIA\";const key=atob(\"QUtJ QVNI NE05 ZVda WkNV VTRL V1Uz RUM0 WEZi Ug==\");key;",
+      "value": "AKIASH4M9eWZZCUU4KWU3EC4XFbR"
+    },
+    {
+      "code": "const prefix=\"\\u041f\\u0430\\u0440\\u043e\";const key=decodeURIComponent(\"%D0%9F%D0%B0%D1%80%D0%BE%D0%BB%D1%8CY3ZLO2EPDYYdPafOJIA2L48L\");key;",
+      "value": "\u041f\u0430\u0440\u043e\u043b\u044cY3ZLO2EPDYYdPafOJIA2L48L"
+    },
+    {
+      "code": "const prefix=\"\\ud83d\\udd1150b\";const key=`\ud83d\udd1150bN1fEN43fN1BPbMU2b0NGb`;key;",
+      "value": "\ud83d\udd1150bN1fEN43fN1BPbMU2b0NGb"
+    },
+    {
+      "code": "const prefix=\"demo\";const key=`${prefix}_key_KefcBVBJYfKDM3E7PLC2Y0FG`;key;",
+      "value": "demo_key_KefcBVBJYfKDM3E7PLC2Y0FG"
+    },
+    {
+      "code": "const key='\\x41KIA\\u004eAFGYOEYPXU1DSYP';key;",
+      "value": "AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const key='\\u{1f511}unicode-secret';key;",
+      "value": "\ud83d\udd11unicode-secret"
+    },
+    {
+      "code": "const key='\\uD83D\\uDD11unicode-secret';key;",
+      "value": "\ud83d\udd11unicode-secret"
+    },
+    {
+      "code": "const key='AKIA\\\nNAFGYOEYPXU1DSYP';key;",
+      "value": "AKIANAFGYOEYPXU1DSYP"
+    },
+    {
+      "code": "const key=atob('w6lzeW50aGV0aWM=');key;",
+      "value": "\u00c3\u00a9synthetic"
+    }
+  ]
+}

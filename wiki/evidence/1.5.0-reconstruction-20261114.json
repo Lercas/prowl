@@ -1,0 +1,188 @@
+{
+  "status": "locally qualified source restoration; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "released_parser_files_sha256": {
+    "tool/internal/reconstruct/adversarial_test.go": "4d6db272c1e8fcbb7d5e157209d5010d92b737c059952d296c62c47db10acad7",
+    "tool/internal/reconstruct/fuzz_test.go": "ba6ba912b9d7e1a8305857bf569488ea01a094df1bce1f2cc5d84d76fcb726bc",
+    "tool/internal/reconstruct/reference_test.go": "0925a09098bb528d1a862633c16cd6b23c46a1b9d9ca8fdc21ab213564bb8943",
+    "tool/internal/reconstruct/strings.go": "22ce5f5990cd9b96f54eba2afc6406470d4868ce8ba29587fdd92c856ac09a4a",
+    "tool/internal/reconstruct/strings_test.go": "9c3abf54b742f0e40182b01ac386783664af648006ada0a900a6ff581c557b8c",
+    "tool/internal/reconstruct/testdata/node_reference.json": "a4f9fa68fe1bb7c34b0de48a7dff69f0200e0682f13034982435dcffd4876d18",
+    "tool/internal/reconstruct/testdata/node_template_reference.json": "08b09f9a6f7056a207a67106d5cc5ba5d38580773a10e551bb79504ede1e25a7"
+  },
+  "node_reference_cases": 279,
+  "native": {
+    "binary_sha256": "4aeab7b0d0a5d38417cb2d19ef8320ad00458b115706f00ef99d9190d0955a61",
+    "checks": [
+      {
+        "case": "concat",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "concat",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "concat",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "concat",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "join",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "join",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "join",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "join",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "template",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "template",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "template",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "template",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "unknown",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "unknown",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "unknown",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "unknown",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "mutable",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "mutable",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "mutable",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "mutable",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "ml": false,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "ml": false,
+        "stdin": true,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "ml": true,
+        "stdin": false,
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "ml": true,
+        "stdin": true,
+        "passed": true
+      }
+    ],
+    "passed": 24,
+    "total": 24
+  },
+  "checks": {
+    "full_go_suite": true,
+    "affected_race": true,
+    "minimum_go_1_26_11": true,
+    "golangci_lint_issues": 0,
+    "fuzz_executions": 1498948,
+    "fuzz_seconds": 15
+  },
+  "contracts": [
+    "opt-in flag and JS/TS paths including named stdin",
+    "immutable-local bounded static parser; no code execution",
+    "original byte and UTF16 coordinates and sanitized evidence",
+    "shared candidate budget consumed before ML",
+    "verification observes original source context",
+    "provider rejection reaches keyed observer with original location before ML suppression",
+    "parser budget is incomplete in coverage and CLI exit status",
+    "source pragma suppression and IgnorePragmas policy"
+  ],
+  "remaining": [
+    "Full provenance/coverage/report integration from released baseline",
+    "Other CLI/source/semantic/correlation/integrity compatibility",
+    "External release qualification and publication"
+  ]
+}

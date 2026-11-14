@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -87,7 +88,7 @@ func TestHelpComesFromAcceptedFlagSchema(t *testing.T) {
 			}
 		}
 	}
-	if strings.Contains(commandFlagHelp("scan"), "--recon") || strings.Contains(commandFlagHelp("hermes-audit"), "--show-secrets") {
+	if slices.Contains(strings.Fields(commandFlagHelp("scan")), "--recon") || strings.Contains(commandFlagHelp("hermes-audit"), "--show-secrets") {
 		t.Fatal("help advertises foreign flags")
 	}
 	_, _, err := parseCommand("rules", []string{"update", "--help"})

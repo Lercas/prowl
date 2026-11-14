@@ -25,6 +25,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	ml, err := flags.mlScorer()
 	options.ML, options.Workers, options.RevealSecrets = ml, flags.workers, flags.showSecrets
 	options.IgnorePragmas = flags.noAutoPolicy
+	options.Reconstruct = flags.reconstruct
 	var indexErr error
 	if flags.indexDir != "" {
 		indexErr = validateIndexOutputs(flags)
