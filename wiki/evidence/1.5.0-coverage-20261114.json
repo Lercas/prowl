@@ -547,5 +547,13 @@
     "command scope is requested selection, not immutable source revision",
     "source-specific acquisition scope/provenance beyond filesystem and stdin remains open",
     "MCP/LSP integration remains open"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "ce35137",
+    "full_go_suite_passed": true,
+    "native_passed": 76,
+    "native_total": 76,
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-coverage-native-cu4ve4vu/qualification.json",
+    "working_copy": "existing uncommitted CLI work retained"
+  }
 }
