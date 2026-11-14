@@ -38,6 +38,10 @@ func runCLI(args []string) int {
 	switch cmd {
 	case "guard":
 		return cmdGuard(args[1:])
+	case "correlate":
+		return cmdCorrelate(args[1:])
+	case "remediation-check":
+		return cmdRemediation(args[1:])
 	case "identity":
 		return cmdIdentity(args[1:])
 	case "agents":

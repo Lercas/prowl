@@ -10,6 +10,8 @@ type cmdInfo struct {
 }
 
 var commands = []cmdInfo{
+	{"correlate", "сопоставить JSON-наблюдения по HMAC identity", "prowl correlate REPORT.json REPORT.json [...]"},
+	{"remediation-check", "сравнить наличие и provider-вердикты в двух отчётах", "prowl remediation-check BEFORE.json AFTER.json"},
 	{"identity", "создать приватный ключ идентичности секретов", "prowl identity init [-o FILE]"},
 	{"agents", "проверить конфиги и текстовые транскрипты AI-агентов", "prowl agents [PROJECT...] [--agent-home DIR] [--shell-history] [scan flags]"},
 	{"guard", "проверить stdin перед передачей промпта или вызовом инструмента", "prowl guard [--protocol raw|claude|cursor-prompt|cursor-tool] [--max-size BYTES] [--timeout DUR]"},

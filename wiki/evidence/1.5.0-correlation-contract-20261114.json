@@ -1,0 +1,222 @@
+{
+  "status": "locally qualified correlation and remediation report restoration; not published",
+  "native": {
+    "binary_sha256": "856508582f2e38a0528529f980e2a2e6e4397bdb0749875802bc4f77e99a6800",
+    "passed": 46,
+    "total": 46,
+    "checks": [
+      {
+        "case": "identity-init",
+        "passed": true
+      },
+      {
+        "case": "before/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "present/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "two-occurrences",
+        "passed": true
+      },
+      {
+        "case": "same-secret-observed",
+        "passed": true
+      },
+      {
+        "case": "same-secret-observed/masked",
+        "passed": true
+      },
+      {
+        "case": "still-present",
+        "passed": true
+      },
+      {
+        "case": "declared-verdict/invalid",
+        "passed": true
+      },
+      {
+        "case": "declared-verdict/verified",
+        "passed": true
+      },
+      {
+        "case": "declared-verdict/error",
+        "passed": true
+      },
+      {
+        "case": "conflicting-verdict-refused",
+        "passed": true
+      },
+      {
+        "case": "conflicting-verdict-refused/masked",
+        "passed": true
+      },
+      {
+        "case": "filtered/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "filtered-absence",
+        "passed": true
+      },
+      {
+        "case": "partial/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "partial-join",
+        "passed": true
+      },
+      {
+        "case": "partial-join/masked",
+        "passed": true
+      },
+      {
+        "case": "partial-absence",
+        "passed": true
+      },
+      {
+        "case": "after/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "absent-in-scope",
+        "passed": true
+      },
+      {
+        "case": "absent-in-scope/no-revocation-inference",
+        "passed": true
+      },
+      {
+        "case": "other-scope/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "different-target",
+        "passed": true
+      },
+      {
+        "case": "revealed-empty/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "revealed-empty-refused",
+        "passed": true
+      },
+      {
+        "case": "revealed-empty-refused/masked",
+        "passed": true
+      },
+      {
+        "case": "second-identity",
+        "passed": true
+      },
+      {
+        "case": "other-key/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "different-key-refused",
+        "passed": true
+      },
+      {
+        "case": "different-key-refused/masked",
+        "passed": true
+      },
+      {
+        "case": "unkeyed/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "keyless-refused",
+        "passed": true
+      },
+      {
+        "case": "keyless-refused/masked",
+        "passed": true
+      },
+      {
+        "case": "policy-is-not-source",
+        "passed": true
+      },
+      {
+        "case": "duplicate-json-refused",
+        "passed": true
+      },
+      {
+        "case": "duplicate-json-refused/masked",
+        "passed": true
+      },
+      {
+        "case": "array-budget-before-decode",
+        "passed": true
+      },
+      {
+        "case": "input-count-budget",
+        "passed": true
+      },
+      {
+        "case": "unsupported-flags",
+        "passed": true
+      },
+      {
+        "case": "help",
+        "passed": true
+      },
+      {
+        "case": "fifo-is-not-report",
+        "passed": true
+      },
+      {
+        "case": "history/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "history-two/scanner-envelope",
+        "passed": true
+      },
+      {
+        "case": "git-shared-blob-evidence",
+        "passed": true
+      },
+      {
+        "case": "git-no-propagation-claim",
+        "passed": true
+      },
+      {
+        "case": "reports-preserved",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-correlation-native-wxwrv3c1",
+    "scope": "native local scanner JSON, owned Git objects and malformed report fixtures; no provider or remote access"
+  },
+  "checks": {
+    "full_go": "passed",
+    "targeted_correlation_race": "passed",
+    "lint": "passed",
+    "minimum_go_1.26.11": "passed",
+    "final_canonical_identity_unit": "passed"
+  },
+  "boundaries": {
+    "max_inputs": 32,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 134217728,
+    "max_total_array_rows": 100000,
+    "max_links_per_group": 256
+  },
+  "semantics": [
+    "Missing observations do not prove revocation; closed remains false",
+    "Only equivalent complete unfiltered known acquisition scopes can confirm absence in scope",
+    "Provider status is saved declared evidence, never a fresh provider request",
+    "Shared immutable metadata does not infer propagation direction",
+    "Canonical identities and consistent detailed/legacy verdicts are required"
+  ],
+  "limits": [
+    "Actual provider revocation and report authenticity are not qualified by this matrix",
+    "Provider verdict cases are declared metadata fixtures",
+    "Remote/unknown acquisition scopes cannot prove absence until their provenance audit is complete"
+  ]
+}

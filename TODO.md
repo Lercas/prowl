@@ -195,6 +195,15 @@
       сравнения L2. Пока флаг отклоняется, чтобы два независимых model inference
       не представлялись как подавление шума одним и тем же L2.
 
+    - [x] Возвращены CLI `correlate` и `remediation-check` для keyed JSON envelope.
+      Shared immutable metadata links не выдаются за направление распространения;
+      отсутствие, сохранённый verdict и закрытие исправления разделены.
+      Проверены 46/46 нативных сценариев с отчётами текущего CLI и Git-объектами,
+      а также strict JSON, file/aggregate/array-row budgets и противоречия verdicts.
+      Полный Go-набор, correlation race, lint и Go 1.26.11 проходят.
+      Контракт — `wiki/Report-Correlation.md`, evidence:
+      `wiki/evidence/1.5.0-correlation-contract-20261114.json`.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

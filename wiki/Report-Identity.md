@@ -84,3 +84,8 @@ JSON/SARIF-отчётом. Проверены файл/stdin, keyless/keyed, ML,
 ошибки. Формат и границы описаны в [Live Verification](Live-Verification.md).
 Полный coverage envelope, run-level свойства SARIF и остальные
 контракты выпущенной базы остаются открытыми в TODO.
+
+
+Восстановлены офлайн-команды `correlate` и `remediation-check` для keyed JSON
+envelopes. Их [контракт](Report-Correlation.md) разделяет наличие в выбранном объёме,
+сохранённый provider verdict и окончательное закрытие исправления.
