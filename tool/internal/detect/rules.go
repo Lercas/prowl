@@ -531,7 +531,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 
 // isContextStage marks the builtins that infer a secret from the name around it.
 func isContextStage(stage string) bool {
-	return stage == "L1-context-pw" || stage == stageContextKey || stage == stageTable
+	return stage == "L1-context-pw" || stage == stageContextKey || stage == stageTable || stage == stageComparison
 }
 
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.
@@ -567,7 +567,18 @@ func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 		if len(ms[i].Value) != len(ms[j].Value) {
 			return len(ms[i].Value) < len(ms[j].Value)
 		}
-		return ms[i].Value < ms[j].Value
+		if ms[i].Value != ms[j].Value {
+			return ms[i].Value < ms[j].Value
+		}
+		// Identical contextual candidates retain a proven field label instead
+		// of depending on which producer happened to append first.
+		if (ms[i].ContextName != "") != (ms[j].ContextName != "") {
+			return ms[i].ContextName != ""
+		}
+		if ms[i].ContextName != ms[j].ContextName {
+			return ms[i].ContextName < ms[j].ContextName
+		}
+		return ms[i].Stage < ms[j].Stage
 	})
 	out := make([]Match, 0, len(ms)) // kept spans, maintained sorted by Start
 	for _, m := range ms {

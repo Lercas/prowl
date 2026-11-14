@@ -45,7 +45,7 @@ var (
 	reQuotedPassword = regexp.MustCompile("(?i)(?:pass(?:word|wd|phrase)?|pwd)([A-Za-z0-9_]{0,24})" +
 		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*[bru]?(?:\"([^\"\\s]{6,64})\"|'([^'\\s]{6,64})')")
 
-	namedBuiltins = []*regexp.Regexp{reNamedKey, reBasicScheme, reQuotedPassword}
+	namedBuiltins = []*regexp.Regexp{reNamedKey, reBasicScheme, reQuotedPassword, reComparisonRight, reComparisonLeft}
 )
 
 // nonSecretNameParts mark a name that holds a description of a secret rather than the secret: a
@@ -285,8 +285,9 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 	hasKey := strings.Contains(lower, "key") || strings.Contains(lower, "token") ||
 		strings.Contains(lower, "secret") || strings.Contains(lower, "credential")
 	hasBasic := strings.Contains(lower, "basic")
-	hasPass := strings.Contains(lower, "pass") || strings.Contains(lower, "pwd")
-	want := []bool{d.genericKey && hasKey, d.basicAuth && hasBasic, d.genericPwd && hasPass}
+	hasPass := strings.Contains(lower, "pass") || strings.Contains(lower, "pw")
+	wantComparison := d.genericKey && hasKey || d.genericPwd && hasPass
+	want := []bool{d.genericKey && hasKey, d.basicAuth && hasBasic, d.genericPwd && hasPass, wantComparison, wantComparison}
 	if !want[0] && !want[1] && !want[2] {
 		return nil, false
 	}
@@ -369,6 +370,18 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			}
 			out = append(out, Match{Type: "generic_password", Value: val, Start: vs, End: ve,
 				Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
+		}
+	}
+	if wantComparison {
+		for i, re := range []*regexp.Regexp{reComparisonRight, reComparisonLeft} {
+			for _, ix := range indices(i+3, re) {
+				if full() {
+					break
+				}
+				if match, ok := d.comparisonMatch(text, ix, i == 1); ok {
+					out = append(out, match)
+				}
+			}
 		}
 	}
 	return out, capped || ctx.Err() != nil
