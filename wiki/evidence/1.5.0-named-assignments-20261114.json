@@ -1,0 +1,260 @@
+{
+  "scope": "Enable named assignment builtins, code Basic scheme, quoted passwords with separator characters; retain bounded candidate status",
+  "candidate_commit": "e5308b3e2082704058b69c814eaaea8117e687e9",
+  "reference_commit": "6c1f81610c75f1dfea835127e8f61402665b243a",
+  "source_isolation": "Five feature source/test files byte-compared with isolated parent export; unrelated uncommitted decode.go and chance-header test deliberately excluded and preserved in user worktree",
+  "validation": {
+    "full_go_suite": "go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test ./... passed",
+    "race": "full internal/detect and internal/scan passed",
+    "minimum_go": "go1.26.11 CGO_ENABLED=0 full internal/detect and internal/scan passed",
+    "lint": "golangci-lint v2.15.0, internal/detect and internal/scan: 0 issues",
+    "static_smoke": "Native darwin/arm64 CGO_ENABLED=0 embedded ML scan, redaction and legacy-model rejection passed",
+    "window_equivalence": {
+      "corpus": "go1.27.4 GOROOT/src",
+      "files": 12044,
+      "builtin_matches": 1149,
+      "differences": 0,
+      "status_equal": true,
+      "log": "/tmp/prowl-named-window-equivalence-20261114.log"
+    },
+    "subset_gate": {
+      "reference_secret_hits": 1585,
+      "candidate_secret_hits": 1608,
+      "secret_total": 2094,
+      "false_positive_files": 61,
+      "negative_total": 982,
+      "modes": [
+        {
+          "indexed": false,
+          "exit": 0,
+          "stdout": "Retained fixture: /var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-zc6bqv7j\nProwlBench(subset): recall=0.768 (1608/2094) T4-FP=0.062 (61/982)\n  OK vs baseline (recall 0.747, T4-FP 0.058)\n",
+          "stderr": ""
+        },
+        {
+          "indexed": true,
+          "exit": 0,
+          "stdout": "Retained fixture: /var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-o3rvrprz\nProwlBench(subset): recall=0.768 (1608/2094) T4-FP=0.062 (61/982)\n  OK vs baseline (recall 0.747, T4-FP 0.058)\n",
+          "stderr": ""
+        }
+      ],
+      "baseline_and_thresholds_unchanged": true,
+      "subset_sha256": "c8de0a5b15d3f360c50b387d1869158ef32d43fa1c9ddce26e4ff4174667db9e",
+      "profile": "Empty temporary PROWL_HOME, bundled rules, portable embedded ML; index on/off. Only harness cleanup disabled; generated fixtures retained."
+    },
+    "full_local_corpus": {
+      "dataset_sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-named-full-corpus-co36rqas",
+      "cases": 24603,
+      "runs": [
+        {
+          "label": "reference",
+          "ml": false,
+          "seconds": 0.8235443750018021,
+          "exit": 2,
+          "truncated": true,
+          "findings": 20872,
+          "diagnostic_types": {
+            "results_truncated": 4
+          },
+          "diagnostic_case_ids": [
+            "pb-01671",
+            "pb-04750",
+            "pb-16998",
+            "pb-23247"
+          ],
+          "secret_total": 16552,
+          "secret_flagged": 13804,
+          "negative_total": 8051,
+          "negative_flagged": 750
+        },
+        {
+          "label": "candidate",
+          "ml": false,
+          "seconds": 0.7263190419907914,
+          "exit": 2,
+          "truncated": true,
+          "findings": 21432,
+          "diagnostic_types": {
+            "results_truncated": 4
+          },
+          "diagnostic_case_ids": [
+            "pb-01671",
+            "pb-04750",
+            "pb-16998",
+            "pb-23247"
+          ],
+          "secret_total": 16552,
+          "secret_flagged": 14340,
+          "negative_total": 8051,
+          "negative_flagged": 760
+        },
+        {
+          "label": "reference",
+          "ml": true,
+          "seconds": 0.7368823339929804,
+          "exit": 2,
+          "truncated": true,
+          "findings": 17709,
+          "diagnostic_types": {
+            "results_truncated": 4
+          },
+          "diagnostic_case_ids": [
+            "pb-01671",
+            "pb-04750",
+            "pb-16998",
+            "pb-23247"
+          ],
+          "secret_total": 16552,
+          "secret_flagged": 12609,
+          "negative_total": 8051,
+          "negative_flagged": 480
+        },
+        {
+          "label": "candidate",
+          "ml": true,
+          "seconds": 0.7485679169913055,
+          "exit": 2,
+          "truncated": true,
+          "findings": 17908,
+          "diagnostic_types": {
+            "results_truncated": 4
+          },
+          "diagnostic_case_ids": [
+            "pb-01671",
+            "pb-04750",
+            "pb-16998",
+            "pb-23247"
+          ],
+          "secret_total": 16552,
+          "secret_flagged": 12793,
+          "negative_total": 8051,
+          "negative_flagged": 481
+        }
+      ]
+    },
+    "full_local_corpus_note": "Observed file-level comparison only. Both candidates return exit 2 with the same four pre-existing results_truncated diagnostic case IDs; diagnostics excluded from detection counts. Not a passing complete-corpus gate. No provider calls, no generated leaderboard overwrite.",
+    "paired_performance": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 8711381167.0,
+            "B/op": 617049176.0,
+            "allocs/op": 1235822.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          },
+          {
+            "ns/op": 8786258416.0,
+            "B/op": 618288248.0,
+            "allocs/op": 1235729.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          },
+          {
+            "ns/op": 8843276834.0,
+            "B/op": 617668904.0,
+            "allocs/op": 1235923.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1133.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 10491533250.0,
+            "B/op": 609878032.0,
+            "allocs/op": 1240771.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10208494083.0,
+            "B/op": 613315136.0,
+            "allocs/op": 1241108.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          },
+          {
+            "ns/op": 10271460167.0,
+            "B/op": 610997360.0,
+            "allocs/op": 1240857.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1153.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "6c1f81610c75f1dfea835127e8f61402665b243a",
+        "candidate": "e5308b3e2082704058b69c814eaaea8117e687e9"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 8786258416.0,
+          "B/op": 617668904.0,
+          "allocs/op": 1235822.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1133.0
+        },
+        "candidate": {
+          "ns/op": 10271460167.0,
+          "B/op": 610997360.0,
+          "allocs/op": 1240857.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1153.0
+        }
+      },
+      "ratios": {
+        "ns/op": 1.169036884721648,
+        "B/op": 0.9891988345911615,
+        "allocs/op": 1.0040742113346421
+      },
+      "regressions": []
+    },
+    "performance_note": "Index off, Go1.27.4 CGO0 GOMAXPROCS2; three alternating immutable revision pairs. Median time +16.90%, B/op -1.08%, allocs/op +0.41%; within existing 20/25/25 percent policy. Pipeline rows 1133 -> 1153 include extra generic detections, not classified as true leaks."
+  },
+  "invariants": [
+    "Name/value guards reject metadata, code references, UUIDs, URLs and placeholders",
+    "Named generic values retain generic confidence and existing verifier/ML policy",
+    "Rejecting raw regex candidates still consumes bounded budget; exhaustion propagates incomplete status",
+    "Decoded Basic pair validates user and password before promotion",
+    "Longer quoted password preserves separators and original value span",
+    "Original byte positions, default masking and index identity policies retained"
+  ],
+  "boundaries": [
+    "No user model overwritten or migrated; incompatible installed model remains fail-closed",
+    "No publication, push, deploy or provider validation",
+    "Cross-platform runtime qualification and full release remain separate",
+    "Short token/password thresholds, comparison expressions and remaining decoding forms still open in TODO",
+    "Unrelated decompression edits remain uncommitted and unqualified by this report"
+  ]
+}
