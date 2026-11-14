@@ -7,17 +7,19 @@ import (
 	"unicode"
 )
 
-// Context mirrors the optional context dict in the Python reference. All fields
-// are optional strings (name / line / path / source).
+// Context preserves the reference lexical fields and adds parser-established
+// facts. Callers without structured parsing leave both facts false.
 type Context struct {
-	Name   string
-	Line   string
-	Path   string
-	Source string
+	Name                   string
+	Line                   string
+	Path                   string
+	Source                 string
+	ParserLiteralSensitive bool `json:"parser_literal_sensitive,omitempty"`
+	UINamespace            bool `json:"ui_namespace,omitempty"`
 }
 
 // FeatureNames is the stable feature order. It preserves the Python feature
-// layout while versioning the portable Go compression feature at index 7.
+// layout through index 48, versions compression at index 7, and appends parser facts.
 var FeatureNames = []string{
 	// string-intrinsic
 	"length",
@@ -74,6 +76,8 @@ var FeatureNames = []string{
 	"is_data_uri",
 	"is_object_id",
 	"url_host_local",
+	"ctx_parser_literal_sensitive_v1",
+	"ctx_ui_namespace_v1",
 }
 
 // --- structural regexes, mirroring src/features/extract.py -------------------
@@ -113,6 +117,12 @@ var secretKeywords = []string{
 	"accesskey", "auth", "credential", "private_key", "privatekey", "client_secret",
 	"secret_key", "session", "bearer", "authorization", "encryption_key", "signing_key",
 	"passphrase", "connectionstring", "conn_str", "dsn", "key", "cert", "ssh",
+}
+
+// HasSecretNameKeyword reports the lexical name evidence understood by the
+// original model; a parser can establish password bindings beyond this list.
+func HasSecretNameKeyword(name string) bool {
+	return containsAny(strings.ToLower(name), secretKeywords)
 }
 
 // sourceTypes mirrors SOURCE_TYPES.
@@ -171,6 +181,7 @@ func Extract(value string, ctx Context) []float64 {
 	out = appendPlaceholderFlags(out, s)
 	out = appendContextFeatures(out, ctx)
 	out = appendStructuralFlags(out, s)
+	out = append(out, boolf(ctx.ParserLiteralSensitive), boolf(ctx.UINamespace))
 
 	return out
 }

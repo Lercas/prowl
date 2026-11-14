@@ -74,16 +74,31 @@ func TestPredictRejectsWrongLength(t *testing.T) {
 func TestParity(t *testing.T) {
 	const tol = 1e-6
 
-	// Preserve evaluation coverage for the historical Python fixture and its original model.
-	m, err := LoadFile("model_binary.json")
-	if err != nil {
-		t.Fatalf("Load: %v", err)
-	}
 	rows := loadFixture(t)
+	// The historical model uses 49 features. Add unused slots only inside this
+	// inference test; production loading still refuses the obsolete schema.
+	raw, err := os.ReadFile("model_binary.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var legacy rawModel
+	if err := json.Unmarshal(raw, &legacy); err != nil {
+		t.Fatal(err)
+	}
+	legacy.FeatureNames = append(legacy.FeatureNames, "unused_legacy_padding_0", "unused_legacy_padding_1")
+	padded, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := parse(padded)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	var maxErr float64
 	var worst int
 	for i, r := range rows {
+		r.Features = append(r.Features, 0, 0)
 		if len(r.Features) != NumFeatures {
 			t.Fatalf("fixture row %d has %d features, want %d", i, len(r.Features), NumFeatures)
 		}

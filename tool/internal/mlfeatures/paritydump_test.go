@@ -28,10 +28,10 @@ func TestExtractorParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := Extract(r.Value, Context{Name: r.Name, Line: r.Line, Path: r.Path, Source: r.Source})
-		if len(got) != len(r.Feats) {
+		if len(got) != len(r.Feats)+2 {
 			t.Fatalf("%q: %d features, golden has %d", r.Value, len(got), len(r.Feats))
 		}
-		for i := range got {
+		for i := range r.Feats {
 			if i == compressionRatioIdx {
 				continue // Python zlib fixture predates the versioned portable feature
 			}

@@ -24,7 +24,7 @@ import (
 
 // NumFeatures is the fixed feature-vector length Predict expects, matching
 // len(feature_names) in the dumped model.
-const NumFeatures = 49
+const NumFeatures = 51
 
 // These limits bound external model reads, decoding and flattening. The bundled export uses
 // approximately 1.2 MB, 400 trees and 24,400 nodes; larger valid retrains remain supported.
@@ -144,7 +144,7 @@ func parse(data []byte) (*Model, error) {
 		return nil, errors.New("mlmodel: model requires a numeric baseline")
 	}
 	if got := len(rm.FeatureNames); got != NumFeatures {
-		return nil, fmt.Errorf("mlmodel: model has %d feature names, want %d", got, NumFeatures)
+		return nil, fmt.Errorf("mlmodel: model has %d feature names, want %d; retrain using the current extractor", got, NumFeatures)
 	}
 	if len(rm.Trees) == 0 {
 		return nil, fmt.Errorf("mlmodel: model has no trees")

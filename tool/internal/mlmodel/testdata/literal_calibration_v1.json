@@ -1,0 +1,54 @@
+{
+  "status": "candidate, not release-qualified",
+  "seed": 13,
+  "threshold": 0.3,
+  "corpus_sha256": "de838d6145bc95f7cd1f34ca46c98bec09142f3f8ca154d99f654b36ba228d3f",
+  "features_sha256": "68bea1bdc4c2a70a20297206565dd6b3b49eb69342a006a0a8d71baee7304392",
+  "base_model_sha256": "c399a4e04288a7ce3a715d701e7dc7bfac544e6c0bd65f1e76de375e32788f0d",
+  "n": 31200,
+  "calibration_rows": 30393,
+  "out_of_scope_rows": 807,
+  "split": {
+    "train": 20385,
+    "val": 4632,
+    "test": 5376
+  },
+  "selected_max_leaf_nodes": 31,
+  "validation_candidates": {
+    "31": {
+      "pr_auc": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "63": {
+      "pr_auc": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "127": {
+      "pr_auc": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "metrics": {
+    "val": {
+      "pr_auc": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "test": {
+      "pr_auc": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "calibration_gate": true,
+  "minimum_metric": 0.995,
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+}

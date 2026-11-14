@@ -507,7 +507,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		if ml != nil {
 			record := recordForMatch(m, it)
 			if literalDoc != nil {
-				record = literalDoc.recordFor(m.Value, it, m.Start)
+				record = literalDoc.recordFor(m.Value, it, m.Start, m.Type)
 			}
 			reqs = append(reqs, record)
 		}
@@ -606,7 +606,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				if ml != nil {
 					reqs[idx] = recordFor(h.Value, it, h.Start)
 					if literalDoc != nil {
-						reqs[idx] = literalDoc.recordFor(h.Value, it, h.Start)
+						reqs[idx] = literalDoc.recordFor(h.Value, it, h.Start, h.RuleID)
 					}
 				}
 				continue
@@ -616,7 +616,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if ml != nil {
 				record := recordFor(h.Value, it, h.Start)
 				if literalDoc != nil {
-					record = literalDoc.recordFor(h.Value, it, h.Start)
+					record = literalDoc.recordFor(h.Value, it, h.Start, h.RuleID)
 				}
 				reqs = append(reqs, record)
 			}

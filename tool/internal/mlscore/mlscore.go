@@ -27,10 +27,12 @@ type Record struct {
 
 // Context mirrors the python feature extractor's context dict (name/line/path/source).
 type Context struct {
-	Name   string `json:"name,omitempty"`
-	Line   string `json:"line,omitempty"`
-	Path   string `json:"path,omitempty"`
-	Source string `json:"source,omitempty"`
+	Name                   string `json:"name,omitempty"`
+	Line                   string `json:"line,omitempty"`
+	Path                   string `json:"path,omitempty"`
+	Source                 string `json:"source,omitempty"`
+	ParserLiteralSensitive bool   `json:"parser_literal_sensitive,omitempty"`
+	UINamespace            bool   `json:"ui_namespace,omitempty"`
 }
 
 // Result is the cascade's verdict for one record.

@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
+	"github.com/Lercas/prowl/tool/internal/mlfeatures"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 )
@@ -255,12 +256,27 @@ func validLiteralBinding(name string) bool {
 	return true
 }
 
-func (doc *literalDocument) recordFor(value string, it model.Item, start int) mlscore.Record {
+func (doc *literalDocument) recordFor(value string, it model.Item, start int, typ string) mlscore.Record {
 	r := recordFor(value, it, start)
 	if v := doc.locate(start, start); v != nil && !v.raw && validLiteralBinding(v.name) {
 		r.Context.Name = doc.binding(v)
+		if typ == "generic_password" && start == v.preparedStart && value == v.value && !v.noPassword && !v.uiPassword && doc.scalars[start].Name != "" {
+			r.Context.ParserLiteralSensitive = literalSensitive(r.Value) || !mlfeatures.HasSecretNameKeyword(r.Context.Name)
+			r.Context.UINamespace = doc.roles[v.group].ui
+		}
 	}
 	return r
+}
+
+// These values require the parser's literal semantics: lexical readers can
+// confuse their data with escaping, whitespace, interpolation or markup.
+func literalSensitive(value string) bool {
+	for _, r := range value {
+		if r >= utf8.RuneSelf || unicode.IsSpace(r) || unicode.IsControl(r) || strings.ContainsRune("\\\"'<>{}$", r) {
+			return true
+		}
+	}
+	return false
 }
 
 // JSON permits isolated surrogate escapes; Go replaces them with U+FFFD. That lossy operation

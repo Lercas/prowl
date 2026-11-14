@@ -1,0 +1,1928 @@
+{
+  "status": "locally qualified source candidate; not published or installed",
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "base_model_sha256": "c399a4e04288a7ce3a715d701e7dc7bfac544e6c0bd65f1e76de375e32788f0d",
+  "features": 51,
+  "threshold": 0.3,
+  "off_scope_bit_identical_rows": 525102,
+  "go_python_predictions": 768,
+  "go_versions": [
+    "1.26.11",
+    "1.27.4"
+  ],
+  "cross_version_equal_feature_rows": 31200,
+  "tests": {
+    "full_go": true,
+    "race": true,
+    "minimum_go": true,
+    "python_unit": 10
+  },
+  "native": {
+    "binary": "/private/tmp/prowl-sensitive-default-20261114",
+    "sha256": "b6f4a644821d5e798b98a79814bb365ec0fe555c6b28ffe7d01fe5689e1207e8",
+    "artifact_dir": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-structured-native-56mzhdkv",
+    "checks": [
+      {
+        "case": "json-0",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-0",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-0",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-0",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-0",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-0",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-0",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-0",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-0",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-0",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-0",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-0",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-1",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-1",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-1",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-1",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-1",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-1",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-1",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-1",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-1",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-1",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-1",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-1",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-2",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-2",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-2",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-2",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-2",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-2",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-2",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-2",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-2",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-2",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-2",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-2",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-3",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-3",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-3",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-3",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-3",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-3",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-3",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-3",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-3",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-3",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-3",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-3",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-4",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-4",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-4",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-4",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-4",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-4",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-4",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-4",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-4",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-4",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-4",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-4",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-5",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-5",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-5",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-5",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-5",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-5",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-5",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-5",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-5",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-5",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-5",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-5",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-6",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-6",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-6",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-6",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-6",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-6",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-6",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-6",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-6",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-6",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-6",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-6",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-7",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-7",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-7",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "json-7",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-7",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-7",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-7",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-canonical-7",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-7",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-7",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-7",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-canonical-7",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-plain",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-plain",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-plain",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-plain",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-escaped",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-escaped",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-escaped",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-escaped",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-block",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-block",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-block",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-block",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-folded",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-folded",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-folded",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-folded",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-scalar-alias",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-scalar-alias",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-scalar-alias",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-scalar-alias",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-object-alias",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-object-alias",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-object-alias",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-object-alias",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-merge-override",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-merge-override",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-merge-override",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-merge-override",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "yaml-binary",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-binary",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-binary",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-binary",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-unicode-crlf",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-unicode-crlf",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-unicode-crlf",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-unicode-crlf",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-data-pragma",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-data-pragma",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-data-pragma",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-data-pragma",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment-pragma",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment-pragma",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment-pragma",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "yaml-comment-pragma",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-escaped",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-escaped",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-escaped",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-escaped",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal-escape",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal-escape",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal-escape",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-literal-escape",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-block",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-block",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-block",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-block",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-folded",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-folded",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-folded",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-folded",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-unicode-key",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-unicode-key",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-unicode-key",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-unicode-key",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-dotted",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-dotted",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-dotted",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-dotted",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-array-tables",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "toml-array-tables",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "toml-array-tables",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "toml-array-tables",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 2,
+        "found": 2,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-data-pragma",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-data-pragma",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-data-pragma",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-data-pragma",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 1,
+        "found": 1,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment-pragma",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment-pragma",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment-pragma",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "toml-comment-pragma",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 0
+      },
+      {
+        "case": "incomplete-47",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-47",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-47",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-47",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-48",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-48",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-48",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-48",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-49",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-49",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-49",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-49",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 1,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-50",
+        "ml": false,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-50",
+        "ml": false,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-50",
+        "ml": true,
+        "stdin": false,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 2
+      },
+      {
+        "case": "incomplete-50",
+        "ml": true,
+        "stdin": true,
+        "passed": true,
+        "expected": 0,
+        "found": 0,
+        "exit": 2
+      }
+    ],
+    "passed": 204,
+    "total": 204
+  },
+  "prowlbench": {
+    "metrics": {
+      "parent": {
+        "secret": 1616,
+        "hardneg": 61
+      },
+      "candidate": {
+        "secret": 1616,
+        "hardneg": 61
+      }
+    },
+    "added_ids": [],
+    "removed_ids": [],
+    "passed": true
+  },
+  "structured_prowlbench": {
+    "selected": 817,
+    "incomplete": 4,
+    "metrics": {
+      "parent": {
+        "true_positive": 377,
+        "false_positive": 9
+      },
+      "candidate": {
+        "true_positive": 377,
+        "false_positive": 9
+      }
+    },
+    "added_negative": [],
+    "removed_positive": []
+  },
+  "static_builds": [
+    {
+      "target": "darwin/amd64",
+      "passed": true
+    },
+    {
+      "target": "darwin/arm64",
+      "passed": true
+    },
+    {
+      "target": "linux/amd64",
+      "passed": true
+    },
+    {
+      "target": "linux/arm64",
+      "passed": true
+    },
+    {
+      "target": "windows/amd64",
+      "passed": true
+    },
+    {
+      "target": "windows/arm64",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Synthetic calibration holdout is not a representative production estimate",
+    "Four structured-source cases remain incomplete, identically to parent",
+    "Python sidecar retains its separately trained lexical model",
+    "Installed model, release artifacts and production remain unchanged"
+  ]
+}

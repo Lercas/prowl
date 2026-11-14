@@ -100,6 +100,7 @@ func (e *Embedded) Score(ctx context.Context, recs []Record) ([]Result, error) {
 		}
 		f := mlfeatures.Extract(r.Value, mlfeatures.Context{
 			Name: r.Context.Name, Line: r.Context.Line, Path: r.Context.Path, Source: r.Context.Source,
+			ParserLiteralSensitive: r.Context.ParserLiteralSensitive, UINamespace: r.Context.UINamespace,
 		})
 		p, err := e.model.Predict(f)
 		if err != nil {

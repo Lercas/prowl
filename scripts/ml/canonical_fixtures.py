@@ -41,8 +41,9 @@ def annotations(per_family=400, seed=718103):
             else:
                 value = a + n + "!" + "".join(rng.choice(string.ascii_letters + string.digits) for _ in range(8))
             assert value not in HELD_OUT
-            for ext, text in carriers(name, value, "settings"):
-                yield dict(name=f"positive-{family}-{index}", path=f"src/config/credentials{ext}", text=text, value=value, label_binary=1, label_type="generic_password")
+            for namespace in (["settings", "validation"] if index % 4 == 0 else ["settings"]):
+                for ext, text in carriers(name, value, namespace):
+                    yield dict(name=f"positive-{family}-{index}-{namespace}", path=f"src/config/credentials{ext}", text=text, value=value, label_binary=1, label_type="generic_password")
 
     # Explicit UI namespaces establish that these strings are instructions,
     # rather than weak literal passwords. Wording differs by binding so shared
@@ -65,8 +66,9 @@ def annotations(per_family=400, seed=718103):
             f"Het wachtwoord moet minimaal {count} tekens bevatten.",
             f"Salasanassa on oltava vähintään {count} merkkiä.",
         ][group]
-        for ext, text in carriers(name, value, "validation"):
-            yield dict(name=f"negative-ui-{index}", path=f"app/translations/messages{ext}", text=text, value=value, label_binary=0, label_type="neg_canonical_ui")
+        for namespace in ("validation", "settings"):
+            for ext, text in carriers(name, value, namespace):
+                yield dict(name=f"negative-ui-{index}-{namespace}", path=f"app/translations/messages{ext}", text=text, value=value, label_binary=0, label_type="neg_canonical_ui")
 
 
 def carriers(name, value, namespace):

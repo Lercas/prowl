@@ -12,13 +12,13 @@ import (
 )
 
 func TestPortablePredictionParity(t *testing.T) {
-	qualification, err := os.ReadFile("testdata/portable_qualification.json")
+	qualification, err := os.ReadFile("testdata/literal_calibration_v1.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	var qualified struct {
 		ModelSHA256 string `json:"model_sha256"`
-		Qualified   bool   `json:"qualified"`
+		Qualified   bool   `json:"calibration_gate"`
 	}
 	if err := json.Unmarshal(qualification, &qualified); err != nil {
 		t.Fatal(err)
@@ -26,7 +26,7 @@ func TestPortablePredictionParity(t *testing.T) {
 	if !qualified.Qualified || fmt.Sprintf("%x", sha256.Sum256(embedded)) != qualified.ModelSHA256 {
 		t.Fatal("embedded model does not match the qualified artifact")
 	}
-	raw, err := os.ReadFile("testdata/prediction_golden.json")
+	raw, err := os.ReadFile("testdata/literal_prediction_golden_v1.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func TestPortablePredictionParity(t *testing.T) {
 	if err := json.Unmarshal(raw, &rows); err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 256 {
+	if len(rows) != 768 {
 		t.Fatalf("prediction fixture has %d rows", len(rows))
 	}
 	m, err := Load()

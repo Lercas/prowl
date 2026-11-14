@@ -65,7 +65,7 @@ func TestParity(t *testing.T) {
 	rows := loadFixture(t)
 
 	for i, row := range rows {
-		if len(row.Features) != len(FeatureNames) {
+		if len(row.Features) != len(FeatureNames)-2 {
 			t.Fatalf("row %d: fixture has %d features, want %d", i, len(row.Features), len(FeatureNames))
 		}
 		ctx := Context{
@@ -78,7 +78,7 @@ func TestParity(t *testing.T) {
 		if len(got) != len(FeatureNames) {
 			t.Fatalf("row %d: Extract returned %d features, want %d", i, len(got), len(FeatureNames))
 		}
-		for j := range FeatureNames {
+		for j := range row.Features {
 			if j == compressionRatioIdx {
 				continue // legacy Python zlib fixture; portable compression has its own tests
 			}
@@ -123,11 +123,11 @@ func TestCompressionRatioDivergence(t *testing.T) {
 
 // TestFeatureCount guards the feature count and name order.
 func TestFeatureCount(t *testing.T) {
-	if len(FeatureNames) != 49 {
-		t.Fatalf("FeatureNames has %d entries, want 49", len(FeatureNames))
+	if len(FeatureNames) != 51 {
+		t.Fatalf("FeatureNames has %d entries, want 51", len(FeatureNames))
 	}
 	got := Extract("AKIAIOSFODNN7EXAMPLE", Context{Name: "key", Source: "code"})
-	if len(got) != 49 {
+	if len(got) != 51 {
 		t.Fatalf("Extract returned %d features, want 49", len(got))
 	}
 }

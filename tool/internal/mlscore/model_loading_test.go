@@ -22,7 +22,7 @@ func ownedModelJSON(t *testing.T, names []string) []byte {
 }
 
 func TestEmbeddedRejectsIncompatibleFeatureOrder(t *testing.T) {
-	for _, mode := range []string{"reordered", "unknown", "duplicate", "empty", "legacy-zlib", "legacy-flate-v1"} {
+	for _, mode := range []string{"reordered", "unknown", "duplicate", "empty", "legacy-zlib", "legacy-flate-v1", "legacy-unscoped-flate-v2"} {
 		t.Run(mode, func(t *testing.T) {
 			names := append([]string(nil), mlfeatures.FeatureNames...)
 			switch mode {
@@ -38,6 +38,8 @@ func TestEmbeddedRejectsIncompatibleFeatureOrder(t *testing.T) {
 				names[7] = "compression_ratio"
 			case "legacy-flate-v1":
 				names[7] = "compression_ratio_go_flate_v1"
+			case "legacy-unscoped-flate-v2":
+				names = names[:49]
 			}
 			path := filepath.Join(t.TempDir(), "model.json")
 			if err := os.WriteFile(path, ownedModelJSON(t, names), 0o600); err != nil {
