@@ -164,5 +164,163 @@
     "CLI scan adapters and LSP remove disabled rule producers before candidate extraction or verification.",
     "detectors.enable retains its existing exact matching and producer scope. Report IDs are unchanged."
   ],
-  "scope": "Synthetic local fixtures; no live provider, deployment, remote publication or final Docker image qualification."
+  "scope": "Synthetic local fixtures; no live provider, deployment, remote publication or final Docker image qualification.",
+  "main_integration": {
+    "source_commit": "dd16c10",
+    "full_go": "passed",
+    "native": {
+      "binary_sha256": "01533498c7c061f46b4cda7322a3908c4790769e6b2ce29ad91b01015b566c58",
+      "passed": 36,
+      "total": 36,
+      "checks": [
+        {
+          "case": "False/json/positive",
+          "passed": true
+        },
+        {
+          "case": "False/json/0/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/json/0/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/json/1/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/json/1/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/json/2/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/json/2/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/json/unrelated",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/positive",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/0/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/0/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/1/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/1/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/2/disabled",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/2/redacted",
+          "passed": true
+        },
+        {
+          "case": "False/sarif/unrelated",
+          "passed": true
+        },
+        {
+          "case": "True/json/positive",
+          "passed": true
+        },
+        {
+          "case": "True/json/0/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/json/0/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/json/1/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/json/1/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/json/2/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/json/2/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/json/unrelated",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/positive",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/0/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/0/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/1/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/1/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/2/disabled",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/2/redacted",
+          "passed": true
+        },
+        {
+          "case": "True/sarif/unrelated",
+          "passed": true
+        },
+        {
+          "case": "json/custom-positive",
+          "passed": true
+        },
+        {
+          "case": "sarif/custom-positive",
+          "passed": true
+        },
+        {
+          "case": "json/custom-disabled",
+          "passed": true
+        },
+        {
+          "case": "sarif/custom-disabled",
+          "passed": true
+        }
+      ],
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-config-disable-native-lyqrfxp8",
+      "scope": "synthetic local values, bundled rules, no provider or network requests"
+    },
+    "unrelated_dirty_work_preserved": true
+  }
 }
