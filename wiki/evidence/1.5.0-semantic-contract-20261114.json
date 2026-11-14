@@ -433,5 +433,26 @@
     "Joint retention under the actual L2 model is not qualified",
     "compare --semantic is rejected until one bounded candidate snapshot can feed both reports",
     "No external endpoint or live-provider qualification"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "7035210",
+    "full_go": "passed",
+    "native_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-semantic-native-__a3jbfe/qualification.json",
+    "native_passed": 101,
+    "native_total": 101,
+    "binary_sha256": "1c0e916b4be76b7e1b45b9bf2110bc764eee1f7800b4f9205ea27fbd2b9e774e",
+    "non_regression": {
+      "lsp": {
+        "passed": 2258,
+        "total": 2258,
+        "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-lsp-native-srrytl5d/qualification.json"
+      },
+      "mcp": {
+        "passed": 80,
+        "total": 80,
+        "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mcp-native-1vihlicm/qualification.json"
+      }
+    },
+    "unrelated_dirty_changes_preserved": true
+  }
 }
