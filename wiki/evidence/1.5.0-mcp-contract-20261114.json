@@ -1,0 +1,422 @@
+{
+  "status": "locally qualified MCP transport restoration; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "native": {
+    "binary_sha256": "18ad8a37d4a9cac808f6c8dff38a43c59838a1b10f7d9f6559e90f378affb9c2",
+    "passed": 80,
+    "total": 80,
+    "checks": [
+      {
+        "case": "negotiation",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "tool-schemas",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "typed",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "spaces",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "ml",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "reconstruct",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "verified-only-empty",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "unknown-argument",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "wrong-type",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "flag-injection",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "authorization",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "ping",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "clean-session-close",
+        "protocol": "2024-11-05",
+        "passed": true
+      },
+      {
+        "case": "negotiation",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "tool-schemas",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "typed",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "spaces",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "ml",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "reconstruct",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "verified-only-empty",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "unknown-argument",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "wrong-type",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "flag-injection",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "authorization",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "ping",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "clean-session-close",
+        "protocol": "2025-03-26",
+        "passed": true
+      },
+      {
+        "case": "negotiation",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "tool-schemas",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "typed",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "spaces",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "ml",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "reconstruct",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "verified-only-empty",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "unknown-argument",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "wrong-type",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "flag-injection",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "authorization",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "ping",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "clean-session-close",
+        "protocol": "2025-06-18",
+        "passed": true
+      },
+      {
+        "case": "negotiation",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "tool-schemas",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "clean",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "typed",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "spaces",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "structured",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "pragma",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "ml",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "reconstruct",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "malformed",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "reveal",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "verified-only-empty",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "mobile",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "unknown-argument",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "wrong-type",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "flag-injection",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "authorization",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "ping",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "unsupported-version",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "missing-capabilities",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "early-cancel-ping",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "clean-session-close",
+        "protocol": "2026-07-28",
+        "passed": true
+      },
+      {
+        "case": "startup-arguments",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite_passed": true,
+    "mcp_race_passed": true,
+    "lint_passed": true,
+    "minimum_go_1_26_11_mcp_passed": true
+  },
+  "limits": [
+    "bundled strict semantic CLI/MCP restoration remains open",
+    "native verified_only case has no findings; no live provider invoked",
+    "domain repo CI acquisition and external clients not exercised",
+    "LSP audit remains open"
+  ]
+}

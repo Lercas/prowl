@@ -146,6 +146,12 @@
       Пустой batch сохраняет policy scope; отмена, parser failure и лимиты не
       сертифицируются как complete. Нативный worker на loopback — 57/57;
       `wiki/evidence/1.5.0-http-contract-20261114.json`. MCP/LSP остаются открыты.
+    - [x] Восстановлены MCP transport negotiation/discovery, structuredContent,
+      отмена request ID и EOF, два активных скана, бюджеты времени и stdout.
+      Строгий JSON отказывает при неоднозначности до subprocess, пути сохраняются
+      буквально; доступны `reconstruct` и `verified_only`. Нативная stdio-матрица
+      четырёх версий — 80/80, `wiki/evidence/1.5.0-mcp-contract-20261114.json`.
+      Остались CLI/MCP `bundled`, `strict`, `semantic`, а также аудит LSP.
 
 ### P1 — архитектура CLI
 

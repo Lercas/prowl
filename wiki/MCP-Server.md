@@ -26,17 +26,54 @@ Each tool runs the corresponding scan and returns the JSON findings envelope as 
 
 | Tool | Required args | Optional | Use for |
 |------|---------------|----------|---------|
-| `prowl_scan` | `path` | `verify`, `ml`, `ocr`, `show_secrets` | a local file or directory |
-| `prowl_domain` | `target`, `authorized` | `recon`, `verify` | a domain's public web surface |
-| `prowl_mobile` | `path` | `ml` | an Android `.apk` / iOS `.ipa` |
-| `prowl_repo` | `url` | `verify`, `ocr` | a git repository |
-| `prowl_cicd` | `target` | `verify`, `ml` | GitHub Actions / GitLab CI logs and artifacts |
+| `prowl_scan` | `path` | `verify`, `verified_only`, `ml`, `ocr`, `show_secrets`, `reconstruct` | a local file or directory |
+| `prowl_domain` | `target`, `authorized` | `recon`, `verify`, `verified_only`, `reconstruct` | a domain's public web surface |
+| `prowl_mobile` | `path` | `ml`, `reconstruct` | an Android `.apk` / iOS `.ipa` |
+| `prowl_repo` | `url` | `verify`, `verified_only`, `ocr`, `reconstruct` | a git repository |
+| `prowl_cicd` | `target` | `verify`, `verified_only`, `ml`, `reconstruct` | GitHub Actions / GitLab CI logs and artifacts |
 
 The optional args map to the CLI flags of the same name: `verify` → [`--verify`](Live-Verification.md)
 (post-detection provider validation), `ml` → `--ml` (the [L2 ML candidate filter](Data-Flywheel.md)),
 `ocr` → `--ocr` (the configured local [image/PDF OCR](OCR-Scanning.md)), `show_secrets` →
 `--show-secrets` (raw values for authorized triage), `recon` → `--recon` (the
 [domain deep sweep](Domain-Scanning.md)).
+
+`reconstruct` включает ограниченную статическую реконструкцию JS/TS, без исполнения
+кода. `verified_only` включает live verification с последующей фильтрацией;
+его семантика совпадает с CLI `--verified-only`, включая сохранение некоторых
+high/critical типов без верификатора. Полное описание — [Live Verification](Live-Verification.md).
+Путь `path` сохраняется буквально, включая начальные и конечные пробелы.
+Неизвестные аргументы и значения неверного типа отклоняются до запуска сканера.
+
+## Протокол и жизненный цикл
+
+Сохранены версии транспорта из выпущенного 1.4.0: initialization-based
+`2024-11-05`, `2025-03-26`, `2025-06-18` и запросы `2026-07-28` с `_meta`
+`io.modelcontextprotocol/protocolVersion` и `io.modelcontextprotocol/clientCapabilities`.
+Для последнего варианта доступен `server/discover`; неподдерживаемая версия даёт
+ошибку с перечнем поддерживаемых значений. Modern-ответы содержат `resultType`
+и server info. Это контракт реализации Prowl, проверяемый локальными тестами.
+
+Отчёт доступен и как text content, и как `structuredContent`; schemas инструментов
+объявляют форму результата. `isError` поднимается при неполноте, truncation или
+ошибке процесса; RPC-успех сам по себе не означает complete scan.
+Ошибки запуска не раскрывают содержимое stderr дочернего процесса.
+
+Одновременно выполняются не более двух сканов, каждый ограничен пятью минутами
+и 32 МиБ stdout. Входное JSON-RPC сообщение ограничено 16 МиБ. `ping` не ждёт
+завершения скана. `notifications/cancelled` отменяет активный request ID;
+для modern-вызова отменённый результат не отправляется. EOF отменяет оставшиеся
+сканы и дожидается завершения дочерних процессов. Повтор активного ID отклоняется.
+Дубли полей и lossy Unicode отклоняются строгим JSON-декодером.
+
+`prowl mcp` запускается без scan flags; параметры передаются в `tools/call`.
+Возврат аргументов `bundled`, `strict`, `semantic` из 1.4.0 ещё не завершён:
+их CLI-реализации остаются отдельными пунктами миграции и сейчас не рекламируются.
+
+Локальная проверка: `python3 scripts/check_mcp_contract.py /path/to/prowl`.
+Матрица использует отдельный PROWL_HOME, только собственные файлы/APK и stdio;
+не вызывает live-провайдеров, domain, clone или CI API. Отмена активных вызовов,
+пределы concurrency/output и ошибки транспорта отдельно покрыты Go/race-тестами.
 
 ## The `authorized` gate
 
