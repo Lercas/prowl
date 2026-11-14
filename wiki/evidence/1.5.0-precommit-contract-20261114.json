@@ -1,0 +1,87 @@
+{
+  "status": "native pre-commit locally qualified; Docker hook and release tag not published/qualified",
+  "native": {
+    "passed": 14,
+    "total": 14,
+    "checks": [
+      {
+        "case": "direct-partial-staging/redacted",
+        "passed": true
+      },
+      {
+        "case": "direct-consumer-index",
+        "passed": true
+      },
+      {
+        "case": "direct-reconstruction/redacted",
+        "passed": true
+      },
+      {
+        "case": "direct-reconstruct",
+        "passed": true
+      },
+      {
+        "case": "framework-partial-staging/redacted",
+        "passed": true
+      },
+      {
+        "case": "framework-real-index",
+        "passed": true
+      },
+      {
+        "case": "framework-restored-working-copy",
+        "passed": true
+      },
+      {
+        "case": "framework-clean/redacted",
+        "passed": true
+      },
+      {
+        "case": "framework-clean-index",
+        "passed": true
+      },
+      {
+        "case": "direct-unmerged/redacted",
+        "passed": true
+      },
+      {
+        "case": "direct-incomplete",
+        "passed": true
+      },
+      {
+        "case": "installed-overlay-untouched",
+        "passed": true
+      },
+      {
+        "case": "direct-empty/redacted",
+        "passed": true
+      },
+      {
+        "case": "empty-index-scope",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-precommit-native-d8etx_eb",
+    "source_revision": "0ad3944039f4e17a73012a3925743e1f907704d3",
+    "pre_commit_version": "pre-commit 4.7.0",
+    "scope": "native script hook and real pre-commit on local disposable consumer repositories; Go module network disabled; Docker hook and publication not qualified"
+  },
+  "checks": {
+    "manifest_validation": "passed with pre-commit 4.7.0",
+    "shell_syntax": "passed",
+    "actionlint": "passed",
+    "python_compile": "passed"
+  },
+  "semantics": [
+    "Native hook builds in its own checkout and runs against consumer index without changing process cwd globally",
+    "Static CGO=0 binary with bundled rules and reconstruction; private installed overlay retained",
+    "Real pre-commit clones the committed local hook and restores unstaged consumer content",
+    "CLI code 2 for incomplete index remains distinct from findings code 1; pre-commit framework exposes failure as 1"
+  ],
+  "limits": [
+    "POSIX host runtime qualified locally; Linux CI job prepared, not remotely executed",
+    "Docker hook points to planned v1.5.0; exact final image blocked by Docker storage and pending approval",
+    "Qualification uses cached Go modules with GOPROXY/GOSUMDB disabled after selecting an installed toolchain",
+    "Dependency installation for the test framework is separate from offline fixture execution"
+  ]
+}

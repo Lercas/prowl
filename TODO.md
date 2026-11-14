@@ -228,6 +228,13 @@
       JSON/SARIF ±L2 сохраняют находку, redaction и baseline guard при ошибке архива.
       Evidence — `wiki/evidence/1.5.0-source-boundaries-20261114.json`.
 
+    - [x] Восстановлены каталог pre-commit и нативная оболочка: сборка в checkout
+      хука, скан immutable staged blobs вызывающего репозитория, bundled rules и
+      reconstruction; статический Go без cgo. Реальный pre-commit 4.7.0 — 14/14,
+      с partial staging, возвратом рабочей копии, unmerged/empty index и redaction.
+      Добавлен CI gate; `wiki/evidence/1.5.0-precommit-contract-20261114.json`.
+      Docker hook закреплён на будущем v1.5.0, его итоговый образ ещё не квалифицирован.
+
 ### P1 — архитектура CLI
 
 - [x] **Декларативные флаги по командам.** `flags.go` задаёт имена, алиасы, области команд,

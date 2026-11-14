@@ -63,3 +63,6 @@ assets/concepts/
 /tests/
 /pyproject.toml
 /data/
+
+# Local binaries built by the pre-commit wrapper.
+.hook-bin/

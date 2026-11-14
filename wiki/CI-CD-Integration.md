@@ -93,6 +93,43 @@ prowl scan . --fail-on high --silence
 
 Note that `--silence` suppresses stdout reporting but **not** `-o`/`--output`: you can be silent on the console and still write a SARIF/JSON artifact to a file. Related logging flags: `-q`/`--quiet` (warnings+errors only, still prints the report), `-v`/`--verbose` (debug), and `--log-format json` for structured logs you can aggregate.
 
+## Каталог pre-commit для 1.5.0
+
+Корневой `.pre-commit-hooks.yaml` снова предоставляет два id: `prowl` и
+`prowl-docker`. Оба запускаются без списка имён файлов и проверяют Git index,
+включая partial staging; `always_run: true` сохраняет диагностику пустого index.
+Включены `--strict --bundled --reconstruct --fail-on high`.
+
+Нативный `prowl` требует Go и POSIX shell. Оболочка `scripts/precommit-prowl`
+собирает статический бинарник (`CGO_ENABLED=0`) в `.hook-bin/` собственного
+checkout хука, затем исполняет его из исходного каталога потребителя. Повреждённые
+установленные rules не заменяют bundled snapshot и не изменяются. Сборка при первом
+запуске может загружать Go toolchain/dependencies; секреты потребителя не передаются
+в сборку. Параметры отчёта можно передать через `args`, например `--format=json`.
+
+Docker hook закреплён на `ghcr.io/lercas/prowl:v1.5.0`; для него нужен Docker,
+без локального Go. Этот тег требует отдельной публикации. Квалификация итогового
+Docker-образа пока не завершена из-за read-only storage Docker Desktop;
+нативные проверки не доказывают работоспособность этого артефакта.
+
+После публикации релиза конфигурация потребителя выглядит так:
+
+```yaml
+repos:
+  - repo: https://github.com/Lercas/prowl
+    rev: v1.5.0
+    hooks:
+      - id: prowl
+```
+
+`pre-commit` возвращает `1` при отказе любого хука; исходный CLI различает находки
+(`1`) и неполный скан (`2`). Нативная квалификация с pre-commit 4.7.0 проверяет
+читаемый JSON, redaction, actual index, reconstruction, пустой/неразрешённый index
+и сохранность рабочей копии: 14/14. Воспроизведение:
+`python3 scripts/check_precommit_contract.py --pre-commit /path/to/pre-commit`.
+Нужны уже загруженные модули Go: само тестирование запрещает их сетевую загрузку.
+Evidence: `wiki/evidence/1.5.0-precommit-contract-20261114.json`.
+
 ## GitHub Actions
 
 Build Prowl, scan, gate on `high`, and upload SARIF to Code Scanning. The SARIF upload runs even when the gate fails so findings still land on the PR.
