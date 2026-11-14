@@ -55,6 +55,36 @@ jobs:
           pre-commit validate-manifest .pre-commit-hooks.yaml
           python scripts/check_precommit_contract.py --pre-commit "$(command -v pre-commit)"
 
+  native-acquisition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.4'
+          cache-dependency-path: tool/go.sum
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: build static qualification binary
+        env:
+          CGO_ENABLED: '0'
+          GOTOOLCHAIN: go1.27.4
+          GOMAXPROCS: '2'
+          GOFLAGS: -p=2
+        run: go -C tool build -o "$RUNNER_TEMP/prowl-acquisition" ./cmd/prowl
+      - name: repository snapshots and forge inventory
+        run: |
+          python3 scripts/check_repository_contract.py "$RUNNER_TEMP/prowl-acquisition"
+          python3 scripts/check_forge_inventory.py "$RUNNER_TEMP/prowl-acquisition"
+      - name: cloud download boundaries and detector selection
+        run: |
+          python3 scripts/check_bucket_contract.py "$RUNNER_TEMP/prowl-acquisition"
+          python3 scripts/check_config_disable.py "$RUNNER_TEMP/prowl-acquisition"
+
   corpus-performance:
     runs-on: ubuntu-latest
     timeout-minutes: 20

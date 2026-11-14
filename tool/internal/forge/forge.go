@@ -16,8 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
+	"github.com/Lercas/prowl/tool/internal/jsonstrict"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
@@ -34,13 +34,14 @@ var maxPages = 200
 // SetMaxPages overrides the pagination cap (limits.org_max_pages); a non-positive value is ignored.
 func SetMaxPages(n int) {
 	if n > 0 {
-		maxPages = n
+		maxPages = min(n, hardMaxPages)
 	}
 }
 
 // ListRepos returns the https clone URLs of every repository under target, where target is
 // "<platform>:<name>" — github:<org-or-user>, gitlab:<group>, or bitbucket:<workspace>.
-func ListRepos(ctx context.Context, target string) ([]string, error) {
+func ListRepos(ctx context.Context, target string) (urls []string, err error) {
+	defer func() { recordInventory(ctx, target, false, urls, err) }()
 	platform, name, ok := strings.Cut(target, ":")
 	if !ok || name == "" {
 		return nil, fmt.Errorf("target must be <platform>:<name> (e.g. github:Lercas), got %q", target)
@@ -59,12 +60,17 @@ func ListRepos(ctx context.Context, target string) ([]string, error) {
 
 // ListGists returns the clone URLs of every public gist of a github:<user> target. Gists are
 // user-scoped (orgs have none) and clone from git_pull_url, not clone_url.
-func ListGists(ctx context.Context, target string) ([]string, error) {
+func ListGists(ctx context.Context, target string) (urls []string, err error) {
+	defer func() { recordInventory(ctx, target, true, urls, err) }()
 	platform, name, ok := strings.Cut(target, ":")
 	if !ok || name == "" || platform != "github" {
 		return nil, fmt.Errorf("--gists supports a github:<user> target, got %q", target)
 	}
 	token, host := os.Getenv("GITHUB_TOKEN"), envOr("GITHUB_API", "https://api.github.com")
+	host, err = apiBase(host)
+	if err != nil {
+		return nil, err
+	}
 	hdr := map[string]string{"Accept": "application/vnd.github+json", "Authorization": bearer(token)}
 	u := fmt.Sprintf("%s/users/%s/gists?per_page=100&page=1", strings.TrimRight(host, "/"), url.PathEscape(name))
 	urls, status, err := listArrays(ctx, u, hdr, "git_pull_url")
@@ -85,6 +91,11 @@ func gitlabRepos(ctx context.Context, name string) ([]string, error) {
 }
 
 func accountRepos(ctx context.Context, host, kind, name, resource, field string, hdr map[string]string) ([]string, error) {
+	base, err := apiBase(host)
+	if err != nil {
+		return nil, err
+	}
+	host = base
 	endpoint := func(kind string) string {
 		query := "per_page=100&page=1"
 		if resource == "projects" {
@@ -127,7 +138,7 @@ func listArrays(ctx context.Context, first string, hdr map[string]string, field 
 		}
 		for _, entry := range entries {
 			var clone string
-			if err := json.Unmarshal(entry[field], &clone); err != nil || clone == "" {
+			if err := json.Unmarshal(entry[field], &clone); err != nil || !validCloneEntry(clone) {
 				problems = errors.New("one or more repository entries have no clone URL")
 				continue
 			}
@@ -141,7 +152,7 @@ func listArrays(ctx context.Context, first string, hdr map[string]string, field 
 			return urls, status, errors.Join(problems, err)
 		}
 		if continuation != "" {
-			continuation, err = checkedPageURL(first, next, continuation)
+			continuation, err = checkedArrayPageURL(first, next, continuation)
 			if err != nil {
 				return urls, status, errors.Join(problems, err)
 			}
@@ -191,7 +202,7 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 		for _, v := range page.Values {
 			found := false
 			for _, cl := range v.Links.Clone {
-				if cl.Name == "https" && cl.Href != "" {
+				if cl.Name == "https" && validCloneEntry(cl.Href) {
 					found = true
 					if !repos[cl.Href] {
 						urls = append(urls, cl.Href)
@@ -219,21 +230,60 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 
 // API-provided continuations are new requests, so redirect guards alone cannot protect credentials.
 func checkedPageURL(first, current, next string) (string, error) {
+	if len(next) > 8192 {
+		return "", errors.New("repository continuation URL exceeds size limit")
+	}
 	root, err := url.Parse(first)
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid repository pagination URL")
 	}
 	base, err := url.Parse(current)
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid repository pagination URL")
 	}
 	ref, err := url.Parse(next)
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid repository pagination URL")
 	}
 	u := base.ResolveReference(ref)
 	if u.User != nil || u.Fragment != "" || !strings.EqualFold(u.Scheme, root.Scheme) || !strings.EqualFold(u.Host, root.Host) || u.EscapedPath() != root.EscapedPath() {
 		return "", errors.New("repository pagination left the original API endpoint")
+	}
+	return u.String(), nil
+}
+
+// GitHub/GitLab array listings use offset pages while preserving the requested selection.
+// Bitbucket next links remain opaque within checkedPageURL's endpoint boundary.
+func checkedArrayPageURL(first, current, next string) (string, error) {
+	address, err := checkedPageURL(first, current, next)
+	if err != nil {
+		return "", err
+	}
+	root, _ := url.Parse(first)
+	u, _ := url.Parse(address)
+	firstQuery, err := url.ParseQuery(root.RawQuery)
+	if err != nil {
+		return "", errors.New("invalid repository selection query")
+	}
+	query, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return "", errors.New("invalid repository continuation query")
+	}
+	for key, values := range firstQuery {
+		if key == "page" {
+			continue
+		}
+		if strings.Join(values, "\x00") != strings.Join(query[key], "\x00") {
+			return "", errors.New("repository pagination changed the requested selection")
+		}
+	}
+	for key := range query {
+		if key != "page" && firstQuery[key] == nil {
+			return "", errors.New("repository pagination introduced a selection parameter")
+		}
+	}
+	if len(query["page"]) > 1 {
+		return "", errors.New("ambiguous repository page index")
 	}
 	return u.String(), nil
 }
@@ -253,6 +303,9 @@ func nextPage(headers http.Header, current string) (string, error) {
 			}
 			for _, rel := range strings.Fields(params["rel"]) {
 				if rel == "next" {
+					if part[1:end] == "" {
+						return "", errors.New("empty repository next-page link")
+					}
 					if next != "" {
 						return "", errors.New("multiple next-page links")
 					}
@@ -261,7 +314,17 @@ func nextPage(headers http.Header, current string) (string, error) {
 			}
 		}
 	}
+	pages := headers.Values("X-Next-Page")
+	if len(pages) > 1 {
+		return "", errors.New("ambiguous repository next-page header")
+	}
 	if next != "" {
+		if page := headers.Get("X-Next-Page"); page != "" {
+			u, err := url.Parse(next)
+			if err != nil || u.Query().Get("page") != page {
+				return "", errors.New("conflicting repository next-page headers")
+			}
+		}
 		return next, nil
 	}
 	if page := headers.Get("X-Next-Page"); page != "" {
@@ -281,10 +344,25 @@ func nextPage(headers http.Header, current string) (string, error) {
 	return "", nil
 }
 
-func getJSON(ctx context.Context, u string, hdr map[string]string, out any) (int, http.Header, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+// apiRequestError keeps the underlying error available for classification without reflecting a
+// credential-bearing API URL, response or transport diagnostic into logs.
+type apiRequestError struct{ cause error }
+
+func (e *apiRequestError) Error() string { return "repository API request failed" }
+func (e *apiRequestError) Unwrap() error { return e.cause }
+
+func getJSON(ctx context.Context, rawURL string, hdr map[string]string, out any) (status int, headers http.Header, err error) {
+	if len(rawURL) > 8192 {
+		return 0, nil, errors.New("repository API endpoint exceeds size limit")
+	}
+	u, parseErr := url.Parse(rawURL)
+	if parseErr != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil || u.Fragment != "" {
+		return 0, nil, errors.New("invalid repository API endpoint")
+	}
+	registerAPI(ctx, rawURL, hdr)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, &apiRequestError{err}
 	}
 	for k, v := range hdr {
 		if v != "" {
@@ -293,22 +371,25 @@ func getJSON(ctx context.Context, u string, hdr map[string]string, out any) (int
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, &apiRequestError{err}
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil && err == nil {
+			err = errors.New("close repository listing body failed")
+		}
+	}()
 	if resp.StatusCode == http.StatusOK {
-		const limit = 32 << 20
-		body, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
-		if err == nil && len(body) > limit {
-			err = errors.New("repository API response exceeds 32 MiB")
-		}
-		if err == nil && !utf8.Valid(body) {
-			err = errors.New("repository API response is not UTF-8")
-		}
-		if err == nil {
-			err = json.Unmarshal(body, out)
-		}
+		body, err := io.ReadAll(io.LimitReader(resp.Body, maxJSONBody+1))
 		if err != nil {
+			return resp.StatusCode, resp.Header, errors.New("read repository API response failed")
+		}
+		if len(body) > maxJSONBody {
+			return resp.StatusCode, resp.Header, errors.New("repository API response exceeds 32 MiB")
+		}
+		if err := boundListingRows(body, out); err != nil {
+			return resp.StatusCode, resp.Header, err
+		}
+		if err := jsonstrict.UnmarshalContext(ctx, body, out); err != nil {
 			return resp.StatusCode, resp.Header, fmt.Errorf("decode repository API: %w", err)
 		}
 	}

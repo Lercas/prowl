@@ -80,6 +80,41 @@ When `prowl org` scans a repository, that repository's own `.prowl.yaml` is **ig
 
 Пагинация учитывает продолжение из `Link`/`X-Next-Page` и поля Bitbucket `next`, а не размер страницы. Переход на другой origin или endpoint запрещён до отправки токена. Ограничение `limits.org_max_pages` прекращает обход с диагностикой неполноты. API-ответ ограничен 32 MiB и должен содержать один полный JSON-документ. Повторяющиеся clone URL сканируются один раз.
 
+## Inventory scope в 1.5.0
+
+`forge-inventory` фиксирует target, режим repo/gists, эффективный предел страниц,
+статус листинга, число принятых URL и digest отсортированного наблюдаемого набора
+без URL credentials/query/fragment. `forge-api` фиксирует фактически запрошенный
+endpoint без query и наличие настроенного токена; значение токена и identity его
+владельца не включаются. Fallback org/group → user отражает оба endpoint.
+Scope сохраняется для успешного пустого списка и для неполного листинга.
+
+GitHub/GitLab continuation не может менять `per_page`, `include_subgroups` или
+добавлять фильтр к исходной выборке. Согласованные `Link` и `X-Next-Page` допустимы,
+противоречивые или неоднозначные заголовки дают неполноту до следующего запроса.
+Bitbucket `next` остаётся opaque URL внутри прежнего origin/endpoint: номер страницы
+не конструируется и отсутствие `pagelen` в следующем URL само по себе не ошибка.
+См. [GitLab pagination](https://docs.gitlab.com/api/rest/#pagination) и
+[Bitbucket pagination](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pagination).
+
+В одном ответе принимается до 100 записей, до выделения типизированного массива.
+JSON с повторными полями, непарными Unicode surrogates или лишним документом
+отклоняется. Clone URL ограничен 4096 байтами, API/continuation URL — 8192 байтами;
+предел `org_max_pages` ограничен сверху 4096 для каждого endpoint. Ошибка, включая
+ошибку закрытия HTTP body, сохраняет неполноту. Текст транспортной ошибки, полный
+ошибочный URL и API body не отражаются в логах Prowl.
+
+Inventory не является атомарным снимком forge или доказательством полного доступа
+токена ко всем приватным репозиториям. Успешная пагинация и отсутствие находки
+не доказывают remote absence либо отзыв секрета. `--exclude-repo` по-прежнему
+задаёт отдельный пользовательский отбор после листинга.
+
+Локальная нативная матрица использует собственные GitHub/GitLab API и локальные Git
+объекты; Bitbucket проверен тестами с локальным HTTP-сервером. Внешние forge и
+провайдеры не вызывались. Матрицы repo/forge/bucket/config включены в CI job
+`native-acquisition`; внешний запуск CI остаётся частью релизной квалификации.
+Доказательства: [forge inventory](evidence/1.5.0-forge-inventory-20261114.json).
+
 ## Output
 
 Repositories are cloned and scanned **in parallel** — `--concurrency N` (default `min(4, number of repos)`) — each in its own temp checkout that is removed as it finishes. Progress is logged to stderr (`scanned repo=… findings=N`) so you can watch a long sweep.

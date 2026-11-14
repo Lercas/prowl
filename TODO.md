@@ -251,7 +251,7 @@
       и блокирует baseline; URL credentials/query исключены из вывода и scopes.
       Нативная матрица — 99/99, полный Go-набор/race/lint/Go 1.26.11 проходят.
       `wiki/evidence/1.5.0-repository-contract-20261114.json`.
-      Forge inventory и доказательство remote absence остаются открыты.
+      Наблюдаемый forge inventory квалифицирован ниже; remote absence остаётся открытым.
 
     - [x] `bucket`: стабильные acquisition/selection scopes, source URL и SHA-256
       исходных байтов объекта, включая UTF-16 и содержимое архивов. Контейнерный
@@ -268,6 +268,16 @@
       Шаблоны отключаются до кандидатов и verification; report IDs не меняются.
       `detectors.enable` сохраняет прежний exact-match контракт.
       Доказательства: `wiki/evidence/1.5.0-config-disable-20261114.json`.
+
+    - [x] `org` forge inventory: отдельные API/observed-set scopes, включая
+      empty/partial и org→user fallback; токены и provider identity не приписываются.
+      GitHub/GitLab pagination сохраняет отбор, Bitbucket next остаётся opaque
+      в пределах endpoint. Строгий JSON, preallocation row bounds и ограниченный
+      page cap; транспортные/URL/close ошибки не отражают приватные детали.
+      Нативная GitHub/GitLab матрица — 241/241; полный Go-набор, race forge,
+      Go 1.26.11 и lint проходят. `wiki/evidence/1.5.0-forge-inventory-20261114.json`.
+      Добавлен CI gate для нативных repo/forge/bucket/config матриц.
+      Полный remote inventory, права токена и absence/remediation не доказываются.
 
 ### P1 — архитектура CLI
 
