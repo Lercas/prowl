@@ -745,5 +745,26 @@
     "recover recall to retained threshold without lowering baseline",
     "external CI and release jobs not executed",
     "full corpus and field/span-level quality not certified by subset gate"
-  ]
+  ],
+  "main_integration": {
+    "runner_commit": "cd2ebc1",
+    "binary_source_commit": "268bc7c",
+    "native": {
+      "status": "regression",
+      "passed": false,
+      "binary_sha256": "a5131924d8e8a4f5975f6202cb22173032d67a3c255820abc1f8f6adda68d3c4",
+      "recall": 0.724450811843362,
+      "t4_fp_rate": 0.0539714867617108,
+      "secret_hits": 1517,
+      "secrets": 2094,
+      "hard_negative_hits": 53,
+      "hard_negatives": 982
+    },
+    "unit_tests": 8,
+    "ruff": "passed",
+    "actionlint": "passed",
+    "candidate_source_commit": "8cde8e6",
+    "external_ci": "not run",
+    "runtime_changes": "none; this patch adds the runner, policy and workflow wiring"
+  }
 }
