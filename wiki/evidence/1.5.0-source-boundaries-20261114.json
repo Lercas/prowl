@@ -553,5 +553,485 @@
         "passed": true
       }
     ]
+  },
+  "main_integration": {
+    "source_commit": "12f9cf7",
+    "full_go": "passed",
+    "native": {
+      "version": "1.5.0",
+      "cases": [
+        {
+          "case": "status_shaped_name",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "--staged"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/status_shaped_name",
+          "after": {
+            "exit": 1,
+            "complete": true,
+            "has_envelope": true,
+            "target_findings": 1
+          },
+          "passed": true
+        },
+        {
+          "case": "unmerged_index",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "--staged"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/unmerged_index",
+          "after": {
+            "exit": 2,
+            "complete": false,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        },
+        {
+          "case": "empty_index",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "--staged"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/empty_index",
+          "after": {
+            "exit": 0,
+            "complete": true,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        },
+        {
+          "case": "subdirectory",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "--staged"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/subdirectory/sub",
+          "after": {
+            "exit": 1,
+            "complete": true,
+            "has_envelope": true,
+            "target_findings": 1
+          },
+          "passed": true
+        },
+        {
+          "case": "archive_depth",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "nested.zip"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/archives",
+          "after": {
+            "exit": 2,
+            "complete": false,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        },
+        {
+          "case": "malformed_archive",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "corrupt.zip"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/archives",
+          "after": {
+            "exit": 2,
+            "complete": false,
+            "has_envelope": true,
+            "target_findings": 1
+          },
+          "passed": true
+        },
+        {
+          "case": "malformed-False-json",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": true,
+          "baseline_preserved": true
+        },
+        {
+          "case": "malformed-False-sarif",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": true,
+          "baseline_preserved": true
+        },
+        {
+          "case": "malformed-True-json",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": true,
+          "baseline_preserved": true
+        },
+        {
+          "case": "malformed-True-sarif",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": true,
+          "baseline_preserved": true
+        },
+        {
+          "case": "depth-False-json",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": false,
+          "baseline_preserved": true
+        },
+        {
+          "case": "depth-False-sarif",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": false,
+          "baseline_preserved": true
+        },
+        {
+          "case": "depth-True-json",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": false,
+          "baseline_preserved": true
+        },
+        {
+          "case": "depth-True-sarif",
+          "passed": true,
+          "exit": 2,
+          "complete": false,
+          "typed_hit": false,
+          "baseline_preserved": true
+        },
+        {
+          "case": "escaped_template",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "application.js",
+            "--reconstruct"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/expressions",
+          "after": {
+            "exit": 0,
+            "complete": true,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        },
+        {
+          "case": "regex_work_budget",
+          "command_arguments": [
+            "scan",
+            "--strict",
+            "--format",
+            "json",
+            "--fail-on",
+            "high",
+            "ambiguous.js",
+            "--reconstruct"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/expressions",
+          "after": {
+            "exit": 2,
+            "complete": false,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        },
+        {
+          "case": "correlation_link_cap",
+          "command_arguments": [
+            "correlate",
+            "before.json",
+            "after.json"
+          ],
+          "working_directory": "/private/tmp/prowl-boundaries-main-native-20261114-qualified/correlation",
+          "after": {
+            "exit": 2,
+            "complete": false,
+            "has_envelope": true,
+            "target_findings": 0
+          },
+          "passed": true
+        }
+      ],
+      "binary_sha256": {
+        "after": "7b9d55ec1ffdab12fb5202b039d074a71a3ef5795c16290c9997536b402c29e3"
+      },
+      "boundary": "Own synthetic inputs. No network verification. Correlation identity IDs are simulated metadata, not real organization keys. Inputs and outputs retained.",
+      "inputs_retained": "/private/tmp/prowl-boundaries-main-native-20261114-qualified"
+    },
+    "source_coverage_nonregression": {
+      "binary_sha256": "7b9d55ec1ffdab12fb5202b039d074a71a3ef5795c16290c9997536b402c29e3",
+      "passed": 36,
+      "total": 36,
+      "checks": [
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "filesystem-policy",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "index",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "worktree",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "history",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "timeline",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "mobile-limit",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "image",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": false,
+          "format": "sarif",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "json",
+          "passed": true
+        },
+        {
+          "case": "agents",
+          "stored": true,
+          "format": "sarif",
+          "passed": true
+        }
+      ]
+    },
+    "preserved_unrelated_dirty_work": true
   }
 }
