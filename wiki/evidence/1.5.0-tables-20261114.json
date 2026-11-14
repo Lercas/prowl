@@ -1,0 +1,334 @@
+{
+  "date": "2026-11-14",
+  "status": "locally_qualified_increment",
+  "source_commit": "e9f52e1c3114810fe7f9248aa41335b7f8a62976",
+  "parent": "99619054a53a6e9397e839a8bec12a530978d2ec",
+  "source_sha256": {
+    "tool/internal/detect/rules.go": "cf1553060c72c2027d538a08357bffd6e849f3163d787fff5520f0cec02a2069",
+    "tool/internal/detect/tables.go": "62dd4bec24cbd6602fd133177f7fbed16481627f471c61f281e37d483d0a0a78",
+    "tool/internal/detect/tables_test.go": "c314c918dcb6530f22a79437a89ef6c21e4840f99e9150fbd47ac337e054d6c2",
+    "tool/internal/scan/scan.go": "a42e4a1c1341a69d34b8ac2bfed25ba8a619aff3f1c57c087796feda7816f624",
+    "tool/internal/scan/tables_test.go": "334aea1de523d1c0cbc37d07de294356c2adfde5639a2cd8343e7ca62ac35968"
+  },
+  "isolated_source": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-tables-clean-kr3szrp1",
+  "scope": "Bounded Markdown/Jira table parsing in the default L1 cascade. No provider traffic, publication, installed model or host client changes.",
+  "contract": {
+    "vertical": "Bordered key/value rows; defer Markdown header until alignment row is known",
+    "horizontal": "Markdown header plus alignment row, or Jira double-pipe header",
+    "values": "Up to two balanced wrapper layers; escaped pipe becomes logical pipe; original span retained",
+    "ml": "Semantic field name and original source line; private identity uses logical value",
+    "limits": {
+      "eligible_rows": 4096,
+      "eligible_source_bytes": 1048576,
+      "line_bytes": 8192,
+      "columns": 32
+    },
+    "incomplete": "Candidate/row/byte limits, recognized sensitive oversize rows or active sensitive table parse limits survive into results_truncated, CLI exit 2 and guard blocking",
+    "excluded": "Password metadata, placeholder values, unrelated tables and unsupported expression rows; generic taxonomy disablement honored"
+  },
+  "validation": {
+    "go_suite": "Go1.27.4 CGO_ENABLED=0 GOMAXPROCS=2 go test -p 2 ./... passed in isolated final source",
+    "lint": "golangci-lint 2.15.0, full module, zero issues",
+    "race": "Go1.27.4 CGO_ENABLED=1 targeted detect/scan table suites passed after final optimization",
+    "minimum_go": "Go1.26.11 full detect/scan suites passed before allocation-only optimization; final targeted table suites passed afterwards",
+    "fuzz": {
+      "target": "FuzzTableSourceBounds",
+      "final_execs": 358504,
+      "elapsed_seconds": 5.701,
+      "result": "passed"
+    },
+    "corpus_equivalence": {
+      "files": 12044,
+      "matches": 1149,
+      "diffs": 0,
+      "status_diffs": 0,
+      "windowed_seconds": 8.3,
+      "whole_seconds": 34.7,
+      "log": "/tmp/prowl-tables-equivalence-20261114.log"
+    },
+    "native": {
+      "binary_sha256": "ed1ebeca2dbd448ba9db046bad1e5cf42830a857e3cc0d1f22b69f6258117034",
+      "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-tables-native-04hrd0ra",
+      "runs": [
+        {
+          "case": "vertical",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "vertical",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "vertical",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "horizontal",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "horizontal",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "horizontal",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "jira",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "jira",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "jira",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "escaped",
+          "ml": false,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "escaped",
+          "ml": true,
+          "exit": 0,
+          "findings": 1,
+          "truncated": false,
+          "expected_value_found": true
+        },
+        {
+          "case": "escaped",
+          "guard": "raw",
+          "exit": 1
+        },
+        {
+          "case": "header",
+          "ml": false,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "header",
+          "ml": true,
+          "exit": 0,
+          "findings": 0,
+          "truncated": false,
+          "expected_value_found": null
+        },
+        {
+          "case": "incomplete",
+          "ml": false,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "incomplete",
+          "ml": true,
+          "exit": 2,
+          "findings": 0,
+          "truncated": true,
+          "expected_value_found": null
+        },
+        {
+          "case": "incomplete",
+          "guard": "raw",
+          "exit": 2
+        }
+      ]
+    }
+  },
+  "prowlbench": {
+    "fixture": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowlbench-xq9th9rg",
+    "metrics": {
+      "parent": {
+        "secret_hits": 1608,
+        "hard_negative_hits": 61,
+        "binary_sha256": "8da3a4e419cc8f35b1768366ad4c27d5b17da70427355fdc4e646cd362316ddc"
+      },
+      "candidate": {
+        "secret_hits": 1611,
+        "hard_negative_hits": 61,
+        "binary_sha256": "ed1ebeca2dbd448ba9db046bad1e5cf42830a857e3cc0d1f22b69f6258117034"
+      }
+    },
+    "added_secret_ids": [
+      "pb-12008",
+      "pb-12120",
+      "pb-13632"
+    ],
+    "added_negative_ids": [],
+    "removed_ids": [],
+    "secrets": 2094,
+    "hard_negatives": 982,
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "secrets": 2094,
+      "hardnegs": 982
+    },
+    "epsilon": 0.005,
+    "status": "passed unchanged gate; no removed or new negative IDs",
+    "fixture_policy": "All fixtures retained; only cleanup line replaced in initial ci_gate.py invocation, baseline and thresholds unchanged"
+  },
+  "performance": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 10084917625.0,
+          "B/op": 621890352.0,
+          "allocs/op": 1254915.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10141395083.0,
+          "B/op": 636704512.0,
+          "allocs/op": 1256001.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10162994125.0,
+          "B/op": 621188256.0,
+          "allocs/op": 1255121.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 10299571916.0,
+          "B/op": 623559888.0,
+          "allocs/op": 1444194.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10265340833.0,
+          "B/op": 626396976.0,
+          "allocs/op": 1443775.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        },
+        {
+          "ns/op": 10276619583.0,
+          "B/op": 622494224.0,
+          "allocs/op": 1443986.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1154.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "99619054a53a6e9397e839a8bec12a530978d2ec",
+      "candidate": "e9f52e1c3114810fe7f9248aa41335b7f8a62976"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 10141395083.0,
+        "B/op": 621890352.0,
+        "allocs/op": 1255121.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      },
+      "candidate": {
+        "ns/op": 10276619583.0,
+        "B/op": 623559888.0,
+        "allocs/op": 1443986.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1154.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.0133339149982112,
+      "B/op": 1.002684614730926,
+      "allocs/op": 1.1504755318411533
+    },
+    "regressions": [],
+    "comparison_scope": "Explicit local incremental parent comparison; not fixed release baseline or publication qualification"
+  },
+  "rejected_initial_performance": {
+    "commit": "90f4ef14f0ea35e44185052620c51ea5f233ecf2",
+    "report": "/tmp/prowl-tables-perf-20261114/report.json",
+    "ratios": {
+      "ns/op": 1.008584220794975,
+      "B/op": 1.1992946466434442,
+      "allocs/op": 3.1352365564154905
+    },
+    "reason": "Loop-local row escaped via pending pointer; replaced pointer with value plus presence flag, then reran full Go/lint, native checks, subset, race, fuzz and three performance pairs"
+  },
+  "limitations": [
+    "Not a full Markdown renderer; no multi-line or whitespace-containing generic passwords",
+    "Existing minimum generic lengths retained: password 6, token 20, hex 32",
+    "No full research corpus run for this increment",
+    "No release signing, external CI/native Windows execution, push or publication in this increment"
+  ]
+}
