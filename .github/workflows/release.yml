@@ -5,63 +5,209 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GORELEASER_VERSION: v2.20.2
+  SYFT_VERSION: v1.57.1
+  COSIGN_VERSION: v3.1.4
 
 jobs:
-  binaries:
+  qualify:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - { goos: linux, goarch: amd64 }
-          - { goos: linux, goarch: arm64 }
-          - { goos: darwin, goarch: amd64 }
-          - { goos: darwin, goarch: arm64 }
-          - { goos: windows, goarch: amd64 }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          go-version: '1.25'
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25.14'
           cache-dependency-path: tool/go.sum
-      - name: build
-        working-directory: tool
+      - name: release prerequisites
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: '0'
+          RELEASE_TAG: ${{ github.ref_name }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
         run: |
-          ext=""
-          [ "$GOOS" = windows ] && ext=".exe"
-          go build -trimpath \
-            -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" \
-            -o "../prowl-$GOOS-$GOARCH$ext" ./cmd/prowl
-      - uses: softprops/action-gh-release@v2
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || exit 1
+          test "$(git rev-parse "tool/${RELEASE_TAG}^{commit}")" = "$(git rev-parse HEAD)"
+          if [[ "$RELEASE_TAG" != *-* ]]; then
+            test -n "$HOMEBREW_TAP_GITHUB_TOKEN" || { echo "HOMEBREW_TAP_GITHUB_TOKEN is required"; exit 1; }
+          fi
+      - name: source qualification
+        working-directory: tool
+        run: |
+          go vet ./...
+          go test -race ./...
+          CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o "$RUNNER_TEMP/prowl-static" ./cmd/prowl
+      - name: static ML qualification
+        run: python3 scripts/ml/smoke_static.py --binary "$RUNNER_TEMP/prowl-static" --legacy-model tool/internal/mlmodel/model_binary.json
+
+  binaries:
+    needs: qualify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          files: prowl-*
-          # only one matrix job generates notes, else each of the 5 appends its own changelog
-          generate_release_notes: ${{ matrix.goos == 'linux' && matrix.goarch == 'amd64' }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25.14'
+          cache-dependency-path: tool/go.sum
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+      - uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        id: syft
+        with:
+          syft-version: ${{ env.SYFT_VERSION }}
+      - name: expose verified Syft executable
+        env:
+          SYFT_CMD: ${{ steps.syft.outputs.cmd }}
+        run: dirname "$SYFT_CMD" >> "$GITHUB_PATH"
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          version: ${{ env.GORELEASER_VERSION }}
+          workdir: tool
+          args: release --draft --parallelism 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: verify published draft assets
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir "$RUNNER_TEMP/release-download"
+          gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/release-download"
+          cosign verify-blob --bundle "$RUNNER_TEMP/release-download/checksums.txt.sigstore.json" \
+            --certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/release.yml@refs/tags/$RELEASE_TAG" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "$RUNNER_TEMP/release-download/checksums.txt"
+          python3 scripts/release/verify_artifacts.py "$RUNNER_TEMP/release-download"
 
   docker:
+    needs: binaries
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+      - uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        id: syft
+        with:
+          syft-version: ${{ env.SYFT_VERSION }}
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        id: build
         with:
           context: tool
           file: tool/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
+          provenance: mode=max
           build-args: |
             VERSION=${{ github.ref_name }}
-          tags: |
-            ghcr.io/lercas/prowl:${{ github.ref_name }}
-            ghcr.io/lercas/prowl:latest
+          tags: ghcr.io/lercas/prowl:${{ github.ref_name }}
+      - name: sign immutable image and attest both platform SBOMs
+        env:
+          IMAGE: ghcr.io/lercas/prowl
+          DIGEST: ${{ steps.build.outputs.digest }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          SYFT_CMD: ${{ steps.syft.outputs.cmd }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/release/sign_image.sh
+
+  publish:
+    needs: [binaries, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+      - name: verify checksums and prepare formula
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir "$RUNNER_TEMP/release-final"
+          gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/release-final"
+          cosign verify-blob --bundle "$RUNNER_TEMP/release-final/checksums.txt.sigstore.json" \
+            --certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/release.yml@refs/tags/$RELEASE_TAG" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "$RUNNER_TEMP/release-final/checksums.txt"
+          cosign verify-blob --bundle "$RUNNER_TEMP/release-final/prowl-image-checksums.txt.sigstore.json" \
+            --certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/release.yml@refs/tags/$RELEASE_TAG" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "$RUNNER_TEMP/release-final/prowl-image-checksums.txt"
+          python3 scripts/release/verify_artifacts.py "$RUNNER_TEMP/release-final" --image-sboms
+          python3 scripts/release/homebrew.py --tag "$RELEASE_TAG" \
+            --checksums "$RUNNER_TEMP/release-final/checksums.txt" --output "$RUNNER_TEMP/prowl.rb"
+          ruby -c "$RUNNER_TEMP/prowl.rb"
+      - name: publish complete GitHub release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "$RELEASE_TAG" --draft=false
+      - name: authenticate to GHCR
+        if: ${{ !contains(github.ref_name, '-') }}
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        if: ${{ !contains(github.ref_name, '-') }}
+      - name: promote verified stable image
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          digest=$(cat "$RUNNER_TEMP/release-final/prowl-image-digest.txt")
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || exit 1
+          docker buildx imagetools create --tag ghcr.io/lercas/prowl:latest "ghcr.io/lercas/prowl@$digest"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ !contains(github.ref_name, '-') }}
+        with:
+          repository: Lercas/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          path: homebrew-tap
+      - name: update stable Homebrew formula
+        if: ${{ !contains(github.ref_name, '-') }}
+        working-directory: homebrew-tap
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cp "$RUNNER_TEMP/prowl.rb" Formula/prowl.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/prowl.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update prowl to $RELEASE_TAG"
+            git push
+          fi

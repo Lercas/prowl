@@ -1,11 +1,18 @@
-# GoReleaser config for prowl. Cut a release with:  git tag v0.1.0 && git push --tags
-# (the release workflow runs `goreleaser release`). Validate locally with `goreleaser check`.
+# Release and snapshot configuration; see ../wiki/Release-Process.md.
 version: 2
 project_name: prowl
+dist: dist
+
+release:
+  draft: true
+  prerelease: auto
+
+git:
+  ignore_tags: ["tool/*"]
 
 before:
   hooks:
-    - go mod tidy
+    - go mod verify
 
 builds:
   - id: prowl
@@ -29,13 +36,37 @@ archives:
       - goos: windows
         formats: [zip]
     files:
-      - README.md
+      - src: ../README.md
+        dst: .
+        strip_parent: true
+      - src: ../README.ru.md
+        dst: .
+        strip_parent: true
+      - src: ../LICENSE
+        dst: .
+        strip_parent: true
+      - src: README.md
+        dst: docs
+        strip_parent: true
+
+sboms:
+  - artifacts: archive
+    documents:
+      - "${artifact}.spdx.json"
+    args: ["scan", "$artifact", "--output", "spdx-json=$document"]
 
 checksum:
   name_template: checksums.txt
+  algorithm: sha256
+
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args: ["sign-blob", "--yes", "--bundle=${signature}", "${artifact}"]
 
 snapshot:
-  version_template: "{{ incpatch .Version }}-next"
+  version_template: '{{ if index .Env "PROWL_SNAPSHOT_VERSION" }}{{ .Env.PROWL_SNAPSHOT_VERSION }}{{ else }}{{ incpatch .Version }}-next{{ end }}'
 
 changelog:
   sort: asc
@@ -45,17 +76,5 @@ changelog:
       - "^test:"
       - "^chore:"
 
-# Publishes a Homebrew formula to github.com/Lercas/homebrew-tap so users can `brew install Lercas/tap/prowl`.
-# Requires a HOMEBREW_TAP_GITHUB_TOKEN secret with write access to that tap repo.
-brews:
-  - name: prowl
-    repository:
-      owner: Lercas
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    homepage: "https://github.com/Lercas/prowl"
-    description: "Fast ML-cascade secret scanner (regex + checksum + entropy + ML) with live verification."
-    install: |
-      bin.install "prowl"
-    test: |
-      system "#{bin}/prowl", "version"
+# The release workflow generates the existing macOS/Linux Homebrew formula from
+# signed checksums using ../scripts/release/homebrew.py. GoReleaser's brews pipe is deprecated.

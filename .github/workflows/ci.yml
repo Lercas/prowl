@@ -9,14 +9,45 @@ permissions:
   contents: read
 
 jobs:
+  release-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.25.14'
+          cache-dependency-path: tool/go.sum
+      - uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        id: syft
+        with:
+          syft-version: v1.57.1
+      - name: expose verified Syft executable
+        env:
+          SYFT_CMD: ${{ steps.syft.outputs.cmd }}
+        run: dirname "$SYFT_CMD" >> "$GITHUB_PATH"
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          version: v2.20.2
+          install-only: true
+      - name: release snapshot and artifact contract
+        run: |
+          (cd tool && goreleaser check)
+          python3 scripts/release/snapshot.py --dist "$RUNNER_TEMP/prowl-snapshot" --version 0.0.0-ci
+          python3 scripts/release/verify_artifacts.py "$RUNNER_TEMP/prowl-snapshot"
+          python3 scripts/release/homebrew.py --tag v0.0.0-ci --checksums "$RUNNER_TEMP/prowl-snapshot/checksums.txt" --output "$RUNNER_TEMP/prowl.rb"
+          ruby -c "$RUNNER_TEMP/prowl.rb"
+
   static-ml:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go: ['1.25.x', '1.27.x']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go }}
           cache-dependency-path: tool/go.sum
@@ -38,8 +69,8 @@ jobs:
       run:
         working-directory: tool
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.25'
           cache-dependency-path: tool/go.sum
@@ -68,12 +99,12 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.25'
           cache-dependency-path: tool/go.sum
-      - uses: golangci/golangci-lint-action@v9
+      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: v2.12.2
           working-directory: tool
@@ -81,14 +112,20 @@ jobs:
   python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
       - name: ruff (real-error classes)
         run: |
           pip install ruff
           ruff check --select E9,F821,F811,F823,F706 .  # respects .gitignore -> only tracked Python
+      - name: release contract tests
+        run: python -m unittest discover -s scripts/release -p 'test_*.py'
+      - name: portable training split tests
+        run: |
+          pip install -r scripts/ml/requirements.txt
+          python -m unittest discover -s scripts/ml -p 'test_*.py'
 
   fuzz-smoke:
     runs-on: ubuntu-latest
@@ -96,8 +133,8 @@ jobs:
       run:
         working-directory: tool
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.25'
           cache-dependency-path: tool/go.sum

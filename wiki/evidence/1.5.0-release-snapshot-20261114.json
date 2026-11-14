@@ -1,0 +1,50 @@
+{
+  "scope": "local snapshot only; not a published release candidate",
+  "snapshot_version": "1.5.0-dev",
+  "source_head": "e38160fe6ec559629945568b262d2da358cc1fb8",
+  "source_worktree": "dirty; includes concurrent detector changes",
+  "go": "go1.25.14",
+  "goreleaser": "v2.20.2",
+  "syft": "v1.57.1",
+  "cosign_configuration": "v3.1.4 keyless via GitHub OIDC",
+  "archives": 6,
+  "archive_sboms": 6,
+  "assets_sha256": {
+    "prowl_1.5.0-dev_darwin_amd64.tar.gz": "3ec07a433b3791848505dcac6ece41d4b9ff070cf7e8dda27defa4354a4bce19",
+    "prowl_1.5.0-dev_darwin_amd64.tar.gz.spdx.json": "3d0e6be49904ab5a0edd60b765b67884e10653d48cee75d202a486dbeba2f4d1",
+    "prowl_1.5.0-dev_darwin_arm64.tar.gz": "2c4e32aedc2431e8940c73cba4e329fc86b9d366eeceaf9daf943caaa60c20eb",
+    "prowl_1.5.0-dev_darwin_arm64.tar.gz.spdx.json": "45b291f4c05179dd7a7272575e0067e04d99fd77a1de0ea3a487abd006824071",
+    "prowl_1.5.0-dev_linux_amd64.tar.gz": "d5e645a0f3cbd25bd39c65ce15d2be82d68445d2c6ccc3107042dab96d46eb14",
+    "prowl_1.5.0-dev_linux_amd64.tar.gz.spdx.json": "1faa9c93855a31b36dfaaccfa93e3dd127f12858253010980b204ffd6442265c",
+    "prowl_1.5.0-dev_linux_arm64.tar.gz": "0abd163f9950470733638882aa951be5f1702270a260457a80be406628b63147",
+    "prowl_1.5.0-dev_linux_arm64.tar.gz.spdx.json": "3862b959785882989a6c6c26f77003b9768a2656e15fa344e053697500e39b30",
+    "prowl_1.5.0-dev_windows_amd64.zip": "686677117cb49a8ee995887aeab564a0fba7aa83878c08af65744c241fb5f4c1",
+    "prowl_1.5.0-dev_windows_amd64.zip.spdx.json": "d549805ea1fd2a99e8ab14f24ac4adca3b0520ee9000742bbb180bfd990b1033",
+    "prowl_1.5.0-dev_windows_arm64.zip": "a844c3ef15e4301c90bc972d41e6ac07db379076f25438b3e208a2f815175164",
+    "prowl_1.5.0-dev_windows_arm64.zip.spdx.json": "5d1ac35b86eb5821392786e97c2f2fc9df6a3129c733bdb7abff300b2c64af9c"
+  },
+  "checksums_sha256": "d3add752dbac6163296a66bce9768498507b4ad9e5453bccebc274334e671b85",
+  "validated": [
+    "GoReleaser check",
+    "full six-target snapshot",
+    "six archive layouts",
+    "SHA256 of all twelve assets",
+    "six SPDX package inventories",
+    "Homebrew formula generation and ruby -c",
+    "archived darwin/arm64 static ML scan and redaction",
+    "legacy ML model rejection",
+    "actionlint and ShellCheck",
+    "five release-helper unit tests"
+  ],
+  "not_validated": [
+    "GitHub Actions execution",
+    "GitHub OIDC signing",
+    "container build, publication and platform attestations",
+    "Homebrew installation and tap publication"
+  ],
+  "publication_prerequisites": [
+    "explicit owner approval",
+    "matching v1.5.0 and tool/v1.5.0 tags on the final qualified commit",
+    "HOMEBREW_TAP_GITHUB_TOKEN; no repository secrets configured at inspection"
+  ]
+}
