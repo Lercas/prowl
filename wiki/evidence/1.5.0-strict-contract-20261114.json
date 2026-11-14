@@ -1,0 +1,337 @@
+{
+  "status": "locally qualified strict compatibility flag; not published",
+  "native": {
+    "binary_sha256": "9f40ef30b86ab3762379b55ee83f1ce3d8f7beed8437df3c7b38bd249f5fcb45",
+    "passed": 79,
+    "total": 79,
+    "checks": [
+      {
+        "case": "default/json/clean",
+        "passed": true
+      },
+      {
+        "case": "default/json/finding",
+        "passed": true
+      },
+      {
+        "case": "default/json/malformed",
+        "passed": true
+      },
+      {
+        "case": "default/json/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "default/json/oversize",
+        "passed": true
+      },
+      {
+        "case": "default/json/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/clean",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/finding",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/malformed",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/oversize",
+        "passed": true
+      },
+      {
+        "case": "default/sarif/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "default/explicit-gate",
+        "passed": true
+      },
+      {
+        "case": "strict/json/clean",
+        "passed": true
+      },
+      {
+        "case": "strict/json/finding",
+        "passed": true
+      },
+      {
+        "case": "strict/json/malformed",
+        "passed": true
+      },
+      {
+        "case": "strict/json/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "strict/json/oversize",
+        "passed": true
+      },
+      {
+        "case": "strict/json/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/clean",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/finding",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/malformed",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/oversize",
+        "passed": true
+      },
+      {
+        "case": "strict/sarif/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "strict/explicit-gate",
+        "passed": true
+      },
+      {
+        "case": "false/json/clean",
+        "passed": true
+      },
+      {
+        "case": "false/json/finding",
+        "passed": true
+      },
+      {
+        "case": "false/json/malformed",
+        "passed": true
+      },
+      {
+        "case": "false/json/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "false/json/oversize",
+        "passed": true
+      },
+      {
+        "case": "false/json/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/clean",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/finding",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/malformed",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/oversize",
+        "passed": true
+      },
+      {
+        "case": "false/sarif/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "false/explicit-gate",
+        "passed": true
+      },
+      {
+        "case": "ci/json/clean",
+        "passed": true
+      },
+      {
+        "case": "ci/json/finding",
+        "passed": true
+      },
+      {
+        "case": "ci/json/malformed",
+        "passed": true
+      },
+      {
+        "case": "ci/json/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci/json/oversize",
+        "passed": true
+      },
+      {
+        "case": "ci/json/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/clean",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/finding",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/malformed",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/oversize",
+        "passed": true
+      },
+      {
+        "case": "ci/sarif/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci/explicit-gate",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/clean",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/finding",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/malformed",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/oversize",
+        "passed": true
+      },
+      {
+        "case": "ci-false/json/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/clean",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/finding",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/malformed",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/malformed/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/oversize",
+        "passed": true
+      },
+      {
+        "case": "ci-false/sarif/oversize/baseline",
+        "passed": true
+      },
+      {
+        "case": "ci-false/explicit-gate",
+        "passed": true
+      },
+      {
+        "case": "invalid-boolean",
+        "passed": true
+      },
+      {
+        "case": "startup-rejected",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/schema",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/incomplete/False",
+        "passed": true
+      },
+      {
+        "case": "2024-11-05/incomplete/True",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/incomplete/False",
+        "passed": true
+      },
+      {
+        "case": "2025-03-26/incomplete/True",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/schema",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/incomplete/False",
+        "passed": true
+      },
+      {
+        "case": "2025-06-18/incomplete/True",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/schema",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/incomplete/False",
+        "passed": true
+      },
+      {
+        "case": "2026-07-28/incomplete/True",
+        "passed": true
+      }
+    ],
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-strict-native-m1p3rlu6",
+    "scope": "local CLI and four MCP transports; no provider calls"
+  },
+  "checks": {
+    "targeted_cli_flags_mcp_tests": "passed",
+    "lint": "passed"
+  },
+  "decision": "Preserve mandatory 1.5 fail-closed completeness rather than reintroducing the optional 1.4 gate; --strict=false cannot weaken it",
+  "limits": [
+    "No scanner algorithm or provider policy changes",
+    "semantic remains open"
+  ]
+}

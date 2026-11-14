@@ -154,6 +154,11 @@ var cliFlags = []flagSpec{
 	stringFlag("--scope", indexedCommands+" index diff", "NAME", "стабильное имя области скана для индекса", func(c *commonFlags) *string { return &c.indexScope }),
 	enumFlag("--format", scanCommands+" index diff", "report format (default pretty; index/diff: pretty or json)", []string{"pretty", "json", "sarif", "defectdojo", "dojo"}, func(c *commonFlags) *string { return &c.format }),
 	enumFlag("--fail-on", scanCommands, "exit 1 at this severity or above", []string{"info", "low", "medium", "high", "critical"}, func(c *commonFlags) *string { return &c.failOn }),
+	// In 1.5 every incomplete scan fails closed; retain the released flag without allowing opt-out.
+	valueFlag("--strict", scanCommands, "", "совместимость с 1.4: неполный скан всегда даёт код 2, включая --strict=false", func(_ *commonFlags, value string) error {
+		_, err := booleanValue(value)
+		return err
+	}),
 	boolFlag("--ci", scanCommands, "CI: код 1 для high/critical; явный --fail-on имеет приоритет, неполный скан — код 2", func(c *commonFlags) *bool { return &c.ci }),
 	boolFlag("--fail-on-verified", scanCommands, "gate only on provider-confirmed live findings; requires --verify", func(c *commonFlags) *bool { return &c.failOnVerified }),
 	listFlag("--exclude", scanCommands, "skip paths containing the substring", false, func(c *commonFlags) *[]string { return &c.exclude }),

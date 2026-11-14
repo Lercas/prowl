@@ -68,8 +68,9 @@ high/critical типов без верификатора. Полное опис�
 
 `prowl mcp` запускается без scan flags; параметры передаются в `tools/call`.
 `bundled: true` в `tools/call` выбирает встроенные rules/verifiers релиза,
-сохраняя текущие конфигурацию и identity key. `strict` и `semantic` остаются
-отдельными пунктами миграции и сейчас не рекламируются.
+сохраняя текущие конфигурацию и identity key. `strict` сохранён для совместимости с 1.4: неполный результат всегда
+возвращается с `isError: true`, включая `strict: false`.
+`semantic` остаётся отдельным пунктом миграции и пока не рекламируется.
 
 Локальная проверка: `python3 scripts/check_mcp_contract.py /path/to/prowl`.
 Матрица использует отдельный PROWL_HOME, только собственные файлы/APK и stdio;
