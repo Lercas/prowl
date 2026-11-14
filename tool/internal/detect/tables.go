@@ -217,7 +217,8 @@ func (d *Detector) tableSecrets(ctx context.Context, text string, budget int) ([
 	if budget <= 0 || !d.genericPwd && !d.genericKey || !strings.Contains(text, "|") {
 		return nil, false
 	}
-	var pending *tableRow
+	var pending tableRow
+	hasPending := false
 	var active []tableField
 	var out []Match
 	rows, bytes := 0, 0
@@ -284,14 +285,14 @@ func (d *Detector) tableSecrets(ctx context.Context, text string, budget int) ([
 		}
 		row, ok := parseTableRow(text, start, end)
 		start = end + 1
-		if pending != nil {
+		if hasPending {
 			if ok && len(row.cells) == len(pending.cells) && tableSeparator(text, row) {
-				active = headers(*pending)
-				pending = nil
+				active = headers(pending)
+				hasPending = false
 				continue
 			}
-			emit(*pending, nil, pending.bordered)
-			pending = nil
+			emit(pending, nil, pending.bordered)
+			hasPending = false
 		}
 		if !ok {
 			if row.limited {
@@ -318,10 +319,11 @@ func (d *Detector) tableSecrets(ctx context.Context, text string, budget int) ([
 			continue
 		}
 		active = nil
-		pending = &row
+		pending = row
+		hasPending = true
 	}
-	if pending != nil && !limited && ctx.Err() == nil {
-		emit(*pending, nil, pending.bordered)
+	if hasPending && !limited && ctx.Err() == nil {
+		emit(pending, nil, pending.bordered)
 	}
 	return out, limited || ctx.Err() != nil
 }
