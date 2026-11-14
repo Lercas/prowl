@@ -1,0 +1,10 @@
+{
+  "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+  "go": "go1.27.4",
+  "pairs": 3,
+  "max_time_ratio": 1.2,
+  "max_bytes_ratio": 1.25,
+  "max_allocs_ratio": 1.25,
+  "min_corpus_files": 1000,
+  "min_corpus_bytes": 67108864
+}

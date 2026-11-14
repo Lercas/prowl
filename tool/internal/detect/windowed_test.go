@@ -31,12 +31,25 @@ func TestWindowedEqualsWholeText(t *testing.T) {
 	var files, diffs, matches int
 	var tw, tf time.Duration
 	walk := func(p string, de fs.DirEntry, err error) error {
-		if err != nil || de.IsDir() {
+		if err != nil {
+			return err
+		}
+		if de.IsDir() {
+			return nil
+		}
+		info, err := de.Info()
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() || info.Size() == 0 || info.Size() > 10<<20 {
 			return nil
 		}
 		raw, err := os.ReadFile(p)
-		if err != nil || len(raw) == 0 || len(raw) > 10<<20 {
-			return nil
+		if err != nil {
+			return err
+		}
+		if len(raw) != int(info.Size()) {
+			t.Fatalf("corpus file changed during acquisition: %s", p)
 		}
 		text := string(raw)
 		files++
@@ -76,7 +89,12 @@ func TestWindowedEqualsWholeText(t *testing.T) {
 		return nil
 	}
 	for _, root := range roots {
-		_ = filepath.WalkDir(root, walk)
+		if err := filepath.WalkDir(root, walk); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if files == 0 {
+		t.Fatal("empty corpus cannot establish equivalence")
 	}
 	t.Logf("files=%d matches=%d diffs=%d windowed=%.1fs whole=%.1fs", files, matches, diffs, tw.Seconds(), tf.Seconds())
 }

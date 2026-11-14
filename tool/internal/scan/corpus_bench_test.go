@@ -41,12 +41,25 @@ func BenchmarkFindingsCorpus(b *testing.B) {
 	var items []model.Item
 	var total int64
 	err = filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() || info.Size() == 0 || info.Size() > 10<<20 {
 			return nil
 		}
 		raw, err := os.ReadFile(p)
-		if err != nil || len(raw) == 0 || len(raw) > 10<<20 {
-			return nil
+		if err != nil {
+			return err
+		}
+		if len(raw) != int(info.Size()) {
+			b.Fatalf("corpus file changed during acquisition: %s", p)
 		}
 		items = append(items, model.Item{Text: string(raw), Source: "code", Path: p})
 		total += int64(len(raw))
@@ -55,14 +68,22 @@ func BenchmarkFindingsCorpus(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
+	if len(items) == 0 {
+		b.Fatal("empty corpus cannot establish performance")
+	}
 	ctx := context.Background()
 	pipeline := New(Options{Detector: det, Rules: eng})
 	b.SetBytes(total)
 	b.ReportAllocs()
 	b.ResetTimer()
+	var findings int
 	for i := 0; i < b.N; i++ {
 		for _, it := range items {
-			pipeline.Findings(ctx, it)
+			findings += len(pipeline.Findings(ctx, it))
 		}
 	}
+	b.StopTimer()
+	b.ReportMetric(float64(total), "corpus-bytes")
+	b.ReportMetric(float64(len(items)), "corpus-files")
+	b.ReportMetric(float64(findings)/float64(b.N), "findings/op")
 }

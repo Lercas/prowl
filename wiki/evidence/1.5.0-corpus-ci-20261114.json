@@ -1,0 +1,142 @@
+{
+  "scope": "paired corpus performance gate and scheduled regex equivalence; no remote execution",
+  "base_commit": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+  "local_runner": {
+    "kind": "initial self-comparison of the same runtime revision with the new common harness",
+    "report": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 9907294584.0,
+            "B/op": 582591424.0,
+            "allocs/op": 1161085.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10034220167.0,
+            "B/op": 585623776.0,
+            "allocs/op": 1161087.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10161784375.0,
+            "B/op": 583498152.0,
+            "allocs/op": 1160957.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 10176930125.0,
+            "B/op": 577835240.0,
+            "allocs/op": 1160509.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10059902083.0,
+            "B/op": 589516536.0,
+            "allocs/op": 1161392.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10153843291.0,
+            "B/op": 579401968.0,
+            "allocs/op": 1160971.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ]
+      },
+      "status": "passed",
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "candidate": "e0f05cd3bb4195ddf602d58614c09d31d435a024"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 10034220167.0,
+          "B/op": 583498152.0,
+          "allocs/op": 1161085.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        "candidate": {
+          "ns/op": 10153843291.0,
+          "B/op": 579401968.0,
+          "allocs/op": 1160971.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      },
+      "ratios": {
+        "ns/op": 1.011921516770522,
+        "B/op": 0.9929799537737011,
+        "allocs/op": 0.9999018159738521
+      },
+      "regressions": []
+    }
+  },
+  "validation": {
+    "performance_gate_unit_tests": "4 tests passed, including metric poisoning, missing samples, threshold regressions and corpus changes",
+    "negative_runner_checks": [
+      "empty corpus rejected",
+      "missing corpus rejected",
+      "existing output preserved",
+      "final native toolchain setup and empty-corpus error report verified",
+      "scheduled-equivalence tests reject an empty corpus in both packages"
+    ],
+    "actionlint": "passed ci.yml and corpus.yml",
+    "golangci_lint": "0 issues",
+    "go_parity_tests": "default source corpus passed",
+    "scheduled_equivalent_local_run": {
+      "source": "clean isolated candidate",
+      "go": "go1.27.4",
+      "gomaxprocs": 2,
+      "files": 12044,
+      "detector_matches": 1129,
+      "rule_hits": 3,
+      "differences": 0
+    }
+  },
+  "workflow": {
+    "performance": "each main push and pull request via ci.yml",
+    "equivalence": "Monday 03:41 UTC or manual workflow_dispatch",
+    "minimum_permissions": "contents: read; checkout credentials not persisted"
+  },
+  "limitations": [
+    "GitHub workflows have not been executed remotely",
+    "timing samples validate the runner on darwin/arm64; no absolute cross-runner time promise",
+    "initial runtime comparison is intentionally the same commit, not evidence of a new speedup",
+    "historical ProwlBench false-positive threshold remains open",
+    "concurrent decoder edits excluded from exports and commit"
+  ]
+}
