@@ -48,6 +48,7 @@ func hasNonASCII(s string) bool {
 
 // Match is one L1 detection in a text block.
 type Match struct {
+	ContextName   string // semantic source label when the value is in a table column
 	Type          string
 	Value         string
 	Start, End    int
@@ -218,7 +219,9 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 	all = append(all, cp...)
 	named, namedCapped := d.namedSecrets(ctx, text, lower, maxScanMatches-len(all))
 	all = append(all, named...)
-	candidateCapped := collectCapped || namedCapped || len(all) >= maxScanMatches
+	tables, tableCapped := d.tableSecrets(ctx, text, maxScanMatches-len(all))
+	all = append(all, tables...)
+	candidateCapped := collectCapped || namedCapped || tableCapped || len(all) >= maxScanMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
@@ -527,7 +530,9 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 }
 
 // isContextStage marks the builtins that infer a secret from the name around it.
-func isContextStage(stage string) bool { return stage == "L1-context-pw" || stage == stageContextKey }
+func isContextStage(stage string) bool {
+	return stage == "L1-context-pw" || stage == stageContextKey || stage == stageTable
+}
 
 // dedupeOverlapsCap keeps the highest-confidence match per overlapping span, capping the kept count.
 // Confidence-first ordering lets a precise token (checksum-valid github_pat_classic, 0.99) win over a

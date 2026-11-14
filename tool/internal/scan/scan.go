@@ -448,10 +448,10 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
 			Verified: ver, Rationale: why, Instruction: itemInstr,
 			ImageEntry: it.ImageEntry,
-			Context:    p.revealContext(it, m.Start),
+			Context:    p.revealMatchContext(it, m),
 		})
 		if ml != nil {
-			reqs = append(reqs, recordFor(m.Value, it, m.Start))
+			reqs = append(reqs, recordForMatch(m, it))
 		}
 	}
 	// external templates (opt-in via --rules-dir)
@@ -595,6 +595,22 @@ func truncationMarker(it model.Item) model.Finding {
 // mlMaxItemFindings is the per-item candidate count above which an item is treated as a data file
 // (ML skipped, the --max-per-file cap takes over).
 const mlMaxItemFindings = 200
+
+func recordForMatch(m detect.Match, it model.Item) mlscore.Record {
+	record := recordFor(m.Value, it, m.Start)
+	if m.ContextName != "" {
+		record.Context.Name = m.ContextName
+	}
+	return record
+}
+
+func (p *Pipeline) revealMatchContext(it model.Item, m detect.Match) *model.FindingContext {
+	if !p.options.RevealSecrets {
+		return nil
+	}
+	record := recordForMatch(m, it)
+	return &model.FindingContext{Name: record.Context.Name, Line: record.Context.Line}
+}
 
 // recordFor builds the ML scoring record for a candidate: the raw value plus the context the model was
 // trained on (surrounding line, best-effort assigned name, path, source).
