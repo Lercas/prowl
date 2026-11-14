@@ -1,5 +1,14 @@
 {
   "status": "locally qualified source restoration; not published",
+  "main_native_integration": {
+    "source_commit": "8d5c1be",
+    "reconstruction_passed": 24,
+    "reconstruction_total": 24,
+    "structured_literals_passed": 204,
+    "structured_literals_total": 204,
+    "reconstruction_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-reconstruction-native-xix4eg3e/qualification.json",
+    "structured_literals_report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-structured-native-vn8hubwu/qualification.json"
+  },
   "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
   "released_parser_files_sha256": {
     "tool/internal/reconstruct/adversarial_test.go": "4d6db272c1e8fcbb7d5e157209d5010d92b737c059952d296c62c47db10acad7",
