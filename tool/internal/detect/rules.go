@@ -48,15 +48,19 @@ func hasNonASCII(s string) bool {
 
 // Match is one L1 detection in a text block.
 type Match struct {
-	ContextName    string // semantic source label when the value is in a table column
-	Type           string
-	Value          string
-	Start, End     int
-	Confidence     float64
-	ChecksumValid  bool
-	LiteralContext bool // source span is a decoded constant expression for ML context
-	Category       string
-	Stage          string
+	DecodedText      string
+	DecodedStart     int
+	DecodeSpans      []Base64Span
+	decodedNonLinear bool
+	ContextName      string // semantic source label when the value is in a table column
+	Type             string
+	Value            string
+	Start, End       int
+	Confidence       float64
+	ChecksumValid    bool
+	LiteralContext   bool // source span is a decoded constant expression for ML context
+	Category         string
+	Stage            string
 	// needsStrong marks a decode candidate with no secret-like name on its line: only a precise typed
 	// hit inside it is reported. Internal to the decode stage; never set on a returned Match.
 	needsStrong bool
@@ -231,14 +235,16 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
 	// confidence in the sort below, not be starved by a cap full of 0.55 generic noise.
-	b64, base64Capped := d.unmaskBase64(ctx, all)
+	b64, base64Capped := d.unmaskNonLinear(ctx, all)
 	all = append(all, b64...)
 	// Both alphabets must be decoded whole: the entropy net omits short blobs, '-'/'_' split it,
 	// and generic assignment regexes can truncate the value or exhaust their budget first.
 	// These independent candidates never become generic findings.
 	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
-	decodedMatches, decodedCapped := d.unmaskBase64(ctx, decodeCandidates)
+	decodedMatches, decodedCapped := d.unmaskNonLinear(ctx, decodeCandidates)
 	all = append(all, decodedMatches...)
+	occurrences, occurrenceLimited := d.base64Occurrences(ctx, text)
+	all = append(all, occurrences...)
 	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
 	all = append(all, authMatches...)
 	// Secrets written through an escaping, concatenation or YAML block-scalar layer (see views.go).
@@ -252,7 +258,7 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 		candidateCapped = candidateCapped || scalarLimited
 	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
-	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped
+	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
 		logx.Warn("detect: scan limits reached — some encoded candidates or matches may not have been inspected")
@@ -591,27 +597,55 @@ func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 		}
 		return ms[i].Stage < ms[j].Stage
 	})
-	out := make([]Match, 0, len(ms)) // kept spans, maintained sorted by Start
+	starts := make([]int, len(ms))
+	for i, m := range ms {
+		starts[i] = m.Start
+	}
+	sort.Ints(starts)
+	unique := starts[:0]
+	for _, start := range starts {
+		if len(unique) == 0 || unique[len(unique)-1] != start {
+			unique = append(unique, start)
+		}
+	}
+	maxEnd := make([]int, len(unique)+1)
+	rawMaxEnd := make([]int, len(unique)+1)
+	out := make([]Match, 0, len(ms))
+	type decodedKey struct {
+		start, end int
+		value      string
+	}
+	decodedValues := map[decodedKey]bool{}
 	for _, m := range ms {
 		if cap >= 0 && len(out) >= cap {
 			// budget reached: remaining candidates are <= the confidence already kept, so drop the tail
 			truncated = true
 			break
 		}
-		// first kept span with Start >= m.Start
-		i := sort.Search(len(out), func(k int) bool { return out[k].Start >= m.Start })
-		overlap := false
-		if i < len(out) && out[i].Start < m.End { // kept span starting in [m.Start, m.End)
-			overlap = true
-		} else if i > 0 && m.Start < out[i-1].End { // predecessor extends past m.Start
-			overlap = true
+		latestEnd := 0
+		rawLatestEnd := 0
+		for i := sort.SearchInts(unique, m.End); i > 0; i -= i & -i {
+			latestEnd = max(latestEnd, maxEnd[i])
+			rawLatestEnd = max(rawLatestEnd, rawMaxEnd[i])
 		}
-		if overlap {
+		decoded := strings.HasPrefix(m.Stage, "L1-base64")
+		if decoded {
+			key := decodedKey{m.Start, m.End, m.Value}
+			if rawLatestEnd > m.Start || decodedValues[key] {
+				continue
+			}
+			decodedValues[key] = true
+		} else if latestEnd > m.Start {
 			continue
 		}
-		out = append(out, Match{}) // grow
-		copy(out[i+1:], out[i:])   // shift to keep Start order
-		out[i] = m                 // insert at sorted position
+		for i := sort.SearchInts(unique, m.Start) + 1; i < len(maxEnd); i += i & -i {
+			maxEnd[i] = max(maxEnd[i], m.End)
+			if !decoded {
+				rawMaxEnd[i] = max(rawMaxEnd[i], m.End)
+			}
+		}
+		out = append(out, m)
 	}
-	return out, truncated // out is already in positional (Start) order
+	sort.SliceStable(out, func(i, j int) bool { return out[i].Start < out[j].Start })
+	return out, truncated
 }

@@ -21,6 +21,8 @@ UTF-8 текста перед нормализацией, разбором liter
 сохранением occurrences сама по себе фильтрацией не считается.
 
 CLI регистрирует scope запрошенной команды и эффективной конфигурации pipeline.
+CLI pipeline policy и HTTP detection policy также включают `scan.DetectionRevision`:
+ревизия меняется при изменении интерпретации исходного текста.
 Filesystem, stdin, явный список файлов, Git worktree/index/history/timeline,
 mobile, image и agent surface добавляют собственный scope. Он регистрируется
 до чтения, поэтому пустая выбранная область не теряет профиль. Policy хранится как digest,

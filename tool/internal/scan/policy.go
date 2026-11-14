@@ -6,6 +6,9 @@ import (
 	"github.com/Lercas/prowl/tool/internal/model"
 )
 
+// DetectionRevision changes when source interpretation or suppression semantics change.
+const DetectionRevision = "1.5.0-decoded-occurrences-v1"
+
 // Capabilities reports configured stages; request fields cannot change this snapshot.
 func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
 	o := p.options
@@ -35,7 +38,7 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 	}
 	_, stages := p.Capabilities()
 	c.RegisterScope("detection_policy", "1.5.0", map[string]any{
-		"revision": "literals-go-v2", "taxonomy": taxonomy, "stages": stages,
+		"revision": DetectionRevision, "taxonomy": taxonomy, "stages": stages,
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 	})
 	rulePolicy := ""

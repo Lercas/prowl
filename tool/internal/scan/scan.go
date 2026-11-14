@@ -542,13 +542,21 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			ImageEntry:  it.ImageEntry,
 			Context:     p.revealMatchContext(it, m),
 		})
+		for j, span := range m.DecodeSpans {
+			transform := "base64-decode"
+			if j > 0 {
+				transform = "base64-decode-layer-" + strconv.Itoa(j+1)
+			}
+			sl, sc := li.cols(span.Start)
+			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: sl, Col: sc, Transform: transform})
+		}
 		if vset != nil {
 			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
 			record := recordForMatch(m, it)
-			if literalDoc != nil {
+			if literalDoc != nil && m.DecodedText == "" {
 				record = literalDoc.recordFor(m.Value, it, m.Start, m.Type)
 			}
 			reqs = append(reqs, record)
@@ -751,6 +759,10 @@ func truncationMarker(it model.Item) model.Finding {
 const mlMaxItemFindings = 200
 
 func recordForMatch(m detect.Match, it model.Item) mlscore.Record {
+	if m.DecodedText != "" {
+		it.Text = m.DecodedText
+		m.Start = m.DecodedStart
+	}
 	record := recordFor(m.Value, it, m.Start)
 	if m.ContextName != "" {
 		record.Context.Name = m.ContextName

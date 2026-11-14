@@ -87,6 +87,15 @@ func (p *Pipeline) mapLiteralFindings(fs []model.Finding, it model.Item, doc *li
 		if v == nil {
 			continue
 		}
+		for j := range f.Evidence {
+			e := &f.Evidence[j]
+			if strings.HasPrefix(e.Transform, "base64-decode") {
+				if original := doc.locate(e.Start, e.End); original != nil {
+					e.Start, e.End = doc.sourceSpan(original, e.Start, e.End)
+					e.Line, e.Col = doc.lines.cols(e.Start)
+				}
+			}
+		}
 		var declarationMatch *model.Evidence
 		if v.whole {
 			declaration := *v

@@ -1,0 +1,1774 @@
+{
+  "status": "locally qualified linear Base64 occurrence restoration; not published",
+  "released_tag_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "native": {
+    "binary_sha256": "d3fb3926c24ce0533ded9b8e624db7d0f1379fe0298f26c34cd2ad2c71880d5a",
+    "passed": 197,
+    "total": 197,
+    "checks": [
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "padded",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "raw-url",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "repeat",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-two",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "nested-four",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": false,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": false,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": false,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": false,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "json",
+        "passed": true
+      },
+      {
+        "case": "json-escaped",
+        "keyed": true,
+        "ml": true,
+        "stdin": true,
+        "dedupe": true,
+        "format": "sarif",
+        "passed": true
+      },
+      {
+        "case": "depth-limit",
+        "passed": true
+      },
+      {
+        "case": "depth-limit-baseline",
+        "passed": true
+      },
+      {
+        "case": "size-limit",
+        "passed": true
+      },
+      {
+        "case": "size-limit-baseline",
+        "passed": true
+      },
+      {
+        "case": "noncanonical",
+        "passed": true
+      }
+    ]
+  },
+  "checks": {
+    "full_go_suite_passed": true,
+    "lint_passed": true,
+    "targeted_race_detect_scan_passed": true,
+    "minimum_go_1_26_11_targeted_passed": true,
+    "source_mapping_fuzz_executions": 42932,
+    "structured_json_toml_yaml_alias_evidence_passed": true
+  },
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "model_changed": false,
+  "limits": [
+    "nonlinear gzip zlib hex retains previous container winner behavior",
+    "verification companion extraction remains on existing source/parser path",
+    "full LSP prototype and 290 noise corpus failures remain isolated and unqualified"
+  ]
+}

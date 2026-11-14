@@ -69,7 +69,7 @@ func TestWindowedEqualsWholeText(t *testing.T) {
 				for _, m := range want {
 					found := false
 					for _, g := range got {
-						found = found || g == m
+						found = found || reflect.DeepEqual(g, m)
 					}
 					if !found {
 						t.Logf("  missing: %s [%d,%d) %q", m.Type, m.Start, m.End, m.Value)
@@ -78,7 +78,7 @@ func TestWindowedEqualsWholeText(t *testing.T) {
 				for _, g := range got {
 					found := false
 					for _, m := range want {
-						found = found || g == m
+						found = found || reflect.DeepEqual(g, m)
 					}
 					if !found {
 						t.Logf("  extra:   %s [%d,%d) %q", g.Type, g.Start, g.End, g.Value)

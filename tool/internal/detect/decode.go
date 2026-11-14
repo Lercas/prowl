@@ -201,11 +201,23 @@ func (d *Detector) bestDecodedBudget(ctx context.Context, decoded string, depth 
 		}
 		m, ok, limited := d.bestDecodedBudget(ctx, inner, depth+1, remaining)
 		capped = capped || limited
+		if ok && nonLinearBlob(val) {
+			m.decodedNonLinear = true
+		}
 		if ok && (!found || m.Confidence > best.Confidence) {
 			best, found = m, true
 		}
 	}
 	return best, found, capped
+}
+
+// Compressed bytes have no linear mapping into plaintext; hex uses another encoding quantum.
+func nonLinearBlob(value string) bool {
+	if len(value) >= minHexBlobBytes && len(value)%2 == 0 && isHex(value) {
+		return true
+	}
+	b, ok := tryB64Decode(value)
+	return ok && len(b) >= 2 && (b[0] == 0x1f && b[1] == 0x8b || b[0]&0x0f == 8 && (uint(b[0])<<8|uint(b[1]))%31 == 0)
 }
 
 // encodedBasicAuth reports base64 `user:password` pairs stored under an auth key — the form Docker's

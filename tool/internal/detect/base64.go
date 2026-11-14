@@ -14,6 +14,14 @@ const (
 // compressed, optionally nested (see decodeBlob / bestDecoded). Findings report the outer blob
 // position; generic hits inside are dropped.
 func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Match, bool) {
+	return d.unmaskBlobs(ctx, candidates, false)
+}
+
+func (d *Detector) unmaskNonLinear(ctx context.Context, candidates []Match) ([]Match, bool) {
+	return d.unmaskBlobs(ctx, candidates, true)
+}
+
+func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinearOnly bool) ([]Match, bool) {
 	var out []Match
 	capped := false
 	for _, c := range candidates {
@@ -38,9 +46,16 @@ func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Matc
 			found = false
 		}
 		if found {
+			// Linear Base64 occurrences are mapped independently, including padding and inner spans.
+			if nonLinearOnly && !best.decodedNonLinear && !nonLinearBlob(c.Value) {
+				continue
+			}
 			best.Start, best.End = c.Start, c.End
 			best.Confidence *= 0.95
 			best.Stage = "L1-base64"
+			if best.ChecksumValid {
+				best.Stage += "-checksum"
+			}
 			out = append(out, best)
 		}
 	}
@@ -97,7 +112,7 @@ func tryB64Decode(s string) ([]byte, bool) {
 	for _, enc := range []*base64.Encoding{
 		base64.StdEncoding, base64.RawStdEncoding, base64.URLEncoding, base64.RawURLEncoding,
 	} {
-		if dec, err := enc.DecodeString(s); err == nil {
+		if dec, err := enc.Strict().DecodeString(s); err == nil {
 			return dec, true
 		}
 	}

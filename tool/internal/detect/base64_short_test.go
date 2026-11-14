@@ -22,8 +22,8 @@ func TestShortBase64AccessKey(t *testing.T) {
 			for _, m := range matches {
 				if m.Type == "aws_access_key_id" && m.Stage == "L1-base64" && m.Value == key {
 					found = true
-					if m.Start != len(prefix) || m.End != len(prefix)+len(strings.TrimRight(blob, "=")) {
-						t.Fatal("short decoded secret lost its complete outer range")
+					if m.Start != len(prefix) || m.End != len(prefix)+len(blob) || len(m.DecodeSpans) != 1 || m.DecodeSpans[0] != (Base64Span{len(prefix), len(prefix) + len(blob)}) {
+						t.Fatal("short decoded secret lost its padded source range or container proof")
 					}
 				}
 			}

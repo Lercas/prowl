@@ -1,0 +1,135 @@
+package detect
+
+import (
+	"context"
+	"strings"
+
+	"github.com/Lercas/prowl/tool/internal/taxonomy"
+)
+
+const maxBase64Blob = 8192
+const maxBase64Work = 8 << 20
+const maxBase64Depth = 4
+
+type Base64Span struct{ Start, End int }
+
+func base64Byte(c byte) bool {
+	return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' ||
+		c == '+' || c == '/' || c == '-' || c == '_'
+}
+
+// A decoded byte belongs to a complete four-character encoding quantum. Compose these intervals
+// through the bounded parent chain; no coordinate ever refers to an invented decoded document.
+type base64Frame struct {
+	parent     *base64Frame
+	start, end int
+}
+
+func (f *base64Frame) sourceSpan(start, end int) (int, int) {
+	if f == nil {
+		return start, end
+	}
+	left := f.start + start/3*4
+	right := min(f.end, f.start+(end+2)/3*4)
+	return f.parent.sourceSpan(left, right)
+}
+
+// unmaskBase64 scans maximal encoded runs independently of generic entropy findings. A decoded
+// value must still pass a typed detector; arbitrary prose does not become a generic secret.
+// All layers share one byte/output budget and a fixed depth; decoded data never creates generics.
+func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match, bool) {
+	var out []Match
+	work, limited := 0, false
+	candidates := 0
+	exhausted := false
+	var walk func(string, *base64Frame, int, []Base64Span, *int)
+	walk = func(text string, parent *base64Frame, depth int, chain []Base64Span, remaining *int) {
+		for i := 0; i < len(text); {
+			if ctx.Err() != nil || exhausted {
+				return
+			}
+			if !base64Byte(text[i]) {
+				i++
+				continue
+			}
+			start := i
+			for i < len(text) && base64Byte(text[i]) {
+				i++
+				if i&4095 == 0 && ctx.Err() != nil {
+					return
+				}
+			}
+			for i < len(text) && text[i] == '=' {
+				i++
+			}
+			end := i
+			if end-start < minBase64CandidateBytes {
+				continue
+			}
+			if end-start > maxBase64Blob {
+				limited = true
+				continue
+			}
+			if depth == 0 && IsKnownNonSecretBlob(text, start) {
+				continue
+			}
+			if work+end-start > maxBase64Work || len(out) >= maxScanMatches {
+				limited, exhausted = true, true
+				return
+			}
+			work += end - start
+			if depth > 0 {
+				if *remaining <= 0 {
+					limited = true
+					return
+				}
+				*remaining--
+			} else {
+				budget := maxNestedBlobs
+				remaining = &budget
+			}
+			dec, ok := tryB64Decode(text[start:end])
+			if !ok || !printableText(dec) {
+				continue
+			}
+			if candidates >= maxScanMatches {
+				limited, exhausted = true, true
+				return
+			}
+			candidates++
+			if depth >= maxBase64Depth {
+				limited = true
+				continue
+			}
+			decoded := string(dec)
+			left, right := parent.sourceSpan(start, end)
+			proof := append(append([]Base64Span(nil), chain...), Base64Span{left, right})
+			frame := &base64Frame{parent: parent, start: start, end: end}
+			matches, capped := d.collect(ctx, decoded, "", "", d.keywordsPresent(strings.ToLower(decoded)), scanStructure(decoded, 32))
+			limited = limited || capped
+			for _, m := range matches {
+				if taxonomy.GenericLast[m.Type] || depth == 0 && !HasSecretNameContext(text, start) && m.Confidence < 0.9 {
+					continue
+				}
+				if len(out) >= maxScanMatches {
+					limited, exhausted = true, true
+					return
+				}
+				stage := "L1-base64"
+				if m.ChecksumValid {
+					stage += "-checksum"
+				}
+				left, right := frame.sourceSpan(m.Start, m.End)
+				out = append(out, Match{
+					Type: m.Type, Value: m.Value, Start: left, End: right,
+					Confidence: m.Confidence * 0.95, ChecksumValid: m.ChecksumValid,
+					Category: m.Category, Stage: stage, DecodedText: decoded, DecodedStart: m.Start, DecodeSpans: proof,
+				})
+			}
+			walk(decoded, frame, depth+1, proof, remaining)
+
+		}
+	}
+	walk(text, nil, 0, nil, nil)
+	return out, limited
+}

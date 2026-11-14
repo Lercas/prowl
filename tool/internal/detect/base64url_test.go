@@ -38,8 +38,11 @@ func TestBase64URLFullCandidate(t *testing.T) {
 					if limited || found == nil {
 						t.Fatalf("encoded typed secret lost: found=%v limited=%v", found != nil, limited)
 					}
-					if found.Value != base64URLTestKey || found.Start != len(prefix) || found.End != len(prefix)+len(strings.TrimRight(blob, "=")) {
-						t.Fatal("decoded key or complete outer range was truncated")
+					start := strings.Index(payload, base64URLTestKey)
+					left := len(prefix) + start/3*4
+					right := len(prefix) + min(len(blob), (start+len(base64URLTestKey)+2)/3*4)
+					if found.Value != base64URLTestKey || found.Start != left || found.End != right || found.DecodedText != payload || found.DecodedStart != start || len(found.DecodeSpans) != 1 || found.DecodeSpans[0] != (Base64Span{len(prefix), len(prefix) + len(blob)}) {
+						t.Fatal("decoded key lost its exact encoding quantum or complete container proof")
 					}
 				})
 			}

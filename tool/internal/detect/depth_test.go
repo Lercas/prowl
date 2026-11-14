@@ -56,8 +56,8 @@ func TestDecodeLayers(t *testing.T) {
 			t.Errorf("%s: no %s (matches=%d limited=%v)", c.name, c.typ, len(ms), limited)
 			continue
 		}
-		if m.Stage != "L1-base64" {
-			t.Errorf("%s: stage %q, want L1-base64", c.name, m.Stage)
+		if !strings.HasPrefix(m.Stage, "L1-base64") || m.ChecksumValid != strings.Contains(m.Stage, "checksum") {
+			t.Errorf("%s: stage %q lost decoded/checksum evidence", c.name, m.Stage)
 		}
 		if blob := c.text[m.Start:m.End]; strings.ContainsAny(blob, " \n\"") || len(blob) < 16 {
 			t.Errorf("%s: span %q is not the outer blob", c.name, blob)
@@ -68,11 +68,11 @@ func TestDecodeLayers(t *testing.T) {
 func TestDecodeDepthIsBounded(t *testing.T) {
 	d := newDetector(t)
 	blob := "token " + validGithubToken()
-	for i := 0; i < maxDecodeDepth+1; i++ {
+	for i := 0; i < maxBase64Depth+1; i++ {
 		blob = b64(blob)
 	}
 	if ms := d.Scan("payload: " + blob + "\n"); findType(ms, "github_pat_classic") != nil {
-		t.Fatalf("a secret %d layers deep was decoded; the depth bound is %d", maxDecodeDepth+1, maxDecodeDepth)
+		t.Fatalf("a secret %d layers deep was decoded; the depth bound is %d", maxBase64Depth+1, maxBase64Depth)
 	}
 }
 

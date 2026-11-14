@@ -26,7 +26,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	if flags.showSecrets {
 		flags.coverage.RevealSecrets()
 	}
-	flags.coverage.RegisterScope("pipeline", "1.5", map[string]any{"version": version, "ml": flags.mlEmbed || flags.mlURL != "", "ml_model": flags.mlModel,
+	flags.coverage.RegisterScope("pipeline", "1.5", map[string]any{"version": version, "detection_revision": scan.DetectionRevision, "ml": flags.mlEmbed || flags.mlURL != "", "ml_model": flags.mlModel,
 		"ml_url": flags.mlURL, "ml_threshold": flags.mlThreshold, "verify": flags.verify, "verify_all": flags.verifyAll || flags.failOnVerified,
 		"index": flags.indexDir != "", "reconstruct": flags.reconstruct, "disable": flags.disable, "rules_only": flags.rulesOnly, "max_per_file": flags.maxPerFile})
 	ml, err := flags.mlScorer()
