@@ -11,6 +11,20 @@ but they are not automatic union stages in the shipped binary.
 
 ## Source normalization
 
+### Изоляция сканов в 1.5.0
+
+`scan.New(scan.Options{...})` создаёт Pipeline с детектором, правилами, верификаторами,
+ML-скорером, allowlist, числом workers и политикой раскрытия. `Pipeline.Run` обрабатывает
+поток, а `Pipeline.Findings` — один элемент. CLI хранит Pipeline вместе с параметрами
+отчёта в `preparedScan`; HTTP-сервер и Hermes используют тот же API.
+
+Настройка `RevealSecrets` копируется при создании. По умолчанию значение маскируется,
+а исходный контекст не включается. `WithRevealSecrets` создаёт отдельный Pipeline:
+параллельный скан с раскрытием не меняет уже работающие сканы. Глобального
+`SetRevealSecrets` больше нет; клиент HTTP не может переключить политику сервера.
+Зависимости разделяются по ссылке и после подготовки должны быть безопасны для
+параллельного чтения. Это не изолирует остальные глобальные настройки детектора.
+
 Before L1, the source pipeline turns containers and documents into virtual text items. It recursively
 opens bounded archives and mail attachments, joins visible Office XML runs, and extracts PDF text
 layers. With explicit `--ocr`, PNG/JPEG/WebP payloads and PDF pages without text are sent to the

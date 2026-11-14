@@ -132,7 +132,7 @@ const scanCommands = "scan compare repo org cicd image mobile bucket domain jira
 
 const detectorCommands = scanCommands + " serve doctor"
 
-const ocrCommands = "scan compare repo org"
+const ocrCommands = "scan repo org"
 
 var commandSubcommands = map[string][]string{
 	"rules":     {"list", "show", "test", "search", "validate", "stats", "update", "manifest", "export"},

@@ -11,6 +11,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/rules"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
 
@@ -20,7 +21,7 @@ func newSrv(t *testing.T) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return New(detect.New(tax), nil, nil, 4)
+	return New(scan.New(scan.Options{Detector: detect.New(tax)}), 4)
 }
 
 func do(s *Server, method, path, body string) *httptest.ResponseRecorder {
@@ -151,7 +152,7 @@ extractors:
 	const body = `{"content":"acme_widget_token = \"wdgt_abcd1234EFGH5678\"","path":"a.py"}`
 
 	// Without the engine (the old behavior) the template-only token is missed.
-	bare := New(det, nil, nil, 4)
+	bare := New(scan.New(scan.Options{Detector: det}), 4)
 	if rr := do(bare, http.MethodPost, "/scan", body); rr.Code == http.StatusOK {
 		var res scanResult
 		json.Unmarshal(rr.Body.Bytes(), &res)
@@ -161,7 +162,7 @@ extractors:
 	}
 
 	// With the engine wired through, the worker finds it — same coverage as `prowl scan`.
-	srv := New(det, eng, nil, 4)
+	srv := New(scan.New(scan.Options{Detector: det, Rules: eng}), 4)
 	rr := do(srv, http.MethodPost, "/scan", body)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d", rr.Code)

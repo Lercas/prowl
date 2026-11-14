@@ -8,15 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Lercas/prowl/tool/internal/config"
-	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/forge"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/ocr"
-	"github.com/Lercas/prowl/tool/internal/rules"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
-	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
 // cmdOrg lists every repo under a GitHub org/user, GitLab group, or Bitbucket workspace, then clones
@@ -69,7 +66,7 @@ func cmdOrg(args []string) int {
 			"pdf_pages", c.ocrMaxPages, "all_pdf_pages", c.ocrAllPages)
 	}
 	// Build the detector + rule engine + verifier set once and share them across workers (read-only
-	// after construction; scan.Run/verify serialise their own internal state).
+	// after construction; Pipeline.Run/verify serialise their own internal state).
 	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
@@ -89,6 +86,7 @@ func cmdOrg(args []string) int {
 		return 2
 	}
 
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
 	var urls []string
 	if gists {
 		logx.Info("listing gists", "target", target)
@@ -141,7 +139,7 @@ func cmdOrg(args []string) int {
 				if ctx.Err() != nil {
 					return
 				}
-				fs, ok := scanOrgRepo(ctx, c, cfg, det, eng, vset, u)
+				fs, ok := scanOrgRepo(ctx, prepared, u)
 				mu.Lock()
 				all = append(all, fs...)
 				if ok {
@@ -180,7 +178,8 @@ func cmdOrg(args []string) int {
 
 // scanOrgRepo uses a repository-qualified locator before allowlisting and fingerprinting.
 // Failed clones remain diagnostics in the aggregate rather than silently skipped repositories.
-func scanOrgRepo(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, url string) (findings []model.Finding, ok bool) {
+func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findings []model.Finding, ok bool) {
+	c := prepared.flags
 	label := repoLabel(url)
 	dir, cleanup, err := source.CloneRepo(ctx, source.CloneOpts{URL: url, Full: c.history, Timeout: c.timeout})
 	if err != nil {
@@ -204,7 +203,7 @@ func scanOrgRepo(ctx context.Context, c commonFlags, cfg *config.Config, det *de
 		}
 		return label + ": " + p, nil
 	})
-	fs := collectFindings(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	fs := prepared.Collect(ctx, items)
 	complete := true
 	for _, f := range fs {
 		if model.IsIncompleteFinding(f) {

@@ -15,7 +15,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
-	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 	"github.com/Lercas/prowl/tool/internal/verify"
@@ -250,7 +249,6 @@ func loadConfig(c *commonFlags) (*config.Config, error) {
 	detect.ApplyTuning(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)
 	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
 	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
-	scan.SetRevealSecrets(c.showSecrets)
 	if !c.mlThresholdSet && cfg.Performance.MLThreshold > 0 {
 		c.mlThreshold = cfg.Performance.MLThreshold
 	}

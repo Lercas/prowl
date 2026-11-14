@@ -7,18 +7,13 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/Lercas/prowl/tool/internal/config"
-	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/ocr"
-	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
-	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
 func cmdScan(args []string) int {
@@ -86,7 +81,7 @@ func cmdCompare(args []string) int {
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	raw := collectFindings(ctx, rawC, cfg, det, eng, nil, rawItems, c.dedupe)
+	raw := prepareScan(rawC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed}).Collect(ctx, rawItems)
 	if code := failClosedIfIncomplete(ctx, gate(raw, "", false)); code != 0 {
 		return code
 	}
@@ -96,7 +91,7 @@ func cmdCompare(args []string) int {
 	mlC.mlEmbed = true
 	mlC.verifiedOnly, mlC.maxPerFile = false, 0
 	// compare requires the in-process model — fail closed rather than run cascade-only and report a
-	// misleading "0% suppressed by ML" (e.g. on a nocgo binary or a bad --ml-model).
+	// misleading "0% suppressed by ML" (e.g. with a bad --ml-model).
 	if code := mlC.mlPreflight(); code != 0 {
 		return code
 	}
@@ -105,7 +100,7 @@ func cmdCompare(args []string) int {
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	kept := collectFindings(ctx, mlC, cfg, det, eng, nil, keptItems, c.dedupe)
+	kept := prepareScan(mlC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed}).Collect(ctx, keptItems)
 	if code := failClosedIfIncomplete(ctx, gate(kept, "", false)); code != 0 {
 		return code
 	}
@@ -263,7 +258,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	code := runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
 	return finalizeOCR(ocrEngine, code)
 }
 
@@ -359,29 +354,6 @@ func firstNonEmpty(values ...string) string {
 	return ""
 }
 
-// runPreparedScan consumes an item stream using the detector, rules and verifiers loaded by the caller.
-func runPreparedScan(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool, finalize ...func([]model.Finding) []model.Finding) int {
-	start := time.Now()
-	collectFlags := c
-	collectDedupe := dedupe
-	if len(finalize) > 0 {
-		// Final-image provenance must be known before selecting a duplicate or capping occurrences.
-		collectFlags.maxPerFile = 0
-		collectDedupe = false
-	}
-	findings := collectFindings(ctx, collectFlags, cfg, det, eng, vset, items, collectDedupe)
-	for _, fz := range finalize { // image scans pass a final-FS marker; other sources pass nothing
-		findings = fz(findings)
-	}
-	if len(finalize) > 0 {
-		if dedupe {
-			findings = dedupeFingerprints(findings)
-		}
-		findings = capGenericPerFile(findings, c.maxPerFile)
-	}
-	return reportScan(ctx, c, findings, time.Since(start))
-}
-
 // failClosedIfIncomplete raises a clean exit to non-zero when the scan didn't finish (timeout or
 // signal): an incomplete scan can't certify "no secrets". Partial results are still written.
 func failClosedIfIncomplete(ctx context.Context, code int) int {
@@ -392,7 +364,7 @@ func failClosedIfIncomplete(ctx context.Context, code int) int {
 	return code
 }
 
-// mlPreflight fails closed: if --ml/--ml-model was requested but can't load (a nocgo binary, a bad
+// mlPreflight fails closed: if --ml/--ml-model was requested but cannot load (e.g. a bad
 // --ml-model path), abort rather than return cascade-only results that look ML-filtered.
 func (c *commonFlags) mlPreflight() int {
 	if !c.mlEmbed && c.mlModel == "" {
@@ -426,25 +398,4 @@ func (c commonFlags) mlScorer() (mlscore.Scorer, error) {
 	default:
 		return nil, nil
 	}
-}
-
-// collectFindings runs the detector + rule engine (+ optional live-verification) over an item stream,
-// applying --verified-only and (for image scans) fingerprint dedupe. The "scan" half of runScan; org
-// calls it once per repo on a worker pool.
-func collectFindings(ctx context.Context, c commonFlags, cfg *config.Config, det *detect.Detector, eng *rules.Engine, vset *verify.Set, items <-chan model.Item, dedupe bool) []model.Finding {
-	ml, mlErr := c.mlScorer()
-	findings := scan.Run(ctx, items, det, eng, vset, c.workers, cfg.Allowed, ml)
-	if mlErr != nil {
-		logx.Error("ML setup failed; scan results are incomplete", "err", mlErr)
-		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",
-			Path: "scan", Stage: "ML setup", Rationale: "requested ML model was not prepared; scan results are incomplete"})
-	}
-	if c.verifiedOnly {
-		findings = keepVerified(findings)
-	}
-	if dedupe {
-		findings = dedupeFingerprints(findings)
-	}
-	findings = capGenericPerFile(findings, c.maxPerFile)
-	return findings
 }

@@ -21,7 +21,9 @@ func TestRunCancellationDoesNotWaitForSource(t *testing.T) {
 	items := make(chan model.Item)
 	defer close(items)
 	done := make(chan []model.Finding, 1)
-	go func() { done <- Run(ctx, items, nil, nil, nil, 2, nil, nil) }()
+	go func() {
+		done <- New(Options{Detector: nil, Workers: 2}).Run(ctx, items)
+	}()
 	cancel()
 	select {
 	case fs := <-done:
@@ -35,7 +37,7 @@ func TestRunCancellationDoesNotWaitForSource(t *testing.T) {
 
 func TestSourceErrorIsNotAnEmptyCleanScan(t *testing.T) {
 	item := model.Item{Source: "code", Path: "unreadable.env", ArtifactURI: "s3://owned/unreadable.env", Error: errors.New("private source error details")}
-	fs := Run(context.Background(), feed(item), nil, nil, nil, 1, func(string, string) bool { return true }, nil)
+	fs := New(Options{Detector: nil, Workers: 1, Allow: func(string, string) bool { return true }}).Run(context.Background(), feed(item))
 	if len(fs) != 1 || fs[0].Type != "source_error" || !model.IsIncompleteFinding(fs[0]) || fs[0].Path != item.Path {
 		t.Fatalf("unreadable source lost its diagnostic: %+v", fs)
 	}
@@ -49,12 +51,11 @@ func TestSourceErrorIsNotAnEmptyCleanScan(t *testing.T) {
 
 func TestProcessingPanicsPreserveIncompleteMarker(t *testing.T) {
 	item := model.Item{Text: encScanSecret, Source: "code", Path: "a.py"}
-	fs := Findings(context.Background(), nil, nil, nil, item, nil, nil)
+	fs := New(Options{Detector: nil}).Findings(context.Background(), item)
 	if len(fs) != 1 || fs[0].Type != "response_truncated" {
 		t.Fatalf("detector panic looked like a clean result: %+v", fs)
 	}
-	fs = Run(context.Background(), feed(item), detector(t), nil, nil, 1,
-		func(string, string) bool { panic("allowlist processing failed") }, nil)
+	fs = New(Options{Detector: detector(t), Workers: 1, Allow: func(string, string) bool { panic("allowlist processing failed") }}).Run(context.Background(), feed(item))
 	if len(fs) != 1 || fs[0].Type != "response_truncated" || fs[0].Path != item.Path {
 		t.Fatalf("worker panic looked like a clean result: %+v", fs)
 	}
@@ -73,7 +74,7 @@ func TestImageEntryIdentitySurvivesDetection(t *testing.T) {
 		t.Fatal(err)
 	}
 	item := model.Item{Text: encScanSecret + "\nCUSTOM_Zx7Q9Rt5Uv3W8Np2", Source: "code", Path: "image|layer0:prod.env", ImageEntry: 17}
-	fs := Findings(context.Background(), detector(t), eng, nil, item, nil, nil)
+	fs := New(Options{Detector: detector(t), Rules: eng}).Findings(context.Background(), item)
 	if len(fs) == 0 {
 		t.Fatal("fixture produced no findings")
 	}
@@ -97,10 +98,10 @@ func TestSingleItemCancellationIsIncomplete(t *testing.T) {
 			cancel()
 		}
 		it := model.Item{Text: encScanSecret, Source: "code", Path: "prod.env"}
-		fs := Findings(ctx, detector(t), nil, nil, it, func(string, string) bool {
+		fs := New(Options{Detector: detector(t), Allow: func(string, string) bool {
 			cancel()
 			return false
-		}, nil)
+		}}).Findings(ctx, it)
 		cancel()
 		found := false
 		for _, f := range fs {
@@ -131,10 +132,10 @@ func feed(items ...model.Item) <-chan model.Item {
 
 func TestRunSeverityPragmaAllow(t *testing.T) {
 	det := detector(t)
-	fs := Run(context.Background(), feed(
+	fs := New(Options{Detector: det, Workers: 2}).Run(context.Background(), feed(
 		model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"},
 		model.Item{Text: `K = "AKIAZZ11YY22XX33WW44"  // prowl:allow`, Source: "code", Path: "b.py"},
-	), det, nil, nil, 2, nil, nil)
+	))
 
 	if len(fs) != 1 {
 		t.Fatalf("expected 1 finding (pragma suppresses the other), got %d", len(fs))
@@ -156,10 +157,10 @@ func TestRunSeverityPragmaAllow(t *testing.T) {
 func TestSourceAwareExamplePathAndURL(t *testing.T) {
 	det := detector(t)
 	const key = `AKIANAFGYOEYPXU1DSYP`
-	fs := Run(context.Background(), feed(
+	fs := New(Options{Detector: det, Workers: 2}).Run(context.Background(), feed(
 		model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "examples/x.py"},
 		model.Item{Text: `AWS="` + key + `"`, Source: "jira", Path: "Examples@v3", Meta: map[string]any{"url": "https://x/browse/E-1"}},
-	), det, nil, nil, 2, nil, nil)
+	))
 	var code, jira model.Finding
 	for _, f := range fs {
 		switch f.Source {
@@ -186,9 +187,9 @@ func TestSourceAwareExamplePathAndURL(t *testing.T) {
 func TestFileSourceStillDemoted(t *testing.T) {
 	det := detector(t)
 	const key = `AKIANAFGYOEYPXU1DSYP`
-	fs := Run(context.Background(), feed(
+	fs := New(Options{Detector: det, Workers: 1}).Run(context.Background(), feed(
 		model.Item{Text: `AWS="` + key + `"`, Source: "file", Path: "examples/setup.md"},
-	), det, nil, nil, 1, nil, nil)
+	))
 	if len(fs) != 1 {
 		t.Fatalf("expected 1 finding, got %d", len(fs))
 	}
@@ -199,31 +200,29 @@ func TestFileSourceStillDemoted(t *testing.T) {
 
 func TestRevealSecrets(t *testing.T) {
 	det := detector(t)
-	const key = `AKIANAFGYOEYPXU1DSYP`
-	item := func() model.Item { return model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "a.py"} }
-
-	SetRevealSecrets(false)
-	if fs := Run(context.Background(), feed(item()), det, nil, nil, 1, nil, nil); len(fs) != 1 || fs[0].Redacted == key {
-		t.Fatalf("default must redact, got %+v", fs)
+	const key = "AKIANAFGYOEYPXU1DSYP"
+	item := model.Item{Text: `AWS="` + key + `"`, Source: "code", Path: "a.py"}
+	masked := New(Options{Detector: det, Workers: 1})
+	revealed := masked.WithRevealSecrets(true)
+	if findings := masked.Run(context.Background(), feed(item)); len(findings) != 1 || findings[0].Redacted == key || findings[0].Context != nil {
+		t.Fatalf("default must mask: %+v", findings)
 	}
-	SetRevealSecrets(true)
-	defer SetRevealSecrets(false)
-	if fs := Run(context.Background(), feed(item()), det, nil, nil, 1, nil, nil); len(fs) != 1 || fs[0].Redacted != key {
-		t.Fatalf("--show-secrets must put the raw value in Redacted, got %+v", fs)
+	if findings := revealed.Run(context.Background(), feed(item)); len(findings) != 1 || findings[0].Redacted != key || findings[0].Context == nil {
+		t.Fatalf("explicit disclosure failed: %+v", findings)
 	}
 }
 
 func TestRunAllowFunc(t *testing.T) {
 	det := detector(t)
 	allow := func(value, path string) bool { return value == "AKIANAFGYOEYPXU1DSYP" }
-	fs := Run(context.Background(), feed(model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}), det, nil, nil, 1, allow, nil)
+	fs := New(Options{Detector: det, Workers: 1, Allow: allow}).Run(context.Background(), feed(model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}))
 	if len(fs) != 0 {
 		t.Errorf("allow func should have suppressed the finding, got %d", len(fs))
 	}
 }
 
 func TestRunEmptyInput(t *testing.T) {
-	if fs := Run(context.Background(), feed(), detector(t), nil, nil, 4, nil, nil); len(fs) != 0 {
+	if fs := New(Options{Detector: detector(t), Workers: 4}).Run(context.Background(), feed()); len(fs) != 0 {
 		t.Errorf("empty input produced %d findings", len(fs))
 	}
 }
@@ -237,7 +236,7 @@ func TestRunCancelledShortCircuits(t *testing.T) {
 		items <- model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"}
 	}
 	close(items)
-	fs := Run(ctx, items, det, nil, nil, 2, nil, nil) // must return promptly, not hang
+	fs := New(Options{Detector: det, Workers: 2}).Run(ctx, items) // must return promptly, not hang
 	if len(fs) != 1 || fs[0].Type != "response_truncated" {
 		t.Errorf("cancelled scan must yield only an incomplete marker, got %+v", fs)
 	}
@@ -267,7 +266,7 @@ func TestExamplePathAndComment(t *testing.T) {
 func TestLockfileKeepsCredentialGeneric(t *testing.T) {
 	det := detector(t)
 	run := func(text, path string) []model.Finding {
-		return Run(context.Background(), feed(model.Item{Text: text, Source: "code", Path: path}), det, nil, nil, 1, nil, nil)
+		return New(Options{Detector: det, Workers: 1}).Run(context.Background(), feed(model.Item{Text: text, Source: "code", Path: path}))
 	}
 
 	// basic_auth_header (URL userinfo form) carries a REAL credential — kept in a lockfile.
@@ -325,9 +324,9 @@ matchers:
     regex:
       - 'ghp_[A-Za-z0-9]+'
 `)
-	fs := Findings(context.Background(), det, eng, nil, model.Item{
+	fs := New(Options{Detector: det, Rules: eng}).Findings(context.Background(), model.Item{
 		Text: `token = "` + ghTok + `"`, Source: "code", Path: "app.py",
-	}, nil, nil)
+	})
 	if len(fs) != 1 {
 		t.Fatalf("expected 1 finding, got %d: %+v", len(fs), fs)
 	}
@@ -351,9 +350,9 @@ matchers:
     regex:
       - 'aB3x[A-Za-z0-9]+'
 `)
-	fs2 := Findings(context.Background(), det, eng2, nil, model.Item{
+	fs2 := New(Options{Detector: det, Rules: eng2}).Findings(context.Background(), model.Item{
 		Text: `api_key = "` + genVal + `"`, Source: "code", Path: "app.py",
-	}, nil, nil)
+	})
 	if len(fs2) != 1 {
 		t.Fatalf("expected 1 finding for generic+template, got %d: %+v", len(fs2), fs2)
 	}
@@ -392,7 +391,7 @@ func TestBothProducersBounded(t *testing.T) {
 		fmt.Fprintf(&b, "secret_key_%039dZ\n", i)
 	}
 	const artifactURI = "https://owned.invalid/dense.txt"
-	fs := Findings(context.Background(), det, eng, nil, model.Item{Text: b.String(), Source: "code", Path: "dense.txt", ArtifactURI: artifactURI}, nil, nil)
+	fs := New(Options{Detector: det, Rules: eng}).Findings(context.Background(), model.Item{Text: b.String(), Source: "code", Path: "dense.txt", ArtifactURI: artifactURI})
 
 	// The combined output (real findings + the one truncation marker) must stay at/near the cap, never
 	// the ~100k the uncapped engine produced.
@@ -418,10 +417,10 @@ func TestBothProducersBounded(t *testing.T) {
 // findings under the cap carries NO truncation marker and reports its real secrets.
 func TestNormalScanNoTruncationMarker(t *testing.T) {
 	det := detector(t)
-	fs := Run(context.Background(), feed(model.Item{
+	fs := New(Options{Detector: det, Workers: 1}).Run(context.Background(), feed(model.Item{
 		Text:   "db_password = \"S3cr3tP4ssw0rd!\"\napi_key = \"AKIANAFGYOEYPXU1DSYP\"",
 		Source: "code", Path: "a.py",
-	}), det, nil, nil, 1, nil, nil)
+	}))
 	if len(fs) == 0 {
 		t.Fatal("normal scan lost all findings")
 	}
@@ -444,10 +443,10 @@ func TestNormalScanNoTruncationMarker(t *testing.T) {
 // the pragma still reports — even when both are scanned through the same cached lineIndex.
 func TestPragmaSuppressionAfterMemoization(t *testing.T) {
 	det := detector(t)
-	fs := Run(context.Background(), feed(model.Item{
+	fs := New(Options{Detector: det, Workers: 1}).Run(context.Background(), feed(model.Item{
 		Text:   "a = \"AKIANAFGYOEYPXU1DSYP\"\nb = \"AKIAZZ11YY22XX33WW44\" # prowl:allow\nc = \"AKIA9988YY22XX33WW44\"",
 		Source: "code", Path: "x.py",
-	}), det, nil, nil, 1, nil, nil)
+	}))
 	// Lines a and c report; line b is pragma-suppressed. (All three are valid-shaped AWS-ID tokens.)
 	for _, f := range fs {
 		if f.Line == 2 {
@@ -471,7 +470,7 @@ func TestSeverityDemotion(t *testing.T) {
 		{"checksum in test path stays", `t = "` + ghTok + `"`, "tests/fixtures.py", "high"},
 	}
 	for _, tc := range cases {
-		fs := Run(context.Background(), feed(model.Item{Text: tc.text, Source: "code", Path: tc.path}), det, nil, nil, 1, nil, nil)
+		fs := New(Options{Detector: det, Workers: 1}).Run(context.Background(), feed(model.Item{Text: tc.text, Source: "code", Path: tc.path}))
 		if len(fs) != 1 {
 			t.Errorf("%s: expected 1 finding, got %d", tc.name, len(fs))
 			continue

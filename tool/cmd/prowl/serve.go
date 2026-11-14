@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/server"
 )
 
@@ -43,7 +44,7 @@ func cmdServe(args []string) int {
 	}
 	ctx, stop := rootContext(c)
 	defer stop()
-	if err := server.Serve(ctx, addr, server.New(det, eng, cfg.Allowed, maxConc)); err != nil {
+	if err := server.Serve(ctx, addr, server.New(scan.New(scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed}), maxConc)); err != nil {
 		logx.Error("server error", "err", err)
 		return 2
 	}

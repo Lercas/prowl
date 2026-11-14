@@ -677,7 +677,7 @@ var (
 	sessionTokenRE = regexp.MustCompile(`(?is)__HERMES_SESSION_TOKEN__\s*=\s*["']([^"']{16,256})["']`)
 	publicScanner  struct {
 		once     sync.Once
-		detector *detect.Detector
+		pipeline *scan.Pipeline
 	}
 )
 
@@ -724,18 +724,16 @@ func scanPublicBody(ctx context.Context, body []byte, path string) []PublicFindi
 	publicScanner.once.Do(func() {
 		tax, err := taxonomy.LoadDefault()
 		if err == nil {
-			publicScanner.detector = detect.New(tax)
+			publicScanner.pipeline = scan.New(scan.Options{Detector: detect.New(tax)})
 		}
 	})
-	if publicScanner.detector == nil || len(body) == 0 {
+	if publicScanner.pipeline == nil || len(body) == 0 {
 		return nil
 	}
-	// This command never has a reveal-secrets flag. Set the process-wide scan
-	// guard defensively in case the package is embedded by another caller.
-	scan.SetRevealSecrets(false)
-	findings := scan.Findings(ctx, publicScanner.detector, nil, nil, model.Item{
+	// This private immutable pipeline always masks values; another scan cannot toggle it.
+	findings := publicScanner.pipeline.Findings(ctx, model.Item{
 		Text: string(body), Source: "code", Path: path,
-	}, nil, nil)
+	})
 	result := make([]PublicFinding, 0, len(findings))
 	for _, finding := range findings {
 		if finding.Type == scan.ResultsTruncatedType {

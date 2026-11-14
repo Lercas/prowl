@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
 func TestFinalizationCancellationCannotCreateBaselineOrCleanReport(t *testing.T) {
@@ -29,11 +29,11 @@ func TestFinalizationCancellationCannotCreateBaselineOrCleanReport(t *testing.T)
 			items := make(chan model.Item)
 			close(items) // Acquisition completed, then final-image/provenance processing is interrupted.
 			called := false
-			code := runPreparedScan(ctx, c, &config.Config{}, nil, nil, nil, items, false, func(_ []model.Finding) []model.Finding {
+			code := prepareScan(c, scan.Options{}).WithFinalizer(func(_ []model.Finding) []model.Finding {
 				called = true
 				cancel()
 				return []model.Finding{{Type: "owned", Path: "owned.env", Severity: "high", Confidence: 1, Fingerprint: "owned"}}
-			})
+			}).Run(ctx, items)
 			if !called || code != 2 {
 				t.Fatalf("called=%v exit=%d", called, code)
 			}

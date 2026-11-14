@@ -35,7 +35,7 @@ func TestSARIFUnicodeColumnsFromBothProducers(t *testing.T) {
 		for _, leading := range []string{"", "first\n", "first\r\n"} {
 			text := leading + prefix + "OWNED_G7hJ9kL2mN5p " + prefix + "TEMPLATE_R4tV8w000001"
 			const artifactURI = "https://owned.invalid/a%23b?x=%2F#state"
-			fs := Findings(context.Background(), det, eng, nil, model.Item{Text: text, Source: "code", Path: "prod.env", ArtifactURI: artifactURI}, nil, nil)
+			fs := New(Options{Detector: det, Rules: eng}).Findings(context.Background(), model.Item{Text: text, Source: "code", Path: "prod.env", ArtifactURI: artifactURI})
 			if len(fs) != 2 {
 				t.Fatalf("fixture returned %d findings, want both producers", len(fs))
 			}

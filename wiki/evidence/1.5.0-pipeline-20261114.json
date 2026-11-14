@@ -1,0 +1,29 @@
+{
+  "scope": "Pipeline dependency and disclosure isolation; no publication",
+  "source_head": "13fa4615dbc86ec44d550bc0032ae4f7a181596b",
+  "source_worktree": "Pipeline refactor plus concurrent uncommitted detector changes",
+  "validation": {
+    "full_go_suite": "go test -p 2 ./... passed",
+    "race": "scan, server, cmd/prowl, hermesaudit, source passed",
+    "vet": "passed",
+    "lint": "0 issues",
+    "e2e": {
+      "toolchain": "go1.25.14",
+      "passed": 80,
+      "failed": 0,
+      "fixtures": "preserved; temporary harness replaces cleanup with retention"
+    },
+    "static_ml": "go1.25.14 CGO_ENABLED=0 build, scan, redaction, legacy-model rejection passed"
+  },
+  "contracts": [
+    "overlapping single-item and worker-pool scans retain independent disclosure policies",
+    "HTTP single/batch request fields cannot change server policy",
+    "loading another CLI config cannot change prepared disclosure",
+    "final-image processing precedes deduplication and caps",
+    "cancellation and ML setup errors remain incomplete results"
+  ],
+  "limitations": [
+    "other process-global detector and configuration settings remain",
+    "release not published"
+  ]
+}

@@ -12,6 +12,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/mlfeatures"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
 func writeSnapshotModel(t *testing.T, path string, baseline float64) {
@@ -91,7 +92,7 @@ func TestUnpreparedMLCannotProduceACompleteReportOrBaseline(t *testing.T) {
 	items := make(chan model.Item, 1)
 	items <- model.Item{Text: `AWS="AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "prod.env"}
 	close(items)
-	fs := collectFindings(context.Background(), c, cfg, det, nil, nil, items, false)
+	fs := prepareScan(c, scan.Options{Detector: det, Allow: cfg.Allowed}).Collect(context.Background(), items)
 	found, incomplete := false, false
 	for _, finding := range fs {
 		found = found || finding.Type == "aws_access_key_id"

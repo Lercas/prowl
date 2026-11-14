@@ -56,12 +56,13 @@ func BenchmarkFindingsCorpus(b *testing.B) {
 		b.Fatal(err)
 	}
 	ctx := context.Background()
+	pipeline := New(Options{Detector: det, Rules: eng})
 	b.SetBytes(total)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, it := range items {
-			Findings(ctx, det, eng, nil, it, nil, nil)
+			pipeline.Findings(ctx, it)
 		}
 	}
 }

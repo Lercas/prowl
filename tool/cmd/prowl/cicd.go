@@ -7,6 +7,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/cicd"
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
 // cmdCICD scans recent CI logs and downloadable artifacts from one GitHub or GitLab repository.
@@ -98,7 +99,7 @@ func cmdCICD(args []string) int {
 		return 2
 	}
 
-	code := runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
 	result := <-done
 	logx.Info("CI collection complete", "target", target, "runs", result.Runs, "artifacts",
 		result.Artifacts, "items", result.Items, "skipped", result.Skipped, "failures", result.Failures)

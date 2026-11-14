@@ -15,6 +15,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
 )
 
@@ -103,7 +104,7 @@ func cmdMobile(args []string) int {
 	}
 	// dedupe on by default: the same key often shows up in several entries (raw resource + dex strings);
 	// report it once. Same as cmdImage.
-	return runPreparedScan(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+	return prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
 }
 
 // minRunDefault mirrors source's default min printable-run length (kept here so the flag default reads

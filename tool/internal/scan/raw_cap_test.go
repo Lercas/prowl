@@ -22,7 +22,7 @@ func TestRawCandidateCapRemainsVisibleAfterDedupeAndAllowlist(t *testing.T) {
 		t.Run(map[bool]string{false: "dedupe", true: "allowlist"}[allowed], func(t *testing.T) {
 			allow := func(value, _ string) bool { return allowed && value == "OWNED_G7hJ9kL2mN5p" }
 			item := model.Item{Source: "file", Path: "owned.env", Text: "OWNED_G7hJ9kL2mN5p LATE_A6bC9dE2fG7h"}
-			findings := Findings(context.Background(), detect.New(tax), nil, nil, item, allow, nil)
+			findings := New(Options{Detector: detect.New(tax), Allow: allow}).Findings(context.Background(), item)
 			markers := 0
 			for _, f := range findings {
 				if f.Type == ResultsTruncatedType {

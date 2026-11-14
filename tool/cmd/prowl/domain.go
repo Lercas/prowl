@@ -9,6 +9,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/domain"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/targetlist"
 )
 
@@ -83,6 +84,7 @@ func cmdDomain(args []string) int {
 		return 2
 	}
 
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
 	ctx, stop := rootContext(c)
 	defer stop()
 	start := time.Now()
@@ -112,7 +114,7 @@ func cmdDomain(args []string) int {
 				}
 				logx.Info("scanning domain", "target", target, "recon", opts.Recon)
 				items, reached := domain.Discover(ctx, target, opts)
-				fs := collectFindings(ctx, c, cfg, det, eng, vset, items, c.dedupe)
+				fs := prepared.Collect(ctx, items)
 				if !reached.Load() {
 					logx.Warn("root page could not be read completely", "target", target)
 				}

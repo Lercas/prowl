@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/logx"
@@ -24,16 +23,8 @@ import (
 // allowPragmas are inline line-level suppression markers (detect-secrets / gitleaks compatible).
 var allowPragmas = []string{"prowl:allow", "pragma: allowlist secret", "gitleaks:allow", "noqa: secret"}
 
-// revealSecrets makes a finding's Redacted field hold the FULL unredacted value (--show-secrets).
-// Off by default, so the raw value never leaves the process unless explicitly requested. Set once
-// before Run.
-var revealSecrets atomic.Bool
-
-// SetRevealSecrets toggles whether findings carry the unredacted secret value (--show-secrets).
-func SetRevealSecrets(v bool) { revealSecrets.Store(v) }
-
-func redactValue(raw string) string {
-	if revealSecrets.Load() {
+func (p *Pipeline) redactValue(raw string) string {
+	if p.options.RevealSecrets {
 		return raw
 	}
 	return model.Redact(raw)
@@ -294,7 +285,8 @@ func (li *lineIndex) isComment(pos int) bool {
 // Run scans the Item stream with workers goroutines and returns all findings. allow (optional)
 // suppresses a match by its raw value+path before redaction. Stops on ctx cancellation with
 // partial results.
-func Run(ctx context.Context, items <-chan model.Item, det *detect.Detector, eng *rules.Engine, vset *verify.Set, workers int, allow func(value, path string) bool, ml mlscore.Scorer) []model.Finding {
+func (p *Pipeline) Run(ctx context.Context, items <-chan model.Item) []model.Finding {
+	workers := p.options.Workers
 	if workers <= 0 {
 		workers = runtime.NumCPU()
 	}
@@ -322,7 +314,7 @@ func Run(ctx context.Context, items <-chan model.Item, det *detect.Detector, eng
 				// guard the whole per-item pipeline so one bad item can't crash the worker and abort the scan
 				var local []model.Finding
 				resilience.Guard(
-					func() { local = Findings(ctx, det, eng, vset, it, allow, ml) },
+					func() { local = p.Findings(ctx, it) },
 					func(r any) {
 						logx.Warn("recovered item-processing panic", "path", it.Path, "err", r)
 						local = []model.Finding{processingError(it, "item processing failed; scan results are incomplete")}
@@ -351,7 +343,8 @@ func processingError(it model.Item, reason string) model.Finding {
 
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
-func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset *verify.Set, it model.Item, allow func(value, path string) bool, ml mlscore.Scorer) []model.Finding {
+func (p *Pipeline) Findings(ctx context.Context, it model.Item) []model.Finding {
+	det, eng, vset, allow, ml := p.options.Detector, p.options.Rules, p.options.Verifiers, p.options.Allow, p.options.ML
 	if ctx.Err() != nil {
 		return []model.Finding{processingError(it, "scan interrupted; results are incomplete")}
 	}
@@ -413,11 +406,11 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 			Source:   it.Source, Path: it.Path, Line: line, Col: col,
 			UTF16Col:    li.utf16Col(m.Start),
 			ArtifactURI: it.ArtifactURI,
-			Redacted:    redactValue(m.Value), Stage: m.Stage, URL: itemURL,
+			Redacted:    p.redactValue(m.Value), Stage: m.Stage, URL: itemURL,
 			Fingerprint: model.ComputeFingerprint(m.Type, it.Path, m.Value),
 			Verified:    ver, Rationale: why, Instruction: itemInstr,
 			ImageEntry: it.ImageEntry,
-			Context:    revealContext(it, m.Start),
+			Context:    p.revealContext(it, m.Start),
 		})
 		if ml != nil {
 			reqs = append(reqs, recordFor(m.Value, it, m.Start))
@@ -480,11 +473,11 @@ func Findings(ctx context.Context, det *detect.Detector, eng *rules.Engine, vset
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
 				UTF16Col:    li.utf16Col(h.Start),
 				ArtifactURI: it.ArtifactURI,
-				Redacted:    redactValue(h.Value), Stage: "rule", URL: itemURL,
+				Redacted:    p.redactValue(h.Value), Stage: "rule", URL: itemURL,
 				Fingerprint: model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
 				Verified:    ver, Rationale: why, Instruction: itemInstr,
 				ImageEntry: it.ImageEntry,
-				Context:    revealContext(it, h.Start),
+				Context:    p.revealContext(it, h.Start),
 			}
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
@@ -565,8 +558,8 @@ func recordFor(value string, it model.Item, start int) mlscore.Record {
 // revealContext returns the finding's ML context (same line/name recordFor feeds the model) when
 // --show-secrets is on, so the JSON carries faithful feedback features. nil otherwise: the line holds
 // the raw secret.
-func revealContext(it model.Item, start int) *model.FindingContext {
-	if !revealSecrets.Load() {
+func (p *Pipeline) revealContext(it model.Item, start int) *model.FindingContext {
+	if !p.options.RevealSecrets {
 		return nil
 	}
 	line := lineText(it.Text, start)

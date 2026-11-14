@@ -217,7 +217,7 @@ func TestExtractPlantedKeyInJSON(t *testing.T) {
 		t.Errorf("path %q lacks the <archive>!/ prefix", found.Path)
 	}
 
-	fs := scan.Run(context.Background(), feedItems(items...), mobileDetector(t), nil, nil, 2, nil, nil)
+	fs := scan.New(scan.Options{Detector: mobileDetector(t), Workers: 2}).Run(context.Background(), feedItems(items...))
 	if !hasType(fs, "aws") {
 		t.Fatalf("no aws finding produced from the planted key; findings: %v", findingTypes(fs))
 	}
@@ -237,7 +237,7 @@ func TestGoogleServicesHighValue(t *testing.T) {
 	if len(items) == 0 || !strings.Contains(items[0].Text, awsKey) {
 		t.Fatalf("google-services.json not scanned raw; items: %v", paths(items))
 	}
-	fs := scan.Run(context.Background(), feedItems(items...), mobileDetector(t), nil, nil, 2, nil, nil)
+	fs := scan.New(scan.Options{Detector: mobileDetector(t), Workers: 2}).Run(context.Background(), feedItems(items...))
 	if !hasType(fs, "aws") {
 		t.Fatalf("no finding from the google-services.json key; findings: %v", findingTypes(fs))
 	}

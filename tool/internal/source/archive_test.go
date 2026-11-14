@@ -167,7 +167,7 @@ func TestFilesystemExtractsSplitSecretFromDOCX(t *testing.T) {
 	input := make(chan model.Item, 1)
 	input <- *document
 	close(input)
-	findings := scan.Run(context.Background(), input, detect.New(tax), nil, nil, 1, nil, nil)
+	findings := scan.New(scan.Options{Detector: detect.New(tax), Workers: 1}).Run(context.Background(), input)
 	found := false
 	for _, finding := range findings {
 		if finding.Type == "aws_access_key_id" {
@@ -282,7 +282,7 @@ func TestFilesystemExtractsPDFTextInsideArchive(t *testing.T) {
 	input := make(chan model.Item, 1)
 	input <- *page
 	close(input)
-	findings := scan.Run(context.Background(), input, detect.New(tax), nil, nil, 1, nil, nil)
+	findings := scan.New(scan.Options{Detector: detect.New(tax), Workers: 1}).Run(context.Background(), input)
 	found := false
 	for _, finding := range findings {
 		if finding.Type == "aws_access_key_id" {

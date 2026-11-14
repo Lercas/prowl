@@ -14,10 +14,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
-	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
@@ -61,21 +59,20 @@ type metrics struct {
 
 // Server is a stateless scan worker. Safe for concurrent use.
 type Server struct {
-	det   *detect.Detector
-	eng   *rules.Engine // installed rule templates (datadog, dropbox, …); nil = taxonomy detectors only
-	allow func(value, path string) bool
-	sem   chan struct{} // bounded concurrency -> backpressure
-	m     metrics
+	pipeline *scan.Pipeline
+	sem      chan struct{} // bounded concurrency -> backpressure
+	m        metrics
 }
 
-// New builds a scan worker. eng carries the loaded rule templates (the set `scan`/`lsp` load) so the
-// server matches the CLI's coverage; pass nil for taxonomy detectors only. eng is read-only after
-// construction and safe to share across the request handlers.
-func New(det *detect.Detector, eng *rules.Engine, allow func(value, path string) bool, maxConcurrent int) *Server {
+// New builds a scan worker sharing an immutable pipeline across requests.
+func New(pipeline *scan.Pipeline, maxConcurrent int) *Server {
 	if maxConcurrent <= 0 {
 		maxConcurrent = 2 * runtime.NumCPU()
 	}
-	return &Server{det: det, eng: eng, allow: allow, sem: make(chan struct{}, maxConcurrent)}
+	if pipeline == nil {
+		pipeline = scan.New(scan.Options{})
+	}
+	return &Server{pipeline: pipeline, sem: make(chan struct{}, maxConcurrent)}
 }
 
 type scanItem struct {
@@ -155,7 +152,7 @@ func (w *muxErrorWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-// recoverMW is defense-in-depth for handler glue (scan.Findings already self-guards). It logs without
+// recoverMW is defense-in-depth for handler glue (Pipeline.Findings already self-guards). It logs without
 // exposing the stack and returns a generic 500 instead of letting net/http abort the connection.
 // http.ErrAbortHandler is re-panicked so net/http's abort contract still holds.
 func recoverMW(next http.Handler) http.Handler {
@@ -238,7 +235,7 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusRequestEntityTooLarge, "item content too large")
 		return
 	}
-	fs := scan.Findings(r.Context(), s.det, s.eng, nil, in.toModel(), s.allow, nil)
+	fs := s.pipeline.Findings(r.Context(), in.toModel())
 	atomic.AddInt64(&s.m.scanned, 1)
 	atomic.AddInt64(&s.m.findings, int64(len(fs)))
 	// Bound the per-request output: even an allowed-size item can fan out to thousands of findings.
@@ -305,7 +302,7 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 			})
 			continue
 		}
-		all = append(all, scan.Findings(ctx, s.det, s.eng, nil, it.toModel(), s.allow, nil)...)
+		all = append(all, s.pipeline.Findings(ctx, it.toModel())...)
 		atomic.AddInt64(&s.m.scanned, 1)
 	}
 	atomic.AddInt64(&s.m.findings, int64(len(all)))

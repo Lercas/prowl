@@ -8,6 +8,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
 )
 
@@ -100,14 +101,14 @@ func cmdImage(args []string) int {
 			}
 		}
 	}()
-	code := runPreparedScan(ctx, c, cfg, det, eng, vset, merged, c.dedupe, func(fs []model.Finding) []model.Finding {
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).WithFinalizer(func(fs []model.Finding) []model.Finding {
 		if ctx.Err() != nil { // cancelled: the flatten map is partial — don't assert in_final verdicts
 			return fs
 		}
 		finalMu.Lock()
 		defer finalMu.Unlock()
 		return source.MarkFinalImage(fs, finals)
-	})
+	}).Run(ctx, merged)
 	// an anti-bomb / cancel abort means extraction stopped early — fail closed, never certify clean
 	finalMu.Lock()
 	for _, fi := range finals {

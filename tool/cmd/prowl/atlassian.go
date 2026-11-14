@@ -87,8 +87,8 @@ func cmdAtlassian(args []string, product string) int {
 		logx.Error("verify setup failed", "err", verr)
 		return 2
 	}
-	ml, err := c.mlScorer()
-	if err != nil {
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if err := prepared.mlError; err != nil {
 		logx.Error("ML setup failed", "err", err)
 		return 2
 	}
@@ -111,7 +111,7 @@ func cmdAtlassian(args []string, product string) int {
 	go func() {
 		defer close(counted)
 		for it := range items {
-			// ctx-aware send: on --timeout/Ctrl-C, scan.Run's workers stop reading `counted`, so a bare
+			// ctx-aware send: on --timeout/Ctrl-C, Pipeline.Run's workers stop reading `counted`, so a bare
 			// `counted <- it` would block this goroutine forever (and never close the channel). Bail on
 			// ctx.Done instead; Collect's emit already respects the same ctx, so the walker unwinds too.
 			select {
@@ -123,7 +123,7 @@ func cmdAtlassian(args []string, product string) int {
 		}
 	}()
 
-	findings := scan.Run(ctx, counted, det, eng, vset, c.workers, cfg.Allowed, ml)
+	findings := prepared.pipeline.Run(ctx, counted)
 	if itemCount.Load() == 0 && ctx.Err() == nil {
 		logx.Error("scanned 0 items — check credentials, the account's project/space access, and any --project/--space filter", "product", product)
 		return 2

@@ -109,6 +109,7 @@ func TestCLIParseFailurePreservesExistingReport(t *testing.T) {
 		{"serve", "--recon"},
 		{"rules", "list", "--source=owned"},
 		{"mcp", "--show-secrets"},
+		{"compare", ".", "--ocr"},
 	} {
 		if code := runCLI(args); code != 2 {
 			t.Fatalf("%v returned %d", args, code)
