@@ -26,7 +26,7 @@ func TestAnalyze(t *testing.T) {
 		{rx: `(?i)пароль=\S+`, lits: []Lit{{S: "пар", Fold: true}}}, // cut at 'о': U+1C82 folds to it
 		{rx: `(?s)ab.cd`, lits: []Lit{{S: "ab"}}, gaps: 1},
 		// not provable: whole-text
-		{rx: `[0-9]{8,10}:[A-Za-z0-9_-]{35}`},                  // no literal
+		{rx: `[0-9]{8,10}:[A-Za-z0-9_-]{35}`, lits: []Lit{{S: ":"}}},
 		{rx: `"key"[^"]*"value"`, lits: []Lit{{S: `"value"`}}}, // byte proof, no finite line bound
 		{rx: `a\w{3}`},                             // literal too short
 		{rx: `-----BEGIN KEY-----\n[A-Za-z]+`},     // required literal spans a line break

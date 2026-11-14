@@ -14,6 +14,7 @@ import (
 
 // owner ties one Aho-Corasick pattern to a regex that requires it.
 type owner struct {
+	guard    *runGuard
 	re       int32
 	exact    string // non-empty: the occurrence must equal this byte-for-byte (case-sensitive literal)
 	nonASCII bool   // only the Unicode-lowered pass can find every occurrence
@@ -55,7 +56,16 @@ func New(res []*regexp.Regexp) *Set {
 			if !l.Fold {
 				o.exact = l.S
 			}
-			s.owners[id] = append(s.owners[id], o)
+			if len(p.triggers) == 0 {
+				s.owners[id] = append(s.owners[id], o)
+			} else {
+				for j := range p.triggers {
+					if p.triggers[j].lit == l {
+						o.guard = &p.triggers[j].guard
+						s.owners[id] = append(s.owners[id], o)
+					}
+				}
+			}
 		}
 	}
 	if len(pats) > 0 {
@@ -241,6 +251,9 @@ func (w *Windows) locate(hay string, unicodePass bool) {
 				}
 				if !unicodePass && start >= st.coveredFrom && start < st.coveredUntil {
 					continue // complete line or separator-delimited segment already covered
+				}
+				if o.guard != nil && !o.guard.matches(text, start) {
+					continue
 				}
 				w.add(int(o.re), start, end, unicodePass)
 			}

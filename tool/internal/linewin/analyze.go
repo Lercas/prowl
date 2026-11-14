@@ -4,13 +4,13 @@
 // For each regex, Analyze proves a required literal set and at least one region
 // bound from the parsed syntax tree, or declines:
 //
-//  1. a set of required literals — every match contains at least one of them;
+//  1. required literals or guarded delimiters — every match contains at least one;
 //  2. a finite byte width, a separator budget, or a finite line-gap bound.
 //
 // At scan time one Aho-Corasick pass locates the literals. Finite match widths or
 // non-consuming separators allow byte-bounded windows even on minified lines.
 // Otherwise a window uses the literal's line plus `gaps` neighboring non-blank lines.
-// Regexes that cannot be proven (no usable literal or region bound) keep the
+// Regexes that cannot be proven (no usable anchor or region bound) keep the
 // whole-text path, so adopting the package never changes what is reported.
 package linewin
 
@@ -37,7 +37,8 @@ type Lit struct {
 
 // Plan is the proof for one regex.
 type Plan struct {
-	Lits []Lit
+	Lits     []Lit
+	triggers []structuralTrigger
 	// Gaps is how many neighbouring non-blank lines (each side) a match may reach from a literal's line.
 	Gaps int
 	// EdgeCheck is set when the regex uses \A / \z / non-multiline ^ $: those assertions also hold at a
@@ -75,14 +76,20 @@ func Analyze(re *regexp.Regexp) *Plan {
 	info := litsOf(tree)
 	lits := info.best()
 	if len(lits) == 0 {
-		return nil
+		p.triggers = structuralTriggers(tree)
+		if len(p.triggers) == 0 {
+			return nil
+		}
+		for _, trigger := range p.triggers {
+			lits = append(lits, trigger.lit)
+		}
 	}
 	for i := range lits {
 		if lits[i].Fold {
 			lits[i].S = safeFoldPiece(lits[i].S)
 		}
 		l := lits[i]
-		if len(l.S) < minLitLen || strings.IndexByte(l.S, '\n') >= 0 {
+		if (len(l.S) < minLitLen && len(p.triggers) == 0) || strings.IndexByte(l.S, '\n') >= 0 {
 			return nil // too short to filter, or spans lines (no single "line of the literal")
 		}
 		for j := 0; j < len(l.S); j++ {
