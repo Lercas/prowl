@@ -421,13 +421,17 @@
   ключ», а «правильно ли он ограничен». Отдельный opt-in `--audit-public --authorized`
   отделяет наблюдение прав от обычного `--verify` (его профили не гарантируют read-only).
   - [ ] Supabase: anon-ключ + таблицы без RLS.
+  - [x] Credential baseline не скрывает изменившиеся public-права Firebase/Algolia
+    и не принимает идентичности audited-находок; сохранены occurrences,
+    JSON/SARIF и severity gate. Целевые Go/race/min-Go и lint проходят.
   - [ ] Firebase: открытые RTDB / Firestore / Storage.
     - [x] Read-only наблюдения RTDB root shallow, configured Storage root list и явно
       выбранных Firestore collections `(default)`. Google key не отправляется;
       scoped `checks`, данные ответов не сериализуются, частичный сбой сохраняет
       наблюдённый доступ и делает покрытие неполным. Поддержаны flat config,
       static JS и документированная Android-связь google-services.json.
-      [Контракт](wiki/Firebase-Public-Audit.md).
+      CLI 39/39 под OS network deny; full Go/race/lint/min-Go и fuzz проходят.
+      [Контракт](wiki/Firebase-Public-Audit.md), `wiki/evidence/1.5.0-firebase-audit-20261115.json`.
     - [ ] Другие Firebase формы/точки чтения и подтверждение на разрешённом
       реальном аккаунте; отказ root/list не считается доказательством всех rules.
   - [ ] Google API key: отсутствие ограничений по referrer / API.

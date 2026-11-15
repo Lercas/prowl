@@ -1,0 +1,310 @@
+{
+  "source_commit": "4b190f5",
+  "binary": "/tmp/prowl-firebase-main-20261115",
+  "sha256": "903d0c4c741046e83f462e5ce64511c66460816e568264c88f2baa8b1be8715c",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-native-rp6pzyrz",
+  "sandbox_profile": "(version 1)(allow default)(deny network*)",
+  "network_boundary_control": {
+    "owned_control_requests": 1,
+    "sandbox_requests": 0,
+    "blocked_exit": 7
+  },
+  "cases": [
+    {
+      "case": "json-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "json-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "js-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "js-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "mjs-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "mjs-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "yaml-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "yaml-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "toml-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "toml-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "android-l1",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "android-ml",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "rtdb-minimal",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "custom-bucket-minimal",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "firestore-minimal",
+      "passed": true,
+      "outcome": "planned reads blocked by verified OS sandbox"
+    },
+    {
+      "case": "invalid-0",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-1",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-2",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-3",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-4",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-5",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-6",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "invalid-7",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "key-cannot-be-url",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "yaml-non-string",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "toml-non-string",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "android-bad-project",
+      "passed": true,
+      "outcome": "invalid configuration rejected before transport"
+    },
+    {
+      "case": "preflight-27",
+      "passed": true
+    },
+    {
+      "case": "preflight-28",
+      "passed": true
+    },
+    {
+      "case": "preflight-29",
+      "passed": true
+    },
+    {
+      "case": "preflight-30",
+      "passed": true
+    },
+    {
+      "case": "preflight-31",
+      "passed": true
+    },
+    {
+      "case": "preflight-32",
+      "passed": true
+    },
+    {
+      "case": "preflight-33",
+      "passed": true
+    },
+    {
+      "case": "preflight-34",
+      "passed": true
+    },
+    {
+      "case": "sarif",
+      "passed": true
+    },
+    {
+      "case": "pretty",
+      "passed": true
+    },
+    {
+      "case": "baseline-preserved",
+      "passed": true
+    },
+    {
+      "case": "opt-out",
+      "passed": true
+    }
+  ],
+  "passed": 39,
+  "failed": 0,
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "real_provider_qualification": false,
+  "integration": {
+    "main_source_commit": "4b190f51416bcf15a8ac0b9ca407868b4f90b84e",
+    "isolated_source_commit": "c6f8bad",
+    "source_trees_equal": true,
+    "docker_candidate_source_commit": "14a0666",
+    "images_rebuilt": false,
+    "release_qualified": false
+  },
+  "checks": {
+    "go_suite": "full Go 1.27.4, CGO=0; final source plus targeted main integration run",
+    "race": [
+      "internal/publicaudit",
+      "internal/scan",
+      "internal/report",
+      "cmd/prowl"
+    ],
+    "minimum_go": "Go 1.26.11: same affected packages",
+    "lint": "golangci-lint: zero issues",
+    "fuzz": [
+      {
+        "target": "FuzzFirebaseResponses",
+        "seconds": 5,
+        "executions": 32309
+      },
+      {
+        "target": "FuzzFirebaseAndroidSchema",
+        "seconds": 5,
+        "executions": 68939
+      },
+      {
+        "target": "FuzzFirebaseBindings",
+        "seconds": 5,
+        "executions": 22589
+      },
+      {
+        "target": "FuzzJSONLiteralInventory",
+        "seconds": 5,
+        "executions": 13602,
+        "modes": [
+          "ordinary",
+          "capture public unknown bindings"
+        ]
+      }
+    ],
+    "owned_http_pipeline": [
+      "post-ML exact sibling binding: JS, JSON, YAML, TOML",
+      "Android client/api_key/current_key role with equal-value decoy rejected",
+      "malformed Android typed configuration rejected before transport",
+      "non-string aliases retained as unknown in JSON/YAML/TOML",
+      "no key/auth/cookies forwarded; one GET per selected resource",
+      "known access survives partial errors and dedupe; reports preserve checks",
+      "default L1 identity/coordinates and ML records unchanged by binding capture"
+    ],
+    "native_outcomes": {
+      "planned reads blocked by verified OS sandbox": 15,
+      "invalid configuration rejected before transport": 12,
+      "format/preflight/opt-out/baseline": 12
+    }
+  },
+  "scope": {
+    "rtdb": "configured HTTPS root, shallow=true; no project inference needed",
+    "storage": "configured bare/gs bucket, including custom; fixed Google API root list, maxResults=1",
+    "firestore": "explicit collection paths only, (default) database; pageSize=1 and projection",
+    "authorization": "domain/mobile --audit-public --authorized, no --verify combinations",
+    "requests": "anonymous GET only; shared 32-attempt budget and concurrency 4",
+    "response_values_retained_in_report": false,
+    "legacy_verified_field_set_by_audit": false,
+    "checks_scope": "SHA256(service + NUL + canonical URL)",
+    "per_check_timestamps": true
+  },
+  "model": {
+    "feature_names": 51,
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "selection": "explicit portable model JSON; no model/threshold/detector changes"
+  },
+  "installed_model": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "feature_names": 49,
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "modified_by_task": false
+  },
+  "limitations": [
+    "No real Firebase account/security-rule qualification",
+    "Read acceptance is not proof of unintended data disclosure or unrestricted API key",
+    "Read denial is not proof of all rules, paths, get/list or query variants",
+    "No writes, media downloads, document/collection discovery or pagination",
+    "Named Firestore databases, explicit Storage object get, RTDB descendant reads and XML/plist/dex bindings remain open",
+    "ML filtering precedes audit; dropped candidates do not generate reads",
+    "Final images, local installation and external release publication are not qualified"
+  ],
+  "baseline_followup": {
+    "main_source_commit": "a277a6c",
+    "isolated_source_commit": "063d905",
+    "behavior": "Credential baselines neither suppress audited findings/occurrences nor write their credential identities. Explicit report filters and gitleaksignore semantics unchanged.",
+    "checks": {
+      "go": "Go 1.27.4 CGO=0: internal/post, cmd/prowl",
+      "race": "Go 1.27.4 CGO=1: internal/post, cmd/prowl",
+      "minimum_go": "Go 1.26.11: internal/post, cmd/prowl",
+      "lint": "zero issues",
+      "regressions": [
+        "legacy credential baseline cannot hide denied/allowed Firebase and Algolia observations",
+        "occurrence-only audit retained",
+        "audit baseline cannot suppress later ordinary scan of same credential",
+        "ordinary credential suppression preserved",
+        "JSON/SARIF report and severity gate retain audit"
+      ]
+    },
+    "native_matrix_source": "39/39 above belongs to 4b190f5 before this followup; no new native matrix claimed"
+  }
+}
