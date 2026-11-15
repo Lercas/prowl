@@ -619,8 +619,19 @@
     HMAC/private index, masking и incomplete baseline). Quality IDs и полный GOROOT
     digest сохранены; фиксированный gate time +18,20%, B/op −11,05%, allocs −3,25%.
     `wiki/evidence/1.5.0-hex-jwt-20261115.json`.
-  - [ ] Сжатые внешние потоки и нормализованные views:
-    передавать целый восстановленный JWT в payload-проход с общей цепочкой source proof.
+  - [x] **Gzip/zlib вокруг JWT.** Base64/hex и смешанные цепочки передают payload
+    builtin/templates с отдельными inflate steps, проецируемыми на весь исходный поток.
+    До трёх распаковок, общий бюджет 8 МиБ сохранённого output и 4096 попыток;
+    отдельные позиции одинаковых JWT внутри потока сохранены в cache. Checksum/обрыв/
+    превышение лимита сохраняют неполноту и запрет baseline. Реконструкция сохраняет
+    claims, но не снимает неполноту исходного повреждённого compressed fragment.
+    Main `1df9458` = изолированный `0a5867d`: full Go, detect/scan race, min-Go, lint,
+    два fuzz-теста (55685 исполнений), native 180/180, включая ожидаемые incomplete
+    случаи. Quality IDs и полный GOROOT digest сохранены; фиксированный gate:
+    time +18,23%, B/op −10,27%, allocs −3,13%, пороги/reference/модель прежние.
+    `wiki/evidence/1.5.0-compressed-jwt-20261115.json`.
+  - [ ] Нормализованные views: передавать целый восстановленный JWT в payload-проход
+    с общей цепочкой source proof.
 - [x] **Таблицы Markdown/Jira.** Вертикальные key/value-строки, Markdown-заголовки с
   выравниванием и Jira `||…||`; целые значения с разделителями и экранированным `|`.
   Имя столбца передаётся ML; исходные позиции, маскирование и HMAC-идентичность сохранены.
