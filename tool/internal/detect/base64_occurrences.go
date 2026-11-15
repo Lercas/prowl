@@ -38,7 +38,18 @@ func (f *base64Frame) sourceSpan(start, end int) (int, int) {
 // value must still pass a typed detector; arbitrary prose does not become a generic secret.
 // All layers share one byte/output budget and a fixed depth; decoded data never creates generics.
 func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match, bool) {
+	opts := ScanOptions{jwtBudget: &jwtPayloadBudget{}}
+	_, rawLimited := d.jwtPayloadFindings(ctx, text, nil, opts)
+	ordinary, jwt, limited := d.base64OccurrencesWithJWT(ctx, text, opts)
+	return append(ordinary, jwt...), limited || rawLimited
+}
+
+func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, opts ScanOptions) ([]Match, []Match, bool) {
+	if opts.jwtBudget == nil {
+		opts.jwtBudget = &jwtPayloadBudget{}
+	}
 	var out []Match
+	var jwtChildren []Match
 	work, limited := 0, false
 	candidates := 0
 	exhausted := false
@@ -80,7 +91,7 @@ func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match,
 			if depth == 0 && IsKnownNonSecretBlob(text, start) {
 				continue
 			}
-			if work+end-start > maxBase64Work || len(out) >= maxScanMatches {
+			if work+end-start > maxBase64Work || len(out)+len(jwtChildren) >= maxScanMatches {
 				limited, exhausted = true, true
 				return
 			}
@@ -128,13 +139,37 @@ func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match,
 			left, right := parent.sourceSpan(start, end)
 			proof := append(append([]Base64Span(nil), chain...), Base64Span{left, right})
 			frame := &base64Frame{parent: parent, start: start, end: end}
+			if strings.Contains(decoded, ".") {
+				local := opts
+				local.jwtOrigin = jwtBase64Origin(frame, opts.jwtOrigin)
+				children, capped := d.jwtPayloadFindings(ctx, decoded, nil, local)
+				limited = limited || capped
+				for _, m := range children {
+					if len(out)+len(jwtChildren) >= maxScanMatches {
+						limited, exhausted = true, true
+						return
+					}
+					if len(proof)+len(m.DecodeSpans) > maxBase64Depth {
+						limited = true
+						continue
+					}
+					m.Start, m.End = frame.sourceSpan(m.Start, m.End)
+					steps := append([]Base64Span(nil), proof...)
+					for _, span := range m.DecodeSpans {
+						left, right := frame.sourceSpan(span.Start, span.End)
+						steps = append(steps, Base64Span{left, right})
+					}
+					m.DecodeSpans = steps
+					jwtChildren = append(jwtChildren, m)
+				}
+			}
 			matches, capped := d.collect(ctx, decoded, "", "", d.keywordsPresent(strings.ToLower(decoded)), scanStructure(decoded, 32))
 			limited = limited || capped
 			for _, m := range matches {
 				if taxonomy.GenericLast[m.Type] || depth == 0 && !HasSecretNameContext(text, start) && m.Confidence < 0.9 {
 					continue
 				}
-				if len(out) >= maxScanMatches {
+				if len(out)+len(jwtChildren) >= maxScanMatches {
 					limited, exhausted = true, true
 					return
 				}
@@ -154,5 +189,5 @@ func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match,
 		}
 	}
 	walk(text, nil, 0, nil, nil)
-	return out, limited
+	return out, jwtChildren, limited
 }

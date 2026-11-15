@@ -16,7 +16,15 @@ const maxJWTConstructs = 4096
 const maxJWTPayloadWork = 1 << 20
 const maxJWTPayloadDepth = 3
 
-type jwtPayloadBudget struct{ count, bytes, escaped int }
+type jwtContainerIdentity struct {
+	start, end int
+	content    string // bounded header + payload, never the potentially long signature
+}
+
+type jwtPayloadBudget struct {
+	count, bytes, escaped int
+	seen                  map[jwtContainerIdentity]bool
+}
 
 // A JWT is a container as well as a finding. Inspect its claims after the ordinary
 // overlap pass, so the enclosing token cannot erase credentials in its payload.
@@ -56,7 +64,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 		if jsonstrict.ValidateEncoding(header) != nil || json.Unmarshal(header, &fields) != nil || json.Unmarshal(fields["alg"], &algorithm) != nil || algorithm == "" {
 			continue
 		}
-		if opts.jwtDepth >= maxJWTPayloadDepth || len(parts[1]) > maxBase64Blob || len(kept) >= maxScanMatches {
+		if len(parts[1]) > maxBase64Blob {
 			limited = true
 			continue
 		}
@@ -64,6 +72,25 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			opts.jwtBudget = &jwtPayloadBudget{}
 		}
 		budget := opts.jwtBudget
+		left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
+		id := jwtContainerIdentity{left, right, container.Value[:len(parts[0])+1+len(parts[1])]}
+		if budget.seen[id] {
+			continue
+		}
+		if len(budget.seen) >= maxJWTConstructs {
+			limited = true
+			continue
+		}
+		if budget.seen == nil {
+			budget.seen = map[jwtContainerIdentity]bool{}
+		}
+		// Record rejected-depth containers too: another decoding route cannot
+		// retry the same physical container with a shallower JWT depth.
+		budget.seen[id] = true
+		if opts.jwtDepth >= maxJWTPayloadDepth || opts.jwtOrigin.encodedDepth() >= maxBase64Depth || len(kept) >= maxScanMatches {
+			limited = true
+			continue
+		}
 		if budget.count >= maxJWTPayloads || budget.bytes+len(parts[0])+len(parts[1]) > maxJWTPayloadWork {
 			limited = true
 			continue
@@ -78,11 +105,10 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 		decoded := string(payload)
 		start := container.Start + len(parts[0]) + 1
 		frame := &base64Frame{start: start, end: start + len(parts[1])}
-		var origin *jwtViewOrigin
+		origin := &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: frame.end, base64: true}
 		if opts.ObserveJWTPayload != nil {
-			origin = &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: frame.end, base64: true}
 			left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
-			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}})
+			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}, token: container.Value})
 		}
 		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin}
 		inner := d.ScanWithStatus(ctx, decoded, childOptions)
@@ -134,5 +160,39 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 	if len(kept) != original {
 		sort.SliceStable(kept, func(i, j int) bool { return kept[i].Start < kept[j].Start })
 	}
+	return kept, limited
+}
+
+// Payload children survive enclosing-token overlap, while the final combined
+// cap still applies. A claims-aware duplicate must keep its binding isolation.
+func mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {
+	if len(children) == 0 {
+		return kept, false
+	}
+	type identity struct {
+		typ, value string
+		start, end int
+	}
+	seen := make(map[identity]int, len(kept))
+	for i, m := range kept {
+		seen[identity{m.Type, m.Value, m.Start, m.End}] = i
+	}
+	limited := false
+	for _, m := range children {
+		key := identity{m.Type, m.Value, m.Start, m.End}
+		if i, ok := seen[key]; ok {
+			if m.JWTPayload && !kept[i].JWTPayload {
+				kept[i] = m
+			}
+			continue
+		}
+		if len(kept) >= maxScanMatches {
+			limited = true
+			break
+		}
+		seen[key] = len(kept)
+		kept = append(kept, m)
+	}
+	sort.SliceStable(kept, func(i, j int) bool { return kept[i].Start < kept[j].Start })
 	return kept, limited
 }

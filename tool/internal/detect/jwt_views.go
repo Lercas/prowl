@@ -12,6 +12,7 @@ type JWTPayloadView struct {
 	Text      string
 	origin    *jwtViewOrigin
 	container Base64Span
+	token     string
 }
 
 type JWTPayloadString struct {
@@ -40,6 +41,10 @@ func (v JWTPayloadView) SourceSpan(start, end int) (int, int) {
 
 func (v JWTPayloadView) ContainerSpan() Base64Span { return v.container }
 
+// ContainerValue is memory-only redaction material, including when JWT output
+// is disabled and only a claims credential reaches the private index.
+func (v JWTPayloadView) ContainerValue() string { return v.token }
+
 // EncodedSpans returns outer-to-inner Base64 proofs. Escaped JSON steps are
 // composed into their source intervals before exposing any coordinates.
 func (v JWTPayloadView) EncodedSpans() []Base64Span {
@@ -61,6 +66,23 @@ type jwtViewOrigin struct {
 	start, end int
 	base64     bool
 	bytes      []Base64Span // decoded scalar bytes -> original JSON spellings
+}
+
+func (o *jwtViewOrigin) encodedDepth() int {
+	depth := 0
+	for ; o != nil; o = o.parent {
+		if o.base64 {
+			depth++
+		}
+	}
+	return depth
+}
+
+func jwtBase64Origin(frame *base64Frame, parent *jwtViewOrigin) *jwtViewOrigin {
+	if frame == nil {
+		return parent
+	}
+	return &jwtViewOrigin{parent: jwtBase64Origin(frame.parent, parent), start: frame.start, end: frame.end, base64: true}
 }
 
 func (o *jwtViewOrigin) sourceSpan(start, end int) (int, int) {

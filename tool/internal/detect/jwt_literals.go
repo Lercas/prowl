@@ -120,7 +120,7 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 		}
 		opts.jwtBudget.escaped++
 		localOptions := opts
-		if opts.ObserveJWTPayload != nil {
+		if opts.jwtOrigin != nil || opts.ObserveJWTPayload != nil {
 			localOptions.jwtOrigin = jwtScalarOrigin(opts.jwtOrigin, text, v)
 		}
 		local := d.ScanWithStatus(ctx, v.value, localOptions)

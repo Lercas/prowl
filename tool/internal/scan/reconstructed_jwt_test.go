@@ -151,8 +151,13 @@ func TestReconstructedJWTPayloadObserverSeesOriginalProofBeforeML(t *testing.T) 
 		if f.Type != "owned-jwt" {
 			continue
 		}
-		count++
 		line, col := newLineIndex(text).cols(start)
+		// General Base64 traversal can observe the same value independently of
+		// JavaScript reconstruction, at its distinct encoded source location.
+		if f.IndexLocationID != location("code", "bundle.js", line, col) {
+			continue
+		}
+		count++
 		if f.Line != line || f.Col != col || f.IndexLocationID != location("code", "bundle.js", line, col) || f.Verified == nil || *f.Verified {
 			t.Fatal("pre-ML observation lost source or rejected verdict")
 		}
@@ -165,7 +170,7 @@ func TestReconstructedJWTPayloadObserverSeesOriginalProofBeforeML(t *testing.T) 
 	}
 	count = 0
 	for _, f := range beforeML {
-		if f.Type != "owned-jwt" {
+		if f.Type != "owned-jwt" || !strings.HasPrefix(f.Stage, "reconstructed/") {
 			continue
 		}
 		count++
@@ -195,8 +200,10 @@ func TestReconstructedJWTOptInAndDecoderShadowing(t *testing.T) {
 		{true, "bundle.js", "function atob(x) { return x; }\nconst token=" + expression + ";"},
 	} {
 		fs := New(Options{Detector: detector(t), Reconstruct: fixture.enabled}).Findings(t.Context(), model.Item{Source: "code", Path: fixture.path, Text: fixture.text})
-		if len(jwtRuleFindings(fs, "generic_password")) != 0 {
-			t.Fatal("unproven string gained a reconstructed payload credential")
+		for _, f := range fs {
+			if strings.HasPrefix(f.Stage, "reconstructed/") {
+				t.Fatal("unproven string gained a reconstructed finding")
+			}
 		}
 	}
 }

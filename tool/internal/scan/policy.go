@@ -8,7 +8,7 @@ import (
 )
 
 // DetectionRevision changes when source interpretation or suppression semantics change.
-const DetectionRevision = "1.5.0-reconstructed-jwt-v1"
+const DetectionRevision = "1.5.0-base64-jwt-v1"
 
 // Capabilities reports configured stages; request fields cannot change this snapshot.
 func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {

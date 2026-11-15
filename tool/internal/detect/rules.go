@@ -236,6 +236,12 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 }
 
 func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOptions) ScanResult {
+	if opts.jwtBudget == nil {
+		opts.jwtBudget = &jwtPayloadBudget{}
+	}
+	// Discover direct containers first so indirect routes cannot reset their
+	// nesting depth. Merge their children only after ordinary overlap selection.
+	jwtChildren, jwtLimited := d.jwtPayloadFindings(ctx, text, nil, opts)
 	lb := d.lowerPool.Get().(*[]byte)
 	lower := lowerScratch(lb, text)
 	pp := d.presentPool.Get().(*[]bool)
@@ -278,7 +284,7 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
 	decodedMatches, decodedCapped := d.unmaskNonLinear(ctx, decodeCandidates)
 	all = append(all, decodedMatches...)
-	occurrences, occurrenceLimited := d.base64Occurrences(ctx, text)
+	occurrences, indirectJWT, occurrenceLimited := d.base64OccurrencesWithJWT(ctx, text, opts)
 	all = append(all, occurrences...)
 	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
 	all = append(all, authMatches...)
@@ -298,7 +304,9 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 		candidateCapped = candidateCapped || limited
 	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
-	kept, jwtLimited := d.jwtPayloadFindings(ctx, text, kept, opts)
+	kept, childLimited := mergeJWTPayloadMatches(kept, jwtChildren)
+	kept, indirectLimited := mergeJWTPayloadMatches(kept, indirectJWT)
+	jwtLimited = jwtLimited || childLimited || indirectLimited
 	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited || jwtLimited
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)

@@ -459,7 +459,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				opts.PasswordScalars = literalDoc.scalars
 			}
 			opts.PublicKeys = p.options.PublicAuditor != nil
-			if eng != nil && eng.Len() > 0 {
+			if eng != nil && eng.Len() > 0 || p.options.ValueFingerprint != nil {
 				opts.ObserveJWTPayload = func(view detect.JWTPayloadView) { payloads = append(payloads, view) }
 			}
 			result := det.ScanWithStatus(ctx, it.Text, opts)
@@ -520,6 +520,10 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 					indexValues = append(indexValues, spelling)
 				}
 			}
+		}
+		for _, view := range payloads {
+			span := view.ContainerSpan()
+			indexValues = append(indexValues, view.Text, view.ContainerValue(), it.Text[span.Start:span.End])
 		}
 	}
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
@@ -653,10 +657,6 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		if p.options.ValueFingerprint != nil {
 			for _, h := range hits {
 				indexValues = append(indexValues, h.Value)
-			}
-			for _, view := range payloads {
-				span := view.ContainerSpan()
-				indexValues = append(indexValues, view.Text, it.Text[span.Start:span.End])
 			}
 		}
 		for i, h := range hits {
