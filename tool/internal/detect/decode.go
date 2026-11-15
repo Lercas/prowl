@@ -256,10 +256,11 @@ func (d *Detector) encodedBasicAuth(ctx context.Context, text string, runs [][2]
 // authKeyBefore reports whether the text just before start is an assignment to a key named exactly
 // auth or _auth (`"auth": "`, `auth: `, `_auth=`), as opposed to any name merely containing "auth".
 func authKeyBefore(text string, start int) bool {
-	before := strings.TrimRight(lineBefore(text, start), "\"' \t")
+	before := strings.TrimRight(lineBeforeRaw(text, start), "\"' \t")
 	if !strings.HasSuffix(before, ":") && !strings.HasSuffix(before, "=") {
 		return false
 	}
+	before = strings.ToLower(before)
 	before = strings.TrimRight(before[:len(before)-1], "\"' \t")
 	if !strings.HasSuffix(before, "auth") {
 		return false

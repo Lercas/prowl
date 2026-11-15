@@ -104,6 +104,48 @@ func (m *Matcher) MatchInto(text string, present []bool) {
 	}
 }
 
+// Contains reports whether any compiled pattern occurs, without allocating output flags.
+func (m *Matcher) Contains(text string) bool {
+	var cur int32
+	for i := 0; i < len(text); i++ {
+		cur = m.next[cur<<8|int32(text[i])]
+		if len(m.out[cur]) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsLower is the early-exit equivalent of MatchLowerInto.
+func (m *Matcher) ContainsLower(text string) bool {
+	var state int32
+	for i := 0; i < len(text); {
+		c := text[i]
+		if c < utf8.RuneSelf {
+			if c >= 'A' && c <= 'Z' {
+				c += 'a' - 'A'
+			}
+			state = m.next[state<<8|int32(c)]
+			if len(m.out[state]) > 0 {
+				return true
+			}
+			i++
+			continue
+		}
+		r, size := utf8.DecodeRuneInString(text[i:])
+		var encoded [utf8.UTFMax]byte
+		n := utf8.EncodeRune(encoded[:], unicode.ToLower(r))
+		for _, b := range encoded[:n] {
+			state = m.next[state<<8|int32(b)]
+			if len(m.out[state]) > 0 {
+				return true
+			}
+		}
+		i += size
+	}
+	return false
+}
+
 // MatchLowerInto matches a Unicode-lowercased view without allocating that view.
 // Patterns must already be lowercase. Its semantics match strings.ToLower,
 // including replacement of invalid UTF-8; this is not Unicode case folding.

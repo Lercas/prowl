@@ -304,7 +304,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 	var out []Match
 	capped := false
 	indices := func(i int, re *regexp.Regexp) [][]int {
-		ix := wins.FindAll(i, re, text, budget+1)
+		ix := wins.FindAllGated(i, re, namedASCIIGates[i], text, lower, budget+1)
 		if len(ix) > budget {
 			capped = true
 			ix = ix[:budget]

@@ -109,14 +109,65 @@ func base64Candidates(ctx context.Context, text string, runs [][2]int) ([]Match,
 
 // tryB64Decode handles padded/unpadded std and url alphabets (candidate spans strip '=' padding).
 func tryB64Decode(s string) ([]byte, bool) {
-	for _, enc := range []*base64.Encoding{
-		base64.StdEncoding, base64.RawStdEncoding, base64.URLEncoding, base64.RawURLEncoding,
-	} {
-		if dec, err := enc.Strict().DecodeString(s); err == nil {
-			return dec, true
+	enc := base64Encoding(s)
+	if enc == nil {
+		return nil, false
+	}
+	dec, err := enc.DecodeString(s)
+	if err != nil {
+		return nil, false
+	}
+	return dec, true
+}
+
+var strictStdB64 = base64.StdEncoding.Strict()
+var strictRawStdB64 = base64.RawStdEncoding.Strict()
+var strictURLB64 = base64.URLEncoding.Strict()
+var strictRawURLB64 = base64.RawURLEncoding.Strict()
+
+// Select exactly the alphabet/padding accepted by the former four-decoder loop.
+// Decode ignores CR/LF, so they must not participate in the length checks.
+func base64Encoding(s string) *base64.Encoding {
+	standard, url, padding, count := false, false, 0, 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c == '\r' || c == '\n' {
+			continue
+		}
+		count++
+		if c == '=' {
+			padding++
+			if padding > 2 {
+				return nil
+			}
+			continue
+		}
+		if padding > 0 {
+			return nil
+		}
+		switch {
+		case c >= 'A' && c <= 'Z', c >= 'a' && c <= 'z', c >= '0' && c <= '9':
+		case c == '+' || c == '/':
+			standard = true
+		case c == '-' || c == '_':
+			url = true
+		default:
+			return nil
 		}
 	}
-	return nil, false
+	if standard && url || padding > 0 && count%4 != 0 || padding == 0 && count%4 == 1 {
+		return nil
+	}
+	if padding > 0 {
+		if url {
+			return strictURLB64
+		}
+		return strictStdB64
+	}
+	if url {
+		return strictRawURLB64
+	}
+	return strictRawStdB64
 }
 
 func printableText(b []byte) bool {

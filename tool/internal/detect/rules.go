@@ -71,10 +71,11 @@ type Match struct {
 
 // compiledType pairs a secret type with its keyword pre-filter.
 type compiledType struct {
-	st    taxonomy.SecretType
-	kws   []string
-	kwIdx []int
-	pf    func(structSignals) bool // structural pre-filter, used instead of the keyword check when set
+	st        taxonomy.SecretType
+	asciiGate *regexp.Regexp
+	kws       []string
+	kwIdx     []int
+	pf        func(structSignals) bool // structural pre-filter, used instead of the keyword check when set
 }
 
 // Detector runs the taxonomy L1 layer (regex + checksum + entropy + example filter).
@@ -129,7 +130,7 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 			}
 			idx = append(idx, id)
 		}
-		d.types[i] = compiledType{st: st, kws: kws, kwIdx: idx, pf: structuralPrefilter[st.ID]}
+		d.types[i] = compiledType{st: st, asciiGate: asciiRegexGate(st.RE), kws: kws, kwIdx: idx, pf: structuralPrefilter[st.ID]}
 		if st.ID == "generic_high_entropy" {
 			d.genericEntropy = true
 		}
@@ -486,7 +487,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 			continue
 		}
 		// cap the per-type FindAll so a pathological file can't build a huge slice up front (it isn't ctx-interruptible)
-		indices := wins.FindAll(ti, st.RE, text, maxScanMatches+1)
+		indices := wins.FindAllGated(ti, st.RE, ct.asciiGate, text, lower, maxScanMatches+1)
 		if len(indices) > maxScanMatches {
 			// Filters can discard every extracted candidate, but the bounded regex walk may still
 			// have omitted a later real secret. Keep that uncertainty separate from accepted hits.

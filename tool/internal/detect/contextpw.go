@@ -5,6 +5,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/Lercas/prowl/tool/internal/ahocorasick"
 )
 
 // mlPasswordCues are multilingual credential cue roots (lowercased) that flag a nearby token as a
@@ -16,6 +18,59 @@ var mlPasswordCues = []string{
 }
 
 var passwordCueRE = regexp.MustCompile(`(?i)(?:` + strings.Join(mlPasswordCues, "|") + `)`)
+var passwordCueMatcher = ahocorasick.New(mlPasswordCues)
+var passwordCueFoldMatcher = newPasswordFoldMatcher()
+
+func lowerFoldRune(r rune) rune {
+	r = unicode.ToLower(r)
+	best := r
+	for next := unicode.SimpleFold(r); next != r; next = unicode.SimpleFold(next) {
+		if next < best {
+			best = next
+		}
+	}
+	return best
+}
+
+func newPasswordFoldMatcher() *ahocorasick.Matcher {
+	patterns := make([]string, len(mlPasswordCues))
+	for i, cue := range mlPasswordCues {
+		patterns[i] = strings.Map(lowerFoldRune, cue)
+	}
+	return ahocorasick.New(patterns)
+}
+
+// This is the literal-alternation regex's simple-fold predicate over a ToLower
+// view, including fold aliases that ToLower alone does not merge (such as long s).
+func containsFoldedPasswordCue(text string) bool {
+	next, out := passwordCueFoldMatcher.Transitions(), passwordCueFoldMatcher.Outputs()
+	var state int32
+	for i := 0; i < len(text); {
+		c := text[i]
+		if c < utf8.RuneSelf {
+			if c >= 'a' && c <= 'z' {
+				c -= 'a' - 'A'
+			}
+			state = next[state<<8|int32(c)]
+			if len(out[state]) > 0 {
+				return true
+			}
+			i++
+			continue
+		}
+		r, size := utf8.DecodeRuneInString(text[i:])
+		var encoded [utf8.UTFMax]byte
+		n := utf8.EncodeRune(encoded[:], lowerFoldRune(r))
+		for _, b := range encoded[:n] {
+			state = next[state<<8|int32(b)]
+			if len(out[state]) > 0 {
+				return true
+			}
+		}
+		i += size
+	}
+	return false
+}
 
 // These connectives support credential prose without borrowing context across arbitrary text or a
 // sentence boundary. Assignments are handled independently by the anchored taxonomy rule.
@@ -172,17 +227,22 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 		}
 		line := text[lineStart:i]
 		base := lineStart
-		// cue presence only: a non-ASCII line needs a Unicode-correct fold (ПАРОЛЬ -> пароль), so
-		// lowercase that line independently; pure-ASCII lines reuse the zero-cost ASCII view.
-		cueSrc := lower[lineStart:i]
-		if uniLower != "" && hasNonASCII(line) {
-			cueSrc = strings.ToLower(line)
-		}
-		if len(line) < 12 || !passwordCueRE.MatchString(cueSrc) {
-			lineStart = i + 1
+		lineStart = i + 1
+		if len(line) < 12 {
 			continue
 		}
-		lineStart = i + 1
+		// Presence only: stream the former Unicode lower+simple-fold predicate,
+		// or reuse the byte-aligned lowercase view on ASCII lines.
+		cueSrc := lower[base:i]
+		var hasCue bool
+		if uniLower != "" && hasNonASCII(line) {
+			hasCue = containsFoldedPasswordCue(line)
+		} else {
+			hasCue = passwordCueMatcher.Contains(cueSrc)
+		}
+		if !hasCue {
+			continue
+		}
 		beforeCount := len(out)
 		for _, cue := range passwordCueRE.FindAllStringIndex(line, maxScanMatches) {
 			j := cue[1]

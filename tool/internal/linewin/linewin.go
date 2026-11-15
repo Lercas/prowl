@@ -134,7 +134,7 @@ func (s *Set) Prepare(text, asciiLower, uniLower string, want []bool) *Windows {
 	for i := range w.state {
 		w.wins[i] = w.wins[i][:0]
 		p := s.plans[i]
-		wanted := p != nil && (want == nil || want[i])
+		wanted := p != nil && (want == nil || i < len(want) && want[i])
 		full := !wanted || (longS && p.foldS) || (kelvin && p.foldK)
 		w.state[i] = winState{wanted: wanted, full: full}
 		anyWanted = anyWanted || !full
@@ -373,12 +373,47 @@ func nextLine(text string, we int) int {
 // FindAll is re.FindAllStringSubmatchIndex(text, n) for regex i of the set, evaluated only over the
 // regions prepared for it. Offsets are relative to the whole text.
 func (w *Windows) FindAll(i int, re *regexp.Regexp, text string, n int) [][]int {
+	return w.findAll(i, re, nil, text, "", n)
+}
+
+// FindAllGated rejects only ASCII regions with no possible match. gate must
+// recognize a superset of re after ASCII lowercasing; extraction always uses re.
+func (w *Windows) FindAllGated(i int, re, gate *regexp.Regexp, text, lower string, n int) [][]int {
+	return w.findAll(i, re, gate, text, lower, n)
+}
+
+func asciiGateRejects(re *regexp.Regexp, text, lower string) bool {
+	if re == nil || len(lower) != len(text) {
+		return false
+	}
+	for i := 0; i < len(text); i++ {
+		c := text[i]
+		if c >= utf8.RuneSelf {
+			return false
+		}
+		if c >= 'A' && c <= 'Z' {
+			c += 'a' - 'A'
+		}
+		if lower[i] != c {
+			return false
+		}
+	}
+	return !re.MatchString(lower)
+}
+
+func (w *Windows) findAll(i int, re, gate *regexp.Regexp, text, lower string, n int) [][]int {
 	if w == nil || w.state[i].full {
+		if asciiGateRejects(gate, text, lower) {
+			return nil
+		}
 		return re.FindAllStringSubmatchIndex(text, n)
 	}
 	edge := w.set.plans[i].EdgeCheck || w.state[i].byteEdges
 	var out [][]int
 	for _, r := range w.wins[i] {
+		if gate != nil && len(lower) == len(text) && asciiGateRejects(gate, text[r[0]:r[1]], lower[r[0]:r[1]]) {
+			continue
+		}
 		want := -1
 		if n >= 0 {
 			if want = n - len(out); want <= 0 {

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/Lercas/prowl/tool/internal/ahocorasick"
 )
 
 // exampleValues are well-known documentation values that must never score as a real secret.
@@ -121,6 +123,10 @@ const lineCtxWindow = 2048
 // lineBefore returns the lowercased text from the start of the line containing `start` up to
 // `start`, scanning back at most lineCtxWindow bytes for the preceding newline.
 func lineBefore(text string, start int) string {
+	return strings.ToLower(lineBeforeRaw(text, start))
+}
+
+func lineBeforeRaw(text string, start int) string {
 	lo := start - lineCtxWindow
 	if lo < 0 {
 		lo = 0
@@ -131,7 +137,7 @@ func lineBefore(text string, start int) string {
 	} else {
 		ls += lo + 1 // byte after the newline
 	}
-	return strings.ToLower(text[ls:start])
+	return text[ls:start]
 }
 
 // IsHashNotSecret rejects digest-shaped hex without adjacent credential evidence. A token/key binding
@@ -362,6 +368,9 @@ func isVersionOrNumber(v string) bool {
 
 var reProseSecretContext = regexp.MustCompile(`(?:^|\s)(?:secret|token|password|api[_ -]?key)\s+(?:is|equals|lautet|ist|est)\s*["']?$`)
 
+// Every prose-context alternative requires one of these literal fragments.
+var proseContextMatcher = ahocorasick.New([]string{"secret", "token", "pass", "pwd", "key", "credential"})
+
 // BindingName returns the immediately adjacent assignment/attribute name. Earlier properties on a
 // minified line must not lend their credential context to an unrelated value.
 func BindingName(text string, start int) string {
@@ -422,7 +431,7 @@ func HasSecretNameContext(text string, start int) bool {
 	name := BindingName(text, start)
 	if name == "" {
 		before := lineBefore(text, start)
-		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || reProseSecretContext.MatchString(before) || proseNamesSecret(before)
+		return strings.HasSuffix(strings.TrimSpace(before), "bearer") || proseContextMatcher.Contains(before) && (reProseSecretContext.MatchString(before) || proseNamesSecret(before))
 	}
 	return IsSecretBindingName(name)
 }
@@ -442,6 +451,9 @@ var reProseNamedSecret = regexp.MustCompile(`(?:^|[^a-z0-9_])([a-z0-9_.-]*(?:sec
 func proseNamesSecret(before string) bool { return proseSecretName(before) != "" }
 
 func proseSecretName(before string) string {
+	if !proseContextMatcher.Contains(before) {
+		return ""
+	}
 	m := reProseNamedSecret.FindStringSubmatch(before)
 	if m == nil {
 		return ""
@@ -479,22 +491,19 @@ var nonSecretBlobMarkers = []string{
 	"integrity=", "sha384-", "sha512-", // SRI hashes
 }
 
+var nonSecretBlobMatcher = ahocorasick.New(nonSecretBlobMarkers)
+
 // IsKnownNonSecretBlob reports whether the run at start sits in a known non-secret context
 // (public key, data URI, bcrypt hash, SRI integrity).
 func IsKnownNonSecretBlob(text string, start int) bool {
-	before := lineBefore(text, start)
+	before := lineBeforeRaw(text, start)
 	// Inspect only the current literal/statement, not other values earlier on the same line.
 	if q := strings.LastIndexAny(before, "\"'`"); q >= 0 {
 		before = before[q+1:]
 	} else if sep := strings.LastIndexAny(before, ";,{}"); sep >= 0 {
 		before = before[sep+1:]
 	}
-	for _, m := range nonSecretBlobMarkers {
-		if strings.Contains(before, m) {
-			return true
-		}
-	}
-	return false
+	return nonSecretBlobMatcher.ContainsLower(before)
 }
 
 // ShannonEntropy in bits/char over the empirical symbol distribution.
@@ -502,6 +511,26 @@ func ShannonEntropy(s string) float64 {
 	if s == "" {
 		return 0
 	}
+	var ascii [128]int
+	for i := 0; i < len(s); i++ {
+		if s[i] >= utf8.RuneSelf {
+			return runeEntropy(s)
+		}
+		ascii[s[i]]++
+	}
+	n := float64(len(s))
+	h := 0.0
+	for _, c := range ascii {
+		if c == 0 {
+			continue
+		}
+		p := float64(c) / n
+		h -= p * math.Log2(p)
+	}
+	return h
+}
+
+func runeEntropy(s string) float64 {
 	counts := make(map[rune]int)
 	for _, r := range s {
 		counts[r]++

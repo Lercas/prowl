@@ -42,6 +42,13 @@ func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match,
 	work, limited := 0, false
 	candidates := 0
 	exhausted := false
+	var scratch *[]byte
+	defer func() {
+		if scratch != nil {
+			d.lowerPool.Put(scratch)
+		}
+	}()
+	rootRemaining := 0
 	var walk func(string, *base64Frame, int, []Base64Span, *int)
 	walk = func(text string, parent *base64Frame, depth int, chain []Base64Span, remaining *int) {
 		for i := 0; i < len(text); {
@@ -85,11 +92,27 @@ func (d *Detector) base64Occurrences(ctx context.Context, text string) ([]Match,
 				}
 				*remaining--
 			} else {
-				budget := maxNestedBlobs
-				remaining = &budget
+				rootRemaining = maxNestedBlobs
+				remaining = &rootRemaining
 			}
-			dec, ok := tryB64Decode(text[start:end])
-			if !ok || !printableText(dec) {
+			enc := base64Encoding(text[start:end])
+			if enc == nil {
+				continue
+			}
+			if scratch == nil {
+				scratch = d.lowerPool.Get().(*[]byte)
+			}
+			needed := enc.DecodedLen(end - start)
+			if cap(*scratch) < needed {
+				*scratch = make([]byte, needed)
+			}
+			dec := (*scratch)[:needed]
+			n, err := enc.Decode(dec, []byte(text[start:end]))
+			if err != nil {
+				continue
+			}
+			dec = dec[:n]
+			if !printableText(dec) {
 				continue
 			}
 			if candidates >= maxScanMatches {
