@@ -1,0 +1,300 @@
+{
+  "schema_version": "prowl-image-provenance-qualification-v1",
+  "date": "2026-11-15",
+  "qualification_status": "partial_performance_blocked_by_disk",
+  "scope": "Local source/native darwin-arm64 image provenance implementation. Required fixed performance measurements are missing after ENOSPC; integration into main/Docker candidate has not occurred.",
+  "base_main_commit": "dd12f8c0fa0784f382fd827d89b7da70d21fb888",
+  "initial_implementation_commit": "c6ef7b8d6bfa138b7308bd7cb611533d3ab8a26e",
+  "tested_runtime_commit": "84913ba630d814e2b5caf030f57890bbca4e3f6b",
+  "source_policy_revision": "1.5.0-image-source-v1",
+  "binary": {
+    "path": "/tmp/prowl-image-provenance-final-20261115-bin",
+    "sha256": "03e77cf6debbb8e22f197fda34660d3da8a4c53606b26cf0a12789fa635c57a1"
+  },
+  "build": {
+    "go": "go1.27.4",
+    "os": "darwin",
+    "arch": "arm64",
+    "cgo_enabled": false,
+    "trimpath": true,
+    "vcs_modified": false,
+    "log": {
+      "path": "/tmp/prowl-image-provenance-final-build-20261115.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "metadata": {
+      "path": "/tmp/prowl-image-provenance-final-buildinfo-20261115.log",
+      "sha256": "1b23f01e9fedb505f5b777e71b07582e7181c4225199cd8b7f844476e3b07cc3"
+    }
+  },
+  "contracts": [
+    "Selected tar/OCI/ref/stdin namespaces are separate from display labels and transient spool names. Opaque per-acquisition scope prevents foreign flatten-index attribution.",
+    "image_digest/config_digest hash observed raw metadata; file digest hashes raw member bytes before decoding; config-view digest hashes its actual rendered text.",
+    "layer_diff_id hashes the full uncompressed TAR stream only after EOF and successful close without cancellation. Available SHA256 rootfs diff IDs are checked; observed hashes do not authenticate compressed blob bytes or a registry signature.",
+    "After source drain, finalization stamps layer metadata, recomputes keyed occurrence IDs with the same report key and assigns final-image status before deduplication.",
+    "Private TAR ordinal separates index places and occurrences. JSON/SARIF preserve final-image status in summary and individual occurrences.",
+    "Build instruction is raw source context and requires explicit --show-secrets. Source/registry/parser errors do not reflect raw causes.",
+    "OCI metadata content-addresses are validated before cache insertion. Metadata failure remains incomplete and never certifies image/runtime/deployment state."
+  ],
+  "validation": {
+    "full_go_suite": {
+      "passed": true,
+      "log": {
+        "path": "/tmp/prowl-image-provenance-qualified-go-20261115.log",
+        "sha256": "b50b7bd27f9263a6bcfd8dad9ffb4ed805536771ee13d80f2620b60811874d52"
+      }
+    },
+    "core_race": {
+      "passed": true,
+      "packages": [
+        "internal/model",
+        "internal/source",
+        "internal/scan",
+        "cmd/prowl"
+      ],
+      "log": {
+        "path": "/tmp/prowl-image-provenance-race-20261115.log",
+        "sha256": "73d2f3ec5626092dcb6306056c88ae614934ce85fe2835392fd1d315ae728364"
+      }
+    },
+    "final_report_delta": {
+      "passed": true,
+      "targeted_log": {
+        "path": "/tmp/prowl-image-provenance-report-20261115.log",
+        "sha256": "2ef0a85c13b02141aa05c6a2bebc24cff6bd29d35f06679e0ff8ecf603401dc6"
+      },
+      "race_log": {
+        "path": "/tmp/prowl-image-provenance-final-report-race-20261115.log",
+        "sha256": "2099e38491e0b42db845d036eb4b0215d26c2aeb523f8c56d39185e2867aa140"
+      },
+      "packages": [
+        "internal/model",
+        "internal/report",
+        "internal/correlation",
+        "cmd/prowl"
+      ]
+    },
+    "minimum_go": {
+      "passed": true,
+      "version": "go1.26.11",
+      "core_log": {
+        "path": "/tmp/prowl-image-provenance-min-go-20261115.log",
+        "sha256": "6e8994c93575a788dfe3a7025b98e98bca74be76666c391b0129633dc6c36525"
+      },
+      "final_report_delta_log": {
+        "path": "/tmp/prowl-image-provenance-report-min-go-20261115.log",
+        "sha256": "478ea23a433c29b5959d244cf3617f59f1dd7c8f56934d71d471d77d5ead8ef0"
+      }
+    },
+    "lint": {
+      "passed": true,
+      "source_log": {
+        "path": "/tmp/prowl-image-provenance-final-lint-20261115.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+      },
+      "report_delta_log": {
+        "path": "/tmp/prowl-image-provenance-report-lint-20261115.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+      },
+      "result": "0 issues"
+    }
+  },
+  "native": {
+    "passed": 400,
+    "failed": 0,
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-image-provenance-native-5h4z1jpq/evidence.json",
+      "sha256": "f4c2121078a742172cdb364c17db68d6ac6e14fc3a998fe49d1bec988dfddf39"
+    },
+    "runner": {
+      "path": "/private/tmp/prowl-image-provenance-20261115/scripts/check_image_provenance.py",
+      "sha256": "943136639e5ae5caa57810d41bfd78e13f0987a5e5a1706e68052ed663365abe"
+    },
+    "log": {
+      "path": "/tmp/prowl-image-provenance-native-final-20261115.log",
+      "sha256": "2589cc84668a59329391df4cc76c25e501efdcc8c77f0090b274df190f5e434f"
+    },
+    "scope": "Owned Docker-save/OCI-directory/stdin fixtures; raw/config/manifest/full-layer hashes, metadata mismatch, duplicate TAR, whiteout, UTF16, ML, JSON/SARIF, index and disclosure. No Docker daemon, registry or deployment.",
+    "network_control": {
+      "profile": "(version 1)(allow default)(deny network*)",
+      "owned_requests": 1,
+      "blocked_exit": 7
+    }
+  },
+  "nonregression": {
+    "report_identity": {
+      "passed": 39,
+      "total": 39,
+      "log": {
+        "path": "/tmp/prowl-image-provenance-identity-nonregression-20261115.log",
+        "sha256": "3e03e4b29004443d6259aacfd945d577fc107731eb4820e161991df44f1c4b5c"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-report-identity-wekobqp4/qualification.json",
+        "sha256": "43da514281d9225e4e09023fc49d56349f57b5e63ef614197052f75280f77cfc"
+      }
+    },
+    "occurrences": {
+      "passed": 71,
+      "total": 71,
+      "log": {
+        "path": "/tmp/prowl-image-provenance-occurrences-nonregression-20261115.log",
+        "sha256": "a7d5c037a7345db69ac1527c9384b4d59af1f246b1b942a57422c2115ff13c99"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-occurrences-native-6i5ey2vi/qualification.json",
+        "sha256": "31b89d4522dde790568d9f8b583e3e0231a0e7bb97a35c09314b9b6f3971fdb1"
+      }
+    },
+    "web": {
+      "passed": 181,
+      "failed": 0,
+      "log": {
+        "path": "/tmp/prowl-image-provenance-web-nonregression-20261115.log",
+        "sha256": "fd840d3916a2d6831dfab0dc351aacc6c81e18ffe86adcb5217c015e996f3b4d"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-domain-provenance-native-r87kc57b/evidence.json",
+        "sha256": "c1d9c05b5b529cce1e6a7f81e8b278b017f8acfefd983677b50dfd15f69f0cd6"
+      }
+    },
+    "mobile": {
+      "passed": 102,
+      "failed": 0,
+      "log": {
+        "path": "/tmp/prowl-image-provenance-mobile-nonregression-20261115.log",
+        "sha256": "156bc7fb7278f1e0fadc03cbdfdc2d98d4a8ea9642fd7abc22c0396e8f48d623"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mobile-provenance-native-9a9tpc6t/evidence.json",
+        "sha256": "b304f97ab4253176af767e6b6caadcd6ada6c6592aeb12e91b98cb28919a332f"
+      }
+    }
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "03e77cf6debbb8e22f197fda34660d3da8a4c53606b26cf0a12789fa635c57a1",
+    "passed": true,
+    "recall": 0.7464183381088825,
+    "t4_fp_rate": 0.05804480651731161,
+    "secret_hits": 1563,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "status": "passed"
+  },
+  "quality_evidence": {
+    "path": "/tmp/prowl-image-provenance-quality-20261115.json",
+    "sha256": "888337bc95f464cbb39089b36d34bc0e3d6618e9ef7c973cb88fd1127d8aa244"
+  },
+  "quality_parent_evidence": {
+    "path": "/tmp/prowl-domain-provenance-quality-20261115.json",
+    "sha256": "b120ce70f7ccf00d38d621a582da46c8c717fabf2894b114f9ee7b024ad57af8"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 531,
+      "sha256": "741a43d8f2c93f625f7ff54943c50f14a478780471596f862b227408eefe14da",
+      "identical_to_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_parent": true
+    }
+  },
+  "ordinary_corpus_equivalence": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "same_as_parent": true,
+    "log": {
+      "path": "/tmp/prowl-image-provenance-corpus-digest-20261115.log",
+      "sha256": "0ff7c15b62858f33f5e1a92f6d1b9d0ad1909a58a4533674caa119fe44e2fded"
+    }
+  },
+  "performance": {
+    "status": "not_measured",
+    "blocking_condition": "ENOSPC while linking candidate test binary; no timing/alloc measurement was produced. Manual retry confirmed linker mapping failure. No files have been deleted to recover space.",
+    "failed_report": {
+      "path": "/tmp/prowl-image-provenance-fixed-perf-20261115/report.json",
+      "sha256": "293566eefe75869d6d073a9c7f692b6112dd3263eda4157144590e53769a5c0f"
+    },
+    "log": {
+      "path": "/tmp/prowl-image-provenance-fixed-perf-20261115.log",
+      "sha256": "293566eefe75869d6d073a9c7f692b6112dd3263eda4157144590e53769a5c0f"
+    },
+    "candidate_build_log": {
+      "path": "/tmp/prowl-image-provenance-fixed-perf-20261115/candidate-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "required_reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+    "required_candidate": "84913ba630d814e2b5caf030f57890bbca4e3f6b"
+  },
+  "stock_model": {
+    "path": "/private/tmp/prowl-image-provenance-20261115/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "installed_legacy_model": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "untouched": true,
+    "loaded": false
+  },
+  "qualification_history": [
+    {
+      "issue": "Default raw build instruction exposed another credential not present in the file",
+      "legacy_test_overlay": {
+        "path": "/tmp/prowl-image-instruction-legacy-overlay-20261115.json",
+        "sha256": "39c1299ba1716418ce63b5e28b293c9ffa9ce3db5be8e1a7cbe0c19ab717b5be"
+      },
+      "legacy_overlay_source": {
+        "path": "/tmp/prowl-image-instruction-legacy-overlay-20261115.go",
+        "sha256": "1330c2273c1ae812ddc5a997bbf1f8c8c27720039661b13b919ac172249748a1"
+      },
+      "reproduction_log": {
+        "path": "/tmp/prowl-image-instruction-reproduction-20261115.log",
+        "sha256": "ea0bbec3f9a2ada2fadc5af94aa01075059f2b85d6593439cdee229ec6cabd4d"
+      },
+      "resolution": "Instruction follows explicit source disclosure; current tests and native raw/default output checks pass."
+    },
+    {
+      "issue": "Initial native matrix exposed SARIF dropping in_final_image",
+      "initial_native_log": {
+        "path": "/tmp/prowl-image-provenance-native-20261115.log",
+        "sha256": "846892244ceaa63c868946f2e52afedfda4351d0d2b7732dc5c70904b3e12aec"
+      },
+      "probe": {
+        "path": "/tmp/prowl-image-provenance-sarif-probe-20261115.json",
+        "sha256": "7d41be1b8da842bd7e25f7336b70dd1b23ff695ca1c2f068deec26556a81d6a6"
+      },
+      "resolution_commit": "84913ba630d814e2b5caf030f57890bbca4e3f6b",
+      "resolution": "SARIF properties and occurrences now preserve known image status and explicitly supplied instruction."
+    }
+  ],
+  "limitations": [
+    "Fixed performance gate is required and is not complete; source integration has not occurred.",
+    "No Docker daemon/registry/deployed-runtime changes or release publication.",
+    "No independent compressed layer digest or signature qualification; layer_diff_id describes observed uncompressed bytes.",
+    "Full 1.5.0 goal and the image TODO leaf remain open."
+  ]
+}

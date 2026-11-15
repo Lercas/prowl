@@ -154,6 +154,19 @@
       Нативная матрица JSON/SARIF, ML, индекс и owned HTTP — 102/102;
       [контракт и границы](wiki/Mobile-Provenance.md),
       `wiki/evidence/1.5.0-mobile-provenance-20261115.json`.
+    - [ ] Image producer provenance: acquisition namespace, manifest/config snapshot,
+      raw member digest и полностью прочитанный layer diff ID. Финализатор обновляет
+      occurrence ID после EOF/close; повторные TAR-entry разделены в индексе,
+      одинаковые labels не заимствуют чужой flatten-index. JSON/SARIF и occurrences
+      сохраняют final-image status; сырой build instruction — только с disclosure.
+      OCI metadata cache не принимает content-address mismatch.
+      - [x] Реализация и native matrix 400/400, report identity 39/39,
+        occurrences 71/71, web 181/181, mobile 102/102; full Go/race/min-Go/lint,
+        quality и полный GOROOT digest подтверждены в изолированном checkout.
+      - [ ] Fixed performance gate: компоновка candidate test binary блокируется
+        ENOSPC; измерения не выполнены. Интеграция в main/candidate ожидает гейта.
+      [Контракт и границы](wiki/Image-Provenance.md),
+      `wiki/evidence/1.5.0-image-provenance-20261115.json`.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

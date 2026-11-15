@@ -51,6 +51,12 @@ Keyed occurrence учитывает изменение контейнера; syn
 Приватный URL selector остаётся только в keyed identity.
 [Web provenance](Web-Provenance.md) описывает смысл digest и ограничения обхода.
 
+Image source различает `image_digest`, `config_digest`, raw member `digest` и
+наблюдаемый `layer_diff_id`. После drain финализатор добавляет последний и
+пересчитывает keyed occurrence ID. Acquisition scope и TAR ordinal остаются
+приватными. JSON/SARIF/occurrences сохраняют final-image status; `instruction`
+доступен только с явным source disclosure. [Image provenance](Image-Provenance.md).
+
 ```sh
 python3 scripts/check_report_identity.py /path/to/prowl
 ```

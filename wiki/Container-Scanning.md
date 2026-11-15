@@ -76,7 +76,7 @@ The config is a prime, non-filesystem hiding place for secrets — environment v
 
 Each config field is charged against the same anti-bomb budget and capped by `--max-size`, so a crafted multi-megabyte env value can't blow up the scan.
 
-## Does the leak survive into the running image? (`in_final_image`)
+## Владение путём в flattened image (`in_final_image`)
 
 A container image is a stack of layers; the running container sees only the *flattened* result, but every layer is preserved and independently pullable. The classic leak:
 
@@ -87,17 +87,31 @@ RUN ... && rm /root/.ssh/id_rsa    # layer 6 — secret "removed"
 
 The file is gone from the final filesystem, so a flattened scan (or `docker run … cat`) finds nothing — but the secret is **fully recoverable** from layer 4, where it persists. prowl scans every layer, so it catches the secret in `layer4:root/.ssh/id_rsa` even though a later layer deleted it. This "COPY a secret, `RM` it later" pattern is one of the most common ways credentials leak in published images, and a flattened scan misses it entirely.
 
-To tell the two cases apart, every finding carries an **`in_final_image`** field (in `--format json`):
+Для файловых находок JSON/SARIF и occurrences сохраняют **`in_final_image`**,
+когда статус известен:
 
 - `true` — the secret is still present in the flattened image a `docker pull` deploys. Highest urgency.
 - `false` — a later layer whiteouted/overwrote it; it lives only in image history, recoverable by anyone who pulls the layers but not in the running container.
 - *omitted* (unknown) — prowl couldn't determine it (a cancelled or anti-bomb-degraded scan); never assume "safe".
 
-prowl computes this by replaying the OCI whiteout rules (`.wh.<name>`, opaque `.wh..wh..opq`, last-writer-wins) across the layer stack. Use it to triage: a `true` is a live exposure in what you ship; a `false` is still a real leak (rotate the key) but reachable only by someone who pulls the historical layers.
+Статус вычисляется воспроизведением OCI whiteout rules (`.wh.<name>`, opaque
+`.wh..wh..opq`, last-writer-wins). Он описывает владение путём в выбранном image.
+`true` не доказывает deployment или доступность ключа у провайдера; `false` не
+означает отзыв ключа и не удаляет наблюдаемые байты из исторического слоя.
 
 ## Layer → Dockerfile instruction
 
-Each layer finding also carries the **`instruction`** field (in `--format json`): the Dockerfile build instruction (`CreatedBy`) that produced that layer, so you can map a leak straight back to the line in the Dockerfile that introduced it.
+Поле **`instruction`** содержит build instruction (`CreatedBy`) и выводится только
+с явным `--show-secrets`: это сырой source context, который может включать другой
+секрет. В режиме disclosure оно сохраняется в JSON/SARIF и occurrences.
+
+## Provenance в 1.5.0
+
+Manifest/config, raw member и полностью прочитанный распакованный слой получают
+отдельные digest. Source-declared URI и приватная acquisition identity разделяют
+одинаковые labels и повторные TAR-entry; stdin не зависит от имени spool.
+`in_final_image` описывает вычисленное владение путём в image, не deployment
+или live-статус секрета. [Контракт и ограничения](Image-Provenance.md).
 
 ## Authentication
 
@@ -110,7 +124,11 @@ Nothing is written to disk. Layers are pulled and their tars are **streamed in m
 
 ## Fingerprint dedup
 
-The same file — and therefore the same secret — frequently appears across several layers (a base layer carries it, a later layer re-copies it). prowl **deduplicates findings by content fingerprint**, so an identical secret seen in multiple layers is reported once rather than once per layer. You get the leak, not a pile of duplicates.
+Группируются совпадающие logical fingerprints; отдельные физические позиции
+сохраняются в `occurrences`. При повторном TAR-entry одного пути представителем
+служит финальная entry, а обе позиции сохраняют собственные digest и final status.
+Разные слои и image views имеют отдельные locators/fingerprints. Для связывания
+одинакового значения между позициями используется независимый secret/value ID.
 
 ## Flags
 
