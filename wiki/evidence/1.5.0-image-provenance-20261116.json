@@ -1,0 +1,119 @@
+{
+  "schema_version": "prowl-image-provenance-qualification-v2",
+  "date": "2026-11-16",
+  "qualification_status": "local_source_native_qualified",
+  "scope": "Local darwin-arm64 source/native qualification; not a Docker image or published release",
+  "source_commit": "1e1900ad4c3798bac345102bfbf60850c0bde1ef",
+  "runtime_commit": "84913ba630d814e2b5caf030f57890bbca4e3f6b",
+  "base_main_commit": "e47c92e588083f7f4c39c356e8faef16a4813cfb",
+  "supersedes": "wiki/evidence/1.5.0-image-provenance-20261115.json",
+  "historical_artifacts": "34 of 35 old path/hash references unavailable after external temporary-directory cleanup; old hashes retained as history. Current matrices replayed and committed.",
+  "binary": {
+    "path": "/tmp/prowl-image-qualified-20261116-bin",
+    "sha256": "88d2f4e10cc055887d015c654374f1b77d629d8640eaa2056ee467da92e5ceb8"
+  },
+  "logs": {
+    "go": {
+      "path": "/tmp/prowl-image-go-20261116.log",
+      "sha256": "74d3871287ea08ea5a888885b782fbd2d3496cb553ca92ca1073eff3563e4aa1"
+    },
+    "race": {
+      "path": "/tmp/prowl-image-race-20261116.log",
+      "sha256": "5cc33c6b93b7fc8b02a5dcdd978c8e7409eb41e22bdc2d602cb9415cdddab411"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-image-min-go-20261116.log",
+      "sha256": "c5f16da2cea079b0d8cbc0dfad573e884199cfdab4b44be319c4bb4a5f1b14d0"
+    },
+    "lint-pinned": {
+      "path": "/tmp/prowl-image-lint-pinned-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "build": {
+      "path": "/tmp/prowl-image-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "buildinfo": {
+      "path": "/tmp/prowl-image-buildinfo-20261116.log",
+      "sha256": "32ffed1121bd8233543acbeb050559dc4413027b59a75baece6e2f3c5c6c7491"
+    },
+    "corpus-digest": {
+      "path": "/tmp/prowl-image-corpus-digest-20261116.log",
+      "sha256": "d0c5c838e86f658602ca76fe8528b8a29e82035cee46eef3641f7d9445d8dd56"
+    },
+    "native": {
+      "path": "/tmp/prowl-image-native-20261116.log",
+      "sha256": "2ee30de1f95ec1e77705674db031fce93f180c7209c2973d6f3508d4f018e373"
+    },
+    "identity": {
+      "path": "/tmp/prowl-image-identity-20261116.log",
+      "sha256": "c4264cbb2810a237a5f7e12ad4dd0dc8ee6319d537d053938d785623c2cdcfb3"
+    },
+    "occurrences": {
+      "path": "/tmp/prowl-image-occurrences-20261116.log",
+      "sha256": "622d46c3aa376ace0ed89a65210bf7632f98ea17f22e159b2b34c3303f49995c"
+    },
+    "web": {
+      "path": "/tmp/prowl-image-web-20261116.log",
+      "sha256": "c12c6ec0b9f495c9666f8fc173290accf1647bce8e5b7773974837234404b4a9"
+    },
+    "mobile": {
+      "path": "/tmp/prowl-image-mobile-20261116.log",
+      "sha256": "a711899b3dab844e527bdfdec937d945e25e495ff99db16276766777d15aee64"
+    }
+  },
+  "validation": {
+    "full_go": "passed",
+    "race": "passed: model/source/scan/report/correlation/cmd/prowl",
+    "minimum_go": "passed: same packages on go1.26.11",
+    "lint": "0 issues with repository-pinned golangci-lint v2.15.0 built on go1.27.4",
+    "native_cases": {
+      "image": 400,
+      "report_identity": 39,
+      "occurrences": 71,
+      "web": 181,
+      "mobile": 102
+    },
+    "performance": {
+      "report": "wiki/evidence/1.5.0-image-fixed-perf-20261116.json",
+      "status": "passed",
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "84913ba630d814e2b5caf030f57890bbca4e3f6b",
+      "ratios": {
+        "ns/op": 1.1709288896056442,
+        "B/op": 0.9546855381758741,
+        "allocs/op": 0.9839858708996533
+      },
+      "policy_unchanged": true
+    },
+    "quality": {
+      "report": "wiki/evidence/1.5.0-image-quality-20261116.json",
+      "secret_hits": 1563,
+      "secrets": 2094,
+      "false_positive_hits": 57,
+      "hard_negatives": 982,
+      "all_missed_positive_and_false_positive_ids_equal_main": true,
+      "main_report": {
+        "path": "/tmp/prowl-main-quality-20261116.json",
+        "sha256": "9d3191cc6a699da2b2c038ff54370c8795fe0e77f4988dacbc6d9050f6e4b889"
+      }
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "findings": 420,
+      "incomplete": 85,
+      "digest": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926"
+    }
+  },
+  "limitations": [
+    "No Docker daemon/registry/image build, deployment, hosted CI or release publication qualified",
+    "layer_diff_id describes full observed uncompressed TAR bytes, not compressed blob digest or signature",
+    "Full 1.5.0 goal remains open"
+  ],
+  "cleanup": {
+    "authorized": "User requested cleanup of agent-created trash after ownership/use checks",
+    "attempt": "Four completed benchmark scratch exports/binaries verified task-owned, no symlinks or open files; logs/reports excluded",
+    "status": "automatic approval review rejected rm under approval policy Never; objects retained without bypass"
+  }
+}

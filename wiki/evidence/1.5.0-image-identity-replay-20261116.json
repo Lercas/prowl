@@ -1,0 +1,163 @@
+{
+  "binary_sha256": "88d2f4e10cc055887d015c654374f1b77d629d8640eaa2056ee467da92e5ceb8",
+  "passed": 39,
+  "total": 39,
+  "checks": [
+    {
+      "case": "keyless-baseline",
+      "passed": true
+    },
+    {
+      "case": "create-a.key",
+      "passed": true
+    },
+    {
+      "case": "exclusive-a.key",
+      "passed": true
+    },
+    {
+      "case": "create-b.key",
+      "passed": true
+    },
+    {
+      "case": "exclusive-b.key",
+      "passed": true
+    },
+    {
+      "case": "production.env/a.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.env/a.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.env/a.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.env/a.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.env/b.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.env/b.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.env/b.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.env/b.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.json/a.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.json/a.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.json/a.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.json/a.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.json/b.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.json/b.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.json/b.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.json/b.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/a.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/a.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/a.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/a.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/b.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/b.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/b.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "production.yaml/b.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/a.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/a.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/a.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/a.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/b.key/ml=False/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/b.key/ml=False/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/b.key/ml=True/stdin=False",
+      "passed": true
+    },
+    {
+      "case": "bundle.js/b.key/ml=True/stdin=True",
+      "passed": true
+    },
+    {
+      "case": "git-source-provenance",
+      "passed": true
+    },
+    {
+      "case": "optional-default-key",
+      "passed": true
+    }
+  ]
+}

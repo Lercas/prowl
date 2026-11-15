@@ -154,7 +154,7 @@
       Нативная матрица JSON/SARIF, ML, индекс и owned HTTP — 102/102;
       [контракт и границы](wiki/Mobile-Provenance.md),
       `wiki/evidence/1.5.0-mobile-provenance-20261115.json`.
-    - [ ] Image producer provenance: acquisition namespace, manifest/config snapshot,
+    - [x] Image producer provenance: acquisition namespace, manifest/config snapshot,
       raw member digest и полностью прочитанный layer diff ID. Финализатор обновляет
       occurrence ID после EOF/close; повторные TAR-entry разделены в индексе,
       одинаковые labels не заимствуют чужой flatten-index. JSON/SARIF и occurrences
@@ -163,10 +163,12 @@
       - [x] Реализация и native matrix 400/400, report identity 39/39,
         occurrences 71/71, web 181/181, mobile 102/102; full Go/race/min-Go/lint,
         quality и полный GOROOT digest подтверждены в изолированном checkout.
-      - [ ] Fixed performance gate: компоновка candidate test binary блокируется
-        ENOSPC; измерения не выполнены. Интеграция в main/candidate ожидает гейта.
+      - [x] Повторная квалификация 2026-11-16: fixed performance gate против
+        `e0f05cd…` в трёх парах пройден: время +17,09%, B/op −4,53%, allocs/op −1,60%.
+        Full Go/race/Go 1.26.11/lint и пять native-матриц повторены после утраты
+        временных артефактов; quality IDs совпали с main, GOROOT digest прежний.
       [Контракт и границы](wiki/Image-Provenance.md),
-      `wiki/evidence/1.5.0-image-provenance-20261115.json`.
+      `wiki/evidence/1.5.0-image-provenance-20261116.json`.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная

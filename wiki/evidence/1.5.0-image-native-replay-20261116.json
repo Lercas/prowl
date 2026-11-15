@@ -1,0 +1,1616 @@
+{
+  "binary": "/private/tmp/prowl-image-qualified-20261116-bin",
+  "binary_sha256": "88d2f4e10cc055887d015c654374f1b77d629d8640eaa2056ee467da92e5ceb8",
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-image-provenance-native-05g2wvq_",
+  "passed": 400,
+  "failed": 0,
+  "checks": [
+    {
+      "case": "OS-network-denial-enforced",
+      "passed": true
+    },
+    {
+      "case": "identity-init",
+      "passed": true
+    },
+    {
+      "case": "tar-normal-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-3",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-4",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-5",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-6",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-7",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-8",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-9",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-10",
+      "passed": true
+    },
+    {
+      "case": "tar-normal-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-12",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-13",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-14",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-15",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-16",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-17",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-18",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-19",
+      "passed": true
+    },
+    {
+      "case": "tar-normal-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-21",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-22",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-23",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-24",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-25",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-26",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-27",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-28",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-29",
+      "passed": true
+    },
+    {
+      "case": "tar-normal-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-31",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-32",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-33",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-34",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-35",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-36",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-37",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-38",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-39",
+      "passed": true
+    },
+    {
+      "case": "tar-utf16-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-41",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-42",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-43",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-44",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-45",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-46",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-47",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-48",
+      "passed": true
+    },
+    {
+      "case": "tar-utf16-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-50",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-51",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-52",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-53",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-54",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-55",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-56",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-57",
+      "passed": true
+    },
+    {
+      "case": "tar-utf16-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-59",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-60",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-61",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-62",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-63",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-64",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-65",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-66",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-67",
+      "passed": true
+    },
+    {
+      "case": "tar-utf16-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-69",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-70",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-71",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-72",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-73",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-74",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-75",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-76",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-77",
+      "passed": true
+    },
+    {
+      "case": "tar-duplicate-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-79",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-80",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-81",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-82",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-83",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-84",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-85",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-86",
+      "passed": true
+    },
+    {
+      "case": "duplicate-physical-observations-87",
+      "passed": true
+    },
+    {
+      "case": "tar-duplicate-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-89",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-90",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-91",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-92",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-93",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-94",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-95",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-96",
+      "passed": true
+    },
+    {
+      "case": "duplicate-physical-observations-97",
+      "passed": true
+    },
+    {
+      "case": "tar-duplicate-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-99",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-100",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-101",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-102",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-103",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-104",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-105",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-106",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-107",
+      "passed": true
+    },
+    {
+      "case": "tar-duplicate-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-109",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-110",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-111",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-112",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-113",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-114",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-115",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-116",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-117",
+      "passed": true
+    },
+    {
+      "case": "tar-whiteout-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-119",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-120",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-121",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-122",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-123",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-124",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-125",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-126",
+      "passed": true
+    },
+    {
+      "case": "tar-whiteout-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-128",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-129",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-130",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-131",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-132",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-133",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-134",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-135",
+      "passed": true
+    },
+    {
+      "case": "tar-whiteout-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-137",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-138",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-139",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-140",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-141",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-142",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-143",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-144",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-145",
+      "passed": true
+    },
+    {
+      "case": "tar-whiteout-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-147",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-148",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-149",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-150",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-151",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-152",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-153",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-154",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-155",
+      "passed": true
+    },
+    {
+      "case": "tar-bad-diff-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-157",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-158",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-159",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-160",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-161",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-162",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-163",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-164",
+      "passed": true
+    },
+    {
+      "case": "tar-bad-diff-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-166",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-167",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-168",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-169",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-170",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-171",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-172",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-173",
+      "passed": true
+    },
+    {
+      "case": "tar-bad-diff-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-175",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-176",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-177",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-178",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-179",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-180",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-181",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-182",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-183",
+      "passed": true
+    },
+    {
+      "case": "tar-bad-diff-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-185",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-186",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-187",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-188",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-189",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-190",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-191",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-192",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-193",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-normal-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-195",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-196",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-197",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-198",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-199",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-200",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-201",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-202",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-normal-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-204",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-205",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-206",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-207",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-208",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-209",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-210",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-211",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-normal-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-213",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-214",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-215",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-216",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-217",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-218",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-219",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-220",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-221",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-normal-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-223",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-224",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-225",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-226",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-227",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-228",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-229",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-230",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-231",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-utf16-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-233",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-234",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-235",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-236",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-237",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-238",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-239",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-240",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-utf16-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-242",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-243",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-244",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-245",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-246",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-247",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-248",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-249",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-utf16-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-251",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-252",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-253",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-254",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-255",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-256",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-257",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-258",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-259",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-utf16-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-261",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-262",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-263",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-264",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-265",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-266",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-267",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-268",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-269",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-duplicate-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-271",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-272",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-273",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-274",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-275",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-276",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-277",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-278",
+      "passed": true
+    },
+    {
+      "case": "duplicate-physical-observations-279",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-duplicate-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-281",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-282",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-283",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-284",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-285",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-286",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-287",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-288",
+      "passed": true
+    },
+    {
+      "case": "duplicate-physical-observations-289",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-duplicate-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-291",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-292",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-293",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-294",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-295",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-296",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-297",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-298",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-299",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-duplicate-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-301",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-302",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-303",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-304",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-305",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-306",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-307",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-308",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-309",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-whiteout-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-311",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-312",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-313",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-314",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-315",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-316",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-317",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-318",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-whiteout-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-320",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-321",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-322",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-323",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-324",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-325",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-326",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-327",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-whiteout-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-329",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-330",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-331",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-332",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-333",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-334",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-335",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-336",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-337",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-whiteout-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-339",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-340",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-341",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-342",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-343",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-344",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-345",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-346",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-347",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-bad-diff-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-349",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-350",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-351",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-352",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-353",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-354",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-355",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-356",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-bad-diff-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-358",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-359",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-360",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-361",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-362",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-363",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-364",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-365",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-bad-diff-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-367",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-368",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-369",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-370",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-371",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-372",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-373",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-374",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-375",
+      "passed": true
+    },
+    {
+      "case": "oci-dir-bad-diff-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-377",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-378",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-379",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-380",
+      "passed": true
+    },
+    {
+      "case": "config-and-image-digest-381",
+      "passed": true
+    },
+    {
+      "case": "raw-file-and-layer-digest-382",
+      "passed": true
+    },
+    {
+      "case": "flatten-status-383",
+      "passed": true
+    },
+    {
+      "case": "finalized-occurrence-384",
+      "passed": true
+    },
+    {
+      "case": "source-declared-URI-385",
+      "passed": true
+    },
+    {
+      "case": "stdin-acquisition-0",
+      "passed": true
+    },
+    {
+      "case": "stdin-acquisition-1",
+      "passed": true
+    },
+    {
+      "case": "stdin-spool-independent-identity",
+      "passed": true
+    },
+    {
+      "case": "explicit-instruction-disclosure-json",
+      "passed": true
+    },
+    {
+      "case": "explicit-instruction-disclosure-sarif",
+      "passed": true
+    },
+    {
+      "case": "bad-config-json-incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "bad-config-sarif-incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "bad-manifest-json-incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "bad-manifest-sarif-incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "safe-acquisition-failure-395",
+      "passed": true
+    },
+    {
+      "case": "safe-acquisition-failure-396",
+      "passed": true
+    },
+    {
+      "case": "index-duplicate-scan-0",
+      "passed": true
+    },
+    {
+      "case": "index-duplicate-scan-1",
+      "passed": true
+    },
+    {
+      "case": "index-separates-duplicate-entries",
+      "passed": true
+    }
+  ],
+  "network_control": {
+    "profile": "(version 1)(allow default)(deny network*)",
+    "owned_requests": 1,
+    "blocked_exit": 7
+  },
+  "scope": "Owned Docker-save/OCI-directory/stdin fixtures; raw/config/manifest/full-layer hashes, metadata mismatch, duplicate TAR, whiteout, UTF16, ML, JSON/SARIF, index and disclosure. No Docker daemon, registry or deployment."
+}

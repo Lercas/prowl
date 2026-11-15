@@ -1,0 +1,740 @@
+{
+  "binary": "/private/tmp/prowl-image-qualified-20261116-bin",
+  "binary_sha256": "88d2f4e10cc055887d015c654374f1b77d629d8640eaa2056ee467da92e5ceb8",
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-domain-provenance-native-n61ex7gy",
+  "passed": 181,
+  "failed": 0,
+  "checks": [
+    {
+      "case": "OS-sandbox-allows-only-owned-port",
+      "passed": true
+    },
+    {
+      "case": "report-identity-init",
+      "passed": true
+    },
+    {
+      "case": "authorization-before-network",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-5",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-6",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-7",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-8",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-9",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-10",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-11",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-12",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlFalse-digest-13",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-16",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-17",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-18",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-19",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-20",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-21",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-22",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-23",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlFalse-digest-24",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-25",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-26",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-27",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-28",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-29",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-30",
+      "passed": true
+    },
+    {
+      "case": "distinct-map-SARIF-views-31",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-34",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-35",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-36",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-37",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-38",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-39",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-40",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-41",
+      "passed": true
+    },
+    {
+      "case": "basic-json-mlTrue-digest-42",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-45",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-46",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-47",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-48",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-49",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-50",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-51",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-52",
+      "passed": true
+    },
+    {
+      "case": "basic-sarif-mlTrue-digest-53",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-54",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-55",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-56",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-57",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-58",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-59",
+      "passed": true
+    },
+    {
+      "case": "distinct-map-SARIF-views-60",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-digest-63",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-64",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-digest-65",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-digest-66",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-digest-67",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-68",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlFalse-digest-69",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-digest-72",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-73",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-digest-74",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-digest-75",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-digest-76",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-77",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlFalse-digest-78",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-79",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-80",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-81",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-82",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-83",
+      "passed": true
+    },
+    {
+      "case": "distinct-map-SARIF-views-84",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-digest-87",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-88",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-digest-89",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-digest-90",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-digest-91",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-92",
+      "passed": true
+    },
+    {
+      "case": "inline-json-mlTrue-digest-93",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-digest-96",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-97",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-digest-98",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-digest-99",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-digest-100",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-101",
+      "passed": true
+    },
+    {
+      "case": "inline-sarif-mlTrue-digest-102",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-103",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-104",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-105",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-106",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-107",
+      "passed": true
+    },
+    {
+      "case": "distinct-map-SARIF-views-108",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlFalse-digest-111",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-112",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlFalse-digest-113",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-114",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlFalse-digest-117",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-118",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlFalse-digest-119",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-120",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-121",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-122",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlTrue-digest-125",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-126",
+      "passed": true
+    },
+    {
+      "case": "selectors-json-mlTrue-digest-127",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-128",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlTrue-digest-131",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-132",
+      "passed": true
+    },
+    {
+      "case": "selectors-sarif-mlTrue-digest-133",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-134",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-135",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-136",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlFalse-digest-139",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-140",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlFalse-findings",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlFalse-digest-143",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-144",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-145",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-146",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "prefix-json-mlTrue-digest-149",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-150",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlTrue-findings",
+      "passed": true
+    },
+    {
+      "case": "prefix-sarif-mlTrue-digest-153",
+      "passed": true
+    },
+    {
+      "case": "raw-or-prefix-digest-154",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-155",
+      "passed": true
+    },
+    {
+      "case": "safe-SARIF-URI-156",
+      "passed": true
+    },
+    {
+      "case": "prefix-baseline-protected",
+      "passed": true
+    },
+    {
+      "case": "missing-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "missing-json-mlFalse-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-mlFalse-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "missing-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "missing-json-mlTrue-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-mlTrue-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "missing-baseline-protected",
+      "passed": true
+    },
+    {
+      "case": "empty-json-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "empty-json-mlFalse-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-mlFalse-coverage",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-mlFalse-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "empty-json-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "empty-json-mlTrue-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-mlTrue-coverage",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-mlTrue-no-invented-key",
+      "passed": true
+    },
+    {
+      "case": "indexed-selector-scan-0",
+      "passed": true
+    },
+    {
+      "case": "indexed-selector-scan-1",
+      "passed": true
+    },
+    {
+      "case": "index-private-query-locations-stable",
+      "passed": true
+    },
+    {
+      "case": "index-failed-acquisition",
+      "passed": true
+    },
+    {
+      "case": "failed-snapshot-does-not-certify-absence",
+      "passed": true
+    },
+    {
+      "case": "SQLite-retains-no-private-inputs",
+      "passed": true
+    }
+  ],
+  "network_control": {
+    "profile": "(version 1)(allow default)(deny network*)(allow network-outbound (remote ip \"localhost:60390\"))",
+    "outside_owned_requests": 0,
+    "blocked_exit": 7
+  },
+  "scope": "Owned HTTP response, redirect, decoded state, duplicate/inline source-map views, partial response, JSON/SARIF, ML and index. No real provider/account qualification."
+}

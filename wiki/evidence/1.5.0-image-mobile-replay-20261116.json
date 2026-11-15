@@ -1,0 +1,419 @@
+{
+  "binary": "/private/tmp/prowl-image-qualified-20261116-bin",
+  "binary_sha256": "88d2f4e10cc055887d015c654374f1b77d629d8640eaa2056ee467da92e5ceb8",
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "passed": 102,
+  "failed": 0,
+  "checks": [
+    {
+      "case": "OS-network-denial-enforced",
+      "passed": true
+    },
+    {
+      "case": "identity-init",
+      "passed": true
+    },
+    {
+      "case": "one-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "one-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "one-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "one-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "one-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "one-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "one-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "one-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "one-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "one-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "two-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "two-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "two-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "two-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "two-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "two-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "two-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "two-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "two-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "two-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ios-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ios-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ios-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ios-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ios-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ios-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ios-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ios-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ios-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ios-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "utf16-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "utf16-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "utf16-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "utf16-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "utf16-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "utf16-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "utf16-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "utf16-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "utf16-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "utf16-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "binary-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "binary-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "binary-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "binary-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "binary-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "binary-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "binary-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "binary-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "binary-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "binary-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-identity-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-observations-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-identity-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-observations-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-URI-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-URI-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "same-basename-separate-report-identity",
+      "passed": true
+    },
+    {
+      "case": "keyless-public-archive-namespace",
+      "passed": true
+    },
+    {
+      "case": "owned-HTTP-acquisition-0",
+      "passed": true
+    },
+    {
+      "case": "owned-HTTP-acquisition-1",
+      "passed": true
+    },
+    {
+      "case": "owned-HTTP-acquisition-2",
+      "passed": true
+    },
+    {
+      "case": "download-spool-independent-identity",
+      "passed": true
+    },
+    {
+      "case": "private-selector-separates-identity",
+      "passed": true
+    },
+    {
+      "case": "missing-json-incomplete",
+      "passed": true
+    },
+    {
+      "case": "missing-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-incomplete",
+      "passed": true
+    },
+    {
+      "case": "missing-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "invalid-json-incomplete",
+      "passed": true
+    },
+    {
+      "case": "invalid-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "invalid-sarif-incomplete",
+      "passed": true
+    },
+    {
+      "case": "invalid-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "http404-json-incomplete",
+      "passed": true
+    },
+    {
+      "case": "http404-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "http404-sarif-incomplete",
+      "passed": true
+    },
+    {
+      "case": "http404-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "blocked-json-incomplete",
+      "passed": true
+    },
+    {
+      "case": "blocked-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "blocked-sarif-incomplete",
+      "passed": true
+    },
+    {
+      "case": "blocked-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "index-acquisition-0",
+      "passed": true
+    },
+    {
+      "case": "index-acquisition-1",
+      "passed": true
+    },
+    {
+      "case": "index-acquisition-2",
+      "passed": true
+    },
+    {
+      "case": "index-links-one-value-two-archives",
+      "passed": true
+    },
+    {
+      "case": "index-HTTP-selection-0",
+      "passed": true
+    },
+    {
+      "case": "index-HTTP-selection-1",
+      "passed": true
+    },
+    {
+      "case": "index-HTTP-selection-2",
+      "passed": true
+    },
+    {
+      "case": "index-duplicate-entries",
+      "passed": true
+    },
+    {
+      "case": "index-failed-acquisition-incomplete",
+      "passed": true
+    },
+    {
+      "case": "index-private-selectors-duplicates-and-failed-snapshot",
+      "passed": true
+    },
+    {
+      "case": "derived-xml-literal-control-plans-blocked-read",
+      "passed": true
+    },
+    {
+      "case": "derived-xml-cannot-authorize-network-checks",
+      "passed": true
+    },
+    {
+      "case": "derived-plist-literal-control-plans-blocked-read",
+      "passed": true
+    },
+    {
+      "case": "derived-plist-cannot-authorize-network-checks",
+      "passed": true
+    },
+    {
+      "case": "report-key-unmodified",
+      "passed": true
+    }
+  ],
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mobile-provenance-native-isk29w27",
+  "network_control": "Local cases: verified OS deny network*. HTTP acquisition: owned loopback server, no provider verification/audit flags."
+}

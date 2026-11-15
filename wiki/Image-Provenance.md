@@ -82,6 +82,10 @@ python3 scripts/check_image_provenance.py /path/to/prowl
 отдельный `PROWL_HOME` и index. Проверенный macOS `deny network*` блокирует
 loopback control. Используются синтетические значения и явная Go-модель с 51
 признаком. Docker daemon, registry, production и клиентские образы не меняются.
-Evidence — `evidence/1.5.0-image-provenance-20261115.json`.
+Актуальная повторная квалификация, включая fixed performance gate, —
+`evidence/1.5.0-image-provenance-20261116.json`.
+Отчёт `evidence/1.5.0-image-provenance-20261115.json` сохраняет историю прежнего
+дискового блокера; его временные артефакты больше недоступны. Новые native matrices
+сохранены рядом с актуальным evidence, а не только во временных каталогах.
 Это source/native darwin-arm64 квалификация. Итоговые Docker/Linux images,
 registry/runtime acceptance, hosted CI и публикация релиза остаются отдельными задачами.
