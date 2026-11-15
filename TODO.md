@@ -432,7 +432,11 @@
     - [x] Статические JS/ES-module привязки одного объекта или одной `const`-декларации:
       AST с исходными byte spans, без JS runtime и source-map I/O, один ленивый
       разбор на item после ML. 72 Node-reference случая; успешный HTTP fixture и
-      отказ от неоднозначных привязок. Обычный scan без opt-in не меняется.
+      отказ от неоднозначных привязок. CLI 37/37 с проверенным OS network deny,
+      full Go/race/lint/min-Go, fuzz и scoped govulncheck проходят;
+      `wiki/evidence/1.5.0-public-js-bindings-20261115.json`.
+      Обычный scan без opt-in не меняется. Установленная локальная модель с 49
+      признаками не заменялась; квалификация использует явную модель с 51.
     - [ ] Специфичный TypeScript/JSX, XML/plist/dex и другие связи;
       точное отличие встроенного admin от широкого custom ACL.
   - [ ] Только read-only пробы; под тем же `--authorized`, что и `domain`.

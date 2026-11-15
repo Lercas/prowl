@@ -1,0 +1,282 @@
+{
+  "source_commit": "654e15d",
+  "binary": "/tmp/prowl-public-js-main-20261115",
+  "sha256": "a10d1805496d990c27e7ebaffdbe62e0d171db42ac7a16a5d685b388417f380f",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-public-js-native-lmp3l816",
+  "sandbox_profile": "(version 1)(allow default)(deny network*)",
+  "network_boundary_control": {
+    "owned_control_requests": 1,
+    "sandbox_requests": 0,
+    "blocked_exit": 7
+  },
+  "cases": [
+    {
+      "case": "object.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "object.js-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "module.mjs-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "module.mjs-ml",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "constant.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "constant.js-ml",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "compatible.ts-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "compatible.ts-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "nested.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "nested.js-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "escape.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "escape.js-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "concat.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "concat.js-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "alias.js-l1",
+      "passed": true,
+      "outcome": "binding accepted; transport denied by OS sandbox"
+    },
+    {
+      "case": "alias.js-ml",
+      "passed": true,
+      "outcome": "ML suppressed candidate"
+    },
+    {
+      "case": "sibling.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "parent.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "separate.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "unknown.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "spread.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "computed.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "getter.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "method.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "duplicate.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "malformed.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "types.ts",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "regex.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "comment.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "string.js",
+      "passed": true,
+      "outcome": "binding rejected before transport"
+    },
+    {
+      "case": "opt-out-False",
+      "passed": true
+    },
+    {
+      "case": "opt-out-True",
+      "passed": true
+    },
+    {
+      "case": "mobile-authorization",
+      "passed": true
+    },
+    {
+      "case": "domain-authorization",
+      "passed": true
+    },
+    {
+      "case": "sarif",
+      "passed": true
+    },
+    {
+      "case": "pretty",
+      "passed": true
+    },
+    {
+      "case": "baseline-preserved",
+      "passed": true
+    }
+  ],
+  "passed": 37,
+  "failed": 0,
+  "real_provider_qualification": false,
+  "integration": {
+    "main_source_commit": "654e15dbb9531600bd3905c6be54f41017fb1395",
+    "isolated_source_commit": "5d0ca09",
+    "source_trees_equal": true,
+    "docker_candidate_source_commit": "17fa48e",
+    "images_rebuilt": false,
+    "release_qualified": false
+  },
+  "checks": {
+    "go_suite": "full Go 1.27.4, CGO=0; final integrated source",
+    "race": [
+      "internal/reconstruct",
+      "internal/publicaudit",
+      "internal/scan",
+      "cmd/prowl"
+    ],
+    "minimum_go": "Go 1.26.11: reconstruct/publicaudit/scan/cmd/prowl; final parser guard rerun",
+    "lint": "golangci-lint: zero issues",
+    "govulncheck": "./internal/reconstruct: no vulnerabilities found",
+    "module_verification": "all modules verified",
+    "node_reference": {
+      "version": "v22.23.4",
+      "passed": 72,
+      "generation": "trusted literal-only inputs; no scanned input executed"
+    },
+    "fuzz": {
+      "target": "FuzzObjectBindings",
+      "duration_seconds": 5,
+      "executions": 51099,
+      "result": "pass"
+    },
+    "owned_http_pipeline": {
+      "accepted": 8,
+      "rejected_before_transport": 8,
+      "scope": "L1 -> ML survivor -> original binding -> real local GET -> separate ACL result"
+    },
+    "native_outcomes": {
+      "binding accepted; transport denied by OS sandbox": 10,
+      "ML suppressed candidate": 6,
+      "binding rejected before transport": 14,
+      "report/auth/opt-out/baseline": 7
+    }
+  },
+  "cross_compile": {
+    "linux/amd64": {
+      "CGO_ENABLED": 0,
+      "source_commit": "5d0ca09",
+      "sha256": "ac0d065ed03169167858bbca56bf363077418f312543cd6a551be9b8a569a56d",
+      "runtime_tested": false
+    },
+    "windows/amd64": {
+      "CGO_ENABLED": 0,
+      "source_commit": "5d0ca09",
+      "sha256": "673440a6e98e35087806150637b509b58fd22f7c841eacd688800ce938dc47cf",
+      "runtime_tested": false
+    }
+  },
+  "qualification_model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "feature_names": 51,
+    "selection": "explicit --ml-model; unchanged portable model"
+  },
+  "installed_model_observation": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "feature_names": 49,
+    "modified": false,
+    "behavior": "default --ml correctly refuses incompatible installed 49-feature model; local installation not migrated"
+  },
+  "development_fixture_isolation": {
+    "earlier_legacy_fixture": "One development test invoked a real provider client with the synthetic documented key and synthetic application ID; delivery was not established. The fixture was replaced with an in-memory auditor before final qualification.",
+    "final_state": "All successful provider pipeline tests use an owned transport available only in _test.go; native CLI runs under verified OS network denial."
+  },
+  "parser_dependencies": {
+    "github.com/grafana/sobek": "v0.0.0-20261105103427-a5b602015248",
+    "github.com/go-sourcemap/sourcemap": "v2.1.4+incompatible",
+    "runtime_imported": false,
+    "automatic_source_maps": "disabled for script and module parsing"
+  },
+  "limitations": [
+    "Static source bindings; no program execution or runtime mutation tracking",
+    "Only one object or one const declaration; no variable/cross-file resolution",
+    "TypeScript-specific syntax, JSX, XML/plist/dex and SDK argument bindings remain open",
+    "ACL metadata does not distinguish built-in admin from a broad custom key",
+    "Real provider accounts, final Docker images and local default installed model are not qualified/migrated"
+  ]
+}
