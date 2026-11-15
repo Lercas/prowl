@@ -74,3 +74,23 @@ func TestSARIFOptionalKeyedValueIdentityPreservesAlertFingerprint(t *testing.T) 
 		t.Fatal("keyed identity emitted without opt-in")
 	}
 }
+
+func TestSARIFPreservesImageSummaryAndOccurrenceState(t *testing.T) {
+	for _, final := range []bool{false, true} {
+		f := model.Finding{Type: "owned", Path: "image|layer0:prod.env", Severity: "high", InFinalImage: &final, Instruction: "COPY owned /app", Provenance: map[string]string{"layer_diff_id": strings.Repeat("a", 64)}}
+		f.Occurrences = []model.Occurrence{f.Occurrence()}
+		var out bytes.Buffer
+		if err := Write(&out, []model.Finding{f}, "sarif", false); err != nil {
+			t.Fatal(err)
+		}
+		var d map[string]any
+		if err := json.Unmarshal(out.Bytes(), &d); err != nil {
+			t.Fatal(err)
+		}
+		props := d["runs"].([]any)[0].(map[string]any)["results"].([]any)[0].(map[string]any)["properties"].(map[string]any)
+		occ := props["occurrences"].([]any)[0].(map[string]any)
+		if props["in_final_image"] != final || occ["in_final_image"] != final || props["instruction"] != f.Instruction || occ["instruction"] != f.Instruction {
+			t.Fatal("SARIF dropped image state or explicitly supplied instruction")
+		}
+	}
+}

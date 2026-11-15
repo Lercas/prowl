@@ -139,7 +139,8 @@ def main():
                             files = [f for f in fs if f['provenance']['source_transform'] == 'image-file']
                             occurrences = files[0].get('occurrences', [])
                             check('duplicate-physical-observations-' + str(len(checks)), len(files) == 1 and len(occurrences) == 2
-                                  and occurrences[0]['id'] != occurrences[1]['id'] and len({o['provenance']['digest'] for o in occurrences}) == 2)
+                                  and occurrences[0]['id'] != occurrences[1]['id'] and len({o['provenance']['digest'] for o in occurrences}) == 2
+                                  and sorted(o.get('in_final_image') for o in occurrences) == [False, True])
         for n in range(2):
             p = run(['image', '-', '--image-input=stdin', '--format=json'], data=normal_tar.read_bytes())
             d = json.loads(p.stdout)
@@ -147,10 +148,13 @@ def main():
             fingerprints = sorted((f['fingerprint'], f.get('occurrence_id')) for f in d['findings'])
             if n == 0: first_stdin = fingerprints
             else: check('stdin-spool-independent-identity', fingerprints == first_stdin)
-        p = run(['image', normal_tar, '--show-secrets', '--format=json'], disclose=True)
-        d = json.loads(p.stdout)
-        check('explicit-instruction-disclosure', p.returncode == 0 and d['secrets_revealed']
-              and any(other in f.get('instruction', '') for f in d['findings']))
+        for fmt in ('json', 'sarif'):
+            p = run(['image', normal_tar, '--show-secrets', '--format', fmt], disclose=True)
+            d = json.loads(p.stdout)
+            meta = d if fmt == 'json' else d['runs'][0]['properties']
+            fs = d['findings'] if fmt == 'json' else [r['properties'] for r in d['runs'][0]['results']]
+            check('explicit-instruction-disclosure-' + fmt, p.returncode == 0 and meta['secrets_revealed']
+                  and any(other in f.get('instruction', '') for f in fs))
         for mode in ('bad-config', 'bad-manifest'):
             path, *_ = fixture(mode, 'oci-dir', mode)
             for fmt in ('json', 'sarif'):

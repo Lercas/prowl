@@ -87,8 +87,10 @@ type Occurrence struct {
 	Provenance     map[string]string `json:"provenance,omitempty"`
 	Verification   *Verification     `json:"verification,omitempty"`
 	PublicKeyAudit *PublicKeyAudit   `json:"public_key_audit,omitempty"`
+	InFinalImage   *bool             `json:"in_final_image,omitempty"`
+	Instruction    string            `json:"instruction,omitempty"`
 }
 
 func (f Finding) Occurrence() Occurrence {
-	return Occurrence{f.OccurrenceID, f.Source, f.Path, f.Line, f.Col, f.Evidence, f.Provenance, f.Verification, f.PublicKeyAudit}
+	return Occurrence{ID: f.OccurrenceID, Source: f.Source, Path: f.Path, Line: f.Line, Col: f.Col, Evidence: f.Evidence, Provenance: f.Provenance, Verification: f.Verification, PublicKeyAudit: f.PublicKeyAudit, InFinalImage: f.InFinalImage, Instruction: f.Instruction}
 }

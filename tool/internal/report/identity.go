@@ -25,4 +25,10 @@ func addIdentityProperties(properties map[string]any, f model.Finding) {
 	if f.Verification != nil {
 		properties["verification"] = f.Verification
 	}
+	if f.InFinalImage != nil {
+		properties["in_final_image"] = *f.InFinalImage
+	}
+	if f.Instruction != "" {
+		properties["instruction"] = f.Instruction
+	}
 }
