@@ -88,6 +88,10 @@ func WriteBaselineContext(ctx context.Context, path string, fs []model.Finding) 
 		if model.IsIncompleteFinding(f) {
 			return fmt.Errorf("cannot write a baseline from incomplete scan results")
 		}
+		// A credential identity cannot accept changing resource permissions.
+		if hasPublicAudit(f) {
+			continue
+		}
 		fp := Fingerprint(f)
 		if strings.TrimSpace(fp) == "" {
 			return fmt.Errorf("baseline contains an empty fingerprint")
@@ -127,9 +131,22 @@ func (b *Baseline) Suppress(fs []model.Finding) []model.Finding {
 	}
 	out := fs[:0]
 	for _, f := range fs {
-		if model.IsIncompleteFinding(f) || !b.fps[Fingerprint(f)] {
+		if model.IsIncompleteFinding(f) || hasPublicAudit(f) || !b.fps[Fingerprint(f)] {
 			out = append(out, f)
 		}
 	}
 	return out
+}
+
+// hasPublicAudit also covers observations attached to a deduplicated occurrence.
+func hasPublicAudit(f model.Finding) bool {
+	if f.PublicKeyAudit != nil {
+		return true
+	}
+	for _, occurrence := range f.Occurrences {
+		if occurrence.PublicKeyAudit != nil {
+			return true
+		}
+	}
+	return false
 }

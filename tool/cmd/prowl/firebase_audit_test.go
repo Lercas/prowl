@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/post"
 	"github.com/Lercas/prowl/tool/internal/scan"
 )
 
@@ -31,6 +35,31 @@ func TestFirestoreAuditFlagScopeAndValidation(t *testing.T) {
 		if _, _, err := parseCommand(command, []string{"--audit-firestore-collection", "public"}); err == nil {
 			t.Fatal("collection scope escaped domain/mobile")
 		}
+	}
+}
+
+func TestPublicAuditSurvivesCredentialBaselineInReport(t *testing.T) {
+	for _, format := range []string{"json", "sarif"} {
+		t.Run(format, func(t *testing.T) {
+			dir := t.TempDir()
+			key := model.Finding{Type: "gcp_api_key", Path: "app.js", Severity: "high", Fingerprint: "same-key"}
+			baseline := filepath.Join(dir, "baseline.json")
+			if err := post.WriteBaseline(baseline, []model.Finding{key}); err != nil {
+				t.Fatal(err)
+			}
+			for _, status := range []string{"read_denied", "public_read_allowed"} {
+				key.PublicKeyAudit = &model.PublicKeyAudit{Provider: "firebase", Status: status}
+				output := filepath.Join(dir, status+".json")
+				code := reportFindings(commonFlags{format: format, output: output, baseline: baseline, noAutoPolicy: true, silence: true, failOn: "high"}, []model.Finding{key}, time.Second)
+				if code != 1 {
+					t.Fatalf("audit disappeared from severity gate: status=%s code=%d", status, code)
+				}
+				raw, err := os.ReadFile(output)
+				if err != nil || !strings.Contains(string(raw), status) || !strings.Contains(string(raw), "public_key_audit") {
+					t.Fatalf("audit disappeared from %s report: %v", format, err)
+				}
+			}
+		})
 	}
 }
 
