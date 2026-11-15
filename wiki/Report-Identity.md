@@ -38,6 +38,13 @@ URL очищаются от userinfo, query и fragment; неподдержив�
 Значение provenance после очистки ограничено 2048 байтами, превышение отражает
 неполноту результата. Не все источники пока заполняют все метаданные релиза.
 
+Для APK/IPA исходный archive/member URI отделён от отображаемого basename;
+URL acquisition без credentials/query используется в публичном provenance,
+приватный селектор — только в keyed identity. `digest` относится к сырым байтам
+member. Повторные ZIP-entry разделены внутренним ordinal. Синтетический fragment
+`mobile+...#/member` — локатор member и сохраняется в SARIF и индексе.
+[Контракт и ограничения mobile](Mobile-Provenance.md).
+
 ```sh
 python3 scripts/check_report_identity.py /path/to/prowl
 ```

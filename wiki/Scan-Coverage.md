@@ -48,6 +48,12 @@ mobile, image и agent surface добавляют собственный scope. 
 revision provenance и MCP/LSP остаётся открытым. Scope локального Git-источника
 описывает выбранные пути/режим, а не атомарный снимок всех изменяемых refs.
 
+Mobile scope использует revision `1.5.0-mobile-source-v1`, исходный acquisition
+selector и настройки чтения. Он не зависит от временной директории HTTP-загрузки.
+Неверный ZIP, отсутствующий файл и сбой загрузки сохраняют неполный отчёт
+с `mobile_acquisition_failed` и запретом записи baseline.
+[Mobile provenance](Mobile-Provenance.md) описывает digest и границы доказательств.
+
 Локальная проверка: `python3 scripts/check_coverage.py /path/to/prowl`.
 Матрица использует приватный временный PROWL_HOME, локальные фикстуры,
 JSON/SARIF, файл/stdin и stdout/атомарный файл отчёта. Внешних провайдеров нет.

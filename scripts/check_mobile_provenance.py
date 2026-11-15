@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import threading
 import warnings
+from urllib.parse import unquote, urlparse
 import zipfile
 
 
@@ -63,8 +64,10 @@ def main():
     blocked = subprocess.run([*sandbox, '/usr/bin/curl', '--silent', '--max-time', '2', url], capture_output=True)
     check('OS-network-denial-enforced', control.returncode == 0 and blocked.returncode != 0 and Handler.calls == 1)
 
-    def run(args, remote=False):
+    def run(args, remote=False, keyless=False):
         localenv = dict(env)
+        if keyless:
+            localenv['PROWL_HOME'] = str(root / 'keyless-home')
         if remote:
             localenv['PROWL_ALLOW_PRIVATE_IPS'] = '1'
         p = subprocess.run([* ([] if remote else sandbox), str(binary), *map(str, args)], cwd=root,
@@ -98,6 +101,11 @@ def main():
                     expected = hashlib.sha256(entries[0][1]).hexdigest()
                     check(f'{parent}-{fmt}-ml{ml}', p.returncode == 0 and meta['complete'] and bool(fs)
                           and all(f.get('provenance', {}).get('digest') == expected for f in fs))
+                    uris = [f['provenance']['source_url'] for f in fs] if fmt == 'json' else [
+                        f['locations'][0]['physicalLocation']['artifactLocation']['uri'] for f in d['runs'][0]['results']]
+                    check(f'{parent}-{fmt}-URI-ml{ml}', all(
+                        urlparse(u).scheme == 'mobile+file' and unquote(urlparse(u).path) == str(target)
+                        and unquote(urlparse(u).fragment) == '/' + entries[0][0] for u in uris))
                     if fmt == 'json':
                         f = fs[0]
                         check(f'{parent}-identity-ml{ml}', f['path'].startswith(target.name + '!/')
@@ -111,6 +119,10 @@ def main():
         check('same-basename-separate-report-identity', first['path'] == second['path']
               and first['secret_id'] == second['secret_id'] and first['fingerprint'] != second['fingerprint']
               and first['occurrence_id'] != second['occurrence_id'])
+        keyless = [json.loads(run(['mobile', p, '--format=json'], keyless=True).stdout)['findings'][0]
+                   for p in variants[:2]]
+        check('keyless-public-archive-namespace', keyless[0]['fingerprint'] != keyless[1]['fingerprint']
+              and all(not f.get('secret_id') and not f.get('occurrence_id') for f in keyless))
         remote_fs, policies = [], []
         for selector in ('ONE', 'ONE', 'TWO'):
             target = url.replace('http://', 'http://alice:PRIVATE_AUTH@') + '?signature=PRIVATE_' + selector
@@ -147,6 +159,41 @@ def main():
         (root / 'index-view.json').write_bytes(p.stdout)
         check('index-links-one-value-two-archives', p.returncode == 0 and len(d['secrets']) == 1
               and d['secrets'][0]['location_count'] == 2)
+        for number, selector in enumerate(('ONE', 'ONE', 'TWO')):
+            target = url.replace('http://', 'http://alice:PRIVATE_AUTH@') + '?signature=PRIVATE_' + selector
+            p = run(['mobile', target, '--index', index, '--scope=owned-mobile', '--format=json'], remote=True)
+            check('index-HTTP-selection-' + str(number), p.returncode == 0)
+        p = run(['mobile', variants[-1], '--index', index, '--scope=owned-mobile', '--format=json'])
+        check('index-duplicate-entries', p.returncode == 0)
+        p = run(['mobile', invalid, '--index', index, '--scope=owned-mobile', '--format=json'])
+        check('index-failed-acquisition-incomplete', p.returncode == 2)
+        p = run(['index', '--index', index, '--format=json'])
+        d = json.loads(p.stdout)
+        check('index-private-selectors-duplicates-and-failed-snapshot', p.returncode == 0
+              and len(d['secrets']) == 1 and d['secrets'][0]['location_count'] == 6
+              and d['scans'][-1]['complete'] is False)
+        google = 'AIzaSy9Qw7Er5Ty3Ui1Op8As6Df4Gh2Jk0Lz5Xc'
+        for name, entry, text in [
+            ('derived-xml', 'res/values/strings.xml', '<resources><string name="google_api_key">KEY</string><string name="project_id">owned-project</string><string name="firebase_database_url">https://owned-project.firebaseio.com</string></resources>'),
+            ('derived-plist', 'Payload/Owned.app/GoogleService-Info.plist', '<plist version="1.0"><dict><key>API_KEY</key><string>KEY</string><key>PROJECT_ID</key><string>owned-project</string><key>DATABASE_URL</key><string>https://owned-project.firebaseio.com</string></dict></plist>'),
+        ]:
+            literal = text.replace('>KEY</string>', '>' + google + '</string>').encode()
+            control = root / (name + '-literal.apk')
+            control.write_bytes(zipped([(entry, literal)]))
+            p = run(['mobile', control, '--audit-public', '--authorized', '--format=json'])
+            assert google.encode() not in p.stdout + p.stderr
+            d = json.loads(p.stdout)
+            audits = [f['public_key_audit'] for f in d['findings'] if f.get('public_key_audit')]
+            check(name + '-literal-control-plans-blocked-read', p.returncode == 2 and not d['complete']
+                  and len(audits) == 1 and bool(audits[0].get('checks')))
+            target = root / (name + '.apk')
+            target.write_bytes(zipped([(entry, b'\x00\x01' + literal + b'\x00')]))
+            p = run(['mobile', target, '--audit-public', '--authorized', '--format=json'])
+            assert google.encode() not in p.stdout + p.stderr
+            d = json.loads(p.stdout)
+            audits = [f['public_key_audit'] for f in d['findings'] if f.get('public_key_audit')]
+            check(name + '-cannot-authorize-network-checks', p.returncode == 2 and not d['complete']
+                  and len(audits) == 1 and audits[0]['status'] == 'inconclusive' and not audits[0].get('checks'))
         check('report-key-unmodified', len(report_key.read_text().strip()) == 64)
         evidence = {'binary': str(binary), 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                     'model_sha256': hashlib.sha256(model.read_bytes()).hexdigest(), 'passed': len(checks),

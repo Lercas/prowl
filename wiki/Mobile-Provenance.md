@@ -9,7 +9,7 @@ SARIF `artifactLocation.uri` и JSON/SARIF `provenance.source_url` задают 
 
 - `mobile+file:///absolute/app.apk#/entry` — явно выбранный локальный архив;
 - `mobile+https://host/app.apk#/entry` — исходный HTTP(S) URL загрузки;
-- `mobile+payload:/logical-name#/entry` — заимствованные байты `MobileBytes`,
+- `mobile+payload:///logical-name#/entry` — заимствованные байты `MobileBytes`,
   без утверждения, что они получены с диска или по сети.
 
 Fragment в этих URI — имя ZIP-member. Спецсимволы кодируются как компоненты URI;

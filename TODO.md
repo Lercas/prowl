@@ -139,6 +139,14 @@
       успешного пустого результата. Нативная локальная матрица — 36/36;
       `wiki/evidence/1.5.0-source-coverage-20261114.json`. Remote adapters,
       immutable revision provenance и аудит MCP/LSP остаются открыты.
+    - [x] Mobile APK/IPA: отдельный namespace архива/member, SHA-256 сырых байтов
+      member до декодирования, безопасный исходный URL вместо временного пути
+      и приватные acquisition selectors. Keyed occurrences и индекс различают
+      повторные ZIP-entry; display/ML path сохранён. Ошибка acquisition даёт
+      неполноту и блокирует baseline; printable strings не устанавливают companions.
+      Нативная матрица JSON/SARIF, ML, индекс и owned HTTP — 102/102;
+      [контракт и границы](wiki/Mobile-Provenance.md),
+      `wiki/evidence/1.5.0-mobile-provenance-20261115.json`.
     - [x] Восстановлен `--reconstruct` для ограниченных статических JS/TS-выражений:
       парсер и 279 Node-reference случаев из выпущенного тега, исходные evidence и
       координаты, общий бюджет до ML, исходный контекст верификации. Нативная
