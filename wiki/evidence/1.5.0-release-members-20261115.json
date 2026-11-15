@@ -1,0 +1,54 @@
+{
+  "scope": "Local release archive layout gate only; no new release build or publication",
+  "source_commit": "b8528fb1a39101f840500920c1223384686f5223",
+  "source_base": "dd12f8c0fa0784f382fd827d89b7da70d21fb888",
+  "regressions": {
+    "legacy_source": "dd12f8c0fa0784f382fd827d89b7da70d21fb888:scripts/release/verify_artifacts.py",
+    "reproduction": "In-memory legacy module injection; current test suite unchanged on disk",
+    "expected_failures": 2,
+    "cases": [
+      "directory named prowl accepted as binary",
+      "duplicate prowl entries accepted"
+    ],
+    "matching_checksums": true
+  },
+  "validation": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/release -p 'test_*.py' -v",
+    "test_methods_passed": 6,
+    "tar_zip_matrix_subcases": 22,
+    "full_release_negative_subcases": 2,
+    "diff_check": "passed"
+  },
+  "historical_snapshot": {
+    "path": "/tmp/prowl-release-snapshot-20261114-150-v4",
+    "version": "1.5.0-dev",
+    "source_commit": "e38160fe6ec559629945568b262d2da358cc1fb8",
+    "original_source_state": "dirty; includes concurrent detector changes",
+    "original_go": "go1.25.14",
+    "archives": 6,
+    "sboms": 6,
+    "new_verifier": "passed",
+    "all_twelve_asset_hashes_match_prior_evidence": true,
+    "checksums_sha256": "d3add752dbac6163296a66bce9768498507b4ad9e5453bccebc274334e671b85",
+    "original_evidence": "wiki/evidence/1.5.0-release-snapshot-20261114.json"
+  },
+  "logs": [
+    {
+      "path": "/tmp/prowl-release-members-tests-20261115.log",
+      "sha256": "2a3255ca42399f5741205ca3eea35aed494a0e5653fd5c04d9f5ba9063ab6486"
+    },
+    {
+      "path": "/tmp/prowl-release-members-reproduction-20261115.log",
+      "sha256": "d2810ec53d6589370e07e063e26e37a56eb419dd65fcbbed5ca3dd215c888b72"
+    },
+    {
+      "path": "/tmp/prowl-release-members-historical-snapshot-20261115.log",
+      "sha256": "d91cdf78463e2ff593f9790e48b3d718cceb88b6284841d5ed56aaabc42a0714"
+    }
+  ],
+  "limits": [
+    "Historical snapshot is not built from current source and is not a final release candidate",
+    "Archive layout verification does not qualify binary architecture, runtime behavior, signatures or hosted CI",
+    "No image build, push, deploy, publication or cleanup performed"
+  ]
+}
