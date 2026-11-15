@@ -1,0 +1,300 @@
+{
+  "schema_version": "prowl-web-provenance-qualification-v1",
+  "date": "2026-11-15",
+  "scope": "Observed HTTP response/prefix and extracted state/source-map provenance and identity, native darwin/arm64 CLI/ML/index. No remote inventory, deployment, real-provider/account acceptance or release publication.",
+  "base_main_commit": "56e19d0f1fcc2c4ad1128251082416831e7c070a",
+  "qualified_runtime_commit": "26cec86ef1a1bfceef1010dced444b3c844bfd6f",
+  "source_policy_revision": "1.5.0-web-source-v1",
+  "detection_revision": "1.5.0-short-key-v1",
+  "binary": {
+    "path": "/tmp/prowl-domain-provenance-20261115-bin",
+    "sha256": "676a141fe8ffe9f2124250dcb403f452fb5292bd65420d006aa54d754aee59e5"
+  },
+  "build": {
+    "go": "go1.27.4",
+    "cgo_enabled": false,
+    "trimpath": true,
+    "vcs_modified": false,
+    "os": "darwin",
+    "arch": "arm64",
+    "log": {
+      "path": "/tmp/prowl-domain-provenance-build-20261115.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "metadata": {
+      "path": "/tmp/prowl-domain-provenance-buildinfo-20261115.log",
+      "sha256": "792e9fb88899845ee0a4fb1b5d5397a4779e3ea738d9e13532680fdb1fcb5f2e"
+    }
+  },
+  "contracts": [
+    "digest hashes the observed Item text; container_digest independently hashes bounded HTTP body bytes exposed by net/http. Prefix hashes never claim complete responses or raw wire streams.",
+    "Container origin follows last accepted content response, including redirects/retries; no ETag, deployment revision or original source authenticity is invented.",
+    "Raw SARIF request locators omit credentials/query; synthetic web+http(s) view URIs separate extracted script/state and duplicate or inline source-map entries.",
+    "Private request selectors remain in keyed report/index identity only. Display paths, text selection, same-origin fetch policy, bounds and content dedup remain established behavior.",
+    "Derived occurrence IDs include container digest. Secret/value identity remains independent of source/response.",
+    "Decoded state or regex/meta fragments cannot invent verifier/auditor companions; unaltered complete script and declared source-map content retain existing safe binding behavior.",
+    "A winning rule replacing a builtin inherits the unbound-view flag, including mobile printable strings.",
+    "Discovery acquisition resets parent provenance, source locator and prior response/view context; errors carry safe text/path and no invented content digest."
+  ],
+  "validation": {
+    "full_go_suite": {
+      "passed": true,
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-qualified-go-20261115.log",
+        "sha256": "3b98a5513b3c8c73c79ebfec600db1f5cd7c4cbc75e911990470f18c5ca41195"
+      }
+    },
+    "race": {
+      "passed": true,
+      "packages": [
+        "internal/domain",
+        "internal/model",
+        "internal/scan",
+        "cmd/prowl"
+      ],
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-race-20261115.log",
+        "sha256": "50de35eb4ed82e746f598f84b3c996912249d9349e2f608cde497039801c7bb0"
+      },
+      "final_boundary_domain_log": {
+        "path": "/tmp/prowl-domain-provenance-boundary-race-20261115.log",
+        "sha256": "167b8c434f58263417719948eba6e4938a146725566a412ab813dcb94c48a86d"
+      }
+    },
+    "minimum_go": {
+      "passed": true,
+      "version": "go1.26.11",
+      "packages": [
+        "internal/domain",
+        "internal/model",
+        "internal/scan",
+        "cmd/prowl"
+      ],
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-min-go-20261115.log",
+        "sha256": "0413de9daed3854edb244a15b7fba42cd14af66916c1f984cf7439b46bfa600a"
+      },
+      "final_domain_and_publicaudit_log": {
+        "path": "/tmp/prowl-domain-provenance-final-min-go-20261115.log",
+        "sha256": "f1fbbc8ec93626dafb2a85ae615ad690686cc212c17acf7009d6f73de5c9c914"
+      }
+    },
+    "lint": {
+      "passed": true,
+      "result": "0 issues",
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-final-lint-20261115.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+      }
+    },
+    "owned_provider_integration": {
+      "passed": true,
+      "race_log": {
+        "path": "/tmp/prowl-domain-provenance-owned-audit-20261115.log",
+        "sha256": "9f21d3b0e3ea0e3f6efa8cd619e700e3179aaeb42123493d2521b2af4066c4a6"
+      },
+      "scope": "Actual production Auditor with owned RoundTripper: unaltered script performs one exact GET and receives search_only; decoded string performs zero requests and stays inconclusive. No external provider is contacted."
+    }
+  },
+  "native": {
+    "passed": 181,
+    "failed": 0,
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-domain-provenance-native-2cwl35gq/evidence.json",
+      "sha256": "f3a4297a1955475c2da5da810432ca8be8bc881398ddd7dbb31d6f61c9230a22"
+    },
+    "runner": {
+      "path": "/private/tmp/prowl-domain-provenance-20261115/scripts/check_domain_provenance.py",
+      "sha256": "e57280d81b42b407432a9830c6da57fbc3dce65507c591b219e1bd54dba36a08"
+    },
+    "log": {
+      "path": "/tmp/prowl-domain-provenance-native-20261115.log",
+      "sha256": "2e91be57b34b151dc1aa69d6e52eb992f10503517c3379176174146be584d12f"
+    },
+    "network_control": {
+      "profile": "(version 1)(allow default)(deny network*)(allow network-outbound (remote ip \"localhost:52945\"))",
+      "outside_owned_requests": 0,
+      "blocked_exit": 7
+    },
+    "scope": "Owned HTTP response, redirect, decoded state, duplicate/inline source-map views, partial response, JSON/SARIF, ML and index. No real provider/account qualification."
+  },
+  "nonregression": {
+    "source_maps_mcp": {
+      "passed": 135,
+      "total": 135,
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-map-nonregression-20261115.log",
+        "sha256": "79092aab4bc5b10cbe4a6bc4969f28f016d29d65faefe55d06e9f3bbb08356b6"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-maps-native-2awiul93/qualification.json",
+        "sha256": "c0f1b18bc780860728bd7d63aeef7068b9ad1d0335d58f8f867135ec2c323278"
+      }
+    },
+    "mobile": {
+      "passed": 102,
+      "failed": 0,
+      "log": {
+        "path": "/tmp/prowl-domain-provenance-mobile-nonregression-20261115.log",
+        "sha256": "fbe223bff126afe60871e7c473b05efc324b0c93eae55e25ff6e716f7cd2ceea"
+      },
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mobile-provenance-native-agr3z08r/evidence.json",
+        "sha256": "fca92adc76c121419e4cb1135d1f2c60a27c6391b5417b21f83c4e027d4761fb"
+      }
+    }
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "676a141fe8ffe9f2124250dcb403f452fb5292bd65420d006aa54d754aee59e5",
+    "passed": true,
+    "recall": 0.7464183381088825,
+    "t4_fp_rate": 0.05804480651731161,
+    "secret_hits": 1563,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "status": "passed"
+  },
+  "quality_evidence": {
+    "path": "/tmp/prowl-domain-provenance-quality-20261115.json",
+    "sha256": "b120ce70f7ccf00d38d621a582da46c8c717fabf2894b114f9ee7b024ad57af8"
+  },
+  "quality_parent_evidence": {
+    "path": "/tmp/prowl-mobile-provenance-quality-20261115.json",
+    "sha256": "881d59e7cf293ae33a617d44d4188ecdf7b6237d1cbae087d92e9f259d9ab13d"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 531,
+      "sha256": "741a43d8f2c93f625f7ff54943c50f14a478780471596f862b227408eefe14da",
+      "identical_to_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_parent": true
+    }
+  },
+  "ordinary_corpus_equivalence": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "same_as_parent": true,
+    "log": {
+      "path": "/tmp/prowl-domain-provenance-corpus-digest-20261115.log",
+      "sha256": "82637d92db582a34467fc36a5b41a07753b12f349e6a9670eec20bc95928f6f2"
+    }
+  },
+  "performance": {
+    "passed": true,
+    "reference_commit": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+    "candidate_commit": "26cec86ef1a1bfceef1010dced444b3c844bfd6f",
+    "pairs": 3,
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 9733659041.0,
+        "B/op": 576773840.0,
+        "allocs/op": 1160957.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 11233404792.0,
+        "B/op": 556427896.0,
+        "allocs/op": 1142859.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 420.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.1540783116280104,
+      "B/op": 0.9647245721130486,
+      "allocs/op": 0.9844111366743127
+    },
+    "report": {
+      "path": "/tmp/prowl-domain-provenance-fixed-perf-20261115/report.json",
+      "sha256": "d349d7e0efb631da2fc902e4934c0b20f8df68608bf62579e2d9e8bc86446428"
+    },
+    "log": {
+      "path": "/tmp/prowl-domain-provenance-fixed-perf-20261115.log",
+      "sha256": "6260d4b867930007f59ae5fef2ede654e6b1f02e12c7302a591ad6713b51b1d8"
+    },
+    "note": "The fixed older reference has 1132 findings versus current 420 after preceding detector changes. Exact immediate-parent result/coverage equivalence is checked separately above."
+  },
+  "stock_model": {
+    "path": "/private/tmp/prowl-domain-provenance-20261115/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "installed_legacy_model": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "untouched": true,
+    "loaded": false
+  },
+  "qualification_history": [
+    {
+      "issue": "Decoded-state regression exposed missing unbound flag on rule replacement",
+      "failing_log": {
+        "path": "/tmp/prowl-domain-provenance-targeted3-20261115.log",
+        "sha256": "e85dbc513b8a5f92d174af477520b7ad28f620363838b7a0eef595a4124ee344"
+      },
+      "failed_full_suite_log": {
+        "path": "/tmp/prowl-domain-provenance-go-20261115.log",
+        "sha256": "837d6127f1510751c5240a8ab4b32fcb73dcc9f2dd1f0c69dbc33d1a36045054"
+      },
+      "resolution": "Winning replacement constructor now copies the same view flag as builtin/new-rule constructors. Final targeted, full, race and owned-provider controls pass.",
+      "final_targeted_log": {
+        "path": "/tmp/prowl-domain-provenance-targeted4-20261115.log",
+        "sha256": "43923ad65e8322dd6b442db0a5f406e2f8b173e738644387395bccf560d1e3d4"
+      }
+    },
+    {
+      "issue": "Darwin sandbox requires localhost rather than a literal IP in a port-scoped network filter",
+      "resolution": "Native runner uses localhost:owned-port and verifies allowed owned-port and blocked second owned-port with actual curl requests before CLI cases."
+    }
+  ],
+  "limitations": [
+    "Observed HTTP bytes are not raw wire bytes or authenticated deployment revisions; source-map text/labels are declarations, not independently fetched original files.",
+    "Existing content and state dedup chooses representative observations. This is not a complete URL inventory or proof of remote absence/remediation.",
+    "Decoded/meta/regex views without original binding proof remain inconclusive for composite verification/audit; full unmodified script control is separately verified.",
+    "No new original-container coordinate mapping, VLQ/indexed source maps, live recon, real provider/account qualification, Docker/Linux images, hosted CI or deployment.",
+    "Full 1.5.0 TODO remains open."
+  ]
+}

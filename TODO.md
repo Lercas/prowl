@@ -247,6 +247,16 @@
       Матрица CLI JSON/SARIF ±L2 и MCP четырёх версий — 135/135;
       `wiki/evidence/1.5.0-source-map-contract-20261114.json`.
       Indexed maps/VLQ не разворачиваются; полный аудит remote adapters остаётся открыт.
+    - [x] Web producer provenance: digest наблюдаемого ответа/prefix и отдельного
+      state/source-map текста, безопасные URL в SARIF, URI отдельных представлений
+      и private selectors в keyed identity/индексе. Повторные имена map sources
+      разделены; ошибки не отражают URL/response в stderr. Декодирование state
+      не создаёт verifier companions, включая замену builtin более сильным rule.
+      Нативная матрица — 181/181; source maps/MCP — 135/135, mobile — 102/102.
+      Full Go, race, минимальный Go 1.26.11 и lint проходят; обычные quality IDs
+      и GOROOT digest прежние, fixed performance gate пройден.
+      [Контракт и границы](wiki/Web-Provenance.md),
+      `wiki/evidence/1.5.0-web-provenance-20261115.json`.
 
     - [x] Восстановлены причины неполноты Git index и архивов, читаемый plaintext
       fallback повреждённого архива и context cancellation в unpack. Возвращены

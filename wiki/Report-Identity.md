@@ -45,6 +45,12 @@ member. Повторные ZIP-entry разделены внутренним ord
 `mobile+...#/member` — локатор member и сохраняется в SARIF и индексе.
 [Контракт и ограничения mobile](Mobile-Provenance.md).
 
+Web-находки сохраняют `container_digest` отдельно от digest конкретного текста.
+Keyed occurrence учитывает изменение контейнера; synthetic `web+http(s)` URI
+разделяет извлечённые представления и повторные map sources в SARIF и индексе.
+Приватный URL selector остаётся только в keyed identity.
+[Web provenance](Web-Provenance.md) описывает смысл digest и ограничения обхода.
+
 ```sh
 python3 scripts/check_report_identity.py /path/to/prowl
 ```

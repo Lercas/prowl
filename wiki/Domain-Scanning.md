@@ -151,6 +151,11 @@ Inline-карты поддерживают JSON в Base64 и percent encoding.
 `--recon` или live verification. Evidence:
 `wiki/evidence/1.5.0-source-map-contract-20261114.json`.
 
+HTTP-тексты, state и source-map views теперь сохраняют отдельные digest текста
+и HTTP-контейнера, безопасный URL и source-declared URI. Повторные имена source map
+не сливают наблюдения; декодированный state не создаёт новых verifier bindings.
+[Контракт происхождения web-находок](Web-Provenance.md).
+
 ## `--recon` (deep sweep)
 
 `--recon` opts into a broader, slower sweep on top of the default. It adds:

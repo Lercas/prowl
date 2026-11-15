@@ -54,6 +54,11 @@ selector и настройки чтения. Он не зависит от вр�
 с `mobile_acquisition_failed` и запретом записи baseline.
 [Mobile provenance](Mobile-Provenance.md) описывает digest и границы доказательств.
 
+Для `domain` revision `1.5.0-web-source-v1` отмечает provenance наблюдаемого
+ответа/prefix и отдельные source-declared views. Читаемый prefix не превращает
+неполную загрузку в complete. Это не полный URL inventory или доказательство
+удалённого отсутствия; [контракт](Web-Provenance.md).
+
 Локальная проверка: `python3 scripts/check_coverage.py /path/to/prowl`.
 Матрица использует приватный временный PROWL_HOME, локальные фикстуры,
 JSON/SARIF, файл/stdin и stdout/атомарный файл отчёта. Внешних провайдеров нет.
