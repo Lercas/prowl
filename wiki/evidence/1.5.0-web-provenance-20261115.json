@@ -290,6 +290,26 @@
       "resolution": "Native runner uses localhost:owned-port and verifies allowed owned-port and blocked second owned-port with actual curl requests before CLI cases."
     }
   ],
+  "integration": {
+    "main_base": "56e19d0f1fcc2c4ad1128251082416831e7c070a",
+    "candidate_base": "1a649b9989687a1ba3f9e4e62f9d827487779a7d",
+    "main_runtime": "b59a73a10c20c5b7954b861516a6887b2ecf325f",
+    "candidate_runtime": "88671b5cce3b7edd4aceb77c54d929ef4962bad3",
+    "main_qualification": "1c7fab9e650a2577cea1ef2d9c1e936e428904b7",
+    "candidate_qualification": "7f27232b610bd66d27e80de9e907ad9eb2175fb6",
+    "main_matches_isolated_tree": true,
+    "main_tool_matches_qualified_runtime": true,
+    "preexisting_cross_checkout_differing_files": 27,
+    "all_preexisting_differences_preserved": true,
+    "todo_differing_payload_preserved": true,
+    "candidate_tool_differences": [
+      "tool/Dockerfile",
+      "tool/Dockerfile.action",
+      "tool/action-entrypoint.sh",
+      "tool/action.yml"
+    ],
+    "note": "Both integration checkouts were clean. All existing differing file blobs were checked against each checkout's own base; TODO added/removed differing payload is unchanged, while its hunk context moved because the new web leaf is adjacent. The complete candidate tree intentionally differs from main. Images were not rebuilt or activated."
+  },
   "limitations": [
     "Observed HTTP bytes are not raw wire bytes or authenticated deployment revisions; source-map text/labels are declarations, not independently fetched original files.",
     "Existing content and state dedup chooses representative observations. This is not a complete URL inventory or proof of remote absence/remediation.",
