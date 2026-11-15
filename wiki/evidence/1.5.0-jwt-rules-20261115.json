@@ -1,0 +1,762 @@
+{
+  "schema_version": 1,
+  "main_source_commit": "c265d0f13116937eeb90b7ce96688df48c1f9292",
+  "isolated_source_commit": "f63ed660da8a9aaab836f12e5889f85a61305725",
+  "docker_candidate_source_commit": "f93565709e0382b1c29f676b8736c580c5b8bdee",
+  "detection_revision": "1.5.0-jwt-rules-v1",
+  "binary": "/tmp/prowl-jwt-rules-20261115-bin",
+  "binary_sha256": "45451440e885a54ca418c64b58c532513fc81337dc4465dcfb58988bf09e83fc",
+  "native_runners": {
+    "/tmp/prowl-jwt-rules-native-20261115.py": "a047425e4a1c0065237794cb3d5b6c073f7c3f5a42f18a29235cf8015db664a5",
+    "/tmp/prowl-jwt-native-20261115.py": "477cb45320f481a0113955617ba9f01c01a4c1e05256f977a3147081212dc25b"
+  },
+  "checks": {
+    "full_go": {
+      "path": "/tmp/prowl-jwt-rules-final-go-20261115.log",
+      "sha256": "ce70a524f994f15a0cb9ddf2603d8450c1a14faf8b685e061bfb820a4dde637e",
+      "passed": true
+    },
+    "affected_race": {
+      "path": "/tmp/prowl-jwt-rules-race-20261115.log",
+      "sha256": "4e6cd8ce62e42a1c21169dbb1ebcdb867466bd71b05a9818e7e651a96b95fa62",
+      "passed": true
+    },
+    "final_rule_race": {
+      "path": "/tmp/prowl-jwt-rules-final-new-race-20261115.log",
+      "sha256": "ed52fd05da7476123a27a3d7cf4db5e2efa04da38d68be02e572c071b36048a0",
+      "passed": true,
+      "selection": "TestJWTRules|FuzzJWTRules; all new cases after final test additions"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-jwt-rules-min-go-20261115.log",
+      "sha256": "45bb748dbb82bd9f8cc2f8525c2e459eb1dc19b4e1f1744555c1e3de79fa1ca1",
+      "passed": true,
+      "toolchain": "go1.26.11"
+    },
+    "final_rule_minimum_go": {
+      "path": "/tmp/prowl-jwt-rules-final-new-min-go-20261115.log",
+      "sha256": "6755fc93211305e9a4212f5b2a3da0aedefc53c5728025e6c5c0212353ffe182",
+      "passed": true,
+      "toolchain": "go1.26.11",
+      "selection": "TestJWTRules|FuzzJWTRules; all new cases after final test additions"
+    },
+    "lint": {
+      "path": "/tmp/prowl-jwt-rules-final-lint-20261115.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "passed": true
+    },
+    "detect_fuzz": {
+      "path": "/tmp/prowl-jwt-rules-detect-fuzz-20261115.log",
+      "sha256": "9ace7aee051d4b9663ef18a2d85fd645781c12712c2828eb4d41f9670511bf4e",
+      "passed": true,
+      "executions": 7679
+    },
+    "pipeline_fuzz": {
+      "path": "/tmp/prowl-jwt-rules-scan-fuzz-20261115.log",
+      "sha256": "35877219f049c891796ce37b74d6cdfefdfa80dbd4811bdcd9b8c813050e8d27",
+      "passed": true,
+      "executions": 17220
+    },
+    "corpus_digest": {
+      "path": "/tmp/prowl-jwt-rules-corpus-digest-20261115.log",
+      "sha256": "f352e672048116a25d40f4968e66dac3c105cb704ab176a491d7985494469e4e",
+      "passed": true
+    },
+    "native_new": {
+      "source_commit": "f63ed660da8a9aaab836f12e5889f85a61305725",
+      "binary": "/tmp/prowl-jwt-rules-20261115-bin",
+      "binary_sha256": "45451440e885a54ca418c64b58c532513fc81337dc4465dcfb58988bf09e83fc",
+      "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-rules-native-o9egta9r",
+      "sandbox_profile": "(version 1)(allow default)(deny network*)",
+      "network_boundary_control": {
+        "owned_control_requests": 1,
+        "sandbox_requests": 0,
+        "blocked_exit": 7
+      },
+      "passed": 62,
+      "failed": 0,
+      "cases": [
+        {
+          "case": "plain-txt-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-txt-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-js-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-js-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-json-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-json-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-yaml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-yaml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-toml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "plain-toml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-txt-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-txt-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-js-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-js-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-json-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-json-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-yaml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-yaml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-toml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-value-toml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-txt-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-txt-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-js-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-js-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-json-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-json-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-yaml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-yaml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-toml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-key-toml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "nested-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "nested-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-nested-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "escaped-nested-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-txt-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-txt-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-js-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-js-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-json-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-json-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-yaml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-yaml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-toml-l1",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "bundled-toml-ml",
+          "passed": true,
+          "payload_rule_findings": 1
+        },
+        {
+          "case": "txt-no-rules",
+          "passed": true
+        },
+        {
+          "case": "txt-disabled",
+          "passed": true
+        },
+        {
+          "case": "js-no-rules",
+          "passed": true
+        },
+        {
+          "case": "js-disabled",
+          "passed": true
+        },
+        {
+          "case": "json-no-rules",
+          "passed": true
+        },
+        {
+          "case": "json-disabled",
+          "passed": true
+        },
+        {
+          "case": "yaml-no-rules",
+          "passed": true
+        },
+        {
+          "case": "yaml-disabled",
+          "passed": true
+        },
+        {
+          "case": "toml-no-rules",
+          "passed": true
+        },
+        {
+          "case": "toml-disabled",
+          "passed": true
+        },
+        {
+          "case": "pretty",
+          "passed": true
+        },
+        {
+          "case": "sarif",
+          "passed": true
+        },
+        {
+          "case": "neutral-ML-denoising-parity-plaintext",
+          "passed": true
+        },
+        {
+          "case": "neutral-ML-denoising-parity-jwt",
+          "passed": true
+        },
+        {
+          "case": "exact-logical-reveal",
+          "passed": true
+        },
+        {
+          "case": "logical-HMAC-and-private-index",
+          "passed": true
+        },
+        {
+          "case": "incomplete-baseline-0",
+          "passed": true
+        },
+        {
+          "case": "incomplete-baseline-1",
+          "passed": true
+        }
+      ],
+      "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+      "real_provider_qualification": false
+    },
+    "native_existing_jwt": {
+      "source_commit": "f63ed660da8a9aaab836f12e5889f85a61305725",
+      "binary": "/tmp/prowl-jwt-rules-20261115-bin",
+      "sha256": "45451440e885a54ca418c64b58c532513fc81337dc4465dcfb58988bf09e83fc",
+      "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-native-lnqekxzv",
+      "sandbox_profile": "(version 1)(allow default)(deny network*)",
+      "network_boundary_control": {
+        "owned_control_requests": 1,
+        "sandbox_requests": 0,
+        "blocked_exit": 7
+      },
+      "cases": [
+        {
+          "case": "txt-l1",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "txt-l1-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "txt-ml",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "txt-ml-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "js-l1",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "js-l1-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "js-ml",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "js-ml-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "json-l1",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "json-l1-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "json-ml",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "json-ml-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "yaml-l1",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "yaml-l1-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "yaml-ml",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "yaml-ml-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "toml-l1",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "toml-l1-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "toml-ml",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "toml-ml-bundled",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "nested",
+          "passed": true,
+          "findings": 4
+        },
+        {
+          "case": "sample",
+          "passed": true,
+          "findings": 3
+        },
+        {
+          "case": "unsigned",
+          "passed": true,
+          "findings": 2
+        },
+        {
+          "case": "duplicate",
+          "passed": true,
+          "findings": 4
+        },
+        {
+          "case": "escaped-0",
+          "passed": true,
+          "findings": 2
+        },
+        {
+          "case": "exact-logical-0",
+          "passed": true
+        },
+        {
+          "case": "escaped-1",
+          "passed": true,
+          "findings": 2
+        },
+        {
+          "case": "exact-logical-1",
+          "passed": true
+        },
+        {
+          "case": "escaped-2",
+          "passed": true,
+          "findings": 2
+        },
+        {
+          "case": "exact-logical-2",
+          "passed": true
+        },
+        {
+          "case": "escaped-3",
+          "passed": true,
+          "findings": 2
+        },
+        {
+          "case": "exact-logical-3",
+          "passed": true
+        },
+        {
+          "case": "sarif",
+          "passed": true
+        },
+        {
+          "case": "pretty",
+          "passed": true
+        },
+        {
+          "case": "incomplete-baseline-0",
+          "passed": true
+        },
+        {
+          "case": "incomplete-guard-0",
+          "passed": true
+        },
+        {
+          "case": "incomplete-baseline-1",
+          "passed": true
+        },
+        {
+          "case": "incomplete-guard-1",
+          "passed": true
+        },
+        {
+          "case": "incomplete-baseline-2",
+          "passed": true
+        },
+        {
+          "case": "incomplete-guard-2",
+          "passed": true
+        },
+        {
+          "case": "guard-raw",
+          "passed": true
+        },
+        {
+          "case": "guard-claude",
+          "passed": true
+        },
+        {
+          "case": "guard-cursor-prompt",
+          "passed": true
+        },
+        {
+          "case": "guard-cursor-tool",
+          "passed": true
+        },
+        {
+          "case": "logical-HMAC-and-private-index",
+          "passed": true
+        }
+      ],
+      "passed": 45,
+      "failed": 0,
+      "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+      "real_provider_qualification": false
+    }
+  },
+  "performance_gate": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 9629514166.0,
+          "B/op": 575254976.0,
+          "allocs/op": 1160632.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 9779761042.0,
+          "B/op": 568440776.0,
+          "allocs/op": 1160250.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 9901083625.0,
+          "B/op": 575127432.0,
+          "allocs/op": 1160452.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 11424842000.0,
+          "B/op": 518276408.0,
+          "allocs/op": 1099338.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 11730487834.0,
+          "B/op": 508515320.0,
+          "allocs/op": 1097862.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 11616237875.0,
+          "B/op": 515743168.0,
+          "allocs/op": 1098270.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "f63ed660da8a9aaab836f12e5889f85a61305725"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 9779761042.0,
+        "B/op": 575127432.0,
+        "allocs/op": 1160452.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 11616237875.0,
+        "B/op": 515743168.0,
+        "allocs/op": 1098270.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 419.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.1877834054547036,
+      "B/op": 0.8967459023933325,
+      "allocs/op": 0.946415706983141
+    },
+    "regressions": []
+  },
+  "corpus_equivalence": {
+    "reference_source_commit": "157518ea32786bf85acd2b03e29d7143fbb30a38",
+    "candidate_source_commit": "f63ed660da8a9aaab836f12e5889f85a61305725",
+    "full_result_sha256": "581917e269c7ccf4b489fd62982fd927d2f3a31a16618fa07c6579d7fcf71a5c",
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 419,
+    "incomplete_files": 85,
+    "identical": true,
+    "scope": "Full per-file result including coverage on GOROOT/src with rules; no claim of equivalence on JWTs containing newly supported template-only credentials or policy revision"
+  },
+  "quality": {
+    "status": "passed",
+    "passed": true,
+    "secret_hits": 1556,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "recall": 0.7430754536771729,
+    "t4_fp_rate": 0.05804480651731161,
+    "binary_sha256": "45451440e885a54ca418c64b58c532513fc81337dc4465dcfb58988bf09e83fc"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 538,
+      "sha256": "23a509c042c620388d27d2052f8e6a306a6f9055f4559674b778392941f8f720",
+      "identical_to_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_parent": true
+    }
+  },
+  "boundary_tests": [
+    "Five file formats, escaped values and field names, exact whole logical credentials, raw structural JSON matcher",
+    "Nested compact JWTs inside JSON escapes retain distinct source occurrences and bounded proof chains",
+    "Combined raw/normalized candidate work cap, disabled engine, excluded bundled rule and JWE refusal",
+    "Standalone verifier works before/after ML; missing companions error before transport even if both enclosing configuration and claims contain them",
+    "Public auditor receives no companion bindings from claims or enclosing configuration",
+    "Checksum-proven builtins survive a stronger external template",
+    "Native logical HMAC matches plaintext and private index contains no raw credential/token",
+    "Neutral-label synthetic value is rejected by unchanged embedded ML both in plaintext and inside JWT; positive native fixtures use an explicit credential field name"
+  ],
+  "limits": [
+    "Source and local darwin/arm64 qualification only; external CI, final images and real providers remain unqualified",
+    "Indirect representations of the complete JWT container remain open",
+    "Performance passes with limited time headroom (+18.78% against +20%)",
+    "85 corpus files remain explicitly incomplete in both compared states",
+    "No installed model, thresholds, reference policy, remote deployment or publication changed"
+  ],
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "installed_49_model_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25"
+}
