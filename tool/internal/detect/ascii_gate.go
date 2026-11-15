@@ -3,6 +3,7 @@ package detect
 import (
 	"regexp"
 	"regexp/syntax"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -30,20 +31,24 @@ func asciiRegexGate(original *regexp.Regexp) *regexp.Regexp {
 		node.Flags &^= syntax.FoldCase
 		switch node.Op {
 		case syntax.OpLiteral:
-			for i, r := range node.Rune {
+			var pieces []*syntax.Regexp
+			for _, r := range node.Rune {
+				runes := []rune{asciiLowerRune(r)}
 				if fold {
 					for candidate := unicode.SimpleFold(r); candidate != r; candidate = unicode.SimpleFold(candidate) {
-						if candidate < 128 {
-							r = candidate
-							break
-						}
+						runes = append(runes, asciiLowerRune(candidate))
 					}
 				}
-				if r >= 'A' && r <= 'Z' {
-					r += 'a' - 'A'
+				sort.Slice(runes, func(i, j int) bool { return runes[i] < runes[j] })
+				var ranges []rune
+				for i, r := range runes {
+					if i == 0 || r != runes[i-1] {
+						ranges = append(ranges, r, r)
+					}
 				}
-				node.Rune[i] = r
+				pieces = append(pieces, &syntax.Regexp{Op: syntax.OpCharClass, Rune: ranges})
 			}
+			return &syntax.Regexp{Op: syntax.OpConcat, Sub: pieces}
 		case syntax.OpCharClass:
 			contains := func(r rune) bool {
 				for i := 0; i < len(node.Rune); i += 2 {
@@ -69,6 +74,7 @@ func asciiRegexGate(original *regexp.Regexp) *regexp.Regexp {
 					accepted[lower] = true
 				}
 			}
+			originalRanges := node.Rune
 			node.Rune = nil
 			for r := rune(0); r < 128; r++ {
 				if accepted[r] {
@@ -80,6 +86,25 @@ func asciiRegexGate(original *regexp.Regexp) *regexp.Regexp {
 					r = end
 				}
 			}
+			// The parser expands folded character classes before returning them.
+			// ASCII lowering leaves every non-ASCII rune unchanged, including
+			// long s, Kelvin sign, Unicode classes and invalid UTF-8 replacements.
+			for i := 0; i < len(originalRanges); i += 2 {
+				if originalRanges[i+1] >= 128 {
+					node.Rune = append(node.Rune, max(128, originalRanges[i]), originalRanges[i+1])
+				}
+			}
+			// syntax's printer expects adjacent intervals to be merged, notably
+			// when the ASCII interval ending at 127 meets a Unicode interval.
+			merged := node.Rune[:0]
+			for i := 0; i < len(node.Rune); i += 2 {
+				if len(merged) > 0 && node.Rune[i] <= merged[len(merged)-1]+1 {
+					merged[len(merged)-1] = max(merged[len(merged)-1], node.Rune[i+1])
+				} else {
+					merged = append(merged, node.Rune[i], node.Rune[i+1])
+				}
+			}
+			node.Rune = merged
 			if len(node.Rune) == 0 {
 				node.Op = syntax.OpNoMatch
 			}
@@ -91,6 +116,13 @@ func asciiRegexGate(original *regexp.Regexp) *regexp.Regexp {
 		return nil
 	}
 	return gate
+}
+
+func asciiLowerRune(r rune) rune {
+	if r >= 'A' && r <= 'Z' {
+		return r + 'a' - 'A'
+	}
+	return r
 }
 
 var namedASCIIGates = func() []*regexp.Regexp {

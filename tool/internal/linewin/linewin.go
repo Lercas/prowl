@@ -376,7 +376,7 @@ func (w *Windows) FindAll(i int, re *regexp.Regexp, text string, n int) [][]int 
 	return w.findAll(i, re, nil, text, "", n)
 }
 
-// FindAllGated rejects only ASCII regions with no possible match. gate must
+// FindAllGated rejects regions with no possible match. gate must
 // recognize a superset of re after ASCII lowercasing; extraction always uses re.
 func (w *Windows) FindAllGated(i int, re, gate *regexp.Regexp, text, lower string, n int) [][]int {
 	return w.findAll(i, re, gate, text, lower, n)
@@ -388,9 +388,6 @@ func asciiGateRejects(re *regexp.Regexp, text, lower string) bool {
 	}
 	for i := 0; i < len(text); i++ {
 		c := text[i]
-		if c >= utf8.RuneSelf {
-			return false
-		}
 		if c >= 'A' && c <= 'Z' {
 			c += 'a' - 'A'
 		}

@@ -9,7 +9,7 @@ import (
 
 func TestGatedWindowsPreserveExtractionAndUnicodeFallback(t *testing.T) {
 	re := regexp.MustCompile(`(?i)(password)[ \t]*:[ \t]*([A-Z0-9]{8,16})`)
-	gate := regexp.MustCompile(`password[ \t]*:[ \t]*[a-z0-9]{8,16}`)
+	gate := regexp.MustCompile(`pa[sſ][sſ]word[ \t]*:[ \t]*[a-z0-9ſK]{8,16}`)
 	set := New([]*regexp.Regexp{re})
 	for _, text := range []string{"note 🚀\nPASSWORD: AB9CD123\n", "paſſword: AB9CD123", "password: short\nPASSWORD: AB9CD123", "ordinary no matches\npassword = nothing"} {
 		lower := strings.ToLower(text)

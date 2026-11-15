@@ -43,14 +43,26 @@ func FuzzASCIIRegexGateCannotRejectOriginalMatch(f *testing.F) {
 			gates = append(gates, gate)
 		}
 	}
+	for _, pattern := range []string{`(?i:ſK)`, `(?i)\b[\p{Greek}\p{Cyrillic}]+\b`, `(?i)[^a-z]{2,8}`, `(?i:api)(?-i:[A-Z])`, `(?im)^password\s*[:=].+$`} {
+		re := regexp.MustCompile(pattern)
+		gate := asciiRegexGate(re)
+		if gate == nil {
+			f.Fatalf("custom projection failed: %s", pattern)
+		}
+		originals = append(originals, re)
+		gates = append(gates, gate)
+	}
 	f.Add(`PASSWORD="R7v!K9pX2mQ"`)
 	f.Add("api_key: Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz")
 	f.Add("ordinaryIdentifiers without a credential")
+	f.Add("paſſword: N7vK2qM9\nKEY=Q7mR3vK8pT2xN6cW4bY9sF5hL1aD0uGz")
+	f.Add("ПАРОЛЬ: N7vK2qM9\ninvalid\xff\xfe")
 	f.Fuzz(func(t *testing.T, text string) {
-		if len(text) > 8192 || hasNonASCII(text) {
+		if len(text) > 8192 {
 			return
 		}
-		lower := strings.ToLower(text)
+		var scratch []byte
+		lower := lowerScratch(&scratch, text)
 		for i, original := range originals {
 			if original.MatchString(text) && !gates[i].MatchString(lower) {
 				t.Fatal("ASCII rejection gate lost a legal original match")
