@@ -101,7 +101,7 @@ def main():
                     if fmt == 'json':
                         f = fs[0]
                         check(f'{parent}-identity-ml{ml}', f['path'].startswith(target.name + '!/')
-                              and f['artifact_uri'].startswith('mobile+file:') and bool(f.get('occurrence_id')))
+                              and f['provenance']['source_url'].startswith('mobile+file:') and bool(f.get('occurrence_id')))
                         if parent == 'duplicate':
                             occurrences = f.get('occurrences', [])
                             check(f'duplicate-observations-ml{ml}', len(occurrences) == 2
@@ -121,7 +121,7 @@ def main():
             policies.append(next(s['policy'] for s in d['scope'] if s['kind'] == 'mobile'))
         check('download-spool-independent-identity', remote_fs[0]['fingerprint'] == remote_fs[1]['fingerprint']
               and remote_fs[0]['occurrence_id'] == remote_fs[1]['occurrence_id'] and policies[0] == policies[1])
-        check('private-selector-separates-identity', remote_fs[0]['artifact_uri'] == remote_fs[2]['artifact_uri']
+        check('private-selector-separates-identity', remote_fs[0]['provenance']['source_url'] == remote_fs[2]['provenance']['source_url']
               and remote_fs[0]['fingerprint'] != remote_fs[2]['fingerprint'] and policies[0] != policies[2])
         invalid = root / 'invalid.apk'
         invalid.write_bytes(b'not ZIP')
