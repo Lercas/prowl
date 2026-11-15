@@ -15,7 +15,8 @@ import (
 func shortKeyDocuments(value string) map[string]string {
 	body, _ := json.Marshal(map[string]string{"note": "🚀", "api_key": value})
 	return map[string]string{
-		"prod.json": string(body), "prod.yaml": "note: 🚀\napi_key: '" + value + "'\n",
+		"escaped.json": `{"note":"🚀","api_key":"\u0071` + value[1:] + `"}`,
+		"prod.json":    string(body), "prod.yaml": "note: 🚀\napi_key: '" + value + "'\n",
 		"prod.toml": "note='🚀'\napi_key='" + value + "'\n", "prod.env": "# 🚀\nDEPLOY_TOKEN=" + value + "\n",
 		"prod.py": "# 🚀\napi_key='" + value + "'\n", "prod.md": "🚀\n| api_key | " + value + " |\n",
 	}

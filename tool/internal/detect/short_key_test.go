@@ -33,18 +33,20 @@ func TestShortKeyExplicitBindings(t *testing.T) {
 			})
 		}
 		body, _ := json.Marshal(map[string]string{"api_key": value})
-		jwt := jwtFixture(string(body))
-		found := false
-		for _, m := range d.Scan(jwt) {
-			if m.Type == "generic_api_key" && m.Value == value {
-				found = true
-				if !m.JWTPayload || m.Start < 0 || m.End > len(jwt) {
-					t.Fatal("claims child lost binding isolation")
+		for _, claims := range []string{string(body), `{"api_key":"\u0071` + value[1:] + `"}`} {
+			jwt := jwtFixture(claims)
+			found := false
+			for _, m := range d.Scan(jwt) {
+				if m.Type == "generic_api_key" && m.Value == value {
+					found = true
+					if !m.JWTPayload || m.Start < 0 || m.End > len(jwt) {
+						t.Fatal("claims child lost binding isolation")
+					}
 				}
 			}
-		}
-		if !found {
-			t.Fatal("short key in JWT claims lost")
+			if !found {
+				t.Fatal("short key in JWT claims lost")
+			}
 		}
 	}
 }
