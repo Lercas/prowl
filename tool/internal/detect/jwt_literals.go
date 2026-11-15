@@ -165,6 +165,9 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			for i := range m.DecodeSpans {
 				m.DecodeSpans[i] = Base64Span{v.start, v.end}
 			}
+			for i := range m.DecodeSteps {
+				m.DecodeSteps[i].Start, m.DecodeSteps[i].End = v.start, v.end
+			}
 			kept = append(kept, m)
 		}
 	}

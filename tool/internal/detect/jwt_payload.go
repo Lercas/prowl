@@ -23,6 +23,7 @@ type jwtContainerIdentity struct {
 
 type jwtPayloadBudget struct {
 	count, bytes, escaped int
+	hexWork, hexAttempts  int
 	seen                  map[jwtContainerIdentity]bool
 }
 
@@ -110,7 +111,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
 			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}, token: container.Value})
 		}
-		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin}
+		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin, jwtHexDepth: opts.jwtHexDepth}
 		inner := d.ScanWithStatus(ctx, decoded, childOptions)
 		inner = d.jwtEscapedFindings(ctx, decoded, inner, childOptions)
 		limited = limited || inner.CandidateLimited || inner.Base64Limited
@@ -125,7 +126,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			if m.Type == "generic_high_entropy" {
 				continue
 			}
-			if len(kept) >= maxScanMatches || len(m.DecodeSpans)+1 > maxBase64Depth {
+			if len(kept) >= maxScanMatches || m.base64ProofDepth()+1 > maxBase64Depth {
 				limited = true
 				break
 			}
@@ -147,7 +148,17 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 				left, right := frame.sourceSpan(span.Start, span.End)
 				proof = append(proof, Base64Span{left, right})
 			}
-			m.DecodeSpans = proof
+			if len(m.DecodeSteps) > 0 {
+				steps := []DecodeStep{{start, frame.end, "base64-decode"}}
+				for _, step := range m.DecodeSteps {
+					step.Start, step.End = frame.sourceSpan(step.Start, step.End)
+					steps = append(steps, step)
+				}
+				m.DecodeSteps = normalizeDecodeSteps(steps)
+				m.DecodeSpans = nil
+			} else {
+				m.DecodeSpans = proof
+			}
 			m.JWTPayload = true
 			m.Stage = "L1-jwt-payload"
 			if m.ChecksumValid {
@@ -184,6 +195,21 @@ func mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {
 			if m.JWTPayload && !kept[i].JWTPayload {
 				kept[i] = m
 			}
+			continue
+		}
+		// The legacy non-linear winner covers the entire encoded blob. Replace
+		// it only when this claims proof names that exact same source interval;
+		// keeping it as a second finding would allow companion borrowing.
+		replaced := false
+		for _, step := range m.DecodeSteps {
+			coarse := identity{m.Type, m.Value, step.Start, step.End}
+			if i, ok := seen[coarse]; ok && kept[i].decodedNonLinear && !kept[i].JWTPayload {
+				delete(seen, coarse)
+				seen[key], kept[i], replaced = i, m, true
+				break
+			}
+		}
+		if replaced {
 			continue
 		}
 		if len(kept) >= maxScanMatches {

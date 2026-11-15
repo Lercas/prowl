@@ -604,13 +604,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			ImageEntry:  it.ImageEntry,
 			Context:     p.revealMatchContext(it, m),
 		})
-		for j, span := range m.DecodeSpans {
-			transform := "base64-decode"
-			if j > 0 {
-				transform = "base64-decode-layer-" + strconv.Itoa(j+1)
-			}
-			sl, sc := li.cols(span.Start)
-			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: sl, Col: sc, Transform: transform})
+		for _, step := range m.ProofSteps() {
+			sl, sc := li.cols(step.Start)
+			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: step.Start, End: step.End, Line: sl, Col: sc, Transform: step.Transform})
 		}
 		if m.Transform != "" {
 			out[len(out)-1].Evidence = append(out[len(out)-1].Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: m.Start, End: m.End, Line: line, Col: col, Transform: m.Transform})
@@ -712,13 +708,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			if h.payload != nil {
 				f.Stage, f.Context = "rule/jwt-payload", nil
-				for j, span := range h.payload.view.EncodedSpans() {
-					transform := "base64-decode"
-					if j > 0 {
-						transform += "-layer-" + strconv.Itoa(j+1)
-					}
-					line, col := li.cols(span.Start)
-					f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: line, Col: col, Transform: transform})
+				for _, step := range h.payload.view.DecodeSteps() {
+					line, col := li.cols(step.Start)
+					f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: step.Start, End: step.End, Line: line, Col: col, Transform: step.Transform})
 				}
 			}
 			p.annotateIdentity(ctx, &f, h.Value, it)

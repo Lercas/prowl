@@ -53,6 +53,7 @@ type Match struct {
 	DecodedText      string
 	DecodedStart     int
 	DecodeSpans      []Base64Span
+	DecodeSteps      []DecodeStep // authoritative mixed-codec proof when non-empty
 	decodedNonLinear bool
 	ContextName      string // semantic source label when the value is in a table column
 	Type             string
@@ -219,6 +220,7 @@ type ScanOptions struct {
 	jwtDepth          int
 	jwtBudget         *jwtPayloadBudget
 	jwtOrigin         *jwtViewOrigin
+	jwtHexDepth       int
 }
 
 type ScanResult struct {

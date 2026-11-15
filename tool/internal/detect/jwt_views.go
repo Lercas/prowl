@@ -65,6 +65,7 @@ type jwtViewOrigin struct {
 	parent     *jwtViewOrigin
 	start, end int
 	base64     bool
+	hex        bool
 	bytes      []Base64Span // decoded scalar bytes -> original JSON spellings
 }
 
@@ -93,10 +94,32 @@ func (o *jwtViewOrigin) sourceSpan(start, end int) (int, int) {
 	if o.base64 {
 		left = o.start + start/3*4
 		right = min(o.end, o.start+(end+2)/3*4)
+	} else if o.hex {
+		left, right = o.start+start*2, min(o.end, o.start+end*2)
 	} else if start >= 0 && end > start && end <= len(o.bytes) {
 		left, right = o.bytes[start].Start, o.bytes[end-1].End
 	}
 	return o.parent.sourceSpan(left, right)
+}
+
+func (v JWTPayloadView) DecodeSteps() []DecodeStep {
+	var out []DecodeStep
+	for o := v.origin; o != nil; o = o.parent {
+		transform := ""
+		if o.base64 {
+			transform = "base64-decode"
+		} else if o.hex {
+			transform = "hex-decode"
+		}
+		if transform != "" {
+			left, right := o.parent.sourceSpan(o.start, o.end)
+			out = append(out, DecodeStep{left, right, transform})
+		}
+	}
+	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+		out[i], out[j] = out[j], out[i]
+	}
+	return normalizeDecodeSteps(out)
 }
 
 // The caller has already validated JSON encoding and surrogate pairs. Build

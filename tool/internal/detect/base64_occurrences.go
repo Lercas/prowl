@@ -106,6 +106,34 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				rootRemaining = maxNestedBlobs
 				remaining = &rootRemaining
 			}
+			// Hex is a separate interpretation: retain the existing Base64 route too.
+			if end-start >= minHexBlobBytes && (end-start)%2 == 0 && isHex(text[start:end]) {
+				local := opts
+				local.jwtOrigin = jwtBase64Origin(parent, opts.jwtOrigin)
+				children, capped := d.jwtHexCandidate(ctx, text, start, end, local)
+				limited = limited || capped
+				for _, m := range children {
+					if len(out)+len(jwtChildren) >= maxScanMatches {
+						limited, exhausted = true, true
+						return
+					}
+					if len(chain)+m.base64ProofDepth() > maxBase64Depth {
+						limited = true
+						continue
+					}
+					m.Start, m.End = parent.sourceSpan(m.Start, m.End)
+					steps := make([]DecodeStep, 0, len(chain)+len(m.DecodeSteps))
+					for _, span := range chain {
+						steps = append(steps, DecodeStep{span.Start, span.End, "base64-decode"})
+					}
+					for _, step := range m.DecodeSteps {
+						step.Start, step.End = parent.sourceSpan(step.Start, step.End)
+						steps = append(steps, step)
+					}
+					m.DecodeSteps = normalizeDecodeSteps(steps)
+					jwtChildren = append(jwtChildren, m)
+				}
+			}
 			enc := base64Encoding(text[start:end])
 			if enc == nil {
 				continue
@@ -149,7 +177,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 						limited, exhausted = true, true
 						return
 					}
-					if len(proof)+len(m.DecodeSpans) > maxBase64Depth {
+					if len(proof)+m.base64ProofDepth() > maxBase64Depth {
 						limited = true
 						continue
 					}
@@ -159,7 +187,19 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 						left, right := frame.sourceSpan(span.Start, span.End)
 						steps = append(steps, Base64Span{left, right})
 					}
-					m.DecodeSpans = steps
+					if len(m.DecodeSteps) > 0 {
+						mixed := make([]DecodeStep, 0, len(proof)+len(m.DecodeSteps))
+						for _, span := range proof {
+							mixed = append(mixed, DecodeStep{span.Start, span.End, "base64-decode"})
+						}
+						for _, step := range m.DecodeSteps {
+							step.Start, step.End = frame.sourceSpan(step.Start, step.End)
+							mixed = append(mixed, step)
+						}
+						m.DecodeSteps, m.DecodeSpans = normalizeDecodeSteps(mixed), nil
+					} else {
+						m.DecodeSpans = steps
+					}
 					jwtChildren = append(jwtChildren, m)
 				}
 			}

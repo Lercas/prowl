@@ -50,6 +50,7 @@ func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinea
 			if nonLinearOnly && !best.decodedNonLinear && !nonLinearBlob(c.Value) {
 				continue
 			}
+			best.decodedNonLinear = nonLinearOnly || best.decodedNonLinear || nonLinearBlob(c.Value)
 			best.Start, best.End = c.Start, c.End
 			best.Confidence *= 0.95
 			best.Stage = "L1-base64"
