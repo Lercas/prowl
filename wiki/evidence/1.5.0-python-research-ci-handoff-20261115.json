@@ -1,0 +1,402 @@
+{
+  "schema_version": 1,
+  "source_checkout_commit": "6923e6430f645c486c98115f8835b47d49eb2de5",
+  "status": "prepared_local_handoff_destination_pending",
+  "source_scope": "Ignored local Python research files, intentionally excluded from scanner repository; no product source or CI workflow changed",
+  "archive": {
+    "path": "/tmp/prowl-python-research-ci-20261115-v2.tar.gz",
+    "sha256": "a49df7a895d3b92d95cdff87c4df06dc12f8725f5712264c97762ff173f2832b",
+    "bytes": 42452,
+    "files": 27
+  },
+  "package_root": "/tmp/prowl-python-research-ci-20261115",
+  "import_manifest": {
+    "schema_version": 1,
+    "source_root": "Local ignored research tree of Prowl",
+    "source_scope": "Local ignored research files only; scanner repository intentionally excludes these paths",
+    "files": [
+      {
+        "path": "src/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/benchmark/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/benchmark/dataset.py",
+        "source_sha256": "32c5061c11c8c2dc6e418be03da7bd23ab5b2bf1841cb1629edc15eb28aed88f",
+        "bytes": 4509,
+        "package_sha256": "32c5061c11c8c2dc6e418be03da7bd23ab5b2bf1841cb1629edc15eb28aed88f"
+      },
+      {
+        "path": "src/features/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/features/entropy.py",
+        "source_sha256": "8a473315126a5ce20fd7e04421e2c4c57e168c205b3f72317f3142142e30335d",
+        "bytes": 3256,
+        "package_sha256": "8a473315126a5ce20fd7e04421e2c4c57e168c205b3f72317f3142142e30335d"
+      },
+      {
+        "path": "src/features/extract.py",
+        "source_sha256": "ada942a91ceb09d42415959995f4ff7a1dd043caeb864dfe72688243e96821e8",
+        "bytes": 11726,
+        "package_sha256": "ada942a91ceb09d42415959995f4ff7a1dd043caeb864dfe72688243e96821e8"
+      },
+      {
+        "path": "src/generation/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/generation/secrets.py",
+        "source_sha256": "4b59501ad0d4f0d7063ece86340371f2e23be289b4ed1e44e19da20f73364e07",
+        "bytes": 14262,
+        "package_sha256": "4b59501ad0d4f0d7063ece86340371f2e23be289b4ed1e44e19da20f73364e07"
+      },
+      {
+        "path": "src/ingest/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/ingest/hf_pii_loader.py",
+        "source_sha256": "50a6439a7dd0f20eeac9d396ef62308918896ffc6f6ffc7bb2288859e107f7cb",
+        "bytes": 5830,
+        "package_sha256": "50a6439a7dd0f20eeac9d396ef62308918896ffc6f6ffc7bb2288859e107f7cb"
+      },
+      {
+        "path": "src/ingest/schema.py",
+        "source_sha256": "4853caa6cff140557d1aabc274ed2706e7491d0a279585822f62a71909fe17d7",
+        "bytes": 4135,
+        "package_sha256": "4853caa6cff140557d1aabc274ed2706e7491d0a279585822f62a71909fe17d7"
+      },
+      {
+        "path": "src/llm/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/llm/label_model.py",
+        "source_sha256": "d87b876a536df8c1fc37093bb58f96379967df1bfc091fabe0ee5f45ad8226a3",
+        "bytes": 11961,
+        "package_sha256": "d87b876a536df8c1fc37093bb58f96379967df1bfc091fabe0ee5f45ad8226a3"
+      },
+      {
+        "path": "src/models/__init__.py",
+        "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "package_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/models/rules.py",
+        "source_sha256": "cbd6d919dc2f85f6f295d4aa058b47d814e9dfea1fc9e2d64c2d083edce8e52e",
+        "bytes": 7283,
+        "package_sha256": "cbd6d919dc2f85f6f295d4aa058b47d814e9dfea1fc9e2d64c2d083edce8e52e"
+      },
+      {
+        "path": "tests/test_data.py",
+        "source_sha256": "8d0b177e422420edf8dce6d4b86bd138e88b68efce215d2a2693ecbafb627c07",
+        "bytes": 4900,
+        "package_sha256": "8d0b177e422420edf8dce6d4b86bd138e88b68efce215d2a2693ecbafb627c07"
+      },
+      {
+        "path": "tests/test_pipeline.py",
+        "source_sha256": "272771ce5044e4d15783a35903dd8f60b95388ecd036daeae5990edd98b0e7f6",
+        "bytes": 3529,
+        "package_sha256": "62ebacf0bb5fc097807cd124a3dafb79fcef098f6ca38c0ea0b50e31f0b7b7f0"
+      },
+      {
+        "path": "references/secret_taxonomy.yaml",
+        "source_sha256": "d6d8cfc9196ebaa876d288273da58fb4ef958a1e0ff1895d9c0503e33106a5a4",
+        "bytes": 19977,
+        "package_sha256": "d6d8cfc9196ebaa876d288273da58fb4ef958a1e0ff1895d9c0503e33106a5a4"
+      }
+    ],
+    "package_changes": [
+      "Taxonomy round-trip generator test uses stable SHA-256 seed instead of process-randomized hash()"
+    ],
+    "source_checkout_commit": "6923e6430f645c486c98115f8835b47d49eb2de5",
+    "research_files_tracked": false
+  },
+  "package_manifest": {
+    "schema_version": 1,
+    "files": [
+      {
+        "path": ".github/workflows/python.yml",
+        "bytes": 1019,
+        "sha256": "5b05c682f4f5c5082ecccdd64768988b2bed73c3b0b9f8d81179436bb0d6f747"
+      },
+      {
+        "path": ".gitignore",
+        "bytes": 71,
+        "sha256": "f4bfbdd1caf6f93268c5f054003de74424219cde67c359318493d89b83417b09"
+      },
+      {
+        "path": "README.md",
+        "bytes": 2669,
+        "sha256": "8364d27cabf2fb66a8a42ae4a60f89599d008da5911cbca08432c788080acc70"
+      },
+      {
+        "path": "import-manifest.json",
+        "bytes": 5050,
+        "sha256": "fde3fa29ee518f09c27b31001b8b5d2ab41ac6998ef55eb6a5534bb9e2ac5e64"
+      },
+      {
+        "path": "references/secret_taxonomy.yaml",
+        "bytes": 19977,
+        "sha256": "d6d8cfc9196ebaa876d288273da58fb4ef958a1e0ff1895d9c0503e33106a5a4"
+      },
+      {
+        "path": "requirements-ci.in",
+        "bytes": 41,
+        "sha256": "b349f2eb1c6f0d59dd91773378d8bbfccffd3e74acf7bd22f73aa4bee0f0a6f2"
+      },
+      {
+        "path": "requirements-ci.txt",
+        "bytes": 13861,
+        "sha256": "7ee9b471a1c7c9b1417140abafdba4790aec877e2b8614dbc2ad413e84e2b7d2"
+      },
+      {
+        "path": "src/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/benchmark/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/benchmark/dataset.py",
+        "bytes": 4509,
+        "sha256": "32c5061c11c8c2dc6e418be03da7bd23ab5b2bf1841cb1629edc15eb28aed88f"
+      },
+      {
+        "path": "src/features/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/features/entropy.py",
+        "bytes": 3256,
+        "sha256": "8a473315126a5ce20fd7e04421e2c4c57e168c205b3f72317f3142142e30335d"
+      },
+      {
+        "path": "src/features/extract.py",
+        "bytes": 11726,
+        "sha256": "ada942a91ceb09d42415959995f4ff7a1dd043caeb864dfe72688243e96821e8"
+      },
+      {
+        "path": "src/generation/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/generation/secrets.py",
+        "bytes": 14262,
+        "sha256": "4b59501ad0d4f0d7063ece86340371f2e23be289b4ed1e44e19da20f73364e07"
+      },
+      {
+        "path": "src/ingest/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/ingest/hf_pii_loader.py",
+        "bytes": 5830,
+        "sha256": "50a6439a7dd0f20eeac9d396ef62308918896ffc6f6ffc7bb2288859e107f7cb"
+      },
+      {
+        "path": "src/ingest/schema.py",
+        "bytes": 4135,
+        "sha256": "4853caa6cff140557d1aabc274ed2706e7491d0a279585822f62a71909fe17d7"
+      },
+      {
+        "path": "src/llm/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/llm/label_model.py",
+        "bytes": 11961,
+        "sha256": "d87b876a536df8c1fc37093bb58f96379967df1bfc091fabe0ee5f45ad8226a3"
+      },
+      {
+        "path": "src/models/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "src/models/rules.py",
+        "bytes": 7283,
+        "sha256": "cbd6d919dc2f85f6f295d4aa058b47d814e9dfea1fc9e2d64c2d083edce8e52e"
+      },
+      {
+        "path": "tests/conftest.py",
+        "bytes": 705,
+        "sha256": "16d8be08d2528248c7dce5c633e8535a96a70579207332c4a8082de51bb28cb9"
+      },
+      {
+        "path": "tests/test_ci_boundary.py",
+        "bytes": 393,
+        "sha256": "82775d851d57b99b4e5ac9c187d485e0a04280052e8c91aa14e35bc75ee54168"
+      },
+      {
+        "path": "tests/test_data.py",
+        "bytes": 4900,
+        "sha256": "8d0b177e422420edf8dce6d4b86bd138e88b68efce215d2a2693ecbafb627c07"
+      },
+      {
+        "path": "tests/test_pipeline.py",
+        "bytes": 3597,
+        "sha256": "62ebacf0bb5fc097807cd124a3dafb79fcef098f6ca38c0ea0b50e31f0b7b7f0"
+      }
+    ]
+  },
+  "checks": {
+    "py312_seed0": {
+      "path": "/tmp/prowl-python-research-ci-py312-seed0-20261115.log",
+      "sha256": "45b37cf9a51b9b4407763b2661e8a098d18e57aa31702e334fd51aff35b9c3c1",
+      "passed": true
+    },
+    "py312_seed1": {
+      "path": "/tmp/prowl-python-research-ci-py312-seed1-20261115.log",
+      "sha256": "ec692cbfd97887b4bdf9479b9dd2d4c47c0b8e6613dd6484ca5fdd8ac338feda",
+      "passed": true
+    },
+    "py314_seed0": {
+      "path": "/tmp/prowl-python-research-ci-py314-seed0-20261115.log",
+      "sha256": "803bfa2c990bb9f8c70e8e1bf5870f3f4354a44575025d0a7470ed04edcdf842",
+      "passed": true
+    },
+    "py314_seed1": {
+      "path": "/tmp/prowl-python-research-ci-py314-seed1-20261115.log",
+      "sha256": "ec692cbfd97887b4bdf9479b9dd2d4c47c0b8e6613dd6484ca5fdd8ac338feda",
+      "passed": true
+    },
+    "fresh312": {
+      "path": "/tmp/prowl-python-research-ci-final-fresh312-20261115.log",
+      "sha256": "3588ba1267fe62926eb4b744e5d12a4e450d94c06203ba879275156cdfd0f8d9",
+      "passed": true
+    },
+    "fresh314": {
+      "path": "/tmp/prowl-python-research-ci-final-fresh314-20261115.log",
+      "sha256": "82662162fc20227ffc2ab09b942a9f95891582259a335aed6ea6534e65165f63",
+      "passed": true
+    },
+    "actionlint": {
+      "path": "/tmp/prowl-python-research-ci-fresh-actionlint-20261115.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    }
+  },
+  "fresh_imports": {
+    "312": {
+      "python": "3.12.13",
+      "module_paths": {
+        "src": "src/__init__.py",
+        "src.features": "src/features/__init__.py",
+        "src.features.entropy": "src/features/entropy.py",
+        "src.features.extract": "src/features/extract.py",
+        "src.generation": "src/generation/__init__.py",
+        "src.generation.secrets": "src/generation/secrets.py",
+        "src.models": "src/models/__init__.py",
+        "src.models.rules": "src/models/rules.py",
+        "src.benchmark": "src/benchmark/__init__.py",
+        "src.benchmark.dataset": "src/benchmark/dataset.py",
+        "src.llm": "src/llm/__init__.py",
+        "src.llm.label_model": "src/llm/label_model.py",
+        "src.ingest": "src/ingest/__init__.py",
+        "src.ingest.schema": "src/ingest/schema.py",
+        "src.ingest.hf_pii_loader": "src/ingest/hf_pii_loader.py"
+      },
+      "tests": 41,
+      "pytest_exit": 0,
+      "dependencies": {
+        "numpy": "2.4.6",
+        "PyYAML": "6.0.3",
+        "pytest": "9.1.0"
+      }
+    },
+    "314": {
+      "python": "3.14.9",
+      "module_paths": {
+        "src": "src/__init__.py",
+        "src.features": "src/features/__init__.py",
+        "src.features.entropy": "src/features/entropy.py",
+        "src.features.extract": "src/features/extract.py",
+        "src.generation": "src/generation/__init__.py",
+        "src.generation.secrets": "src/generation/secrets.py",
+        "src.models": "src/models/__init__.py",
+        "src.models.rules": "src/models/rules.py",
+        "src.benchmark": "src/benchmark/__init__.py",
+        "src.benchmark.dataset": "src/benchmark/dataset.py",
+        "src.llm": "src/llm/__init__.py",
+        "src.llm.label_model": "src/llm/label_model.py",
+        "src.ingest": "src/ingest/__init__.py",
+        "src.ingest.schema": "src/ingest/schema.py",
+        "src.ingest.hf_pii_loader": "src/ingest/hf_pii_loader.py"
+      },
+      "tests": 41,
+      "pytest_exit": 0,
+      "dependencies": {
+        "numpy": "2.4.6",
+        "PyYAML": "6.0.3",
+        "pytest": "9.1.0"
+      }
+    }
+  },
+  "actionlint": {
+    "version": "1.7.12",
+    "path": "/tmp/prowl-release-tools-20261114-v2202/actionlint",
+    "sha256": "8db11704dc296f096216db4db65d86cd7f0ebfdf4c38453a1da276b137b88388"
+  },
+  "workflow_matrix": {
+    "python": [
+      "3.12",
+      "3.14"
+    ],
+    "hash_seed": [
+      "0",
+      "1"
+    ],
+    "original_tests": 39,
+    "network_guard_tests": 2,
+    "tests_per_run": 41,
+    "matrix_runs": 4,
+    "fresh_archive_runs": 2
+  },
+  "changes_in_copy": [
+    "Stable SHA-256 taxonomy generator seed replaces process-randomized hash()",
+    "Minimal hash-locked binary-wheel test dependencies",
+    "Offline test/collection guard, tested with refused DNS and connection attempts",
+    "Pinned read-only GitHub Actions workflow for a standalone research root"
+  ],
+  "original_research_files_unchanged": true,
+  "scanner_and_installed_model_changed": false,
+  "pending": [
+    "User chooses the canonical research repository/directory",
+    "Apply the prepared package to the chosen location after inspecting its current instructions/state",
+    "Explicit current authorization required before publication/push",
+    "Hosted GitHub Actions run and Linux qualification remain unexecuted"
+  ],
+  "limits": [
+    "Package is a local portable CI handoff, not a published research repository or a successful hosted CI run",
+    "The Python research zlib feature path is not the product Go-flate-v2 model or a qualified sidecar",
+    "No datasets, model weights, unused research modules or installed-model updates included"
+  ],
+  "installed_model_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+  "unchanged_go_source_tree": "9995a6fd5fd619f469961eb79af9924ebf37e12a"
+}

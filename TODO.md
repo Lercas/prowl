@@ -703,6 +703,13 @@
 - [ ] Запускать Python-тесты (`tests/test_pipeline.py`, `tests/test_data.py`) в CI — сейчас
   только ruff по пяти классам ошибок. Уточнено 2026-11-14: `src/`, `tests/`, `references/`
   и `pyproject.toml` исключены из Git; сначала определить место CI для исследовательского проекта.
+  - [x] Подготовлен отдельный локальный CI-handoff: минимальные 18 research source/test
+    файлов, hash-locked зависимости, стабильный seed taxonomy и сетевой guard.
+    Python 3.12/3.14 × два seed — 4×41; распакованный архив — ещё 2×41, все 15 imports
+    из нового каталога. Actionlint проходит. Исходники и CI сканера не менялись.
+    `wiki/evidence/1.5.0-python-research-ci-handoff-20261115.json`.
+  - [ ] Выбрать каноническое место research-кода, применить пакет и подтвердить hosted CI;
+    текущая локальная подготовка не закрывает общий пункт. [Границы](wiki/Python-Research-CI.md).
 - [x] Убрать двойные прогоны: push запускается только для `main`, остальные ветки — через PR.
 - [x] Добавлены минимальные `permissions:`; все Actions в CI и релизном workflow закреплены
   по проверенным SHA. YAML, `actionlint` и ShellCheck прошли локально.
