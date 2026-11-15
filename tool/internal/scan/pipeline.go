@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"context"
+
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -9,6 +11,11 @@ import (
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
+// PublicAuditor accepts already-bound values; implementations must be safe for concurrent calls.
+type PublicAuditor interface {
+	Audit(context.Context, string, string, map[string]string) *model.PublicKeyAudit
+}
+
 // Options groups one scan's dependencies and privacy policy. Dependency objects
 // and the allow callback must be safe for concurrent reads after construction.
 type Options struct {
@@ -16,6 +23,7 @@ type Options struct {
 	SemanticEngine *semantic.Engine
 	Detector       *detect.Detector
 	Rules          *rules.Engine
+	PublicAuditor  PublicAuditor
 	Verifiers      *verify.Set
 	VerifyAll      bool // verify before ML; observers also retain this mode for index evidence
 	ML             mlscore.Scorer

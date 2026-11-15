@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/publicaudit"
 	"github.com/Lercas/prowl/tool/internal/verify"
 )
 
@@ -38,4 +39,20 @@ func verificationMetadata(r verify.Result) *model.Verification {
 		detail.Reason = r.Note // Verifier transport errors are already classified, never raw URL errors.
 	}
 	return detail
+}
+
+func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor, doc *literalDocument, path string, f *model.Finding) {
+	if !publicaudit.Supports(c.typ) {
+		return
+	}
+	var bindings map[string]string
+	if doc != nil && !doc.verificationUnsafe {
+		if v := doc.locate(c.start, c.end); v != nil && !doc.unsafeGroups[v.group] {
+			bindings = doc.bindings[v.group]
+		}
+	}
+	f.PublicKeyAudit = auditor.Audit(ctx, c.typ, c.value, bindings)
+	if f.PublicKeyAudit.Status == "inconclusive" {
+		model.Note(ctx, "public_key_audit_inconclusive", path, true)
+	}
 }

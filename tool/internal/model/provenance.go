@@ -78,16 +78,17 @@ func SafeLocator(raw string) string {
 }
 
 type Occurrence struct {
-	ID           string            `json:"id,omitempty"`
-	Source       string            `json:"source"`
-	Path         string            `json:"path"`
-	Line         int               `json:"line"`
-	Col          int               `json:"col"`
-	Evidence     []Evidence        `json:"evidence,omitempty"`
-	Provenance   map[string]string `json:"provenance,omitempty"`
-	Verification *Verification     `json:"verification,omitempty"`
+	ID             string            `json:"id,omitempty"`
+	Source         string            `json:"source"`
+	Path           string            `json:"path"`
+	Line           int               `json:"line"`
+	Col            int               `json:"col"`
+	Evidence       []Evidence        `json:"evidence,omitempty"`
+	Provenance     map[string]string `json:"provenance,omitempty"`
+	Verification   *Verification     `json:"verification,omitempty"`
+	PublicKeyAudit *PublicKeyAudit   `json:"public_key_audit,omitempty"`
 }
 
 func (f Finding) Occurrence() Occurrence {
-	return Occurrence{f.OccurrenceID, f.Source, f.Path, f.Line, f.Col, f.Evidence, f.Provenance, f.Verification}
+	return Occurrence{f.OccurrenceID, f.Source, f.Path, f.Line, f.Col, f.Evidence, f.Provenance, f.Verification, f.PublicKeyAudit}
 }

@@ -418,12 +418,17 @@
   Нативные Unix-тесты, race, минимальный Go и шесть сборок CGO=0 проверены локально;
   Windows ACL CI подготовлен, его внешний запуск остаётся частью релизной квалификации.
 - [ ] **Аудит ключей, «публичных по замыслу»** (для `domain` и `mobile`): проверять не «жив ли
-  ключ», а «правильно ли он ограничен». Механизм — capability-пробы верификаторов; сейчас ими
-  пользуется только `google-api-key.yaml` из 88.
+  ключ», а «правильно ли он ограничен». Отдельный opt-in `--audit-public --authorized`
+  отделяет наблюдение прав от обычного `--verify` (его профили не гарантируют read-only).
   - [ ] Supabase: anon-ключ + таблицы без RLS.
   - [ ] Firebase: открытые RTDB / Firestore / Storage.
   - [ ] Google API key: отсутствие ограничений по referrer / API.
   - [ ] Algolia: admin-ключ вместо search-ключа (ACL).
+    - [x] Read-only self-ACL для пар из одного объекта JSON/YAML/TOML: отдельный
+      `public_key_audit`, после ML, фиксированный GET, bounded/cache-aware запросы,
+      строгий ответ и неполное покрытие при неоднозначности. JSON/SARIF/occurrences
+      сохраняют результат без `verified:true`. [Контракт](wiki/Public-Key-Audit.md).
+    - [ ] JS/TS и прочие форматы; точное отличие встроенного admin от широкого custom ACL.
   - [ ] Только read-only пробы; под тем же `--authorized`, что и `domain`.
 - [ ] **Сборка составных учётных данных из разных файлов.** Связывать части, найденные в разных
   местах: AWS key ID + secret, `client_id` + `client_secret` + tenant, хост БД + пользователь +

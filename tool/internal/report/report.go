@@ -196,6 +196,9 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 				badge, maxType, sanitizeTerminal(f.Type),
 				paint(color, cDim, fmt.Sprintf("%-7s", loc)),
 				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag, locator)
+			if a := f.PublicKeyAudit; a != nil {
+				fmt.Fprintf(w, "        public key audit: %s — %s\n", sanitizeTerminal(a.Status), sanitizeTerminal(a.Reason))
+			}
 			if options.Snippet != nil {
 				if line := sanitizeTerminal(options.Snippet(f)); line != "" {
 					fmt.Fprintf(w, "        %s\n", paint(color, cDim, line))

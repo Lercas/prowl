@@ -6,6 +6,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/publicaudit"
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/secretindex"
 )
@@ -36,6 +37,9 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.Reconstruct = flags.reconstruct
 	options.Semantic, options.SemanticEngine = flags.semantic, flags.semanticEngine
 	options.VerifyAll = flags.verifyAll || flags.failOnVerified
+	if flags.auditPublic {
+		options.PublicAuditor = publicaudit.New(flags.timeout)
+	}
 	var indexErr error
 	if flags.indexDir != "" {
 		indexErr = validateIndexOutputs(flags)

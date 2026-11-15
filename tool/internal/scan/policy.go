@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/publicaudit"
 )
 
 // DetectionRevision changes when source interpretation or suppression semantics change.
@@ -12,11 +13,15 @@ const DetectionRevision = "1.5.0-prose-credentials-v2"
 // Capabilities reports configured stages; request fields cannot change this snapshot.
 func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
 	o := p.options
-	return !o.RevealSecrets, map[string]bool{
+	stages = map[string]bool{
 		"l1": o.Detector != nil, "rules": o.Rules != nil,
 		"ml": o.ML != nil, "verification": o.Verifiers != nil,
 		"reconstruction": o.Reconstruct, "semantic": o.Semantic, "ocr": false,
 	}
+	if o.PublicAuditor != nil {
+		stages["public_key_audit"] = true
+	}
+	return !o.RevealSecrets, stages
 }
 
 // RegisterPolicy stamps even empty HTTP batches with their configured detection profile.
@@ -42,6 +47,9 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 		"all_occurrences": o.AllOccurrences,
 	})
+	if o.PublicAuditor != nil {
+		c.RegisterScope("public_key_audit", publicaudit.Revision, "structured-sibling-bindings")
+	}
 	if o.Semantic && o.SemanticEngine != nil {
 		c.RegisterScope("semantic", "literal-span-v1", o.SemanticEngine.Policy())
 	}

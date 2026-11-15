@@ -490,6 +490,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		truncated = true
 	}
 	out := make([]model.Finding, 0, len(ms))
+	auditor := p.options.PublicAuditor
 	var pending []verificationCandidate // parallel to final producer winners, never serialized
 	verifyBeforeML := p.options.VerifyAll || p.options.ObserveVerification != nil
 	var indexValues []string
@@ -595,7 +596,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		if m.Stage == "semantic-candidate" {
 			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
-		if vset != nil {
+		if vset != nil || auditor != nil {
 			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
@@ -700,7 +701,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 					continue
 				}
 				out[idx] = f
-				if vset != nil {
+				if vset != nil || auditor != nil {
 					pending[idx] = verificationCandidate{h.RuleID, h.Value, h.Start, h.End}
 				}
 				if ml != nil {
@@ -713,7 +714,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			dedup[key] = len(out)
 			out = append(out, f)
-			if vset != nil {
+			if vset != nil || auditor != nil {
 				pending = append(pending, verificationCandidate{h.RuleID, h.Value, h.Start, h.End})
 			}
 			if ml != nil {
@@ -772,6 +773,15 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				original = selected[i]
 			}
 			pending[original].apply(ctx, vset, literalDoc, verificationText, it.Path, &out[i])
+		}
+	}
+	if auditor != nil {
+		for i := range out {
+			original := i
+			if selected != nil {
+				original = selected[i]
+			}
+			pending[original].audit(ctx, auditor, literalDoc, it.Path, &out[i])
 		}
 	}
 	if failed {

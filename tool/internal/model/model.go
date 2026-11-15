@@ -91,15 +91,16 @@ type Finding struct {
 	// ImageEntry is internal provenance; it is deliberately absent from report formats.
 	ImageEntry int `json:"-"`
 	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
-	Instruction   string            `json:"instruction,omitempty"`
-	SecretID      string            `json:"secret_id,omitempty"`
-	IdentityScope string            `json:"identity_scope,omitempty"`
-	Occurrences   []Occurrence      `json:"occurrences,omitempty"`
-	OccurrenceID  string            `json:"occurrence_id,omitempty"`
-	Evidence      []Evidence        `json:"evidence,omitempty"`
-	Provenance    map[string]string `json:"provenance,omitempty"`
-	Verification  *Verification     `json:"verification,omitempty"`
-	MLScore       *float64          `json:"ml_score,omitempty"`
+	Instruction    string            `json:"instruction,omitempty"`
+	SecretID       string            `json:"secret_id,omitempty"`
+	IdentityScope  string            `json:"identity_scope,omitempty"`
+	Occurrences    []Occurrence      `json:"occurrences,omitempty"`
+	OccurrenceID   string            `json:"occurrence_id,omitempty"`
+	Evidence       []Evidence        `json:"evidence,omitempty"`
+	Provenance     map[string]string `json:"provenance,omitempty"`
+	Verification   *Verification     `json:"verification,omitempty"`
+	PublicKeyAudit *PublicKeyAudit   `json:"public_key_audit,omitempty"`
+	MLScore        *float64          `json:"ml_score,omitempty"`
 }
 
 // Evidence points at observed source spans without retaining plaintext fragments.
@@ -110,6 +111,15 @@ type Evidence struct {
 	Line      int    `json:"line"`
 	Col       int    `json:"col"`
 	Transform string `json:"transform"`
+}
+
+// PublicKeyAudit records permission observations independently of credential liveness.
+type PublicKeyAudit struct {
+	Provider     string   `json:"provider"`
+	Status       string   `json:"status"`
+	CheckedAt    string   `json:"checked_at,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	Reason       string   `json:"reason,omitempty"`
 }
 
 type Verification struct {

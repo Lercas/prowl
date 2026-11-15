@@ -267,7 +267,8 @@ var cliFlags = []flagSpec{
 	intFlag("--concurrency", "org hermes-audit", "source concurrency", 1, func(c *commonFlags) *int { return &c.cmd.concurrency }),
 	listFlag("--exclude-repo", "org", "skip matching repository URL substrings", true, func(c *commonFlags) *[]string { return &c.cmd.excludeRepos }),
 	boolFlag("--gists", "org", "scan a GitHub user's public gists", func(c *commonFlags) *bool { return &c.cmd.gists }),
-	boolFlag("--authorized", "domain hermes-audit", "attest that all targets are in your authorized scope", func(c *commonFlags) *bool { return &c.cmd.authorized }),
+	boolFlag("--audit-public", "domain mobile", "read-only Algolia ACL audit of structured config; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
+	boolFlag("--authorized", "domain mobile hermes-audit", "attest that all targets are in your authorized scope", func(c *commonFlags) *bool { return &c.cmd.authorized }),
 	boolFlag("--recon", "domain", "enumerate public subdomains and historical assets", func(c *commonFlags) *bool { return &c.cmd.recon }),
 	intFlag("--max-assets", "domain", "maximum web assets (default 300)", 1, func(c *commonFlags) *int { return &c.cmd.maxAssets }),
 	stringFlag("--targets", "domain hermes-audit", "FILE", "read a newline-delimited target inventory", func(c *commonFlags) *string { return &c.cmd.targetsFile }),
@@ -447,6 +448,14 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.verifiedOnly || c.verifyAll {
 		c.verify = true
 	}
+	if c.auditPublic {
+		if !c.cmd.authorized {
+			return c, nil, errors.New("--audit-public requires --authorized")
+		}
+		if c.verify || c.failOnVerified {
+			return c, nil, errors.New("--audit-public cannot be combined with verification flags")
+		}
+	}
 	if c.semantic || seen["--semantic-url"] || seen["--semantic-model"] || c.semanticAllowRemote {
 		c.semantic = true
 		if c.semanticURL == "" {
@@ -586,6 +595,7 @@ type commonFlags struct {
 	rules                                    []string
 	rulesDir                                 []string
 	tags, excludeTags, ruleSeverity          string
+	auditPublic                              bool
 	verify, verifiedOnly                     bool
 	showSecrets                              bool // --show-secrets: emit the full unredacted value
 	failOnVerified                           bool // gate (exit 1) only on a provider-confirmed-LIVE secret

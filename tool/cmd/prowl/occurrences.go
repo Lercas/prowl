@@ -70,6 +70,9 @@ func (a *occurrenceAccumulator) add(o model.Occurrence, key string) {
 		a.seen = make(map[string]int)
 	}
 	if i, found := a.seen[key]; found {
+		if o.PublicKeyAudit != nil && (a.items[i].PublicKeyAudit == nil || o.PublicKeyAudit.Status == "excess_permissions") {
+			a.items[i].PublicKeyAudit = o.PublicKeyAudit
+		}
 		if o.Verification != nil && (a.items[i].Verification == nil || o.Verification.Status == "verified") {
 			a.items[i].Verification = o.Verification
 		}
@@ -104,6 +107,9 @@ func (a *occurrenceAccumulator) addFinding(f model.Finding) {
 }
 
 func combineFindingSummary(chosen *model.Finding, other model.Finding) {
+	if other.PublicKeyAudit != nil && (chosen.PublicKeyAudit == nil || other.PublicKeyAudit.Status == "excess_permissions") {
+		chosen.PublicKeyAudit = other.PublicKeyAudit
+	}
 	if other.Verified != nil && *other.Verified && (chosen.Verified == nil || !*chosen.Verified || chosen.Verification == nil) {
 		chosen.Verified, chosen.Verification, chosen.Rationale = other.Verified, other.Verification, other.Rationale
 	}

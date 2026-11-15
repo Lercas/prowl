@@ -19,6 +19,9 @@ func addIdentityProperties(properties map[string]any, f model.Finding) {
 	if len(f.Provenance) > 0 {
 		properties["provenance"] = f.Provenance
 	}
+	if f.PublicKeyAudit != nil {
+		properties["public_key_audit"] = f.PublicKeyAudit
+	}
 	if f.Verification != nil {
 		properties["verification"] = f.Verification
 	}
