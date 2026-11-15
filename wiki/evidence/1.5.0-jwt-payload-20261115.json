@@ -1,0 +1,584 @@
+{
+  "source_commit": "3c5c4b9",
+  "binary": "/tmp/prowl-jwt-payload-lex-20261115-bin",
+  "sha256": "c5b38e933cca202b88784b489d559d4b7b7e8206acaf19424c9d833f8426a5e6",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-native-hfhity7g",
+  "sandbox_profile": "(version 1)(allow default)(deny network*)",
+  "network_boundary_control": {
+    "owned_control_requests": 1,
+    "sandbox_requests": 0,
+    "blocked_exit": 7
+  },
+  "cases": [
+    {
+      "case": "txt-l1",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "txt-l1-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "txt-ml",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "txt-ml-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "js-l1",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "js-l1-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "js-ml",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "js-ml-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "json-l1",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "json-l1-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "json-ml",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "json-ml-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "yaml-l1",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "yaml-l1-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "yaml-ml",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "yaml-ml-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "toml-l1",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "toml-l1-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "toml-ml",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "toml-ml-bundled",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "nested",
+      "passed": true,
+      "findings": 4
+    },
+    {
+      "case": "sample",
+      "passed": true,
+      "findings": 3
+    },
+    {
+      "case": "unsigned",
+      "passed": true,
+      "findings": 2
+    },
+    {
+      "case": "duplicate",
+      "passed": true,
+      "findings": 4
+    },
+    {
+      "case": "escaped-0",
+      "passed": true,
+      "findings": 2
+    },
+    {
+      "case": "exact-logical-0",
+      "passed": true
+    },
+    {
+      "case": "escaped-1",
+      "passed": true,
+      "findings": 2
+    },
+    {
+      "case": "exact-logical-1",
+      "passed": true
+    },
+    {
+      "case": "escaped-2",
+      "passed": true,
+      "findings": 2
+    },
+    {
+      "case": "exact-logical-2",
+      "passed": true
+    },
+    {
+      "case": "escaped-3",
+      "passed": true,
+      "findings": 2
+    },
+    {
+      "case": "exact-logical-3",
+      "passed": true
+    },
+    {
+      "case": "sarif",
+      "passed": true
+    },
+    {
+      "case": "pretty",
+      "passed": true
+    },
+    {
+      "case": "incomplete-baseline-0",
+      "passed": true
+    },
+    {
+      "case": "incomplete-guard-0",
+      "passed": true
+    },
+    {
+      "case": "incomplete-baseline-1",
+      "passed": true
+    },
+    {
+      "case": "incomplete-guard-1",
+      "passed": true
+    },
+    {
+      "case": "incomplete-baseline-2",
+      "passed": true
+    },
+    {
+      "case": "incomplete-guard-2",
+      "passed": true
+    },
+    {
+      "case": "guard-raw",
+      "passed": true
+    },
+    {
+      "case": "guard-claude",
+      "passed": true
+    },
+    {
+      "case": "guard-cursor-prompt",
+      "passed": true
+    },
+    {
+      "case": "guard-cursor-tool",
+      "passed": true
+    },
+    {
+      "case": "logical-HMAC-and-private-index",
+      "passed": true
+    }
+  ],
+  "passed": 45,
+  "failed": 0,
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "real_provider_qualification": false,
+  "integration": {
+    "main_source_commit": "a08378efc04108363134a1a2e7a31409c66635be",
+    "isolated_source_commit": "3c5c4b955048d24f0a68492545cc0fe05c94eb90",
+    "source_trees_equal": true,
+    "main_binary": {
+      "path": "/tmp/prowl-jwt-main-20261115",
+      "sha256": "a5144498db5222cce29ceb4e1abb7576068336866094bc366284a704938e51ad",
+      "vcs_modified": false,
+      "scope": "Build and targeted JWT Go integration; 45 native cases ran the isolated clean-source binary"
+    },
+    "docker_candidate_source_commit": "cc21764859508c2009b589cea2f57eb0970ca9dd",
+    "images_rebuilt": false,
+    "release_qualified": false
+  },
+  "checks": {
+    "full_go": "Go 1.27.4 CGO=0 full suite on final 3c5c4b9; PROWL_LIVE_TEST empty",
+    "race": {
+      "a046266": [
+        "internal/detect",
+        "internal/scan",
+        "cmd/prowl"
+      ],
+      "final_3c5c4b9": "JWT tests in internal/detect and internal/scan after replacing only container discovery with a stateless lexical pass"
+    },
+    "minimum_go": "Go 1.26.11: internal/detect, internal/scan, cmd/prowl on final source",
+    "lint": "golangci-lint zero issues on final source",
+    "fuzz": {
+      "target": "FuzzJWTPayloadSourceMapping",
+      "seconds": 5,
+      "executions": 123295,
+      "source": "3c5c4b9"
+    },
+    "pipeline": [
+      "JWT plus typed AWS/GitHub and named passwords survive container overlap",
+      "JSON/JS/YAML/TOML/plain text retain source coordinates and private keyed identities",
+      "duplicate members, escaped names/values, controls, surrogate pairs, nested and unsigned compact claims",
+      "ML sees logical value and decoded field context without inheriting parent checksum exemption",
+      "JWT output type disablement and example-token filter do not hide independent payload credentials",
+      "claims and enclosing config are never borrowed as verification/public-audit companions",
+      "missing required verifier bindings fail before owned HTTP transport",
+      "limits/malformed JSON/Unicode remain incomplete and preserve baseline; guard fails closed"
+    ],
+    "native_cases": 45,
+    "native_scope": "20 format L1/ML +/- bundled cases; 4 container variants; 4 escaped L1 cases plus 4 explicit exact-value disclosure cases; SARIF/pretty; 3 incomplete baseline and guard pairs; 4 guard protocols; HMAC/index privacy"
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "c5b38e933cca202b88784b489d559d4b7b7e8206acaf19424c9d833f8426a5e6",
+    "passed": true,
+    "status": "passed",
+    "secret_hits": 1556,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "recall": 0.7430754536771729,
+    "t4_fp_rate": 0.05804480651731161
+  },
+  "performance": {
+    "parent_comparison": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 21452511041.0,
+            "B/op": 893179496.0,
+            "allocs/op": 3964135.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 21688906209.0,
+            "B/op": 880663032.0,
+            "allocs/op": 3964015.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 21772115542.0,
+            "B/op": 878892512.0,
+            "allocs/op": 3962724.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 21864207334.0,
+            "B/op": 881924456.0,
+            "allocs/op": 3963283.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 21889651375.0,
+            "B/op": 886016176.0,
+            "allocs/op": 3964348.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 22050388708.0,
+            "B/op": 885963256.0,
+            "allocs/op": 3963872.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          }
+        ]
+      },
+      "status": "passed",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "6c73aee5cb522e07ceb651308cf2aa16a36f2fe3",
+        "candidate": "3c5c4b955048d24f0a68492545cc0fe05c94eb90"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 21688906209.0,
+          "B/op": 880663032.0,
+          "allocs/op": 3964015.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        "candidate": {
+          "ns/op": 21889651375.0,
+          "B/op": 885963256.0,
+          "allocs/op": 3963872.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      },
+      "ratios": {
+        "ns/op": 1.0092556611230445,
+        "B/op": 1.0060184472464606,
+        "allocs/op": 0.9999639254644597
+      },
+      "regressions": []
+    },
+    "fixed_release_gate_attempt": {
+      "policy": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "go": "go1.27.4",
+        "pairs": 3,
+        "max_time_ratio": 1.2,
+        "max_bytes_ratio": 1.25,
+        "max_allocs_ratio": 1.25,
+        "min_corpus_files": 1000,
+        "min_corpus_bytes": 67108864
+      },
+      "samples": {
+        "reference": [
+          {
+            "ns/op": 10180674667.0,
+            "B/op": 588891960.0,
+            "allocs/op": 1160984.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10328265584.0,
+            "B/op": 578208392.0,
+            "allocs/op": 1160692.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          },
+          {
+            "ns/op": 10354219917.0,
+            "B/op": 576795168.0,
+            "allocs/op": 1160835.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 1132.0
+          }
+        ],
+        "candidate": [
+          {
+            "ns/op": 23243156125.0,
+            "B/op": 884193584.0,
+            "allocs/op": 3963658.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 23486479542.0,
+            "B/op": 875592640.0,
+            "allocs/op": 3964023.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          },
+          {
+            "ns/op": 23732180291.0,
+            "B/op": 869677616.0,
+            "allocs/op": 3963271.0,
+            "corpus-files": 12044.0,
+            "corpus-bytes": 132407542.0,
+            "findings/op": 419.0
+          }
+        ]
+      },
+      "status": "regression",
+      "runtime": {
+        "go": "go1.27.4",
+        "os": "darwin",
+        "arch": "arm64",
+        "gomaxprocs": 2
+      },
+      "corpus": {
+        "files": 12044,
+        "bytes": 132407542,
+        "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+      },
+      "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+      "commits": {
+        "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+        "candidate": "a04626692836c929c32229c30adc7ad39b5dc362"
+      },
+      "medians": {
+        "reference": {
+          "ns/op": 10328265584.0,
+          "B/op": 578208392.0,
+          "allocs/op": 1160835.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        "candidate": {
+          "ns/op": 23486479542.0,
+          "B/op": 875592640.0,
+          "allocs/op": 3963658.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      },
+      "ratios": {
+        "ns/op": 2.2740003489437766,
+        "B/op": 1.514320186483907,
+        "allocs/op": 3.4144887085589253
+      },
+      "regressions": [
+        "ns/op",
+        "B/op",
+        "allocs/op"
+      ]
+    },
+    "fixed_gate_status": "open: last fixed-reference attempt regressed; local parent comparison does not qualify the fixed release gate",
+    "parent_diagnostic_before_jwt": {
+      "source": "6c73aee",
+      "samples": 1,
+      "ns_per_op": 20877113500,
+      "bytes_per_op": 878720824,
+      "allocs_per_op": 3964107,
+      "findings": 419,
+      "scope": "diagnostic, not a paired gate; confirms high cost also exists without this feature"
+    },
+    "profile": {
+      "source": "a046266",
+      "path": "/tmp/prowl-jwt-a046266-cpu.pprof",
+      "jwt_payload_findings_cumulative_seconds": 1.4,
+      "total_cpu_sample_seconds": 21.42,
+      "other_hotspots": [
+        "contextualPassword",
+        "collect",
+        "namedSecrets",
+        "regex matching"
+      ],
+      "scope": "CPU attribution only; no line-level source claims"
+    },
+    "finding_counts": "Parent and optimized candidate both report 419 rows on GOROOT; the fixed old reference reports 1132. Counts do not establish ground-truth recall/equivalence."
+  },
+  "contract": {
+    "revision": "1.5.0-jwt-payload-v1",
+    "scope": "built-in taxonomy and named candidates in compact JSON-object payloads; signature is not authenticated",
+    "root_container_retained": true,
+    "generic_entropy_claims_reported": false,
+    "borrowed_companion_bindings": false,
+    "network_requests_added_by_decoder": false,
+    "caps": {
+      "raw_compact_candidates_per_pass": 4096,
+      "recognized_payload_attempts_shared": 128,
+      "encoded_header_payload_work_shared_bytes": 1048576,
+      "encoded_segment_bytes": 8192,
+      "jwt_depth": 3,
+      "base64_proof_depth": 4,
+      "json_tokens": 4096,
+      "json_depth": 64,
+      "escaped_scalar_checks_shared": 256,
+      "logical_scalar_bytes": 4096
+    },
+    "escaped_values": "complete decoded strings; source range covers lexical JSON scalar within original encoded payload; no prefix identity",
+    "partial_results": "incomplete diagnostics propagate; baseline write refused; guard error/deny follows existing protocol"
+  },
+  "model": {
+    "portable_features": 51,
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "threshold_changed": false,
+    "installed_features": 49,
+    "installed_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "installed_modified_by_task": false
+  },
+  "limitations": [
+    "Template-only credential types do not receive decoded payload items yet",
+    "Whole-container indirect encodings/reconstruction are not fully integrated by this pass",
+    "Five-part encrypted JWE, detached payloads and JWS JSON serialization are outside this compact-claims pass",
+    "No JWT signature/issuer/role/expiry trust or cryptographic validation is implied",
+    "No new public-audit bindings are established inside claims",
+    "Non-exempt children remain subject to ML filtering",
+    "Fixed release performance gate is not green; local parent comparison is a separate passing result",
+    "Final images, installation, deployed runtime and publication not qualified"
+  ]
+}
