@@ -18,7 +18,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
-const Revision = "public-acl-v4-supabase"
+const Revision = "public-acl-v5-firebase-xml"
 const maxRequests = 32
 const maxBody = 64 << 10
 

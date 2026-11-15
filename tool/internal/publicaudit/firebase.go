@@ -80,7 +80,7 @@ func (a *Auditor) Policy() map[string]any {
 	for _, table := range a.tables {
 		tables = append(tables, scopeHash("supabase-table", table))
 	}
-	return map[string]any{"bindings": "structured-siblings-static-js-and-android-google-services", "rtdb": "configured root shallow GET", "storage": "configured bucket root list, one result", "firestore_collections": scopes, "firestore_mask": "prowlAuditMetadataOnly", "supabase_tables": tables, "supabase": "public schema HEAD limit=1, no count, public key only"}
+	return map[string]any{"bindings": "structured-static-js-android-google-services-and-firebase-xml", "rtdb": "configured root shallow GET", "storage": "configured bucket root list, one result", "firestore_collections": scopes, "firestore_mask": "prowlAuditMetadataOnly", "supabase_tables": tables, "supabase": "public schema HEAD limit=1, no count, public key only"}
 }
 
 type firebaseProbe struct{ service, url, project, collection, bucket string }

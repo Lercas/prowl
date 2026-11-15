@@ -362,8 +362,8 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	coverage := model.NewCoverage()
 	options := p.options
 	localOptions := false
-	if options.PublicAuditor != nil && reconstructable(it) && it.Error == nil {
-		options.publicBindings = &publicBindings{text: it.Text}
+	if options.PublicAuditor != nil && (reconstructable(it) || firebaseXMLKind(it.Path) != "") && it.Error == nil {
+		options.publicBindings = &publicBindings{text: it.Text, path: it.Path}
 		localOptions = true
 	}
 	if options.Reconstruct && reconstructable(it) {
