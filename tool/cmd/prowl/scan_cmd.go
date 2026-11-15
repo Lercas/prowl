@@ -70,7 +70,7 @@ func cmdCompare(args []string) int {
 		logx.Error("compare supports only pretty or json output")
 		return 2
 	}
-	det, _, err := loadDetector(c, cfg)
+	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
@@ -79,6 +79,9 @@ func cmdCompare(args []string) int {
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2
+	}
+	if code := detectorPreflight(c, tax, eng); code != 0 {
+		return code
 	}
 
 	// With no explicit mode, compare defaults to the current tree even when stdin is not a TTY.
@@ -284,29 +287,13 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("rule setup failed", "err", err)
 		return 2
 	}
+	if code := detectorPreflight(c, tax, eng); code != 0 {
+		return code
+	}
 	vset, err := loadVerifySet(c)
 	if err != nil {
 		logx.Error("verify setup failed", "err", err)
 		return 2
-	}
-	if problem := noDetectors(c, len(tax.Types), eng); problem != "" {
-		fmt.Fprintln(os.Stderr, "prowl:", problem)
-		return 2
-	}
-	if c.tags != "" && eng != nil && eng.Len() == 0 {
-		logx.Warn("--tags matched no rule template; only built-in detectors run", "tags", c.tags)
-	}
-	if c.disable != "" && !c.silence {
-		known := make([]string, 0, len(tax.Types))
-		for _, secretType := range tax.Types {
-			known = append(known, secretType.ID)
-		}
-		if eng != nil {
-			for _, template := range eng.Templates() {
-				known = append(known, template.ID)
-			}
-		}
-		warnDisableTypos(c.disable, known)
 	}
 
 	items, err := acquire(ctx, c)
@@ -335,6 +322,9 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 		mode, rev := "staged", ""
 		if c.since != "" {
 			mode, rev = "since", c.since
+		}
+		if !source.IsGitRepo(repoDir) {
+			return nil, fmt.Errorf("--%s needs a git repository, but this is not one", mode)
 		}
 		files, err := source.GitChangedFilesIn(ctx, repoDir, mode, rev)
 		if err != nil {

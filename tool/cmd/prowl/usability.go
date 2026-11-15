@@ -15,6 +15,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/post"
 	"github.com/Lercas/prowl/tool/internal/rules"
+	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
 
 // warnMissingPaths names a mistyped path, with the nearest existing name, before any work starts.
@@ -231,4 +232,29 @@ func noDetectors(c commonFlags, taxonomyTypes int, eng *rules.Engine) string {
 		return "no detectors are active: --rules-only disables the built-in ones, so pass your own with --rules FILE or --rules-dir DIR"
 	}
 	return "no detectors are active: the configuration disables every built-in detector and no rule template is selected"
+}
+
+// detectorPreflight runs after the detectors are loaded and before any input is read: it stops a
+// selection with nothing to detect with and points at flag values that select nothing.
+func detectorPreflight(c commonFlags, tax *taxonomy.Taxonomy, eng *rules.Engine) int {
+	if problem := noDetectors(c, len(tax.Types), eng); problem != "" {
+		fmt.Fprintln(os.Stderr, "prowl:", problem)
+		return 2
+	}
+	if c.tags != "" && eng != nil && eng.Len() == 0 {
+		logx.Warn("--tags matched no rule template; only built-in detectors run", "tags", c.tags)
+	}
+	if c.disable != "" && !c.silence {
+		known := make([]string, 0, len(tax.Types))
+		for _, secretType := range tax.Types {
+			known = append(known, secretType.ID)
+		}
+		if eng != nil {
+			for _, template := range eng.Templates() {
+				known = append(known, template.ID)
+			}
+		}
+		warnDisableTypos(c.disable, known)
+	}
+	return 0
 }

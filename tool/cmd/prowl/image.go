@@ -38,7 +38,7 @@ func cmdImage(args []string) int {
 		fmt.Fprintln(os.Stderr, "config error:", err)
 		return 2
 	}
-	det, _, err := loadDetector(c, cfg)
+	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)
 		return 2
@@ -48,6 +48,9 @@ func cmdImage(args []string) int {
 	if err != nil {
 		logx.Error("rule setup failed", "err", err)
 		return 2
+	}
+	if code := detectorPreflight(c, tax, eng); code != 0 {
+		return code
 	}
 	vset, verr := loadVerifySet(c)
 	if verr != nil {

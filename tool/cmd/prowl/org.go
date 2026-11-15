@@ -81,6 +81,9 @@ func cmdOrg(args []string) int {
 		logx.Error("rule setup failed", "err", err)
 		return 2
 	}
+	if code := detectorPreflight(c, tax, eng); code != 0 {
+		return code
+	}
 	vset, verr := loadVerifySet(c)
 	if verr != nil {
 		logx.Error("verify setup failed", "err", verr)

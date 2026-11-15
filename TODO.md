@@ -387,6 +387,13 @@
   сообщают, сколько находок убрали (`report filters hid findings`), — раньше отчёт просто писал
   `no secrets found`. Итоговая строка `scan complete` не считает диагностику неполноты находками
   (отдельное поле `incomplete_inputs`).
+- [x] **Проверки детекторов во всех командах скана** (2026-11-15): отказ при нуле детекторов,
+  предупреждения об опечатке в `--disable` и о `--tags` без совпадений работают в `repo`, `org`,
+  `image`, `mobile`, `cicd`, `domain`, `jira`/`confluence`, `compare`, `serve` (общий
+  `detectorPreflight`), а не только в `scan`.
+- [x] **Понятные ошибки Git-режимов** (2026-11-15): `--since <нет такой ревизии>` сообщает
+  `bad revision '…'` вместо `exit status 128`; `--staged` / `--since` вне репозитория —
+  `needs a git repository` вместо `exit status 129`.
 
 ### Новые возможности (то, что на рынке есть только в enterprise или отсутствует)
 

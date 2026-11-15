@@ -3,6 +3,7 @@ package source
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -64,6 +65,13 @@ func GitChangedFilesIn(ctx context.Context, dir, mode, rev string) ([]string, er
 	}
 	out, err := gitCmd(ctx, dir, args...).Output()
 	if err != nil {
+		// "exit status 128" alone does not say that the revision is unknown; git's own first line does.
+		var exit *exec.ExitError
+		if errors.As(err, &exit) {
+			if reason, _, _ := strings.Cut(strings.TrimSpace(string(exit.Stderr)), "\n"); reason != "" {
+				return nil, fmt.Errorf("git %s: %s: %w", args[0], strings.TrimPrefix(reason, "fatal: "), err)
+			}
+		}
 		return nil, err
 	}
 	// Split on NUL and keep bytes verbatim (a path may contain spaces, so do NOT TrimSpace); only drop
