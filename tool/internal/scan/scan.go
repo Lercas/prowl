@@ -565,7 +565,10 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
-		if pathIsFile && taxonomy.GenericLast[m.Type] && m.Stage != "semantic-candidate" && codeValues.NonLiteral(m.Start, m.End) {
+		// A reconstructed string is already proven by the expression parser.
+		// Its encoded JWT ranges are not identifiers in the original program.
+		provenJWTPayload := m.JWTPayload && p.options.reconstruction != nil
+		if pathIsFile && taxonomy.GenericLast[m.Type] && m.Stage != "semantic-candidate" && !provenJWTPayload && codeValues.NonLiteral(m.Start, m.End) {
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}

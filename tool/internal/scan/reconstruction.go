@@ -78,6 +78,16 @@ func (p *Pipeline) mapReconstructed(fs []model.Finding, it model.Item) {
 		f.Path, f.URL = model.SafeLocator(f.Path), model.SafeLocator(f.URL)
 		f.Stage = "reconstructed/" + f.Stage
 		f.Context = nil
+		// Existing evidence is relative to the reconstructed value, not the
+		// observed file. Preserve its transform chain on the proven expression;
+		// the original literal/binding spans below explain that expression.
+		for j := range f.Evidence {
+			e := &f.Evidence[j]
+			e.Path = model.SafeLocator(it.Path)
+			e.Start, e.End = origin.value.Expression.Start, origin.value.Expression.End
+			e.Line, e.Col = f.Line, f.Col
+			e.Transform = "reconstructed/" + origin.value.Transform + "/" + e.Transform
+		}
 		for _, span := range origin.value.Spans {
 			line, col := origin.lines.cols(span.Start)
 			f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: line, Col: col, Transform: origin.value.Transform})
