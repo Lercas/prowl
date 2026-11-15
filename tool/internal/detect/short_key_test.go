@@ -112,15 +112,23 @@ func FuzzShortKeySourceIdentity(f *testing.F) {
 			return
 		}
 		text := `api_key="` + value + `"`
+		expected := value
 		if mode%2 != 0 {
 			body, _ := json.Marshal(map[string]string{"api_key": value})
+			// JSON marshaling replaces invalid UTF-8 with U+FFFD. The logical
+			// source value, rather than the pre-marshaling byte string, is identity.
+			var logical map[string]string
+			if err := json.Unmarshal(body, &logical); err != nil {
+				t.Fatal(err)
+			}
+			expected = logical["api_key"]
 			text = jwtFixture(string(body))
 		}
 		for _, m := range d.Scan(text) {
 			if m.Start < 0 || m.Start >= m.End || m.End > len(text) {
 				t.Fatal("source bounds lost")
 			}
-			if m.Type == "generic_api_key" && m.Value != value {
+			if m.Type == "generic_api_key" && m.Value != expected {
 				t.Fatal("prefix identity minted")
 			}
 		}

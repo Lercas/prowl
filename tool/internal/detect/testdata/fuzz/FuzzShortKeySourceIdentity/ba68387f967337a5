@@ -1,0 +1,3 @@
+go test fuzz v1
+string("0:\x7f1270A108A9B02C\xd1X")
+byte('K')
