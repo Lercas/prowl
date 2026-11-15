@@ -289,6 +289,25 @@
       "resolution": "Free space later recovered without deletion. Final clean unstripped build succeeded; no cleanup authorization was consumed."
     }
   ],
+  "integration": {
+    "main_base": "0b8cfd5e2962420982634c3b3778d3d5834244fb",
+    "candidate_base": "81033d9460282b015ff2f8793b6cff0a35bf6abd",
+    "main_runtime": "57d5d22c9b28eceeffb3eeec405ce653f25dba1b",
+    "candidate_runtime": "cb8781d5d00d456d59fc5aeeb872a22bfb359de7",
+    "main_qualification": "30965b650226c52ee08454544ace0776abbd9a46",
+    "candidate_qualification": "8bcc8bd0f8b09b455320b09a8f5d36018294e412",
+    "main_matches_isolated_tree": true,
+    "preexisting_cross_checkout_differing_files": 27,
+    "all_preexisting_differences_preserved": true,
+    "todo_cross_diff_preserved": true,
+    "candidate_tool_differences": [
+      "tool/Dockerfile",
+      "tool/Dockerfile.action",
+      "tool/action-entrypoint.sh",
+      "tool/action.yml"
+    ],
+    "note": "Main and candidate were clean before/after cherry-picks. All existing cross-checkout differences were compared to each checkout's own base; the complete repository trees are intentionally different. Only the four preserved Docker/action files differ inside tool. Images were not rebuilt or activated."
+  },
   "limitations": [
     "Raw-member digest does not authenticate the complete package or an installed/mobile runtime.",
     "Printable-string and decoded-text coordinates do not claim original binary byte offsets.",
