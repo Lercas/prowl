@@ -81,6 +81,12 @@ report); `false` = dead/rotated; `null` = generic type with no verifier, judge b
 С `--verify`, `--verify-all`, `--verified-only` и `--fail-on-verified` режим не совмещается. MCP/HTTP/LSP
 не включают этот аудит. [Контракт](wiki/Firebase-Public-Audit.md).
 
+Supabase: `--audit-supabase-table NAME` выбирает public-schema таблицы. Только HEAD
+с publishable/узко распознанным anon key, без user session/RPC/тела ответа.
+Service-role ключи не используются. Принятый запрос не доказывает отсутствие RLS.
+Дополнительный publishable subject включён только в audit-режиме, severity info.
+[Контракт](wiki/Supabase-Public-Audit.md).
+
 ## Interface language
 
 Everything the tool shows a user is in English: help, flag descriptions, errors, logs, report text,

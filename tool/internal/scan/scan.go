@@ -36,6 +36,7 @@ var categorySeverity = map[string]string{
 	"cloud": "high", "vcs": "high", "ai": "high", "comms": "high", "messaging": "high",
 	"ci": "high", "saas": "high", "observability": "high", "auth": "high",
 	"generic": "medium",
+	"public":  "info",
 }
 
 func severityFor(category string, conf float64) string {
@@ -456,6 +457,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if literalDoc != nil {
 				opts.PasswordScalars = literalDoc.scalars
 			}
+			opts.PublicKeys = p.options.PublicAuditor != nil
 			result := det.ScanWithStatus(ctx, it.Text, opts)
 			ms, truncated = result.Matches, result.CandidateLimited || result.Base64Limited
 		},

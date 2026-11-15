@@ -210,6 +210,7 @@ type ScanOptions struct {
 	BarePasswordLiterals bool
 	PasswordScalars      map[int]PasswordScalar
 	YAML                 bool
+	PublicKeys           bool // Explicit public-audit subjects, never ordinary secret detection.
 }
 
 type ScanResult struct {
@@ -282,6 +283,11 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 		var scalarLimited bool
 		all, scalarLimited = d.scalarMatches(ctx, text, all, opts.PasswordScalars)
 		candidateCapped = candidateCapped || scalarLimited
+	}
+	if opts.PublicKeys {
+		public, limited := publicKeyCandidates(ctx, text)
+		all = append(all, public...)
+		candidateCapped = candidateCapped || limited
 	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
 	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited

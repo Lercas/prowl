@@ -118,8 +118,9 @@ Credential baseline не подавляет `public_key_audit`, в том чис
 контракты. Финальные сетевые проверки используют локальный provider fixture;
 реальный аккаунт не квалифицирован и требует отдельного разрешённого ресурса.
 Полный пункт TODO остаётся открыт: прочие форматы/связи, надёжное распознавание admin,
-Supabase и Google API restrictions ещё не реализованы; Firebase имеет отдельный
-[ограниченный read-only контракт](Firebase-Public-Audit.md).
+Google API restrictions ещё не реализованы. Firebase и Supabase имеют отдельные
+ограниченные контракты: [Firebase](Firebase-Public-Audit.md),
+[Supabase](Supabase-Public-Audit.md). Наблюдение чтения не доказывает отсутствие rules/RLS.
 
 Локальная CLI-матрица — 32/32; полный Go-набор, race затронутых компонентов,
 lint и минимальный Go 1.26.11 проходят. Зафиксированы отдельные source/binary

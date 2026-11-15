@@ -421,6 +421,13 @@
   ключ», а «правильно ли он ограничен». Отдельный opt-in `--audit-public --authorized`
   отделяет наблюдение прав от обычного `--verify` (его профили не гарантируют read-only).
   - [ ] Supabase: anon-ключ + таблицы без RLS.
+    - [x] Bounded HEAD для явных public-schema таблиц с publishable/узко
+      распознанным legacy anon key. Same-object URL/ref, без user session,
+      RPC/записи/тела ответа; scoped checks и неполнота при сбое.
+      Публичный ключ сам по себе не считается утечкой.
+      [Контракт](wiki/Supabase-Public-Audit.md).
+    - [ ] Подтверждение RLS на разрешённом аккаунте, другие форматы привязок,
+      custom/self-hosted endpoints и schemas. HEAD не доказывает отсутствие RLS.
   - [x] Credential baseline не скрывает изменившиеся public-права Firebase/Algolia
     и не принимает идентичности audited-находок; сохранены occurrences,
     JSON/SARIF и severity gate. Целевые Go/race/min-Go и lint проходят.

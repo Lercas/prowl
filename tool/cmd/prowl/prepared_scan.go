@@ -41,7 +41,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	var auditErr error
 	if flags.auditPublic {
 		// Parsing has already validated the immutable collection selection.
-		options.PublicAuditor, auditErr = publicaudit.NewWithCollections(flags.timeout, flags.auditCollections)
+		options.PublicAuditor, auditErr = publicaudit.NewWithTargets(flags.timeout, flags.auditCollections, flags.auditTables)
 	}
 	var indexErr error
 	if flags.indexDir != "" {

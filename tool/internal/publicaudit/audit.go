@@ -18,7 +18,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
-const Revision = "public-acl-v3-firebase"
+const Revision = "public-acl-v4-supabase"
 const maxRequests = 32
 const maxBody = 64 << 10
 
@@ -33,6 +33,7 @@ type Auditor struct {
 	attempts    int
 	slots       chan struct{}
 	collections []string
+	tables      []string
 }
 type entry struct {
 	done   chan struct{}
@@ -49,7 +50,17 @@ func New(timeout time.Duration) *Auditor {
 	return &Auditor{client: client, entries: make(map[[32]byte]*entry), slots: make(chan struct{}, 4)}
 }
 
-func Supports(typ string) bool { return typ == "algolia-api-key" || GoogleType(typ) }
+func Supports(typ string) bool {
+	return typ == "algolia-api-key" || GoogleType(typ) || supabaseType(typ)
+}
+
+func supabaseType(typ string) bool {
+	switch typ {
+	case "jwt", "generic_api_key", "generic_high_entropy", "supabase-publishable-key":
+		return true
+	}
+	return false
+}
 
 func GoogleType(typ string) bool {
 	switch typ {
@@ -68,6 +79,9 @@ func Inconclusive(reason string) *model.PublicKeyAudit {
 func (a *Auditor) Audit(ctx context.Context, typ, key string, bindings map[string]string) *model.PublicKeyAudit {
 	if !Supports(typ) {
 		return nil
+	}
+	if supabaseType(typ) {
+		return a.auditSupabase(ctx, key, bindings)
 	}
 	if typ != "algolia-api-key" {
 		return a.auditFirebase(ctx, key, bindings)

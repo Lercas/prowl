@@ -59,7 +59,7 @@ func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor,
 	f.PublicKeyAudit = auditor.Audit(ctx, c.typ, c.value, bindings)
 	if f.PublicKeyAudit == nil {
 		return
-	} // A generic Google key without Firebase config is not a Firebase audit target.
+	} // Inapplicable public-key candidates have no audit metadata.
 	if f.PublicKeyAudit.Status == "inconclusive" {
 		model.Note(ctx, "public_key_audit_inconclusive", path, true)
 	}

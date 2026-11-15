@@ -268,8 +268,9 @@ var cliFlags = []flagSpec{
 	intFlag("--concurrency", "org hermes-audit", "source concurrency", 1, func(c *commonFlags) *int { return &c.cmd.concurrency }),
 	listFlag("--exclude-repo", "org", "skip matching repository URL substrings", true, func(c *commonFlags) *[]string { return &c.cmd.excludeRepos }),
 	boolFlag("--gists", "org", "scan a GitHub user's public gists", func(c *commonFlags) *bool { return &c.cmd.gists }),
-	boolFlag("--audit-public", "domain mobile", "read-only public-key ACL/Firebase audit; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
+	boolFlag("--audit-public", "domain mobile", "read-only public-key permission audit; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
 	listFlag("--audit-firestore-collection", "domain mobile", "explicit Firestore collection path; requires --audit-public; up to 8", false, func(c *commonFlags) *[]string { return &c.auditCollections }),
+	listFlag("--audit-supabase-table", "domain mobile", "explicit public-schema Supabase table name; requires --audit-public; up to 8", false, func(c *commonFlags) *[]string { return &c.auditTables }),
 	boolFlag("--authorized", "domain mobile hermes-audit", "attest that all targets are in your authorized scope", func(c *commonFlags) *bool { return &c.cmd.authorized }),
 	boolFlag("--recon", "domain", "enumerate public subdomains and historical assets", func(c *commonFlags) *bool { return &c.cmd.recon }),
 	intFlag("--max-assets", "domain", "maximum web assets (default 300)", 1, func(c *commonFlags) *int { return &c.cmd.maxAssets }),
@@ -453,6 +454,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if len(c.auditCollections) > 0 && !c.auditPublic {
 		return c, nil, errors.New("--audit-firestore-collection requires --audit-public")
 	}
+	if len(c.auditTables) > 0 && !c.auditPublic {
+		return c, nil, errors.New("--audit-supabase-table requires --audit-public")
+	}
 	if c.auditPublic {
 		if !c.cmd.authorized {
 			return c, nil, errors.New("--audit-public requires --authorized")
@@ -462,6 +466,11 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 			return c, nil, err
 		}
 		c.auditCollections = collections
+		tables, err := publicaudit.ValidateTables(c.auditTables)
+		if err != nil {
+			return c, nil, err
+		}
+		c.auditTables = tables
 		if c.verify || c.failOnVerified {
 			return c, nil, errors.New("--audit-public cannot be combined with verification flags")
 		}
@@ -606,6 +615,7 @@ type commonFlags struct {
 	rulesDir                                 []string
 	tags, excludeTags, ruleSeverity          string
 	auditCollections                         []string
+	auditTables                              []string
 	auditPublic                              bool
 	verify, verifiedOnly                     bool
 	showSecrets                              bool // --show-secrets: emit the full unredacted value
