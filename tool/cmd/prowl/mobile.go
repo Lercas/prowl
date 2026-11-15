@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/logx"
+	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/source"
@@ -97,7 +98,7 @@ func cmdMobile(args []string) int {
 		defer os.RemoveAll(tmp)
 		p, derr := downloadToTemp(ctx, target, tmp, c.maxSize, c.timeout)
 		if derr != nil {
-			logx.Error("mobile download failed", "url", redactURL(target), "reason", mobileDownloadFailureClass(derr))
+			logx.Error("mobile download failed", "url", model.SafeLocator(target), "reason", mobileDownloadFailureClass(derr))
 			return prepared.Run(ctx, source.MobileFailure(ctx, downloadName(target), opts))
 		}
 		localPath = p
