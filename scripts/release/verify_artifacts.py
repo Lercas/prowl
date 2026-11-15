@@ -5,8 +5,42 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import stat
 import tarfile
 import zipfile
+
+
+def verify_archive(path, extension, executable):
+    required = {executable, "README.md", "README.ru.md", "LICENSE", "docs/README.md"}
+    seen = set()
+
+    def member(name, regular, directory, size):
+        canonical = "docs" if name in ("docs", "docs/") else name
+        if canonical in seen:
+            raise ValueError(f"duplicate archive member: {name}")
+        seen.add(canonical)
+        if canonical == "docs":
+            if not directory or size != 0:
+                raise ValueError("docs archive member must be an empty directory")
+        elif name in required:
+            if not regular or directory or size <= 0:
+                raise ValueError(f"required archive member must be a nonempty regular file: {name}")
+        else:
+            raise ValueError(f"unexpected archive member: {name}")
+
+    if extension == "zip":
+        with zipfile.ZipFile(path) as archive:
+            for entry in archive.infolist():
+                mode = stat.S_IFMT(entry.external_attr >> 16)
+                directory = entry.is_dir() or mode == stat.S_IFDIR or bool(entry.external_attr & 0x10)
+                member(entry.filename, mode in (0, stat.S_IFREG) and not directory,
+                       directory and mode in (0, stat.S_IFDIR), entry.file_size)
+    else:
+        with tarfile.open(path) as archive:
+            for entry in archive:
+                member(entry.name, entry.isfile(), entry.isdir(), entry.size)
+    if not required <= seen:
+        raise ValueError(f"incomplete archive: {path.name}")
 
 
 def verify_checksums(root, name):
@@ -52,23 +86,7 @@ def verify(root, image_sboms=False):
         platforms.add((os_name, arch))
         versions.add(version)
         path = root / name
-        if extension == "zip":
-            with zipfile.ZipFile(path) as archive:
-                entries = archive.infolist()
-                if any((entry.external_attr >> 16) & 0o170000 == 0o120000 for entry in entries):
-                    raise ValueError("linked archive member")
-                members = {entry.filename for entry in entries}
-        else:
-            with tarfile.open(path) as archive:
-                entries = archive.getmembers()
-                if any(not entry.isfile() and not entry.isdir() for entry in entries):
-                    raise ValueError("linked or special archive member")
-                members = {entry.name for entry in entries}
-        required = {"prowl.exe" if os_name == "windows" else "prowl", "README.md", "README.ru.md", "LICENSE", "docs/README.md"}
-        if not required <= members:
-            raise ValueError(f"incomplete archive: {name}")
-        if any(member not in required and member.rstrip("/") != "docs" for member in members):
-            raise ValueError(f"unexpected archive member: {name}")
+        verify_archive(path, extension, "prowl.exe" if os_name == "windows" else "prowl")
         sbom = name + ".spdx.json"
         if sbom not in files:
             raise ValueError(f"SBOM is not checksum-protected: {sbom}")
