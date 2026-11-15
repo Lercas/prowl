@@ -425,7 +425,10 @@
       распознанным legacy anon key. Same-object URL/ref, без user session,
       RPC/записи/тела ответа; scoped checks и неполнота при сбое.
       Публичный ключ сам по себе не считается утечкой.
-      [Контракт](wiki/Supabase-Public-Audit.md).
+      CLI 40/40 под проверенным OS network deny, owned HTTP pipeline,
+      full Go/race/lint/min-Go и два fuzz-прогона проходят.
+      [Контракт](wiki/Supabase-Public-Audit.md),
+      `wiki/evidence/1.5.0-supabase-audit-20261115.json`.
     - [ ] Подтверждение RLS на разрешённом аккаунте, другие форматы привязок,
       custom/self-hosted endpoints и schemas. HEAD не доказывает отсутствие RLS.
   - [x] Credential baseline не скрывает изменившиеся public-права Firebase/Algolia

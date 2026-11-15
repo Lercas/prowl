@@ -1,0 +1,299 @@
+{
+  "source_commit": "73e68a9",
+  "binary": "/tmp/prowl-supabase-audit-20261115-bin",
+  "sha256": "3464b5fb4b1108046fa58ab31d4606ba0f35ad8e9cdb6818348af7ad0356d0ff",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-supabase-native-61adpzkb",
+  "sandbox_profile": "(version 1)(allow default)(deny network*)",
+  "network_boundary_control": {
+    "owned_control_requests": 1,
+    "sandbox_requests": 0,
+    "blocked_exit": 7
+  },
+  "cases": [
+    {
+      "case": "publishable-json-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-json-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-js-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-js-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-mjs-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-mjs-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-yaml-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-yaml-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-toml-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "publishable-toml-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-json-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-json-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-js-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-js-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-mjs-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-mjs-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-yaml-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-yaml-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-toml-l1",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "anon-toml-ml",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "invalid-0",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-1",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-2",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-3",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-4",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-5",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-6",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "invalid-7",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "missing-table",
+      "passed": true,
+      "outcome": "invalid binding rejected before transport"
+    },
+    {
+      "case": "two-tables",
+      "passed": true,
+      "outcome": "planned HEAD blocked by verified OS network deny"
+    },
+    {
+      "case": "preflight-30",
+      "passed": true
+    },
+    {
+      "case": "preflight-31",
+      "passed": true
+    },
+    {
+      "case": "preflight-32",
+      "passed": true
+    },
+    {
+      "case": "preflight-33",
+      "passed": true
+    },
+    {
+      "case": "preflight-34",
+      "passed": true
+    },
+    {
+      "case": "preflight-35",
+      "passed": true
+    },
+    {
+      "case": "sarif",
+      "passed": true
+    },
+    {
+      "case": "pretty",
+      "passed": true
+    },
+    {
+      "case": "inconclusive-baseline-preserved",
+      "passed": true
+    },
+    {
+      "case": "opt-out",
+      "passed": true
+    }
+  ],
+  "passed": 40,
+  "failed": 0,
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "real_provider_qualification": false,
+  "integration": {
+    "main_source_commit": "d7067f9ecb5a63d34f3653dcb31ae2b70860b5c3",
+    "isolated_source_commit": "73e68a9d8c9317e93986b5c5385cde9aff309fd3",
+    "source_trees_equal": true,
+    "main_binary": {
+      "path": "/tmp/prowl-supabase-main-20261115",
+      "sha256": "47f37bbf0195f47a128e70599b0cdd2352a044227a9f0d121a93397872c56f77",
+      "platform": "darwin/arm64 CGO=0",
+      "vcs_modified": false,
+      "scope": "Build and targeted main Go integration; the 40-case native matrix above ran the isolated clean-source binary"
+    },
+    "docker_candidate_source_commit": "50068fca03c7b62dc16cec7a2594a5e4b8047225",
+    "images_rebuilt": false,
+    "release_qualified": false
+  },
+  "checks": {
+    "full_go": "Go 1.27.4 CGO=0 go test -p 2 ./...; PROWL_LIVE_TEST empty",
+    "race": [
+      "internal/publicaudit",
+      "internal/detect",
+      "internal/scan",
+      "cmd/prowl"
+    ],
+    "minimum_go": "Go 1.26.11 same affected packages",
+    "lint": "golangci-lint zero issues",
+    "fuzz": [
+      {
+        "target": "FuzzSupabasePublicKey",
+        "seconds": 5,
+        "executions": 176059
+      },
+      {
+        "target": "FuzzPublicKeySubjectSpans",
+        "seconds": 5,
+        "executions": 405527
+      }
+    ],
+    "owned_http_pipeline": [
+      "publishable and legacy anon through JSON/JS/YAML/TOML",
+      "post-ML exact surviving publishable object; existing structural JWT exemption preserved",
+      "no Authorization/user session/cookies/Prefer count",
+      "HEAD only, selected fixed table path, explicit public schema",
+      "unknown aliases/cross-object binding rejected before transport",
+      "response metadata and key not serialized",
+      "same-host and foreign-host redirects refused",
+      "HEAD body never read and response closed",
+      "shared budget and credential-separated cache; inconclusive retry"
+    ],
+    "native": "40/40: 20 L1/ML format cases, 8 invalid configs, missing/two tables, 6 CLI preflight cases, SARIF/pretty, baseline preservation, opt-out"
+  },
+  "contract": {
+    "method": "HEAD",
+    "path": "fixed managed /rest/v1/TABLE?limit=1",
+    "schema": "public",
+    "keys": "publishable or narrow legacy anon shape; key sent only as apikey header",
+    "user_session": false,
+    "response_body_read": false,
+    "discovery": false,
+    "writes": false,
+    "count_requested": false,
+    "max_tables": 8,
+    "shared_request_attempts": 32,
+    "shared_concurrency": 4,
+    "timeout_seconds_max": 10,
+    "legacy_verification_fields_set": false,
+    "rls_disabled_claimed": false,
+    "default_detection_changed": false,
+    "public_subject": "supabase-publishable-key, opt-in only, severity info",
+    "legacy_jwt_signature_verified_offline": false,
+    "baseline": "Audited observations are not suppressed by credential baseline or accepted as credential identities"
+  },
+  "model": {
+    "portable_features": 51,
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "threshold_changed": false,
+    "installed_model_path": "/Users/sugar/.prowl/model_binary.json",
+    "installed_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "installed_features": 49,
+    "installed_modified_by_task": false
+  },
+  "limitations": [
+    "No real Supabase account, key, RLS configuration or grants qualified",
+    "HEAD acceptance/empty response does not prove readable rows, disabled RLS or unintended disclosure",
+    "HTTP 403 is a request rejection, not a diagnosis of grants versus gateway versus RLS",
+    "Simple public schema table identifiers only; table/view distinction not inferred",
+    "No custom/self-hosted domains, XML/plist/dex/env bindings or cross-declaration/file joins",
+    "Strict legacy JWT subset; other headers/claims excluded without claims of safety",
+    "Server-side pre-request hooks/policies can execute during ordinary read requests",
+    "ML can drop non-exempt candidates; structural JWT exemption unchanged",
+    "No final images, installed-model migration, deployment or external release publication"
+  ]
+}
