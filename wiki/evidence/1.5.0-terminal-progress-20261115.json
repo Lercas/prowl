@@ -3,7 +3,9 @@
   "base_commit": "417033f",
   "preserved_parallel_commits": [
     "fb02f32",
-    "417033f"
+    "417033f",
+    "c312c9a",
+    "e140353"
   ],
   "native": {
     "complete": true,
@@ -230,5 +232,80 @@
     "owned local fixtures only; no external providers or registry",
     "source package, model and detection policy untouched",
     "final images and release publication separate"
-  ]
+  ],
+  "main_integration": {
+    "source_commit": "ef261183d43031dd724c07f73a1c0a67b822a50c",
+    "base_commit": "e140353",
+    "binary_vcs_modified": false,
+    "full_go": "passed ./... Go 1.27.4 CGO_ENABLED=0",
+    "race": "passed cmd/prowl",
+    "minimum_go": "passed current progress/preflight CLI cases Go 1.26.11",
+    "lint": "0 issues",
+    "cross_builds": [
+      "linux/amd64",
+      "linux/arm64",
+      "darwin/amd64",
+      "darwin/arm64",
+      "windows/amd64",
+      "windows/arm64"
+    ],
+    "native": {
+      "complete": true,
+      "binary_sha256": "0018806280d69fe9770d52f4a68fb8dd07b8e5806164634d0c65a7bdf9472634",
+      "passed": 36,
+      "total": 36,
+      "requests": 14,
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-progress-native-xdb223u_",
+      "scope": "real local Unix PTYs with independent stdout/stderr, owned local Git clone shim, stdin image tar and loopback verifier only; preserves stderr progress for files and pipes; Windows terminal runtime not qualified"
+    },
+    "repository": {
+      "binary_sha256": "0018806280d69fe9770d52f4a68fb8dd07b8e5806164634d0c65a7bdf9472634",
+      "passed": 99,
+      "total": 99,
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-native-a23nyslo",
+      "scope": "local Git clone wrapper, owned Git objects and loopback org inventory only; no real remote repository or provider use"
+    },
+    "verdicts": {
+      "binary_sha256": "0018806280d69fe9770d52f4a68fb8dd07b8e5806164634d0c65a7bdf9472634",
+      "passed": 49,
+      "total": 49
+    },
+    "source_coverage": {
+      "binary_sha256": "0018806280d69fe9770d52f4a68fb8dd07b8e5806164634d0c65a7bdf9472634",
+      "passed": 36,
+      "total": 36
+    },
+    "quality": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "0018806280d69fe9770d52f4a68fb8dd07b8e5806164634d0c65a7bdf9472634",
+      "passed": true,
+      "recall": 0.7430754536771729,
+      "t4_fp_rate": 0.05804480651731161,
+      "secret_hits": 1556,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "status": "passed"
+    },
+    "candidate_source_commit": "fc8fdbc",
+    "final_images": "not rebuilt or qualified",
+    "external_ci": "not run"
+  }
 }
