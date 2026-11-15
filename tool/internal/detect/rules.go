@@ -555,6 +555,14 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				}
 			}
 			val := text[vs:ve]
+			if st.ID == "generic_api_key" && len(val) < minNamedSecret {
+				name := BindingName(text, vs)
+				ok, hexOnly := nameIsSecretLike(name)
+				end, complete := literalPasswordEnd(text, vs)
+				if name == "" || !ok || !complete || end != ve || (!quoted && bareValueIsCode(text, vs, ve)) || !d.boundKeyValueOK(name, val, hexOnly) {
+					continue
+				}
+			}
 			transform := ""
 			if literalPassword {
 				if scalar, ok := opts.PasswordScalars[vs]; ok && scalar.End >= vs && scalar.End <= len(text) && len(scalar.Value) <= 4096 {

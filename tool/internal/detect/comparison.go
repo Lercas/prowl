@@ -135,7 +135,7 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 			return Match{}, false
 		}
 	} else {
-		if !d.genericKey || !namedKeyValueOK(value, field.hexOnly) {
+		if !d.genericKey || !d.boundKeyValueOK(field.name, value, field.hexOnly) {
 			return Match{}, false
 		}
 		typ, category = "generic_api_key", d.genericKeyCat

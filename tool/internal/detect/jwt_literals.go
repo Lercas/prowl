@@ -126,7 +126,7 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			nominated, _ = d.scalarMatches(ctx, v.value, nil, map[int]PasswordScalar{0: {Name: v.name, Value: v.value, End: len(v.value)}})
 			if len(nominated) == 0 && d.genericKey {
 				ok, hexOnly := nameIsSecretLike(v.name)
-				if ok && namedKeyValueOK(v.value, hexOnly) {
+				if ok && d.boundKeyValueOK(v.name, v.value, hexOnly) {
 					nominated = append(nominated, Match{Type: "generic_api_key", Value: v.value, Start: 0, End: len(v.value), Confidence: .6, Category: d.genericKeyCat, Stage: stageContextKey, ContextName: v.name})
 				}
 			}

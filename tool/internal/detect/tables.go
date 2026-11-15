@@ -205,7 +205,7 @@ func (d *Detector) fieldValue(value string, lo, hi int, field tableField, stage 
 			return Match{}, false
 		}
 	case "key":
-		if !d.genericKey || utf8.RuneCountInString(value) > 200 || !namedKeyValueOK(value, field.hexOnly) {
+		if !d.genericKey || utf8.RuneCountInString(value) > 200 || !d.boundKeyValueOK(field.name, value, field.hexOnly) {
 			return Match{}, false
 		}
 		typ, category = "generic_api_key", d.genericKeyCat

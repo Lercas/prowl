@@ -27,9 +27,10 @@ import (
 // decides on the name and the value, so widening the accepted syntax does not widen what is reported.
 
 const (
-	stageContextKey = "L1-context-key"
-	minNamedSecret  = 20
-	minHexSecret    = 32
+	stageContextKey     = "L1-context-key"
+	minNamedSecret      = 20
+	minShortNamedSecret = 12
+	minHexSecret        = 32
 )
 
 var (
@@ -38,7 +39,7 @@ var (
 	// (DEPLOY_ in DEPLOY_TOKEN) is recovered by nameStart.
 	reNamedKey = regexp.MustCompile("(?i)((?:token|secret|api[_\\- ]?key|apikey|key|credential)[A-Za-z0-9_\\-]*)" +
 		"[\"'`\\])]{0,3}[ \\t]*(?:=>|:=|=|:)[ \\t]*" +
-		"(?:[bru]?\"([^\"\\s]{16,200})\"|[bru]?'([^'\\s]{16,200})'|`([^`\\s]{16,200})`|([A-Za-z0-9_\\-+/=.]{16,200}))")
+		"(?:[bru]?\"([^\"\\s]{12,200})\"|[bru]?'([^'\\s]{12,200})'|`([^`\\s]{12,200})`|([A-Za-z0-9_\\-+/=.]{12,200}))")
 	// 1 = a generated key in a bounded, explicit prose binding.
 	reProseKey = regexp.MustCompile("(?i)(?:api[_\\- ]?key|apikey|[A-Za-z0-9_]*_key|[A-Za-z0-9_]*secret|[A-Za-z0-9_]*token)[A-Za-z0-9_]*(?:\\*\\*)?[\"'`]?(?:[ \\t]+(?:is|was|equals|lautet|ist|est|actuel|actual|atual|é|è|es|to|now|used|for|authentication|access)){0,4}[ \\t]*(?:[(:（：]|[—–-][ \\t]+|[ \\t]+)[ \\t]*[\"'`(]?([A-Za-z0-9_\\-+/=.]{16,200})")
 	// 1 = base64 credentials after the Basic scheme.
@@ -209,7 +210,11 @@ var reUUID = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 
 // namedKeyValueOK applies the value-side checks shared by every named-key form.
 func namedKeyValueOK(v string, hexOnly bool) bool {
-	if len(v) < minNamedSecret || hexOnly && !isHexRun(v) {
+	return namedKeyValueWithMinimum(v, hexOnly, minNamedSecret)
+}
+
+func namedKeyValueWithMinimum(v string, hexOnly bool, minimum int) bool {
+	if len(v) < minimum || hexOnly && !isHexRun(v) {
 		return false
 	}
 	if strings.Contains(v, "://") || reUUID.MatchString(v) || isVersionOrNumber(v) {
@@ -219,6 +224,34 @@ func namedKeyValueOK(v string, hexOnly bool) bool {
 		return false
 	}
 	return looksRandom(v)
+}
+
+// Short generated material needs an explicit credential field and a taxonomy
+// that accepts its length. The legacy prose path retains its twenty-byte floor.
+func (d *Detector) boundKeyValueOK(name, value string, hexOnly bool) bool {
+	if len(value) >= minNamedSecret {
+		return namedKeyValueOK(value, hexOnly)
+	}
+	ok, onlyHex := nameIsSecretLike(name)
+	if !ok || !namedKeyValueWithMinimum(value, hexOnly || onlyHex, minShortNamedSecret) {
+		return false
+	}
+	for _, ct := range d.types {
+		if ct.st.ID != "generic_api_key" {
+			continue
+		}
+		for _, field := range []string{name, "api_key"} {
+			prefix := "\"" + field + "\": \""
+			ix := ct.st.RE.FindStringSubmatchIndex(prefix + value + "\"")
+			if ix != nil {
+				start, end := extractSpan(ix, ct.st.Extract)
+				if start == len(prefix) && end == start+len(value) {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 var identifierWords = []string{
@@ -318,7 +351,8 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			if full() {
 				break
 			}
-			ok, hexOnly := nameIsSecretLike(text[nameStart(text, ix[2]):ix[3]])
+			name := text[nameStart(text, ix[2]):ix[3]]
+			ok, hexOnly := nameIsSecretLike(name)
 			vs, ve, found := firstGroup(ix, 2, 5)
 			if !ok || !found {
 				continue
@@ -328,8 +362,14 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			if ix[10] >= 0 && bareValueIsCode(text, vs, ve) {
 				continue
 			}
+			if ve-vs < minNamedSecret && ix[10] < 0 {
+				end, complete := literalPasswordEnd(text, vs)
+				if !complete || end != ve {
+					continue
+				}
+			}
 			val := strings.TrimRight(text[vs:ve], ".=")
-			if !namedKeyValueOK(val, hexOnly) {
+			if !d.boundKeyValueOK(name, val, hexOnly) {
 				continue
 			}
 			out = append(out, Match{Type: "generic_api_key", Value: val, Start: vs, End: vs + len(val),
