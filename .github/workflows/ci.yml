@@ -86,6 +86,8 @@ jobs:
           python3 scripts/check_config_disable.py "$RUNNER_TEMP/prowl-acquisition"
       - name: Jira and Confluence acquisition reports
         run: python3 scripts/check_atlassian_contract.py "$RUNNER_TEMP/prowl-acquisition"
+      - name: terminal progress, stream separation and cancellation
+        run: python3 scripts/check_progress_contract.py "$RUNNER_TEMP/prowl-acquisition"
       - name: prose credential ranges and private report identity
         run: python3 scripts/check_prose_contract.py "$RUNNER_TEMP/prowl-acquisition"
       - name: fixed candidate comparison and semantic transport

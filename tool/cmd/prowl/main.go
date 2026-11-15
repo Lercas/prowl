@@ -16,6 +16,7 @@ var version = "dev"
 func main() { os.Exit(runCLI(os.Args[1:])) }
 
 func runCLI(args []string) int {
+	defer progress.finish()
 	args = normalizeScanArgs(args)
 	// Block outbound connections to private/loopback IPs (SSRF guard) by default; opt out explicitly.
 	safehttp.AllowPrivate.Store(os.Getenv("PROWL_ALLOW_PRIVATE_IPS") != "")

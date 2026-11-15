@@ -22,10 +22,12 @@ const (
 
 // progressMeter draws one status line on a terminal while a long command works: the current stage,
 // the items and bytes handed to the scanner, and the elapsed time. Stages may nest and overlap
-// (parallel clones in `org`); the line names the stage that started last and is still running.
+// (parallel clones in `org`). Image loading takes precedence during lazy reads; otherwise
+// the line names the stage that started last and is still running.
 type progressMeter struct {
 	mu            sync.Mutex
 	out           io.Writer
+	columns       func() int
 	delay, every  time.Duration
 	stages        []*progressStage
 	started, idle time.Time
@@ -41,7 +43,7 @@ var progress = &progressMeter{out: os.Stderr, delay: progressDelay, every: progr
 // progressEnabled keys on stderr alone: a report redirected to a file or a pipe is exactly the
 // long run where a person is left looking at an empty terminal.
 func progressEnabled(c commonFlags) bool {
-	return !c.quiet && !c.silence && isTTY(os.Stderr)
+	return !c.quiet && !c.silence && os.Getenv("TERM") != "dumb" && supportsProgressTerminal(os.Stderr)
 }
 
 // startStage begins a named stage and returns the function that ends it.
@@ -72,11 +74,18 @@ func (m *progressMeter) stage(label string) func() {
 
 func (m *progressMeter) end(entry *progressStage) {
 	m.mu.Lock()
+	found := false
 	for i, stage := range m.stages {
 		if stage == entry {
 			m.stages = append(m.stages[:i], m.stages[i+1:]...)
+			found = true
 			break
 		}
+	}
+	// A report may finish before a cancelled acquisition goroutine unwinds.
+	if !found {
+		m.mu.Unlock()
+		return
 	}
 	if len(m.stages) > 0 {
 		m.mu.Unlock()
@@ -88,7 +97,33 @@ func (m *progressMeter) end(entry *progressStage) {
 	close(stop)
 	<-stopped
 	m.mu.Lock()
-	m.erase()
+	// A new stage can start while the previous loop is joining. Its line belongs to
+	// the new loop and must not be erased by this older finish callback.
+	if m.stop == stop {
+		m.erase()
+	}
+	m.mu.Unlock()
+}
+
+// finish stops rendering before a report or command exit, including when acquisition
+// goroutines are still unwinding cancellation. Their late stage callbacks are harmless.
+func (m *progressMeter) finish() {
+	m.mu.Lock()
+	if len(m.stages) == 0 {
+		m.erase()
+		m.mu.Unlock()
+		return
+	}
+	m.stages = nil
+	stop, stopped := m.stop, m.stopped
+	m.idle = time.Now()
+	m.mu.Unlock()
+	close(stop)
+	<-stopped
+	m.mu.Lock()
+	if m.stop == stop {
+		m.erase()
+	}
 	m.mu.Unlock()
 }
 
@@ -114,11 +149,43 @@ func (m *progressMeter) draw(now time.Time) {
 	if len(m.stages) == 0 || elapsed < m.delay {
 		return
 	}
-	line := "  " + m.stages[len(m.stages)-1].label + "…"
-	if n := m.count.Load(); n > 0 {
-		line += fmt.Sprintf(" %d files · %s ·", n, humanBytes(m.size.Load()))
+	label := m.stages[len(m.stages)-1].label
+	// Image metadata returns before lazy layer reads finish. Merely starting the scanner
+	// must not hide the acquisition still feeding it.
+	for i := len(m.stages) - 1; i >= 0; i-- {
+		if m.stages[i].label == "loading image" {
+			label = m.stages[i].label
+			break
+		}
 	}
-	fmt.Fprintf(m.out, "\r\x1b[K%s %s\r", line, elapsed.Round(time.Second))
+	width := terminalColumns(os.Stderr)
+	if m.columns != nil {
+		width = m.columns()
+	}
+	if width <= 0 {
+		width = 72
+	}
+	limit := max(0, width-1)
+	duration := elapsed.Round(time.Second).String()
+	line := "  " + label + "…"
+	if n := m.count.Load(); n > 0 {
+		unit := "files"
+		if n == 1 {
+			unit = "file"
+		}
+		line += fmt.Sprintf(" %d %s · %s ·", n, unit, humanBytes(m.size.Load()))
+	}
+	line += " " + duration
+	if len([]rune(line)) > limit {
+		prefix, suffix := "  ", "… "+duration
+		room := max(0, limit-len([]rune(prefix+suffix)))
+		runes := []rune(label)
+		line = prefix + string(runes[:min(room, len(runes))]) + suffix
+		if len([]rune(line)) > limit {
+			line = string([]rune(line)[:limit])
+		}
+	}
+	fmt.Fprintf(m.out, "\r\x1b[K%s\r", line)
 	m.shown = true
 }
 

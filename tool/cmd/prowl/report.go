@@ -218,6 +218,7 @@ func reportFindings(c commonFlags, findings []model.Finding, elapsed time.Durati
 
 // reportScan carries lifecycle cancellation through suppression, baseline commit and the gate.
 func reportScan(ctx context.Context, c commonFlags, findings []model.Finding, elapsed time.Duration) int {
+	progress.finish()
 	if c.indexCoverageComplete != nil {
 		complete := c.indexCoverageComplete()
 		c.indexCoverageComplete = func() bool { return complete }

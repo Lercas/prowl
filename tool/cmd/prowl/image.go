@@ -83,8 +83,8 @@ func cmdImage(args []string) int {
 			// pull just before draining so a per-attempt deadline can't expire while earlier images scan
 			loaded := startStage(c, "loading image")
 			items, fi, err := source.Image(ctx, arg, kind, c.maxSize, c.timeout, c.exclude)
-			loaded()
 			if err != nil {
+				loaded()
 				logx.Error("image load failed", "arg", arg, "err", err)
 				rc.Store(2)
 				select {
@@ -101,9 +101,12 @@ func cmdImage(args []string) int {
 				select {
 				case merged <- it:
 				case <-ctx.Done():
+					loaded()
 					return
 				}
 			}
+			// Layers can read lazily after source.Image returns; loading ends only after drain.
+			loaded()
 		}
 	}()
 	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).WithFinalizer(func(fs []model.Finding) []model.Finding {

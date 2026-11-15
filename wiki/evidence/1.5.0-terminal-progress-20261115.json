@@ -1,0 +1,234 @@
+{
+  "status": "locally qualified hardening of existing terminal progress; not published",
+  "base_commit": "417033f",
+  "preserved_parallel_commits": [
+    "fb02f32",
+    "417033f"
+  ],
+  "native": {
+    "complete": true,
+    "binary_sha256": "e6a1d4c8eff65e869680c0e4c3f9700fc86a1e7e7ae8c521229120ced1226231",
+    "passed": 36,
+    "total": 36,
+    "checks": [
+      {
+        "case": "clone/phase",
+        "passed": true
+      },
+      {
+        "case": "clone/private",
+        "passed": true
+      },
+      {
+        "case": "clone/cleared-before-report",
+        "passed": true
+      },
+      {
+        "case": "clone/final-screen",
+        "passed": true
+      },
+      {
+        "case": "image/phase",
+        "passed": true
+      },
+      {
+        "case": "image/private",
+        "passed": true
+      },
+      {
+        "case": "image/cleared-before-report",
+        "passed": true
+      },
+      {
+        "case": "image/final-screen",
+        "passed": true
+      },
+      {
+        "case": "verify/phase",
+        "passed": true
+      },
+      {
+        "case": "verify/private",
+        "passed": true
+      },
+      {
+        "case": "verify/cleared-before-report",
+        "passed": true
+      },
+      {
+        "case": "verify/final-screen",
+        "passed": true
+      },
+      {
+        "case": "narrow/no-wrap",
+        "passed": true
+      },
+      {
+        "case": "quiet/no-controls",
+        "passed": true
+      },
+      {
+        "case": "silence/no-controls",
+        "passed": true
+      },
+      {
+        "case": "dumb/no-controls",
+        "passed": true
+      },
+      {
+        "case": "json/stderr-progress",
+        "passed": true
+      },
+      {
+        "case": "json/stdout-clean",
+        "passed": true
+      },
+      {
+        "case": "json/complete",
+        "passed": true
+      },
+      {
+        "case": "sarif/stderr-progress",
+        "passed": true
+      },
+      {
+        "case": "sarif/stdout-clean",
+        "passed": true
+      },
+      {
+        "case": "sarif/complete",
+        "passed": true
+      },
+      {
+        "case": "file/stderr-progress",
+        "passed": true
+      },
+      {
+        "case": "file/stdout-clean",
+        "passed": true
+      },
+      {
+        "case": "file/complete",
+        "passed": true
+      },
+      {
+        "case": "pipe-pretty/stderr-progress",
+        "passed": true
+      },
+      {
+        "case": "pipe-pretty/stdout-clean",
+        "passed": true
+      },
+      {
+        "case": "log-json/stderr-progress",
+        "passed": true
+      },
+      {
+        "case": "log-json/stdout-clean",
+        "passed": true
+      },
+      {
+        "case": "log-json/complete",
+        "passed": true
+      },
+      {
+        "case": "both-pipes/json-clean",
+        "passed": true
+      },
+      {
+        "case": "redirected-stderr/no-controls",
+        "passed": true
+      },
+      {
+        "case": "cancel/verify-cleared",
+        "passed": true
+      },
+      {
+        "case": "cancel/clone-cleared",
+        "passed": true
+      },
+      {
+        "case": "cancel/image-cleared",
+        "passed": true
+      },
+      {
+        "case": "fast/no-flicker",
+        "passed": true
+      }
+    ],
+    "requests": 14,
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-progress-native-6on65ac8",
+    "scope": "real local Unix PTYs with independent stdout/stderr, owned local Git clone shim, stdin image tar and loopback verifier only; preserves stderr progress for files and pipes; Windows terminal runtime not qualified"
+  },
+  "nonregression": {
+    "repository": {
+      "binary_sha256": "e6a1d4c8eff65e869680c0e4c3f9700fc86a1e7e7ae8c521229120ced1226231",
+      "passed": 99,
+      "total": 99,
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-native-vj8172fi",
+      "scope": "local Git clone wrapper, owned Git objects and loopback org inventory only; no real remote repository or provider use"
+    },
+    "verdicts": {
+      "binary_sha256": "e6a1d4c8eff65e869680c0e4c3f9700fc86a1e7e7ae8c521229120ced1226231",
+      "passed": 49,
+      "total": 49
+    },
+    "source_coverage": {
+      "binary_sha256": "e6a1d4c8eff65e869680c0e4c3f9700fc86a1e7e7ae8c521229120ced1226231",
+      "passed": 36,
+      "total": 36
+    },
+    "quality": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "e6a1d4c8eff65e869680c0e4c3f9700fc86a1e7e7ae8c521229120ced1226231",
+      "passed": true,
+      "recall": 0.7430754536771729,
+      "t4_fp_rate": 0.05804480651731161,
+      "secret_hits": 1556,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "status": "passed"
+    }
+  },
+  "validation": {
+    "full_go": "passed Go 1.27.4 CGO_ENABLED=0 ./...",
+    "race": "passed cmd/prowl",
+    "minimum_go": "passed Go 1.26.11 cmd/prowl",
+    "lint": "0 issues",
+    "ruff": "passed E9,F821,F811,F823,F706",
+    "actionlint": "passed",
+    "cross_builds": [
+      "linux/amd64",
+      "linux/arm64",
+      "darwin/amd64",
+      "darwin/arm64",
+      "windows/amd64",
+      "windows/arm64"
+    ]
+  },
+  "limitations": [
+    "real Unix PTY; Windows console runtime not qualified",
+    "stderr TTY progress for file/pipe/machine stdout intentionally preserved",
+    "owned local fixtures only; no external providers or registry",
+    "source package, model and detection policy untouched",
+    "final images and release publication separate"
+  ]
+}

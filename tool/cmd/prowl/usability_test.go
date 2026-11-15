@@ -246,7 +246,7 @@ func TestProgressMeterStagesAndLogs(t *testing.T) {
 	close(items)
 	for range meter.track(t.Context(), items) {
 	}
-	waitFor("scanning… 1 files · 2 KB · ")
+	waitFor("scanning… 1 file · 2 KB · ")
 	// The inner stage ends: the line returns to the one still running.
 	scanned()
 	before := len(out.String())
