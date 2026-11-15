@@ -22,6 +22,7 @@ type firebaseXMLNode struct {
 	children   []*firebaseXMLNode
 	body       strings.Builder
 	start, end int
+	dataSpans  [][2]int
 }
 
 type firebaseXMLBindings struct {
@@ -107,6 +108,7 @@ func parseFirebaseXML(ctx context.Context, text, kind string) *firebaseXMLBindin
 				}
 			} else {
 				stack[len(stack)-1].body.Write(token)
+				stack[len(stack)-1].dataSpans = append(stack[len(stack)-1].dataSpans, [2]int{before, int(decoder.InputOffset())})
 			}
 		case xml.ProcInst:
 			if root != nil || declaration || token.Target != "xml" {
@@ -276,11 +278,18 @@ func (b *firebaseXMLBindings) forSpan(start, end int, value string) map[string]s
 	}
 	for _, key := range b.keys {
 		if start >= key.start && end <= key.end && value == key.body.String() {
-			out := make(map[string]string, len(b.fields))
-			for k, v := range b.fields {
-				out[k] = v
+			// Container bounds alone include comments. Only an observed XML data
+			// token can own the candidate, even when a comment repeats its value.
+			for _, span := range key.dataSpans {
+				if start < span[0] || end > span[1] {
+					continue
+				}
+				out := make(map[string]string, len(b.fields))
+				for k, v := range b.fields {
+					out[k] = v
+				}
+				return out
 			}
-			return out
 		}
 	}
 	return nil

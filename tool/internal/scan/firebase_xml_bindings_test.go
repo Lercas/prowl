@@ -128,6 +128,23 @@ func TestFirebaseXMLOnlySchemaKeyOwnsConfiguration(t *testing.T) {
 	}
 }
 
+func TestFirebaseXMLCommentInsideKeyCannotOwnData(t *testing.T) {
+	for _, tc := range []struct{ kind, text string }{
+		{"resources", xmlResourceFixture("owned-project", xmlGoogleKey)},
+		{"plist", xmlPlistFixture("owned-project", xmlGoogleKey)},
+	} {
+		text := strings.Replace(tc.text, xmlGoogleKey+"</string>", xmlGoogleKey+"<!-- "+xmlGoogleKey+" --></string>", 1)
+		p := parseFirebaseXML(t.Context(), text, tc.kind)
+		first, last := strings.Index(text, xmlGoogleKey), strings.LastIndex(text, xmlGoogleKey)
+		if first == last || p.forSpan(first, first+len(xmlGoogleKey), xmlGoogleKey)["projectId"] != "owned-project" {
+			t.Fatal("real XML data lost configuration")
+		}
+		if p.forSpan(last, last+len(xmlGoogleKey), xmlGoogleKey) != nil {
+			t.Fatal("same-value XML comment acquired data ownership")
+		}
+	}
+}
+
 func TestFirebaseXMLPipelineBindingAndNonRegression(t *testing.T) {
 	engine, err := rules.Load("../../rules/cloud/gcp-api-key.yaml")
 	if err != nil {
@@ -213,8 +230,10 @@ func FuzzFirebaseXMLSourceBindings(f *testing.F) {
 			if key.start < 0 || key.start > key.end || key.end > len(text) {
 				t.Fatal("XML source span escaped input")
 			}
-			if key.start < key.end && p.forSpan(key.start, key.end, key.body.String())["firebaseConfig"] == "" {
-				t.Fatal("exact source binding lost")
+			for _, span := range key.dataSpans {
+				if span[0] < key.start || span[1] > key.end || span[0] > span[1] {
+					t.Fatal("XML data token escaped its scalar")
+				}
 			}
 		}
 	})

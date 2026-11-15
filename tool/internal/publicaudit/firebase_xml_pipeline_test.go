@@ -98,3 +98,29 @@ func TestFirebaseXMLEqualUnrelatedValueCannotBorrowFields(t *testing.T) {
 		}
 	}
 }
+
+func TestFirebaseXMLCommentInsideKeyNeverGetsReadVerdict(t *testing.T) {
+	for _, plist := range []bool{false, true} {
+		path, text := firebaseXMLFixture(plist)
+		text = strings.Replace(text, googleFixtureKey+"</string>", googleFixtureKey+"<!-- "+googleFixtureKey+" --></string>", 1)
+		auditor, calls := ownedFirebase(t)
+		fs := firebasePipeline(t, auditor, false).Findings(t.Context(), model.Item{Source: "code", Path: path, Text: text})
+		google := 0
+		for _, f := range fs {
+			if !publicaudit.GoogleType(f.Type) {
+				continue
+			}
+			google++
+			want := "public_read_allowed"
+			if f.Col == strings.LastIndex(text, googleFixtureKey)+1 {
+				want = "inconclusive"
+			}
+			if f.PublicKeyAudit == nil || f.PublicKeyAudit.Status != want {
+				t.Fatal("comment acquired the XML data verdict")
+			}
+		}
+		if google != 2 || calls.Load() != 3 {
+			t.Fatal("real data/comment audit separation lost", google, calls.Load())
+		}
+	}
+}
