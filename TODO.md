@@ -454,6 +454,15 @@
       static JS и документированная Android-связь google-services.json.
       CLI 39/39 под OS network deny; full Go/race/lint/min-Go и fuzz проходят.
       [Контракт](wiki/Firebase-Public-Audit.md), `wiki/evidence/1.5.0-firebase-audit-20261115.json`.
+    - [x] Firebase XML: Android `<resources>` с `google_api_key` / legacy crash key
+      и строковый root-dict `GoogleService-Info.plist`. Компоненты принадлежат
+      одной конфигурации и точному исходному значению; чужие равные ключи,
+      вложенные plist, дубликаты, динамические ресурсы и повреждение не заимствуют
+      поля. Неустановленная XML-привязка — `inconclusive` без запроса.
+      XML entities/CDATA, лимиты и отмена проверены; DTD не загружается.
+      APK/IPA CLI 32/32 под OS network deny, owned HTTP для трёх сервисов,
+      full Go/race/min-Go/lint и fuzz 67325 проходят. Обычные quality IDs и
+      полный GOROOT digest прежние. `wiki/evidence/1.5.0-firebase-xml-20261115.json`.
     - [ ] Другие Firebase формы/точки чтения и подтверждение на разрешённом
       реальном аккаунте; отказ root/list не считается доказательством всех rules.
   - [ ] Google API key: отсутствие ограничений по referrer / API.

@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "main_source_commit": "8ee6b32bd5da0141250aa81506f87cf70cabbbb8",
+  "docker_candidate_source_commit": "f0c971596b5614269cdf623da99ba4a0500a9dd2",
+  "isolated_source_commit": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+  "audit_revision": "public-acl-v5-firebase-xml",
+  "detection_revision_unchanged": "1.5.0-short-key-v1",
+  "binary": {
+    "path": "/tmp/prowl-firebase-xml-20261115-bin",
+    "sha256": "2aad59d010dc22abddebffc0a7f806fdadcb82c6a7b9d202b2c11bbe88c7c527"
+  },
+  "build": {
+    "CGO_ENABLED": "0",
+    "vcs.revision": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+    "vcs.modified": false
+  },
+  "checks": {
+    "full_go": {
+      "path": "/tmp/prowl-xml-public-final-go-20261115.log",
+      "sha256": "6f3913e625b9426541040a327dbe1a1e75066f062ad3fee5c220efb11ce00941",
+      "passed": true
+    },
+    "targeted_and_limits": {
+      "path": "/tmp/prowl-xml-public-limits-20261115.log",
+      "sha256": "04ff96fe4e340082047c77dae4dc113277da22b991c34cd7f712766a3205d7e5",
+      "passed": true
+    },
+    "affected_race": {
+      "path": "/tmp/prowl-xml-public-race-20261115.log",
+      "sha256": "1793aa5a2a9f7fca8a610cd00504f071e832f84aaabb174e154a95e5c740f80f",
+      "passed": true
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-xml-public-min-go-20261115.log",
+      "sha256": "d828b3ae0947c124cdab30183c471b39d3c77bed0e950dbdef0db14d9afb5b5b",
+      "passed": true,
+      "toolchain": "go1.26.11"
+    },
+    "lint": {
+      "path": "/tmp/prowl-xml-public-lint-20261115.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "passed": true
+    },
+    "fuzz": {
+      "path": "/tmp/prowl-xml-public-fuzz-20261115.log",
+      "sha256": "b28ab50d50ff36017ddbe0ae6396e1d0a49b5d2d5f3c82b8bcb116e730869a12",
+      "passed": true,
+      "executions": 67325
+    },
+    "corpus_digest": {
+      "path": "/tmp/prowl-xml-public-corpus-digest-20261115.log",
+      "sha256": "fb18fa312d307b1588215818fd06e78dc65539294e83ad519efb16038f20e3b9",
+      "passed": true
+    }
+  },
+  "native": {
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/evidence.json",
+      "sha256": "2e9447b1f095093a883da9a94bc8135d9da3e981d93a5d445aa1b1dd2173c4e3"
+    },
+    "runner": {
+      "path": "/tmp/prowl-firebase-xml-native-20261115.py",
+      "sha256": "9ca99fe0901c4f51701c8d9984fd21f01c5753a0554abe7c8bfc918516a6f33b"
+    },
+    "passed": 32,
+    "failed": 0,
+    "outcomes": {
+      "planned reads blocked by verified OS sandbox": 10,
+      "ordinary/output/preflight": 11,
+      "invalid configuration rejected before transport": 11
+    },
+    "model_retained_cases": 5,
+    "isolated_PROWL_HOME": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/home",
+    "network_control": {
+      "profile": "(version 1)(allow default)(deny network*)",
+      "owned_requests": 1,
+      "sandbox_requests": 0,
+      "blocked_exit": 7
+    },
+    "scope": "Synthetic APK/IPA XML/plist acquisition, binding and output contracts under verified OS network denial. Valid configured requests are planned but transport is blocked; successful HTTP behavior is qualified separately on owned Go fixtures. No real Firebase provider/account qualification."
+  },
+  "owned_http": {
+    "test_file": "tool/internal/publicaudit/firebase_xml_pipeline_test.go",
+    "test_file_sha256": "642e073838313e4d78214e89d3f57de0c56fb22cca70d85bf02388ac23a44abf",
+    "tests": [
+      "TestFirebaseXMLReadTargetsThroughOwnedHTTP",
+      "TestFirebaseXMLUnsafeBindingMakesNoRequests",
+      "TestFirebaseXMLEqualUnrelatedValueCannotBorrowFields"
+    ],
+    "semantics": "The real Auditor builds its fixed HTTPS provider requests; the test-only transport maps validated owned-project targets to a private loopback fixture. Valid XML and plist each perform three GETs; invalid/ambiguous cases issue zero requests. An equal unrelated source occurrence remains inconclusive. Google key is not sent, and private response contents/resource identifiers are absent from serialized findings. This is not a real provider/account result."
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "2aad59d010dc22abddebffc0a7f806fdadcb82c6a7b9d202b2c11bbe88c7c527",
+    "passed": true,
+    "recall": 0.7464183381088825,
+    "t4_fp_rate": 0.05804480651731161,
+    "secret_hits": 1563,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "status": "passed"
+  },
+  "quality_evidence": {
+    "path": "/tmp/prowl-xml-public-quality-20261115.json",
+    "sha256": "80f491c9f2406c3f80452f0da2e3b0b3445cf009b5b0d675c3a7013dac145a08"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 531,
+      "sha256": "741a43d8f2c93f625f7ff54943c50f14a478780471596f862b227408eefe14da",
+      "identical_to_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_parent": true
+    }
+  },
+  "ordinary_corpus_equivalence": {
+    "parent_source_commit": "d48a8a86f9405c996a8ab93e6c0a0ba963bf91c7",
+    "parent_evidence": {
+      "path": "/tmp/prowl-short-keys-final-corpus-digest-20261115.log",
+      "sha256": "74678a368fe02cb30edd13513b63b4dcbc1b68b05a2b1a1a410cca2536297c40"
+    },
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete_files": 85,
+    "full_result_and_coverage_sha256": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "identical": true
+  },
+  "performance_scope": {
+    "new_fixed_gate_run": false,
+    "reason": "The parser is created/used only with a public auditor and parsed lazily after ML. The existing nil-auditor guard short-circuits before XML path checks in ordinary scan. Ordinary full results/coverage and exact quality IDs are verified unchanged. This is not a new measured performance qualification for this source revision.",
+    "latest_preceding_measured_gate": "wiki/evidence/1.5.0-short-keys-20261115.json"
+  },
+  "limits": {
+    "input_bytes": 1048576,
+    "xml_tokens": 100000,
+    "depth": 64,
+    "fields_per_root": 4096,
+    "string_value_bytes": 4096,
+    "external_entity_resolution": false,
+    "DTD_network_fetch": false,
+    "accepted_DTD": "Two exact conventional Apple plist PUBLIC declarations only"
+  },
+  "boundaries": [
+    "Android resources: one root resources element, only the declared google_api_key or google_crash_reporting_api_key scalar owns same-file project_id/firebase_database_url/google_storage_bucket. Two declared Google keys must agree.",
+    "Apple: exact GoogleService-Info.plist basename, plist version=1.0 and a single root dictionary. Only the top-level string API_KEY owns same-dict PROJECT_ID/DATABASE_URL/STORAGE_BUCKET.",
+    "Complete logical value and observed source containment are required. Equal unrelated values, nested plist keys and comments cannot borrow fields. Duplicate names, malformed XML, unknown/non-string companions, cancellation and limits do not authorize requests.",
+    "XML entities and CDATA are parsed as XML data only. Android references/escaping/formatting/quotes/whitespace transformations are not resolved. Nonliteral metadata remains explicitly unknown.",
+    "API key is never sent by the Firebase read protocol. Existing RTDB shallow root, Storage root list and explicitly selected Firestore collection probes are unchanged.",
+    "Bindings belong to one original item with lazy sync.Once and copy-out maps. Shared pipelines retain no previous item source/binding state. Allowlist/ML suppression precedes auditing. Ordinary detection/ML records/coordinates and identity are unchanged."
+  ],
+  "earlier_harness_corrections": [
+    {
+      "log": {
+        "path": "/tmp/prowl-xml-public-http-20261115.log",
+        "sha256": "7297b82510ba19002789988d707fa4ac63ea5cf466586ca76c03e57ab6504599"
+      },
+      "reason": "Initial assertions applied public-audit expectations to the separately appended incomplete diagnostic. Final tests inspect Google candidates separately while retaining coverage and exact request-count assertions."
+    },
+    {
+      "log": {
+        "path": "/tmp/prowl-xml-public-native-20261115.log",
+        "sha256": "c34fc90217998ef2fb9c01982dbe6c60a6e4bb06f9a9bd265da8a0d2514fc249"
+      },
+      "reason": "The initial ZIP fixture replaced KEY globally and corrupted the API_KEY plist field name. The runner now substitutes only value text/CDATA. Final qualification additionally uses a fresh explicit PROWL_HOME."
+    }
+  ],
+  "model": {
+    "path": "/tmp/prowl-xml-public-bindings-20261115/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "installed_legacy_49_model": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25"
+  },
+  "model_thresholds_changed": false,
+  "reference_and_detection_thresholds_changed": false,
+  "primary_sources": [
+    {
+      "url": "https://firebase.google.com/docs/android/google-services-plugin-and-file",
+      "use": "Documented generated Android resource names and current-key relationship."
+    },
+    {
+      "url": "https://github.com/firebase/firebase-android-sdk/blob/main/firebase-common/src/main/java/com/google/firebase/FirebaseOptions.java",
+      "use": "SDK resource names including google_storage_bucket."
+    },
+    {
+      "url": "https://firebase.google.com/docs/reference/cpp/class/firebase/app-options",
+      "use": "GoogleService-Info.plist project/API configuration."
+    },
+    {
+      "url": "https://developer.android.com/guide/topics/resources/string-resource",
+      "use": "XML processing precedes Android escaping/whitespace/formatting; unsupported transformations remain unknown."
+    },
+    {
+      "url": "https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_markup_formatting_ref/LocalizationKey.html",
+      "use": "XML plist dictionary shape and conventional Apple DTD declaration."
+    }
+  ],
+  "qualification_limits": [
+    "Local darwin-arm64 source/static-binary qualification only. Final images, hosted CI and real Firebase accounts/rules remain unqualified.",
+    "Native provider transport was denied by the OS; successful GET behavior is a separate owned HTTP fixture. Read access observed in a fixture does not prove any live data exposure or RLS status.",
+    "TypeScript/JSX-specific bindings, binary plist/dex, general XML schemas, cross-file components and arbitrary alternate plist filenames remain outside this change. Algolia/Supabase XML binding was not added.",
+    "No installed model, remote service, Docker resource, reference, thresholds, push, deployment or publication changed. No files were deleted."
+  ]
+}

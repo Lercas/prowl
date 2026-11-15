@@ -78,6 +78,9 @@ report); `false` = dead/rotated; `null` = generic type with no verifier, judge b
 не передаётся. `public_key_audit` отделён от `verified`/`verification`:
 `public_read_allowed` не доказывает утечку, а `read_denied` не доказывает безопасность
 всех rules. Частичный сбой — `inconclusive`, exit 2 и запрет baseline.
+Firebase bindings также поддерживают literal Android resources XML и root-dict
+`GoogleService-Info.plist`; неоднозначность и неподдерживаемые представления
+не разрешают сетевые пробы. Форматы и лимиты — в контракте Firebase ниже.
 С `--verify`, `--verify-all`, `--verified-only` и `--fail-on-verified` режим не совмещается. MCP/HTTP/LSP
 не включают этот аудит. [Контракт](wiki/Firebase-Public-Audit.md).
 

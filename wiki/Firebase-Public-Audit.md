@@ -3,8 +3,9 @@
 `domain` и `mobile` поддерживают `--audit-public --authorized`. Для найденных
 Google API keys аудит ищет явную Firebase-конфигурацию: настройки одного объекта
 JSON/YAML/TOML, статической JS-группы либо стандартного Android
-`google-services.json`. Обычный Google key без такой конфигурации не получает
-фиктивный Firebase-результат.
+`google-services.json`, Android XML resources или стандартного XML
+`GoogleService-Info.plist`. Для XML и стандартного plist неустановленная
+привязка явно даёт `inconclusive`, без угадывания цели и без запроса.
 
 ```sh
 prowl mobile owned.apk --audit-public --authorized --format json
@@ -67,8 +68,62 @@ Firestore требует явного project ID из 6–30 строчных л
 Явные RTDB URL и Storage bucket не нуждаются в угадывании project ID. Если project ID
 присутствует, его неизвестное или некорректное значение не игнорируется.
 Парные компоненты из отдельных файлов/деклараций, специфичный TypeScript/JSX,
-XML/plist и dex не связываются. Именованные Firestore databases, известные object get и вложенные RTDB-пути остаются вне этой
+другие XML-схемы, binary plist и dex не связываются. Именованные Firestore databases, известные object get и вложенные RTDB-пути остаются вне этой
 проверки. Отказ root/list не доказывает, что другой путь или операция закрыты.
+
+### Firebase XML / plist
+
+Android: один корневой `<resources>`, строка `google_api_key` либо
+`google_crash_reporting_api_key` и компоненты того же файла: `project_id`,
+`firebase_database_url`, `google_storage_bucket`. Для двух key-полей нужны
+одинаковые значения. Комментарий, вложенное значение и равная строка с другим
+именем не становятся владельцем конфигурации. Повтор имени ресурса делает
+привязку неоднозначной. Поддержаны обычные XML entities и CDATA; Android
+references, backslash escapes, formatting, кавычки и whitespace-преобразования
+не интерпретируются: соответствующее значение остаётся неизвестным.
+
+Apple: точное имя `GoogleService-Info.plist`, `<plist version="1.0">` с одним
+корневым `<dict>`. Связывается только строковый `API_KEY` с `PROJECT_ID`,
+`DATABASE_URL`, `STORAGE_BUCKET` того же dict. Неизвестный или нестроковый
+компонент не подменяется другим полем. Повтор ключа, вложенный API key и
+несколько plist-корней не разрешают привязку. Выбор активного bundle/build
+variant и конфигурации с произвольными именами файлов не эмулируется.
+
+Парсер работает только в opt-in public audit, после ML, лениво один раз на item.
+Внешние DTD и entities не разрешаются. Узнаются две стандартные строковые
+декларации Apple DTD без загрузки URL; остальные directives отклоняются.
+Границы: 1 MiB входа, 100000 XML tokens, глубина 64, 4096 полей и 4096 байт
+строкового значения. Отмена/ошибка/лимит оставляют аудит неполным. Исходный
+диапазон и полное логическое значение должны принадлежать API-key scalar;
+параметры не смешиваются между item, файлами, nested dict и равными значениями.
+
+Изменение не добавляет сетевых операций: используются прежние scoped RTDB,
+Storage и явно выбранный Firestore. API key не передаётся в запросы. Обычный
+scan не разбирает XML для public bindings; его finding/ML identities сохранены.
+
+Локальная квалификация: main `8ee6b32` = isolated `dfbedc3` = candidate `f0c9715`.
+Статический бинарник имеет чистый VCS snapshot. APK/IPA CLI 32/32 с отдельным
+`PROWL_HOME` и проверенным OS network deny: 10 запланированных read-сценариев,
+11 отказов до транспорта и 11 обычных/output/preflight guards. Во всех пяти
+ML-примерах key сохранился. Успешные GET и отсутствие передачи ключа/response
+data проверены отдельно на собственном HTTP fixture для XML и plist; нативная
+сеть к провайдерам заблокирована. Full Go, affected race, Go 1.26.11, lint,
+fuzz 67325, limits и cancellation проходят. Quality IDs прежние: 1563/2094,
+57/982; все результаты и coverage на 12044 файлах GOROOT совпали (420 находок,
+85 неполных). Модель, detection revision, пороги и установленный файл модели
+не менялись. Audit revision — `public-acl-v5-firebase-xml`.
+
+Это локальная квалификация source/binary на darwin-arm64. Реальные аккаунты,
+остальные XML/plist-представления, финальные образы и hosted CI не подтверждены.
+Обычный fixed performance gate в этом изменении не повторялся: новый разбор
+недостижим без public auditor; последний измеренный gate относится к отдельному
+этапу short keys. [Evidence](evidence/1.5.0-firebase-xml-20261115.json).
+
+Форматы сверены с [generated Android resources](https://firebase.google.com/docs/android/google-services-plugin-and-file),
+[полями Android SDK](https://github.com/firebase/firebase-android-sdk/blob/main/firebase-common/src/main/java/com/google/firebase/FirebaseOptions.java),
+[Firebase options](https://firebase.google.com/docs/reference/cpp/class/firebase/app-options),
+[Android string semantics](https://developer.android.com/guide/topics/resources/string-resource)
+и [XML plist Apple](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_markup_formatting_ref/LocalizationKey.html).
 
 ## Интерпретация отчёта
 
