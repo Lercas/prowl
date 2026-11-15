@@ -73,6 +73,16 @@ func cmdMobile(args []string) int {
 		return 2
 	}
 
+	options := scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}
+	var prepared preparedScan
+	if c.auditPublic {
+		prepared = prepareScan(c, options)
+		if prepared.auditError != nil {
+			logx.Error("public audit setup failed", "err", prepared.auditError)
+			return 2
+		}
+	}
+
 	localPath := target
 	if isURL(target) {
 		tmp, err := os.MkdirTemp("", "prowl-mobile-*")
@@ -107,7 +117,10 @@ func cmdMobile(args []string) int {
 	}
 	// dedupe on by default: the same key often shows up in several entries (raw resource + dex strings);
 	// report it once. Same as cmdImage.
-	return prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
+	if !c.auditPublic {
+		prepared = prepareScan(c, options)
+	}
+	return prepared.Run(ctx, items)
 }
 
 // minRunDefault mirrors source's default min printable-run length (kept here so the flag default reads

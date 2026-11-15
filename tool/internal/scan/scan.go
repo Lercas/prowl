@@ -438,7 +438,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}}
 	}
 	if literalDoc == nil && literalFormat(it) != "" {
-		if doc := parseLiterals(ctx, it); doc != nil {
+		if doc := parseLiterals(ctx, it, p.options.PublicAuditor != nil); doc != nil {
 			return p.literalFindings(ctx, it, doc)
 		}
 		// A failed parser cannot establish a value safe for provider submission.

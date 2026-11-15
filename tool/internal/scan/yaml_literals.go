@@ -14,6 +14,10 @@ import (
 )
 
 func yamlLiterals(ctx context.Context, it model.Item) *literalDocument {
+	return yamlLiteralsWithPublic(ctx, it, false)
+}
+
+func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bool) *literalDocument {
 	ext := strings.ToLower(filepath.Ext(model.SafeLocator(it.Path)))
 	if !pathIsFilesystem(it.Source) || ext != ".yaml" && ext != ".yml" {
 		return nil
@@ -279,6 +283,9 @@ func yamlLiterals(ctx context.Context, it model.Item) *literalDocument {
 		}
 	}
 	walk = func(n *yaml.Node, name string, gid int, ref *yamlPhysical, proof []model.Evidence, depth int) {
+		if capturePublic && (n.Kind == yaml.MappingNode || n.Kind == yaml.SequenceNode || n.Kind == yaml.ScalarNode && n.Tag != "!!str") {
+			doc.markPublicUnknown(gid, name)
+		}
 		if ctx.Err() != nil || limited {
 			return
 		}

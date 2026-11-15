@@ -115,11 +115,38 @@ type Evidence struct {
 
 // PublicKeyAudit records permission observations independently of credential liveness.
 type PublicKeyAudit struct {
-	Provider     string   `json:"provider"`
-	Status       string   `json:"status"`
-	CheckedAt    string   `json:"checked_at,omitempty"`
-	Capabilities []string `json:"capabilities,omitempty"`
-	Reason       string   `json:"reason,omitempty"`
+	Provider     string             `json:"provider"`
+	Status       string             `json:"status"`
+	CheckedAt    string             `json:"checked_at,omitempty"`
+	Capabilities []string           `json:"capabilities,omitempty"`
+	Reason       string             `json:"reason,omitempty"`
+	Checks       []PublicAuditCheck `json:"checks,omitempty"`
+}
+
+// PublicAuditCheck records a bounded read observation without retaining response data.
+type PublicAuditCheck struct {
+	CheckedAt string `json:"checked_at,omitempty"`
+	Service   string `json:"service"`
+	Scope     string `json:"scope"`
+	Status    string `json:"status"`
+	DataState string `json:"data_state,omitempty"`
+	Reason    string `json:"reason,omitempty"`
+}
+
+// HasAccessObservation selects a known exposure over a denied or unknown observation.
+func (a *PublicKeyAudit) HasAccessObservation() bool {
+	if a == nil {
+		return false
+	}
+	if a.Status == "excess_permissions" || a.Status == "public_read_allowed" {
+		return true
+	}
+	for _, check := range a.Checks {
+		if check.Status == "public_read_allowed" {
+			return true
+		}
+	}
+	return false
 }
 
 type Verification struct {

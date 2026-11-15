@@ -198,6 +198,17 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 				paint(color, cDim, sanitizeTerminal(displayRedaction(f))), tag, locator)
 			if a := f.PublicKeyAudit; a != nil {
 				fmt.Fprintf(w, "        public key audit: %s — %s\n", sanitizeTerminal(a.Status), sanitizeTerminal(a.Reason))
+				for _, check := range a.Checks {
+					scope := []rune(sanitizeTerminal(check.Scope))
+					if len(scope) > 12 {
+						scope = scope[:12]
+					}
+					data := ""
+					if check.DataState != "" {
+						data = "; data " + sanitizeTerminal(check.DataState)
+					}
+					fmt.Fprintf(w, "          %s: %s [%s]%s\n", sanitizeTerminal(check.Service), sanitizeTerminal(check.Status), string(scope), data)
+				}
 			}
 			if options.Snippet != nil {
 				if line := sanitizeTerminal(options.Snippet(f)); line != "" {

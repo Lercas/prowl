@@ -17,6 +17,7 @@ type preparedScan struct {
 	flags      commonFlags
 	pipeline   *scan.Pipeline
 	mlError    error
+	auditError error
 	indexError error
 	dedupe     bool
 	finalizers []func([]model.Finding) []model.Finding
@@ -37,8 +38,10 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.Reconstruct = flags.reconstruct
 	options.Semantic, options.SemanticEngine = flags.semantic, flags.semanticEngine
 	options.VerifyAll = flags.verifyAll || flags.failOnVerified
+	var auditErr error
 	if flags.auditPublic {
-		options.PublicAuditor = publicaudit.New(flags.timeout)
+		// Parsing has already validated the immutable collection selection.
+		options.PublicAuditor, auditErr = publicaudit.NewWithCollections(flags.timeout, flags.auditCollections)
 	}
 	var indexErr error
 	if flags.indexDir != "" {
@@ -60,7 +63,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 		}
 		cancel()
 	}
-	return preparedScan{flags: flags, pipeline: scan.New(options), mlError: err, indexError: indexErr, dedupe: flags.dedupe}
+	return preparedScan{flags: flags, pipeline: scan.New(options), mlError: err, auditError: auditErr, indexError: indexErr, dedupe: flags.dedupe}
 }
 
 func (p preparedScan) WithFinalizer(finalize func([]model.Finding) []model.Finding) preparedScan {
@@ -71,6 +74,10 @@ func (p preparedScan) WithFinalizer(finalize func([]model.Finding) []model.Findi
 // Collect preserves diagnostics when ML setup failed: a partial L1 scan must not
 // look like a complete ML-filtered scan to reports, gates or baseline writers.
 func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []model.Finding {
+	if p.auditError != nil {
+		logx.Error("public audit setup failed", "err", p.auditError)
+		return []model.Finding{{Detector: "scan", Type: "response_truncated", Severity: "info", Path: "scan", Stage: "public audit setup", Rationale: "the requested public audit was not prepared; scan did not run"}}
+	}
 	if p.indexError != nil {
 		logx.Error("index setup failed", "err", p.indexError)
 		return []model.Finding{{Detector: "scan", Type: "response_truncated", Severity: "info", Path: "index", Stage: "index setup", Rationale: "the local index is unavailable; the scan did not run"}}

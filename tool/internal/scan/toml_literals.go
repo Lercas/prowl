@@ -22,6 +22,10 @@ type tomlLiteralToken struct {
 // tomlLiterals delegates value semantics to the pinned TOML parser, while a bounded token inventory
 // preserves byte positions, comments, arrays of tables and the distinction between keys and values.
 func tomlLiterals(ctx context.Context, it model.Item) *literalDocument {
+	return tomlLiteralsWithPublic(ctx, it, false)
+}
+
+func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bool) *literalDocument {
 	if !pathIsFilesystem(it.Source) || strings.ToLower(filepath.Ext(model.SafeLocator(it.Path))) != ".toml" {
 		return nil
 	}
@@ -171,11 +175,17 @@ func tomlLiterals(ctx context.Context, it model.Item) *literalDocument {
 				add(t, name, path, f.instances)
 				f.awaitValue = false
 			} else {
+				if capturePublic && f.awaitValue && len(f.keys) > 0 {
+					doc.markPublicUnknown(groupFor(copyAppend(f.path, f.keys[:len(f.keys)-1]), f.instances), f.keys[len(f.keys)-1])
+				}
 				f.awaitValue = false
 			}
 		case '=':
 			f.keyMode, f.awaitValue = false, true
 		case '{', '[':
+			if capturePublic && f.awaitValue && len(f.keys) > 0 {
+				doc.markPublicUnknown(groupFor(copyAppend(f.path, f.keys[:len(f.keys)-1]), f.instances), f.keys[len(f.keys)-1])
+			}
 			path := f.path
 			if f.awaitValue {
 				path = copyAppend(path, f.keys)

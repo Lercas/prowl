@@ -88,6 +88,10 @@ func cmdDomain(args []string) int {
 	}
 
 	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.auditError != nil {
+		logx.Error("public audit setup failed", "err", prepared.auditError)
+		return 2
+	}
 	if prepared.indexError != nil {
 		logx.Error("index setup failed", "err", prepared.indexError)
 		return 2

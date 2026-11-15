@@ -49,14 +49,17 @@ func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor,
 		bindings = nil
 		if !doc.verificationUnsafe {
 			if v := doc.locate(c.start, c.end); v != nil && !doc.unsafeGroups[v.group] {
-				bindings = doc.bindings[v.group]
+				bindings = doc.publicBindingsFor(v.group, doc.bindings[v.group])
 			}
 		}
 	}
+	if doc != nil && publicaudit.GoogleType(c.typ) {
+		bindings = doc.firebaseAndroidBindings(ctx, path, c, bindings)
+	}
 	f.PublicKeyAudit = auditor.Audit(ctx, c.typ, c.value, bindings)
 	if f.PublicKeyAudit == nil {
-		f.PublicKeyAudit = publicaudit.Inconclusive("audit produced no result")
-	}
+		return
+	} // A generic Google key without Firebase config is not a Firebase audit target.
 	if f.PublicKeyAudit.Status == "inconclusive" {
 		model.Note(ctx, "public_key_audit_inconclusive", path, true)
 	}

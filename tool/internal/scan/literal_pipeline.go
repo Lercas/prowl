@@ -27,7 +27,7 @@ func literalFormat(it model.Item) string {
 	return ""
 }
 
-func parseLiterals(ctx context.Context, it model.Item) (doc *literalDocument) {
+func parseLiterals(ctx context.Context, it model.Item, capturePublic bool) (doc *literalDocument) {
 	defer func() {
 		if doc != nil {
 			complete, _, _ := model.CoverageFrom(ctx).Snapshot()
@@ -36,11 +36,11 @@ func parseLiterals(ctx context.Context, it model.Item) (doc *literalDocument) {
 	}()
 	switch literalFormat(it) {
 	case ".json":
-		return jsonLiterals(ctx, it)
+		return jsonLiteralsWithPublic(ctx, it, capturePublic)
 	case ".toml":
-		return tomlLiterals(ctx, it)
+		return tomlLiteralsWithPublic(ctx, it, capturePublic)
 	case ".yaml", ".yml":
-		return yamlLiterals(ctx, it)
+		return yamlLiteralsWithPublic(ctx, it, capturePublic)
 	}
 	return nil
 }

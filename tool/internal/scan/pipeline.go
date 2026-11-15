@@ -12,6 +12,7 @@ import (
 )
 
 // PublicAuditor accepts already-bound values; implementations must be safe for concurrent calls.
+// A nil result denotes an inapplicable provider/configuration, never a successful audit.
 type PublicAuditor interface {
 	Audit(context.Context, string, string, map[string]string) *model.PublicKeyAudit
 }

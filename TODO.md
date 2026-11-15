@@ -422,6 +422,14 @@
   отделяет наблюдение прав от обычного `--verify` (его профили не гарантируют read-only).
   - [ ] Supabase: anon-ключ + таблицы без RLS.
   - [ ] Firebase: открытые RTDB / Firestore / Storage.
+    - [x] Read-only наблюдения RTDB root shallow, configured Storage root list и явно
+      выбранных Firestore collections `(default)`. Google key не отправляется;
+      scoped `checks`, данные ответов не сериализуются, частичный сбой сохраняет
+      наблюдённый доступ и делает покрытие неполным. Поддержаны flat config,
+      static JS и документированная Android-связь google-services.json.
+      [Контракт](wiki/Firebase-Public-Audit.md).
+    - [ ] Другие Firebase формы/точки чтения и подтверждение на разрешённом
+      реальном аккаунте; отказ root/list не считается доказательством всех rules.
   - [ ] Google API key: отсутствие ограничений по referrer / API.
   - [ ] Algolia: admin-ключ вместо search-ключа (ACL).
     - [x] Read-only self-ACL для пар из одного объекта JSON/YAML/TOML: отдельный

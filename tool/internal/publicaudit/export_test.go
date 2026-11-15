@@ -11,3 +11,11 @@ func NewWithOwnedTransport(transport http.RoundTripper) *Auditor {
 	a.client.Transport = transport
 	return a
 }
+
+func NewWithOwnedCollections(transport http.RoundTripper, collections []string) (*Auditor, error) {
+	a, err := NewWithCollections(time.Second, collections)
+	if err == nil {
+		a.client.Transport = transport
+	}
+	return a, err
+}

@@ -33,6 +33,8 @@ type sourceLiteral struct {
 }
 
 type literalDocument struct {
+	publicUnknown      map[int]map[string]bool
+	firebaseSchema     *firebaseSchemaBindings
 	original           string
 	text               string
 	values             []sourceLiteral
@@ -56,7 +58,7 @@ func (doc *literalDocument) hasPragma(pos int) bool {
 
 // jsonLiterals preserves duplicate keys and original byte spans. It never unmarshals objects into
 // maps, executes substitutions, or silently accepts the Unicode replacement performed by encoding/json.
-func jsonLiterals(ctx context.Context, it model.Item) *literalDocument {
+func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bool) *literalDocument {
 	if !pathIsFilesystem(it.Source) || strings.ToLower(filepath.Ext(model.SafeLocator(it.Path))) != ".json" {
 		return nil
 	}
@@ -117,6 +119,12 @@ func jsonLiterals(ctx context.Context, it model.Item) *literalDocument {
 					parent := stack[len(stack)-1]
 					role = parent.role.child(parent.name)
 				}
+				if capturePublic && len(stack) > 0 {
+					parent := stack[len(stack)-1]
+					if parent.object {
+						doc.markPublicUnknown(parent.group, parent.name)
+					}
+				}
 				consume()
 				group++
 				doc.roles[group] = role
@@ -158,6 +166,12 @@ func jsonLiterals(ctx context.Context, it model.Item) *literalDocument {
 			doc.values = append(doc.values, v)
 			consume()
 		default:
+			if capturePublic && len(stack) > 0 {
+				parent := stack[len(stack)-1]
+				if parent.object {
+					doc.markPublicUnknown(parent.group, parent.name)
+				}
+			}
 			consume()
 		}
 	}

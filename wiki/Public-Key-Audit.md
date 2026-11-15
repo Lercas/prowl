@@ -1,6 +1,7 @@
 # Аудит публичных ключей
 
-В 1.5.0 добавлена отдельная проверка ACL Algolia для `domain` и `mobile`.
+В 1.5.0 добавлены отдельные проверки публичных ключей для `domain` и `mobile`:
+ACL Algolia и [read-only Firebase](Firebase-Public-Audit.md). Ниже — контракт Algolia.
 
 ```sh
 prowl mobile owned.apk --audit-public --authorized --format json

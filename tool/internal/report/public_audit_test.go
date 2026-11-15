@@ -45,3 +45,20 @@ func TestPublicAuditReportsRemainSeparateFromLiveVerdicts(t *testing.T) {
 		t.Fatal("pretty audit missing or conflated with liveness")
 	}
 }
+
+func TestFirebaseChecksInAllReportFormats(t *testing.T) {
+	f := model.Finding{Type: "gcp_api_key", Source: "code", Path: "prod.json", Line: 1, Col: 1, Severity: "high", Redacted: "AIza****owned", PublicKeyAudit: &model.PublicKeyAudit{Provider: "firebase", Status: "inconclusive", Checks: []model.PublicAuditCheck{{Service: "rtdb", Scope: strings.Repeat("a", 64), Status: "public_read_allowed", DataState: "present"}, {Service: "storage", Scope: strings.Repeat("b", 64), Status: "inconclusive"}}}}
+	f.Occurrences = []model.Occurrence{f.Occurrence()}
+	for _, format := range []string{"json", "sarif", "pretty"} {
+		var output bytes.Buffer
+		if err := Write(&output, []model.Finding{f}, format, false); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(output.String(), "public_read_allowed") || !strings.Contains(output.String(), "inconclusive") || strings.Contains(output.String(), "LIVE") {
+			t.Fatal("partial Firebase access disappeared or became a live credential")
+		}
+		if format != "pretty" && !strings.Contains(output.String(), `"checks"`) {
+			t.Fatal("checks lost in structured report")
+		}
+	}
+}

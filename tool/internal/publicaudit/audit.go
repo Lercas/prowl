@@ -18,7 +18,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
-const Revision = "algolia-self-acl-v2-js-bindings"
+const Revision = "public-acl-v3-firebase"
 const maxRequests = 32
 const maxBody = 64 << 10
 
@@ -27,11 +27,12 @@ var apiKey = regexp.MustCompile(`^[a-fA-F0-9]{32}$`)
 
 // Auditor belongs to one invocation. No endpoint override or discovered host is accepted.
 type Auditor struct {
-	client   *http.Client
-	mu       sync.Mutex
-	entries  map[[32]byte]*entry
-	attempts int
-	slots    chan struct{}
+	client      *http.Client
+	mu          sync.Mutex
+	entries     map[[32]byte]*entry
+	attempts    int
+	slots       chan struct{}
+	collections []string
 }
 type entry struct {
 	done   chan struct{}
@@ -48,7 +49,15 @@ func New(timeout time.Duration) *Auditor {
 	return &Auditor{client: client, entries: make(map[[32]byte]*entry), slots: make(chan struct{}, 4)}
 }
 
-func Supports(typ string) bool { return typ == "algolia-api-key" }
+func Supports(typ string) bool { return typ == "algolia-api-key" || GoogleType(typ) }
+
+func GoogleType(typ string) bool {
+	switch typ {
+	case "gcp_api_key", "gcp-api-key", "google-api-key", "google-gemini-api-key":
+		return true
+	}
+	return false
+}
 
 func Inconclusive(reason string) *model.PublicKeyAudit {
 	return &model.PublicKeyAudit{Provider: "algolia", Status: "inconclusive", Reason: reason}
@@ -60,27 +69,37 @@ func (a *Auditor) Audit(ctx context.Context, typ, key string, bindings map[strin
 	if !Supports(typ) {
 		return nil
 	}
+	if typ != "algolia-api-key" {
+		return a.auditFirebase(ctx, key, bindings)
+	}
 	app, ok := applicationID(bindings)
 	if !ok || !apiKey.MatchString(key) {
 		return Inconclusive("missing or ambiguous application binding")
 	}
-	if ctx.Err() != nil {
-		return Inconclusive("audit canceled")
+	hash := sha256.Sum256([]byte("algolia\x00" + app + "\x00" + key))
+	return a.cached(ctx, hash, "algolia", func() *model.PublicKeyAudit { return a.probe(ctx, app, key) })
+}
+
+func (a *Auditor) cached(ctx context.Context, hash [32]byte, provider string, probe func() *model.PublicKeyAudit) *model.PublicKeyAudit {
+	fail := func(reason string) *model.PublicKeyAudit {
+		return &model.PublicKeyAudit{Provider: provider, Status: "inconclusive", Reason: reason}
 	}
-	hash := sha256.Sum256([]byte(app + "\x00" + key))
+	if ctx.Err() != nil {
+		return fail("audit canceled")
+	}
 	a.mu.Lock()
 	if e := a.entries[hash]; e != nil {
 		a.mu.Unlock()
 		select {
 		case <-ctx.Done():
-			return Inconclusive("audit canceled")
+			return fail("audit canceled")
 		case <-e.done:
 			return clone(e.result)
 		}
 	}
 	if a.attempts >= maxRequests {
 		a.mu.Unlock()
-		return Inconclusive("audit request budget exhausted")
+		return fail("audit request budget exhausted")
 	}
 	a.attempts++
 	e := &entry{done: make(chan struct{})}
@@ -89,14 +108,13 @@ func (a *Auditor) Audit(ctx context.Context, typ, key string, bindings map[strin
 	var result *model.PublicKeyAudit
 	select {
 	case <-ctx.Done():
-		result = Inconclusive("audit canceled")
+		result = fail("audit canceled")
 	case a.slots <- struct{}{}:
-		result = a.probe(ctx, app, key)
+		result = probe()
 		<-a.slots
 	}
 	a.mu.Lock()
 	e.result = result
-	// Transient errors must not become definitive evidence for another occurrence.
 	if result.Status == "inconclusive" {
 		delete(a.entries, hash)
 	}
@@ -108,6 +126,7 @@ func (a *Auditor) Audit(ctx context.Context, typ, key string, bindings map[strin
 func clone(r *model.PublicKeyAudit) *model.PublicKeyAudit {
 	c := *r
 	c.Capabilities = append([]string(nil), r.Capabilities...)
+	c.Checks = append([]model.PublicAuditCheck(nil), r.Checks...)
 	return &c
 }
 

@@ -70,6 +70,17 @@ report); `false` = dead/rotated; `null` = generic type with no verifier, judge b
   OpenAI-compatible endpoint at `127.0.0.1:8080`. A remote endpoint requires
   `--ocr-allow-remote` plus HTTPS because documents can contain the very secrets being scanned.
 
+## Публичные ключи
+
+Для `domain`/`mobile` opt-in `--audit-public --authorized` проверяет ACL Algolia
+и наблюдаемые чтения Firebase без аутентификации. Firestore `(default)` требует явного
+`--audit-firestore-collection PATH`; коллекции не угадываются. Firebase API key
+не передаётся. `public_key_audit` отделён от `verified`/`verification`:
+`public_read_allowed` не доказывает утечку, а `read_denied` не доказывает безопасность
+всех rules. Частичный сбой — `inconclusive`, exit 2 и запрет baseline.
+С `--verify`, `--verify-all`, `--verified-only` и `--fail-on-verified` режим не совмещается. MCP/HTTP/LSP
+не включают этот аудит. [Контракт](wiki/Firebase-Public-Audit.md).
+
 ## Interface language
 
 Everything the tool shows a user is in English: help, flag descriptions, errors, logs, report text,
