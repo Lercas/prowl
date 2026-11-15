@@ -562,7 +562,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 					transform = "yaml-scalar"
 				}
 			}
-			if st.ID == "generic_password" && utf8.RuneCountInString(val) < 6 {
+			if st.ID == "generic_password" && utf8.RuneCountInString(val) < 6 && (!literalPassword || !d.shortPasswordAllowed(BindingName(text, vs), val)) {
 				continue
 			}
 			placeholder := IsExampleOrPlaceholder(val)

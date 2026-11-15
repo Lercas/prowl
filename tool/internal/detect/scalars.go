@@ -65,7 +65,7 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 			}
 			v := scalars[start]
 			if start < 0 || v.End < start || v.End > len(text) || text[start:v.End] != v.Value ||
-				len(v.Name) > 4096 || len(v.Value) > 4096 || utf8.RuneCountInString(v.Value) < 6 ||
+				len(v.Name) > 4096 || len(v.Value) > 4096 || (utf8.RuneCountInString(v.Value) < 6 && !d.shortPasswordAllowed(v.Name, v.Value)) ||
 				!ct.st.RE.MatchString("\""+v.Name+"\": \"Qx7vN8\"") || IsCanonicalPasswordPlaceholder(v.Value) ||
 				IsEncodedPasswordHash(v.Value) || strings.HasPrefix(v.Value, "data:") {
 				continue

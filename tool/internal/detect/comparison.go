@@ -10,7 +10,7 @@ const stageComparison = "L1-context-comparison"
 
 // Captures are whole operand values. Escaped quotes cannot prematurely end a
 // literal and turn its prefix into an apparent password. No source is executed.
-const comparisonLiteral = "(?:\"((?:\\\\[^\\r\\n]|[^\"\\\\\\r\\n]){6,200})\"|'((?:\\\\[^\\r\\n]|[^'\\\\\\r\\n]){6,200})'|`((?:\\\\[^\\r\\n]|[^`\\\\\\r\\n]){6,200})`)"
+const comparisonLiteral = "(?:\"((?:\\\\[^\\r\\n]|[^\"\\\\\\r\\n]){1,200})\"|'((?:\\\\[^\\r\\n]|[^'\\\\\\r\\n]){1,200})'|`((?:\\\\[^\\r\\n]|[^`\\\\\\r\\n]){1,200})`)"
 const comparisonOperator = `[ \t]*(?:===|!==|==|!=)[ \t]*`
 
 var reComparisonRight = regexp.MustCompile("(?i)((?:pass(?:word|wd|phrase)?|pwd|pw|token|secret|api[_\\- ]?key|apikey|key|credential)[A-Za-z0-9_\\-]{0,64})" +
@@ -131,7 +131,7 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 	typ, category := "generic_password", "generic"
 	if field.kind == "password" {
 		n := utf8.RuneCountInString(value)
-		if !d.genericPwd || n < 6 || n > 64 || isBcryptHash(value) || isVersionOrNumber(value) || hasJSOperator(value) || looksLikeUnicodeEscaped(value) {
+		if !d.genericPwd || (n < 6 && !d.shortPasswordAllowed(field.name, value)) || n > 64 || isBcryptHash(value) || (n >= 6 && isVersionOrNumber(value)) || hasJSOperator(value) || looksLikeUnicodeEscaped(value) {
 			return Match{}, false
 		}
 	} else {

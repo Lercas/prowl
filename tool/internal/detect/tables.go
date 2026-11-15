@@ -201,7 +201,7 @@ func (d *Detector) fieldValue(value string, lo, hi int, field tableField, stage 
 	switch field.kind {
 	case "password":
 		size := utf8.RuneCountInString(value)
-		if !d.genericPwd || size < 6 || size > 64 || isBcryptHash(value) || isVersionOrNumber(value) || hasJSOperator(value) || looksLikeUnicodeEscaped(value) {
+		if !d.genericPwd || (size < 6 && !d.shortPasswordAllowed(field.name, value)) || size > 64 || isBcryptHash(value) || (size >= 6 && isVersionOrNumber(value)) || hasJSOperator(value) || looksLikeUnicodeEscaped(value) {
 			return Match{}, false
 		}
 	case "key":
