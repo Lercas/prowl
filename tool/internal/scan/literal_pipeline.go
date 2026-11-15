@@ -107,7 +107,7 @@ func (p *Pipeline) mapLiteralFindings(fs []model.Finding, it model.Item, doc *li
 		f.ByteStart, f.ByteEnd = doc.sourceSpan(v, f.ByteStart, f.ByteEnd)
 		f.Line, f.Col = doc.lines.cols(f.ByteStart)
 		f.UTF16Col = doc.lines.utf16Col(f.ByteStart)
-		f.IndexLocationID = p.locationFingerprint(it.Source, it.Path, f.Line, f.Col)
+		f.IndexLocationID = p.itemLocationFingerprint(it, f.Line, f.Col)
 		f.Context = nil // Synthetic source is never presented as the observed source.
 		if !v.raw {
 			transform := doc.transform

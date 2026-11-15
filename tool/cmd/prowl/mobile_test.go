@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -95,6 +96,55 @@ func TestCmdMobileLocalAPK(t *testing.T) {
 func TestCmdMobileMissingFile(t *testing.T) {
 	if code := cmdMobile([]string{filepath.Join(t.TempDir(), "no-such.apk")}); code != 2 {
 		t.Fatalf("exit = %d, want 2 for a missing file", code)
+	}
+}
+
+func TestMobileAcquisitionFailuresPreserveCoverageAndBaseline(t *testing.T) {
+	t.Setenv("PROWL_HOME", t.TempDir())
+	before := safehttp.AllowPrivate.Load()
+	safehttp.AllowPrivate.Store(true)
+	t.Cleanup(func() { safehttp.AllowPrivate.Store(before) })
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) }))
+	defer server.Close()
+	u, err := url.Parse(server.URL + "/app.apk?signature=PRIVATE_QUERY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u.User = url.UserPassword("alice", "PRIVATE_AUTH")
+	invalid := filepath.Join(t.TempDir(), "invalid.ipa")
+	if err := os.WriteFile(invalid, []byte("not a ZIP"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range []string{filepath.Join(t.TempDir(), "missing.apk"), invalid, u.String()} {
+		for _, format := range []string{"json", "sarif"} {
+			out := filepath.Join(t.TempDir(), "report."+format)
+			if code := cmdMobile([]string{target, "--format", format, "--output", out, "--silence"}); code != 2 {
+				t.Fatalf("acquisition failure exit=%d", code)
+			}
+			raw, err := os.ReadFile(out)
+			if err != nil || !json.Valid(raw) || bytes.Contains(raw, []byte("PRIVATE_")) {
+				t.Fatal("failed acquisition did not produce a safe report")
+			}
+			if !bytes.Contains(raw, []byte("mobile_acquisition_failed")) || !bytes.Contains(raw, []byte(`"complete": false`)) {
+				t.Fatal("failed acquisition lost coverage disposition")
+			}
+			baseline := filepath.Join(t.TempDir(), "baseline.json")
+			const sentinel = "owned baseline sentinel"
+			if err := os.WriteFile(baseline, []byte(sentinel), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if code := cmdMobile([]string{target, "--format", format, "--output", out, "--write-baseline", baseline, "--silence"}); code != 2 {
+				t.Fatal("failed acquisition allowed baseline write")
+			}
+			body, err := os.ReadFile(baseline)
+			if err != nil || string(body) != sentinel {
+				t.Fatal("failed acquisition changed baseline")
+			}
+		}
+	}
+	privateErr := &url.Error{Op: "Get", URL: u.String(), Err: fmt.Errorf("PRIVATE_CAUSE")}
+	if strings.Contains(mobileDownloadFailureClass(privateErr), "PRIVATE_") {
+		t.Fatal("download failure classifier exposed an unsafe cause")
 	}
 }
 

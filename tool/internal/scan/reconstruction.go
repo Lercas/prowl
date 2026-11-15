@@ -74,7 +74,7 @@ func (p *Pipeline) mapReconstructed(fs []model.Finding, it model.Item) {
 		f.Line, f.Col = origin.lines.cols(origin.value.Expression.Start)
 		f.UTF16Col = origin.lines.utf16Col(origin.value.Expression.Start)
 		f.ByteStart, f.ByteEnd = origin.value.Expression.Start, origin.value.Expression.End
-		f.IndexLocationID = p.locationFingerprint(it.Source, it.Path, f.Line, f.Col)
+		f.IndexLocationID = p.itemLocationFingerprint(it, f.Line, f.Col)
 		f.Path, f.URL = model.SafeLocator(f.Path), model.SafeLocator(f.URL)
 		f.Stage = "reconstructed/" + f.Stage
 		f.Context = nil

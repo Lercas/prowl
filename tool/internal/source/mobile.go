@@ -2,6 +2,7 @@ package source
 
 import (
 	"archive/zip"
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -42,6 +43,7 @@ const (
 
 // MobileOptions configures a mobile-app scan.
 type MobileOptions struct {
+	Origin   string `json:"-"` // Original download URL, not its temporary file path.
 	MaxBytes int64
 	Exclude  []string
 	Strings  bool // run the binary printable-strings pass (default true)
@@ -95,7 +97,11 @@ func Extract(ctx context.Context, p string, opts MobileOptions) (<-chan model.It
 	if opts.MaxBytes <= 0 {
 		opts.MaxBytes = maxMobileEntryBytes
 	}
-	registerLocalScope(ctx, "mobile", p, opts)
+	var err error
+	ctx, err = mobileContext(ctx, p, false, opts)
+	if err != nil {
+		return nil, err
+	}
 	zr, err := zip.OpenReader(p)
 	if err != nil {
 		return nil, fmt.Errorf("open mobile archive %q: %w", p, err)
@@ -130,7 +136,7 @@ func emitMobileReader(ctx context.Context, ch chan<- model.Item, zr *zip.Reader,
 		return
 	}
 	b := &mobileBudget{}
-	for _, f := range zr.File {
+	for ordinal, f := range zr.File {
 		if ctx.Err() != nil {
 			return
 		}
@@ -139,6 +145,7 @@ func emitMobileReader(ctx context.Context, ch chan<- model.Item, zr *zip.Reader,
 			continue
 		}
 		reportPath := archiveBase + "!/" + name
+		entryCtx := context.WithValue(ctx, mobileEntryKey{}, ordinal+1)
 		// Inspected headers remain bounded even when bodies are deliberately excluded.
 		if !b.addEntry(0) {
 			emitSourceError(ctx, ch, archiveBase, b.err)
@@ -183,6 +190,7 @@ func emitMobileReader(ctx context.Context, ch chan<- model.Item, zr *zip.Reader,
 			}
 			continue
 		}
+		entryCtx = mobileMemberContext(entryCtx, body)
 		switch cls {
 		case clsTextRaw:
 			text, ok := scannableText(body)
@@ -190,16 +198,19 @@ func emitMobileReader(ctx context.Context, ch chan<- model.Item, zr *zip.Reader,
 				// A text-classified entry that is actually binary (mis-extensioned, or binary AXML /
 				// bplist): fall through to the strings pass so nothing is silently dropped.
 				if opts.Strings {
-					emitStrings(ctx, ch, body, reportPath, opts)
+					emitStrings(entryCtx, ch, body, reportPath, opts)
 				}
 				continue
 			}
-			if !send(ctx, ch, model.Item{Text: string(text), Source: mobileSource, Path: reportPath}) {
+			if !bytes.Equal(body, text) {
+				entryCtx = model.WithProvenance(entryCtx, map[string]any{"source_transform": "mobile-text-decoded"})
+			}
+			if !send(entryCtx, ch, model.Item{Text: string(text), Source: mobileSource, Path: reportPath}) {
 				return
 			}
 		case clsBinStrings:
 			if opts.Strings {
-				emitStrings(ctx, ch, body, reportPath, opts)
+				emitStrings(entryCtx, ch, body, reportPath, opts)
 			}
 		}
 	}
@@ -268,6 +279,7 @@ func classifyEntry(name string) entryClass {
 // sends the newline-joined runs as one Item, so scan.Run's lineIndex gives each run its own line/col and
 // capGenericPerFile bounds the per-path noise.
 func emitStrings(ctx context.Context, ch chan<- model.Item, body []byte, reportPath string, opts MobileOptions) {
+	ctx = model.WithProvenance(ctx, map[string]any{"source_transform": "mobile-printable-strings"})
 	min := opts.MinRun
 	if min <= 0 {
 		min = minRunDefault

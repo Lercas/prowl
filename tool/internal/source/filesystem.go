@@ -75,6 +75,7 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 		it.ArtifactURI = origin.artifact(it.Path)
 	}
 	attachBucketOrigin(ctx, &it)
+	attachMobileOrigin(ctx, &it)
 	select {
 	case ch <- it:
 		return true

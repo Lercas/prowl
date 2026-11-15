@@ -17,9 +17,14 @@ func (p *Pipeline) annotateIdentity(ctx context.Context, f *model.Finding, raw s
 		f.SecretID = hex.EncodeToString(mac.Sum(nil))
 		scope := sha256.Sum256(o.IdentityKey)
 		f.IdentityScope = hex.EncodeToString(scope[:8])
-		f.Fingerprint = p.reportFingerprint(f.Type, it.Path, raw)
+		f.Fingerprint = p.reportFingerprint(f.Type, privateIdentityPath(it), raw)
+		if it.IdentityPath != "" {
+			sourceMAC := hmac.New(sha256.New, o.IdentityKey)
+			_, _ = fmt.Fprintf(sourceMAC, "producer-source\x00%s", it.IdentityPath)
+			f.SourceIdentity = hex.EncodeToString(sourceMAC.Sum(nil))
+		}
 	}
-	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "layer_digest", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "git_index"} {
+	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "layer_digest", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "source_transform", "git_index"} {
 		if v, ok := it.Meta[k]; ok {
 			value := model.SafeLocator(fmt.Sprint(v))
 			if len(value) > 2048 {
@@ -63,6 +68,12 @@ func (p *Pipeline) annotateOccurrence(f *model.Finding) {
 	// observations. Keep their ordinal private while separating report IDs.
 	if f.ImageEntry > 0 {
 		_, _ = fmt.Fprintf(mac, "\x00image-entry\x00%d", f.ImageEntry)
+	}
+	if f.SourceIdentity != "" {
+		_, _ = fmt.Fprintf(mac, "\x00producer-source\x00%s", f.SourceIdentity)
+	}
+	if f.MobileEntry > 0 {
+		_, _ = fmt.Fprintf(mac, "\x00mobile-entry\x00%d", f.MobileEntry)
 	}
 	// A shared physical alias can expand into different logical occurrences. Its original-source
 	// proof distinguishes those paths without storing any credential or synthetic document bytes.

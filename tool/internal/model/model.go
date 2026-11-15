@@ -23,6 +23,10 @@ type Item struct {
 	Meta   map[string]any
 	// ArtifactURI identifies a source-declared locator independently of the display path.
 	ArtifactURI string `json:"-"`
+	// IdentityPath is producer-declared private identity material, never report text.
+	IdentityPath string `json:"-"`
+	// MobileEntry separates ZIP central-directory observations without publishing ordinals.
+	MobileEntry int `json:"-"`
 	// Error marks unreadable source content; it must not be treated as a clean empty item.
 	Error error
 	// ImageEntry identifies the physical TAR entry when a layer repeats a file path.
@@ -89,7 +93,10 @@ type Finding struct {
 	// if only in a historical/overwritten/whiteout-deleted layer, nil = unknown or not an image scan.
 	InFinalImage *bool `json:"in_final_image,omitempty"`
 	// ImageEntry is internal provenance; it is deliberately absent from report formats.
-	ImageEntry int `json:"-"`
+	ImageEntry  int `json:"-"`
+	MobileEntry int `json:"-"`
+	// SourceIdentity is a keyed digest, never the private producer locator itself.
+	SourceIdentity string `json:"-"`
 	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.
 	Instruction    string            `json:"instruction,omitempty"`
 	SecretID       string            `json:"secret_id,omitempty"`

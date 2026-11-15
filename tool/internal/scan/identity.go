@@ -37,6 +37,28 @@ func (p *Pipeline) locationFingerprint(source, path string, line, col int) strin
 	return p.options.LocationFingerprint(source, path, line, col)
 }
 
+func publicIdentityPath(it model.Item) string {
+	if it.IdentityPath != "" && it.ArtifactURI != "" {
+		return it.ArtifactURI
+	}
+	return it.Path
+}
+
+func privateIdentityPath(it model.Item) string {
+	if it.IdentityPath != "" {
+		return it.IdentityPath
+	}
+	return it.Path
+}
+
+func (p *Pipeline) itemLocationFingerprint(it model.Item, line, col int) string {
+	path := privateIdentityPath(it)
+	if it.MobileEntry > 0 {
+		path += fmt.Sprintf("\x00mobile-entry\x00%d", it.MobileEntry)
+	}
+	return p.locationFingerprint(it.Source, path, line, col)
+}
+
 func (p *Pipeline) indexText(text, raw string) string {
 	if p.options.ValueFingerprint == nil {
 		return ""
@@ -80,7 +102,13 @@ func (p *Pipeline) sanitizeIndexMetadata(findings []model.Finding, values []stri
 		result := replace(text)
 		if strings.Contains(text, "://") {
 			if u, err := url.Parse(text); err == nil {
-				u.User, u.RawQuery, u.Fragment, u.RawFragment = nil, "", "", ""
+				u.User, u.RawQuery = nil, ""
+				if u.Scheme == "mobile+file" || u.Scheme == "mobile+payload" || u.Scheme == "mobile+http" || u.Scheme == "mobile+https" {
+					// Synthetic mobile fragments locate ZIP members, not request data.
+					u.Fragment, u.RawFragment = replace(u.Fragment), ""
+				} else {
+					u.Fragment, u.RawFragment = "", ""
+				}
 				u.ForceQuery = false
 				u.Path, u.Host, u.Opaque = replace(u.Path), replace(u.Host), replace(u.Opaque)
 				u.RawPath = ""

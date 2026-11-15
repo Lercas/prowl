@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -74,53 +75,65 @@ func cmdMobile(args []string) int {
 	}
 
 	options := scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}
-	var prepared preparedScan
+	prepared := prepareScan(c, options)
 	if c.auditPublic {
-		prepared = prepareScan(c, options)
 		if prepared.auditError != nil {
 			logx.Error("public audit setup failed", "err", prepared.auditError)
 			return 2
 		}
 	}
 
+	opts := source.MobileOptions{MaxBytes: c.maxSize, Exclude: c.exclude, Strings: !c.cmd.noStrings, MinRun: c.cmd.minRun}
+	if isURL(target) {
+		opts.Origin = target
+	}
 	localPath := target
 	if isURL(target) {
 		tmp, err := os.MkdirTemp("", "prowl-mobile-*")
 		if err != nil {
 			logx.Error("tempdir failed", "err", err)
-			return 2
+			return prepared.Run(ctx, source.MobileFailure(ctx, downloadName(target), opts))
 		}
 		defer os.RemoveAll(tmp)
 		p, derr := downloadToTemp(ctx, target, tmp, c.maxSize, c.timeout)
 		if derr != nil {
-			logx.Error("mobile download failed", "url", redactURL(target), "err", derr)
-			return 2
+			logx.Error("mobile download failed", "url", redactURL(target), "reason", mobileDownloadFailureClass(derr))
+			return prepared.Run(ctx, source.MobileFailure(ctx, downloadName(target), opts))
 		}
 		localPath = p
 	} else if _, err := os.Stat(localPath); err != nil { // #nosec G703 -- explicitly selected local scanner input, not a sandboxed server path.
 		logx.Error("mobile file not found", "path", localPath)
-		return 2
-	}
-
-	opts := source.MobileOptions{
-		MaxBytes: c.maxSize,
-		Exclude:  c.exclude,
-		Strings:  !c.cmd.noStrings,
-		MinRun:   c.cmd.minRun,
+		return prepared.Run(ctx, source.MobileFailure(ctx, localPath, opts))
 	}
 
 	logx.Info("scanning mobile app", "path", localPath)
 	items, err := source.MobileItems(ctx, localPath, opts)
 	if err != nil {
-		logx.Error("mobile extract failed", "path", localPath, "err", err)
-		return 2
+		logx.Error("mobile extract failed", "path", filepath.Base(localPath))
+		return prepared.Run(ctx, source.MobileFailure(ctx, localPath, opts))
 	}
 	// dedupe on by default: the same key often shows up in several entries (raw resource + dex strings);
 	// report it once. Same as cmdImage.
-	if !c.auditPublic {
-		prepared = prepareScan(c, options)
-	}
 	return prepared.Run(ctx, items)
+}
+
+type mobileHTTPStatusError struct{ status int }
+
+func (e mobileHTTPStatusError) Error() string {
+	return fmt.Sprintf("mobile download returned HTTP %d", e.status)
+}
+func mobileDownloadFailureClass(err error) string {
+	if errors.Is(err, context.Canceled) {
+		return "canceled"
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return "deadline exceeded"
+	}
+	var status mobileHTTPStatusError
+	if errors.As(err, &status) {
+		return status.Error()
+	}
+	return "mobile acquisition failed"
 }
 
 // minRunDefault mirrors source's default min printable-run length (kept here so the flag default reads
@@ -149,7 +162,7 @@ func downloadToTemp(ctx context.Context, rawURL, dir string, maxBytes int64, tim
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", fmt.Errorf("download %s: unexpected status %s", redactURL(rawURL), resp.Status)
+		return "", mobileHTTPStatusError{resp.StatusCode}
 	}
 	dst := filepath.Join(dir, downloadName(rawURL))
 	f, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600) // #nosec G703 -- safe basename in an owned private directory; never replaces an existing entry.

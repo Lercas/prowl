@@ -12,13 +12,14 @@ import (
 
 // Keep original prepared spans even after findings are mapped to source coordinates.
 type verificationCandidate struct {
-	typ, value string
-	start, end int
-	jwtPayload bool
+	typ, value    string
+	start, end    int
+	jwtPayload    bool
+	derivedMobile bool
 }
 
 func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
-	if c.jwtPayload && set != nil {
+	if (c.jwtPayload || c.derivedMobile) && set != nil {
 		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, detect.IsExampleOrPlaceholder(c.value)))
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
@@ -51,6 +52,12 @@ func verificationMetadata(r verify.Result) *model.Verification {
 func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor, doc *literalDocument, bindings map[string]string, path string, f *model.Finding) {
 	if !publicaudit.Supports(c.typ) {
 		return
+	}
+	if c.derivedMobile {
+		doc, bindings = nil, nil
+		if publicaudit.GoogleType(c.typ) {
+			bindings = map[string]string{"firebaseConfig": "derived mobile strings"}
+		}
 	}
 	if c.jwtPayload {
 		// Decoding claims does not establish a configuration/companion relationship.

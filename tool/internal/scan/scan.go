@@ -597,11 +597,12 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			ByteStart: m.Start, ByteEnd: m.End,
 			ArtifactURI: it.ArtifactURI,
 			Redacted:    p.redactValue(m.Value), Stage: m.Stage, URL: itemURL,
-			Fingerprint:      model.ComputeFingerprint(m.Type, it.Path, m.Value),
-			ValueFingerprint: p.valueFingerprint(m.Value), IndexPath: p.indexText(it.Path, ""),
-			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
+			Fingerprint:      model.ComputeFingerprint(m.Type, publicIdentityPath(it), m.Value),
+			ValueFingerprint: p.valueFingerprint(m.Value), IndexPath: p.indexText(publicIdentityPath(it), ""),
+			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.itemLocationFingerprint(it, line, col),
 			Instruction: itemInstr,
 			ImageEntry:  it.ImageEntry,
+			MobileEntry: it.MobileEntry,
 			Context:     p.revealMatchContext(it, m),
 		})
 		for _, step := range m.ProofSteps() {
@@ -615,7 +616,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
 		if vset != nil || auditor != nil {
-			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload})
+			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, derivedMobile: it.Meta["source_transform"] == "mobile-printable-strings"})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
@@ -699,11 +700,12 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				ByteStart: h.Start, ByteEnd: h.End,
 				ArtifactURI: it.ArtifactURI,
 				Redacted:    p.redactValue(h.Value), Stage: "rule", URL: itemURL,
-				Fingerprint:      model.ComputeFingerprint(h.RuleID, it.Path, h.Value),
-				ValueFingerprint: p.valueFingerprint(h.Value), IndexPath: p.indexText(it.Path, ""),
-				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.locationFingerprint(it.Source, it.Path, line, col),
+				Fingerprint:      model.ComputeFingerprint(h.RuleID, publicIdentityPath(it), h.Value),
+				ValueFingerprint: p.valueFingerprint(h.Value), IndexPath: p.indexText(publicIdentityPath(it), ""),
+				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.itemLocationFingerprint(it, line, col),
 				Instruction: itemInstr,
 				ImageEntry:  it.ImageEntry,
+				MobileEntry: it.MobileEntry,
 				Context:     p.revealContext(it, h.Start),
 			}
 			if h.payload != nil {
@@ -733,7 +735,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			dedup[key] = len(out)
 			out = append(out, f)
 			if vset != nil || auditor != nil {
-				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil})
+				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, derivedMobile: it.Meta["source_transform"] == "mobile-printable-strings"})
 			}
 			if ml != nil {
 				reqs = append(reqs, h.record(it, literalDoc))
@@ -797,7 +799,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			candidate := pending[original]
 			var bindings map[string]string
-			if literalDoc == nil && publicaudit.Supports(candidate.typ) {
+			if literalDoc == nil && !candidate.derivedMobile && publicaudit.Supports(candidate.typ) {
 				bindings = p.options.publicBindings.forCandidate(ctx, candidate, p.options.reconstruction)
 			}
 			candidate.audit(ctx, auditor, literalDoc, bindings, it.Path, &out[i])
