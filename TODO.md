@@ -599,7 +599,18 @@
     occurrences, SARIF, HMAC/private index, incomplete baseline). Quality IDs сохранены;
     фиксированный gate +17,82% времени, B/op −10,64%, allocs −5,39%, пороги прежние.
     `wiki/evidence/1.5.0-reconstructed-jwt-20261115.json`.
-  - [ ] Остальные внешние кодирования (Base64/hex/сжатие) и нормализованные views:
+  - [x] **Линейный Base64 вокруг JWT.** Четыре варианта алфавита/padding, до трёх
+    внешних слоёв плюс payload, source proof из исходных квантов для builtin/templates.
+    Прямые JWT обнаруживаются первыми; общий бюджет и cache физических контейнеров
+    запрещают сброс глубины через другой путь. Claims-aware duplicate сохраняет
+    запрет companion bindings при выключенном JWT output; логический контейнер
+    удаляется из приватных метаданных и без template engine. Base64-данные читаются
+    независимо от opt-in исполнения реконструкции JS. Main `c45fc23` = `e0d9ad4`:
+    full Go, detect/scan race, min-Go, lint, fuzz 19461, native 168/168; точные Quality
+    IDs прежние (1556/2094, 57/982), GOROOT digest сохранён. Фиксированный gate:
+    time +18,72%, B/op −11,26%, allocs −4,33%; модель/reference/пороги сохранены.
+    `wiki/evidence/1.5.0-base64-jwt-20261115.json`.
+  - [ ] Остальные внешние кодирования (hex/сжатие) и нормализованные views:
     передавать целый восстановленный JWT в payload-проход с общей цепочкой source proof.
 - [x] **Таблицы Markdown/Jira.** Вертикальные key/value-строки, Markdown-заголовки с
   выравниванием и Jira `||…||`; целые значения с разделителями и экранированным `|`.

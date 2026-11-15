@@ -96,3 +96,8 @@ GOROOT-корпуса сохранён. [Evidence](evidence/1.5.0-jwt-rules-2026
 allocs/op −5,39%. Обычный GOROOT digest сохранён. Новая опциональная ветка проверена
 функционально на реконструированных JS/TSX; этот корпусный замер её throughput не
 оценивает. [Evidence](evidence/1.5.0-reconstructed-jwt-20261115.json).
+
+Линейный Base64/JWT (`e0d9ad4`, main `c45fc23`) включён в обычный Pipeline и проходит
+фиксированные три пары: 11,532 / 9,713 с (+18,72%), B/op −11,26%, allocs/op −4,33%.
+Полный GOROOT digest и точные Quality IDs сохранены. Reference, модель и пороги
+прежние; запас времени ограничен. [Evidence](evidence/1.5.0-base64-jwt-20261115.json).
