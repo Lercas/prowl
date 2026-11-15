@@ -119,7 +119,11 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			continue
 		}
 		opts.jwtBudget.escaped++
-		local := d.ScanWithStatus(ctx, v.value, opts)
+		localOptions := opts
+		if opts.ObserveJWTPayload != nil {
+			localOptions.jwtOrigin = jwtScalarOrigin(opts.jwtOrigin, text, v)
+		}
+		local := d.ScanWithStatus(ctx, v.value, localOptions)
 		limited = limited || local.CandidateLimited || local.Base64Limited
 		var nominated []Match
 		if IsSecretBindingName(v.name) {

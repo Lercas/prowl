@@ -76,7 +76,15 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			continue
 		}
 		decoded := string(payload)
-		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget}
+		start := container.Start + len(parts[0]) + 1
+		frame := &base64Frame{start: start, end: start + len(parts[1])}
+		var origin *jwtViewOrigin
+		if opts.ObserveJWTPayload != nil {
+			origin = &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: frame.end, base64: true}
+			left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
+			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}})
+		}
+		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin}
 		inner := d.ScanWithStatus(ctx, decoded, childOptions)
 		inner = d.jwtEscapedFindings(ctx, decoded, inner, childOptions)
 		limited = limited || inner.CandidateLimited || inner.Base64Limited
@@ -86,8 +94,6 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 				seen[identity{m.Type, m.Value, m.Start, m.End}] = true
 			}
 		}
-		start := container.Start + len(parts[0]) + 1
-		frame := &base64Frame{start: start, end: start + len(parts[1])}
 		for _, m := range inner.Matches {
 			// Bare claim identifiers, hashes and random user IDs are not credentials.
 			if m.Type == "generic_high_entropy" {

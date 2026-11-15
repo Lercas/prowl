@@ -213,8 +213,12 @@ type ScanOptions struct {
 	PasswordScalars      map[int]PasswordScalar
 	YAML                 bool
 	PublicKeys           bool // Explicit public-audit subjects, never ordinary secret detection.
-	jwtDepth             int
-	jwtBudget            *jwtPayloadBudget
+	// ObserveJWTPayload receives bounded, validated JSON views with source projections.
+	// It must not retain credentials beyond the current item or trust claims as bindings.
+	ObserveJWTPayload func(JWTPayloadView)
+	jwtDepth          int
+	jwtBudget         *jwtPayloadBudget
+	jwtOrigin         *jwtViewOrigin
 }
 
 type ScanResult struct {

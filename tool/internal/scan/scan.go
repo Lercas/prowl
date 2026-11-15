@@ -446,6 +446,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		vset = nil
 	}
 	var ms []detect.Match
+	var payloads []detect.JWTPayloadView
 	truncated := false
 	failed := false
 	resilience.Guard(
@@ -458,6 +459,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				opts.PasswordScalars = literalDoc.scalars
 			}
 			opts.PublicKeys = p.options.PublicAuditor != nil
+			if eng != nil && eng.Len() > 0 {
+				opts.ObserveJWTPayload = func(view detect.JWTPayloadView) { payloads = append(payloads, view) }
+			}
 			result := det.ScanWithStatus(ctx, it.Text, opts)
 			ms, truncated = result.Matches, result.CandidateLimited || result.Base64Limited
 		},
@@ -624,17 +628,13 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		// Bound the engine by the remaining combined budget: the cascade already consumed len(out) of the
 		// cap, so MatchN stops early at maxMatches-len(out) and never materializes the full hit slice on a
 		// dense file. A non-positive budget means the cascade filled the cap; the engine emits nothing.
-		var hits []rules.Hit
+		var hits []ruleCandidate
 		var engTrunc bool
 		budget := maxMatches - len(out)
 		if budget > 0 {
 			resilience.Guard(
 				func() {
-					if p.options.ValueFingerprint != nil || p.options.AllOccurrences {
-						hits, engTrunc = eng.MatchOccurrencesN(it.Text, budget)
-					} else {
-						hits, engTrunc = eng.MatchN(it.Text, budget)
-					}
+					hits, engTrunc = p.ruleCandidates(ctx, it, payloads, budget)
 				},
 				func(r any) {
 					logx.Warn("recovered rule-engine panic", "path", it.Path, "err", r)
@@ -651,12 +651,16 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			for _, h := range hits {
 				indexValues = append(indexValues, h.Value)
 			}
+			for _, view := range payloads {
+				span := view.ContainerSpan()
+				indexValues = append(indexValues, view.Text, it.Text[span.Start:span.End])
+			}
 		}
 		for i, h := range hits {
 			if i&1023 == 0 && ctx.Err() != nil {
 				break
 			}
-			if literalDoc != nil && !literalDoc.accepts(h.RuleID, h.Start, h.End) {
+			if literalDoc != nil && !literalDoc.accepts(h.RuleID, h.Start, h.End) && !(h.payload != nil && literalDoc.locate(h.Start, h.End) != nil) {
 				continue
 			}
 			// backstop the combined cap during accumulation (collisions update in place; distinct hits grow out)
@@ -690,7 +694,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			f := model.Finding{
 				Agent: it.Agent, Detector: h.RuleID, Type: h.RuleID, Confidence: 0.9,
-				Severity: ruleSeverity(sev, h, li, examplePath, pathIsFile),
+				Severity: ruleSeverity(sev, h.Hit, li, examplePath, pathIsFile),
 				Source:   it.Source, Path: it.Path, Line: line, Col: col,
 				UTF16Col:  li.utf16Col(h.Start),
 				ByteStart: h.Start, ByteEnd: h.End,
@@ -703,37 +707,41 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				ImageEntry:  it.ImageEntry,
 				Context:     p.revealContext(it, h.Start),
 			}
+			if h.payload != nil {
+				f.Stage, f.Context = "rule/jwt-payload", nil
+				for j, span := range h.payload.view.EncodedSpans() {
+					transform := "base64-decode"
+					if j > 0 {
+						transform += "-layer-" + strconv.Itoa(j+1)
+					}
+					line, col := li.cols(span.Start)
+					f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: span.Start, End: span.End, Line: line, Col: col, Transform: transform})
+				}
+			}
 			p.annotateIdentity(ctx, &f, h.Value, it)
 			// On a collision (same value+line) keep the stronger finding; a specific template supersedes a
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
 			// builtin — a cryptographic L1-checksum hit must never be rewritten by a template's self-declared severity.
 			if collided {
-				if prev := out[idx]; prev.Stage == "rule" || isChecksumProven(prev) || stronger(prev, f) || eng.Bundled() && !taxonomy.GenericLast[prev.Type] {
+				if prev := out[idx]; prev.Stage == "rule" || prev.Stage == "rule/jwt-payload" || isChecksumProven(prev) || stronger(prev, f) || eng.Bundled() && !taxonomy.GenericLast[prev.Type] {
 					continue
 				}
 				out[idx] = f
 				if vset != nil || auditor != nil {
-					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End}
+					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil}
 				}
 				if ml != nil {
-					reqs[idx] = recordFor(h.Value, it, h.Start)
-					if literalDoc != nil {
-						reqs[idx] = literalDoc.recordFor(h.Value, it, h.Start, h.RuleID)
-					}
+					reqs[idx] = h.record(it, literalDoc)
 				}
 				continue
 			}
 			dedup[key] = len(out)
 			out = append(out, f)
 			if vset != nil || auditor != nil {
-				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End})
+				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil})
 			}
 			if ml != nil {
-				record := recordFor(h.Value, it, h.Start)
-				if literalDoc != nil {
-					record = literalDoc.recordFor(h.Value, it, h.Start, h.RuleID)
-				}
-				reqs = append(reqs, record)
+				reqs = append(reqs, h.record(it, literalDoc))
 			}
 		}
 	}
