@@ -586,7 +586,7 @@
   Quality сохраняет точные ID пропусков/FP (1556/2094, 57/982); фиксированный performance
   gate проходит три пары: time +18,78%, B/op −10,33%, allocs −5,36%, пороги прежние.
   `wiki/evidence/1.5.0-jwt-rules-20261115.json`.
-- [ ] **Непрямые представления самого JWT-контейнера.** Связать их декодированные payload
+- [x] **Непрямые представления самого JWT-контейнера.** Связать их декодированные payload
   со всеми исходными преобразованиями и координатами, включая внешнее кодирование
   и реконструированные выражения; проверить builtin и template engine вместе.
   - [x] **Parser-proven реконструкция JS/TS.** `--reconstruct` сохраняет builtin/template
@@ -630,8 +630,17 @@
     случаи. Quality IDs и полный GOROOT digest сохранены; фиксированный gate:
     time +18,23%, B/op −10,27%, allocs −3,13%, пороги/reference/модель прежние.
     `wiki/evidence/1.5.0-compressed-jwt-20261115.json`.
-  - [ ] Нормализованные views: передавать целый восстановленный JWT в payload-проход
-    с общей цепочкой source proof.
+  - [x] **Нормализованные views JWT.** Escape/concat, percent/HTML и статический
+    `String.fromCharCode` передают claims builtin/templates с общей source proof;
+    длинный носитель расширяется за пределы 256-байтового окна с сохранением разделителя.
+    Общие бюджеты 1 МиБ, 4096 constructs и трёх уровней; JSON escaped scalars имеют
+    приоритет в cache, а внешнее поле не заменяет claims child при отключённом JWT.
+    Main `273d103` = изолированный `2a37396`: full Go, detect/scan race, min-Go, lint,
+    fuzz 27153, native 136/136 и 180/180 регрессионных compressed-сценариев. Обычная
+    нормализация может стать primary для прямой конкатенации; AST proof сохранена
+    в occurrences. Quality IDs и GOROOT digest прежние; фиксированный gate time
+    +17,69%, B/op −3,41%, allocs −2,42%, модель/reference/пороги не менялись.
+    `wiki/evidence/1.5.0-normalized-jwt-20261115.json`.
 - [x] **Таблицы Markdown/Jira.** Вертикальные key/value-строки, Markdown-заголовки с
   выравниванием и Jira `||…||`; целые значения с разделителями и экранированным `|`.
   Имя столбца передаётся ML; исходные позиции, маскирование и HMAC-идентичность сохранены.
