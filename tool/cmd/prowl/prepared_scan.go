@@ -71,7 +71,9 @@ func (p preparedScan) Collect(ctx context.Context, items <-chan model.Item) []mo
 		logx.Error("index setup failed", "err", p.indexError)
 		return []model.Finding{{Detector: "scan", Type: "response_truncated", Severity: "info", Path: "index", Stage: "index setup", Rationale: "the local index is unavailable; the scan did not run"}}
 	}
+	items, done := scanProgress(ctx, p.flags, items)
 	findings := p.pipeline.Run(ctx, items)
+	done()
 	if p.mlError != nil {
 		logx.Error("ML setup failed; scan results are incomplete", "err", p.mlError)
 		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info",

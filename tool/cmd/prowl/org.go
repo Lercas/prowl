@@ -93,6 +93,7 @@ func cmdOrg(args []string) int {
 		return 2
 	}
 	var urls []string
+	listed := startStage(c, "listing repositories")
 	if gists {
 		logx.Info("listing gists", "target", target)
 		urls, err = forge.ListGists(ctx, target)
@@ -100,6 +101,7 @@ func cmdOrg(args []string) int {
 		logx.Info("listing repositories", "target", target)
 		urls, err = forge.ListRepos(ctx, target)
 	}
+	listed()
 	var listingDiagnostics []model.Finding
 	if err != nil {
 		logx.Error("listing failed", "err", err)
@@ -186,7 +188,9 @@ func cmdOrg(args []string) int {
 func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findings []model.Finding, ok bool) {
 	c := prepared.flags
 	label := repoLabel(url)
+	cloned := startStage(c, "cloning repositories")
 	dir, cleanup, err := source.CloneRepo(ctx, source.CloneOpts{URL: url, Full: c.history, Timeout: c.timeout})
+	cloned()
 	if err != nil {
 		logx.Error("clone failed", "url", source.RepositoryLocator(url), "err", err)
 		return []model.Finding{orgDiagnostic(label, "repository clone failed; scan results are incomplete")}, false

@@ -32,7 +32,10 @@ func runCLI(args []string) int {
 		if len(args) > 1 {
 			topic = args[1]
 		}
-		helpFor(topic)
+		if !helpFor(topic) {
+			fmt.Fprintln(os.Stderr, unknownCommandMessage(topic))
+			return 2
+		}
 		return 0
 	}
 	switch cmd {

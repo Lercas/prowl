@@ -24,8 +24,15 @@ type Options struct {
 
 var (
 	mu  sync.RWMutex
-	def = slog.New(newConsoleHandler(os.Stderr, slog.LevelInfo, true))
+	def = slog.New(newConsoleHandler(os.Stderr, slog.LevelInfo, defaultColor()))
 )
+
+// defaultColor decides colour for records logged before Setup runs (flag and preflight errors):
+// escape codes belong on a terminal, not in a CI log or a captured stderr.
+func defaultColor() bool {
+	info, err := os.Stderr.Stat()
+	return err == nil && info.Mode()&os.ModeCharDevice != 0 && os.Getenv("NO_COLOR") == ""
+}
 
 // Setup installs the global logger from Options. Call once at startup after flag parsing.
 func Setup(o Options) {

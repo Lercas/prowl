@@ -8,7 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -33,6 +35,10 @@ func TestGroupedHelpCoversSchema(t *testing.T) {
 		if !strings.Contains(help, "\n"+title+"\n") && !strings.HasPrefix(help, title+"\n") {
 			t.Fatalf("scan help lost its %q section", title)
 		}
+	}
+	// `scan` has no flags of its own: one landing in the untitled list was added without a section.
+	if strings.Contains(help, "This command:") {
+		t.Fatalf("a scan flag has no help section:\n%s", help[:strings.Index(help, "\n\n")])
 	}
 	if strings.Index(help, "--staged") > strings.Index(help, "--max-size") {
 		t.Fatal("flags inside a section do not follow the section's order")
@@ -192,11 +198,81 @@ func TestSourceLinesMaskEverySecretOnTheLine(t *testing.T) {
 func TestProgressIsOffOutsideATerminal(t *testing.T) {
 	items := make(chan model.Item)
 	var in <-chan model.Item = items
-	if withProgress(t.Context(), commonFlags{format: "pretty"}, in) != in {
-		t.Fatal("progress wrapped a scan whose output is not a terminal")
+	got, done := scanProgress(t.Context(), commonFlags{format: "pretty"}, in)
+	done()
+	if got != in {
+		t.Fatal("progress wrapped a scan whose stderr is not a terminal")
 	}
 	if humanBytes(1536) != "2 KB" || humanBytes(5<<20) != "5.0 MB" || humanBytes(12) != "12 B" {
 		t.Fatal("byte formatting changed")
+	}
+}
+
+// lockedBuffer lets the test read what the meter's goroutine writes.
+type lockedBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *lockedBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *lockedBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
+}
+
+func TestProgressMeterStagesAndLogs(t *testing.T) {
+	out := &lockedBuffer{}
+	meter := &progressMeter{out: out, delay: time.Millisecond, every: time.Millisecond}
+	waitFor := func(text string) {
+		t.Helper()
+		for deadline := time.Now().Add(5 * time.Second); !strings.Contains(out.String(), text); {
+			if time.Now().After(deadline) {
+				t.Fatalf("progress never showed %q: %q", text, out.String())
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}
+	cloned := meter.stage("cloning repository")
+	waitFor("cloning repository… ")
+	scanned := meter.stage("scanning")
+	items := make(chan model.Item, 1)
+	items <- model.Item{Text: strings.Repeat("x", 2048)}
+	close(items)
+	for range meter.track(t.Context(), items) {
+	}
+	waitFor("scanning… 1 files · 2 KB · ")
+	// The inner stage ends: the line returns to the one still running.
+	scanned()
+	before := len(out.String())
+	for deadline := time.Now().Add(5 * time.Second); !strings.Contains(out.String()[before:], "cloning repository…"); {
+		if time.Now().After(deadline) {
+			t.Fatal("ending a nested stage did not restore the outer one")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	// A log record clears the status line before it is written.
+	var sink bytes.Buffer
+	meter.mu.Lock()
+	meter.shown = true
+	meter.mu.Unlock()
+	if _, err := (progressLog{meter, &sink}).Write([]byte("WARN x\n")); err != nil || sink.String() != "WARN x\n" {
+		t.Fatalf("log record was altered: %q %v", sink.String(), err)
+	}
+	cloned()
+	cloned() // ending twice is harmless
+	final := out.String()
+	time.Sleep(10 * time.Millisecond)
+	if out.String() != final {
+		t.Fatal("the meter kept drawing after its last stage ended")
+	}
+	if !strings.HasSuffix(final, "\r\x1b[K") && !strings.HasSuffix(final, "\r") {
+		t.Fatalf("the status line was left on screen: %q", final)
 	}
 }
 
@@ -241,5 +317,41 @@ func TestInstalledModelHint(t *testing.T) {
 	}
 	if installedModelHint("explicit.json") != "" {
 		t.Fatal("an explicitly chosen model is not the installed one")
+	}
+}
+
+func TestTypoSuggestionsStayPlausible(t *testing.T) {
+	commands := commandNames()
+	for typo, want := range map[string]string{"scna": "scan", "ogr": "org", "repp": "repo", "domian": "domain"} {
+		if got := closest(typo, commands); got != want {
+			t.Errorf("closest(%q) = %q, want %q", typo, got, want)
+		}
+	}
+	// A different word is not a typo of a short name.
+	if got := closest("nope", []string{"e", "t", "src"}); got != "" {
+		t.Errorf("unrelated name suggested: %q", got)
+	}
+	if code := runCLI([]string{"help", "nope"}); code != 2 {
+		t.Fatalf("help for an unknown command exited %d", code)
+	}
+	if code := runCLI([]string{"help", "scan"}); code != 0 {
+		t.Fatalf("help for a known command exited %d", code)
+	}
+}
+
+func TestFileArgumentsFailBeforeTheScan(t *testing.T) {
+	dir := t.TempDir()
+	missing := filepath.Join(dir, "absent", "report.json")
+	for _, flags := range []commonFlags{{output: missing}, {writeBaseline: missing}, {baseline: filepath.Join(dir, "none.json")}} {
+		if err := flags.filePreflight(); err == nil {
+			t.Fatalf("unusable file argument passed preflight: %+v", flags)
+		}
+	}
+	ok := commonFlags{output: filepath.Join(dir, "report.json"), writeBaseline: "baseline.json"}
+	if err := ok.filePreflight(); err != nil {
+		t.Fatalf("writable destination rejected: %v", err)
+	}
+	if code := runCLI([]string{"scan", dir, "--format", "json", "--output", missing}); code != 2 {
+		t.Fatalf("scan with an unwritable --output exited %d", code)
 	}
 }

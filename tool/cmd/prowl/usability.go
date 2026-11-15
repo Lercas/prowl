@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -10,12 +9,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync/atomic"
-	"time"
 	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/post"
 )
 
 // warnMissingPaths names a mistyped path, with the nearest existing name, before any work starts.
@@ -172,78 +170,26 @@ func cutSnippet(line string, lead int) string {
 	return cut
 }
 
-const (
-	progressDelay = time.Second // a scan faster than this shows nothing
-	progressEvery = 200 * time.Millisecond
-)
-
-// withProgress shows files and bytes handed to the scanner on a terminal while a long scan runs.
-// The line ends with a carriage return, so a log record written meanwhile starts at column zero
-// instead of being glued to it; the line is erased before the report is printed.
-func withProgress(ctx context.Context, c commonFlags, items <-chan model.Item) <-chan model.Item {
-	if !interactiveReport(c) || c.quiet {
-		return items
-	}
-	out := make(chan model.Item)
-	var count, size atomic.Int64
-	done := make(chan struct{})
-	finished := make(chan struct{})
-	go func() {
-		defer close(finished)
-		started := time.Now()
-		ticker := time.NewTicker(progressEvery)
-		defer ticker.Stop()
-		shown := false
-		for {
-			select {
-			case <-done:
-				if shown {
-					fmt.Fprint(os.Stderr, "\r\x1b[K")
-				}
-				return
-			case now := <-ticker.C:
-				if elapsed := now.Sub(started); elapsed >= progressDelay {
-					shown = true
-					fmt.Fprintf(os.Stderr, "\r\x1b[K  scanning… %d files · %s · %s\r", count.Load(), humanBytes(size.Load()), elapsed.Round(time.Second))
-				}
-			}
+// filePreflight rejects, before any scanning, the file arguments that would otherwise fail only
+// when the report is written: a long scan must not end with its result thrown away.
+func (c *commonFlags) filePreflight() error {
+	if c.baseline != "" {
+		if _, err := post.LoadBaseline(c.baseline); err != nil {
+			return fmt.Errorf("--baseline %s: %w", c.baseline, err)
 		}
-	}()
-	go func() {
-		defer func() {
-			close(done)
-			<-finished
-			close(out)
-		}()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case item, ok := <-items:
-				if !ok {
-					return
-				}
-				count.Add(1)
-				size.Add(int64(len(item.Text)))
-				select {
-				case out <- item:
-				case <-ctx.Done():
-					return
-				}
-			}
-		}
-	}()
-	return out
-}
-
-func humanBytes(n int64) string {
-	switch {
-	case n >= 1<<30:
-		return fmt.Sprintf("%.1f GB", float64(n)/(1<<30))
-	case n >= 1<<20:
-		return fmt.Sprintf("%.1f MB", float64(n)/(1<<20))
-	case n >= 1<<10:
-		return fmt.Sprintf("%.0f KB", float64(n)/(1<<10))
 	}
-	return fmt.Sprintf("%d B", n)
+	for _, target := range []struct{ flag, path string }{{"--output", c.output}, {"--write-baseline", c.writeBaseline}} {
+		if target.path == "" {
+			continue
+		}
+		dir := filepath.Dir(target.path)
+		info, err := os.Stat(dir) // #nosec G703 -- The operator names the report destination; only its directory is checked.
+		switch {
+		case errors.Is(err, fs.ErrNotExist):
+			return fmt.Errorf("%s %s: directory %s does not exist", target.flag, target.path, dir)
+		case err == nil && !info.IsDir():
+			return fmt.Errorf("%s %s: %s is not a directory", target.flag, target.path, dir)
+		}
+	}
+	return nil
 }

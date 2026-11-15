@@ -318,10 +318,11 @@ Examples:
   prowl scan . --verify --verifiers ./verifiers`
 
 // helpFor derives the accepted flags from the same schema used by the parser.
-func helpFor(name string) {
+// helpFor prints the help for a command ("" is the overview) and reports whether it exists.
+func helpFor(name string) bool {
 	if name == "" {
 		fmt.Print(usageText())
-		return
+		return true
 	}
 	parent, _, nested := strings.Cut(name, ".")
 	for _, command := range commands {
@@ -356,9 +357,9 @@ func helpFor(name string) {
 		fmt.Print(commandFlagHelp(name))
 		fmt.Println("\nUse -- to end flag parsing; use --flag=VALUE for values starting with --.")
 
-		return
+		return true
 	}
-	fmt.Print(usageText())
+	return false
 }
 
 func commandNames() []string {
@@ -385,7 +386,7 @@ func closest(in string, candidates []string) string {
 			best, bestD = c, d
 		}
 	}
-	if bestD <= 3 && bestD < len(in) { // close enough to be a typo, not a different word
+	if bestD <= 3 && bestD*2 <= len(in) { // a typo changes at most half of the word; more is another word
 		return best
 	}
 	return ""
@@ -396,6 +397,7 @@ func levenshtein(a, b string) int {
 	for j := range prev {
 		prev[j] = j
 	}
+	before := prev
 	for i := 1; i <= len(a); i++ {
 		cur := make([]int, len(b)+1)
 		cur[0] = i
@@ -405,8 +407,12 @@ func levenshtein(a, b string) int {
 				cost = 0
 			}
 			cur[j] = min3(cur[j-1]+1, prev[j]+1, prev[j-1]+cost)
+			// Two swapped neighbours ("scna") are one slip of the fingers, not two edits.
+			if i > 1 && j > 1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] && before[j-2]+1 < cur[j] {
+				cur[j] = before[j-2] + 1
+			}
 		}
-		prev = cur
+		before, prev = prev, cur
 	}
 	return prev[len(b)]
 }

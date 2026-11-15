@@ -128,7 +128,9 @@ func cmdAtlassian(args []string, product string) int {
 		}
 	}()
 
-	findings := prepared.pipeline.Run(ctx, counted)
+	tracked, done := scanProgress(ctx, c, counted)
+	findings := prepared.pipeline.Run(ctx, tracked)
+	done()
 	if itemCount.Load() == 0 && ctx.Err() == nil {
 		logx.Error("scanned 0 items — check credentials, the account's project/space access, and any --project/--space filter", "product", product)
 		c.coverage.Note("atlassian_empty_collection", product, true)

@@ -46,7 +46,9 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 		if o.Timeout == 0 {
 			o.Timeout = c.timeout
 		}
+		cloned := startStage(c, "cloning repository")
 		dir, release, err := source.CloneRepo(ctx, o)
+		cloned()
 		cleanup = release
 		if err != nil {
 			logx.Error("clone failed", "url", source.RepositoryLocator(o.URL), "err", err)

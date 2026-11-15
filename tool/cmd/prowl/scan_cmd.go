@@ -295,7 +295,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, withProgress(ctx, c, items))
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
 	return finalizeOCR(ocrEngine, code)
 }
 

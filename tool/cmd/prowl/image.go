@@ -78,7 +78,9 @@ func cmdImage(args []string) int {
 			}
 			logx.Info("scanning image", "arg", arg)
 			// pull just before draining so a per-attempt deadline can't expire while earlier images scan
+			loaded := startStage(c, "loading image")
 			items, fi, err := source.Image(ctx, arg, kind, c.maxSize, c.timeout, c.exclude)
+			loaded()
 			if err != nil {
 				logx.Error("image load failed", "arg", arg, "err", err)
 				rc.Store(2)

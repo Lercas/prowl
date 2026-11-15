@@ -23,6 +23,10 @@ func (c *commonFlags) scanPreflight() int {
 	if code := c.mlPreflight(); code != 0 {
 		return code
 	}
+	if err := c.filePreflight(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
 	if c.indexDir == "" {
 		return 0
 	}

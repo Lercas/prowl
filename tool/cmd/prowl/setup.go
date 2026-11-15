@@ -177,7 +177,7 @@ func loadVerifySet(c commonFlags) (*verify.Set, error) {
 	if vs == nil || vs.Count() == 0 {
 		return nil, fmt.Errorf("--verify needs verifiers, but the loaded set is empty — run 'prowl verifiers update'")
 	}
-	logx.Info("live-verification enabled", "verifiers", vs.Count())
+	logx.Debug("live-verification enabled", "verifiers", vs.Count())
 	return vs, nil
 }
 
@@ -201,7 +201,11 @@ func setupLogging(c commonFlags) {
 		level = slog.LevelWarn
 	}
 	color := !c.noColor && os.Getenv("NO_COLOR") == "" && c.logFormat != "json" && isTTY(os.Stderr)
-	logx.Setup(logx.Options{Level: level, Format: c.logFormat, Color: color})
+	options := logx.Options{Level: level, Format: c.logFormat, Color: color}
+	if progressEnabled(c) {
+		options.Out = progressLog{progress, os.Stderr}
+	}
+	logx.Setup(options)
 }
 
 // rootContext returns a context cancelled on Ctrl-C / SIGTERM and, with --timeout, after that
