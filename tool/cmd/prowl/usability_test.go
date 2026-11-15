@@ -355,3 +355,30 @@ func TestFileArgumentsFailBeforeTheScan(t *testing.T) {
 		t.Fatalf("scan with an unwritable --output exited %d", code)
 	}
 }
+
+func TestDisableTypoIsReported(t *testing.T) {
+	read := func(disable string) string {
+		t.Helper()
+		reader, writer, err := os.Pipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+		stderr := os.Stderr
+		os.Stderr = writer
+		warnDisableTypos(disable, []string{"aws_access_key_id", "stripe-secret-key"})
+		os.Stderr = stderr
+		writer.Close()
+		var out bytes.Buffer
+		if _, err := out.ReadFrom(reader); err != nil {
+			t.Fatal(err)
+		}
+		return out.String()
+	}
+	if got := read("aws_acess_key_id"); !strings.Contains(got, "did you mean 'aws_access_key_id'?") {
+		t.Fatalf("misspelt detector id was accepted silently: %q", got)
+	}
+	// Either spelling of a real id, an engine-defined type and an unrelated custom id stay quiet.
+	if got := read("AWS-Access-Key-ID,stripe_secret_key,generic_password,my_company_token"); got != "" {
+		t.Fatalf("valid --disable ids were reported: %q", got)
+	}
+}

@@ -289,6 +289,18 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("verify setup failed", "err", err)
 		return 2
 	}
+	if c.disable != "" && !c.silence {
+		known := make([]string, 0, len(tax.Types))
+		for _, secretType := range tax.Types {
+			known = append(known, secretType.ID)
+		}
+		if eng != nil {
+			for _, template := range eng.Templates() {
+				known = append(known, template.ID)
+			}
+		}
+		warnDisableTypos(c.disable, known)
+	}
 
 	items, err := acquire(ctx, c)
 	if err != nil {

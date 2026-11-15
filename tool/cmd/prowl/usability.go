@@ -193,3 +193,29 @@ func (c *commonFlags) filePreflight() error {
 	}
 	return nil
 }
+
+// codeDefinedTypes are finding types produced by the engine itself rather than by the taxonomy or
+// a rule template.
+var codeDefinedTypes = []string{"generic_password", "generic_api_key", "generic_high_entropy", "generic_semantic_secret", "basic_auth_header", "private_key_pem", "jwt"}
+
+// warnDisableTypos flags a --disable id that names no detector but is one typo away from a real
+// one: a misspelt id disables nothing and the scan would not say so. An id far from every known
+// name is left alone, since custom rule packs define their own.
+func warnDisableTypos(disable string, known []string) {
+	exact := map[string]bool{}
+	keys := make([]string, 0, len(known)+len(codeDefinedTypes))
+	for _, id := range append(append([]string(nil), known...), codeDefinedTypes...) {
+		if key := typeKey(id); !exact[key] {
+			exact[key] = true
+			keys = append(keys, key)
+		}
+	}
+	for _, id := range splitCSV(disable) {
+		if exact[typeKey(id)] {
+			continue
+		}
+		if near := closest(typeKey(id), keys); near != "" {
+			fmt.Fprintf(os.Stderr, "prowl: --disable %s matches no detector; did you mean '%s'?\n", id, near)
+		}
+	}
+}
