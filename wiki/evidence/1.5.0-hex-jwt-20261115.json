@@ -1,0 +1,1090 @@
+{
+  "schema_version": 1,
+  "main_source_commit": "e9ad714070fb75078840be040a05ca1f7cf4f59a",
+  "isolated_source_commit": "9d42c7b68d8b395b3fbfa3f460041f0e9bb11bd3",
+  "docker_candidate_source_commit": "57352f232133a1830c506daebea9d2483caad010",
+  "detection_revision": "1.5.0-hex-jwt-v1",
+  "binary": "/tmp/prowl-jwt-hex-20261115-bin",
+  "binary_sha256": "ca41e97128027f247fa884effe0e2587f7e71cbb5a3e33dad52c0720c4ff3c12",
+  "build": {
+    "CGO_ENABLED": "0",
+    "vcs.revision": "9d42c7b68d8b395b3fbfa3f460041f0e9bb11bd3",
+    "vcs.modified": false
+  },
+  "checks": {
+    "full_go": {
+      "path": "/tmp/prowl-jwt-hex-go-20261115.log",
+      "sha256": "a8fa2adb5c8e29ec43285908546741aa5fe2c41b03b09395d9dc96bbee54780b",
+      "passed": true
+    },
+    "affected_race": {
+      "path": "/tmp/prowl-jwt-hex-race-20261115.log",
+      "sha256": "1191e6b6b38849b95c41cf0b793a685a405c5d5e5dca0091ac57c49ce30ff9bf",
+      "passed": true
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-jwt-hex-min-go-20261115.log",
+      "sha256": "61747db7dae057ee7182a0d2e5adcdb0ddd0073c36c86aa3832b82c792b0d242",
+      "passed": true,
+      "toolchain": "go1.26.11"
+    },
+    "fuzz": {
+      "path": "/tmp/prowl-jwt-hex-fuzz-20261115.log",
+      "sha256": "99f8e3224c43f85ce2c29e7dbc883a70c644be431f0f4ba19176bc766f2d71f3",
+      "passed": true,
+      "executions": 9085
+    },
+    "lint": {
+      "path": "/tmp/prowl-jwt-hex-lint-20261115.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "passed": true
+    },
+    "corpus_digest": {
+      "path": "/tmp/prowl-jwt-hex-corpus-digest-20261115.log",
+      "sha256": "7b6165949b10615b8592c5c61a0b36a9077a8bf5d91daacb3e31eb326c9ba75f",
+      "passed": true
+    }
+  },
+  "native": {
+    "source_commit": "9d42c7b68d8b395b3fbfa3f460041f0e9bb11bd3",
+    "binary": "/tmp/prowl-jwt-hex-20261115-bin",
+    "binary_sha256": "ca41e97128027f247fa884effe0e2587f7e71cbb5a3e33dad52c0720c4ff3c12",
+    "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-hex-native-1hg7woaj",
+    "passed": 174,
+    "failed": 0,
+    "cases": [
+      {
+        "case": "external-h-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-h-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-H-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hhh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hb-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-hbh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-js-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-js-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-json-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-json-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "external-bhbh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 3
+      },
+      {
+        "case": "bundled-h-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-h-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-H-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hhh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hb-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-hbh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-txt-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-txt-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-js-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-js-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-json-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-json-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-yaml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-yaml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-toml-l1",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "bundled-bhbh-1-toml-ml",
+        "passed": true,
+        "payload_findings": 2
+      },
+      {
+        "case": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pretty",
+        "passed": true
+      },
+      {
+        "case": "exact-logical-reveal",
+        "passed": true
+      },
+      {
+        "case": "disabled-container-output",
+        "passed": true
+      },
+      {
+        "case": "logical-HMAC-and-private-index",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-0",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-1",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-2",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-h-l1",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-h-ml",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-hb-l1",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-hb-ml",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-bh-l1",
+        "passed": true
+      },
+      {
+        "case": "reconstructed-bh-ml",
+        "passed": true
+      }
+    ],
+    "sandbox_profile": "(version 1)(allow default)(deny network*)",
+    "network_boundary_control": {
+      "owned_control_requests": 1,
+      "sandbox_requests": 0,
+      "blocked_exit": 7
+    },
+    "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "real_provider_qualification": false
+  },
+  "native_evidence": {
+    "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-hex-native-1hg7woaj/evidence.json",
+    "sha256": "b621b682d06b42778c1b5eb2e5a566eb01617885617ad5df07ef5b4fb59c6fc2"
+  },
+  "native_runner": {
+    "path": "/tmp/prowl-jwt-hex-native-20261115.py",
+    "sha256": "b9d348fb25a89d4017953ad30b2b2b90a8e3b02fa8ba784afc132eba16877c88"
+  },
+  "quality": {
+    "status": "passed",
+    "passed": true,
+    "secret_hits": 1556,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "recall": 0.7430754536771729,
+    "t4_fp_rate": 0.05804480651731161,
+    "binary_sha256": "ca41e97128027f247fa884effe0e2587f7e71cbb5a3e33dad52c0720c4ff3c12"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 538,
+      "sha256": "23a509c042c620388d27d2052f8e6a306a6f9055f4559674b778392941f8f720",
+      "identical_to_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_parent": true
+    }
+  },
+  "performance_gate": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 9922689166.0,
+          "B/op": 574998960.0,
+          "allocs/op": 1160475.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 9992266792.0,
+          "B/op": 585947400.0,
+          "allocs/op": 1160781.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10010885000.0,
+          "B/op": 578129856.0,
+          "allocs/op": 1160714.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 11646624250.0,
+          "B/op": 515768272.0,
+          "allocs/op": 1123462.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 12008193875.0,
+          "B/op": 514263296.0,
+          "allocs/op": 1122957.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 11810683500.0,
+          "B/op": 509344312.0,
+          "allocs/op": 1122781.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "9d42c7b68d8b395b3fbfa3f460041f0e9bb11bd3"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 9992266792.0,
+        "B/op": 578129856.0,
+        "allocs/op": 1160714.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 11810683500.0,
+        "B/op": 514263296.0,
+        "allocs/op": 1122957.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 419.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.181982401576373,
+      "B/op": 0.8895290403407223,
+      "allocs/op": 0.9674708843005254
+    },
+    "regressions": []
+  },
+  "corpus_equivalence": {
+    "reference_source_commit": "e0d9ad4dba7c0ab9d996d67800a56e00369d6345",
+    "full_result_sha256": "581917e269c7ccf4b489fd62982fd927d2f3a31a16618fa07c6579d7fcf71a5c",
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 419,
+    "incomplete_files": 85,
+    "identical": true,
+    "scope": "Full ordinary-pipeline per-file results and coverage on GOROOT/src, excluding new hex-JWT fixtures and policy revision"
+  },
+  "boundary_tests": [
+    "Upper/lowercase hex, one to three hex layers, mixed hex/Base64 order, nested JWT and escaped scalar claims",
+    "Hex steps use two source characters per decoded byte; Base64 layers retain their numbered operation names",
+    "Builtin and external/bundled template proofs remain ordered and source-bounded across txt, JS, JSON, YAML and TOML",
+    "Shared hex budget: 4096 attempts and 8 MiB encoded input per root; max three hex layers; existing Base64/JWT work, depth, cache and output caps retained",
+    "Legacy coarse non-linear duplicate replaced only by same type/value at a proven outer source interval; unrelated source occurrence preserved",
+    "Disabled JWT taxonomy cannot enable companion borrowing, before or after ML; owned loopback verifier receives zero requests",
+    "Private metadata redacts logical container even without rules or JWT output; logical HMAC matches plaintext; ML retains claim names/values",
+    "Native network deny verified against owned control; reconstruction source proofs, default masking, reveal, SARIF/pretty, private SQLite and incomplete baseline guards"
+  ],
+  "limits": [
+    "Compressed streams and normalization-view JWT traversal remain open",
+    "Hex contributes generic credentials only through validated JWT JSON claims; ordinary hex typed-detection contract retained",
+    "Local source/darwin-arm64 qualification only; final images, external CI and real providers remain unqualified",
+    "85 GOROOT files remain explicitly incomplete in both source versions",
+    "Fixed performance time margin remains narrow: +18.20% against +20% cap",
+    "No installed model, reference, thresholds, remote service, image or publication changed"
+  ],
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "installed_49_model_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25"
+}

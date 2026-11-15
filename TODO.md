@@ -610,7 +610,16 @@
     IDs прежние (1556/2094, 57/982), GOROOT digest сохранён. Фиксированный gate:
     time +18,72%, B/op −11,26%, allocs −4,33%; модель/reference/пороги сохранены.
     `wiki/evidence/1.5.0-base64-jwt-20261115.json`.
-  - [ ] Остальные внешние кодирования (hex/сжатие) и нормализованные views:
+  - [x] **Hex и смешанные hex/Base64-обёртки JWT.** До трёх hex-слоёв с общими
+    бюджетами, линейная проекция 2:1 и именованные decode steps для builtin/templates.
+    Coarse non-linear duplicate заменяется claims-aware находкой только по доказанному
+    исходному диапазону; независимые вхождения и запрет companion borrowing сохранены.
+    Main `e9ad714` = изолированный `9d42c7b`: full Go, detect/scan race, min-Go, lint,
+    fuzz 9085, native 174/174 (пять форматов, ML, bundled/external, реконструкция,
+    HMAC/private index, masking и incomplete baseline). Quality IDs и полный GOROOT
+    digest сохранены; фиксированный gate time +18,20%, B/op −11,05%, allocs −3,25%.
+    `wiki/evidence/1.5.0-hex-jwt-20261115.json`.
+  - [ ] Сжатые внешние потоки и нормализованные views:
     передавать целый восстановленный JWT в payload-проход с общей цепочкой source proof.
 - [x] **Таблицы Markdown/Jira.** Вертикальные key/value-строки, Markdown-заголовки с
   выравниванием и Jira `||…||`; целые значения с разделителями и экранированным `|`.
