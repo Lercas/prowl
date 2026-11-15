@@ -63,6 +63,7 @@ func newClient(timeout time.Duration) *http.Client {
 
 type fetchedText struct {
 	text    string
+	digest  string // Bytes exposed by net/http, bounded to the retained response/prefix.
 	present bool
 	url     string // Address of the last accepted content response, including across retries.
 }
@@ -124,6 +125,7 @@ func (f *textFetcher) getDocument(ctx context.Context, rawurl string) (fetchedTe
 		// Preserve readable bytes even if a transport tail, close or byte cap fails. A later complete
 		// response replaces this prefix (including with an empty body), never a 404/error response.
 		content.text = string(b[:min(len(b), maxBodyBytes)])
+		content.digest = textDigest(content.text)
 		if err != nil {
 			return errors.Join(addressErr, err)
 		}

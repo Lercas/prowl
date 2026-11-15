@@ -103,8 +103,8 @@ func (p *Pipeline) sanitizeIndexMetadata(findings []model.Finding, values []stri
 		if strings.Contains(text, "://") {
 			if u, err := url.Parse(text); err == nil {
 				u.User, u.RawQuery = nil, ""
-				if u.Scheme == "mobile+file" || u.Scheme == "mobile+payload" || u.Scheme == "mobile+http" || u.Scheme == "mobile+https" {
-					// Synthetic mobile fragments locate ZIP members, not request data.
+				if u.Scheme == "mobile+file" || u.Scheme == "mobile+payload" || u.Scheme == "mobile+http" || u.Scheme == "mobile+https" || u.Scheme == "web+http" || u.Scheme == "web+https" {
+					// Synthetic fragments locate source-declared views, not request data.
 					u.Fragment, u.RawFragment = replace(u.Fragment), ""
 				} else {
 					u.Fragment, u.RawFragment = "", ""

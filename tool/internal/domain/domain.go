@@ -24,9 +24,15 @@ func sendItem(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	if it.Error != nil {
 		model.Note(ctx, "web_source_error", it.Path, true)
 	}
-	// Only this source knows its paths are web locators; URL-looking local filenames stay literal.
-	if u, err := url.Parse(it.Path); err == nil && (u.Scheme == "http" || u.Scheme == "https") {
-		it.ArtifactURI = it.Path
+	attachWebProvenance(ctx, &it)
+	if it.Error != nil {
+		// Transport and parser errors can retain request URLs or response bytes.
+		reason := "web source content could not be read"
+		if strings.HasPrefix(it.Error.Error(), "HTML document could not be parsed") {
+			reason = "HTML document could not be parsed"
+		}
+		it.Error = errors.New(reason)
+		it.Path = model.SafeLocator(it.Path)
 	}
 	select {
 	case ch <- it:
@@ -48,6 +54,9 @@ type Options struct {
 // Discover returns a stream of fetched Items (HTML, state blobs, JS, source-maps) to scan.
 // All network I/O is ctx-cancellable, retried with backoff, and guarded by a per-origin breaker.
 func Discover(ctx context.Context, target string, opts Options) (<-chan model.Item, *atomic.Bool) {
+	ctx = context.WithValue(ctx, responseOriginKey{}, struct{}{})
+	ctx = context.WithValue(ctx, inlineMapKey{}, struct{}{})
+	ctx = model.WithSourceLocator(model.WithoutProvenance(ctx), func(path string) string { return path })
 	if opts.MaxAssets == 0 {
 		opts.MaxAssets = 300
 	}
@@ -55,7 +64,7 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 		Revision, Target string
 		Recon            bool
 		MaxAssets        int
-	}{"1.5.0-source-maps-v1", target, opts.Recon, opts.MaxAssets})
+	}{"1.5.0-web-source-v1", target, opts.Recon, opts.MaxAssets})
 	ch := make(chan model.Item, 64)
 	reached := &atomic.Bool{} // set once the root page is fetched, so the caller can exit non-zero on an unreachable host
 	go func() {
@@ -91,13 +100,15 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 		bodyDedup := &contentSeen{seen: map[uint64]bool{}}
 		discoveredBodies := map[string]bool{}
 		var assetURLs []string
-		emit := func(base, htmlText string, complete bool) bool {
+		emit := func(content fetchedText, complete bool) bool {
+			base, htmlText := content.url, content.text
+			responseCtx := responseContext(ctx, content)
 			if bodyDedup.firstTime(htmlText) {
 				if !b.take() {
 					diagnostic(base, errors.New("domain asset budget exhausted"))
 					return false
 				}
-				if !sendItem(ctx, ch, model.Item{Text: htmlText, Source: "code", Path: base}) {
+				if !sendItem(responseCtx, ch, responseItem(content, "code", complete)) {
 					return false
 				}
 			}
@@ -124,7 +135,7 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 			discoveredBodies[htmlText] = true
 			// inline hydration/state/config blobs
 			for _, it := range extractStateBlobsFromDocument(htmlText, root, base) {
-				if !sendItem(ctx, ch, it) {
+				if !sendItem(responseCtx, ch, it) {
 					return false
 				}
 			}
@@ -140,14 +151,14 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 			}
 			content, err := fetcher.getDocument(ctx, base)
 			if err != nil && content.present {
-				if content.text != "" && !emit(content.url, content.text, false) || !diagnostic(content.url, err) {
+				if content.text != "" && !emit(content, false) || !diagnostic(content.url, err) {
 					return
 				}
 			}
 			if err == nil && content.present {
 				got = true
 				reached.Store(true)
-				if !emit(content.url, content.text, true) {
+				if !emit(content, true) {
 					return
 				}
 			}
@@ -156,14 +167,14 @@ func Discover(ctx context.Context, target string, opts Options) (<-chan model.It
 			base := address.fallback
 			content, err := fetcher.getDocument(ctx, base)
 			if err != nil && content.present {
-				if content.text != "" && !emit(content.url, content.text, false) || !diagnostic(content.url, err) {
+				if content.text != "" && !emit(content, false) || !diagnostic(content.url, err) {
 					return
 				}
 			}
 			if err == nil && content.present {
 				got = true
 				reached.Store(true)
-				if !emit(content.url, content.text, true) {
+				if !emit(content, true) {
 					return
 				}
 			}
@@ -322,6 +333,7 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 	}
 	emit := func(u string, fetched result) bool {
 		content := fetched.content
+		responseCtx := responseContext(ctx, content)
 		processed[u] = true
 		unavailable[u] = fetched.err != nil || !content.present
 		if fetched.err != nil {
@@ -329,7 +341,7 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 				return false
 			}
 			if content.present && content.text != "" && bodyDedup.firstTime(content.text) {
-				return sendItem(ctx, ch, model.Item{Text: content.text, Source: source, Path: content.url})
+				return sendItem(responseCtx, ch, responseItem(content, source, false))
 			}
 			return true
 		}
@@ -351,7 +363,7 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 			model.Note(ctx, "source_map_invalid", content.url, true)
 		}
 		if content.present && content.text != "" {
-			if bodyDedup.firstTime(content.text) && !sendItem(ctx, ch, model.Item{Text: content.text, Source: source, Path: content.url}) {
+			if bodyDedup.firstTime(content.text) && !sendItem(responseCtx, ch, responseItem(content, source, true)) {
 				return false
 			}
 			parsed, _ := url.Parse(content.url)
@@ -359,7 +371,7 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 			if isMap {
 				if required[u] || sourceMapVersion(content.text) == 3 {
 					mapParsed[u] = true
-					emitSourceMap(ctx, ch, content.url, content.text, b)
+					emitSourceMap(responseCtx, ch, content.url, content.text, b)
 				} else {
 					model.Note(ctx, "optional_map_not_found", content.url, false)
 				}
@@ -370,10 +382,10 @@ func (f *textFetcher) fetchAll(ctx context.Context, ch chan<- model.Item, urls [
 					model.Note(ctx, "web_reference_limit", content.url, true)
 					refs = refs[:32]
 				}
-				for _, ref := range refs {
+				for ordinal, ref := range refs {
 					if strings.HasPrefix(ref[1], "data:") {
 						if decoded, ok := decodeInlineMap(ref[1]); ok {
-							emitSourceMap(ctx, ch, content.url+"!/inline.map", decoded, b)
+							emitSourceMap(context.WithValue(responseCtx, inlineMapKey{}, ordinal+1), ch, content.url+"!/inline.map", decoded, b)
 						} else {
 							model.Note(ctx, "source_map_invalid", content.url, true)
 						}

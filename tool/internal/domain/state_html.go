@@ -132,7 +132,7 @@ func stateInventoryFromTokens(markup string) stateInventory {
 func (inventory stateInventory) items(sourceURL string) []model.Item {
 	var items []model.Item
 	seen := map[[32]byte]bool{}
-	add := func(name, content string, unescapeHTML bool) {
+	add := func(name, content string, unescapeHTML, completeScript bool) {
 		content = strings.TrimSpace(content)
 		if len(content) < 12 {
 			return
@@ -146,39 +146,45 @@ func (inventory stateInventory) items(sourceURL string) []model.Item {
 		hash := sha256.Sum256([]byte(decoded))
 		if !seen[hash] {
 			seen[hash] = true
-			items = append(items, model.Item{Text: decoded, Source: "code", Path: sourceURL + "#" + name})
+			transform := "web-state-decoded"
+			if completeScript && decoded == content {
+				transform = "web-state-script"
+			}
+			it := model.Item{Text: decoded, Source: "code", Path: sourceURL + "#" + name, Meta: map[string]any{"digest": textDigest(decoded), "source_url": model.SafeLocator(sourceURL), "source_transform": transform}}
+			webViewIdentity(&it, sourceURL, "state", name, len(items)+1)
+			items = append(items, it)
 		}
 	}
 	// Retain the established container priority so an equivalent representation has stable provenance.
 	for _, id := range []string{"__NEXT_DATA__", "__NUXT_DATA__"} {
 		for _, script := range inventory.scripts {
 			if strings.EqualFold(script.attrs["id"], id) {
-				add(id, script.text, script.unescapeHTML)
+				add(id, script.text, script.unescapeHTML, true)
 			}
 		}
 	}
 	for _, pattern := range stateAssignmentPatterns {
 		for _, script := range inventory.scripts {
 			for _, match := range pattern.re.FindAllStringSubmatch(script.text, -1) {
-				add(pattern.name, match[1], script.unescapeHTML)
+				add(pattern.name, match[1], script.unescapeHTML, false)
 			}
 		}
 	}
 	for _, script := range inventory.scripts {
 		mediaType, _, err := mime.ParseMediaType(strings.TrimSpace(script.attrs["type"]))
 		if err == nil && mediaType == "application/json" {
-			add("json-island", script.text, script.unescapeHTML)
+			add("json-island", script.text, script.unescapeHTML, true)
 		}
 	}
 	for _, script := range inventory.scripts {
 		low := strings.ToLower(script.text)
 		if len(script.text) >= 16 && (strings.Contains(low, "key") || strings.Contains(low, "token") || strings.Contains(low, "secret") ||
 			strings.Contains(low, "config") || strings.Contains(low, "apikey") || strings.Contains(low, "env")) {
-			add("inline-script", script.text, script.unescapeHTML)
+			add("inline-script", script.text, script.unescapeHTML, true)
 		}
 	}
 	for _, value := range inventory.meta {
-		add("meta", value, false) // The HTML parser already decoded attribute entities once.
+		add("meta", value, false, false) // The HTML parser already decoded attribute entities once.
 	}
 	return items
 }

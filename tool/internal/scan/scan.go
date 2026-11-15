@@ -616,7 +616,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
 		if vset != nil || auditor != nil {
-			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, derivedMobile: it.Meta["source_transform"] == "mobile-printable-strings"})
+			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, unboundView: unboundVerificationView(it)})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
@@ -725,7 +725,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				}
 				out[idx] = f
 				if vset != nil || auditor != nil {
-					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil}
+					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)}
 				}
 				if ml != nil {
 					reqs[idx] = h.record(it, literalDoc)
@@ -735,7 +735,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			dedup[key] = len(out)
 			out = append(out, f)
 			if vset != nil || auditor != nil {
-				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, derivedMobile: it.Meta["source_transform"] == "mobile-printable-strings"})
+				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)})
 			}
 			if ml != nil {
 				reqs = append(reqs, h.record(it, literalDoc))
@@ -799,7 +799,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			candidate := pending[original]
 			var bindings map[string]string
-			if literalDoc == nil && !candidate.derivedMobile && publicaudit.Supports(candidate.typ) {
+			if literalDoc == nil && candidate.unboundView == "" && publicaudit.Supports(candidate.typ) {
 				bindings = p.options.publicBindings.forCandidate(ctx, candidate, p.options.reconstruction)
 			}
 			candidate.audit(ctx, auditor, literalDoc, bindings, it.Path, &out[i])

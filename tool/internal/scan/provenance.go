@@ -24,14 +24,14 @@ func (p *Pipeline) annotateIdentity(ctx context.Context, f *model.Finding, raw s
 			f.SourceIdentity = hex.EncodeToString(sourceMAC.Sum(nil))
 		}
 	}
-	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "layer_digest", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "source_transform", "git_index"} {
+	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "container_digest", "layer_digest", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "source_transform", "git_index"} {
 		if v, ok := it.Meta[k]; ok {
 			value := model.SafeLocator(fmt.Sprint(v))
 			if len(value) > 2048 {
 				model.Note(ctx, "provenance_limit", it.Path, true)
 				continue
 			}
-			if (k == "blob" || k == "commit" || k == "digest" || k == "layer_digest") && !model.ValidImmutableMetadata(k, value) {
+			if (k == "blob" || k == "commit" || k == "digest" || k == "container_digest" || k == "layer_digest") && !model.ValidImmutableMetadata(k, value) {
 				continue
 			}
 			if f.Provenance == nil {
@@ -71,6 +71,9 @@ func (p *Pipeline) annotateOccurrence(f *model.Finding) {
 	}
 	if f.SourceIdentity != "" {
 		_, _ = fmt.Fprintf(mac, "\x00producer-source\x00%s", f.SourceIdentity)
+	}
+	if digest := f.Provenance["container_digest"]; digest != "" {
+		_, _ = fmt.Fprintf(mac, "\x00container-digest\x00%s", digest)
 	}
 	if f.MobileEntry > 0 {
 		_, _ = fmt.Fprintf(mac, "\x00mobile-entry\x00%d", f.MobileEntry)

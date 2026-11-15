@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Lercas/prowl/tool/internal/jsonstrict"
@@ -88,7 +89,16 @@ func emitSourceMap(ctx context.Context, ch chan<- model.Item, locator, text stri
 		}
 		p := model.SafeLocator(locator) + "!/sources/" + url.PathEscape(name)
 		sum := sha256.Sum256([]byte(*content))
-		if !sendItem(ctx, ch, model.Item{Text: *content, Path: p, Source: "code", Meta: map[string]any{"source_map": model.SafeLocator(locator), "original_source": name, "digest": hex.EncodeToString(sum[:])}}) {
+		it := model.Item{Text: *content, Path: p, Source: "code", Meta: map[string]any{"source_map": model.SafeLocator(locator), "original_source": name, "digest": hex.EncodeToString(sum[:]), "source_url": model.SafeLocator(locator), "source_transform": "source-map-content"}}
+		parent, kind := locator, "sources"
+		if response, ok := ctx.Value(responseOriginKey{}).(responseOrigin); ok {
+			parent = response.url
+		}
+		if inline, ok := ctx.Value(inlineMapKey{}).(int); ok {
+			kind = "inline-map-" + strconv.Itoa(inline)
+		}
+		webViewIdentity(&it, parent, kind, name, i+1)
+		if !sendItem(ctx, ch, it) {
 			return
 		}
 	}

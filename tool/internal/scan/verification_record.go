@@ -12,14 +12,24 @@ import (
 
 // Keep original prepared spans even after findings are mapped to source coordinates.
 type verificationCandidate struct {
-	typ, value    string
-	start, end    int
-	jwtPayload    bool
-	derivedMobile bool
+	typ, value  string
+	start, end  int
+	jwtPayload  bool
+	unboundView string
+}
+
+func unboundVerificationView(it model.Item) string {
+	switch it.Meta["source_transform"] {
+	case "mobile-printable-strings":
+		return "derived mobile strings"
+	case "web-state-decoded":
+		return "decoded web state"
+	}
+	return ""
 }
 
 func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
-	if (c.jwtPayload || c.derivedMobile) && set != nil {
+	if (c.jwtPayload || c.unboundView != "") && set != nil {
 		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, detect.IsExampleOrPlaceholder(c.value)))
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
@@ -53,10 +63,10 @@ func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor,
 	if !publicaudit.Supports(c.typ) {
 		return
 	}
-	if c.derivedMobile {
+	if c.unboundView != "" {
 		doc, bindings = nil, nil
 		if publicaudit.GoogleType(c.typ) {
-			bindings = map[string]string{"firebaseConfig": "derived mobile strings"}
+			bindings = map[string]string{"firebaseConfig": c.unboundView}
 		}
 	}
 	if c.jwtPayload {
