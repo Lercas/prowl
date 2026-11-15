@@ -18,7 +18,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/safehttp"
 )
 
-const Revision = "algolia-self-acl-v1"
+const Revision = "algolia-self-acl-v2-js-bindings"
 const maxRequests = 32
 const maxBody = 64 << 10
 

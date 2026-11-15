@@ -1,0 +1,725 @@
+{
+  "node_version": "v22.23.4",
+  "cases": [
+    {
+      "id": "encoding-0-context-0",
+      "source": "const c={app_id:\"ABCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 46,
+      "end": 78,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-0-context-1",
+      "source": "function f(){return {app_id:\"ABCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-0-context-2",
+      "source": "const c=[{app_id:\"ABCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 47,
+      "end": 79,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-0-context-3",
+      "source": "export default {app_id:\"ABCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-0-context-4",
+      "source": "const c={nested:{app_id:\"ABCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 54,
+      "end": 86,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-0-context-5",
+      "source": "const app_id=\"ABCDEF1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 43,
+      "end": 75,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-0",
+      "source": "const c={app_id:'ABCDEF1234',algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 46,
+      "end": 78,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-1",
+      "source": "function f(){return {app_id:'ABCDEF1234',algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-2",
+      "source": "const c=[{app_id:'ABCDEF1234',algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 47,
+      "end": 79,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-3",
+      "source": "export default {app_id:'ABCDEF1234',algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-4",
+      "source": "const c={nested:{app_id:'ABCDEF1234',algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 54,
+      "end": 86,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-1-context-5",
+      "source": "const app_id='ABCDEF1234',algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 43,
+      "end": 75,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-0",
+      "source": "const c={app_id:`ABCDEF1234`,algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 46,
+      "end": 78,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-1",
+      "source": "function f(){return {app_id:`ABCDEF1234`,algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-2",
+      "source": "const c=[{app_id:`ABCDEF1234`,algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 47,
+      "end": 79,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-3",
+      "source": "export default {app_id:`ABCDEF1234`,algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-4",
+      "source": "const c={nested:{app_id:`ABCDEF1234`,algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 54,
+      "end": 86,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-2-context-5",
+      "source": "const app_id=`ABCDEF1234`,algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 43,
+      "end": 75,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-0",
+      "source": "const c={app_id:\"ABCDE\" + \"F1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 51,
+      "end": 83,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-1",
+      "source": "function f(){return {app_id:\"ABCDE\" + \"F1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 63,
+      "end": 95,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-2",
+      "source": "const c=[{app_id:\"ABCDE\" + \"F1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 52,
+      "end": 84,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-3",
+      "source": "export default {app_id:\"ABCDE\" + \"F1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-4",
+      "source": "const c={nested:{app_id:\"ABCDE\" + \"F1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 59,
+      "end": 91,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-3-context-5",
+      "source": "const app_id=\"ABCDE\" + \"F1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 48,
+      "end": 80,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-0",
+      "source": "const c={app_id:(\"ABCDE\" + \"F1234\"),algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-1",
+      "source": "function f(){return {app_id:(\"ABCDE\" + \"F1234\"),algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 65,
+      "end": 97,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-2",
+      "source": "const c=[{app_id:(\"ABCDE\" + \"F1234\"),algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 54,
+      "end": 86,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-3",
+      "source": "export default {app_id:(\"ABCDE\" + \"F1234\"),algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 60,
+      "end": 92,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-4",
+      "source": "const c={nested:{app_id:(\"ABCDE\" + \"F1234\"),algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 61,
+      "end": 93,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-4-context-5",
+      "source": "const app_id=(\"ABCDE\" + \"F1234\"),algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 50,
+      "end": 82,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-0",
+      "source": "const c={app_id:\"\\x41BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 49,
+      "end": 81,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-1",
+      "source": "function f(){return {app_id:\"\\x41BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 61,
+      "end": 93,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-2",
+      "source": "const c=[{app_id:\"\\x41BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 50,
+      "end": 82,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-3",
+      "source": "export default {app_id:\"\\x41BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 56,
+      "end": 88,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-4",
+      "source": "const c={nested:{app_id:\"\\x41BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 57,
+      "end": 89,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-5-context-5",
+      "source": "const app_id=\"\\x41BCDEF1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 46,
+      "end": 78,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-0",
+      "source": "const c={app_id:\"\\u0041BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 51,
+      "end": 83,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-1",
+      "source": "function f(){return {app_id:\"\\u0041BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 63,
+      "end": 95,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-2",
+      "source": "const c=[{app_id:\"\\u0041BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 52,
+      "end": 84,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-3",
+      "source": "export default {app_id:\"\\u0041BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-4",
+      "source": "const c={nested:{app_id:\"\\u0041BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 59,
+      "end": 91,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-6-context-5",
+      "source": "const app_id=\"\\u0041BCDEF1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 48,
+      "end": 80,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-0",
+      "source": "const c={app_id:\"\\u{41}BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 51,
+      "end": 83,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-1",
+      "source": "function f(){return {app_id:\"\\u{41}BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 63,
+      "end": 95,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-2",
+      "source": "const c=[{app_id:\"\\u{41}BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 52,
+      "end": 84,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-3",
+      "source": "export default {app_id:\"\\u{41}BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-4",
+      "source": "const c={nested:{app_id:\"\\u{41}BCDEF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 59,
+      "end": 91,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-7-context-5",
+      "source": "const app_id=\"\\u{41}BCDEF1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 48,
+      "end": 80,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-0",
+      "source": "const c={app_id:\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 58,
+      "end": 90,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-1",
+      "source": "function f(){return {app_id:\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 70,
+      "end": 102,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-2",
+      "source": "const c=[{app_id:\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 59,
+      "end": 91,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-3",
+      "source": "export default {app_id:\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 65,
+      "end": 97,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-4",
+      "source": "const c={nested:{app_id:\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 66,
+      "end": 98,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-8-context-5",
+      "source": "const app_id=\"ABCDEF\\x31\\x32\\x33\\x34\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 55,
+      "end": 87,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-0",
+      "source": "const c={app_id:\"ABCDE\\\nF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 48,
+      "end": 80,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-1",
+      "source": "function f(){return {app_id:\"ABCDE\\\nF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 60,
+      "end": 92,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-2",
+      "source": "const c=[{app_id:\"ABCDE\\\nF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 49,
+      "end": 81,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-3",
+      "source": "export default {app_id:\"ABCDE\\\nF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 55,
+      "end": 87,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-4",
+      "source": "const c={nested:{app_id:\"ABCDE\\\nF1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 56,
+      "end": 88,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-9-context-5",
+      "source": "const app_id=\"ABCDE\\\nF1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 45,
+      "end": 77,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-0",
+      "source": "const c={app_id:\"ABC\" + `DEF` + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 56,
+      "end": 88,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-1",
+      "source": "function f(){return {app_id:\"ABC\" + `DEF` + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 68,
+      "end": 100,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-2",
+      "source": "const c=[{app_id:\"ABC\" + `DEF` + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 57,
+      "end": 89,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-3",
+      "source": "export default {app_id:\"ABC\" + `DEF` + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 63,
+      "end": 95,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-4",
+      "source": "const c={nested:{app_id:\"ABC\" + `DEF` + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 64,
+      "end": 96,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-10-context-5",
+      "source": "const app_id=\"ABC\" + `DEF` + \"1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-0",
+      "source": "const c={app_id:\"ABCDEF\" + \"\" + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 56,
+      "end": 88,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-1",
+      "source": "function f(){return {app_id:\"ABCDEF\" + \"\" + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};}",
+      "start": 68,
+      "end": 100,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-2",
+      "source": "const c=[{app_id:\"ABCDEF\" + \"\" + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}];",
+      "start": 57,
+      "end": 89,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-3",
+      "source": "export default {app_id:\"ABCDEF\" + \"\" + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"};",
+      "start": 63,
+      "end": 95,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-4",
+      "source": "const c={nested:{app_id:\"ABCDEF\" + \"\" + \"1234\",algolia_api_key:\"13ad45b4d0a2f6ea65ecbddf6aa260f2\"}};",
+      "start": 64,
+      "end": 96,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    },
+    {
+      "id": "encoding-11-context-5",
+      "source": "const app_id=\"ABCDEF\" + \"\" + \"1234\",algolia_api_key=\"13ad45b4d0a2f6ea65ecbddf6aa260f2\";",
+      "start": 53,
+      "end": 85,
+      "fields": {
+        "app_id": "ABCDEF1234",
+        "algolia_api_key": "13ad45b4d0a2f6ea65ecbddf6aa260f2"
+      }
+    }
+  ]
+}

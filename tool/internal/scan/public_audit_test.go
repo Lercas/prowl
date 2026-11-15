@@ -24,6 +24,10 @@ func TestPublicAuditAfterMLKeepsExactObject(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct{ path, text string }{
+
+		{"prod.js", `const one={app_id:"ABCDEF1234",algolia_api_key:"` + auditTestKey + `"},two={app_id:"ZZZZZZ9999",algolia_api_key:"` + auditTestKey + `"};`},
+		{"prod.ts", `const one={app_id:"ABCDEF1234",algolia_api_key:"` + auditTestKey + `"},two={app_id:"ZZZZZZ9999",algolia_api_key:"` + auditTestKey + `"};`},
+		{"prod.mjs", `export const one={app_id:"ABCDEF1234",algolia_api_key:"` + auditTestKey + `"},two={app_id:"ZZZZZZ9999",algolia_api_key:"` + auditTestKey + `"};`},
 		{"prod.json", `{"one":{"app_id":"ABCDEF1234","algolia_api_key":"` + auditTestKey + `"},"two":{"app_id":"ZZZZZZ9999","algolia_api_key":"` + auditTestKey + `"}}`},
 		{"prod.yaml", "one: {app_id: ABCDEF1234, algolia_api_key: " + auditTestKey + "}\ntwo: {app_id: ZZZZZZ9999, algolia_api_key: " + auditTestKey + "}\n"},
 		{"prod.toml", "[one]\napp_id='ABCDEF1234'\nalgolia_api_key='" + auditTestKey + "'\n[two]\napp_id='ZZZZZZ9999'\nalgolia_api_key='" + auditTestKey + "'\n"},
@@ -54,12 +58,17 @@ func TestPublicAuditUnsafeAndUnsupportedInputs(t *testing.T) {
 	for _, tc := range []struct{ path, text string }{
 		{"prod.json", `{"app_id":"ABCDEF1234","algolia_api_key":"` + auditTestKey + `","app_id":"ZZZZZZ9999"}`},
 		{"prod.json", `{"app_id":"ABCDEF1234","nested":{"algolia_api_key":"` + auditTestKey + `"}}`},
-		{"prod.js", `const algolia_api_key="` + auditTestKey + `",app_id="ABCDEF1234";`},
+		{"prod.js", `const algolia_api_key="` + auditTestKey + `"; const app_id="ABCDEF1234";`},
 	} {
 		t.Run(tc.text[:12], func(t *testing.T) {
 			coverage := model.NewCoverage()
 			ctx := model.WithCoverage(t.Context(), coverage)
-			fs := New(Options{Detector: detector(t), Rules: engine, PublicAuditor: publicaudit.New(0)}).Findings(ctx, model.Item{Source: "code", Path: tc.path, Text: tc.text})
+			fs := New(Options{Detector: detector(t), Rules: engine, PublicAuditor: auditFunc(func(_ context.Context, _ string, _ string, bindings map[string]string) *model.PublicKeyAudit {
+				if bindings["app_id"] != "" {
+					t.Fatal("unsafe fixture supplied an application binding")
+				}
+				return publicaudit.Inconclusive("missing or ambiguous application binding")
+			})}).Findings(ctx, model.Item{Source: "code", Path: tc.path, Text: tc.text})
 			if len(fs) == 0 {
 				t.Fatal("fixture did not detect Algolia key")
 			}

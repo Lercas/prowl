@@ -37,6 +37,7 @@ type Options struct {
 	// AllOccurrences retains distinct spans of repeated values for editor diagnostics.
 	AllOccurrences bool
 	// reconstruction maps a child scan to its original expression before observers.
+	publicBindings  *publicBindings
 	reconstruction  *reconstructionOrigin
 	matchLimit      int
 	beforeML        func([]model.Finding) bool

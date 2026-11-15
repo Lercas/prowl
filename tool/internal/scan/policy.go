@@ -48,7 +48,7 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 		"all_occurrences": o.AllOccurrences,
 	})
 	if o.PublicAuditor != nil {
-		c.RegisterScope("public_key_audit", publicaudit.Revision, "structured-sibling-bindings")
+		c.RegisterScope("public_key_audit", publicaudit.Revision, "structured-siblings-and-static-js-groups")
 	}
 	if o.Semantic && o.SemanticEngine != nil {
 		c.RegisterScope("semantic", "literal-span-v1", o.SemanticEngine.Policy())

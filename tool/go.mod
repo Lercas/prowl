@@ -10,10 +10,13 @@ require (
 )
 
 require (
+	github.com/grafana/sobek v0.0.0-20261105103427-a5b602015248
 	github.com/ledongthuc/pdf v0.0.0-20261020125853-5e46805f718e
 	golang.org/x/net v0.62.0
 	modernc.org/sqlite v1.62.0
 )
+
+require github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 
 require (
 	github.com/dustin/go-humanize v1.1.0 // indirect

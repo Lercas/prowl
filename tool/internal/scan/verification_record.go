@@ -41,17 +41,22 @@ func verificationMetadata(r verify.Result) *model.Verification {
 	return detail
 }
 
-func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor, doc *literalDocument, path string, f *model.Finding) {
+func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor, doc *literalDocument, bindings map[string]string, path string, f *model.Finding) {
 	if !publicaudit.Supports(c.typ) {
 		return
 	}
-	var bindings map[string]string
-	if doc != nil && !doc.verificationUnsafe {
-		if v := doc.locate(c.start, c.end); v != nil && !doc.unsafeGroups[v.group] {
-			bindings = doc.bindings[v.group]
+	if doc != nil {
+		bindings = nil
+		if !doc.verificationUnsafe {
+			if v := doc.locate(c.start, c.end); v != nil && !doc.unsafeGroups[v.group] {
+				bindings = doc.bindings[v.group]
+			}
 		}
 	}
 	f.PublicKeyAudit = auditor.Audit(ctx, c.typ, c.value, bindings)
+	if f.PublicKeyAudit == nil {
+		f.PublicKeyAudit = publicaudit.Inconclusive("audit produced no result")
+	}
 	if f.PublicKeyAudit.Status == "inconclusive" {
 		model.Note(ctx, "public_key_audit_inconclusive", path, true)
 	}

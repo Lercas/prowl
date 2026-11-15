@@ -429,7 +429,12 @@
       строгий ответ и неполное покрытие при неоднозначности. JSON/SARIF/occurrences
       сохраняют результат без `verified:true`. CLI 32/32, full Go/race/lint и Go 1.26.11;
       [контракт](wiki/Public-Key-Audit.md), `wiki/evidence/1.5.0-public-key-audit-20261115.json`.
-    - [ ] JS/TS и прочие форматы; точное отличие встроенного admin от широкого custom ACL.
+    - [x] Статические JS/ES-module привязки одного объекта или одной `const`-декларации:
+      AST с исходными byte spans, без JS runtime и source-map I/O, один ленивый
+      разбор на item после ML. 72 Node-reference случая; успешный HTTP fixture и
+      отказ от неоднозначных привязок. Обычный scan без opt-in не меняется.
+    - [ ] Специфичный TypeScript/JSX, XML/plist/dex и другие связи;
+      точное отличие встроенного admin от широкого custom ACL.
   - [ ] Только read-only пробы; под тем же `--authorized`, что и `domain`.
 - [ ] **Сборка составных учётных данных из разных файлов.** Связывать части, найденные в разных
   местах: AWS key ID + secret, `client_id` + `client_secret` + tenant, хост БД + пользователь +

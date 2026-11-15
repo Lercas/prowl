@@ -14,6 +14,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
+	"github.com/Lercas/prowl/tool/internal/publicaudit"
 	"github.com/Lercas/prowl/tool/internal/resilience"
 	"github.com/Lercas/prowl/tool/internal/rules"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
@@ -358,13 +359,21 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		model.CoverageFrom(ctx).Processed(len(it.Text))
 	}
 	coverage := model.NewCoverage()
-	if p.options.Reconstruct && reconstructable(it) {
-		options := p.options
+	options := p.options
+	localOptions := false
+	if options.PublicAuditor != nil && reconstructable(it) && it.Error == nil {
+		options.publicBindings = &publicBindings{text: it.Text}
+		localOptions = true
+	}
+	if options.Reconstruct && reconstructable(it) {
 		budget := detect.MaxScanMatches()
 		if options.matchLimit > 0 {
 			budget = min(budget, options.matchLimit)
 		}
 		options.candidateBudget = &budget
+		localOptions = true
+	}
+	if localOptions {
 		p = New(options)
 	}
 	result = p.findings(model.WithCoverage(ctx, coverage), it, nil)
@@ -781,7 +790,12 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if selected != nil {
 				original = selected[i]
 			}
-			pending[original].audit(ctx, auditor, literalDoc, it.Path, &out[i])
+			candidate := pending[original]
+			var bindings map[string]string
+			if literalDoc == nil && publicaudit.Supports(candidate.typ) {
+				bindings = p.options.publicBindings.forCandidate(ctx, candidate, p.options.reconstruction)
+			}
+			candidate.audit(ctx, auditor, literalDoc, bindings, it.Path, &out[i])
 		}
 	}
 	if failed {

@@ -267,7 +267,7 @@ var cliFlags = []flagSpec{
 	intFlag("--concurrency", "org hermes-audit", "source concurrency", 1, func(c *commonFlags) *int { return &c.cmd.concurrency }),
 	listFlag("--exclude-repo", "org", "skip matching repository URL substrings", true, func(c *commonFlags) *[]string { return &c.cmd.excludeRepos }),
 	boolFlag("--gists", "org", "scan a GitHub user's public gists", func(c *commonFlags) *bool { return &c.cmd.gists }),
-	boolFlag("--audit-public", "domain mobile", "read-only Algolia ACL audit of structured config; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
+	boolFlag("--audit-public", "domain mobile", "read-only Algolia ACL audit of config/static JS; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
 	boolFlag("--authorized", "domain mobile hermes-audit", "attest that all targets are in your authorized scope", func(c *commonFlags) *bool { return &c.cmd.authorized }),
 	boolFlag("--recon", "domain", "enumerate public subdomains and historical assets", func(c *commonFlags) *bool { return &c.cmd.recon }),
 	intFlag("--max-assets", "domain", "maximum web assets (default 300)", 1, func(c *commonFlags) *int { return &c.cmd.maxAssets }),
