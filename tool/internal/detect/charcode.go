@@ -267,7 +267,7 @@ func (d *Detector) charCodeSecrets(ctx context.Context, text string, byteBudget,
 	return matches, limited
 }
 
-func (d *Detector) charCodeDetails(ctx context.Context, text string, byteBudget, constructBudget int) ([]Match, bool, [][2]int) {
+func (d *Detector) charCodeDetails(ctx context.Context, text string, byteBudget, constructBudget int, observers ...func(*view)) ([]Match, bool, [][2]int) {
 	if uint64(len(text)) > 1<<31-1 {
 		return nil, true, nil
 	}
@@ -325,6 +325,10 @@ func (d *Detector) charCodeDetails(ctx context.Context, text string, byteBudget,
 	limited = limited || cap
 	var out []Match
 	if v != nil && ctx.Err() == nil {
+		v.coarse = true
+		for _, observe := range observers {
+			observe(v)
+		}
 		matches, cap := d.collect(ctx, v.text, "", "", d.keywordsPresent(strings.ToLower(v.text)), scanStructure(v.text, 32))
 		limited = limited || cap
 		spans := make(map[int]charCodeCall, len(calls))

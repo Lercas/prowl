@@ -122,6 +122,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 						continue
 					}
 					m.Start, m.End = parent.sourceSpan(m.Start, m.End)
+					m.jwtContainer.Start, m.jwtContainer.End = parent.sourceSpan(m.jwtContainer.Start, m.jwtContainer.End)
 					steps := make([]DecodeStep, 0, len(chain)+len(m.DecodeSteps))
 					for _, span := range chain {
 						steps = append(steps, DecodeStep{span.Start, span.End, "base64-decode"})
@@ -172,6 +173,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 						continue
 					}
 					m.Start, m.End = frame.sourceSpan(m.Start, m.End)
+					m.jwtContainer.Start, m.jwtContainer.End = frame.sourceSpan(m.jwtContainer.Start, m.jwtContainer.End)
 					steps := make([]DecodeStep, 0, len(chain)+1+len(m.DecodeSteps))
 					for _, span := range chain {
 						steps = append(steps, DecodeStep{span.Start, span.End, "base64-decode"})
@@ -202,10 +204,16 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 			left, right := parent.sourceSpan(start, end)
 			proof := append(append([]Base64Span(nil), chain...), Base64Span{left, right})
 			frame := &base64Frame{parent: parent, start: start, end: end}
-			if strings.Contains(decoded, ".") {
+			if strings.Contains(decoded, ".") || normalizedJWTConstruct(decoded) {
 				local := opts
 				local.jwtOrigin = jwtBase64Origin(frame, opts.jwtOrigin)
 				children, capped := d.jwtPayloadFindings(ctx, decoded, nil, local)
+				if normalizedJWTConstruct(decoded) {
+					local.jwtOnly = true
+					_, extra, viewLimited, _ := d.scanViewsWithJWT(ctx, decoded, local)
+					children = append(children, extra...)
+					capped = capped || viewLimited
+				}
 				limited = limited || capped
 				for _, m := range children {
 					if len(out)+len(jwtChildren) >= maxScanMatches {
@@ -217,6 +225,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 						continue
 					}
 					m.Start, m.End = frame.sourceSpan(m.Start, m.End)
+					m.jwtContainer.Start, m.jwtContainer.End = frame.sourceSpan(m.jwtContainer.Start, m.jwtContainer.End)
 					steps := append([]Base64Span(nil), proof...)
 					for _, span := range m.DecodeSpans {
 						left, right := frame.sourceSpan(span.Start, span.End)
@@ -238,7 +247,11 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 					jwtChildren = append(jwtChildren, m)
 				}
 			}
-			matches, capped := d.collect(ctx, decoded, "", "", d.keywordsPresent(strings.ToLower(decoded)), scanStructure(decoded, 32))
+			var matches []Match
+			capped := false
+			if !opts.jwtOnly {
+				matches, capped = d.collect(ctx, decoded, "", "", d.keywordsPresent(strings.ToLower(decoded)), scanStructure(decoded, 32))
+			}
 			limited = limited || capped
 			for _, m := range matches {
 				if taxonomy.GenericLast[m.Type] || depth == 0 && !HasSecretNameContext(text, start) && m.Confidence < 0.9 {

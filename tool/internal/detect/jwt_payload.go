@@ -17,15 +17,16 @@ const maxJWTPayloadWork = 1 << 20
 const maxJWTPayloadDepth = 3
 
 type jwtContainerIdentity struct {
-	start, end          int
-	compressedPositions [maxDecodeDepth]Base64Span
-	content             string // bounded header + payload, never the potentially long signature
+	start, end       int
+	logicalPositions [maxDecodeDepth * 2]Base64Span
+	content          string // bounded header + payload, never the potentially long signature
 }
 
 type jwtPayloadBudget struct {
 	count, bytes, escaped         int
 	hexWork, hexAttempts          int
 	inflateBytes, inflateAttempts int
+	viewBytes, viewConstructs     int
 	seen                          map[jwtContainerIdentity]bool
 }
 
@@ -75,8 +76,12 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			opts.jwtBudget = &jwtPayloadBudget{}
 		}
 		budget := opts.jwtBudget
+		if !opts.jwtOrigin.validContainer(container.Start, container.End) {
+			limited = true
+			continue
+		}
 		left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
-		id := jwtContainerIdentity{start: left, end: right, compressedPositions: opts.jwtOrigin.compressedPositions(container.Start, container.End), content: container.Value[:len(parts[0])+1+len(parts[1])]}
+		id := jwtContainerIdentity{start: left, end: right, logicalPositions: opts.jwtOrigin.logicalPositions(container.Start, container.End), content: container.Value[:len(parts[0])+1+len(parts[1])]}
 		if budget.seen[id] {
 			continue
 		}
@@ -108,14 +113,13 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 		decoded := string(payload)
 		start := container.Start + len(parts[0]) + 1
 		frame := &base64Frame{start: start, end: start + len(parts[1])}
-		origin := &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: frame.end, base64: true}
+		origin := &jwtViewOrigin{parent: anchorJWTViews(opts.jwtOrigin, container.Start, container.End), start: start, end: frame.end, base64: true}
 		if opts.ObserveJWTPayload != nil {
 			left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
 			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}, token: container.Value})
 		}
-		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin, jwtHexDepth: opts.jwtHexDepth, jwtInflateDepth: opts.jwtInflateDepth}
-		inner := d.ScanWithStatus(ctx, decoded, childOptions)
-		inner = d.jwtEscapedFindings(ctx, decoded, inner, childOptions)
+		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin, jwtHexDepth: opts.jwtHexDepth, jwtInflateDepth: opts.jwtInflateDepth, jwtViewDepth: opts.jwtViewDepth}
+		inner := d.jwtEscapedFindings(ctx, decoded, ScanResult{}, childOptions, func() ScanResult { return d.ScanWithStatus(ctx, decoded, childOptions) })
 		limited = limited || inner.CandidateLimited || inner.Base64Limited
 		if seen == nil {
 			seen = make(map[identity]bool, len(kept))
@@ -161,6 +165,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			} else {
 				m.DecodeSpans = proof
 			}
+			m.jwtContainer = Base64Span{container.Start, container.End}
 			m.JWTPayload = true
 			m.Stage = "L1-jwt-payload"
 			if m.ChecksumValid {

@@ -62,12 +62,15 @@ func (v JWTPayloadView) EncodedSpans() []Base64Span {
 }
 
 type jwtViewOrigin struct {
-	parent     *jwtViewOrigin
-	start, end int
-	base64     bool
-	hex        bool
-	inflate    string
-	bytes      []Base64Span // decoded scalar bytes -> original JSON spellings
+	parent        *jwtViewOrigin
+	start, end    int
+	base64        bool
+	hex           bool
+	inflate       string
+	normalized    *view
+	normalization string
+	anchored      bool
+	bytes         []Base64Span // decoded scalar bytes -> original JSON spellings
 }
 
 func (o *jwtViewOrigin) encodedDepth() int {
@@ -98,7 +101,9 @@ func (o *jwtViewOrigin) sourceSpan(start, end int) (int, int) {
 // sourceInterval maps one layer; compressed output names its entire stream.
 func (o *jwtViewOrigin) sourceInterval(start, end int) (int, int) {
 	left, right := o.start, o.end
-	if o.base64 {
+	if o.normalized != nil {
+		left, right = o.normalized.sourceSpan(start, end)
+	} else if o.base64 {
 		left = o.start + start/3*4
 		right = min(o.end, o.start+(end+2)/3*4)
 	} else if o.hex {
@@ -119,9 +124,15 @@ func (v JWTPayloadView) DecodeSteps() []DecodeStep {
 			transform = "hex-decode"
 		} else if o.inflate != "" {
 			transform = o.inflate
+		} else if o.normalized != nil {
+			transform = o.normalization
 		}
 		if transform != "" {
-			left, right := o.parent.sourceSpan(o.start, o.end)
+			left, right := o.start, o.end
+			if o.normalized != nil {
+				left, right = o.normalized.sourceSpan(left, right)
+			}
+			left, right = o.parent.sourceSpan(left, right)
 			out = append(out, DecodeStep{left, right, transform})
 		}
 	}
@@ -160,17 +171,49 @@ func jwtScalarOrigin(parent *jwtViewOrigin, text string, value jwtString) *jwtVi
 	return o
 }
 
-// Coarse stream proofs must not collapse distinct logical container positions
-// in the physical-container cache. At most three inflate boundaries can exist.
-func (o *jwtViewOrigin) compressedPositions(start, end int) [maxDecodeDepth]Base64Span {
-	var positions [maxDecodeDepth]Base64Span
+// Coarse stream and numeric-call proofs retain distinct logical positions in
+// the physical-container cache: at most three inflate and three view boundaries.
+func (o *jwtViewOrigin) logicalPositions(start, end int) [maxDecodeDepth * 2]Base64Span {
+	var positions [maxDecodeDepth * 2]Base64Span
 	count := 0
 	for ; o != nil; o = o.parent {
-		if o.inflate != "" && count < len(positions) {
+		if (o.inflate != "" || o.normalized != nil && o.normalized.coarse) && count < len(positions) {
 			positions[count] = Base64Span{start, end}
 			count++
 		}
 		start, end = o.sourceInterval(start, end)
 	}
 	return positions
+}
+
+func (o *jwtViewOrigin) validContainer(start, end int) bool {
+	for ; o != nil; o = o.parent {
+		if o.normalized != nil && (anyIn(o.normalized.cuts, start, start) || anyIn(o.normalized.cuts, end, end)) {
+			return false
+		}
+		start, end = o.sourceInterval(start, end)
+	}
+	return true
+}
+
+// Freeze each normalization proof on its first whole carrier. Later nested
+// claims retain that outer proof rather than shrinking it to a scalar fragment.
+func anchorJWTViews(o *jwtViewOrigin, start, end int) *jwtViewOrigin {
+	if o == nil {
+		return nil
+	}
+	left, right := o.sourceInterval(start, end)
+	if o.base64 || o.hex || o.inflate != "" {
+		left, right = o.start, o.end
+	}
+	parent := anchorJWTViews(o.parent, left, right)
+	if o.normalized != nil && !o.anchored || parent != o.parent {
+		clone := *o
+		clone.parent = parent
+		if o.normalized != nil && !o.anchored {
+			clone.start, clone.end, clone.anchored = start, end, true
+		}
+		return &clone
+	}
+	return o
 }

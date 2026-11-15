@@ -54,6 +54,7 @@ type Match struct {
 	DecodedStart     int
 	DecodeSpans      []Base64Span
 	DecodeSteps      []DecodeStep // authoritative mixed-codec proof when non-empty
+	jwtContainer     Base64Span
 	decodedNonLinear bool
 	ContextName      string // semantic source label when the value is in a table column
 	Type             string
@@ -222,6 +223,8 @@ type ScanOptions struct {
 	jwtOrigin         *jwtViewOrigin
 	jwtHexDepth       int
 	jwtInflateDepth   int
+	jwtViewDepth      int
+	jwtOnly           bool
 }
 
 type ScanResult struct {
@@ -292,7 +295,8 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
 	all = append(all, authMatches...)
 	// Secrets written through an escaping, concatenation or YAML block-scalar layer (see views.go).
-	viewMatches, viewCapped, literalSpans := d.scanViewsWithLiterals(ctx, text)
+	viewMatches, viewJWT, viewCapped, literalSpans := d.scanViewsWithJWT(ctx, text, opts)
+	indirectJWT = append(indirectJWT, viewJWT...)
 	all = discardLiteralArgumentGuesses(all, literalSpans)
 	all = append(all, viewMatches...)
 	// dedupeOverlapsCap sorts confidence-first, drops overlaps, then truncates to maxScanMatches.

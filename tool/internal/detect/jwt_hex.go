@@ -28,7 +28,7 @@ func (d *Detector) jwtHexCandidate(ctx context.Context, text string, start, end 
 	origin := &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: end, hex: true}
 	local := ScanOptions{
 		jwtDepth: opts.jwtDepth, jwtBudget: budget, jwtOrigin: origin,
-		jwtHexDepth: opts.jwtHexDepth + 1, jwtInflateDepth: opts.jwtInflateDepth, ObserveJWTPayload: opts.ObserveJWTPayload,
+		jwtHexDepth: opts.jwtHexDepth + 1, jwtInflateDepth: opts.jwtInflateDepth, jwtViewDepth: opts.jwtViewDepth, ObserveJWTPayload: opts.ObserveJWTPayload,
 	}
 	var inner ScanResult
 	if transform != "" {
@@ -42,6 +42,7 @@ func (d *Detector) jwtHexCandidate(ctx context.Context, text string, start, end 
 			continue
 		}
 		m.Start, m.End = start+m.Start*2, min(end, start+m.End*2)
+		m.jwtContainer = Base64Span{start + m.jwtContainer.Start*2, min(end, start+m.jwtContainer.End*2)}
 		steps := []DecodeStep{{start, end, "hex-decode"}}
 		for _, step := range m.ProofSteps() {
 			step.Start, step.End = start+step.Start*2, min(end, start+step.End*2)

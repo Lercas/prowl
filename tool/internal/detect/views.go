@@ -36,7 +36,8 @@ type rewrite struct {
 }
 
 type view struct {
-	constructs int // consumed discovery budget, before neighbourhood merging
+	coarse     bool // decoded numeric-call bytes share a whole source expression
+	constructs int  // consumed discovery budget, before neighbourhood merging
 	text       string
 	start, end []int32 // per view byte: the original [start,end) it came from
 	edits      []int   // view offsets where a rewrite happened, ascending
@@ -200,7 +201,7 @@ func buildViewStatus(ctx context.Context, text string) (*view, bool) {
 	return buildViewBudget(ctx, text, false, maxViewBytes, maxViewConstructs)
 }
 
-func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBudget, constructBudget int) (*view, bool) {
+func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBudget, constructBudget int, wholeCarrier ...bool) (*view, bool) {
 	if ctx.Err() != nil {
 		return nil, false
 	}
@@ -210,6 +211,7 @@ func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBu
 	limited := false
 	var rewrites []rewrite
 	var regions [][2]int
+	lastLeft, lastRight := 0, 0
 	// around adds the neighbourhood of [lo,hi): viewContext bytes each side, kept within the lines
 	// that hold lo and hi.
 	around := func(lo, hi int) {
@@ -223,6 +225,41 @@ func buildViewBudget(ctx context.Context, text string, encodingOnly bool, byteBu
 		}
 		if nl := strings.IndexByte(text[hi:le], '\n'); nl >= 0 {
 			le = hi + nl
+		}
+		if len(wholeCarrier) > 0 && wholeCarrier[0] {
+			if ls >= lastLeft && ls < lastRight {
+				ls = lastLeft
+			} else {
+				walked := 0
+				for ls > 0 && jwtViewCarrierByte(text[ls-1]) && walked < byteBudget {
+					ls--
+					walked++
+				}
+				if ls > 0 && jwtViewCarrierByte(text[ls-1]) {
+					limited = true
+				}
+			}
+			if le > lastLeft && le <= lastRight {
+				le = lastRight
+			} else {
+				walked := 0
+				for le < len(text) && jwtViewCarrierByte(text[le]) && walked < byteBudget {
+					le++
+					walked++
+				}
+				if le < len(text) && jwtViewCarrierByte(text[le]) {
+					limited = true
+				}
+			}
+			lastLeft, lastRight = ls, le
+			// Retain the delimiter too: a carrier ending at a copied region edge
+			// must not look like a token cut out of a longer physical source word.
+			if ls > 0 {
+				ls--
+			}
+			if le < len(text) {
+				le++
+			}
 		}
 		regions = append(regions, [2]int{ls, le})
 	}
@@ -427,22 +464,52 @@ func (d *Detector) scanViewsStatus(ctx context.Context, text string) ([]Match, b
 }
 
 func (d *Detector) scanViewsWithLiterals(ctx context.Context, text string) ([]Match, bool, [][2]int) {
+	ordinary, children, limited, spans := d.scanViewsWithJWT(ctx, text, ScanOptions{jwtBudget: &jwtPayloadBudget{}})
+	return append(ordinary, children...), limited, spans
+}
+
+func (d *Detector) scanViewsWithJWT(ctx context.Context, text string, opts ScanOptions) ([]Match, []Match, bool, [][2]int) {
 	v, limited := buildViewStatus(ctx, text)
-	out, collectLimited := d.scanMappedView(ctx, text, v, false)
+	var out []Match
+	collectLimited := false
+	if !opts.jwtOnly {
+		out, collectLimited = d.scanMappedView(ctx, text, v, false)
+	}
+	var children []Match
+	inspect := func(v *view, transform string, encodingOnly bool) {
+		if v == nil {
+			return
+		}
+		candidate := v
+		if len(v.cuts) > 0 && !v.coarse {
+			var capped bool
+			candidate, capped = buildViewBudget(ctx, text, encodingOnly, maxViewBytes, maxViewConstructs, true)
+			limited = limited || capped
+		}
+		extra, capped := d.jwtMappedView(ctx, candidate, transform, opts)
+		children = append(children, extra...)
+		limited = limited || capped
+	}
+	inspect(v, "text-normalize", false)
 	remainingBytes, remainingConstructs := maxViewBytes, maxViewConstructs
 	if v != nil {
 		remainingBytes -= len(v.text)
 		remainingConstructs -= v.constructs
 	}
 	encoded, encodedLimited := buildViewBudget(ctx, text, true, remainingBytes, remainingConstructs)
-	extra, extraLimited := d.scanMappedView(ctx, text, encoded, true)
+	var extra []Match
+	extraLimited := false
+	if !opts.jwtOnly {
+		extra, extraLimited = d.scanMappedView(ctx, text, encoded, true)
+	}
+	inspect(encoded, "percent-html-decode", true)
 	if encoded != nil {
 		remainingBytes -= len(encoded.text)
 		remainingConstructs -= encoded.constructs
 	}
-	numeric, numericLimited, spans := d.charCodeDetails(ctx, text, remainingBytes, remainingConstructs)
+	numeric, numericLimited, spans := d.charCodeDetails(ctx, text, remainingBytes, remainingConstructs, func(v *view) { inspect(v, "charcode-decode", false) })
 	out = append(out, extra...)
-	return append(out, numeric...), limited || collectLimited || encodedLimited || extraLimited || numericLimited, spans
+	return append(out, numeric...), children, limited || collectLimited || encodedLimited || extraLimited || numericLimited, spans
 }
 
 func (d *Detector) scanMappedView(ctx context.Context, text string, v *view, typedOnly bool) ([]Match, bool) {

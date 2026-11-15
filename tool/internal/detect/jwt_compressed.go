@@ -35,7 +35,7 @@ func (d *Detector) jwtInflatedFindings(ctx context.Context, data []byte, opts Sc
 		return nil, limited
 	}
 	local := ScanOptions{
-		jwtDepth: opts.jwtDepth, jwtHexDepth: opts.jwtHexDepth, jwtInflateDepth: opts.jwtInflateDepth + 1,
+		jwtDepth: opts.jwtDepth, jwtHexDepth: opts.jwtHexDepth, jwtInflateDepth: opts.jwtInflateDepth + 1, jwtViewDepth: opts.jwtViewDepth,
 		jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload,
 		jwtOrigin: &jwtViewOrigin{parent: opts.jwtOrigin, start: 0, end: len(data), inflate: transform},
 	}
@@ -56,6 +56,7 @@ func (d *Detector) jwtInflatedFindings(ctx context.Context, data []byte, opts Sc
 			steps = append(steps, step)
 		}
 		m.Start, m.End = 0, len(data)
+		m.jwtContainer = Base64Span{0, len(data)}
 		m.DecodeSteps, m.DecodeSpans = normalizeDecodeSteps(steps), nil
 		out = append(out, m)
 	}

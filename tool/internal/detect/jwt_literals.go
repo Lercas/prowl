@@ -89,26 +89,22 @@ func jwtStrings(ctx context.Context, text string) ([]jwtString, bool) {
 
 // The raw JSON spelling of an escaped scalar is not its credential value.
 // Replace those candidates with scans/nominations over complete decoded strings.
-func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner ScanResult, opts ScanOptions) ScanResult {
+func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner ScanResult, opts ScanOptions, rawScan ...func() ScanResult) ScanResult {
 	if !strings.Contains(text, "\\") {
+		if len(rawScan) > 0 {
+			return rawScan[0]()
+		}
 		return inner
 	}
 	values, limited := jwtStrings(ctx, text)
+	parseLimited := limited
 	var selected []jwtString
 	for _, v := range values {
 		if limited || v.escaped {
 			selected = append(selected, v)
 		}
 	}
-	kept := make([]Match, 0, len(inner.Matches))
-	if !limited {
-		for _, m := range inner.Matches {
-			i := sort.Search(len(selected), func(i int) bool { return selected[i].end > m.Start })
-			if i == len(selected) || selected[i].start >= m.End {
-				kept = append(kept, m)
-			}
-		}
-	}
+	var kept []Match
 	for _, v := range selected {
 		if ctx.Err() != nil {
 			limited = true
@@ -138,7 +134,7 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 		if len(nominated) > 0 {
 			typed := false
 			for _, m := range local.Matches {
-				typed = typed || !taxonomy.GenericLast[m.Type]
+				typed = typed || m.JWTPayload || !taxonomy.GenericLast[m.Type]
 			}
 			if !typed {
 				local.Matches = nominated
@@ -162,6 +158,9 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 				m.LiteralContext = true
 			}
 			m.Start, m.End = v.start, v.end
+			if m.JWTPayload {
+				m.jwtContainer = Base64Span{v.start, v.end}
+			}
 			for i := range m.DecodeSpans {
 				m.DecodeSpans[i] = Base64Span{v.start, v.end}
 			}
@@ -171,6 +170,26 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			kept = append(kept, m)
 		}
 	}
+	// Logical escaped scalars own their containers before the raw normalization
+	// route can cache them. Filter the raw spelling without rescanning those keys.
+	if len(rawScan) > 0 {
+		inner = rawScan[0]()
+	}
+	var ordinary []Match
+	if !parseLimited {
+		for _, m := range inner.Matches {
+			i := sort.Search(len(selected), func(i int) bool { return selected[i].end > m.Start })
+			if i == len(selected) || selected[i].start >= m.End {
+				ordinary = append(ordinary, m)
+			}
+		}
+	}
+	if len(ordinary)+len(kept) > maxScanMatches {
+		limited = true
+		kept = kept[:min(len(kept), maxScanMatches-len(ordinary))]
+	}
+	kept = append(ordinary, kept...)
+
 	inner.Matches = kept
 	inner.CandidateLimited = inner.CandidateLimited || limited
 	inner.Base64Limited = inner.Base64Limited || limited
