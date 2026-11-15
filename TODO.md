@@ -460,8 +460,10 @@
       вложенные plist, дубликаты, динамические ресурсы и повреждение не заимствуют
       поля. Неустановленная XML-привязка — `inconclusive` без запроса.
       XML entities/CDATA, лимиты и отмена проверены; DTD не загружается.
-      APK/IPA CLI 32/32 под OS network deny, owned HTTP для трёх сервисов,
-      full Go/race/min-Go/lint и fuzz 67325 проходят. Обычные quality IDs и
+      APK/IPA CLI 34/34 под OS network deny, owned HTTP для трёх сервисов,
+      full Go/race/min-Go/lint и финальный fuzz 28281 проходят. Комментарий
+      внутри string проверен отдельно: совпадение значения не даёт ему владеть
+      CharData. Обычные quality IDs и
       полный GOROOT digest прежние. `wiki/evidence/1.5.0-firebase-xml-20261115.json`.
     - [ ] Другие Firebase формы/точки чтения и подтверждение на разрешённом
       реальном аккаунте; отказ root/list не считается доказательством всех rules.

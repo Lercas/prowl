@@ -1,76 +1,77 @@
 {
   "schema_version": 1,
-  "main_source_commit": "8ee6b32bd5da0141250aa81506f87cf70cabbbb8",
-  "docker_candidate_source_commit": "f0c971596b5614269cdf623da99ba4a0500a9dd2",
-  "isolated_source_commit": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+  "main_source_commit": "248725ee90b25ddfea38a0b1016fded4d0a78a24",
+  "docker_candidate_source_commit": "a48eec1ac0027f530d35faa001a4fd05eac0a04a",
+  "isolated_source_commit": "2155a8773656a667462f8b389e60c78543ff3dde",
   "audit_revision": "public-acl-v5-firebase-xml",
   "detection_revision_unchanged": "1.5.0-short-key-v1",
   "binary": {
-    "path": "/tmp/prowl-firebase-xml-20261115-bin",
-    "sha256": "2aad59d010dc22abddebffc0a7f806fdadcb82c6a7b9d202b2c11bbe88c7c527"
+    "path": "/tmp/prowl-firebase-xml-data-spans-20261115-bin",
+    "sha256": "0c5a964dc32366c7051cf8db2956ce3fb9e340384f7001971dcff8c8989e1ee7"
   },
   "build": {
     "CGO_ENABLED": "0",
-    "vcs.revision": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+    "vcs.revision": "2155a8773656a667462f8b389e60c78543ff3dde",
     "vcs.modified": false
   },
   "checks": {
     "full_go": {
-      "path": "/tmp/prowl-xml-public-final-go-20261115.log",
-      "sha256": "6f3913e625b9426541040a327dbe1a1e75066f062ad3fee5c220efb11ce00941",
+      "path": "/tmp/prowl-xml-data-spans-go-20261115.log",
+      "sha256": "08da95d5ebddefcf1527e19654093ae85b1ae7f9f49e266e4e60f6bc9f3c4342",
       "passed": true
     },
     "targeted_and_limits": {
-      "path": "/tmp/prowl-xml-public-limits-20261115.log",
-      "sha256": "04ff96fe4e340082047c77dae4dc113277da22b991c34cd7f712766a3205d7e5",
+      "path": "/tmp/prowl-xml-public-final-data-spans-20261115.log",
+      "sha256": "13833f7491e24b04744c56f5a4788decb9435d4f933ccf6b3d52ccdf8e92c1d1",
       "passed": true
     },
     "affected_race": {
-      "path": "/tmp/prowl-xml-public-race-20261115.log",
-      "sha256": "1793aa5a2a9f7fca8a610cd00504f071e832f84aaabb174e154a95e5c740f80f",
+      "path": "/tmp/prowl-xml-data-spans-race-20261115.log",
+      "sha256": "8c5dd8bb05b04798e25b539b44bc38b092dd84ace6723c041b4eeb953b8a9812",
       "passed": true
     },
     "minimum_go": {
-      "path": "/tmp/prowl-xml-public-min-go-20261115.log",
-      "sha256": "d828b3ae0947c124cdab30183c471b39d3c77bed0e950dbdef0db14d9afb5b5b",
+      "path": "/tmp/prowl-xml-data-spans-min-go-20261115.log",
+      "sha256": "b56a3c977312098613c5277e3e416a5e2cdf985ba8c5bb69e3bfbcd223929f0f",
       "passed": true,
       "toolchain": "go1.26.11"
     },
     "lint": {
-      "path": "/tmp/prowl-xml-public-lint-20261115.log",
+      "path": "/tmp/prowl-xml-data-spans-lint-20261115.log",
       "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
       "passed": true
     },
     "fuzz": {
-      "path": "/tmp/prowl-xml-public-fuzz-20261115.log",
-      "sha256": "b28ab50d50ff36017ddbe0ae6396e1d0a49b5d2d5f3c82b8bcb116e730869a12",
+      "path": "/tmp/prowl-xml-data-spans-fuzz-20261115.log",
+      "sha256": "8baece89f70c45524dd0dc815ab8a55466d57ceac9aec08cbd33573473609812",
       "passed": true,
-      "executions": 67325
+      "executions": 28281
     },
     "corpus_digest": {
-      "path": "/tmp/prowl-xml-public-corpus-digest-20261115.log",
-      "sha256": "fb18fa312d307b1588215818fd06e78dc65539294e83ad519efb16038f20e3b9",
+      "path": "/tmp/prowl-xml-data-spans-corpus-digest-20261115.log",
+      "sha256": "eaf0575c2d083142034dbc923771e471b14500b3a5549175c868f0cb1577bb4a",
       "passed": true
     }
   },
   "native": {
     "evidence": {
-      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/evidence.json",
-      "sha256": "2e9447b1f095093a883da9a94bc8135d9da3e981d93a5d445aa1b1dd2173c4e3"
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-lksckk82/evidence.json",
+      "sha256": "2b3f1ecb3872616466dcc32cc90f7dd9918ede048fab4e5a1b5dcfcc151881fe"
     },
     "runner": {
       "path": "/tmp/prowl-firebase-xml-native-20261115.py",
-      "sha256": "9ca99fe0901c4f51701c8d9984fd21f01c5753a0554abe7c8bfc918516a6f33b"
+      "sha256": "2991dfc989ae4322bfe86580c6c8dc9c47bf51d51ae767b5e33d68fab3ccd5d3"
     },
-    "passed": 32,
+    "passed": 34,
     "failed": 0,
     "outcomes": {
       "planned reads blocked by verified OS sandbox": 10,
       "ordinary/output/preflight": 11,
-      "invalid configuration rejected before transport": 11
+      "invalid configuration rejected before transport": 11,
+      "data token owns planned checks; equal comment owns none": 2
     },
     "model_retained_cases": 5,
-    "isolated_PROWL_HOME": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/home",
+    "isolated_PROWL_HOME": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-lksckk82/home",
     "network_control": {
       "profile": "(version 1)(allow default)(deny network*)",
       "owned_requests": 1,
@@ -81,13 +82,14 @@
   },
   "owned_http": {
     "test_file": "tool/internal/publicaudit/firebase_xml_pipeline_test.go",
-    "test_file_sha256": "642e073838313e4d78214e89d3f57de0c56fb22cca70d85bf02388ac23a44abf",
+    "test_file_sha256": "a7f5b42268c3033fb44b62a02a51665ff3a1521ab1ba91bbf138a1a76297aaad",
     "tests": [
       "TestFirebaseXMLReadTargetsThroughOwnedHTTP",
       "TestFirebaseXMLUnsafeBindingMakesNoRequests",
-      "TestFirebaseXMLEqualUnrelatedValueCannotBorrowFields"
+      "TestFirebaseXMLEqualUnrelatedValueCannotBorrowFields",
+      "TestFirebaseXMLCommentInsideKeyNeverGetsReadVerdict"
     ],
-    "semantics": "The real Auditor builds its fixed HTTPS provider requests; the test-only transport maps validated owned-project targets to a private loopback fixture. Valid XML and plist each perform three GETs; invalid/ambiguous cases issue zero requests. An equal unrelated source occurrence remains inconclusive. Google key is not sent, and private response contents/resource identifiers are absent from serialized findings. This is not a real provider/account result."
+    "semantics": "The real Auditor builds its fixed HTTPS provider requests; the test-only transport maps validated owned-project targets to a private loopback fixture. Valid XML and plist each perform three GETs; invalid/ambiguous cases issue zero requests. An equal unrelated source occurrence remains inconclusive. Google key is not sent, and private response contents/resource identifiers are absent from serialized findings. This is not a real provider/account result. Equal comments inside the API-key string are also inconclusive; only observed XML data tokens can own configuration."
   },
   "quality": {
     "schema_version": "prowl-quality-v1",
@@ -108,7 +110,7 @@
       "tolerance": 0.005,
       "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
     },
-    "binary_sha256": "2aad59d010dc22abddebffc0a7f806fdadcb82c6a7b9d202b2c11bbe88c7c527",
+    "binary_sha256": "0c5a964dc32366c7051cf8db2956ce3fb9e340384f7001971dcff8c8989e1ee7",
     "passed": true,
     "recall": 0.7464183381088825,
     "t4_fp_rate": 0.05804480651731161,
@@ -119,8 +121,8 @@
     "status": "passed"
   },
   "quality_evidence": {
-    "path": "/tmp/prowl-xml-public-quality-20261115.json",
-    "sha256": "80f491c9f2406c3f80452f0da2e3b0b3445cf009b5b0d675c3a7013dac145a08"
+    "path": "/tmp/prowl-xml-data-spans-quality-20261115.json",
+    "sha256": "b5fe6a146d13392d4139779c1b55016b3dbd7cd9d3177ea7cf5bf05f94840de6"
   },
   "quality_id_sets": {
     "missed_positive_ids": {
@@ -165,7 +167,7 @@
   "boundaries": [
     "Android resources: one root resources element, only the declared google_api_key or google_crash_reporting_api_key scalar owns same-file project_id/firebase_database_url/google_storage_bucket. Two declared Google keys must agree.",
     "Apple: exact GoogleService-Info.plist basename, plist version=1.0 and a single root dictionary. Only the top-level string API_KEY owns same-dict PROJECT_ID/DATABASE_URL/STORAGE_BUCKET.",
-    "Complete logical value and observed source containment are required. Equal unrelated values, nested plist keys and comments cannot borrow fields. Duplicate names, malformed XML, unknown/non-string companions, cancellation and limits do not authorize requests.",
+    "Complete logical value and observed containment in an XML CharData token are required. Equal comments inside a key string, unrelated values, nested plist keys and comments outside data cannot borrow fields. Duplicate names, malformed XML, unknown/non-string companions, cancellation and limits do not authorize requests.",
     "XML entities and CDATA are parsed as XML data only. Android references/escaping/formatting/quotes/whitespace transformations are not resolved. Nonliteral metadata remains explicitly unknown.",
     "API key is never sent by the Firebase read protocol. Existing RTDB shallow root, Storage root list and explicitly selected Firestore collection probes are unchanged.",
     "Bindings belong to one original item with lazy sync.Once and copy-out maps. Shared pipelines retain no previous item source/binding state. Allowlist/ML suppression precedes auditing. Ordinary detection/ML records/coordinates and identity are unchanged."
@@ -223,5 +225,104 @@
     "Native provider transport was denied by the OS; successful GET behavior is a separate owned HTTP fixture. Read access observed in a fixture does not prove any live data exposure or RLS status.",
     "TypeScript/JSX-specific bindings, binary plist/dex, general XML schemas, cross-file components and arbitrary alternate plist filenames remain outside this change. Algolia/Supabase XML binding was not added.",
     "No installed model, remote service, Docker resource, reference, thresholds, push, deployment or publication changed. No files were deleted."
-  ]
+  ],
+  "initial_qualification": {
+    "source_commit": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+    "main_source_commit": "8ee6b32bd5da0141250aa81506f87cf70cabbbb8",
+    "docker_candidate_source_commit": "f0c971596b5614269cdf623da99ba4a0500a9dd2",
+    "binary": {
+      "path": "/tmp/prowl-firebase-xml-20261115-bin",
+      "sha256": "2aad59d010dc22abddebffc0a7f806fdadcb82c6a7b9d202b2c11bbe88c7c527"
+    },
+    "checks": {
+      "full_go": {
+        "path": "/tmp/prowl-xml-public-final-go-20261115.log",
+        "sha256": "6f3913e625b9426541040a327dbe1a1e75066f062ad3fee5c220efb11ce00941",
+        "passed": true
+      },
+      "targeted_and_limits": {
+        "path": "/tmp/prowl-xml-public-limits-20261115.log",
+        "sha256": "04ff96fe4e340082047c77dae4dc113277da22b991c34cd7f712766a3205d7e5",
+        "passed": true
+      },
+      "affected_race": {
+        "path": "/tmp/prowl-xml-public-race-20261115.log",
+        "sha256": "1793aa5a2a9f7fca8a610cd00504f071e832f84aaabb174e154a95e5c740f80f",
+        "passed": true
+      },
+      "minimum_go": {
+        "path": "/tmp/prowl-xml-public-min-go-20261115.log",
+        "sha256": "d828b3ae0947c124cdab30183c471b39d3c77bed0e950dbdef0db14d9afb5b5b",
+        "passed": true,
+        "toolchain": "go1.26.11"
+      },
+      "lint": {
+        "path": "/tmp/prowl-xml-public-lint-20261115.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+        "passed": true
+      },
+      "fuzz": {
+        "path": "/tmp/prowl-xml-public-fuzz-20261115.log",
+        "sha256": "b28ab50d50ff36017ddbe0ae6396e1d0a49b5d2d5f3c82b8bcb116e730869a12",
+        "passed": true,
+        "executions": 67325
+      },
+      "corpus_digest": {
+        "path": "/tmp/prowl-xml-public-corpus-digest-20261115.log",
+        "sha256": "fb18fa312d307b1588215818fd06e78dc65539294e83ad519efb16038f20e3b9",
+        "passed": true
+      }
+    },
+    "native": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/evidence.json",
+        "sha256": "2e9447b1f095093a883da9a94bc8135d9da3e981d93a5d445aa1b1dd2173c4e3"
+      },
+      "runner": {
+        "path": "/tmp/prowl-firebase-xml-initial-qualified-runner-20261115.py",
+        "sha256": "9ca99fe0901c4f51701c8d9984fd21f01c5753a0554abe7c8bfc918516a6f33b"
+      },
+      "passed": 32,
+      "failed": 0,
+      "outcomes": {
+        "planned reads blocked by verified OS sandbox": 10,
+        "ordinary/output/preflight": 11,
+        "invalid configuration rejected before transport": 11
+      },
+      "model_retained_cases": 5,
+      "isolated_PROWL_HOME": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-firebase-xml-native-l4rg4304/home",
+      "network_control": {
+        "profile": "(version 1)(allow default)(deny network*)",
+        "owned_requests": 1,
+        "sandbox_requests": 0,
+        "blocked_exit": 7
+      },
+      "scope": "Synthetic APK/IPA XML/plist acquisition, binding and output contracts under verified OS network denial. Valid configured requests are planned but transport is blocked; successful HTTP behavior is qualified separately on owned Go fixtures. No real Firebase provider/account qualification."
+    },
+    "status": "Prior vectors passed, but comment-within-key ownership was not covered. Superseded by the final data-token fix and explicit regression; not final qualification."
+  },
+  "comment_ownership_regression": {
+    "pre_fix_commit": "dfbedc34b9edd8f4036bee604a6c4497625de488",
+    "legacy_function_sha256": "cce04bfd1a2d1acd94e91a3a0bc294807fed6ef11b3988e319a0b5d3d24d239f",
+    "overlay_source": {
+      "path": "/tmp/prowl-xml-comment-legacy-overlay-20261115.go",
+      "sha256": "fa181083ff9d44b69477df7cfd87951fa48ec8915b31b830fe0f469f1ebf8f14"
+    },
+    "overlay_manifest": {
+      "path": "/tmp/prowl-xml-comment-legacy-overlay-20261115.json",
+      "sha256": "1b8da4efdbd902935d8e8e1491370eb9ffcb2caf5dcf10031ea3d5b73683a39e"
+    },
+    "reproduction": {
+      "path": "/tmp/prowl-xml-comment-reproduction-20261115.log",
+      "sha256": "605efefbfcc34e8e0dbb9d747789a998a895045a6a294339b62aa219c50cb985",
+      "expected_failed": true
+    },
+    "fixed_source_commit": "2155a8773656a667462f8b389e60c78543ff3dde",
+    "fixed_tests": {
+      "path": "/tmp/prowl-xml-public-final-data-spans-20261115.log",
+      "sha256": "13833f7491e24b04744c56f5a4788decb9435d4f933ccf6b3d52ccdf8e92c1d1",
+      "passed": true
+    },
+    "mechanism": "An XML comment inside the API-key string repeated the same complete key. Whole-element bounds plus equal logical value allowed it to borrow configuration. The final function requires membership in an observed XML CharData token; comments are separate tokens. Unit and real owned HTTP regressions fail on the exact old function and pass on the fixed source. Two native no-dedupe cases additionally retain planned checks only for the real data occurrence."
+  }
 }
