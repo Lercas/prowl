@@ -1,0 +1,565 @@
+{
+  "schema_version": 1,
+  "main_source_commit": "71a0a99e7a36c955930214c6bd7ac7994c0de0c1",
+  "isolated_source_commit": "157518ea32786bf85acd2b03e29d7143fbb30a38",
+  "docker_candidate_source_commit": "264a1b636646554cf1f7f2147961f05ebaae2712",
+  "binary": "/tmp/prowl-perf-recovery-unicode-20261115-bin",
+  "binary_sha256": "6e1ed1d568fbf859e5d325379c6389906489d89011e7cf39c0dfb145f571a189",
+  "performance_gate": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 9830404500.0,
+          "B/op": 577931920.0,
+          "allocs/op": 1160646.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 9994336750.0,
+          "B/op": 582393960.0,
+          "allocs/op": 1161229.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10009784584.0,
+          "B/op": 574423352.0,
+          "allocs/op": 1160958.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 11722862209.0,
+          "B/op": 505209760.0,
+          "allocs/op": 1074260.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 11889774458.0,
+          "B/op": 518072856.0,
+          "allocs/op": 1074044.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 11885793167.0,
+          "B/op": 519186232.0,
+          "allocs/op": 1074738.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "157518ea32786bf85acd2b03e29d7143fbb30a38"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 9994336750.0,
+        "B/op": 577931920.0,
+        "allocs/op": 1160958.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 11885793167.0,
+        "B/op": 518072856.0,
+        "allocs/op": 1074260.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 419.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.1892528203034582,
+      "B/op": 0.8964254059543899,
+      "allocs/op": 0.9253220185398611
+    },
+    "regressions": []
+  },
+  "failed_intermediate_attempt": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 10578364875.0,
+          "B/op": 581273864.0,
+          "allocs/op": 1161119.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10480575667.0,
+          "B/op": 582210392.0,
+          "allocs/op": 1161440.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10595002583.0,
+          "B/op": 576555704.0,
+          "allocs/op": 1160642.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 13556995208.0,
+          "B/op": 507797504.0,
+          "allocs/op": 1074225.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 13818211625.0,
+          "B/op": 510740776.0,
+          "allocs/op": 1074208.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        },
+        {
+          "ns/op": 13604815375.0,
+          "B/op": 509658416.0,
+          "allocs/op": 1074465.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 419.0
+        }
+      ]
+    },
+    "status": "regression",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "56c3c5c916eb2879ea8f679ee8300305761277f7"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 10578364875.0,
+        "B/op": 581273864.0,
+        "allocs/op": 1161119.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 13604815375.0,
+        "B/op": 509658416.0,
+        "allocs/op": 1074225.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 419.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.2860981385840125,
+      "B/op": 0.8767956854155067,
+      "allocs/op": 0.9251635706589936
+    },
+    "regressions": [
+      "ns/op"
+    ]
+  },
+  "corpus_equivalence": {
+    "reference_source_commit": "3c5c4b955048d24f0a68492545cc0fe05c94eb90",
+    "candidate_source_commit": "157518ea32786bf85acd2b03e29d7143fbb30a38",
+    "same_harness": true,
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 419,
+    "incomplete_files": 85,
+    "full_result_sha256": "581917e269c7ccf4b489fd62982fd927d2f3a31a16618fa07c6579d7fcf71a5c",
+    "identical": true,
+    "scope": "Per-file full JSON findings and coverage in the L1 pipeline with bundled rules; not equivalence to older performance-reference findings"
+  },
+  "quality": {
+    "status": "passed",
+    "passed": true,
+    "recall": 0.7430754536771729,
+    "t4_fp_rate": 0.05804480651731161,
+    "secret_hits": 1556,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "binary_sha256": "6e1ed1d568fbf859e5d325379c6389906489d89011e7cf39c0dfb145f571a189"
+  },
+  "quality_id_sets": {
+    "missed_positive_ids": {
+      "count": 538,
+      "sha256": "23a509c042c620388d27d2052f8e6a306a6f9055f4559674b778392941f8f720",
+      "identical_to_jwt_parent": true
+    },
+    "false_positive_ids": {
+      "count": 57,
+      "sha256": "ee306351bd1a5611c0dda382a6441f5785e1452e69fb52481f991276fd290cf6",
+      "identical_to_jwt_parent": true
+    }
+  },
+  "checks": {
+    "full_go": {
+      "path": "/tmp/prowl-perf-recovery-final-go-space-retry-20261115.log",
+      "sha256": "deff3c8797aecdfdbb2d0a065b75a23a194ab6a35ebe18254a5f0733d12d9e8b",
+      "passed": true
+    },
+    "full_affected_race_before_unicode_extension": {
+      "path": "/tmp/prowl-perf-recovery-race-20261115.log",
+      "sha256": "2974ad2780a5b02d8467a244c56ea22c877b87e61a3c8da17fdd4769309da6c4",
+      "passed": true,
+      "source_commit": "61d1c4c6b843dee40554823631f170c15b930469",
+      "packages": [
+        "detect",
+        "scan",
+        "linewin",
+        "ahocorasick"
+      ]
+    },
+    "final_gate_race": {
+      "path": "/tmp/prowl-perf-recovery-final-race-20261115.log",
+      "sha256": "cb21a3bb7d49c8a0dc20fe1b6f68d1117e04b8719ea66e6d8f58fef17a730477",
+      "passed": true,
+      "source_commit": "157518ea32786bf85acd2b03e29d7143fbb30a38",
+      "selection": "TestASCIIGate|TestGatedWindows|FuzzASCIIRegexGate in detect/linewin; full 200000-input window race already passed before extension"
+    },
+    "minimum_go_final_gates": {
+      "path": "/tmp/prowl-perf-recovery-final-min-go-space-retry-20261115.log",
+      "sha256": "0b1744ef0e1c953f615cc49c9882a5b726f099502fe67d39cb8a6a4a619dffaa",
+      "passed": true,
+      "go": "go1.26.11",
+      "selection": "TestASCIIGate|TestGatedWindows|FuzzASCIIRegexGate in detect/linewin; full affected minimum-Go suite passed before extension"
+    },
+    "full_lint": {
+      "path": "/tmp/prowl-perf-recovery-final-lint-space-retry-20261115.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "passed": true
+    },
+    "corpus_digest": {
+      "path": "/tmp/prowl-perf-recovery-final-digest-20261115.log",
+      "sha256": "e2af10acd3ab1a5b936514e854db95090307171b876394e11b8840a9ba7ca257",
+      "passed": true
+    },
+    "unicode_projection_fuzz": {
+      "path": "/tmp/prowl-perf-recovery-unicode-fuzz-final-20261115.log",
+      "sha256": "fb5fcd952c4c708dd15bcfdb14a0b9e03e6e1a78151193bbf66b1a91dfea052c",
+      "passed": true
+    }
+  },
+  "fuzz": {
+    "earlier_oracles_passed": 8,
+    "earlier_oracle_executions": 1233097,
+    "final_unicode_projection_executions": 32252,
+    "final_unicode_projection_passed": true,
+    "oracle_targets": [
+      "FuzzSelectedBase64MatchesFourDecoders",
+      "FuzzASCIIEntropyMatchesRuneReference",
+      "FuzzASCIIPasswordCueGateMatchesRegex",
+      "FuzzUnicodePasswordCueGateMatchesRegex",
+      "FuzzASCIIRegexGateCannotRejectOriginalMatch",
+      "FuzzContextPredicatesPreserveOriginalLowercaseSemantics",
+      "FuzzProseGateCannotRejectOriginalMatch",
+      "FuzzContainsLowerMatchesStandardLibrary"
+    ]
+  },
+  "native_jwt_guard_index": {
+    "source_commit": "157518ea32786bf85acd2b03e29d7143fbb30a38",
+    "binary": "/tmp/prowl-perf-recovery-unicode-20261115-bin",
+    "sha256": "6e1ed1d568fbf859e5d325379c6389906489d89011e7cf39c0dfb145f571a189",
+    "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-jwt-native-ydcx35_q",
+    "sandbox_profile": "(version 1)(allow default)(deny network*)",
+    "network_boundary_control": {
+      "owned_control_requests": 1,
+      "sandbox_requests": 0,
+      "blocked_exit": 7
+    },
+    "cases": [
+      {
+        "case": "txt-l1",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "txt-l1-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "txt-ml",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "txt-ml-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "js-l1",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "js-l1-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "js-ml",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "js-ml-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "json-l1",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "json-l1-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "json-ml",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "json-ml-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "yaml-l1",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "yaml-l1-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "yaml-ml",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "yaml-ml-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "toml-l1",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "toml-l1-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "toml-ml",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "toml-ml-bundled",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "nested",
+        "passed": true,
+        "findings": 4
+      },
+      {
+        "case": "sample",
+        "passed": true,
+        "findings": 3
+      },
+      {
+        "case": "unsigned",
+        "passed": true,
+        "findings": 2
+      },
+      {
+        "case": "duplicate",
+        "passed": true,
+        "findings": 4
+      },
+      {
+        "case": "escaped-0",
+        "passed": true,
+        "findings": 2
+      },
+      {
+        "case": "exact-logical-0",
+        "passed": true
+      },
+      {
+        "case": "escaped-1",
+        "passed": true,
+        "findings": 2
+      },
+      {
+        "case": "exact-logical-1",
+        "passed": true
+      },
+      {
+        "case": "escaped-2",
+        "passed": true,
+        "findings": 2
+      },
+      {
+        "case": "exact-logical-2",
+        "passed": true
+      },
+      {
+        "case": "escaped-3",
+        "passed": true,
+        "findings": 2
+      },
+      {
+        "case": "exact-logical-3",
+        "passed": true
+      },
+      {
+        "case": "sarif",
+        "passed": true
+      },
+      {
+        "case": "pretty",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-0",
+        "passed": true
+      },
+      {
+        "case": "incomplete-guard-0",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-1",
+        "passed": true
+      },
+      {
+        "case": "incomplete-guard-1",
+        "passed": true
+      },
+      {
+        "case": "incomplete-baseline-2",
+        "passed": true
+      },
+      {
+        "case": "incomplete-guard-2",
+        "passed": true
+      },
+      {
+        "case": "guard-raw",
+        "passed": true
+      },
+      {
+        "case": "guard-claude",
+        "passed": true
+      },
+      {
+        "case": "guard-cursor-prompt",
+        "passed": true
+      },
+      {
+        "case": "guard-cursor-tool",
+        "passed": true
+      },
+      {
+        "case": "logical-HMAC-and-private-index",
+        "passed": true
+      }
+    ],
+    "passed": 45,
+    "failed": 0,
+    "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "real_provider_qualification": false
+  },
+  "model_changes": false,
+  "threshold_changes": false,
+  "reference_changes": false,
+  "installed_49_model_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+  "resource_failures": {
+    "cause": "ENOSPC during parallel and serial Go builds and minimum-Go link; transient missing cache entry during lint",
+    "resolved": "After host free space increased, serial full Go, final minimum-Go gates and full lint passed. No deletion or restart performed. One fixed-gate retry failed at reference build without diagnostics, then completed from a new directory after checks."
+  },
+  "limits": [
+    "Local darwin/arm64 fixed gate only; external CI remains unexecuted",
+    "Time median is +18.93% against a +20% cap: limited headroom",
+    "85 files had incomplete coverage in both compared current runtime states",
+    "Model, policy thresholds and pinned performance reference unchanged",
+    "Docker images not rebuilt; runtime, release publication and live providers not qualified by this work",
+    "Four intermediate test binaries are retained pending explicit deletion permission"
+  ]
+}
