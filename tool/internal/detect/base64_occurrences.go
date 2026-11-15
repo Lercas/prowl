@@ -63,7 +63,9 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 	var walk func(string, *base64Frame, int, []Base64Span, *int)
 	walk = func(text string, parent *base64Frame, depth int, chain []Base64Span, remaining *int) {
 		for i := 0; i < len(text); {
-			if ctx.Err() != nil || exhausted {
+			// Poll at the same bounded byte interval as the encoded-run loop.
+			// Most source separators need no interface call into the context.
+			if exhausted || i&4095 == 0 && ctx.Err() != nil {
 				return
 			}
 			if !base64Byte(text[i]) {
@@ -79,6 +81,9 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 			}
 			for i < len(text) && text[i] == '=' {
 				i++
+				if i&4095 == 0 && ctx.Err() != nil {
+					return
+				}
 			}
 			end := i
 			if end-start < minBase64CandidateBytes {
