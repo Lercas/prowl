@@ -1,0 +1,203 @@
+{
+  "source_commit": "ee895cf",
+  "binary": "/tmp/prowl-public-audit-main-20261115",
+  "sha256": "411df21255645d825376fad8af3abedf263da85843bcc2e2337b4e4e581476b6",
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-public-audit-native-5bk99cb0",
+  "cases": [
+    {
+      "case": "default-opt-out",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "case": "explicit-opt-out",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "case": "missing-binding",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "parent-binding-rejected",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "duplicate-binding-rejected",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "unsupported-not-fabricated",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "case": "pretty-separate",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "sarif-separate",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-unauthorized-False",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-unauthorized-True",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-reject---verify",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-reject---verify-all",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-reject---verified-only",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-reject---fail-on-verified",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-unauthorized-False",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-unauthorized-True",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-reject---verify",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-reject---verify-all",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-reject---verified-only",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-reject---fail-on-verified",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-scan",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-repo",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-image",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-bucket",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-cicd",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-compare",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-serve",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-mcp",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "scope-lsp",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "baseline-protected",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "domain-no-source-request",
+      "passed": true,
+      "exit": 2
+    },
+    {
+      "case": "mobile-no-source-request",
+      "passed": true,
+      "exit": 2
+    }
+  ],
+  "passed": 32,
+  "failed": 0,
+  "provider_requests": "none; native fixtures intentionally omit usable provider bindings",
+  "scope": "Algolia structured self-ACL slice; not complete 1.5.0 qualification",
+  "integration": {
+    "main_source_commit": "ee895cf52a1387c2afae5819d773e4e1e5e555ae",
+    "isolated_source_commit": "fafbc93",
+    "source_trees_equal": true,
+    "docker_candidate_source_commit": "0976dd5",
+    "images_rebuilt": false,
+    "release_qualified": false
+  },
+  "checks": {
+    "go": "full suite, Go 1.27.4, CGO=0",
+    "race": "publicaudit, scan, report and cmd/prowl; final publicaudit rerun",
+    "lint": "golangci-lint: zero issues",
+    "minimum_go": "Go 1.26.11: publicaudit, scan, report and cmd/prowl",
+    "provider_fixture": "owned local HTTP server through a test-only transport; production endpoint has no override",
+    "backend_contracts": [
+      "GET self-key only; fixed validated provider authority",
+      "strict matching response identity and allowlisted ACL",
+      "duplicate fields/case aliases/invalid Unicode/depth/body limits rejected",
+      "transport and HTTP denial remain inconclusive without raw errors",
+      "coalesced binding-sensitive cache; caller cancellation; request budget",
+      "ML survivor retains original sibling binding; unsafe and unsupported inputs",
+      "JSON/SARIF/pretty and occurrence separation from legacy verification"
+    ]
+  },
+  "limitations": [
+    "Structured sibling bindings only; JS/TS and cross-file pairs remain open",
+    "ACL metadata cannot distinguish built-in admin from a broad custom key",
+    "search_only does not certify data or all key restrictions",
+    "Supabase, Firebase and Google public-key audit remain open",
+    "No real provider account qualification, final container image or release publication"
+  ]
+}

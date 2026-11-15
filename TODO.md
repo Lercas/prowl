@@ -427,7 +427,8 @@
     - [x] Read-only self-ACL для пар из одного объекта JSON/YAML/TOML: отдельный
       `public_key_audit`, после ML, фиксированный GET, bounded/cache-aware запросы,
       строгий ответ и неполное покрытие при неоднозначности. JSON/SARIF/occurrences
-      сохраняют результат без `verified:true`. [Контракт](wiki/Public-Key-Audit.md).
+      сохраняют результат без `verified:true`. CLI 32/32, full Go/race/lint и Go 1.26.11;
+      [контракт](wiki/Public-Key-Audit.md), `wiki/evidence/1.5.0-public-key-audit-20261115.json`.
     - [ ] JS/TS и прочие форматы; точное отличие встроенного admin от широкого custom ACL.
   - [ ] Только read-only пробы; под тем же `--authorized`, что и `domain`.
 - [ ] **Сборка составных учётных данных из разных файлов.** Связывать части, найденные в разных
