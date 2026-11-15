@@ -589,6 +589,18 @@
 - [ ] **Непрямые представления самого JWT-контейнера.** Связать их декодированные payload
   со всеми исходными преобразованиями и координатами, включая внешнее кодирование
   и реконструированные выражения; проверить builtin и template engine вместе.
+  - [x] **Parser-proven реконструкция JS/TS.** `--reconstruct` сохраняет builtin/template
+    children, включая пароль, который прежде терялся как JS identifier. Evidence
+    переносится из виртуальной строки на доказанное исходное выражение с цепочкой
+    преобразований и отдельными spans литералов/bindings до ML и наблюдений индекса.
+    Обычный некавыченный JS и shadowed decoders сохраняют прежние ограничения.
+    Main `140fac5` = изолированный `d4378e9`: full Go, scan race, min-Go, lint,
+    fuzz 15332 и native 46/46 (concat/array join/atob/URI, JS/TSX, ML, bundled/external,
+    occurrences, SARIF, HMAC/private index, incomplete baseline). Quality IDs сохранены;
+    фиксированный gate +17,82% времени, B/op −10,64%, allocs −5,39%, пороги прежние.
+    `wiki/evidence/1.5.0-reconstructed-jwt-20261115.json`.
+  - [ ] Остальные внешние кодирования (Base64/hex/сжатие) и нормализованные views:
+    передавать целый восстановленный JWT в payload-проход с общей цепочкой source proof.
 - [x] **Таблицы Markdown/Jira.** Вертикальные key/value-строки, Markdown-заголовки с
   выравниванием и Jira `||…||`; целые значения с разделителями и экранированным `|`.
   Имя столбца передаётся ML; исходные позиции, маскирование и HMAC-идентичность сохранены.

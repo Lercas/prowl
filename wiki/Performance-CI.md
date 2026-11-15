@@ -2,7 +2,7 @@
 
 Job `corpus-performance` в основном CI запускает `BenchmarkFindingsCorpus` из
 `internal/scan`. Он измеряет полный локальный L1 Pipeline с bundled-правилами;
-ML, OCR и live verification в этот замер не входят.
+ML, OCR, опциональная реконструкция строк и live verification в этот замер не входят.
 
 Политика закреплена в `scripts/perf/policy.json`:
 
@@ -90,3 +90,9 @@ JWT с непосредственным родителем остаются в
 фиксированный гейт в трёх парах: медиана 11,616 / 9,780 с (+18,78%), B/op −10,33%,
 allocs/op −5,36%. Модель, reference и пороги прежние; полный digest указанного
 GOROOT-корпуса сохранён. [Evidence](evidence/1.5.0-jwt-rules-20261115.json).
+
+Исправление source proof реконструированного JWT (`d4378e9`, main `140fac5`):
+фиксированные три пары также проходят — 11,416 / 9,689 с (+17,82%), B/op −10,64%,
+allocs/op −5,39%. Обычный GOROOT digest сохранён. Новая опциональная ветка проверена
+функционально на реконструированных JS/TSX; этот корпусный замер её throughput не
+оценивает. [Evidence](evidence/1.5.0-reconstructed-jwt-20261115.json).
