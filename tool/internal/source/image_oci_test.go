@@ -50,7 +50,7 @@ func TestLocalOCICompatibilityAndPartialFailure(t *testing.T) {
 
 func TestOCIMetadataCacheAndSharedBudget(t *testing.T) {
 	dir := t.TempDir()
-	h := indexHash(1)
+	h := v1.Hash{Algorithm: "sha256", Hex: imageBytesDigest([]byte("data"))}
 	blobs := filepath.Join(dir, "blobs", "sha256")
 	if err := os.MkdirAll(blobs, 0o700); err != nil {
 		t.Fatal(err)
@@ -73,6 +73,25 @@ func TestOCIMetadataCacheAndSharedBudget(t *testing.T) {
 	s = &ociStore{ctx: context.Background(), dir: dir, cache: map[v1.Hash][]byte{}, bytes: maxOCIMetadataTotalBytes - 3}
 	if _, err := s.metadata(h); !errors.Is(err, errSourceTooLarge) {
 		t.Fatalf("remaining metadata budget ignored before allocation: %v", err)
+	}
+}
+
+func TestOCIMetadataRejectsMismatchedContentAddress(t *testing.T) {
+	dir := t.TempDir()
+	h := v1.Hash{Algorithm: "sha256", Hex: imageBytesDigest([]byte("expected"))}
+	blobs := filepath.Join(dir, "blobs", "sha256")
+	if err := os.MkdirAll(blobs, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(blobs, h.Hex), []byte("PRIVATE_WRONG_BODY"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	s := &ociStore{ctx: t.Context(), dir: dir, cache: map[v1.Hash][]byte{}}
+	if _, err := s.metadata(h); err == nil || strings.Contains(err.Error(), "PRIVATE_") {
+		t.Fatal("mismatched OCI metadata was trusted or reflected")
+	}
+	if len(s.cache) != 0 {
+		t.Fatal("corrupt metadata entered the immutable cache")
 	}
 }
 

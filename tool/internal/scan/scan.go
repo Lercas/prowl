@@ -544,6 +544,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	codeValues := NewCodeValueFilter(it.Path, it.Text)
 	itemURL, _ := it.Meta["url"].(string)
 	itemInstr, _ := it.Meta["instruction"].(string) // image: the Dockerfile step that built the layer
+	if !p.options.RevealSecrets {
+		itemInstr = ""
+	} // Build instructions are raw source context, like Context.
 	verificationText := it.Text
 	if p.options.reconstruction != nil {
 		// Companion extraction observes the source, never synthetic decoded text.
@@ -602,6 +605,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(m.Type, ""), IndexLocationID: p.itemLocationFingerprint(it, line, col),
 			Instruction: itemInstr,
 			ImageEntry:  it.ImageEntry,
+			ImageScope:  it.ImageScope, ImagePath: it.ImagePath,
 			MobileEntry: it.MobileEntry,
 			Context:     p.revealMatchContext(it, m),
 		})
@@ -705,6 +709,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				IndexSource: p.indexText(it.Source, ""), IndexType: p.indexText(h.RuleID, ""), IndexLocationID: p.itemLocationFingerprint(it, line, col),
 				Instruction: itemInstr,
 				ImageEntry:  it.ImageEntry,
+				ImageScope:  it.ImageScope, ImagePath: it.ImagePath,
 				MobileEntry: it.MobileEntry,
 				Context:     p.revealContext(it, h.Start),
 			}

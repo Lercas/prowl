@@ -2,7 +2,10 @@ package source
 
 import (
 	"archive/tar"
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -88,12 +91,11 @@ func (b *imageBudget) addBytes(bodyBytes int64) bool {
 // config and EVERY layer's files as Items — a secret COPYd then rm'd survives in the earlier layer. Only
 // remote refs hit the network (SSRF-guarded); one anti-bomb budget is shared across all images.
 func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, timeout time.Duration, exclude []string) (<-chan model.Item, *FinalIndex, error) {
-	model.CoverageFrom(ctx).RegisterScope("image", arg, struct {
-		Kind     ImageInput
-		MaxBytes int64
-		Timeout  time.Duration
-		Exclude  []string
-	}{kind, maxBytes, timeout, exclude})
+	var err error
+	ctx, kind, err = imageContext(ctx, arg, kind, maxBytes, timeout, exclude)
+	if err != nil {
+		return nil, nil, err
+	}
 	imgs, cleanup, err := resolveImages(ctx, arg, kind, timeout)
 	if err != nil {
 		return nil, nil, err
@@ -118,11 +120,11 @@ func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, tim
 			label := imageLabel(arg, i, len(imgs)) // prefix so findings from distinct images never collide
 			img := img
 			resilience.Guard(
-				func() { emitImage(ctx, ch, img, label, maxBytes, exclude, budget, fi) },
+				func() { emitImage(withImageOrigin(ctx, label, i, fi), ch, img, label, maxBytes, exclude, budget, fi) },
 				// a recovered panic cut the layer walk short — mark aborted so the scan fails closed (exit 2),
 				// never certifies the image clean (mirrors the budget-abort and ctx-cancel paths).
 				func(r any) {
-					logx.Warn("recovered image-scan panic — results incomplete", "err", r)
+					logx.Warn("recovered image-scan panic — results incomplete")
 					imageSourceError(ctx, ch, fi, label, errors.New("image reader failed"))
 				},
 			)
@@ -138,7 +140,7 @@ func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, tim
 
 // resolveImages picks the acquisition path by Stat (not name.ParseReference — too permissive): "-"=stdin,
 // dir=OCI layout, file=tarball, else remote. Only the remote branch touches the network.
-func resolveImages(ctx context.Context, arg string, kind ImageInput, timeout time.Duration) ([]v1.Image, func(), error) {
+func effectiveImageKind(arg string, kind ImageInput) ImageInput {
 	if kind == ImageAuto {
 		if arg == "-" {
 			kind = ImageStdin
@@ -152,6 +154,11 @@ func resolveImages(ctx context.Context, arg string, kind ImageInput, timeout tim
 			kind = ImageRef
 		}
 	}
+	return kind
+}
+
+func resolveImages(ctx context.Context, arg string, kind ImageInput, timeout time.Duration) ([]v1.Image, func(), error) {
+	kind = effectiveImageKind(arg, kind)
 	switch kind {
 	case ImageStdin:
 		return loadStdin(ctx)
@@ -295,13 +302,15 @@ func cmp(a, b error) error {
 // a finding's layer can be told from the final flattened image. Built during the sequential walk; read
 // only after the Items channel drains. aborted/degraded force "unknown" so a partial map never downgrades.
 type FinalIndex struct {
-	mu        sync.Mutex
-	owner     map[string]finalEntry
-	nextEntry int
-	labels    map[string]bool // image labels this index has folded (a foreign label reads as unknown)
-	sweepWork map[string]int  // per-label cumulative cost of opaque/dir subtree sweeps (DoS guard)
-	aborted   bool            // the anti-bomb budget tripped mid-walk (global to the invocation)
-	degraded  map[string]bool // per-label: one image's blowup must not poison a sibling arch's attribution
+	scope        *model.ImageScope
+	layerDigests map[string]string
+	mu           sync.Mutex
+	owner        map[string]finalEntry
+	nextEntry    int
+	labels       map[string]bool // image labels this index has folded (a foreign label reads as unknown)
+	sweepWork    map[string]int  // per-label cumulative cost of opaque/dir subtree sweeps (DoS guard)
+	aborted      bool            // the anti-bomb budget tripped mid-walk (global to the invocation)
+	degraded     map[string]bool // per-label: one image's blowup must not poison a sibling arch's attribution
 }
 
 type finalEntry struct {
@@ -311,7 +320,7 @@ type finalEntry struct {
 }
 
 func newFinalIndex() *FinalIndex {
-	return &FinalIndex{owner: map[string]finalEntry{}, labels: map[string]bool{},
+	return &FinalIndex{scope: new(model.ImageScope), layerDigests: map[string]string{}, owner: map[string]finalEntry{}, labels: map[string]bool{},
 		sweepWork: map[string]int{}, degraded: map[string]bool{}}
 }
 
@@ -469,21 +478,50 @@ func buildInstructions(cfg *v1.ConfigFile, nLayers int) []string {
 
 // MarkFinalImage sets InFinalImage on each image finding by matching its Path against the flatten
 // indexes. Config findings and unknown verdicts stay nil (never downgraded).
-func MarkFinalImage(findings []model.Finding, indexes []*FinalIndex) []model.Finding {
-	for i, finding := range findings {
-		label, idx, name, ok := parseLayerPath(finding.Path)
+func MarkFinalImage(findings []model.Finding, indexes []*FinalIndex, identityKeys ...[]byte) []model.Finding {
+	var key []byte
+	if len(identityKeys) > 0 {
+		key = identityKeys[0]
+	}
+	for i := range findings {
+		finding := &findings[i] //nolint:gosec // i comes from ranging over findings.
+		physical := finding.Path
+		if finding.ImageScope != nil && finding.ImagePath != "" {
+			physical = finding.ImagePath
+		}
+		label, idx, name, ok := parseLayerPath(physical)
 		if !ok {
 			continue
 		}
-		findings[i].InFinalImage = nil
-		if model.IsIncompleteFinding(finding) {
+		finding.InFinalImage = nil
+		if model.IsIncompleteFinding(*finding) {
 			continue
 		}
 		clean := path.Clean("/" + name)
 		for _, fi := range indexes {
+			if finding.ImageScope != nil && finding.ImageScope != fi.scope {
+				continue
+			}
+			if finding.ImageScope != nil {
+				fi.mu.Lock()
+				digest := fi.layerDigests[layerDigestKey(label, idx)]
+				fi.mu.Unlock()
+				if digest != "" {
+					meta := map[string]string{}
+					for k, v := range finding.Provenance {
+						meta[k] = v
+					}
+					meta["layer_diff_id"] = digest
+					finding.Provenance = meta
+					if finding.SecretID != "" {
+						finding.OccurrenceID = ""
+						model.UpdateOccurrenceIdentity(finding, key)
+					}
+				}
+			}
 			if final, known := fi.inFinalEntry(label, idx, clean, finding.ImageEntry); known {
 				v := final
-				findings[i].InFinalImage = &v //nolint:gosec // i comes from ranging over findings.
+				finding.InFinalImage = &v
 				break
 			}
 		}
@@ -526,12 +564,14 @@ func imageLabel(arg string, i, n int) string {
 // emitImage emits the image config then walks every layer's tar in order, charging the shared anti-bomb
 // budget and folding each layer into the flatten index fi.
 func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label string, maxBytes int64, exclude []string, budget *imageBudget, fi *FinalIndex) {
-	if !emitConfig(ctx, ch, img, label, maxBytes, exclude, budget, fi) {
+	cfg, cfgErr := img.ConfigFile()
+	ctx, cfg = imageMetadataContext(ctx, ch, img, label, fi, cfg, cfgErr)
+	if !emitConfigFile(ctx, ch, cfg, cfgErr, label, maxBytes, exclude, budget, fi) {
 		return
 	}
 	layers, err := img.Layers()
 	if err != nil {
-		logx.Error("cannot read image layers", "err", err)
+		logx.Error("cannot read image layers")
 		imageSourceError(ctx, ch, fi, label, err)
 		return
 	}
@@ -541,8 +581,10 @@ func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label st
 		imageSourceError(ctx, ch, fi, label, fmt.Errorf("image exceeds the %d-layer cap", maxImageLayers))
 		return
 	}
-	cfg, _ := img.ConfigFile()
 	instructions := buildInstructions(cfg, len(layers)) // nil if history doesn't line up
+	if cfg != nil && len(cfg.RootFS.DiffIDs) != len(layers) {
+		imageSourceError(ctx, ch, fi, label+"|image:rootfs", errors.New("image diff-id count mismatch"))
+	}
 	for i, layer := range layers {
 		if ctx.Err() != nil {
 			return
@@ -551,19 +593,27 @@ func emitImage(ctx context.Context, ch chan<- model.Item, img v1.Image, label st
 		if i < len(instructions) {
 			ins = instructions[i]
 		}
-		if !emitLayer(ctx, ch, label, i, layer, maxBytes, exclude, budget, fi, ins) {
+		layerCtx := ctx
+		if cfg != nil && i < len(cfg.RootFS.DiffIDs) {
+			expected := cfg.RootFS.DiffIDs[i]
+			if expected.Algorithm == "sha256" && model.ValidImmutableMetadata("layer_diff_id", expected.Hex) {
+				layerCtx = context.WithValue(ctx, imageLayerExpectedKey{}, expected.Hex)
+			} else {
+				imageSourceError(ctx, ch, fi, label+"|image:rootfs", errors.New("unsupported layer diff-id"))
+			}
+		}
+		if !emitLayer(layerCtx, ch, label, i, layer, maxBytes, exclude, budget, fi, ins) || budget.err != nil {
 			return // ctx-cancel or budget abort; Image() logs budget.err
 		}
 	}
 }
 
-// emitConfig emits every secret-bearing config field plus each build-history instruction as its own Item
+// emitConfigFile emits every secret-bearing config field plus each build-history instruction as its own Item
 // (the prime non-filesystem secret locations). Returns false if the consumer asked to stop.
-func emitConfig(ctx context.Context, ch chan<- model.Item, img v1.Image, label string, maxBytes int64, exclude []string, budget *imageBudget, fi *FinalIndex) bool {
-	cfg, err := img.ConfigFile()
+func emitConfigFile(ctx context.Context, ch chan<- model.Item, cfg *v1.ConfigFile, err error, label string, maxBytes int64, exclude []string, budget *imageBudget, fi *FinalIndex) bool {
 	if err != nil || cfg == nil {
 		if err != nil {
-			logx.Warn("cannot read image config", "err", err)
+			logx.Warn("cannot read image config")
 		}
 		if err == nil {
 			err = errors.New("image config is missing")
@@ -583,7 +633,7 @@ func emitConfig(ctx context.Context, ch chan<- model.Item, img v1.Image, label s
 			imageSourceError(ctx, ch, fi, reportPath, budget.err)
 			return false
 		}
-		return send(ctx, ch, model.Item{Text: text, Source: "code", Path: reportPath})
+		return send(ctx, ch, model.Item{Text: text, Source: "code", Path: reportPath, Meta: map[string]any{"digest": imageBytesDigest([]byte(text)), "source_transform": "image-config-rendered"}})
 	}
 	if !emit("env", strings.Join(c.Env, "\n")) || !emit("labels", joinLabels(c.Labels)) ||
 		!emit("entrypoint", strings.Join(c.Entrypoint, " ")) || !emit("cmd", strings.Join(c.Cmd, " ")) ||
@@ -640,15 +690,29 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 	layerPath := fmt.Sprintf("%s|layer%d:", label, idx)
 	rc, err := layer.Uncompressed()
 	if err != nil {
-		logx.Warn("cannot read layer", "layer", idx, "err", err)
+		logx.Warn("cannot read layer", "layer", idx)
 		return imageSourceError(ctx, ch, fi, layerPath, err)
 	}
+	digest := sha256.New()
+	stream := io.TeeReader(rc, digest)
+	completed := false
 	defer func() {
 		if err := rc.Close(); err != nil && ctx.Err() == nil {
 			imageSourceError(ctx, ch, fi, layerPath, err)
+			return
+		}
+		if completed && ctx.Err() == nil {
+			observed := hex.EncodeToString(digest.Sum(nil))
+			if expected, ok := ctx.Value(imageLayerExpectedKey{}).(string); ok && observed != expected {
+				imageSourceError(ctx, ch, fi, layerPath, errors.New("layer diff-id mismatch"))
+			}
+			if !fi.recordLayerDigest(label, idx, observed) {
+				b.err = errors.New("image layer provenance budget exceeded")
+				imageSourceError(ctx, ch, fi, layerPath, b.err)
+			}
 		}
 	}()
-	tr := tar.NewReader(rc)
+	tr := tar.NewReader(stream)
 	for {
 		if ctx.Err() != nil {
 			return false
@@ -656,7 +720,7 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 		hdr, err := tr.Next()
 		if err == io.EOF {
 			// TAR end markers can precede a compressed stream's checksum or corrupt trailer.
-			n, err := io.Copy(io.Discard, io.LimitReader(rc, maxImageTotalBytes-b.totalBytes+1))
+			n, err := io.Copy(io.Discard, io.LimitReader(stream, maxImageTotalBytes-b.totalBytes+1))
 			if err != nil {
 				return imageSourceError(ctx, ch, fi, layerPath, err)
 			}
@@ -664,10 +728,11 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 				imageSourceError(ctx, ch, fi, layerPath, b.err)
 				return false
 			}
+			completed = true
 			return true
 		}
 		if err != nil {
-			logx.Warn("corrupt layer tar", "layer", idx, "err", err)
+			logx.Warn("corrupt layer tar", "layer", idx)
 			return imageSourceError(ctx, ch, fi, layerPath, err)
 		}
 		// Charge every header against the budget BEFORE per-entry filtering: a bomb of millions of empty
@@ -721,9 +786,13 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 			Source:     "code",
 			Path:       reportPath,
 			ImageEntry: entryID,
+			Meta:       map[string]any{"digest": imageBytesDigest(content), "source_transform": "image-file"},
+		}
+		if !bytes.Equal(content, text) {
+			it.Meta["source_transform"] = "image-text-decoded"
 		}
 		if instruction != "" {
-			it.Meta = map[string]any{"instruction": instruction}
+			it.Meta["instruction"] = instruction
 		}
 		if !send(ctx, ch, it) {
 			return false
@@ -733,5 +802,24 @@ func emitLayer(ctx context.Context, ch chan<- model.Item, label string, idx int,
 
 func imageSourceError(ctx context.Context, ch chan<- model.Item, fi *FinalIndex, reportPath string, err error) bool {
 	fi.markAborted()
-	return emitSourceError(ctx, ch, reportPath, err)
+	model.Note(ctx, "image_source_error", reportPath, true)
+	return emitSourceError(ctx, ch, reportPath, errors.New("image source content could not be read"))
+}
+
+func layerDigestKey(label string, idx int) string { return label + "\x00" + strconv.Itoa(idx) }
+
+const finalIndexMaxLayerDigests = 10000
+
+func (fi *FinalIndex) recordLayerDigest(label string, idx int, digest string) bool {
+	fi.mu.Lock()
+	defer fi.mu.Unlock()
+	key := layerDigestKey(label, idx)
+	if fi.layerDigests == nil {
+		fi.layerDigests = map[string]string{}
+	}
+	if _, ok := fi.layerDigests[key]; !ok && len(fi.layerDigests) >= finalIndexMaxLayerDigests {
+		return false
+	}
+	fi.layerDigests[key] = digest
+	return true
 }

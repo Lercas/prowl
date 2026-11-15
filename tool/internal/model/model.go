@@ -14,6 +14,9 @@ type AgentProvenance struct {
 	Kind    string `json:"kind"`
 }
 
+// ImageScope separates in-memory acquisitions independently of their display labels.
+type ImageScope struct{ _ byte }
+
 // Item is a unit of content from a Source (a file, a Jira ticket, a Confluence page).
 type Item struct {
 	Agent  *AgentProvenance
@@ -31,6 +34,8 @@ type Item struct {
 	Error error
 	// ImageEntry identifies the physical TAR entry when a layer repeats a file path.
 	ImageEntry int
+	ImageScope *ImageScope `json:"-"`
+	ImagePath  string      `json:"-"`
 }
 
 // IsIncompleteFinding identifies scan diagnostics that filtering must not hide as accepted secrets.
@@ -93,8 +98,10 @@ type Finding struct {
 	// if only in a historical/overwritten/whiteout-deleted layer, nil = unknown or not an image scan.
 	InFinalImage *bool `json:"in_final_image,omitempty"`
 	// ImageEntry is internal provenance; it is deliberately absent from report formats.
-	ImageEntry  int `json:"-"`
-	MobileEntry int `json:"-"`
+	ImageEntry  int         `json:"-"`
+	ImageScope  *ImageScope `json:"-"`
+	ImagePath   string      `json:"-"`
+	MobileEntry int         `json:"-"`
 	// SourceIdentity is a keyed digest, never the private producer locator itself.
 	SourceIdentity string `json:"-"`
 	// Instruction (image scans only): the Dockerfile build step (RUN/COPY/…) that introduced the layer.

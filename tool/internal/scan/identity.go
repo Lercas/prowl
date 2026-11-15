@@ -56,6 +56,9 @@ func (p *Pipeline) itemLocationFingerprint(it model.Item, line, col int) string 
 	if it.MobileEntry > 0 {
 		path += fmt.Sprintf("\x00mobile-entry\x00%d", it.MobileEntry)
 	}
+	if it.ImageEntry > 0 {
+		path += fmt.Sprintf("\x00image-entry\x00%d", it.ImageEntry)
+	}
 	return p.locationFingerprint(it.Source, path, line, col)
 }
 
@@ -103,7 +106,7 @@ func (p *Pipeline) sanitizeIndexMetadata(findings []model.Finding, values []stri
 		if strings.Contains(text, "://") {
 			if u, err := url.Parse(text); err == nil {
 				u.User, u.RawQuery = nil, ""
-				if u.Scheme == "mobile+file" || u.Scheme == "mobile+payload" || u.Scheme == "mobile+http" || u.Scheme == "mobile+https" || u.Scheme == "web+http" || u.Scheme == "web+https" {
+				if u.Scheme == "mobile+file" || u.Scheme == "mobile+payload" || u.Scheme == "mobile+http" || u.Scheme == "mobile+https" || u.Scheme == "web+http" || u.Scheme == "web+https" || u.Scheme == "image+file" || u.Scheme == "image+oci" || u.Scheme == "image+ref" || u.Scheme == "image+stdin" {
 					// Synthetic fragments locate source-declared views, not request data.
 					u.Fragment, u.RawFragment = replace(u.Fragment), ""
 				} else {

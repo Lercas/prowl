@@ -76,6 +76,7 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	}
 	attachBucketOrigin(ctx, &it)
 	attachMobileOrigin(ctx, &it)
+	attachImageOrigin(ctx, &it)
 	select {
 	case ch <- it:
 		return true

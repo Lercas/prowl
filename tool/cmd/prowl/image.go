@@ -67,6 +67,11 @@ func cmdImage(args []string) int {
 		logx.Error("--image-input stdin reads one image from '-'; pass a single argument", "args", len(rest))
 		return 2
 	}
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	if prepared.indexError != nil {
+		logx.Error("index setup failed", "err", prepared.indexError)
+		return 2
+	}
 	var (
 		finals  []*source.FinalIndex
 		finalMu sync.Mutex
@@ -79,18 +84,20 @@ func cmdImage(args []string) int {
 			if ctx.Err() != nil {
 				return
 			}
-			logx.Info("scanning image", "arg", arg)
+			logx.Info("scanning image", "arg", source.ImageLocator(arg, kind))
 			// pull just before draining so a per-attempt deadline can't expire while earlier images scan
 			loaded := startStage(c, "loading image")
 			items, fi, err := source.Image(ctx, arg, kind, c.maxSize, c.timeout, c.exclude)
 			if err != nil {
 				loaded()
-				logx.Error("image load failed", "arg", arg, "err", err)
+				logx.Error("image load failed", "arg", source.ImageLocator(arg, kind))
 				rc.Store(2)
-				select {
-				case merged <- model.Item{Source: "code", Path: arg, Error: err}:
-				case <-ctx.Done():
-					return
+				for it := range source.ImageFailure(ctx, arg, kind, c.maxSize, c.timeout, c.exclude) {
+					select {
+					case merged <- it:
+					case <-ctx.Done():
+						return
+					}
 				}
 				continue
 			}
@@ -109,13 +116,13 @@ func cmdImage(args []string) int {
 			loaded()
 		}
 	}()
-	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).WithFinalizer(func(fs []model.Finding) []model.Finding {
+	code := prepared.WithFinalizer(func(fs []model.Finding) []model.Finding {
 		if ctx.Err() != nil { // cancelled: the flatten map is partial — don't assert in_final verdicts
 			return fs
 		}
 		finalMu.Lock()
 		defer finalMu.Unlock()
-		return source.MarkFinalImage(fs, finals)
+		return source.MarkFinalImage(fs, finals, c.identityKey)
 	}).Run(ctx, merged)
 	// an anti-bomb / cancel abort means extraction stopped early — fail closed, never certify clean
 	finalMu.Lock()

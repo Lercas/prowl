@@ -30,7 +30,7 @@ func WithoutProvenance(ctx context.Context) context.Context {
 
 // Only immutable content/revision identifiers can justify shared-metadata links.
 func ValidImmutableMetadata(key, value string) bool {
-	if key == "digest" || key == "layer_digest" || key == "container_digest" {
+	if key == "digest" || key == "layer_digest" || key == "container_digest" || key == "image_digest" || key == "config_digest" || key == "layer_diff_id" {
 		value = strings.TrimPrefix(value, "sha256:")
 		if len(value) != 64 {
 			return false

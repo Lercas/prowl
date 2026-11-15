@@ -3,6 +3,8 @@ package source
 import (
 	"bytes"
 	"context"
+	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -64,6 +66,19 @@ func (s *ociStore) metadata(h v1.Hash) ([]byte, error) {
 	raw, err := s.readMetadata(func() (*os.File, error) { return s.openBlob(h) })
 	if err != nil {
 		return nil, err
+	}
+	observed := ""
+	switch h.Algorithm {
+	case "sha256":
+		observed = imageBytesDigest(raw)
+	case "sha512":
+		sum := sha512.Sum512(raw)
+		observed = hex.EncodeToString(sum[:])
+	default:
+		return nil, errors.New("unsupported OCI metadata digest algorithm")
+	}
+	if observed != h.Hex {
+		return nil, errors.New("OCI metadata digest mismatch")
 	}
 	s.cache[h] = raw
 	return raw, nil
