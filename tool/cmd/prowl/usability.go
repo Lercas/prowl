@@ -14,6 +14,7 @@ import (
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/post"
+	"github.com/Lercas/prowl/tool/internal/rules"
 )
 
 // warnMissingPaths names a mistyped path, with the nearest existing name, before any work starts.
@@ -218,4 +219,16 @@ func warnDisableTypos(disable string, known []string) {
 			fmt.Fprintf(os.Stderr, "prowl: --disable %s matches no detector; did you mean '%s'?\n", id, near)
 		}
 	}
+}
+
+// noDetectors explains a selection that leaves nothing to detect with. Such a scan would inspect
+// every file, find nothing by construction and exit 0, which reads as a clean tree.
+func noDetectors(c commonFlags, taxonomyTypes int, eng *rules.Engine) string {
+	if taxonomyTypes > 0 || eng != nil && eng.Len() > 0 {
+		return ""
+	}
+	if c.rulesOnly {
+		return "no detectors are active: --rules-only disables the built-in ones, so pass your own with --rules FILE or --rules-dir DIR"
+	}
+	return "no detectors are active: the configuration disables every built-in detector and no rule template is selected"
 }

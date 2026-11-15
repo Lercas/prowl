@@ -289,6 +289,13 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("verify setup failed", "err", err)
 		return 2
 	}
+	if problem := noDetectors(c, len(tax.Types), eng); problem != "" {
+		fmt.Fprintln(os.Stderr, "prowl:", problem)
+		return 2
+	}
+	if c.tags != "" && eng != nil && eng.Len() == 0 {
+		logx.Warn("--tags matched no rule template; only built-in detectors run", "tags", c.tags)
+	}
 	if c.disable != "" && !c.silence {
 		known := make([]string, 0, len(tax.Types))
 		for _, secretType := range tax.Types {

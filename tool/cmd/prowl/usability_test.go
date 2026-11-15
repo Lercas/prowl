@@ -382,3 +382,23 @@ func TestDisableTypoIsReported(t *testing.T) {
 		t.Fatalf("valid --disable ids were reported: %q", got)
 	}
 }
+
+func TestScanWithoutDetectorsFailsClosed(t *testing.T) {
+	if noDetectors(commonFlags{}, 3, nil) != "" || noDetectors(commonFlags{rulesOnly: true}, 0, nil) == "" {
+		t.Fatal("detector presence was misjudged")
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "a.env"), []byte("password = \"Tr0ub4dor&3xKq9\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// --rules-only with no rules has nothing to detect with: that is an error, not a clean tree.
+	if code := runCLI([]string{"scan", dir, "--rules-only", "--silence"}); code != 2 {
+		t.Fatalf("a scan with zero detectors exited %d", code)
+	}
+}
+
+func TestPlural(t *testing.T) {
+	if plural(1, "category", "categories") != "1 category" || plural(4, "template", "templates") != "4 templates" {
+		t.Fatal("plural forms changed")
+	}
+}

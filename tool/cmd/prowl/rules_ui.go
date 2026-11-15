@@ -140,7 +140,7 @@ func renderRulesList(eng *rules.Engine) {
 				ansi(color, "\x1b[2m", strings.Join(t.TagList(), ", ")))
 		}
 	}
-	fmt.Fprintf(os.Stderr, "\n%d templates in %d categories\n", eng.Len(), len(cats))
+	fmt.Fprintf(os.Stderr, "\n%s in %s\n", plural(eng.Len(), "template", "templates"), plural(len(cats), "category", "categories"))
 }
 
 // renderRulesStats prints category/severity breakdowns and the top tags (the rest summarised).
@@ -602,6 +602,13 @@ func renderRulesSearch(term string, eng *rules.Engine) int {
 				maxID, r.id, src, tags)
 		}
 	}
-	fmt.Fprintf(os.Stderr, "\n%d rule(s) match %q in %d categories\n", total, term, len(cats))
+	fmt.Fprintf(os.Stderr, "\n%s matching %q in %s\n", plural(total, "rule", "rules"), term, plural(len(cats), "category", "categories"))
 	return 0
+}
+
+func plural(n int, one, many string) string {
+	if n == 1 {
+		return "1 " + one
+	}
+	return fmt.Sprintf("%d %s", n, many)
 }

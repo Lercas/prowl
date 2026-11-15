@@ -94,7 +94,12 @@ func writeReportFile(path string, findings []model.Finding, format string, cover
 func summarize(findings []model.Finding, dur time.Duration, interactive bool) {
 	bySev := map[string]int{}
 	live, rejected, attempted := 0, 0, 0
+	incomplete := 0
 	for _, f := range findings {
+		if model.IsIncompleteFinding(f) {
+			incomplete++ // a diagnostic about coverage, not a secret
+			continue
+		}
 		bySev[f.Severity]++
 		if f.Verified != nil {
 			attempted++
@@ -106,8 +111,11 @@ func summarize(findings []model.Finding, dur time.Duration, interactive bool) {
 		}
 	}
 	args := []any{
-		"findings", len(findings), "critical", bySev["critical"], "high", bySev["high"],
+		"findings", len(findings) - incomplete, "critical", bySev["critical"], "high", bySev["high"],
 		"medium", bySev["medium"], "low", bySev["low"], "took", dur.Round(time.Millisecond),
+	}
+	if incomplete > 0 {
+		args = append(args, "incomplete_inputs", incomplete)
 	}
 	if attempted > 0 {
 		args = append(args, "verified_live", live, "rejected", rejected)
@@ -365,24 +373,39 @@ func applyReportFilters(c commonFlags, fs []model.Finding) []model.Finding {
 		return fs
 	}
 	out := fs[:0]
+	var lowConfidence, lowSeverity, off int
 	for _, f := range fs {
 		if model.IsIncompleteFinding(f) {
 			out = append(out, f)
 			continue
 		}
 		if c.minConfidence > 0 && f.Confidence < c.minConfidence {
+			lowConfidence++
 			continue
 		}
 		if minSev >= 0 && model.SeverityOrder[f.Severity] < minSev {
+			lowSeverity++
 			continue
 		}
 		if disabled[typeKey(f.Type)] {
+			off++
 			continue
 		}
 		out = append(out, f)
 	}
-	if len(out) < len(fs) {
+	if hidden := lowConfidence + lowSeverity + off; hidden > 0 {
 		c.coverage.Filtered()
+		// Without this line a filtered-out result reads as "no secrets found".
+		args := []any{"count", hidden}
+		for _, reason := range []struct {
+			flag  string
+			count int
+		}{{"min_severity", lowSeverity}, {"min_confidence", lowConfidence}, {"disable", off}} {
+			if reason.count > 0 {
+				args = append(args, reason.flag, reason.count)
+			}
+		}
+		logx.Info("report filters hid findings", args...)
 	}
 	return out
 }
