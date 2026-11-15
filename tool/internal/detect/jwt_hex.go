@@ -15,17 +15,27 @@ func (d *Detector) jwtHexCandidate(ctx context.Context, text string, start, end 
 	budget.hexAttempts++
 	budget.hexWork += end - start
 	decoded, err := hex.DecodeString(text[start:end])
-	if err != nil || !printableText(decoded) {
+	if err != nil {
+		return nil, false
+	}
+	transform := compressedTransform(decoded)
+	if transform == "" && !printableText(decoded) {
 		return nil, false
 	}
 	if opts.jwtHexDepth >= maxDecodeDepth {
 		return nil, true
 	}
 	origin := &jwtViewOrigin{parent: opts.jwtOrigin, start: start, end: end, hex: true}
-	inner := d.ScanWithStatus(ctx, string(decoded), ScanOptions{
+	local := ScanOptions{
 		jwtDepth: opts.jwtDepth, jwtBudget: budget, jwtOrigin: origin,
-		jwtHexDepth: opts.jwtHexDepth + 1, ObserveJWTPayload: opts.ObserveJWTPayload,
-	})
+		jwtHexDepth: opts.jwtHexDepth + 1, jwtInflateDepth: opts.jwtInflateDepth, ObserveJWTPayload: opts.ObserveJWTPayload,
+	}
+	var inner ScanResult
+	if transform != "" {
+		inner.Matches, inner.Base64Limited = d.jwtInflatedFindings(ctx, decoded, local)
+	} else {
+		inner = d.ScanWithStatus(ctx, string(decoded), local)
+	}
 	var out []Match
 	for _, m := range inner.Matches {
 		if !m.JWTPayload {

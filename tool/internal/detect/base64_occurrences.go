@@ -151,6 +151,41 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				continue
 			}
 			dec = dec[:n]
+			if compressedTransform(dec) != "" {
+				if depth >= maxBase64Depth {
+					limited = true
+					continue
+				}
+				frame := &base64Frame{parent: parent, start: start, end: end}
+				local := opts
+				local.jwtOrigin = jwtBase64Origin(frame, opts.jwtOrigin)
+				children, capped := d.jwtInflatedFindings(ctx, dec, local)
+				limited = limited || capped
+				left, right := parent.sourceSpan(start, end)
+				for _, m := range children {
+					if len(out)+len(jwtChildren) >= maxScanMatches {
+						limited, exhausted = true, true
+						return
+					}
+					if len(chain)+1+m.base64ProofDepth() > maxBase64Depth {
+						limited = true
+						continue
+					}
+					m.Start, m.End = frame.sourceSpan(m.Start, m.End)
+					steps := make([]DecodeStep, 0, len(chain)+1+len(m.DecodeSteps))
+					for _, span := range chain {
+						steps = append(steps, DecodeStep{span.Start, span.End, "base64-decode"})
+					}
+					steps = append(steps, DecodeStep{left, right, "base64-decode"})
+					for _, step := range m.DecodeSteps {
+						step.Start, step.End = frame.sourceSpan(step.Start, step.End)
+						steps = append(steps, step)
+					}
+					m.DecodeSteps = normalizeDecodeSteps(steps)
+					jwtChildren = append(jwtChildren, m)
+				}
+				continue
+			}
 			if !printableText(dec) {
 				continue
 			}

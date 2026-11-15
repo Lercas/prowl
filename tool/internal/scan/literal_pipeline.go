@@ -89,7 +89,7 @@ func (p *Pipeline) mapLiteralFindings(fs []model.Finding, it model.Item, doc *li
 		}
 		for j := range f.Evidence {
 			e := &f.Evidence[j]
-			if strings.HasPrefix(e.Transform, "base64-decode") || e.Transform == "hex-decode" || e.Transform == "literal-semantic-span" {
+			if strings.HasPrefix(e.Transform, "base64-decode") || e.Transform == "gzip-inflate" || e.Transform == "zlib-inflate" || e.Transform == "hex-decode" || e.Transform == "literal-semantic-span" {
 				if original := doc.locate(e.Start, e.End); original != nil {
 					e.Start, e.End = doc.sourceSpan(original, e.Start, e.End)
 					e.Line, e.Col = doc.lines.cols(e.Start)

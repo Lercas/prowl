@@ -221,6 +221,7 @@ type ScanOptions struct {
 	jwtBudget         *jwtPayloadBudget
 	jwtOrigin         *jwtViewOrigin
 	jwtHexDepth       int
+	jwtInflateDepth   int
 }
 
 type ScanResult struct {

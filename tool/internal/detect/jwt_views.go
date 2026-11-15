@@ -66,6 +66,7 @@ type jwtViewOrigin struct {
 	start, end int
 	base64     bool
 	hex        bool
+	inflate    string
 	bytes      []Base64Span // decoded scalar bytes -> original JSON spellings
 }
 
@@ -90,6 +91,12 @@ func (o *jwtViewOrigin) sourceSpan(start, end int) (int, int) {
 	if o == nil {
 		return start, end
 	}
+	left, right := o.sourceInterval(start, end)
+	return o.parent.sourceSpan(left, right)
+}
+
+// sourceInterval maps one layer; compressed output names its entire stream.
+func (o *jwtViewOrigin) sourceInterval(start, end int) (int, int) {
 	left, right := o.start, o.end
 	if o.base64 {
 		left = o.start + start/3*4
@@ -99,7 +106,7 @@ func (o *jwtViewOrigin) sourceSpan(start, end int) (int, int) {
 	} else if start >= 0 && end > start && end <= len(o.bytes) {
 		left, right = o.bytes[start].Start, o.bytes[end-1].End
 	}
-	return o.parent.sourceSpan(left, right)
+	return left, right
 }
 
 func (v JWTPayloadView) DecodeSteps() []DecodeStep {
@@ -110,6 +117,8 @@ func (v JWTPayloadView) DecodeSteps() []DecodeStep {
 			transform = "base64-decode"
 		} else if o.hex {
 			transform = "hex-decode"
+		} else if o.inflate != "" {
+			transform = o.inflate
 		}
 		if transform != "" {
 			left, right := o.parent.sourceSpan(o.start, o.end)
@@ -149,4 +158,19 @@ func jwtScalarOrigin(parent *jwtViewOrigin, text string, value jwtString) *jwtVi
 		}
 	}
 	return o
+}
+
+// Coarse stream proofs must not collapse distinct logical container positions
+// in the physical-container cache. At most three inflate boundaries can exist.
+func (o *jwtViewOrigin) compressedPositions(start, end int) [maxDecodeDepth]Base64Span {
+	var positions [maxDecodeDepth]Base64Span
+	count := 0
+	for ; o != nil; o = o.parent {
+		if o.inflate != "" && count < len(positions) {
+			positions[count] = Base64Span{start, end}
+			count++
+		}
+		start, end = o.sourceInterval(start, end)
+	}
+	return positions
 }

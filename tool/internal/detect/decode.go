@@ -68,6 +68,10 @@ func inflate(b []byte) ([]byte, bool) {
 }
 
 func inflateStatus(b []byte) ([]byte, bool, bool) {
+	return inflateStatusLimit(b, maxInflateBytes)
+}
+
+func inflateStatusLimit(b []byte, limit int) ([]byte, bool, bool) {
 	if len(b) < 6 {
 		return nil, false, false
 	}
@@ -88,11 +92,11 @@ func inflateStatus(b []byte) ([]byte, bool, bool) {
 	default:
 		return nil, false, false
 	}
-	out, err := io.ReadAll(io.LimitReader(r, maxInflateBytes+1))
+	out, err := io.ReadAll(io.LimitReader(r, int64(limit)+1))
 	closeErr := r.Close()
 	// A plausible header followed only by invalid data is not evidence of a
 	// compressed document. Random provider tokens can have those bytes too.
-	oversized := len(out) > maxInflateBytes
+	oversized := len(out) > limit
 	// Even a short or low-entropy prefix can come from a real damaged stream.
 	// Entropy and printability must not turn an integrity failure into a clean scan.
 	// A validated empty deflate stream with a bad checksum is also evidence of
@@ -100,8 +104,8 @@ func inflateStatus(b []byte) ([]byte, bool, bool) {
 	checksumFailure := errors.Is(err, gzip.ErrChecksum) || errors.Is(err, zlib.ErrChecksum)
 	damaged := (len(out) > 0 || checksumFailure) && (err != nil || closeErr != nil)
 	limited := oversized || damaged
-	if len(out) > maxInflateBytes {
-		out = out[:maxInflateBytes]
+	if len(out) > limit {
+		out = out[:limit]
 	}
 	return out, true, limited
 }

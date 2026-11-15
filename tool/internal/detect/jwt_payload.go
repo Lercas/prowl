@@ -17,14 +17,16 @@ const maxJWTPayloadWork = 1 << 20
 const maxJWTPayloadDepth = 3
 
 type jwtContainerIdentity struct {
-	start, end int
-	content    string // bounded header + payload, never the potentially long signature
+	start, end          int
+	compressedPositions [maxDecodeDepth]Base64Span
+	content             string // bounded header + payload, never the potentially long signature
 }
 
 type jwtPayloadBudget struct {
-	count, bytes, escaped int
-	hexWork, hexAttempts  int
-	seen                  map[jwtContainerIdentity]bool
+	count, bytes, escaped         int
+	hexWork, hexAttempts          int
+	inflateBytes, inflateAttempts int
+	seen                          map[jwtContainerIdentity]bool
 }
 
 // A JWT is a container as well as a finding. Inspect its claims after the ordinary
@@ -74,7 +76,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 		}
 		budget := opts.jwtBudget
 		left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
-		id := jwtContainerIdentity{left, right, container.Value[:len(parts[0])+1+len(parts[1])]}
+		id := jwtContainerIdentity{start: left, end: right, compressedPositions: opts.jwtOrigin.compressedPositions(container.Start, container.End), content: container.Value[:len(parts[0])+1+len(parts[1])]}
 		if budget.seen[id] {
 			continue
 		}
@@ -111,7 +113,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			left, right := opts.jwtOrigin.sourceSpan(container.Start, container.End)
 			opts.ObserveJWTPayload(JWTPayloadView{Text: decoded, origin: origin, container: Base64Span{left, right}, token: container.Value})
 		}
-		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin, jwtHexDepth: opts.jwtHexDepth}
+		childOptions := ScanOptions{jwtDepth: opts.jwtDepth + 1, jwtBudget: budget, ObserveJWTPayload: opts.ObserveJWTPayload, jwtOrigin: origin, jwtHexDepth: opts.jwtHexDepth, jwtInflateDepth: opts.jwtInflateDepth}
 		inner := d.ScanWithStatus(ctx, decoded, childOptions)
 		inner = d.jwtEscapedFindings(ctx, decoded, inner, childOptions)
 		limited = limited || inner.CandidateLimited || inner.Base64Limited
