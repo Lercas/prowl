@@ -61,6 +61,7 @@ type Match struct {
 	Confidence       float64
 	ChecksumValid    bool
 	LiteralContext   bool // source span is a decoded constant expression for ML context
+	JWTPayload       bool // decoded claims cannot borrow companion bindings from the enclosing token
 	Category         string
 	Stage            string
 	// needsStrong marks a decode candidate with no secret-like name on its line: only a precise typed
@@ -211,6 +212,8 @@ type ScanOptions struct {
 	PasswordScalars      map[int]PasswordScalar
 	YAML                 bool
 	PublicKeys           bool // Explicit public-audit subjects, never ordinary secret detection.
+	jwtDepth             int
+	jwtBudget            *jwtPayloadBudget
 }
 
 type ScanResult struct {
@@ -290,12 +293,13 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 		candidateCapped = candidateCapped || limited
 	}
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
-	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited
+	kept, jwtLimited := d.jwtPayloadFindings(ctx, text, kept, opts)
+	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited || jwtLimited
 	if truncated && !collectCapped {
 		// surface that a secret past the global cap was dropped (collect() warns when IT hit the cap)
 		logx.Warn("detect: scan limits reached — some encoded candidates or matches may not have been inspected")
 	}
-	return ScanResult{Matches: kept, CandidateLimited: truncated, Base64Limited: base64Capped || decodeCandidateCapped || decodedCapped || occurrenceLimited || authCapped}
+	return ScanResult{Matches: kept, CandidateLimited: truncated, Base64Limited: base64Capped || decodeCandidateCapped || decodedCapped || occurrenceLimited || authCapped || jwtLimited}
 }
 
 // acAndStructure fuses the Aho-Corasick keyword pass and the structural byte-scan into one loop.

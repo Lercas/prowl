@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/publicaudit"
 	"github.com/Lercas/prowl/tool/internal/verify"
@@ -13,9 +14,15 @@ import (
 type verificationCandidate struct {
 	typ, value string
 	start, end int
+	jwtPayload bool
 }
 
 func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
+	if c.jwtPayload && set != nil {
+		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, detect.IsExampleOrPlaceholder(c.value)))
+		noteVerificationFailure(ctx, path, f.Verification)
+		return
+	}
 	f.Verified, f.Rationale, f.Verification = applyLiteralVerify(ctx, set, doc, c.typ, c.value, c.start, c.end, original)
 	noteVerificationFailure(ctx, path, f.Verification)
 }
@@ -44,6 +51,10 @@ func verificationMetadata(r verify.Result) *model.Verification {
 func (c verificationCandidate) audit(ctx context.Context, auditor PublicAuditor, doc *literalDocument, bindings map[string]string, path string, f *model.Finding) {
 	if !publicaudit.Supports(c.typ) {
 		return
+	}
+	if c.jwtPayload {
+		// Decoding claims does not establish a configuration/companion relationship.
+		doc, bindings = nil, nil
 	}
 	if doc != nil {
 		bindings = nil

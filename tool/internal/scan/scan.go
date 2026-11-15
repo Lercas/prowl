@@ -547,7 +547,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 
 			break
 		}
-		if literalDoc != nil && !literalDoc.accepts(m.Type, m.Start, m.End) {
+		if literalDoc != nil && !literalDoc.accepts(m.Type, m.Start, m.End) && !(m.JWTPayload && literalDoc.locate(m.Start, m.End) != nil) {
 			continue
 		}
 		if gitRecord != nil {
@@ -608,7 +608,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
 		if vset != nil || auditor != nil {
-			pending = append(pending, verificationCandidate{m.Type, m.Value, m.Start, m.End})
+			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
@@ -713,7 +713,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				}
 				out[idx] = f
 				if vset != nil || auditor != nil {
-					pending[idx] = verificationCandidate{h.RuleID, h.Value, h.Start, h.End}
+					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End}
 				}
 				if ml != nil {
 					reqs[idx] = recordFor(h.Value, it, h.Start)
@@ -726,7 +726,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			dedup[key] = len(out)
 			out = append(out, f)
 			if vset != nil || auditor != nil {
-				pending = append(pending, verificationCandidate{h.RuleID, h.Value, h.Start, h.End})
+				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End})
 			}
 			if ml != nil {
 				record := recordFor(h.Value, it, h.Start)
@@ -836,6 +836,7 @@ func recordForMatch(m detect.Match, it model.Item) mlscore.Record {
 	if m.DecodedText != "" {
 		it.Text = m.DecodedText
 		m.Start = m.DecodedStart
+		m.End = m.DecodedStart + len(m.Value)
 	}
 	record := recordFor(m.Value, it, m.Start)
 	if m.ContextName != "" {
