@@ -101,6 +101,8 @@ jobs:
         run: |
           python3 scripts/check_bucket_contract.py "$RUNNER_TEMP/prowl-acquisition"
           python3 scripts/check_config_disable.py "$RUNNER_TEMP/prowl-acquisition"
+      - name: cross-file credentials in local, staged and since inputs
+        run: python3 scripts/check_cross_file_credentials.py "$RUNNER_TEMP/prowl-acquisition"
       - name: Jira and Confluence acquisition reports
         run: python3 scripts/check_atlassian_contract.py "$RUNNER_TEMP/prowl-acquisition"
       - name: terminal progress, stream separation and cancellation

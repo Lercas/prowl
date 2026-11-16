@@ -53,6 +53,18 @@ func GitWorktreeFilesIn(ctx context.Context, dir string, paths, exclude []string
 			send(ctx, ch, model.Item{Source: "code", Error: err})
 			return
 		}
+		if components, _ := ctx.Value(credentialModeKey{}).(bool); components {
+			resilience.Guard(func() {
+				if err := readCredentialWorktree(ctx, ch, root, paths, exclude, maxBytes); err != nil {
+					model.Note(ctx, "cross_file_worktree_read_failed", "", true)
+					send(ctx, ch, model.Item{Source: "code", Error: fmt.Errorf("cross-file working-tree intake failed")})
+				}
+			}, func(any) {
+				model.Note(ctx, "cross_file_worktree_read_failed", "", true)
+				send(ctx, ch, model.Item{Source: "code", Error: fmt.Errorf("cross-file working-tree reader failed")})
+			})
+			return
+		}
 		for _, path := range paths {
 			if !emitListedTarget(ctx, ch, filepath.Join(root, path), path, maxBytes, exclude) {
 				return

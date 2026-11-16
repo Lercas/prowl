@@ -107,6 +107,99 @@ def main():
 
     try:
         for extension in ('json', 'yaml', 'toml', 'env'):
+            source = staged_fixture('since-' + extension, extension)
+            account = source / ('account.' + extension)
+            working = account.read_text()
+            account.write_text(working.replace('tenant_a', 'tenant_b'))
+            git(source, 'add', '--all')
+            account.write_text(working)
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--since=HEAD'], fmt=fmt, ml=ml, cwd=source)
+                    fs, complete = report(p, fmt)
+                    label = f'since-{extension}-{fmt}-ml{ml}'
+                    check(label + '-complete', p.returncode == 0 and complete and len(fs) == 1)
+                    check(label + '-working-not-index', len(Handler.calls) == before + 1 and Handler.calls[-1] and fs[0]['verification']['status'] == 'verified')
+                    check(label + '-private', KEY.encode() not in p.stdout and b'tenant_a' not in p.stdout)
+            index = root / ('since-index-' + extension)
+            p = run([], extra=['--since=HEAD', '--index', index, '--scope', 'owned-since'], cwd=source)
+            fs, complete = report(p, 'json')
+            indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+            places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
+            check('since-index-' + extension, p.returncode == 0 and complete and indexed.returncode == 0 and set(fs[0]['verification']['components']['primary']) <= places)
+            with sqlite3.connect(index / 'index.sqlite') as database:
+                raw = '\n'.join(database.iterdump()).encode()
+            check('since-index-private-' + extension, all(value.encode() not in raw for value in (KEY, 'tenant_a', 'accessKeyId')))
+
+        for mode in ('unchanged-companion', 'symlink', 'outside-alias', 'archive', 'unknown', 'oversize'):
+            source = staged_fixture('since-negative-' + mode)
+            if mode == 'unchanged-companion':
+                git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned committed configuration')
+                with (source / 'key.json').open('a') as stream:
+                    stream.write('\n')
+            elif mode == 'symlink':
+                (source / 'account.json').unlink()
+                (source / 'target.env').write_text('account=tenant_a\n')
+                (source / 'account.json').symlink_to('target.env')
+            elif mode == 'outside-alias':
+                (source / 'account.json').unlink()
+                target = root / 'outside-since-account.env'
+                target.write_text('account=tenant_a\n')
+                (source / 'account.json').symlink_to(target)
+            elif mode == 'oversize':
+                (source / 'account.json').write_text(' ' * 2048 + '{"account":"tenant_a"}')
+            elif mode == 'archive':
+                with zipfile.ZipFile(source / 'bundle.zip', 'w') as archive:
+                    archive.writestr('account.json', (source / 'account.json').read_bytes())
+                (source / 'account.json').unlink()
+                git(source, 'add', '--', 'bundle.zip')
+            else:
+                (source / 'account.json').write_text('{"account":null}')
+            baseline = root / ('since-' + mode + '.baseline')
+            baseline.write_bytes(b'owned since baseline')
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--since=HEAD', '--verified-only', '--write-baseline', baseline, *(['--max-size=64'] if mode == 'oversize' else [])], fmt=fmt, ml=ml, cwd=source)
+                    fs, complete = report(p, fmt)
+                    label = f'since-negative-{mode}-{fmt}-ml{ml}'
+                    check(label + '-incomplete', p.returncode == 2 and not complete and not fs)
+                    check(label + '-no-provider', len(Handler.calls) == before)
+                    check(label + '-baseline', baseline.read_bytes() == b'owned since baseline')
+
+        source = staged_fixture('since-empty-and-subdirectory')
+        git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned initial configuration')
+        child = source / 'child'
+        child.mkdir()
+        for fmt in ('json', 'sarif'):
+            before = len(Handler.calls)
+            p = run([], extra=['--since=HEAD'], fmt=fmt, cwd=child)
+            fs, complete = report(p, fmt)
+            check('since-empty-' + fmt, p.returncode == 0 and complete and not fs and len(Handler.calls) == before)
+        with (source / 'key.json').open('a') as stream:
+            stream.write('\n')
+        with (source / 'account.json').open('a') as stream:
+            stream.write('\n')
+        for fmt in ('json', 'sarif'):
+            before = len(Handler.calls)
+            p = run([], extra=['--since=HEAD'], fmt=fmt, cwd=child)
+            fs, complete = report(p, fmt)
+            check('since-subdirectory-' + fmt, p.returncode == 0 and complete and len(fs) == 1 and fs[0]['verification']['status'] == 'verified' and len(Handler.calls) == before + 1)
+
+        source = staged_fixture('since-sealed')
+        (source / 'other-key.json').write_text(json.dumps({'secondKey': OTHER}))
+        git(source, 'add', '--all')
+        Handler.mutate = lambda: (source / 'account.json').write_text('{"account":"tenant_b"}')
+        before = len(Handler.calls)
+        p = run([], extra=['--since=HEAD'], cwd=source)
+        fs, complete = report(p, 'json')
+        check('since-sealed-before-probes', p.returncode == 0 and complete and len(fs) == 2 and len(Handler.calls) == before + 2 and all(Handler.calls[before:]))
+        p = run([], extra=['--since=HEAD'], cwd=source)
+        fs, complete = report(p, 'json')
+        check('since-next-acquisition-observes-worktree', p.returncode == 0 and complete and len(fs) == 2 and all(f['verification']['status'] == 'invalid' for f in fs))
+
+        for extension in ('json', 'yaml', 'toml', 'env'):
             source = staged_fixture(extension, extension)
             # Conflicting worktree content must not replace staged components.
             (source / ('account.' + extension)).write_text('account=tenant_b\n')
@@ -452,7 +545,7 @@ def main():
         evidence = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'model_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'passed': len(checks), 'failed': 0, 'checks': checks, 'fixture_root': str(root),
                     'provider': 'Owned loopback stub only; no real provider/account acceptance', 'owned_requests': len(Handler.calls),
-                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Staged Git index is qualified separately from local roots; other adapters are not qualified.'}
+                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Staged index and selected --since working files are qualified separately from local roots; other adapters are not qualified.'}
         (root / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
         print(json.dumps({'passed': len(checks), 'evidence': str(root / 'evidence.json')}))
     finally:

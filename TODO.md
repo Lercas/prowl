@@ -741,6 +741,15 @@
     Go 1.26.11/lint, quality IDs и полный GOROOT digest подтверждены.
     History/timeline и прочие источники остаются открыты.
     `wiki/evidence/1.5.0-cross-file-repositories-20261116.json`.
+  - [x] `scan --since REV --cross-file --verify`: выбранные working-tree файлы,
+    без заимствования неизменённых/index/HEAD companions. Scope каждого intake,
+    nested-repo separation, os.Root, nil scope для symlink/archive; неатомарность
+    рабочей копии описана явно. Limits/ошибки блокируют composite probes и baseline.
+    Native — 1044/1044, JSON/SARIF ±ML/index, working/index disagreement, external
+    alias, size/empty/subdirectory и seal-before-probes. Full Go, race/min-Go/lint,
+    шесть CGO=0 builds проходят; quality IDs и GOROOT digest прежние. CI runner
+    добавлен, hosted run не выполнен. History/timeline и другие adapters открыты.
+    `wiki/evidence/1.5.0-cross-file-since-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

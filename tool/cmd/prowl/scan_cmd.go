@@ -237,7 +237,7 @@ func checkSourceModes(c commonFlags, rest []string) int {
 // stdinModeError validates the label before configuration, reports or input I/O.
 func stdinModeError(c commonFlags, rest []string) error {
 	if c.crossFile {
-		if len(rest) == 0 && !c.staged && c.command != "repo" && c.command != "org" && !isTTY(os.Stdin) {
+		if len(rest) == 0 && !c.staged && c.since == "" && c.command != "repo" && c.command != "org" && !isTTY(os.Stdin) {
 			return fmt.Errorf("--cross-file requires explicit local filesystem roots when stdin is piped")
 		}
 		for _, path := range rest {

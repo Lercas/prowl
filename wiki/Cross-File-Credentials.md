@@ -1,10 +1,11 @@
 # Составные credentials между файлами
 
 CLI `scan --cross-file --verify` собирает компоненты из выбранных локальных корней
-или выбранных staged blobs одного Git index (`--staged`). В CLI `repo`/`org`
+или выбранных staged blobs одного Git index (`--staged`), а также изменённых
+рабочих файлов `--since REV`. В CLI `repo`/`org`
 доступно связывание внутри закреплённого commit каждого репозитория.
 Включение явно разрешает связывание однозначных именованных ролей внутри каждого
-корня, выбранного индекса или commit; выбирайте область одной связанной конфигурации.
+корня, выбранного индекса, working-tree intake или commit; выбирайте область одной связанной конфигурации.
 Единственность значений сама
 по себе не доказывает, что приложение использует их вместе. Режим использует
 `credentialset` и `verify.Set.VerifyComponents`, не перебирает возможные пары.
@@ -12,11 +13,12 @@ CLI `scan --cross-file --verify` собирает компоненты из вы
 ```sh
 prowl scan ./config --cross-file --verify --ml --format json
 prowl scan --staged --cross-file --verify --ml --format json
+prowl scan --since HEAD~1 --cross-file --verify --ml --format json
 prowl scan ./config --cross-file --verify --index "$HOME/.prowl/index" --scope app:config
 ```
 
 Без `--cross-file` поведение `--verify` не меняется. Флаг доступен у CLI `scan`, `repo`, `org`:
-stdin, history/`--since`, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
+stdin, history/timeline, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
 не включены. Общий пункт TODO остаётся открытым до остальных источников и форматов.
 
 ## Поддержанные входы CLI
@@ -299,3 +301,40 @@ acquisitions и проверяют item/byte bounds и duplicate tree paths. Qua
 acceptance реального provider account или hosted Git service.
 
 Квалификация: `evidence/1.5.0-cross-file-repositories-20261116.json`.
+
+
+## Выбранные рабочие файлы `--since`
+
+`scan --since REV --cross-file --verify` использует существующую семантику Git diff:
+выбирает изменённые tracked paths относительно REV и читает их текущие working-tree
+байты. Это не содержимое index, не полный commit и не все файлы конфигурации.
+Неизменённый companion не добавляется автоматически. Новые untracked файлы
+не входят в diff; для полного дерева используйте явный конфигурационный root.
+Список путей фиксируется один раз, но рабочая копия не является атомарным снимком:
+байты каждого файла наблюдаются при чтении. Временный component set закрывается
+после полного intake, до первого provider call; повторного чтения во время probes нет.
+
+Каждый запуск получает новую acquisition scope. Вложенные `.git` разделяют области,
+даже когда их каталоги отсутствуют в diff. Файлы с symlink в любом компоненте пути
+могут читаться только внутри закреплённого `os.Root` и не передают межфайловые роли;
+внешний alias оставляет неполноту. Archive members также не заимствуют scope.
+Сверка file identity между stat и открытым дескриптором отклоняет замену inode;
+это не обещание атомарности содержимого изменяемого файла.
+
+Selection ограничен прежними 64 MiB stdout Git; reader принимает максимум 10000
+выбранных scannable paths и 32 MiB суммарных исходных байтов. `--max-size`, excludes
+и component literal/namespace budgets продолжают действовать. Неканонический или
+повторный путь, недоступный файл, special file, превышение лимита и ошибка определения
+границы не разрешают composite probes или новый baseline. Пустой diff — полный
+пустой выбранный скан. Metadata `git_worktree:true` не утверждает commit identity;
+coverage `components-worktree` фиксирует revision reader и его лимиты.
+
+Локальная квалификация: 1044/1044 CLI checks JSON/SARIF ±ML/index, в том числе
+working/index disagreement, неизменённый companion, symlink внутри/вне root,
+archive/unknown roles, max-size, empty diff, subdirectory и mutation после начала
+provider calls. Запросы идут только owned loopback fixture под OS network deny
+с исключением localhost. Новый CI step повторяет этот runner; hosted run не выполнен.
+Full Go, целевые race/min-Go/lint, шесть CGO=0 builds проходят. Pinned quality metrics
+и точные IDs прежние: 1661/2094, FP 61/982. Полный GOROOT digest прежний.
+Новый performance gate не выполнялся: изменения reader включаются только opt-in.
+Evidence — `evidence/1.5.0-cross-file-since-20261116.json`.

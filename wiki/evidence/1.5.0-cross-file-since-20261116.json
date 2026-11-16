@@ -1,0 +1,704 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "source_commit": "bf853454f6bc635d8b80b63a21b9ec5769c216cb",
+  "binary": {
+    "path": "/tmp/prowl-since-qualified-20261116-bin",
+    "sha256": "4b6c56d3b6698ae500b7b97e2817322356aa4a29fc0a797d6af9d178f4c439ee",
+    "build_info": "/tmp/prowl-since-qualified-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n"
+  },
+  "contract": {
+    "selection": "existing git diff REV selected paths; current working bytes only; no untracked or unchanged companion injection",
+    "atomic_snapshot": false,
+    "scope": "fresh per acquisition, separated by nested .git, symlink and archive content never lends cross-file roles",
+    "root": "os.Root bounds all opt-in reads; same file identity required at open",
+    "limits": {
+      "git_selection_stdout_bytes": 67108864,
+      "selected_items": 10000,
+      "raw_bytes": 33554432
+    },
+    "failure": "intake errors inhibit composite probes and baseline update",
+    "default_reader_changed": false
+  },
+  "native": {
+    "passed": 1044,
+    "failed": 0,
+    "new_since_checks": [
+      {
+        "case": "since-json-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-json-json-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-json-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-json-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-json-json-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-json-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-json-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-index-json",
+        "passed": true
+      },
+      {
+        "case": "since-index-private-json",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-yaml-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-index-yaml",
+        "passed": true
+      },
+      {
+        "case": "since-index-private-yaml",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-toml-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-toml-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-index-toml",
+        "passed": true
+      },
+      {
+        "case": "since-index-private-toml",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-env-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlFalse-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlTrue-working-not-index",
+        "passed": true
+      },
+      {
+        "case": "since-env-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "since-index-env",
+        "passed": true
+      },
+      {
+        "case": "since-index-private-env",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unchanged-companion-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-symlink-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-outside-alias-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-archive-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-unknown-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlFalse-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlFalse-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlTrue-incomplete",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlTrue-no-provider",
+        "passed": true
+      },
+      {
+        "case": "since-negative-oversize-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "since-empty-json",
+        "passed": true
+      },
+      {
+        "case": "since-empty-sarif",
+        "passed": true
+      },
+      {
+        "case": "since-subdirectory-json",
+        "passed": true
+      },
+      {
+        "case": "since-subdirectory-sarif",
+        "passed": true
+      },
+      {
+        "case": "since-sealed-before-probes",
+        "passed": true
+      },
+      {
+        "case": "since-next-acquisition-observes-worktree",
+        "passed": true
+      }
+    ],
+    "previous_local_and_staged_checks": 910,
+    "owned_requests": 201,
+    "provider": "Owned loopback stub only; no real provider/account acceptance",
+    "network": "macOS sandbox deny network* except localhost",
+    "full_evidence_path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-t87awxvs/evidence.json",
+    "full_evidence_sha256": "4a34940671ac2c5378d40a4d1922e60f19d86530ef526e327a408ae5697df7bf"
+  },
+  "quality": {
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982,
+    "all_metrics_and_exact_ids_equal_previous": true,
+    "path": "/tmp/prowl-since-qualified-quality-20261116.json",
+    "sha256": "54f73f947bfb077062dc81f152c32da37a644f871e55dfb2dfd8e470e71d756d"
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "checks": {
+    "full_go": "pass",
+    "targeted_race": "pass",
+    "minimum_go_1_26_11": "pass",
+    "golangci_lint": "0 issues",
+    "actionlint": "pass",
+    "source_unit_cases": [
+      "working bytes instead of index/HEAD",
+      "selected files only and nested repository scopes",
+      "fresh scope per acquisition",
+      "archive and symlink boundary",
+      "invalid/duplicate/missing paths and external alias",
+      "per-file size and exclusions",
+      "10001 item selection and aggregate 34 MiB inputs rejected",
+      "literal POSIX path bytes preserved"
+    ]
+  },
+  "cross_builds": [
+    {
+      "os": "linux",
+      "arch": "amd64",
+      "binary_sha256": "19c8c8a37801e7c50668fce470dc5dbf28058aa9d2fe74ccc8e0815b79ff866a",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/linux-amd64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "linux",
+      "arch": "arm64",
+      "binary_sha256": "5235d6591b7a89777f558193fd7014991e650aad71a07f2ae73ed53f80c5a7cb",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/linux-arm64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=linux\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "amd64",
+      "binary_sha256": "c3a6d810db5906ca781c700d12a0c80f117b17c489c39f875403cca5107e7480",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/darwin-amd64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=darwin\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "arm64",
+      "binary_sha256": "4b6c56d3b6698ae500b7b97e2817322356aa4a29fc0a797d6af9d178f4c439ee",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/darwin-arm64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "windows",
+      "arch": "amd64",
+      "binary_sha256": "f76ef78717cc12e93f273e4e75074884826d0961c983b2bf21fab8a28fd10f3a",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/windows-amd64.exe: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "windows",
+      "arch": "arm64",
+      "binary_sha256": "03d64fc5eec6523b06d8b56da1e13cf4f950475f156c15eef82e4ea4203760ed",
+      "build_info": "/tmp/prowl-since-cross-build-20261116/windows-arm64.exe: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=windows\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bf853454f6bc635d8b80b63a21b9ec5769c216cb\n\tbuild\tvcs.time=2026-11-16T09:29:31Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/prowl-since-final-go-20261116.log",
+      "sha256": "a7d3647da29e343008b60952559cc542e16b01a8bd080899cd7ae52282879a06",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-final-targeted-20261116.log",
+      "sha256": "5f2567ecdb0966e41fba9586ee2e2ecd3318df53f527f252a2eb4538fa967c4c",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-final-race-20261116.log",
+      "sha256": "d0149d94fecbd2a2786f6c188e8aaf319d93aaad3171e1e009d63df446410445",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-final-min-go-20261116.log",
+      "sha256": "0739c550d91001627897f04154a63657a6360b9dbf7555ccf7b8c46ded65faa8",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-final-actionlint-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-qualified-native-20261116.log",
+      "sha256": "6631e9ac6acf6d12ac9915dd6bf3533d8811cc32d718547478cfe624449f5758",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-qualified-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-since-qualified-corpus-20261116.log",
+      "sha256": "aa8bce7437a6942def069407ac3a06a0d1b3fb5d1c8242bb35959c6eb78caa96",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "Owned loopback provider only; no real AWS/OAuth/DB qualification",
+    "Working-tree bytes are observed individually; no atomic filesystem snapshot is claimed",
+    "History/timeline and other source adapters/import overlays remain open",
+    "CI step added but no hosted run, push or publication",
+    "Six builds were inspected but foreign-platform binaries were not executed",
+    "No new fixed-reference performance gate or Docker factory rebuild for this new source commit"
+  ]
+}
