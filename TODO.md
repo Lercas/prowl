@@ -172,6 +172,15 @@
     и correlation 46/46. Full Go/race/min-Go/lint, шесть static builds,
     прежние quality IDs и GOROOT digest проходят. [Контракт](wiki/Configuration-Policy-Identity.md),
     `wiki/evidence/1.5.0-config-policy-20261116.json`.
+  - [x] Запретить false-absence при lossy scope encoding: невалидные UTF-8
+    строки/ключи policy, kind/target, ошибки JSON и opaque TextMarshaler дают
+    `scope_policy_failed`, incomplete/code 2, без нового scope и baseline.
+    Нативное воспроизведение двух разных Git index byte paths: прежний binary
+    ошибочно выдаёт `absent_in_scope`, новый — `inconclusive`; находки сохранены.
+    JSON/SARIF и valid ASCII/Unicode/U+FFFD — 203/203, correlation — 46/46;
+    full Go, model race/min-Go/lint и прежние ProwlBench IDs проходят.
+    [Контракт и границы](wiki/Scope-Policy-Encoding.md),
+    `wiki/evidence/1.5.0-scope-encoding-20261116.json`.
   - [x] Изолировать detection tuning между pipelines/requests: immutable снимок
     entropy floor, placeholder threshold и candidate cap, включая вложенные
     decode/literal/reconstruction и verification. CLI/LSP получают явные defaults;

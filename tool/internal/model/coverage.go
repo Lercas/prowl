@@ -5,9 +5,9 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"sort"
 	"sync"
+	"unicode/utf8"
 )
 
 // Diagnostic is scan metadata, never a synthetic secret or a raw error string.
@@ -112,7 +112,12 @@ func (c *Coverage) RegisterScope(kind, target string, policy any) {
 	if c == nil {
 		return
 	}
-	b, _ := json.Marshal(policy)
+	b, valid := scopePolicyBytes(policy)
+	if !valid || !utf8.ValidString(kind) || !utf8.ValidString(target) {
+		// Keep source findings, but never certify repaired or failed scope encodings.
+		c.Note("scope_policy_failed", "", true)
+		return
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	h := sha256.Sum256(b)

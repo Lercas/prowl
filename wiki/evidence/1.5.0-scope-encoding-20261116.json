@@ -1,0 +1,4195 @@
+{
+  "recorded_at": "2026-11-16T18:05:40.535615+00:00",
+  "scope": "Prevent false absence from lossy scope JSON encoding; the full 1.5.0 migration remains open.",
+  "parent_commit": "0043e09953e80485e3e43f43f459d5405f8466ac",
+  "runtime_source_commit": "9312b6426f24016de6129746d2a25179e7e58d28",
+  "runtime_tool_tree": "2028026e7f0c3e16fc9a0637875511660d46fa89",
+  "binary": {
+    "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/candidate-final-bin",
+    "sha256": "c424a8358afb0bcfa60ab4429fd148f2859ddd688cba52159a363193c50bba0f"
+  },
+  "parent_binary": {
+    "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/before-bin",
+    "sha256": "458ee4e2d265583cf56763a1bd72df8fdd8ca8a875ce03438f4e41e48cf2bb50"
+  },
+  "contract": {
+    "failure": "scope_policy_failed, incomplete, code 2, no failed scope, no new baseline; findings preserved",
+    "encoding": "Validate source strings/map keys and JSON encoding; opaque TextMarshaler, serialization errors and panics fail closed.",
+    "validation_depth_max": 128,
+    "validation_values_max": 1000000,
+    "valid_policy_hashes": "Existing SHA-256/HMAC over exact JSON bytes unchanged for valid plain data; literal U+FFFD is supported.",
+    "byte_policy": "Plain []byte remains base64. Named byte TextMarshaler cannot bypass validation."
+  },
+  "native": {
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-scope-encoding-native-gpozyyzu/evidence.json",
+      "sha256": "6373b49f3a23bdd4967ca8308c374932b4bbe83cf121724b8dc55993f1f96e4d"
+    },
+    "result": {
+      "passed": true,
+      "checks": [
+        {
+          "case": "candidate/identity/masked",
+          "passed": true
+        },
+        {
+          "case": "identity-init",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes/absence",
+          "passed": true
+        },
+        {
+          "case": "raw-bytes/legacy-collision-reproduced",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-before/no-repaired-index-scope",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-json-after/no-repaired-index-scope",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes/absence",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/raw-bytes-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-before/no-repaired-index-scope",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-sarif-after/no-repaired-index-scope",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-baseline-False/masked",
+          "passed": true
+        },
+        {
+          "case": "raw-bytes/baseline-False",
+          "passed": true
+        },
+        {
+          "case": "candidate/raw-bytes-baseline-True/masked",
+          "passed": true
+        },
+        {
+          "case": "raw-bytes/baseline-True",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character/absence",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character/absence",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/replacement-character-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/replacement-character-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/json/after/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "replacement-character/sarif/after/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "before/unicode/absence",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode/absence",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/unicode-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/unicode-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "unicode/json/after/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "unicode/sarif/after/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "before/ascii/absence",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-json-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-comparison/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii/absence",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "before/ascii-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-before/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-before/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-before/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-before/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-after/masked",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-after/coverage",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-after/findings-retained",
+          "passed": true
+        },
+        {
+          "case": "candidate/ascii-sarif-after/diagnostic",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "ascii/json/after/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/before/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/before/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/before/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/before/unchanged-diagnostics",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/after/unchanged-scope",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/after/unchanged-complete",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/after/unchanged-stats",
+          "passed": true
+        },
+        {
+          "case": "ascii/sarif/after/unchanged-diagnostics",
+          "passed": true
+        }
+      ],
+      "artifacts_sha256": {
+        "candidate-identity.stdout": "1962578db129847b92ef69d4f91c8304161085a4885617cb73ddc7b250b21ec4",
+        "candidate-identity.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-raw-bytes-json-before.stdout": "66751a02716068c7878ccf9c4031fcaf33b156e457b72bdf0d6c85fa897eec78",
+        "before-raw-bytes-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-raw-bytes-json-after.stdout": "7417585aadfa1b162920c37613c6683eb179e35559fe7ba8e30e0fb735a7b3c6",
+        "before-raw-bytes-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-raw-bytes-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "before-raw-bytes-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-json-before.stdout": "7501c70696bbb282f08334a29ea72e7aa20abb3c8144ecefd1dcbb7e0f8e773a",
+        "candidate-raw-bytes-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-json-after.stdout": "2f4cd98c1f673489a6896968d05e41057423dde7ce04c5faee216c6dca3f2058",
+        "candidate-raw-bytes-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-comparison.stdout": "0bc75404f31b416dcc643e3276e25523d73ca385995c0b1cf9a1fe394947000b",
+        "candidate-raw-bytes-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-raw-bytes-sarif-before.stdout": "13c463d221d593b212598cb301b11594a8acf851f43f7eb3daf86cfe5acd9c27",
+        "before-raw-bytes-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-raw-bytes-sarif-after.stdout": "3d791f362bbd9e0ed04415af4eb9c7959cabab1e6236a6dfa8cdcfa436cdf8ec",
+        "before-raw-bytes-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-sarif-before.stdout": "b1f28e984762d1ca8aa723d97cb6d0dffe33378a61eed8fb58b5596b4ad61820",
+        "candidate-raw-bytes-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-sarif-after.stdout": "305f54b9702788dfd4faf1b2472d1d708b8e497d5676e7d3c93dd10102801627",
+        "candidate-raw-bytes-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-baseline-False.stdout": "7501c70696bbb282f08334a29ea72e7aa20abb3c8144ecefd1dcbb7e0f8e773a",
+        "candidate-raw-bytes-baseline-False.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-raw-bytes-baseline-True.stdout": "7501c70696bbb282f08334a29ea72e7aa20abb3c8144ecefd1dcbb7e0f8e773a",
+        "candidate-raw-bytes-baseline-True.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-replacement-character-json-before.stdout": "a418e049956b150fa51b5f3be3d9de8305d9c861d6ba868d01c37a664d48f35e",
+        "before-replacement-character-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-replacement-character-json-after.stdout": "7417585aadfa1b162920c37613c6683eb179e35559fe7ba8e30e0fb735a7b3c6",
+        "before-replacement-character-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-replacement-character-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "before-replacement-character-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-replacement-character-json-before.stdout": "a418e049956b150fa51b5f3be3d9de8305d9c861d6ba868d01c37a664d48f35e",
+        "candidate-replacement-character-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-replacement-character-json-after.stdout": "7417585aadfa1b162920c37613c6683eb179e35559fe7ba8e30e0fb735a7b3c6",
+        "candidate-replacement-character-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-replacement-character-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "candidate-replacement-character-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-replacement-character-sarif-before.stdout": "bbd6084b481d0303032c8ecf5c3e4955c18bb32349d54896d045ce4bdfda5ee9",
+        "before-replacement-character-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-replacement-character-sarif-after.stdout": "3d791f362bbd9e0ed04415af4eb9c7959cabab1e6236a6dfa8cdcfa436cdf8ec",
+        "before-replacement-character-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-replacement-character-sarif-before.stdout": "bbd6084b481d0303032c8ecf5c3e4955c18bb32349d54896d045ce4bdfda5ee9",
+        "candidate-replacement-character-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-replacement-character-sarif-after.stdout": "3d791f362bbd9e0ed04415af4eb9c7959cabab1e6236a6dfa8cdcfa436cdf8ec",
+        "candidate-replacement-character-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-unicode-json-before.stdout": "5c3fcd04355ff3cd8a5b8419d13ce897c73541731eb7d27f7adc220b90a7195d",
+        "before-unicode-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-unicode-json-after.stdout": "75b66826d5f037b08387540a504b7db55b783bc24cd16caa5b3a7853ac5e7435",
+        "before-unicode-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-unicode-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "before-unicode-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-unicode-json-before.stdout": "5c3fcd04355ff3cd8a5b8419d13ce897c73541731eb7d27f7adc220b90a7195d",
+        "candidate-unicode-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-unicode-json-after.stdout": "75b66826d5f037b08387540a504b7db55b783bc24cd16caa5b3a7853ac5e7435",
+        "candidate-unicode-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-unicode-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "candidate-unicode-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-unicode-sarif-before.stdout": "6d1d379e08785a1b439e69cb00a9c82cef6cf1255c2165e19c77e5ad47fc4e90",
+        "before-unicode-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-unicode-sarif-after.stdout": "82f774a6167e7e31c79837ad38d6fb211cbaf73b0ac4b42f7ef0a35920274a2f",
+        "before-unicode-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-unicode-sarif-before.stdout": "6d1d379e08785a1b439e69cb00a9c82cef6cf1255c2165e19c77e5ad47fc4e90",
+        "candidate-unicode-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-unicode-sarif-after.stdout": "82f774a6167e7e31c79837ad38d6fb211cbaf73b0ac4b42f7ef0a35920274a2f",
+        "candidate-unicode-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-ascii-json-before.stdout": "1901b93f1c5b252f4d12499bbb039b1723c68dfa00832158e7cc111225ee3037",
+        "before-ascii-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-ascii-json-after.stdout": "09e5f8dbf9df09b2ad655442c332da4ba07493c43a6c400e4da4ef1526937e23",
+        "before-ascii-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-ascii-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "before-ascii-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-ascii-json-before.stdout": "1901b93f1c5b252f4d12499bbb039b1723c68dfa00832158e7cc111225ee3037",
+        "candidate-ascii-json-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-ascii-json-after.stdout": "09e5f8dbf9df09b2ad655442c332da4ba07493c43a6c400e4da4ef1526937e23",
+        "candidate-ascii-json-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-ascii-comparison.stdout": "468411a45b68cb137d42df4be34bef8456e8a5dbad4beb371df49d25d75070eb",
+        "candidate-ascii-comparison.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-ascii-sarif-before.stdout": "0d673a1dda11e61430933eaa191a76b3e015cd7cf1a82cec810d202d783cca93",
+        "before-ascii-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-ascii-sarif-after.stdout": "c14eedbf31fd11ca4d77545237ec481b99986d1ea14e35b39f97883188e7240b",
+        "before-ascii-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-ascii-sarif-before.stdout": "0d673a1dda11e61430933eaa191a76b3e015cd7cf1a82cec810d202d783cca93",
+        "candidate-ascii-sarif-before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate-ascii-sarif-after.stdout": "c14eedbf31fd11ca4d77545237ec481b99986d1ea14e35b39f97883188e7240b",
+        "candidate-ascii-sarif-after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "binaries": {
+        "before": {
+          "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/before-bin",
+          "sha256": "458ee4e2d265583cf56763a1bd72df8fdd8ca8a875ce03438f4e41e48cf2bb50"
+        },
+        "candidate": {
+          "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/candidate-final-bin",
+          "sha256": "c424a8358afb0bcfa60ab4429fd148f2859ddd688cba52159a363193c50bba0f"
+        }
+      },
+      "network": "OS denies all network",
+      "root": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-scope-encoding-native-gpozyyzu",
+      "scope": "Two new Git indexes per case; one owned repository; synthetic fixture only. Invalid names reside in Git indexes, not in host filesystem names."
+    }
+  },
+  "final_model_passes": [
+    "TestScopeEncodingFailureCannotCertifyCompleteness/nested-pointer",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/function",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/map-value",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/cycle",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/panic",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/opaque-map-key",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/opaque-byte-slice",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/opaque-byte-array",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/string",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/embedded",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/nan",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/infinity",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/map-key",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/embedded-pointer",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/opaque-text",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/raw-invalid-utf8",
+    "TestScopeEncodingFailureCannotCertifyCompleteness/raw-unpaired-surrogate",
+    "TestScopeEncodingFailureCannotCertifyCompleteness",
+    "TestScopeEncodingPreservesValidPolicyDigests",
+    "TestScopeEncodingValidationBounds"
+  ],
+  "final_correlation": {
+    "binary_sha256": "c424a8358afb0bcfa60ab4429fd148f2859ddd688cba52159a363193c50bba0f",
+    "passed": 46,
+    "total": 46,
+    "root": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-correlation-native-cjqcipph",
+    "scope": "native local scanner JSON, owned Git objects and malformed report fixtures; no provider or remote access"
+  },
+  "final_logs": {
+    "go-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/go-final.log",
+      "sha256": "5f83d2a3c6e59920166498876de5a4f029428a15352ba80b4a81543593f6f33b"
+    },
+    "race-final-model.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/race-final-model.log",
+      "sha256": "a6908893b76716cd076c5961a10642c5b3bf2dcdeb25018093fa238281ab20ad"
+    },
+    "min-go-final-model.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/min-go-final-model.log",
+      "sha256": "f5fc3a730614592b2498b6b11315ad84667f2ada623b0db374a63542e11d114c"
+    },
+    "lint-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/lint-final.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "model-tests-final.jsonl": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/model-tests-final.jsonl",
+      "sha256": "b46d696016ad0b07a80ef149dc46c836f6ae58985fc402633445b164ea24682a"
+    },
+    "native-final-runtime.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/native-final-runtime.log",
+      "sha256": "4a7cb7439bd8150ce810fb0618bb29002f38af13d9f6d04a87688fa084e70985"
+    },
+    "quality-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/quality-final.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "correlation-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/correlation-final.log",
+      "sha256": "94c34b831ffd3629dc41e4ad5f498177a09c445b6c741316876b6baf86694dd4"
+    },
+    "final-build.txt": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/final-build.txt",
+      "sha256": "62ca4a0dd8f3a68811d5c25054e050a6392868e4b6ea406604c9e0bf4e789b94"
+    }
+  },
+  "quality": {
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/quality-final.json",
+      "sha256": "ebbc760993c7a1037f3399b29e717a7a1d861bd22dea042e20996d5bd647acb7"
+    },
+    "parent_artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/quality-before.json",
+      "sha256": "a0dc1c2ece1df0237921a16c4564d0f6b42e67d0bbb11d7d5b452334cda77f7f"
+    },
+    "equal_to_parent_except_binary_sha256": true,
+    "result": {
+      "schema_version": "prowl-quality-v1",
+      "dataset": {
+        "repository": "Lercas/prowlbench",
+        "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+        "file": "prowlbench.jsonl",
+        "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+        "rows": 24603,
+        "selection_stride": 8,
+        "selected_rows": 3076,
+        "secrets": 2094,
+        "hard_negatives": 982
+      },
+      "baseline": {
+        "recall": 0.7469,
+        "t4_fp_rate": 0.058,
+        "tolerance": 0.005,
+        "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+      },
+      "binary_sha256": "c424a8358afb0bcfa60ab4429fd148f2859ddd688cba52159a363193c50bba0f",
+      "passed": true,
+      "recall": 0.7932187201528176,
+      "t4_fp_rate": 0.062118126272912425,
+      "secret_hits": 1661,
+      "secrets": 2094,
+      "hard_negative_hits": 61,
+      "hard_negatives": 982,
+      "missed_positive_ids": [
+        "pb-00016",
+        "pb-00160",
+        "pb-00184",
+        "pb-00304",
+        "pb-00312",
+        "pb-00480",
+        "pb-00560",
+        "pb-00584",
+        "pb-00592",
+        "pb-00632",
+        "pb-00680",
+        "pb-00696",
+        "pb-00720",
+        "pb-00760",
+        "pb-00824",
+        "pb-00960",
+        "pb-01080",
+        "pb-01128",
+        "pb-01160",
+        "pb-01168",
+        "pb-01208",
+        "pb-01216",
+        "pb-01248",
+        "pb-01280",
+        "pb-01288",
+        "pb-01352",
+        "pb-01384",
+        "pb-01416",
+        "pb-01424",
+        "pb-01536",
+        "pb-01568",
+        "pb-01576",
+        "pb-01640",
+        "pb-01664",
+        "pb-01728",
+        "pb-01808",
+        "pb-01872",
+        "pb-01904",
+        "pb-01968",
+        "pb-01992",
+        "pb-02008",
+        "pb-02016",
+        "pb-02024",
+        "pb-02072",
+        "pb-02208",
+        "pb-02224",
+        "pb-02248",
+        "pb-02320",
+        "pb-02448",
+        "pb-02488",
+        "pb-02544",
+        "pb-02560",
+        "pb-02568",
+        "pb-02648",
+        "pb-02656",
+        "pb-02664",
+        "pb-02728",
+        "pb-02760",
+        "pb-02800",
+        "pb-02976",
+        "pb-02992",
+        "pb-03032",
+        "pb-03040",
+        "pb-03056",
+        "pb-03160",
+        "pb-03224",
+        "pb-03304",
+        "pb-03328",
+        "pb-03352",
+        "pb-03432",
+        "pb-03512",
+        "pb-03544",
+        "pb-03560",
+        "pb-03696",
+        "pb-03832",
+        "pb-03848",
+        "pb-03880",
+        "pb-03976",
+        "pb-04072",
+        "pb-04136",
+        "pb-04192",
+        "pb-04240",
+        "pb-04328",
+        "pb-04336",
+        "pb-04344",
+        "pb-04448",
+        "pb-04528",
+        "pb-04552",
+        "pb-04576",
+        "pb-04624",
+        "pb-04688",
+        "pb-04720",
+        "pb-04728",
+        "pb-04776",
+        "pb-04816",
+        "pb-04840",
+        "pb-04976",
+        "pb-04992",
+        "pb-05008",
+        "pb-05176",
+        "pb-05224",
+        "pb-05432",
+        "pb-05480",
+        "pb-05504",
+        "pb-05536",
+        "pb-05568",
+        "pb-05584",
+        "pb-05592",
+        "pb-05640",
+        "pb-05656",
+        "pb-05760",
+        "pb-05808",
+        "pb-05912",
+        "pb-06008",
+        "pb-06056",
+        "pb-06112",
+        "pb-06120",
+        "pb-06168",
+        "pb-06200",
+        "pb-06208",
+        "pb-06216",
+        "pb-06224",
+        "pb-06328",
+        "pb-06336",
+        "pb-06464",
+        "pb-06512",
+        "pb-06584",
+        "pb-06784",
+        "pb-06928",
+        "pb-07088",
+        "pb-07096",
+        "pb-07160",
+        "pb-07216",
+        "pb-07248",
+        "pb-07464",
+        "pb-07560",
+        "pb-07656",
+        "pb-07680",
+        "pb-07768",
+        "pb-07832",
+        "pb-07840",
+        "pb-07864",
+        "pb-07872",
+        "pb-07928",
+        "pb-08064",
+        "pb-08144",
+        "pb-08160",
+        "pb-08208",
+        "pb-08336",
+        "pb-08344",
+        "pb-08368",
+        "pb-08384",
+        "pb-08440",
+        "pb-08448",
+        "pb-08496",
+        "pb-08568",
+        "pb-08616",
+        "pb-08696",
+        "pb-08720",
+        "pb-08824",
+        "pb-08832",
+        "pb-08864",
+        "pb-08896",
+        "pb-08960",
+        "pb-08968",
+        "pb-08976",
+        "pb-09024",
+        "pb-09032",
+        "pb-09152",
+        "pb-09176",
+        "pb-09256",
+        "pb-09288",
+        "pb-09304",
+        "pb-09384",
+        "pb-09392",
+        "pb-09424",
+        "pb-09432",
+        "pb-09632",
+        "pb-09776",
+        "pb-09936",
+        "pb-09952",
+        "pb-10040",
+        "pb-10064",
+        "pb-10080",
+        "pb-10104",
+        "pb-10240",
+        "pb-10256",
+        "pb-10432",
+        "pb-10440",
+        "pb-10448",
+        "pb-10464",
+        "pb-10512",
+        "pb-10520",
+        "pb-10560",
+        "pb-10616",
+        "pb-10632",
+        "pb-10672",
+        "pb-10880",
+        "pb-10976",
+        "pb-11000",
+        "pb-11168",
+        "pb-11248",
+        "pb-11296",
+        "pb-11312",
+        "pb-11384",
+        "pb-11392",
+        "pb-11432",
+        "pb-11448",
+        "pb-11656",
+        "pb-11760",
+        "pb-11816",
+        "pb-12056",
+        "pb-12312",
+        "pb-12344",
+        "pb-12544",
+        "pb-12656",
+        "pb-12800",
+        "pb-12880",
+        "pb-12976",
+        "pb-12992",
+        "pb-13008",
+        "pb-13016",
+        "pb-13136",
+        "pb-13160",
+        "pb-13184",
+        "pb-13240",
+        "pb-13376",
+        "pb-13464",
+        "pb-13624",
+        "pb-13720",
+        "pb-13728",
+        "pb-13744",
+        "pb-13768",
+        "pb-13816",
+        "pb-13848",
+        "pb-13888",
+        "pb-13904",
+        "pb-13944",
+        "pb-13976",
+        "pb-14144",
+        "pb-14272",
+        "pb-14344",
+        "pb-14392",
+        "pb-14416",
+        "pb-14544",
+        "pb-14576",
+        "pb-14648",
+        "pb-14688",
+        "pb-14776",
+        "pb-14848",
+        "pb-14880",
+        "pb-14896",
+        "pb-15072",
+        "pb-15080",
+        "pb-15088",
+        "pb-15112",
+        "pb-15136",
+        "pb-15144",
+        "pb-15184",
+        "pb-15192",
+        "pb-15216",
+        "pb-15248",
+        "pb-15328",
+        "pb-15352",
+        "pb-15400",
+        "pb-15424",
+        "pb-15448",
+        "pb-15544",
+        "pb-15592",
+        "pb-15952",
+        "pb-16032",
+        "pb-16128",
+        "pb-16224",
+        "pb-16272",
+        "pb-16304",
+        "pb-16320",
+        "pb-16408",
+        "pb-16496",
+        "pb-16512",
+        "pb-16520",
+        "pb-16616",
+        "pb-16672",
+        "pb-16688",
+        "pb-16704",
+        "pb-16712",
+        "pb-16728",
+        "pb-16816",
+        "pb-16848",
+        "pb-16864",
+        "pb-16944",
+        "pb-16960",
+        "pb-16984",
+        "pb-17032",
+        "pb-17112",
+        "pb-17192",
+        "pb-17200",
+        "pb-17248",
+        "pb-17280",
+        "pb-17288",
+        "pb-17304",
+        "pb-17328",
+        "pb-17424",
+        "pb-17568",
+        "pb-17608",
+        "pb-17616",
+        "pb-17632",
+        "pb-17672",
+        "pb-17696",
+        "pb-17704",
+        "pb-17720",
+        "pb-17824",
+        "pb-17832",
+        "pb-17840",
+        "pb-17888",
+        "pb-17904",
+        "pb-17944",
+        "pb-17992",
+        "pb-18008",
+        "pb-18024",
+        "pb-18160",
+        "pb-18208",
+        "pb-18232",
+        "pb-18336",
+        "pb-18360",
+        "pb-18472",
+        "pb-18512",
+        "pb-18608",
+        "pb-18656",
+        "pb-18672",
+        "pb-18688",
+        "pb-18712",
+        "pb-18736",
+        "pb-18792",
+        "pb-18800",
+        "pb-18848",
+        "pb-18960",
+        "pb-18968",
+        "pb-18976",
+        "pb-19016",
+        "pb-19192",
+        "pb-19216",
+        "pb-19232",
+        "pb-19280",
+        "pb-19392",
+        "pb-19552",
+        "pb-19616",
+        "pb-19648",
+        "pb-19752",
+        "pb-19808",
+        "pb-19864",
+        "pb-19936",
+        "pb-19944",
+        "pb-20080",
+        "pb-20088",
+        "pb-20176",
+        "pb-20200",
+        "pb-20256",
+        "pb-20320",
+        "pb-20344",
+        "pb-20352",
+        "pb-20392",
+        "pb-20408",
+        "pb-20432",
+        "pb-20520",
+        "pb-20672",
+        "pb-20816",
+        "pb-20896",
+        "pb-20944",
+        "pb-21120",
+        "pb-21240",
+        "pb-21248",
+        "pb-21264",
+        "pb-21368",
+        "pb-21536",
+        "pb-21544",
+        "pb-21584",
+        "pb-21592",
+        "pb-21640",
+        "pb-21768",
+        "pb-21888",
+        "pb-21912",
+        "pb-21928",
+        "pb-21944",
+        "pb-21952",
+        "pb-21960",
+        "pb-22024",
+        "pb-22088",
+        "pb-22128",
+        "pb-22144",
+        "pb-22208",
+        "pb-22224",
+        "pb-22240",
+        "pb-22328",
+        "pb-22336",
+        "pb-22344",
+        "pb-22376",
+        "pb-22472",
+        "pb-22568",
+        "pb-22760",
+        "pb-22888",
+        "pb-22904",
+        "pb-22952",
+        "pb-22968",
+        "pb-23008",
+        "pb-23048",
+        "pb-23152",
+        "pb-23160",
+        "pb-23216",
+        "pb-23248",
+        "pb-23328",
+        "pb-23568",
+        "pb-23584",
+        "pb-23696",
+        "pb-23704",
+        "pb-23744",
+        "pb-23840",
+        "pb-23904",
+        "pb-23944",
+        "pb-24088",
+        "pb-24128",
+        "pb-24136",
+        "pb-24160",
+        "pb-24176",
+        "pb-24208",
+        "pb-24240",
+        "pb-24248",
+        "pb-24256",
+        "pb-24368",
+        "pb-24392",
+        "pb-24432",
+        "pb-24456",
+        "pb-24472",
+        "pb-24496"
+      ],
+      "false_positive_ids": [
+        "pb-00496",
+        "pb-00848",
+        "pb-00968",
+        "pb-01088",
+        "pb-01464",
+        "pb-01488",
+        "pb-01624",
+        "pb-01752",
+        "pb-01984",
+        "pb-02040",
+        "pb-02576",
+        "pb-02640",
+        "pb-03096",
+        "pb-03856",
+        "pb-04560",
+        "pb-05784",
+        "pb-05792",
+        "pb-05976",
+        "pb-06136",
+        "pb-06152",
+        "pb-06184",
+        "pb-07016",
+        "pb-07272",
+        "pb-07608",
+        "pb-07672",
+        "pb-07816",
+        "pb-08280",
+        "pb-08760",
+        "pb-09200",
+        "pb-09296",
+        "pb-09320",
+        "pb-09464",
+        "pb-09944",
+        "pb-10408",
+        "pb-10816",
+        "pb-12136",
+        "pb-12944",
+        "pb-13128",
+        "pb-14736",
+        "pb-15288",
+        "pb-15408",
+        "pb-15560",
+        "pb-16040",
+        "pb-16184",
+        "pb-17072",
+        "pb-17504",
+        "pb-17648",
+        "pb-18176",
+        "pb-18544",
+        "pb-19008",
+        "pb-19240",
+        "pb-19520",
+        "pb-19824",
+        "pb-19952",
+        "pb-20400",
+        "pb-20568",
+        "pb-20640",
+        "pb-20712",
+        "pb-22920",
+        "pb-23464",
+        "pb-23912"
+      ],
+      "status": "passed"
+    }
+  },
+  "initial_qualification": {
+    "runtime_source_commit": "0ebe8ce7925f5bd228f70e279c8b531ffa2bc87b",
+    "binary": {
+      "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/candidate-bin",
+      "sha256": "fb9da41f09121ff96f73eb93d66fe8f169aef5ffc91691fffcac8ed213f6d1a0"
+    },
+    "logs": {
+      "go.log": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/go.log",
+        "sha256": "59709b39b5a677312180567f80619be9ab37d8f83c396a2fb938562c98145f07"
+      },
+      "race.log": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/race.log",
+        "sha256": "91f2d874a38f33b4f984f9a9daf783681e3998f653bf9970d922edf50a8bd4e8"
+      },
+      "min-go.log": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/min-go.log",
+        "sha256": "31c8ba6389e386fca1990ee07f73e46746a6f26b287e380e99df0a53a64b6694"
+      },
+      "lint-qualified.log": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/lint-qualified.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+      },
+      "corpus.log": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/corpus.log",
+        "sha256": "d758119cccfac050d57fd322ebdc2f60465de914dd6ec34e39bec4559a3d0032"
+      }
+    },
+    "coverage": {
+      "artifact": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-coverage-native-3_wwxfsn/qualification.json",
+        "sha256": "c9a755d7f0ed16d533bd80dab8101df387f4c64a371dfb653e54d89db886b61a"
+      },
+      "result": {
+        "binary_sha256": "fb9da41f09121ff96f73eb93d66fe8f169aef5ffc91691fffcac8ed213f6d1a0",
+        "passed": 90,
+        "total": 90,
+        "checks": [
+          {
+            "case": "clean",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "clean",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "finding",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "aggregate",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "pragma",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "report-filter",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "reveal",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "malformed",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "limit",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "missing",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "missing",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "missing",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "missing",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "structured",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "empty-directory",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "empty-directory",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "empty-directory",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "empty-directory",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": false,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": false,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": false,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": false,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": true,
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": true,
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": true,
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy",
+            "stdin": true,
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy-baseline",
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "invalid-policy-baseline",
+            "format": "sarif",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "source_coverage": {
+      "artifact": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-source-coverage-native-bpvlozs_/qualification.json",
+        "sha256": "5e6a5c91b27ae305bbbf0c560ce97091e32beda725b5d96cb33a25f7288537cd"
+      },
+      "result": {
+        "binary_sha256": "fb9da41f09121ff96f73eb93d66fe8f169aef5ffc91691fffcac8ed213f6d1a0",
+        "passed": 36,
+        "total": 36,
+        "checks": [
+          {
+            "case": "filesystem-policy",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "filesystem-policy",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "filesystem-policy",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "filesystem-policy",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "index",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "index",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "index",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "index",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "worktree",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "worktree",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "worktree",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "worktree",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "history",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "history",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "history",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "history",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "timeline",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "timeline",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "timeline",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "timeline",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "mobile",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "mobile",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "mobile",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "mobile",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "mobile-limit",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "mobile-limit",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "mobile-limit",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "mobile-limit",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "image",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "image",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "image",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "image",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "agents",
+            "stored": false,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "agents",
+            "stored": false,
+            "format": "sarif",
+            "passed": true
+          },
+          {
+            "case": "agents",
+            "stored": true,
+            "format": "json",
+            "passed": true
+          },
+          {
+            "case": "agents",
+            "stored": true,
+            "format": "sarif",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "config_policy": {
+      "artifact": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-config-policy-native-qqr2pggh/evidence.json",
+        "sha256": "11a1c6830b318b4d0ba49b548f8342c025ca1c9197ea4edd4b76d0c9019f343d"
+      },
+      "result": {
+        "binary_sha256": "fb9da41f09121ff96f73eb93d66fe8f169aef5ffc91691fffcac8ed213f6d1a0",
+        "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+        "checks": [
+          {
+            "case": "identity-init",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-same-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-same-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-same-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-same-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-drift-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-drift-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-drift-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-drift-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-configuration-drift",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-other-filename-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-other-filename-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-other-filename-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-other-filename-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-filename-independent",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-matching-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-drift-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-values-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-paths-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-regexes-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-stopwords-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlFalse-disable-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-same-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-same-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-same-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-same-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-drift-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-drift-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-drift-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-drift-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-configuration-drift",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-other-filename-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-other-filename-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-other-filename-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-other-filename-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-filename-independent",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-matching-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-drift-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-values-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-paths-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-regexes-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-stopwords-remediation",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-before-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-after-status",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-same-policy",
+            "passed": true
+          },
+          {
+            "case": "json-mlTrue-disable-remediation",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-same-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-same-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-same-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-same-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-drift-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-drift-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-drift-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-drift-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-configuration-drift",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-other-filename-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-other-filename-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-other-filename-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-other-filename-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-filename-independent",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-values-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-paths-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-regexes-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-stopwords-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlFalse-disable-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-same-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-same-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-same-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-same-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-drift-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-drift-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-drift-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-drift-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-configuration-drift",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-other-filename-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-other-filename-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-other-filename-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-other-filename-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-filename-independent",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-values-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-paths-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-regexes-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-stopwords-same-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-before-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-before-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-before-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-before-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-after-status",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-after-filtered",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-after-known-policy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-after-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-mlTrue-disable-same-policy",
+            "passed": true
+          },
+          {
+            "case": "import-a-status",
+            "passed": true
+          },
+          {
+            "case": "import-a-filtered",
+            "passed": true
+          },
+          {
+            "case": "import-a-known-policy",
+            "passed": true
+          },
+          {
+            "case": "import-a-privacy",
+            "passed": true
+          },
+          {
+            "case": "import-b-status",
+            "passed": true
+          },
+          {
+            "case": "import-b-filtered",
+            "passed": true
+          },
+          {
+            "case": "import-b-known-policy",
+            "passed": true
+          },
+          {
+            "case": "import-b-privacy",
+            "passed": true
+          },
+          {
+            "case": "final-imported-allowlist-identity",
+            "passed": true
+          },
+          {
+            "case": "import-remediation",
+            "passed": true
+          },
+          {
+            "case": "oversize-json-status",
+            "passed": true
+          },
+          {
+            "case": "oversize-json-privacy",
+            "passed": true
+          },
+          {
+            "case": "json-budget-diagnostic",
+            "passed": true
+          },
+          {
+            "case": "json-baseline-preserved",
+            "passed": true
+          },
+          {
+            "case": "oversize-sarif-status",
+            "passed": true
+          },
+          {
+            "case": "oversize-sarif-privacy",
+            "passed": true
+          },
+          {
+            "case": "sarif-budget-diagnostic",
+            "passed": true
+          },
+          {
+            "case": "sarif-baseline-preserved",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "network": "OS deny, checked by loopback bind",
+        "scope": "Synthetic config/allowlist/gitleaks, JSON/SARIF, canonical L2, default controls, absence and baseline guards. No provider or production qualification."
+      }
+    },
+    "loaded_policy": {
+      "artifact": {
+        "path": "/Users/sugar/dev/prowl-qualification/scope-encoding-20261116/prowl-loaded-policy-native-kzhxyepf/evidence.json",
+        "sha256": "2fe872bcbe82b79cc82d5f3d1b454ff9e1b09575523193670115b3c762627784"
+      },
+      "result": {
+        "binary_sha256": "fb9da41f09121ff96f73eb93d66fe8f169aef5ffc91691fffcac8ed213f6d1a0",
+        "model_feature_names_source_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+        "checks": [
+          {
+            "case": "identity-init",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-before-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-3",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-same-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-changed-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-changed-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-9",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-changed-snapshot",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-threshold-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-threshold-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-13",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-14",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-threshold-identified",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-matching-remediation",
+            "passed": true
+          },
+          {
+            "case": "explicit-json-changed-remediation",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-before-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-20",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-same-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-changed-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-changed-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-26",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-changed-snapshot",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-threshold-complete",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-threshold-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-30",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-31",
+            "passed": true
+          },
+          {
+            "case": "explicit-sarif-threshold-identified",
+            "passed": true
+          },
+          {
+            "case": "model-other-filename-complete",
+            "passed": true
+          },
+          {
+            "case": "model-other-filename-redaction",
+            "passed": true
+          },
+          {
+            "case": "model-original-filename-complete",
+            "passed": true
+          },
+          {
+            "case": "model-original-filename-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-37",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-38",
+            "passed": true
+          },
+          {
+            "case": "model-digest-independent-of-filename",
+            "passed": true
+          },
+          {
+            "case": "installed-json-before-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-json-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-42",
+            "passed": true
+          },
+          {
+            "case": "installed-json-same-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-json-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "installed-json-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "installed-json-changed-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-json-changed-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-48",
+            "passed": true
+          },
+          {
+            "case": "installed-json-changed-snapshot",
+            "passed": true
+          },
+          {
+            "case": "installed-json-threshold-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-json-threshold-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-52",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-53",
+            "passed": true
+          },
+          {
+            "case": "installed-json-threshold-identified",
+            "passed": true
+          },
+          {
+            "case": "installed-json-matching-remediation",
+            "passed": true
+          },
+          {
+            "case": "installed-json-changed-remediation",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-before-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-59",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-same-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-changed-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-changed-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-65",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-changed-snapshot",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-threshold-complete",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-threshold-redaction",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-69",
+            "passed": true
+          },
+          {
+            "case": "ml_model-single-scope-70",
+            "passed": true
+          },
+          {
+            "case": "installed-sarif-threshold-identified",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-before-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-74",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-same-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-status-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-status-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-80",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-status-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-status-remediation",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-header-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-header-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-85",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-header-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-header-remediation",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-url-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-url-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-90",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-url-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-url-remediation",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-method-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-method-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-95",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-method-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-method-remediation",
+            "passed": true
+          },
+          {
+            "case": "verifier-json-same-remediation",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-before-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-101",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-same-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-same-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-same-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-status-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-status-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-107",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-status-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-header-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-header-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-111",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-header-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-url-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-url-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-115",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-url-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-method-complete",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-method-redaction",
+            "passed": true
+          },
+          {
+            "case": "verifiers-single-scope-119",
+            "passed": true
+          },
+          {
+            "case": "verifier-sarif-method-different-snapshot",
+            "passed": true
+          },
+          {
+            "case": "owned-provider-only",
+            "passed": true
+          },
+          {
+            "case": "sidecar-before-complete",
+            "passed": true
+          },
+          {
+            "case": "sidecar-before-redaction",
+            "passed": true
+          },
+          {
+            "case": "sidecar-after-complete",
+            "passed": true
+          },
+          {
+            "case": "sidecar-after-redaction",
+            "passed": true
+          },
+          {
+            "case": "unversioned_policy-single-scope-126",
+            "passed": true
+          },
+          {
+            "case": "unversioned_policy-single-scope-127",
+            "passed": true
+          },
+          {
+            "case": "sidecar-unversioned",
+            "passed": true
+          },
+          {
+            "case": "sidecar-remediation",
+            "passed": true
+          },
+          {
+            "case": "owned-sidecar-used",
+            "passed": true
+          },
+          {
+            "case": "default-complete",
+            "passed": true
+          },
+          {
+            "case": "default-redaction",
+            "passed": true
+          },
+          {
+            "case": "default-no-loaded-policies",
+            "passed": true
+          }
+        ],
+        "passed": true,
+        "network": "OS deny outside loopback, checked by denied bind; owned loopback verifier and sidecar only",
+        "verification_calls": 2,
+        "score_calls": 1,
+        "scope": "Local synthetic model/verifier snapshots and report correlation. No real provider or hosted qualification."
+      }
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "findings": 420,
+      "incomplete": 85,
+      "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6"
+    },
+    "later_delta": "Final runtime only narrows byte fast path to exact byte type, with slice/array TextMarshaler regressions; final full Go/model race/min-Go/lint/native/correlation/quality rerun. Initial broader suites are not claimed as final binary reruns."
+  },
+  "excluded_attempts": {
+    "pre_recovery": "Temporary /tmp worktrees/processes/artifacts disappeared. Initial uncommitted source and loose evidence were unavailable; recovered under /Users/sugar/dev and reran qualification.",
+    "native.log": "Harness counted response_truncated marker as a secret; corrected to assert AWS findings explicitly.",
+    "native-second.log": "Optional cross-file case omitted required verify flag; no cross-file qualification claimed.",
+    "native-third.log": "Cross-file requires verify; OS deny caused expected verification_inconclusive. Removed that unrelated native case, retained normal staged scope coverage.",
+    "lint.log": "Installed 2.13.2 could not read Go 1.27.4 export data; pinned CI 2.15.0 rebuilt with 1.27.4 and passed.",
+    "loaded-policy.log": "Full OS network deny blocked owned loopback server; rerun under OS loopback-only profile passed.",
+    "dataset_fetch": "Python TLS trust-store failure; system curl with TLS verification obtained pinned dataset, SHA-256 verified."
+  },
+  "limits": [
+    "No provider credentials or external provider requests used; native/quality OS network deny, loaded-policy owned loopback only.",
+    "No native Windows execution, final release factory/archive/signature publication or deployment qualification.",
+    "Historical frozen evidence JSON retained unchanged. No lossless arbitrary-byte path schema introduced."
+  ]
+}
