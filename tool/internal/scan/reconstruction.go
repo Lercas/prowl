@@ -27,7 +27,7 @@ func (p *Pipeline) appendReconstructed(ctx context.Context, it model.Item, out [
 	if limited {
 		model.Note(ctx, "reconstruction_limit", it.Path, true)
 	}
-	li := newLineIndex(it.Text)
+	li := newSourceLineIndex(it.Text, it.Path)
 	for _, value := range values {
 		if ctx.Err() != nil {
 			break

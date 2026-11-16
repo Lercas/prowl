@@ -144,7 +144,7 @@ func imageFileName(p string) string {
 // filesystem path — applying the example/test-path heuristic there would wrongly demote a real secret
 // on a page that merely happens to be titled e.g. "Examples".
 func adjustSeverity(sev string, m detect.Match, li *lineIndex, path string, pathIsFile bool) string {
-	if m.Stage == "L1-checksum" {
+	if m.ChecksumValid {
 		return sev // checksum is proof regardless of location
 	}
 	if !li.isComment(m.Start) && !(pathIsFile && isExamplePath(path)) {
@@ -175,6 +175,7 @@ type lineIndex struct {
 	// runs once per line instead of once per match, collapsing the O(matches·lineLen) single-line time DoS.
 	pragmaCache  []int8 // -1 = unknown, 0 = no pragma, 1 = has pragma; len == len(starts)
 	commentCache []int8 // -1 = unknown, 0 = not a comment, 1 = comment; len == len(starts)
+	pragmaSyntax uint8
 }
 
 func newLineIndex(text string) *lineIndex {
@@ -196,7 +197,7 @@ func newLineIndex(text string) *lineIndex {
 		pc[i] = -1 // unknown until first lookup
 		cc[i] = -1
 	}
-	return &lineIndex{text: text, starts: starts, pragmaCache: pc, commentCache: cc}
+	return &lineIndex{text: text, starts: starts, pragmaCache: pc, commentCache: cc, pragmaSyntax: pragmaAll}
 }
 
 // lineAt returns the 0-based index of the line containing byte pos.
@@ -234,32 +235,10 @@ func (li *lineIndex) bounds(pos int) (int, int) {
 // hasPragma reports whether the line containing pos carries an inline allow marker. Memoized per line.
 func (li *lineIndex) hasPragma(pos int) bool {
 	i := li.lineAt(pos)
-	if i < len(li.pragmaCache) {
-		if c := li.pragmaCache[i]; c >= 0 {
-			return c == 1
-		}
+	if li.pragmaCache[i] < 0 {
+		li.initPragmas()
 	}
-	s := li.starts[i]
-	e := len(li.text)
-	if i+1 < len(li.starts) {
-		e = li.starts[i+1] - 1
-	}
-	has := false
-	line := strings.ToLower(li.text[s:e])
-	for _, p := range allowPragmas {
-		if strings.Contains(line, p) {
-			has = true
-			break
-		}
-	}
-	if i < len(li.pragmaCache) {
-		if has {
-			li.pragmaCache[i] = 1
-		} else {
-			li.pragmaCache[i] = 0
-		}
-	}
-	return has
+	return li.pragmaCache[i] == 1
 }
 
 // isComment reports whether the line containing pos begins (after whitespace) with a comment marker.
@@ -483,6 +462,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			}
 			result := det.ScanWithStatus(ctx, it.Text, opts)
 			ms, truncated = result.Matches, result.CandidateLimited || result.Base64Limited
+			if result.Base64Limited {
+				model.Note(ctx, "base64_limit", it.Path, true)
+			}
 		},
 		func(r any) {
 			logx.Warn("recovered scan panic", "path", it.Path, "err", r)
@@ -547,7 +529,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	}
 	var reqs []mlscore.Record // parallel to out, populated only when the ML stage is active
 	dedup := map[string]int{} // value+line key -> index in out, avoids cascade/template double-reporting
-	li := newLineIndex(it.Text)
+	li := newSourceLineIndex(it.Text, it.Path)
 	hasPragma := li.hasPragma
 	if literalDoc != nil {
 		hasPragma = func(start int) bool {
@@ -1040,6 +1022,7 @@ func mlFilterSelected(ctx context.Context, ml mlscore.Scorer, out []model.Findin
 // mlExemptTypes carry no "private"/"key" token yet must never be ML-dropped — notably
 // gcp_service_account, a "-----BEGIN PRIVATE KEY-----" inside JSON (category "cloud", not "pki").
 var mlExemptTypes = map[string]bool{
+	"jwt":                 true, // Reliable structural nomination, not authenticity proof.
 	"private_key_pem":     true,
 	"gcp_service_account": true,
 }

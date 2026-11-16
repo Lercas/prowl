@@ -626,15 +626,16 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 			checked, valid := checksumValid(st.ID, val)
 			conf, stage := 0.9, "L1-regex"
 			switch {
+			case st.ID == "jwt":
+				if !JWTStructuralOK(val) {
+					continue
+				}
+				stage = "L1-structure" // Parsed JOSE shape is not a checksum/signature proof.
 			case checked && valid:
 				conf, stage = 0.99, "L1-checksum"
 			case checked && !valid:
-				// Checksum failed. For a structural type (jwt) that proves it isn't one — drop it. For a
-				// prefix-defined token (github ghp_/…) a failed CRC doesn't prove fake (our CRC is
+				// For a prefix-defined token (github ghp_/…) a failed CRC doesn't prove fake (our CRC is
 				// best-effort), so gate on entropy and report at reduced confidence instead of dropping.
-				if st.ID == "jwt" {
-					continue
-				}
 				if ShannonEntropy(val) < 3.2 {
 					continue
 				}

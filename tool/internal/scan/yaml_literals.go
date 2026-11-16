@@ -177,7 +177,7 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 	visits, work := 0, 0
 	limited := false
 	add := func(v sourceLiteral) {
-		if len(doc.values) >= 10000 || work+len(v.value)+len(v.name) > 8<<20 {
+		if len(doc.values) >= 100000 || work+len(v.value)+len(v.name) > 8<<20 {
 			limited = true
 			return
 		}
