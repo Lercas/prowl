@@ -179,6 +179,14 @@
   - [ ] Проверить остальные разошедшиеся компоненты: MCP/LSP, источники, отчёты,
     correlation, integrity шаблонов и release checks. Намеренные замены ML/cgo
     не откатывать: сохранить квалифицированную Go-flate-v2 модель и security-обновления.
+    - [x] Integrity выбранных rules/verifiers: native CLI candidate и неизменённый
+      пересобранный тег 1.4.0 — по 182/182 под OS network deny. Проверены
+      installed/explicit selection, повреждённые manifests/files, list/validate,
+      baseline guard и bundled override. Целевые Go-тесты — 258 passed, один
+      opt-in corpus test пропущен; runtime integrity sources совпадают с тегом.
+      Remote update/install и подписи релиза остаются отдельно.
+      [Контракт](wiki/Template-Integrity.md),
+      `wiki/evidence/1.5.0-template-integrity-20261116.json`.
     - [x] HTTP worker вновь возвращает полный coverage envelope и `/capabilities`,
       сохраняя immutable Pipeline 1.5.0. Неподдерживаемые request stage/disclosure
       поля отклоняются, batch count ограничен до материализации всей коллекции.
