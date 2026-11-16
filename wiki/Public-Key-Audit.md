@@ -118,7 +118,8 @@ Credential baseline не подавляет `public_key_audit`, в том чис
 контракты. Финальные сетевые проверки используют локальный provider fixture;
 реальный аккаунт не квалифицирован и требует отдельного разрешённого ресурса.
 Полный пункт TODO остаётся открыт: прочие форматы/связи, надёжное распознавание admin,
-Google API restrictions ещё не реализованы. Firebase и Supabase имеют отдельные
+Google API restrictions имеют отдельный opt-in [metadata-контракт](Google-API-Restrictions.md);
+его real-account acceptance остаётся открытым. Firebase и Supabase имеют отдельные
 ограниченные контракты: [Firebase](Firebase-Public-Audit.md),
 [Supabase](Supabase-Public-Audit.md). Наблюдение чтения не доказывает отсутствие rules/RLS.
 

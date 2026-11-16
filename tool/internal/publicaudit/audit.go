@@ -27,13 +27,14 @@ var apiKey = regexp.MustCompile(`^[a-fA-F0-9]{32}$`)
 
 // Auditor belongs to one invocation. No endpoint override or discovered host is accepted.
 type Auditor struct {
-	client      *http.Client
-	mu          sync.Mutex
-	entries     map[[32]byte]*entry
-	attempts    int
-	slots       chan struct{}
-	collections []string
-	tables      []string
+	client          *http.Client
+	googleAuthorize func(*http.Request)
+	mu              sync.Mutex
+	entries         map[[32]byte]*entry
+	attempts        int
+	slots           chan struct{}
+	collections     []string
+	tables          []string
 }
 type entry struct {
 	done   chan struct{}
@@ -84,7 +85,11 @@ func (a *Auditor) Audit(ctx context.Context, typ, key string, bindings map[strin
 		return a.auditSupabase(ctx, key, bindings)
 	}
 	if typ != "algolia-api-key" {
-		return a.auditFirebase(ctx, key, bindings)
+		firebase := a.auditFirebase(ctx, key, bindings)
+		if a.googleAuthorize != nil {
+			return mergeGoogleAudit(a.auditGoogleRestrictions(ctx, key), firebase)
+		}
+		return firebase
 	}
 	app, ok := applicationID(bindings)
 	if !ok || !apiKey.MatchString(key) {

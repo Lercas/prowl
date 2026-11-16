@@ -27,3 +27,11 @@ func NewWithOwnedTargets(transport http.RoundTripper, collections, tables []stri
 	}
 	return a, err
 }
+
+func NewWithOwnedGoogleRestrictions(transport http.RoundTripper, token string) (*Auditor, error) {
+	a, err := NewWithGoogleRestrictions(time.Second, nil, nil, token)
+	if err == nil {
+		a.client.Transport = transport
+	}
+	return a, err
+}

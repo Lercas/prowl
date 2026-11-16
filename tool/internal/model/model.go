@@ -157,11 +157,11 @@ func (a *PublicKeyAudit) HasAccessObservation() bool {
 	if a == nil {
 		return false
 	}
-	if a.Status == "excess_permissions" || a.Status == "public_read_allowed" {
+	if a.Status == "excess_permissions" || a.Status == "unrestricted" || a.Status == "public_read_allowed" {
 		return true
 	}
 	for _, check := range a.Checks {
-		if check.Status == "public_read_allowed" {
+		if check.Status == "public_read_allowed" || check.Status == "unrestricted" {
 			return true
 		}
 	}

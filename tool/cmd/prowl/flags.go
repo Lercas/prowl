@@ -269,6 +269,7 @@ var cliFlags = []flagSpec{
 	intFlag("--concurrency", "org hermes-audit", "source concurrency", 1, func(c *commonFlags) *int { return &c.cmd.concurrency }),
 	listFlag("--exclude-repo", "org", "skip matching repository URL substrings", true, func(c *commonFlags) *[]string { return &c.cmd.excludeRepos }),
 	boolFlag("--gists", "org", "scan a GitHub user's public gists", func(c *commonFlags) *bool { return &c.cmd.gists }),
+	boolFlag("--audit-google-restrictions", "domain mobile", "read Google API key restriction metadata using PROWL_GOOGLE_AUDIT_TOKEN; requires --audit-public", func(c *commonFlags) *bool { return &c.auditGoogleRestrictions }),
 	boolFlag("--audit-public", "domain mobile", "read-only public-key permission audit; requires --authorized", func(c *commonFlags) *bool { return &c.auditPublic }),
 	listFlag("--audit-firestore-collection", "domain mobile", "explicit Firestore collection path; requires --audit-public; up to 8", false, func(c *commonFlags) *[]string { return &c.auditCollections }),
 	listFlag("--audit-supabase-table", "domain mobile", "explicit public-schema Supabase table name; requires --audit-public; up to 8", false, func(c *commonFlags) *[]string { return &c.auditTables }),
@@ -455,6 +456,9 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.crossFile && (!c.verify || c.since != "" || c.history || c.stdinName != "") {
 		return c, nil, errors.New("--cross-file requires --verify and local roots, --staged or a repository commit; history, --since and stdin are not supported")
 	}
+	if c.auditGoogleRestrictions && !c.auditPublic {
+		return c, nil, errors.New("--audit-google-restrictions requires --audit-public")
+	}
 	if len(c.auditCollections) > 0 && !c.auditPublic {
 		return c, nil, errors.New("--audit-firestore-collection requires --audit-public")
 	}
@@ -623,6 +627,7 @@ type commonFlags struct {
 	auditCollections                         []string
 	auditTables                              []string
 	auditPublic                              bool
+	auditGoogleRestrictions                  bool
 	verify, verifiedOnly                     bool
 	showSecrets                              bool // --show-secrets: emit the full unredacted value
 	failOnVerified                           bool // gate (exit 1) only on a provider-confirmed-LIVE secret

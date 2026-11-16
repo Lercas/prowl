@@ -90,6 +90,16 @@ Service-role ключи не используются. Принятый запр
 Дополнительный publishable subject включён только в audit-режиме, severity info.
 [Контракт](wiki/Supabase-Public-Audit.md).
 
+Google API restrictions: CLI `domain/mobile --audit-public --authorized
+--audit-google-restrictions` читает только metadata через API Keys API с отдельным
+`PROWL_GOOGLE_AUDIT_TOKEN` оператора. LookupKey/GetKey требуют IAM lookup/get;
+Maps/Gemini и другие data API не вызываются. `unrestricted` означает отсутствие
+хотя бы одного измерения client/API restrictions; `restrictions_configured` не
+подтверждает силу policy или безопасность. Firebase checks сохраняются отдельно.
+OAuth/key/raw metadata values не копируются в `public_key_audit`; disclosure самой
+находки управляется обычным `--show-secrets`. [Контракт](wiki/Google-API-Restrictions.md).
+
+
 ## Interface language
 
 Everything the tool shows a user is in English: help, flag descriptions, errors, logs, report text,

@@ -627,6 +627,18 @@
     - [ ] Другие Firebase формы/точки чтения и подтверждение на разрешённом
       реальном аккаунте; отказ root/list не считается доказательством всех rules.
   - [ ] Google API key: отсутствие ограничений по referrer / API.
+    - [x] Явный `--audit-google-restrictions` в domain/mobile вместе с
+      `--audit-public --authorized`: authenticated read-only LookupKey/GetKey,
+      отдельный OAuth-токен оператора фиксируется при создании auditor.
+      Отмечаются unconfigured client/API dimensions и наличие configured fields,
+      без утверждения о силе policy, LIVE или доступности billable API.
+      Google/Firebase checks сосуществуют; ошибки/неизвестные формы — inconclusive,
+      exit 2 и baseline guard. Fixed host, strict metadata и общий request budget;
+      credential/response values не сериализуются. Локальная квалификация:
+      `wiki/evidence/1.5.0-google-restrictions-20261116.json`.
+    - [ ] Read-only подтверждение на разрешённом реальном GCP account/key pair;
+      нужны passage-ссылки на operator OAuth и owned тестовые ключи. Локальный
+      HTTP fixture и network-denied CLI не заменяют эту проверку.
   - [ ] Algolia: admin-ключ вместо search-ключа (ACL).
     - [x] Read-only self-ACL для пар из одного объекта JSON/YAML/TOML: отдельный
       `public_key_audit`, после ML, фиксированный GET, bounded/cache-aware запросы,

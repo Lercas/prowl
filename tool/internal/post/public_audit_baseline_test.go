@@ -17,7 +17,7 @@ func TestCredentialBaselineCannotHideChangedPublicPermissions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, status := range []string{"read_denied", "public_read_allowed", "search_only", "excess_permissions", "inconclusive"} {
+	for _, status := range []string{"read_denied", "public_read_allowed", "search_only", "excess_permissions", "unrestricted", "restrictions_configured", "inconclusive"} {
 		for _, inOccurrence := range []bool{false, true} {
 			finding := key
 			audit := &model.PublicKeyAudit{Status: status}

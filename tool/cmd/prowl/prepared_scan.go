@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/logx"
@@ -51,7 +52,15 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	var auditErr error
 	if flags.auditPublic {
 		// Parsing has already validated the immutable collection selection.
-		options.PublicAuditor, auditErr = publicaudit.NewWithTargets(flags.timeout, flags.auditCollections, flags.auditTables)
+		var auditor *publicaudit.Auditor
+		if flags.auditGoogleRestrictions {
+			auditor, auditErr = publicaudit.NewWithGoogleRestrictions(flags.timeout, flags.auditCollections, flags.auditTables, os.Getenv("PROWL_GOOGLE_AUDIT_TOKEN"))
+		} else {
+			auditor, auditErr = publicaudit.NewWithTargets(flags.timeout, flags.auditCollections, flags.auditTables)
+		}
+		if auditErr == nil {
+			options.PublicAuditor = auditor
+		}
 	}
 	var indexErr error
 	if flags.indexDir != "" {
