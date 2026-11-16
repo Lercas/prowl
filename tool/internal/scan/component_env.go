@@ -53,7 +53,7 @@ func envComponents(ctx context.Context, it model.Item) (*literalDocument, map[st
 		if eq <= 0 {
 			return nil, nil
 		}
-		name := strings.TrimSpace(left[:eq])
+		name := strings.Trim(left[:eq], " \t")
 		for i, c := range name {
 			if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || i > 0 && c >= '0' && c <= '9') {
 				return nil, nil
@@ -63,7 +63,7 @@ func envComponents(ctx context.Context, it model.Item) (*literalDocument, map[st
 			doc.unsafeGroups[1] = true
 		}
 		fields[name] = nil
-		raw := strings.TrimSpace(left[eq+1:])
+		raw := strings.Trim(left[eq+1:], " \t")
 		valueStart := start + eq + 1 + len(left[eq+1:]) - len(strings.TrimLeft(left[eq+1:], " \t"))
 		known, value := true, raw
 		if len(raw) > 0 && (raw[0] == '\'' || raw[0] == '"') {
@@ -73,7 +73,7 @@ func envComponents(ctx context.Context, it model.Item) (*literalDocument, map[st
 				known = false
 			} else {
 				close++
-				tail := strings.TrimSpace(raw[close+1:])
+				tail := strings.Trim(raw[close+1:], " \t")
 				if tail != "" && !strings.HasPrefix(tail, "#") {
 					known = false
 				}

@@ -21,12 +21,20 @@ import (
 
 const componentMaxItems = 10000
 const componentMaxBytes = 32 << 20
+const componentMaxLiterals = 100000
 
 type componentBatch struct {
 	set     *credentialset.Set
 	docs    map[int]*literalDocument
 	scopes  map[int]*credentialset.Scope
 	allowed map[int]map[int]bool
+}
+
+func (b *componentBatch) discard() {
+	b.set.Close()
+	clear(b.docs)
+	clear(b.scopes)
+	clear(b.allowed)
 }
 
 func (p *Pipeline) componentLocation(it model.Item, line, col int) string {
@@ -116,7 +124,7 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 	}
 	collector := New(options)
 	var items []model.Item
-	bytes, valid := 0, true
+	bytes, literals, valid := 0, 0, true
 	collecting := true
 	for collecting {
 		select {
@@ -135,6 +143,10 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 			bytes += len(it.Text)
 			it.CredentialEntry = len(items) + 1
 			items = append(items, it)
+			if !valid {
+				batch.discard()
+				continue
+			}
 			if it.Error != nil {
 				valid = false
 				continue
@@ -155,6 +167,13 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 				}
 			}
 			if doc != nil {
+				if len(doc.values) > componentMaxLiterals-literals {
+					model.Note(ctx, "cross_file_literal_limit", it.Path, true)
+					valid = false
+					batch.discard()
+					continue
+				}
+				literals += len(doc.values)
 				batch.docs[it.CredentialEntry] = doc
 			}
 			if it.CredentialScope == nil || doc == nil || doc.verificationUnsafe || len(it.Text) > 1<<20 || !flat {
@@ -195,6 +214,9 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 	complete, _, _ := model.CoverageFrom(ctx).Snapshot()
 	if set.Seal(ctx, valid && complete) != nil {
 		valid = false
+	}
+	if !valid {
+		batch.discard()
 	}
 	options.components = batch
 	buffered := make(chan model.Item, len(items))

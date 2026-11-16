@@ -81,7 +81,7 @@ func TestCrossFileRunUsesCompleteOriginalConfigurationInventory(t *testing.T) {
 
 func TestCrossFileInvalidOrForeignComponentsNeverProbe(t *testing.T) {
 	allowOrderFixture(t)
-	for _, mode := range []string{"foreign-root", "missing-scope", "source-error", "ambiguous", "unknown-role", "empty-role", "nested", "duplicate", "interpolation", "derived-jwt"} {
+	for _, mode := range []string{"foreign-root", "missing-scope", "source-error", "ambiguous", "unknown-role", "empty-role", "nested", "duplicate", "interpolation", "unicode-prefix", "derived-jwt"} {
 		t.Run(mode, func(t *testing.T) {
 			var calls atomic.Int32
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { calls.Add(1); w.WriteHeader(200) }))
@@ -107,6 +107,9 @@ func TestCrossFileInvalidOrForeignComponentsNeverProbe(t *testing.T) {
 			case "interpolation":
 				items[1].Path = "prod.env"
 				items[1].Text = "account=${OTHER}\n"
+			case "unicode-prefix":
+				items[0].Path = "prod.env"
+				items[0].Text = "accessKeyId=\u00a0AKIANAFGYOEYPXU1DSYP\n"
 			case "derived-jwt":
 				items[0].Text = `{"token":"eyJhbGciOiJub25lIn0.eyJhd3NfYWNjZXNzX2tleV9pZCI6IkFLSUFOQUZHWU9FWVBYVTFEU1lQIn0."}`
 			}
@@ -167,11 +170,18 @@ func TestCrossFileIntakeLimitsStayIncomplete(t *testing.T) {
 	allowOrderFixture(t)
 	srv := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("incomplete intake reached provider") }))
 	defer srv.Close()
-	for _, mode := range []string{"items", "bytes"} {
+	for _, mode := range []string{"items", "bytes", "literals"} {
 		t.Run(mode, func(t *testing.T) {
 			items := make([]model.Item, componentMaxItems+1)
 			if mode == "bytes" {
 				items = []model.Item{{Source: "code", Path: "large.txt", Text: strings.Repeat("x", componentMaxBytes+1)}}
+			}
+			if mode == "literals" {
+				items = nil
+				scope := credentialset.NewScope()
+				for range 11 {
+					items = append(items, model.Item{Source: "code", Path: "comments.env", Text: strings.Repeat("#\n", 10000), CredentialScope: scope})
+				}
 			}
 			fs, _ := runComponentItems(t, Options{Detector: detector(t), Verifiers: orderVerifier(t, srv.URL, "extract:\n  account: 'tenant_[ab]'\n"), CrossFile: true}, items)
 			if !hasIncompleteFinding(fs) {
