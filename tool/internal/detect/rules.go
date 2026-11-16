@@ -51,6 +51,7 @@ func hasNonASCII(s string) bool {
 type Match struct {
 	verificationText  string
 	verificationStart int
+	containerPriority float64 // child-proof selection rank, never reported as confidence/authenticity
 	Transform         string
 	DecodedText       string
 	DecodedStart      int
@@ -323,6 +324,7 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 		all = append(all, public...)
 		candidateCapped = candidateCapped || limited
 	}
+	prioritizeJWTContainers(all, jwtChildren, indirectJWT)
 	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
 	kept, childLimited := mergeJWTPayloadMatches(kept, jwtChildren)
 	kept, indirectLimited := mergeJWTPayloadMatches(kept, indirectJWT)
@@ -684,8 +686,9 @@ func isContextStage(stage string) bool {
 // retains the highest-confidence findings. A negative cap means no cap; the bool reports truncation.
 func dedupeOverlapsCap(ms []Match, cap int) (kept []Match, truncated bool) {
 	sort.Slice(ms, func(i, j int) bool {
-		if ms[i].Confidence != ms[j].Confidence {
-			return ms[i].Confidence > ms[j].Confidence
+		a, b := max(ms[i].Confidence, ms[i].containerPriority), max(ms[j].Confidence, ms[j].containerPriority)
+		if a != b {
+			return a > b
 		}
 		// A contextual guess must not replace an equally confident exact regex/checksum span with
 		// a larger token containing its assignment name. This priority precedes position for all types.

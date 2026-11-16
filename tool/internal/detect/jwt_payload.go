@@ -181,6 +181,32 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 	return kept, limited
 }
 
+// Preserve an envelope needed to anchor its typed children before the overlap
+// pass discards unbound encoded aliases. This changes only internal selection
+// rank; a parsed JWT's reported confidence never becomes checksum evidence.
+func prioritizeJWTContainers(matches []Match, groups ...[]Match) {
+	var priorities map[Base64Span]float64
+	for _, children := range groups {
+		for _, child := range children {
+			if !child.JWTPayload {
+				continue
+			}
+			if priorities == nil {
+				priorities = make(map[Base64Span]float64)
+			}
+			priorities[child.jwtContainer] = max(priorities[child.jwtContainer], child.Confidence)
+		}
+	}
+	if len(priorities) == 0 {
+		return
+	}
+	for i := range matches {
+		if matches[i].Type == "jwt" {
+			matches[i].containerPriority = priorities[Base64Span{matches[i].Start, matches[i].End}]
+		}
+	}
+}
+
 // Payload children survive enclosing-token overlap, while the final combined
 // cap still applies. A claims-aware duplicate must keep its binding isolation.
 func mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {

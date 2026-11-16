@@ -208,11 +208,11 @@ func TestScanDropsExamples(t *testing.T) {
 	if !has(`api_key = "aZ9xK1bC3dQ7rT4vW8yU2pL5"`, "generic_api_key") {
 		t.Error("real generic_api_key dropped")
 	}
-	// jwt.io example dropped, real JWT kept
+	// jwt.io example dropped, well-formed synthetic compact JWS kept.
 	if has(`tok = "`+jwtIOExample+`"`, "jwt") {
 		t.Error("jwt.io example reported as jwt")
 	}
-	if !has(`tok = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZ"`, "jwt") {
+	if !has(`tok = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmNkZWZnIn0.dozjgNryP4Jq3mNHl9wYZQ"`, "jwt") {
 		t.Error("real JWT dropped")
 	}
 }

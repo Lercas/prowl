@@ -176,8 +176,15 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 	doc.pragmas = &lineIndex{text: it.Text, starts: source.starts, pragmaCache: make([]int8, len(source.starts))}
 	visits, work := 0, 0
 	limited := false
+	maxValues := 100000 // Physical inventories retain the released 9000-map capacity.
+	for _, p := range inventory {
+		if p.node.Kind == yaml.AliasNode {
+			maxValues = 10000 // Graph expansion keeps its separately qualified shared bound.
+			break
+		}
+	}
 	add := func(v sourceLiteral) {
-		if len(doc.values) >= 100000 || work+len(v.value)+len(v.name) > 8<<20 {
+		if len(doc.values) >= maxValues || work+len(v.value)+len(v.name) > 8<<20 {
 			limited = true
 			return
 		}

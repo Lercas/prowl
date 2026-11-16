@@ -134,7 +134,7 @@ func TestRunSeverityPragmaAllow(t *testing.T) {
 	det := detector(t)
 	fs := New(Options{Detector: det, Workers: 2}).Run(context.Background(), feed(
 		model.Item{Text: `AWS = "AKIANAFGYOEYPXU1DSYP"`, Source: "code", Path: "a.py"},
-		model.Item{Text: `K = "AKIAZZ11YY22XX33WW44"  // prowl:allow`, Source: "code", Path: "b.py"},
+		model.Item{Text: `K = "AKIAZZ11YY22XX33WW44"  # prowl:allow`, Source: "code", Path: "b.py"},
 	))
 
 	if len(fs) != 1 {
