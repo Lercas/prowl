@@ -107,6 +107,78 @@ def main():
 
     try:
         for extension in ('json', 'yaml', 'toml', 'env'):
+            source = staged_fixture('history-' + extension, extension)
+            git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned first complete tree')
+            first = git(source, 'rev-parse', 'HEAD').decode().strip()
+            account = source / ('account.' + extension)
+            text = account.read_text()
+            account.write_text(text.replace('tenant_a', 'tenant_b'))
+            git(source, 'add', '--all')
+            git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned second complete tree')
+            second = git(source, 'rev-parse', 'HEAD').decode().strip()
+            account.write_text(text.replace('tenant_a', 'uncommitted'))
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--history'], fmt=fmt, ml=ml, cwd=source)
+                    fs, complete = report(p, fmt)
+                    label = f'history-{extension}-{fmt}-ml{ml}'
+                    occurrences = [o for f in fs for o in f.get('occurrences', [f])]
+                    verdicts = {o['provenance']['commit']: o['verification']['status'] for o in occurrences}
+                    check(label + '-commit-verdicts', p.returncode == 0 and complete and len(occurrences) == 2 and verdicts == {first: 'verified', second: 'invalid'})
+                    ids = {i for o in occurrences for i in o['verification']['components']['primary']}
+                    check(label + '-separate-ids', len(ids) == 2 and len(Handler.calls) == before + 2 and sorted(Handler.calls[before:]) == [False, True])
+                    check(label + '-private', all(value.encode() not in p.stdout for value in (KEY, 'tenant_a', 'tenant_b', 'uncommitted')))
+            index = root / ('history-index-' + extension)
+            p = run([], extra=['--history', '--index', index, '--scope', 'owned-history'], cwd=source)
+            fs, complete = report(p, 'json')
+            indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+            places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
+            ids = {i for f in fs for o in f.get('occurrences', [f]) for i in o['verification']['components']['primary']}
+            check('history-index-' + extension, p.returncode == 0 and complete and len(ids) == 2 and ids <= places and len({f['value_fingerprint'] for f in fs}) == 1)
+            with sqlite3.connect(index / 'index.sqlite') as database:
+                raw = '\n'.join(database.iterdump()).encode()
+            check('history-index-private-' + extension, all(value.encode() not in raw for value in (KEY, 'tenant_a', 'tenant_b')))
+
+        for mode in ('split-revisions', 'shallow', 'archive', 'symlink'):
+            source = staged_fixture('history-negative-' + mode)
+            if mode == 'split-revisions':
+                (source / 'account.json').unlink()
+            elif mode == 'archive':
+                with zipfile.ZipFile(source / 'bundle.zip', 'w') as archive:
+                    archive.writestr('account.json', (source / 'account.json').read_bytes())
+                (source / 'account.json').unlink()
+            elif mode == 'symlink':
+                (source / 'account.json').unlink()
+                (source / 'account.json').symlink_to('{"account":"tenant_a"}')
+            git(source, 'add', '--all')
+            git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned history negative')
+            if mode == 'split-revisions':
+                (source / 'key.json').unlink()
+                (source / 'account.json').write_text('{"account":"tenant_a"}')
+                git(source, 'add', '--all')
+                git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned companion at different revision')
+            if mode == 'shallow':
+                (source / '.git/shallow').write_bytes(git(source, 'rev-parse', 'HEAD'))
+            baseline = root / ('history-' + mode + '.baseline')
+            baseline.write_bytes(b'owned history baseline')
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--history', '--verified-only', '--write-baseline', baseline], fmt=fmt, ml=ml, cwd=source)
+                    fs, complete = report(p, fmt)
+                    label = f'history-negative-{mode}-{fmt}-ml{ml}'
+                    check(label + '-incomplete', p.returncode == 2 and not complete and not fs)
+                    check(label + '-no-probe', len(Handler.calls) == before)
+                    check(label + '-baseline', baseline.read_bytes() == b'owned history baseline')
+        source = staged_fixture('history-empty')
+        for fmt in ('json', 'sarif'):
+            before = len(Handler.calls)
+            p = run([], extra=['--history'], fmt=fmt, cwd=source)
+            fs, complete = report(p, fmt)
+            check('history-empty-' + fmt, p.returncode == 0 and complete and not fs and len(Handler.calls) == before)
+
+        for extension in ('json', 'yaml', 'toml', 'env'):
             source = staged_fixture('since-' + extension, extension)
             account = source / ('account.' + extension)
             working = account.read_text()
@@ -537,7 +609,7 @@ def main():
         _, complete = report(p, 'json')
         check('source-not-reread', p.returncode == 0 and complete and len(Handler.calls) == before + 2 and all(Handler.calls[before:]))
 
-        for args in (['scan', '--cross-file'], ['scan', '-', '--cross-file', '--verify'], ['scan', '--cross-file', '--verify', '--history'], ['repo', '--cross-file', '--verify']):
+        for args in (['scan', '--cross-file'], ['scan', '-', '--cross-file', '--verify'], ['scan', '--cross-file', '--verify', '--git-timeline'], ['repo', '--cross-file', '--verify']):
             before = len(Handler.calls)
             p = subprocess.run([str(binary), *args], input=b'', capture_output=True, cwd=root, env=env, timeout=10)
             check('flag-guard-' + str(len(checks)), p.returncode == 2 and len(Handler.calls) == before)
@@ -545,7 +617,7 @@ def main():
         evidence = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'model_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'passed': len(checks), 'failed': 0, 'checks': checks, 'fixture_root': str(root),
                     'provider': 'Owned loopback stub only; no real provider/account acceptance', 'owned_requests': len(Handler.calls),
-                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Staged index and selected --since working files are qualified separately from local roots; other adapters are not qualified.'}
+                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Staged index and selected --since working files are qualified separately from local roots; history uses separate complete commit trees; remaining adapters are not qualified.'}
         (root / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
         print(json.dumps({'passed': len(checks), 'evidence': str(root / 'evidence.json')}))
     finally:

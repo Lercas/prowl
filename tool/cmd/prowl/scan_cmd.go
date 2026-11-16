@@ -237,7 +237,7 @@ func checkSourceModes(c commonFlags, rest []string) int {
 // stdinModeError validates the label before configuration, reports or input I/O.
 func stdinModeError(c commonFlags, rest []string) error {
 	if c.crossFile {
-		if len(rest) == 0 && !c.staged && c.since == "" && c.command != "repo" && c.command != "org" && !isTTY(os.Stdin) {
+		if len(rest) == 0 && !c.staged && c.since == "" && !c.history && c.command != "repo" && c.command != "org" && !isTTY(os.Stdin) {
 			return fmt.Errorf("--cross-file requires explicit local filesystem roots when stdin is piped")
 		}
 		for _, path := range rest {
@@ -353,6 +353,9 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 	case c.history:
 		if !source.IsGitRepo(repoDir) { // mirror --staged/--since: fail loudly outside a git repo, not exit-0 "clean"
 			return nil, fmt.Errorf("--history needs a git repository, but this is not one")
+		}
+		if c.crossFile {
+			return source.GitCredentialHistory(ctx, repoDir, c.exclude, c.maxSize), nil
 		}
 		if c.gitTimeline {
 			return source.GitTimelineBlobs(ctx, repoDir, c.exclude, c.maxSize), nil

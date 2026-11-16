@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -120,8 +121,17 @@ func GitHistoryBlobs(ctx context.Context, dir string, exclude []string, maxBytes
 
 // gitCmd builds a git command bound to ctx, running in dir when dir != "" (else the current dir).
 func gitCmd(ctx context.Context, dir string, args ...string) *exec.Cmd {
+	if components, _ := ctx.Value(credentialModeKey{}).(bool); components {
+		// A mutable refs/replace mapping must not change an immutable object's
+		// meaning after component acquisition has recorded its commit/blob ID.
+		args = append([]string{"--no-replace-objects"}, args...)
+	}
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
+	if components, _ := ctx.Value(credentialModeKey{}).(bool); components {
+		// Legacy grafts also rewrite parent relationships independently of replace refs.
+		cmd.Env = append(cmd.Environ(), "GIT_GRAFT_FILE="+os.DevNull)
+	}
 	return cmd
 }
 

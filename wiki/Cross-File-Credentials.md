@@ -4,6 +4,7 @@ CLI `scan --cross-file --verify` собирает компоненты из вы
 или выбранных staged blobs одного Git index (`--staged`), а также изменённых
 рабочих файлов `--since REV`. В CLI `repo`/`org`
 доступно связывание внутри закреплённого commit каждого репозитория.
+С `--history` команды `scan`, `repo` и `org` разделяют полные деревья по commit.
 Включение явно разрешает связывание однозначных именованных ролей внутри каждого
 корня, выбранного индекса, working-tree intake или commit; выбирайте область одной связанной конфигурации.
 Единственность значений сама
@@ -14,11 +15,12 @@ CLI `scan --cross-file --verify` собирает компоненты из вы
 prowl scan ./config --cross-file --verify --ml --format json
 prowl scan --staged --cross-file --verify --ml --format json
 prowl scan --since HEAD~1 --cross-file --verify --ml --format json
+prowl scan --history --cross-file --verify --ml --format json
 prowl scan ./config --cross-file --verify --index "$HOME/.prowl/index" --scope app:config
 ```
 
 Без `--cross-file` поведение `--verify` не меняется. Флаг доступен у CLI `scan`, `repo`, `org`:
-stdin, history/timeline, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
+stdin, `--git-timeline`, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
 не включены. Общий пункт TODO остаётся открытым до остальных источников и форматов.
 
 ## Поддержанные входы CLI
@@ -279,9 +281,9 @@ location IDs разрешаются в постоянном индексе; plai
 Принимаются regular modes `100644`/`100755`; link text остаётся входом обычного L1,
 но не конфигурационным companion. Archive members не наследуют repository scope.
 Submodule entries отмечаются policy-пропуском и не читаются как конфигурационные файлы.
-History/`--git-timeline` вместе с `--cross-file` отклоняются до clone: общая история
-blobs не доказывает их сосуществование в одной revision. MCP `prowl_repo` новый
-режим не включает.
+Первоначальная static-commit квалификация не покрывала history. Отдельный режим
+полных исторических деревьев добавлен ниже; `--git-timeline` по-прежнему отклоняется
+вместе с `--cross-file` до clone.
 
 Tree listing ограничен 64 MiB до материализации. Дополнительно producer ограничивает
 выбранные scannable blob entries 10000 файлами и 32 MiB сырых bytes; действуют также
@@ -363,3 +365,62 @@ race/min-Go/lint и шесть сборок проходят. Полный Go-н
 однократного timing failure существующего bucket-cancellation теста; отдельно
 он прошёл 5/5. Причина этого сбоя не установлена и исправленной не заявляется.
 Evidence — `evidence/1.5.0-since-path-boundaries-20261116.json`.
+
+
+## Составные credentials в `--history`
+
+`scan/repo/org --history --cross-file --verify` фиксирует результат одного bounded
+`git rev-list --all <captured HEAD>` и затем читает полные деревья перечисленных
+commit по immutable hash. Detached HEAD включён явно. Unborn repository без refs
+даёт полный пустой history scan; рабочая копия при этом не сканируется. Shallow
+history не сертифицируется как полная и не разрешает composite probes.
+
+Каждая пара repository acquisition + commit получает отдельный scope. В пределах
+commit применяются прежние точные namespace и правила неоднозначности; между
+commit, репозиториями, symlink и archive members companions не заимствуются.
+Неизменённый primary blob читается снова в следующем дереве: изменение companion
+может изменить verdict, даже если primary сохранился. Полные деревья означают,
+что неизменённый companion внутри того же commit доступен. Если repository содержит
+независимые конфигурации с одинаковыми именами ролей, задайте exclusions; режим
+не угадывает, какие root-level файлы приложение использует вместе.
+
+Список commit не является атомарным снимком движущихся refs. После его фиксации
+читаются только перечисленные immutable trees/blobs; новые commits и рабочие файлы
+не дополняют уже собранный intake. SHA-256 списка фиксируется в scope
+`components-history-snapshot`. Составной set закрывается до первого provider call.
+`--git-timeline` остаётся отдельным неподдержанным сочетанием: его события появления
+и исчезновения не получают исторический LIVE verdict из этой возможности.
+Provider verdict отражает проверку сейчас, а не состояние ключа на дату commit.
+
+Приватная identity нового history reader включает commit. Одинаковое значение
+сохраняет общий `value_fingerprint`, но component/index location IDs и occurrences
+различают ревизии. Source URL, commit и blob остаются обычной provenance;
+приватный selector не добавляется в текст отчёта или SQLite plaintext credentials.
+Обычный history без `--cross-file` не меняет свой reader или identity.
+
+В opt-in component Git-командах отключены `refs/replace` подстановки
+(`--no-replace-objects`) и legacy graft-файлы (`GIT_GRAFT_FILE` указывает на null
+устройство). Они не могут переопределить дерево или родителей записанного object ID.
+Сами объекты, достижимые через refs, продолжают входить в выбранную историю.
+Это относится также к static repository/staged/`--since` component acquisitions;
+общий opt-in policy revision теперь `cross-file-namespaces-v3-literal-git`.
+Документация Git описывает [replace semantics](https://git-scm.com/docs/git-replace.html);
+источник Git отдельно использует [graft environment](https://kernel.googlesource.com/pub/scm/git/git/+/9de1cce1387da7ffe5ab6b3fc6ea12e36dc621bb/environment.c).
+
+Лимиты: максимум 10000 commit, 64 MiB каждого служебного stdout и прежние глобальные
+10000 selected tree entries / 32 MiB raw input на весь history intake, а не на каждый
+commit. Parser/literal/namespace budgets продолжают действовать. Повторные полные
+деревья расходуют лимит повторно. Missing/corrupt objects, malformed/duplicate commit
+listing, shallow state и лимиты дают неполноту, exit 2 и запрещают новый baseline
+и composite probes; частично собранная история не принимается за полную.
+
+Квалификация из чистого `47454e2`: local/staged/since/history CLI — 1150/1150,
+repo/org static/history — 256/256 под OS deny-network с исключением localhost.
+Проверены JSON/SARIF ±ML/index, противоположные verdicts primary в двух commit,
+раздельные location IDs, split-revisions/repositories, archive/symlink, shallow,
+metadata errors, empty history и baseline guards. Unit cases покрывают detached
+HEAD, 10000/malformed listing, repeated-blob global byte cap и replace/graft views.
+Full Go, race/min-Go/lint/actionlint и шесть CGO=0 builds проходят; default quality
+metrics/IDs и GOROOT digest сохранены. Hosted CI и реальные provider accounts
+не квалифицированы. Новый performance gate и Docker rebuild не выполнялись.
+Evidence — `evidence/1.5.0-cross-file-history-20261116.json`.

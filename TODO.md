@@ -758,6 +758,17 @@
       quality IDs и GOROOT digest прежние. Один bucket timing failure сохранён
       в evidence, отдельно 5/5 и полный повтор проходят; причина не объявлена
       исправленной. `wiki/evidence/1.5.0-since-path-boundaries-20261116.json`.
+  - [x] `scan/repo/org --history --cross-file --verify`: полное immutable дерево
+    каждого captured commit, отдельные scopes и revision-specific private location
+    IDs; одинаковый primary с изменённым companion сохраняет разные verdicts.
+    Working copy, другие revisions/repositories, symlink/archive не поставляют
+    чужие роли. Detached HEAD и empty history учтены, shallow/malformed/budgets
+    блокируют composite probes и baseline. Git replacements/grafts отключены
+    в opt-in component acquisitions; policy v3. Native local — 1150/1150,
+    repo/org — 256/256; full Go, race/min-Go/lint/actionlint и 6 builds проходят.
+    Quality IDs/GOROOT digest прежние. `--git-timeline`, другие adapters,
+    реальные provider accounts и hosted CI остаются открытыми.
+    `wiki/evidence/1.5.0-cross-file-history-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

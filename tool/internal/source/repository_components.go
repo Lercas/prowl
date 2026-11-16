@@ -36,7 +36,7 @@ func RepositoryCredentialFiles(ctx context.Context, dir string, exclude []string
 				return
 			}
 			ctx = credentialRootContext(WithCredentialScopes(ctx))
-			if err := readRepositoryCredentialFiles(ctx, ch, dir, origin.revision, exclude, maxBytes); err != nil {
+			if err := readRepositoryCredentialFiles(ctx, ch, dir, origin.revision, exclude, maxBytes, &repositoryComponentBudget{}); err != nil {
 				model.Note(ctx, "cross_file_repository_read_failed", origin.url, true)
 				send(ctx, ch, model.Item{Source: "code", Path: origin.url, Error: errors.New("cross-file repository object read failed")})
 			}
@@ -48,7 +48,12 @@ func RepositoryCredentialFiles(ctx context.Context, dir string, exclude []string
 	return ch
 }
 
-func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, dir, commit string, exclude []string, maxBytes int64) (err error) {
+type repositoryComponentBudget struct {
+	count int
+	bytes int64
+}
+
+func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, dir, commit string, exclude []string, maxBytes int64, budget *repositoryComponentBudget) (err error) {
 	listing, err := timelineOutput(ctx, dir, "ls-tree", "-r", "-z", commit, "--")
 	if err != nil {
 		return err
@@ -87,7 +92,6 @@ func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, di
 		}
 	}()
 	br := bufio.NewReader(out)
-	count, total := 0, int64(0)
 	seen := make(map[string]bool)
 	for _, entry := range strings.Split(string(listing), "\x00") {
 		if entry == "" {
@@ -115,8 +119,8 @@ func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, di
 			return errors.New("duplicate repository tree path")
 		}
 		seen[path] = true
-		count++
-		if count > maxComponentRepositoryItems {
+		budget.count++
+		if budget.count > maxComponentRepositoryItems {
 			return errors.New("repository component item limit reached")
 		}
 		if _, err := io.WriteString(in, fields[2]+"\n"); err != nil {
@@ -130,10 +134,10 @@ func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, di
 		if !ok || typ != "blob" || !strings.HasPrefix(header, fields[2]+" ") {
 			return errors.New("repository blob is unavailable")
 		}
-		if size > int64(maxComponentRepositoryBytes)-total {
+		if size > int64(maxComponentRepositoryBytes)-budget.bytes {
 			return errors.New("repository component byte limit reached")
 		}
-		total += size
+		budget.bytes += size
 		data, err := consumeBlob(br, size, maxBytes)
 		if err != nil {
 			return err

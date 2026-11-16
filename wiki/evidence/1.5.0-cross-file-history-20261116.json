@@ -1,0 +1,1106 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "source_commit": "47454e2c68891a05dbd2800e85c0f43572a28db2",
+  "binary": {
+    "path": "/tmp/prowl-history-qualified-20261116-bin",
+    "sha256": "236a0d1dd2e17f5c11f7ea8adb4431b894048048729086d487909470960b20c4",
+    "build_info": "/tmp/prowl-history-qualified-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n"
+  },
+  "contract": {
+    "commands": [
+      "scan --history --cross-file --verify",
+      "repo --history --cross-file --verify",
+      "org --history --cross-file --verify"
+    ],
+    "selection": "bounded rev-list --all plus captured HEAD, then immutable full trees; no atomic refs snapshot claimed",
+    "scopes": "one per acquisition and commit; no cross-revision/repository, archive or symlink borrowing",
+    "identity": "private history selector contains commit; value fingerprint stays shared, location IDs differ",
+    "git_views": "--no-replace-objects and GIT_GRAFT_FILE=null device for opt-in component Git commands",
+    "policy": "cross-file-namespaces-v3-literal-git",
+    "history_reader": "complete-commit-trees-v1",
+    "limits": {
+      "commits": 10000,
+      "metadata_stdout_bytes": 67108864,
+      "global_selected_tree_entries": 10000,
+      "global_raw_input_bytes": 33554432
+    },
+    "incomplete": "shallow/malformed/missing objects and budget failures inhibit composite probes and baseline update",
+    "unborn_history": "complete empty history when no refs and symbolic HEAD; ignores working files"
+  },
+  "native": {
+    "local": {
+      "passed": 1150,
+      "failed": 0,
+      "full_evidence_path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-oj6jv40h/evidence.json",
+      "full_evidence_sha256": "e20074de489717330b07c855b625df29862db3fd8d7910cbd88d863f8dd8d894",
+      "history_checks": [
+        {
+          "case": "history-json-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-json-json-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-json-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-json-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-json-json-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-json-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-json-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-index-json",
+          "passed": true
+        },
+        {
+          "case": "history-index-private-json",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-yaml-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-index-yaml",
+          "passed": true
+        },
+        {
+          "case": "history-index-private-yaml",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-toml-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-toml-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-index-toml",
+          "passed": true
+        },
+        {
+          "case": "history-index-private-toml",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-env-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlFalse-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlTrue-separate-ids",
+          "passed": true
+        },
+        {
+          "case": "history-env-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "history-index-env",
+          "passed": true
+        },
+        {
+          "case": "history-index-private-env",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-json-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-split-revisions-sarif-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-json-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-shallow-sarif-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-json-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-archive-sarif-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-json-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlFalse-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlFalse-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlFalse-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlTrue-incomplete",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlTrue-no-probe",
+          "passed": true
+        },
+        {
+          "case": "history-negative-symlink-sarif-mlTrue-baseline",
+          "passed": true
+        },
+        {
+          "case": "history-empty-json",
+          "passed": true
+        },
+        {
+          "case": "history-empty-sarif",
+          "passed": true
+        }
+      ],
+      "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-oj6jv40h",
+      "network": "OS deny-network except localhost; owned Git/HTTP only"
+    },
+    "repository": {
+      "passed": 256,
+      "failed": 0,
+      "full_evidence_path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-components-6_ml_w5a/evidence.json",
+      "full_evidence_sha256": "b3cf1046bc9fa408bebe6014131b454eaf0a09ffefba46bd86df126c48368f5a",
+      "history_checks": [
+        {
+          "case": "repo-history-json-mlFalse-complete",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlFalse-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlFalse-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlFalse-scope",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-complete",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-scope",
+          "passed": true
+        },
+        {
+          "case": "repo-history-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-complete",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-scope",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-complete",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-scope",
+          "passed": true
+        },
+        {
+          "case": "repo-history-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "repo-history-index",
+          "passed": true
+        },
+        {
+          "case": "repo-history-index-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-complete",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-probe",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-scope",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-complete",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-probe",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-scope",
+          "passed": true
+        },
+        {
+          "case": "org-history-json-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-complete",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-probe",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-scope",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlFalse-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-complete",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-commit-verdicts",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-separate-component-ids",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-probe",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-scope",
+          "passed": true
+        },
+        {
+          "case": "org-history-sarif-mlTrue-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-index",
+          "passed": true
+        },
+        {
+          "case": "org-history-index-private",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-key-only-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-archive-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-symlink-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-split-repositories-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "repo-metadata-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "repo-history-empty",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-key-only-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-archive-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-archive-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-archive-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-archive-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-archive-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-archive-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-symlink-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-split-repositories-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-json-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-json-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-json-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-sarif-history-no-probe",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-sarif-history-baseline",
+          "passed": true
+        },
+        {
+          "case": "org-metadata-sarif-history-private",
+          "passed": true
+        },
+        {
+          "case": "org-history-empty",
+          "passed": true
+        }
+      ],
+      "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-components-6_ml_w5a",
+      "network": "OS deny-network except localhost; owned Git/HTTP only"
+    }
+  },
+  "default_repository": {
+    "binary_sha256": "236a0d1dd2e17f5c11f7ea8adb4431b894048048729086d487909470960b20c4",
+    "passed": 99,
+    "total": 99,
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-repository-native-6bzp5_4w",
+    "scope": "local Git clone wrapper, owned Git objects and loopback org inventory only; no real remote repository or provider use"
+  },
+  "quality": {
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982,
+    "all_metrics_and_exact_ids_equal_previous": true,
+    "path": "/tmp/prowl-history-qualified-quality-20261116.json",
+    "sha256": "8a2028a4a039252743ff9b009f495051a4e6c7d2cac5c33355f5ba5c4ccb4ac8"
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "source_tests": [
+    "separate complete trees, unchanged primary and working-copy disagreement",
+    "independent acquisition/commit scopes",
+    "detached HEAD selected explicitly",
+    "unborn and shallow state",
+    "malformed/duplicate listing and 10000-commit boundary",
+    "34 MiB repeated blob across two commits exceeds global 32 MiB cap",
+    "literal commit trees under replace refs and disk/environment graft views"
+  ],
+  "development_finding": {
+    "case": "repo-history-json-mlFalse-separate-component-ids",
+    "result": "initial opt-in history prototype reused location ID across commits; new producer private IdentityPath separates revisions",
+    "released_regression_claimed": false,
+    "log": "/tmp/prowl-history-development-repository-20261116.log"
+  },
+  "checks": {
+    "full_go": "pass",
+    "race": "pass",
+    "minimum_go_1_26_11": "pass",
+    "lint": "0 issues",
+    "actionlint": "pass"
+  },
+  "cross_builds": [
+    {
+      "os": "linux",
+      "arch": "amd64",
+      "binary_sha256": "422464dafa38ad8f79d31a3c760ae3fc8985210b51a79f733798078e51f06457",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/linux-amd64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "linux",
+      "arch": "arm64",
+      "binary_sha256": "e7f24de57969fa96aa3050d14d5ea2458bc60a19cbc4fb33db324de3976e6dc2",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/linux-arm64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=linux\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "amd64",
+      "binary_sha256": "88755b914e8aca42da5e3f683a8c9e908a3baee74c3e1b4320def71b367c03b8",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/darwin-amd64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=darwin\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "darwin",
+      "arch": "arm64",
+      "binary_sha256": "236a0d1dd2e17f5c11f7ea8adb4431b894048048729086d487909470960b20c4",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/darwin-arm64: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "windows",
+      "arch": "amd64",
+      "binary_sha256": "5c00d6d2b9d17724b98805a09955ce774f1c2aa08afc31ed04099f4be91eb0fc",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/windows-amd64.exe: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    },
+    {
+      "os": "windows",
+      "arch": "arm64",
+      "binary_sha256": "3241e4e326f2d484bf9ea5aba52c90301a6001d3d1be79302825f2ddd2dd37d0",
+      "build_info": "/tmp/prowl-history-cross-build-20261116/windows-arm64.exe: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=windows\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=47454e2c68891a05dbd2800e85c0f43572a28db2\n\tbuild\tvcs.time=2026-11-16T10:04:37Z\n\tbuild\tvcs.modified=false\n",
+      "executed": false
+    }
+  ],
+  "ci": "local/staged/since/history runner plus repo/org runner wired in native-acquisition; hosted run not executed",
+  "sources": [
+    "https://git-scm.com/docs/git-replace.html",
+    "https://kernel.googlesource.com/pub/scm/git/git/+/9de1cce1387da7ffe5ab6b3fc6ea12e36dc621bb/environment.c"
+  ],
+  "logs": [
+    {
+      "path": "/tmp/prowl-history-final-targeted-20261116.log",
+      "sha256": "e07a128ed2b0d3f79879e5eb210e5b57e71e9afc79239032be47330a548d5542",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-go-20261116.log",
+      "sha256": "33921a2ca5f230bf76342082a4aee0c11d09950ea8dc2c5e8a4e25317af7d67f",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-go-policy-20261116.log",
+      "sha256": "c3e388f5d1d51934ac5304c9a6c204ae33889ab8ebcbabb68891331140a67915",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-race-20261116.log",
+      "sha256": "ae47851cfbd8ca66ad8ebdcb2e005cd38db9c909c7ea82a3fb78f5e0a944ee6f",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-min-go-20261116.log",
+      "sha256": "e4b68672733c3badc894d6af5bce87286e71210396c5a1d633f6840447535a8c",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-lint-policy-corrected-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-final-actionlint-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-local-20261116.log",
+      "sha256": "3d53ce3ea119ea08b7e19d9b3422f72f173bf4683ff2b1243b8a4ca0568b42df",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-repository-20261116.log",
+      "sha256": "6283d1a7220529148d67c573bfb223ef778dd650096ba1072ddab3f3c4924fd0",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-default-repository-20261116.log",
+      "sha256": "039e4292a08ba8ff9c0f0bdd54ca27e2e63790c8c4fd1d1c6df515c123a4edd2",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-corpus-20261116.log",
+      "sha256": "38560047c0f1506f92c02fb23a06f69c7ce3dfb4306151944ab6aa588bdf6268",
+      "result": "pass"
+    },
+    {
+      "path": "/tmp/prowl-history-qualified-build-info-20261116.log",
+      "sha256": "dfaa576cdb7c3df98fe6cabdf49f69f5ef580eb9574fc70c2647f4da24985e45",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "--git-timeline remains rejected with --cross-file; its event/verdict integration is unfinished",
+    "Provider verdicts are current observations of historical tuples, not liveness at commit date",
+    "Owned loopback only, no real AWS/OAuth/DB or other provider acceptance",
+    "No new fixed-reference performance gate, Docker rebuild, hosted CI, Windows runtime, signature or publication"
+  ]
+}

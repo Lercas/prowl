@@ -78,6 +78,13 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	attachBucketOrigin(ctx, &it)
 	attachMobileOrigin(ctx, &it)
 	attachImageOrigin(ctx, &it)
+	if commit, ok := ctx.Value(credentialHistoryCommitKey{}).(string); ok {
+		identity := it.ArtifactURI
+		if identity == "" {
+			identity = it.Path
+		}
+		it.IdentityPath = identity + "\x00history-commit\x00" + commit
+	}
 	it.CredentialScope, _ = ctx.Value(credentialScopeKey{}).(*credentialset.Scope)
 	select {
 	case ch <- it:

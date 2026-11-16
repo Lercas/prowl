@@ -42,12 +42,14 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.CrossFile = flags.crossFile
 	if flags.crossFile {
 		acquisition := "local-filesystem"
-		if flags.staged {
+		if flags.history {
+			acquisition = "git-history-commits"
+		} else if flags.staged {
 			acquisition = "git-index"
 		} else if flags.command == "repo" || flags.command == "org" {
 			acquisition = "repository-commit"
 		}
-		flags.coverage.RegisterScope("components", acquisition, map[string]any{"revision": "cross-file-namespaces-v2", "max_items": 10000, "max_bytes": 32 << 20, "max_literals": 100000, "max_namespace_bytes": 32 << 20})
+		flags.coverage.RegisterScope("components", acquisition, map[string]any{"revision": "cross-file-namespaces-v3-literal-git", "max_items": 10000, "max_bytes": 32 << 20, "max_literals": 100000, "max_namespace_bytes": 32 << 20})
 	}
 	var auditErr error
 	if flags.auditPublic {
