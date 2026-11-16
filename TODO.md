@@ -34,6 +34,17 @@
     subcase и сохранённый шестиплатформенный snapshot проходят новый гейт;
     `wiki/evidence/1.5.0-release-members-20261115.json`. Это локальная проверка
     упаковки; актуальный финальный релиз и внешняя публикация остаются открыты.
+  - [x] Platform binding release assets: bounded ELF64/Mach-O/PE32+ header gate,
+    CPU/format mismatch и Unix executable bit. Три legacy gaps воспроизведены при
+    совпадающих checksums; новый gate отвергает также реальную замену Linux amd64
+    на архивный arm64 binary. Source snapshot `43ec325` собрал 6 архивов + 6 SPDX
+    SBOM на Go 1.27.4; все GOOS/GOARCH/CGO/VCS build-info сверены. Static-ML smoke
+    проходит на macOS arm64/amd64 и Linux arm64/amd64; Linux — в старых immutable
+    runtime carriers с новым архивным binary, без пересборки Docker images.
+    Два macOS quality отчёта сохраняют metrics/IDs. Восемь release-helper tests,
+    platform/malformed matrices, config/actionlint и formula syntax проходят.
+    Windows runtime, signing, hosted CI и final-source publication остаются открыты.
+    `wiki/evidence/1.5.0-release-platform-qualification-20261116.json`.
 
 
 - [x] **Вернуть совместимость `--stdin-name` с 1.4.0.** В `refs/tags/v1.4.0`

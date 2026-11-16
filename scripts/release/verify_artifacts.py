@@ -10,7 +10,46 @@ import tarfile
 import zipfile
 
 
-def verify_archive(path, extension, executable):
+MAX_BINARY_HEADER = 64 << 10
+
+
+def verify_binary_header(header, os_name, arch):
+    """Bind the expected executable container and 64-bit machine, without executing it."""
+    if os_name not in ("linux", "darwin", "windows") or arch not in ("amd64", "arm64"):
+        raise ValueError("unsupported release platform")
+    if os_name == "linux":
+        if len(header) < 64 or header[:7] != b"\x7fELF\x02\x01\x01" or header[7] not in (0, 3):
+            raise ValueError("expected little-endian ELF64 executable")
+        machine = int.from_bytes(header[18:20], "little")
+        if machine != {"amd64": 62, "arm64": 183}[arch]:
+            raise ValueError("ELF machine does not match archive architecture")
+        if int.from_bytes(header[16:18], "little") not in (2, 3) or int.from_bytes(header[20:24], "little") != 1 or int.from_bytes(header[52:54], "little") != 64:
+            raise ValueError("invalid ELF64 executable header")
+    elif os_name == "darwin":
+        if len(header) < 32 or header[:4] != b"\xcf\xfa\xed\xfe":
+            raise ValueError("expected a thin little-endian Mach-O 64 executable")
+        if int.from_bytes(header[4:8], "little") != {"amd64": 0x01000007, "arm64": 0x0100000c}[arch]:
+            raise ValueError("Mach-O CPU does not match archive architecture")
+        if int.from_bytes(header[12:16], "little") != 2:
+            raise ValueError("Mach-O is not an executable")
+    else:
+        if len(header) < 64 or header[:2] != b"MZ":
+            raise ValueError("expected a PE32+ executable")
+        offset = int.from_bytes(header[60:64], "little")
+        if offset < 64 or offset + 24 > len(header) or offset + 24 > MAX_BINARY_HEADER or header[offset:offset + 4] != b"PE\0\0":
+            raise ValueError("invalid or oversized PE header offset")
+        if int.from_bytes(header[offset + 4:offset + 6], "little") != {"amd64": 0x8664, "arm64": 0xaa64}[arch]:
+            raise ValueError("PE machine does not match archive architecture")
+        optional_size = int.from_bytes(header[offset + 20:offset + 22], "little")
+        characteristics = int.from_bytes(header[offset + 22:offset + 24], "little")
+        optional = offset + 24
+        if not characteristics & 2 or characteristics & 0x2000 or optional_size < 112 or optional + optional_size > len(header) or optional + optional_size > MAX_BINARY_HEADER:
+            raise ValueError("invalid PE executable or optional header")
+        if int.from_bytes(header[optional:optional + 2], "little") != 0x20b or int.from_bytes(header[optional + 68:optional + 70], "little") != 3:
+            raise ValueError("expected a PE32+ console executable")
+
+
+def verify_archive(path, extension, executable, os_name, arch):
     required = {executable, "README.md", "README.ru.md", "LICENSE", "docs/README.md"}
     seen = set()
 
@@ -35,10 +74,18 @@ def verify_archive(path, extension, executable):
                 directory = entry.is_dir() or mode == stat.S_IFDIR or bool(entry.external_attr & 0x10)
                 member(entry.filename, mode in (0, stat.S_IFREG) and not directory,
                        directory and mode in (0, stat.S_IFDIR), entry.file_size)
+                if entry.filename == executable:
+                    with archive.open(entry) as binary:
+                        verify_binary_header(binary.read(MAX_BINARY_HEADER), os_name, arch)
     else:
         with tarfile.open(path) as archive:
             for entry in archive:
                 member(entry.name, entry.isfile(), entry.isdir(), entry.size)
+                if entry.name == executable:
+                    if not entry.mode & 0o111:
+                        raise ValueError("archive binary lacks executable permission")
+                    with archive.extractfile(entry) as binary:
+                        verify_binary_header(binary.read(MAX_BINARY_HEADER), os_name, arch)
     if not required <= seen:
         raise ValueError(f"incomplete archive: {path.name}")
 
@@ -86,7 +133,7 @@ def verify(root, image_sboms=False):
         platforms.add((os_name, arch))
         versions.add(version)
         path = root / name
-        verify_archive(path, extension, "prowl.exe" if os_name == "windows" else "prowl")
+        verify_archive(path, extension, "prowl.exe" if os_name == "windows" else "prowl", os_name, arch)
         sbom = name + ".spdx.json"
         if sbom not in files:
             raise ValueError(f"SBOM is not checksum-protected: {sbom}")

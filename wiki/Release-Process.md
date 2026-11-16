@@ -48,7 +48,15 @@ SBOM на архив и `checksums.txt` с SHA-256 архивов и SBOM. В к
 повторное имя, каталог вместо бинарника, ссылка или специальный файл отклоняются
 даже при совпадении SHA-256 всего архива. Допускается один пустой directory entry
 `docs` или `docs/`; обычный файл с этим именем и оба варианта одновременно запрещены.
-Эта проверка состава не подтверждает архитектуру или работоспособность бинарника.
+Дополнительно verifier читает не более 64 KiB префикса binary member и проверяет
+формат и 64-bit machine относительно имени архива: Linux ELF64 little-endian с
+SYSV/Linux ABI и amd64/AArch64, thin Mach-O 64 executable для macOS, PE32+ console
+executable с соответствующей machine для Windows. Foreign ELF ABI, FAT/shared
+Mach-O, PE DLL/GUI/32-bit, повреждённые header offsets и неверный CPU отвергаются.
+Unix TAR-бинарник должен иметь executable bit. Синтетический или чужой файл с верным
+форматом не становится от этого Prowl: application identity, подписи, build metadata
+и фактическое исполнение проверяются отдельно. Generic SYSV ELF header сам по себе
+не устанавливает Linux GOOS.
 
 ## Порядок релизного workflow
 
@@ -102,3 +110,45 @@ GitHub OIDC, права GHCR/tap, результат внешней публик
 [GoReleaser](https://goreleaser.com/customization/sign/sign/),
 [SBOM](https://goreleaser.com/customization/sbom/) и
 [Sigstore](https://docs.sigstore.dev/cosign/signing/signing_with_blobs/).
+
+
+## Локальная квалификация snapshot 2026-11-16
+
+Из чистого `43ec3252d0cf809d925ee27a35d5aa9091bf4d70` собран
+`1.5.0-dev.43ec325`: шесть архивов и шесть SPDX SBOM, один checksums manifest и
+macOS/Linux Homebrew formula с `ruby -c`. Использованы Go 1.27.4, GoReleaser 2.20.2
+и Syft 1.57.1. Pinned инструменты загружены из официальных release assets с проверкой
+соответствующих checksum manifests. Snapshot пропустил signing/publication.
+
+Все шесть binaries извлечены из проверенных архивов: формат и CPU проверены gate,
+независимо прочитаны Go build info с точными GOOS/GOARCH, `CGO_ENABLED=0`, Go 1.27.4,
+VCS commit и `vcs.modified=false`. Windows amd64/arm64 этим инспектированы и собраны,
+но не исполнены.
+
+Архивные macOS arm64 и amd64 прошли static embedded ML, redaction и отказ legacy
+модели под OS network deny; amd64 исполнялся через Rosetta. На обоих совпали точные
+quality metrics/IDs текущего source: 1661/2094, FP 61/982. Linux arm64 и amd64
+исполнили архивные binaries в nonroot, read-only Docker carriers с `--network none`:
+version/bundled snapshot, static ML/redaction, legacy rejection и 7 selftest cases.
+Carrier images взяты по существующим immutable IDs; это не новая сборка Dockerfile
+или квалификация текущих Docker Action images.
+
+На старом verifier воспроизведены три acceptance gaps с корректными checksums:
+wrong architecture, wrong executable container и отсутствие Unix executable bit.
+Дополнительно настоящий архивный Linux arm64 binary помещён в копию Linux amd64
+архива с пересчитанным checksums manifest. Старый verifier принял комплект; новый
+отверг именно ELF machine mismatch. Исходный положительный snapshot не изменён.
+Release helpers: восемь test methods, 22 layout, 30 platform-header и 15 malformed-
+header subcases, пять whole-release negative variants. Config check и actionlint проходят.
+
+Это локальный snapshot конкретного commit, а не финальный опубликованный v1.5.0.
+Теги, GitHub OIDC, hosted jobs, Windows runtime, текущая Docker factory, GHCR/tap и
+установка Homebrew остаются отдельными непроверенными стадиями. Последующие изменения
+source потребуют соответствующей переквалификации final release.
+
+Артефакты и exact hashes:
+`evidence/1.5.0-release-platform-qualification-20261116.json`.
+
+Структурные константы сверены с [Go ELF](https://go.dev/src/debug/elf/elf.go),
+[Go Mach-O](https://go.dev/src/debug/macho/macho.go) и
+[Microsoft PE/COFF](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format).
