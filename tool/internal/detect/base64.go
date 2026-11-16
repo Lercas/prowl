@@ -96,6 +96,10 @@ func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinea
 // so unmaskBase64 accepts only a precise typed hit from it (a ConfigMap value, a cookie, a CI
 // variable named "payload" carry encoded credentials just as often as one named "secret").
 func base64Candidates(ctx context.Context, text string, runs [][2]int) ([]Match, bool) {
+	return currentTuning().base64Candidates(ctx, text, runs)
+}
+
+func (policyTuning Tuning) base64Candidates(ctx context.Context, text string, runs [][2]int) ([]Match, bool) {
 	var candidates []Match
 	capped := false
 	for _, r := range runs {
@@ -114,16 +118,16 @@ func base64Candidates(ctx context.Context, text string, runs [][2]int) ([]Match,
 		if !ok {
 			continue
 		}
-		if IsKnownNonSecretBlob(text, r[0]) || IsExampleOrPlaceholder(val) {
+		if IsKnownNonSecretBlob(text, r[0]) || policyTuning.IsExampleOrPlaceholder(val) {
 			continue
 		}
 		named := HasSecretNameContext(text, r[0])
-		if named && (ShannonEntropy(val) < genericEntropyMin || IsHashNotSecret(text, r[0], val) ||
+		if named && (ShannonEntropy(val) < policyTuning.GenericEntropyMin || IsHashNotSecret(text, r[0], val) ||
 			looksLikeCodePath(val) || (reRecaptchaSiteKey.MatchString(val) && hasRecaptchaCue(text, r[0]))) {
 			// the entropy net's own non-secret verdicts still hold, but only cost the name's vouching
 			named = false
 		}
-		if len(candidates) >= maxScanMatches {
+		if len(candidates) >= policyTuning.MaxMatches {
 			return candidates, true
 		}
 		candidates = append(candidates, Match{Value: val, Start: r[0], End: r[1], needsStrong: !named})

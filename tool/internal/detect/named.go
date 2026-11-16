@@ -123,7 +123,7 @@ func nameIsSecretLike(name string) (ok, hexOnly bool) {
 // looksRandom reports whether v reads as generated key material rather than a word, an identifier or
 // a composed label: letters and digits both present, enough entropy, and — when it is built from
 // separator-joined parts — at least one part that is itself random.
-func looksRandom(v string) bool {
+func (policyTuning Tuning) looksRandom(v string) bool {
 	var letter, digit bool
 	for i := 0; i < len(v); i++ {
 		switch c := v[i]; {
@@ -139,7 +139,7 @@ func looksRandom(v string) bool {
 	if isHexRun(v) {
 		return len(v) >= minHexSecret && ShannonEntropy(v) >= 3.0
 	}
-	if ShannonEntropy(v) < genericEntropyMin || classSwitchRate(v) < minClassSwitchRate {
+	if ShannonEntropy(v) < policyTuning.GenericEntropyMin || classSwitchRate(v) < minClassSwitchRate {
 		return false
 	}
 	parts := strings.FieldsFunc(v, func(r rune) bool { return r == '_' || r == '-' || r == '.' })
@@ -209,31 +209,31 @@ func partIsRandom(p string) bool {
 var reUUID = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
 // namedKeyValueOK applies the value-side checks shared by every named-key form.
-func namedKeyValueOK(v string, hexOnly bool) bool {
-	return namedKeyValueWithMinimum(v, hexOnly, minNamedSecret)
+func (policyTuning Tuning) namedKeyValueOK(v string, hexOnly bool) bool {
+	return policyTuning.namedKeyValueWithMinimum(v, hexOnly, minNamedSecret)
 }
 
-func namedKeyValueWithMinimum(v string, hexOnly bool, minimum int) bool {
+func (policyTuning Tuning) namedKeyValueWithMinimum(v string, hexOnly bool, minimum int) bool {
 	if len(v) < minimum || hexOnly && !isHexRun(v) {
 		return false
 	}
 	if strings.Contains(v, "://") || reUUID.MatchString(v) || isVersionOrNumber(v) {
 		return false
 	}
-	if IsPlaceholderAPIKey(v) || IsTemplatePlaceholder(v) || isLicenseKeyShape(v) || looksLikeCodePath(v) {
+	if policyTuning.IsPlaceholderAPIKey(v) || IsTemplatePlaceholder(v) || isLicenseKeyShape(v) || looksLikeCodePath(v) {
 		return false
 	}
-	return looksRandom(v)
+	return policyTuning.looksRandom(v)
 }
 
 // Short generated material needs an explicit credential field and a taxonomy
 // that accepts its length. The legacy prose path retains its twenty-byte floor.
 func (d *Detector) boundKeyValueOK(name, value string, hexOnly bool) bool {
 	if len(value) >= minNamedSecret {
-		return namedKeyValueOK(value, hexOnly)
+		return d.Tuning().namedKeyValueOK(value, hexOnly)
 	}
 	ok, onlyHex := nameIsSecretLike(name)
-	if !ok || !namedKeyValueWithMinimum(value, hexOnly || onlyHex, minShortNamedSecret) {
+	if !ok || !d.Tuning().namedKeyValueWithMinimum(value, hexOnly || onlyHex, minShortNamedSecret) {
 		return false
 	}
 	for _, ct := range d.types {
@@ -390,7 +390,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			name := proseSecretName(lineBefore(text, vs))
 			ok, hexOnly := nameIsSecretLike(name)
 			// Keep the existing entropy type/identity for the long base64-shaped prose path.
-			if BindingName(text, vs) != "" || !ok || !namedKeyValueOK(val, hexOnly) || d.genericEntropy && len(val) >= 32 && !strings.ContainsAny(val, "_-") {
+			if BindingName(text, vs) != "" || !ok || !d.Tuning().namedKeyValueOK(val, hexOnly) || d.genericEntropy && len(val) >= 32 && !strings.ContainsAny(val, "_-") {
 				continue
 			}
 			out = append(out, Match{Type: "generic_api_key", Value: val, Start: vs, End: vs + len(val), Confidence: .6, Category: d.genericKeyCat, Stage: stageContextKey, ContextName: name})
@@ -408,7 +408,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			}
 			user, pass, ok := strings.Cut(string(dec), ":")
 			if !ok || !isBasicAuthUser(user) || len(pass) < 1 || !isBasicAuthPassword(pass+"      "[:max(0, 6-len(pass))]) ||
-				IsExampleOrPlaceholder(pass) {
+				d.Tuning().IsExampleOrPlaceholder(pass) {
 				continue
 			}
 			// The decoded user:password pair is proof of what the blob is, unlike the bare regex shape.
@@ -427,7 +427,7 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			}
 			val := text[vs:ve]
 			// Only values the main regex cannot take whole: it stops at a quote, comma or semicolon.
-			if !strings.ContainsAny(val, `"',;`) || !passwordWithSeparatorsOK(val) {
+			if !strings.ContainsAny(val, `"',;`) || !d.Tuning().passwordWithSeparatorsOK(val) {
 				continue
 			}
 			out = append(out, Match{Type: "generic_password", Value: val, Start: vs, End: ve,
@@ -469,7 +469,7 @@ func passwordNameSuffixIsMeta(suffix string) bool {
 
 // passwordWithSeparatorsOK: a quoted password holding separator characters must still look like one —
 // a letter and a digit, no placeholder, no template or code fragment.
-func passwordWithSeparatorsOK(v string) bool {
+func (policyTuning Tuning) passwordWithSeparatorsOK(v string) bool {
 	var letter, digit bool
 	for i := 0; i < len(v); i++ {
 		switch c := v[i]; {
@@ -481,5 +481,5 @@ func passwordWithSeparatorsOK(v string) bool {
 			return false // a call, a template or markup, not a literal
 		}
 	}
-	return letter && digit && !IsExampleOrPlaceholder(v) && !IsTemplatePlaceholder(v) && !hasJSOperator(v)
+	return letter && digit && !policyTuning.IsExampleOrPlaceholder(v) && !IsTemplatePlaceholder(v) && !hasJSOperator(v)
 }

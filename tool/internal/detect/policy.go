@@ -16,7 +16,14 @@ func (d *Detector) PolicyDigest() (string, error) {
 		st.RE = nil
 		types = append(types, st)
 	}
-	b, err := json.Marshal(types)
+	var snapshot any = types
+	if settings := d.Tuning(); settings != DefaultTuning() {
+		snapshot = struct {
+			Types  []taxonomy.SecretType
+			Tuning Tuning
+		}{types, settings}
+	}
+	b, err := json.Marshal(snapshot)
 	if err != nil {
 		return "", err
 	}

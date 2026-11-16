@@ -95,6 +95,13 @@ type compiledType struct {
 
 // Detector runs the taxonomy L1 layer (regex + checksum + entropy + example filter).
 type Detector struct {
+	*detectorCore
+	settings Tuning
+	frozen   bool
+}
+
+// detectorCore owns immutable compiled matchers and concurrency-safe scratch pools.
+type detectorCore struct {
 	types          []compiledType
 	allKW          []string
 	ac             *ahocorasick.Matcher
@@ -131,7 +138,7 @@ func New(tax *taxonomy.Taxonomy) *Detector {
 		}
 		return false
 	})
-	d := &Detector{types: make([]compiledType, len(order))}
+	d := &Detector{detectorCore: &detectorCore{types: make([]compiledType, len(order))}}
 	kwID := map[string]int{}
 	for i, st := range order {
 		kws := keywordsFor(st)
@@ -202,7 +209,9 @@ func anyPresent(present []bool, idx []int) bool {
 
 // MaxScanMatches reports the global per-Scan match cap, exported so the scan orchestrator can bound the
 // combined output of both producers (the cascade and the rule-template engine) at the same ceiling.
-func MaxScanMatches() int { return maxScanMatches }
+func MaxScanMatches() int { return currentTuning().MaxScanMatches() }
+
+func (policyTuning Tuning) MaxScanMatches() int { return policyTuning.MaxMatches }
 
 // Scan returns non-overlapping highest-confidence matches, including secrets hidden inside base64 blobs.
 // It runs the cascade with no cancellation; use ScanCtx to bound a dense file with --timeout/Ctrl-C.
@@ -256,6 +265,7 @@ func (d *Detector) scanCtxWithScalars(ctx context.Context, text string, scalars 
 }
 
 func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOptions) ScanResult {
+	d = d.Snapshot()
 	if opts.jwtBudget == nil {
 		opts.jwtBudget = &jwtPayloadBudget{}
 	}
@@ -285,13 +295,13 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 	// sorts confidence-first and truncates last.
 	all, collectCapped := d.collect(ctx, text, lower, uniLower, present, sig, opts)
 	// contextualPassword honors the remaining budget internally (one match per cue line)
-	cp := d.contextualPassword(text, lower, uniLower, present, maxScanMatches-len(all))
+	cp := d.contextualPassword(text, lower, uniLower, present, d.Tuning().MaxMatches-len(all))
 	all = append(all, cp...)
-	named, namedCapped := d.namedSecrets(ctx, text, lower, maxScanMatches-len(all))
+	named, namedCapped := d.namedSecrets(ctx, text, lower, d.Tuning().MaxMatches-len(all))
 	all = append(all, named...)
-	tables, tableCapped := d.tableSecrets(ctx, text, maxScanMatches-len(all))
+	tables, tableCapped := d.tableSecrets(ctx, text, d.Tuning().MaxMatches-len(all))
 	all = append(all, tables...)
-	candidateCapped := collectCapped || namedCapped || tableCapped || len(all) >= maxScanMatches
+	candidateCapped := collectCapped || namedCapped || tableCapped || len(all) >= d.Tuning().MaxMatches
 	d.presentPool.Put(pp)
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
@@ -301,12 +311,12 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 	// Both alphabets must be decoded whole: the entropy net omits short blobs, '-'/'_' split it,
 	// and generic assignment regexes can truncate the value or exhaust their budget first.
 	// These independent candidates never become generic findings.
-	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
+	decodeCandidates, decodeCandidateCapped := d.Tuning().base64Candidates(ctx, text, sig.b64decodeRuns)
 	decodedMatches, decodedCapped := d.unmaskNonLinearContext(ctx, decodeCandidates, opts.CaptureVerificationContext)
 	all = append(all, decodedMatches...)
 	occurrences, indirectJWT, occurrenceLimited := d.base64OccurrencesWithJWT(ctx, text, opts)
 	all = append(all, occurrences...)
-	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, maxScanMatches)
+	authMatches, authCapped := d.encodedBasicAuth(ctx, text, sig.b64decodeRuns, d.Tuning().MaxMatches)
 	all = append(all, authMatches...)
 	// Secrets written through an escaping, concatenation or YAML block-scalar layer (see views.go).
 	viewMatches, viewJWT, viewCapped, literalSpans := d.scanViewsWithJWT(ctx, text, opts)
@@ -320,14 +330,14 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 		candidateCapped = candidateCapped || scalarLimited
 	}
 	if opts.PublicKeys {
-		public, limited := publicKeyCandidates(ctx, text)
+		public, limited := d.Tuning().publicKeyCandidates(ctx, text)
 		all = append(all, public...)
 		candidateCapped = candidateCapped || limited
 	}
 	prioritizeJWTContainers(all, jwtChildren, indirectJWT)
-	kept, truncated := dedupeOverlapsCap(all, maxScanMatches)
-	kept, childLimited := mergeJWTPayloadMatches(kept, jwtChildren)
-	kept, indirectLimited := mergeJWTPayloadMatches(kept, indirectJWT)
+	kept, truncated := dedupeOverlapsCap(all, d.Tuning().MaxMatches)
+	kept, childLimited := d.Tuning().mergeJWTPayloadMatches(kept, jwtChildren)
+	kept, indirectLimited := d.Tuning().mergeJWTPayloadMatches(kept, indirectJWT)
 	jwtLimited = jwtLimited || childLimited || indirectLimited
 	truncated = truncated || candidateCapped || base64Capped || decodeCandidateCapped || decodedCapped || authCapped || viewCapped || occurrenceLimited || jwtLimited
 	if truncated && !collectCapped {
@@ -479,7 +489,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 	for ti, ct := range d.types {
 		// ctx/cap checks bound the match-building loops only; the core O(n) AC + structure scans aren't
 		// ctx-interruptible, so a single file is bounded by --max-size and --timeout bounds the whole run.
-		if ctx.Err() != nil || len(all) >= maxScanMatches {
+		if ctx.Err() != nil || len(all) >= d.Tuning().MaxMatches {
 			break
 		}
 		st := ct.st
@@ -489,11 +499,11 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				if n&4095 == 0 && ctx.Err() != nil {
 					break
 				}
-				if len(all) >= maxScanMatches {
+				if len(all) >= d.Tuning().MaxMatches {
 					break
 				}
 				val := text[r[0]:r[1]]
-				if IsExampleOrPlaceholder(val) || ShannonEntropy(val) < genericEntropyMin {
+				if d.Tuning().IsExampleOrPlaceholder(val) || ShannonEntropy(val) < d.Tuning().GenericEntropyMin {
 					continue
 				}
 				if IsHashNotSecret(text, r[0], val) {
@@ -521,8 +531,8 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 			continue
 		}
 		// cap the per-type FindAll so a pathological file can't build a huge slice up front (it isn't ctx-interruptible)
-		indices := wins.FindAllGated(ti, st.RE, ct.asciiGate, text, lower, maxScanMatches+1)
-		if len(indices) > maxScanMatches {
+		indices := wins.FindAllGated(ti, st.RE, ct.asciiGate, text, lower, d.Tuning().MaxMatches+1)
+		if len(indices) > d.Tuning().MaxMatches {
 			// Filters can discard every extracted candidate, but the bounded regex walk may still
 			// have omitted a later real secret. Keep that uncertainty separate from accepted hits.
 			capped = true
@@ -531,7 +541,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 			if n&4095 == 0 && ctx.Err() != nil {
 				break
 			}
-			if len(all) >= maxScanMatches {
+			if len(all) >= d.Tuning().MaxMatches {
 				break
 			}
 			vs, ve := extractSpan(ix, st.Extract)
@@ -588,7 +598,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 			if st.ID == "generic_password" && utf8.RuneCountInString(val) < 6 && (!literalPassword || !d.shortPasswordAllowed(BindingName(text, vs), val)) {
 				continue
 			}
-			placeholder := IsExampleOrPlaceholder(val)
+			placeholder := d.Tuning().IsExampleOrPlaceholder(val)
 			if literalPassword {
 				placeholder = IsLiteralPasswordPlaceholder(val)
 			}
@@ -602,7 +612,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				continue
 			}
 			// generic_api_key captures whatever follows the cue, often an instructional placeholder
-			if st.ID == "generic_api_key" && (IsPlaceholderAPIKey(val) || isLicenseKeyShape(val)) {
+			if st.ID == "generic_api_key" && (d.Tuning().IsPlaceholderAPIKey(val) || isLicenseKeyShape(val)) {
 				continue
 			}
 			// drop the jwt.io demo token and doc fixtures; real tokens still fire
@@ -643,7 +653,7 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				}
 				conf = 0.6
 			case st.ID == "generic_high_entropy":
-				if ShannonEntropy(val) < genericEntropyMin {
+				if ShannonEntropy(val) < d.Tuning().GenericEntropyMin {
 					continue
 				}
 				conf = 0.55
@@ -662,11 +672,11 @@ func (d *Detector) collect(ctx context.Context, text, lower, uniLower string, pr
 				Confidence: conf, ChecksumValid: valid, Category: st.Category, Stage: stage, Transform: transform})
 		}
 	}
-	capped = capped || len(all) >= maxScanMatches
+	capped = capped || len(all) >= d.Tuning().MaxMatches
 	if capped {
 		// surface that the dense input was truncated (a secret past the cap is dropped)
 		logx.Warn("detect: match cap reached — some findings in this dense input were not collected",
-			"cap", maxScanMatches)
+			"cap", d.Tuning().MaxMatches)
 	}
 	return all, capped
 }

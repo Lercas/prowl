@@ -53,18 +53,18 @@ func (doc *literalDocument) accepts(typ string, start, end int, contextualPasswo
 	return typ != "generic_password" || v.raw || start == v.preparedStart && end == v.preparedEnd || contextualPassword && doc.scalars[v.preparedStart].Prose
 }
 
-func applyLiteralVerify(ctx context.Context, vset *verify.Set, doc *literalDocument, typ, value string, start, end int, original string) (*bool, string, *model.Verification) {
+func applyLiteralVerify(ctx context.Context, vset *verify.Set, doc *literalDocument, typ, value string, start, end int, original string, tuning ...*detect.Tuning) (*bool, string, *model.Verification) {
 	if vset == nil {
 		return nil, "", nil
 	}
 	if doc == nil {
-		return applyVerify(ctx, vset, typ, value, original)
+		return applyVerify(ctx, vset, typ, value, original, tuning...)
 	}
 	v := doc.locate(start, end)
 	if v == nil || doc.verificationUnsafe || doc.unsafeGroups[v.group] {
 		return verificationResult(verify.Result{Status: verify.Errored, Note: "structured literal could not be established"})
 	}
-	return verificationResult(vset.VerifyLiteral(ctx, typ, value, doc.bindings[v.group], detect.IsExampleOrPlaceholder(value)))
+	return verificationResult(vset.VerifyLiteral(ctx, typ, value, doc.bindings[v.group], verificationExample(value, tuning...)))
 }
 
 func (p *Pipeline) literalFindings(ctx context.Context, it model.Item, doc *literalDocument) []model.Finding {

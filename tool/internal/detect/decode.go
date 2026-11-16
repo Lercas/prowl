@@ -252,7 +252,7 @@ func (d *Detector) encodedBasicAuth(ctx context.Context, text string, runs [][2]
 			continue
 		}
 		user, pass, ok := strings.Cut(string(dec), ":")
-		if !ok || !isBasicAuthUser(user) || !isBasicAuthPassword(pass) || IsExampleOrPlaceholder(pass) {
+		if !ok || !isBasicAuthUser(user) || !isBasicAuthPassword(pass) || d.Tuning().IsExampleOrPlaceholder(pass) {
 			continue
 		}
 		if len(out) >= budget {

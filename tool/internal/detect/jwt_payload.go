@@ -95,7 +95,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 		// Record rejected-depth containers too: another decoding route cannot
 		// retry the same physical container with a shallower JWT depth.
 		budget.seen[id] = true
-		if opts.jwtDepth >= maxJWTPayloadDepth || opts.jwtOrigin.encodedDepth() >= maxBase64Depth || len(kept) >= maxScanMatches {
+		if opts.jwtDepth >= maxJWTPayloadDepth || opts.jwtOrigin.encodedDepth() >= maxBase64Depth || len(kept) >= d.Tuning().MaxMatches {
 			limited = true
 			continue
 		}
@@ -132,7 +132,7 @@ func (d *Detector) jwtPayloadFindings(ctx context.Context, text string, kept []M
 			if m.Type == "generic_high_entropy" {
 				continue
 			}
-			if len(kept) >= maxScanMatches || m.base64ProofDepth()+1 > maxBase64Depth {
+			if len(kept) >= d.Tuning().MaxMatches || m.base64ProofDepth()+1 > maxBase64Depth {
 				limited = true
 				break
 			}
@@ -209,7 +209,7 @@ func prioritizeJWTContainers(matches []Match, groups ...[]Match) {
 
 // Payload children survive enclosing-token overlap, while the final combined
 // cap still applies. A claims-aware duplicate must keep its binding isolation.
-func mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {
+func (policyTuning Tuning) mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {
 	if len(children) == 0 {
 		return kept, false
 	}
@@ -245,7 +245,7 @@ func mergeJWTPayloadMatches(kept, children []Match) ([]Match, bool) {
 		if replaced {
 			continue
 		}
-		if len(kept) >= maxScanMatches {
+		if len(kept) >= policyTuning.MaxMatches {
 			limited = true
 			break
 		}

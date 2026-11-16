@@ -1,23 +1,77 @@
 package detect
 
-// Detection thresholds, overridable from the config's `detection:` section. Process-wide and set once
-// at startup via ApplyTuning before any scan, so the concurrent read-only workers see a race-free value.
-var (
-	genericEntropyMin         = 3.5   // min Shannon entropy for a generic high-entropy hit
-	weakPlaceholderMaxEntropy = 4.2   // below this, a value with a placeholder word is treated as a placeholder
-	maxScanMatches            = 50000 // DoS backstop: stop collecting after this many raw matches per Scan
+import (
+	"sync"
+	"sync/atomic"
+
+	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
 
-// ApplyTuning overrides the detection thresholds; a zero/negative argument keeps the current default.
-// Call once at startup before scanning (the values are read by concurrent scan workers).
-func ApplyTuning(genericEntropy, placeholderMaxEntropy float64, maxMatches int) {
-	if genericEntropy > 0 {
-		genericEntropyMin = genericEntropy
+// Tuning is one scan's immutable detection thresholds and combined candidate cap.
+type Tuning struct {
+	GenericEntropyMin         float64
+	WeakPlaceholderMaxEntropy float64
+	MaxMatches                int
+}
+
+func DefaultTuning() Tuning { return Tuning{3.5, 4.2, 50000} }
+
+// With preserves zero/negative-as-unspecified compatibility without inheriting
+// another caller's configuration when starting from DefaultTuning().
+func (t Tuning) With(entropy, placeholder float64, maxMatches int) Tuning {
+	if entropy > 0 {
+		t.GenericEntropyMin = entropy
 	}
-	if placeholderMaxEntropy > 0 {
-		weakPlaceholderMaxEntropy = placeholderMaxEntropy
+	if placeholder > 0 {
+		t.WeakPlaceholderMaxEntropy = placeholder
 	}
 	if maxMatches > 0 {
-		maxScanMatches = maxMatches
+		t.MaxMatches = maxMatches
 	}
+	return t
+}
+
+var (
+	tuningMu     sync.Mutex
+	legacyTuning atomic.Pointer[Tuning]
+)
+
+func init()                 { t := DefaultTuning(); legacyTuning.Store(&t) }
+func currentTuning() Tuning { return *legacyTuning.Load() }
+
+// ApplyTuning updates only legacy direct-detector defaults. Existing snapshots
+// and Pipelines remain unchanged. Production constructors use explicit Tuning.
+func ApplyTuning(entropy, placeholder float64, maxMatches int) {
+	tuningMu.Lock()
+	defer tuningMu.Unlock()
+	t := currentTuning().With(entropy, placeholder, maxMatches)
+	legacyTuning.Store(&t)
+}
+
+// Tuning reports effective values; legacy direct Detector scans snapshot them on entry.
+func (d *Detector) Tuning() Tuning {
+	if d == nil {
+		return DefaultTuning()
+	}
+	if d.frozen {
+		return d.settings
+	}
+	return currentTuning()
+}
+
+// Snapshot shares only the immutable engine and concurrency-safe pools. No lock
+// or process-wide swap is needed while another detector is scanning.
+func (d *Detector) Snapshot() *Detector {
+	if d == nil || d.frozen {
+		return d
+	}
+	return &Detector{detectorCore: d.detectorCore, settings: d.Tuning(), frozen: true}
+}
+func NewWithTuning(tax *taxonomy.Taxonomy, t Tuning) *Detector {
+	d := New(tax)
+	return &Detector{detectorCore: d.detectorCore, settings: DefaultTuning().With(t.GenericEntropyMin, t.WeakPlaceholderMaxEntropy, t.MaxMatches), frozen: true}
+}
+func (d *Detector) MaxScanMatches() int { return d.Tuning().MaxMatches }
+func (d *Detector) IsExampleOrPlaceholder(value string) bool {
+	return d.Tuning().IsExampleOrPlaceholder(value)
 }

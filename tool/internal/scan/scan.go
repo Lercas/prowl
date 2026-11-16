@@ -360,7 +360,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 		localOptions = true
 	}
 	if options.Reconstruct && reconstructable(it) {
-		budget := detect.MaxScanMatches()
+		budget := p.options.Detector.MaxScanMatches()
 		if options.matchLimit > 0 {
 			budget = min(budget, options.matchLimit)
 		}
@@ -497,7 +497,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 					model.Note(ctx, "semantic_limit", it.Path, true)
 				}
 				for _, c := range candidates {
-					if detect.IsExampleOrPlaceholder(c.Value) {
+					if p.options.Detector.IsExampleOrPlaceholder(c.Value) {
 						continue
 					}
 					ms = append(ms, detect.Match{Type: "generic_semantic_secret", Value: c.Value, Start: c.Start, End: c.End, Confidence: .75, Category: "generic", Stage: "semantic-candidate", Transform: "literal-semantic-span"})
@@ -507,7 +507,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	}
 	// maxMatches is the global cap shared across both producers (cascade and template engine below).
 	// truncated records when either producer hit the cap so the output can carry a truncation marker.
-	maxMatches := detect.MaxScanMatches()
+	maxMatches := p.options.Detector.MaxScanMatches()
 	if p.options.matchLimit > 0 && p.options.matchLimit < maxMatches {
 		maxMatches = p.options.matchLimit
 	}
@@ -517,6 +517,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	}
 	out := make([]model.Finding, 0, len(ms))
 	auditor := p.options.PublicAuditor
+	candidateTuning := p.options.Detector.Tuning()
 	var pending []verificationCandidate // parallel to final producer winners, never serialized
 	verifyBeforeML := p.options.VerifyAll || p.options.ObserveVerification != nil
 	var indexValues []string
@@ -636,7 +637,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}
 		if vset != nil || auditor != nil {
 			decodedText, decodedStart := m.VerificationContext()
-			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, unboundView: unboundVerificationView(it), decodedText: decodedText, decodedStart: decodedStart})
+			pending = append(pending, verificationCandidate{tuning: &candidateTuning, typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, unboundView: unboundVerificationView(it), decodedText: decodedText, decodedStart: decodedStart})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
@@ -705,7 +706,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			// drop unresolved $VAR refs and doc examples/placeholders, as the cascade does, so installed
 			// templates don't worsen precision on .env.example/docs
 			if detect.IsTemplatePlaceholder(h.Value) || detect.ConnURICredentialIsPlaceholder(h.Value) ||
-				detect.IsExampleOrPlaceholder(h.Value) {
+				p.options.Detector.IsExampleOrPlaceholder(h.Value) {
 				continue
 			}
 			if !p.options.IgnorePragmas && hasPragma(h.Start) {
@@ -757,7 +758,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				}
 				out[idx] = f
 				if vset != nil || auditor != nil {
-					pending[idx] = verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)}
+					pending[idx] = verificationCandidate{tuning: &candidateTuning, typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)}
 				}
 				if ml != nil {
 					reqs[idx] = h.record(it, literalDoc)
@@ -767,7 +768,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			dedup[key] = len(out)
 			out = append(out, f)
 			if vset != nil || auditor != nil {
-				pending = append(pending, verificationCandidate{typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)})
+				pending = append(pending, verificationCandidate{tuning: &candidateTuning, typ: h.RuleID, value: h.Value, start: h.Start, end: h.End, jwtPayload: h.payload != nil, unboundView: unboundVerificationView(it)})
 			}
 			if ml != nil {
 				reqs = append(reqs, h.record(it, literalDoc))
@@ -1105,11 +1106,18 @@ func stronger(a, b model.Finding) bool {
 
 // applyVerify runs the opt-in live-credential check on a raw secret before redaction, returning a
 // tri-state pointer (nil = not attempted/inconclusive) and a human rationale.
-func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context string) (*bool, string, *model.Verification) {
+func verificationExample(value string, tuning ...*detect.Tuning) bool {
+	if len(tuning) > 0 && tuning[0] != nil {
+		return tuning[0].IsExampleOrPlaceholder(value)
+	}
+	return detect.IsExampleOrPlaceholder(value)
+}
+
+func applyVerify(ctx context.Context, vset *verify.Set, typeID, raw, context string, tuning ...*detect.Tuning) (*bool, string, *model.Verification) {
 	if vset == nil {
 		return nil, "", nil
 	}
-	r := vset.Verify(ctx, typeID, raw, context, detect.IsExampleOrPlaceholder(raw))
+	r := vset.Verify(ctx, typeID, raw, context, verificationExample(raw, tuning...))
 	return verificationResult(r)
 }
 

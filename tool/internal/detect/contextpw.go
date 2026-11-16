@@ -101,7 +101,7 @@ func cueWordBoundary(line string, start, end int) bool {
 	return true
 }
 
-func isLikelyPasswordToken(t string) bool {
+func (policyTuning Tuning) isLikelyPasswordToken(t string) bool {
 	if len(t) < 8 || len(t) > 64 {
 		return false
 	}
@@ -124,7 +124,7 @@ func isLikelyPasswordToken(t string) bool {
 	if !dg && !(len(t) >= 12 && partIsRandom(t) && classSwitchRate(t) >= .45 && ShannonEntropy(t) >= 3.5) {
 		return false
 	}
-	if IsExampleOrPlaceholder(t) || isVersionOrNumber(t) || isHexRun(t) || looksLikeIdentifier(t) || looksLikeJSCode(t) {
+	if policyTuning.IsExampleOrPlaceholder(t) || isVersionOrNumber(t) || isHexRun(t) || looksLikeIdentifier(t) || looksLikeJSCode(t) {
 		return false
 	}
 	return true
@@ -246,7 +246,7 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 			continue
 		}
 		beforeCount := len(out)
-		for _, cue := range passwordCueRE.FindAllStringIndex(line, maxScanMatches) {
+		for _, cue := range passwordCueRE.FindAllStringIndex(line, d.Tuning().MaxMatches) {
 			j := cue[1]
 			switch line[cue[0]:cue[1]] {
 			case "パスワード", "密码", "密碼":
@@ -296,7 +296,7 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 					k--
 				}
 				tok := line[j:k]
-				if isLikelyPasswordToken(tok) && (k == len(line) || !strings.ContainsRune("([=", rune(line[k])) && (line[k] != '.' || k+1 == len(line) || line[k+1] == ' ')) &&
+				if d.Tuning().isLikelyPasswordToken(tok) && (k == len(line) || !strings.ContainsRune("([=", rune(line[k])) && (line[k] != '.' || k+1 == len(line) || line[k+1] == ' ')) &&
 					(freeWords <= maxWeakPasswordGap || !isWeakPasswordToken(tok)) {
 					out = append(out, Match{Type: "generic_password", Value: tok,
 						Start: base + j, End: base + k, Confidence: 0.6,
@@ -316,23 +316,23 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 			}
 		}
 		if len(out) == beforeCount {
-			for _, ix := range contextualAssignment.FindAllStringSubmatchIndex(line, maxScanMatches) {
+			for _, ix := range contextualAssignment.FindAllStringSubmatchIndex(line, d.Tuning().MaxMatches) {
 				name := strings.ToLower(line[ix[2]:ix[3]])
 				value := line[ix[4]:ix[5]]
-				if (strings.Contains(name, "password") || strings.Contains(name, "credential") || strings.Contains(name, "lösenord")) && isLikelyPasswordToken(value) {
+				if (strings.Contains(name, "password") || strings.Contains(name, "credential") || strings.Contains(name, "lösenord")) && d.Tuning().isLikelyPasswordToken(value) {
 					out = append(out, Match{Type: "generic_password", Value: value, Start: base + ix[4], End: base + ix[5], Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
 					break
 				}
 			}
 		}
 		if len(out) == beforeCount {
-			if ix := reversePassword.FindStringSubmatchIndex(line); ix != nil && isLikelyPasswordToken(line[ix[2]:ix[3]]) {
+			if ix := reversePassword.FindStringSubmatchIndex(line); ix != nil && d.Tuning().isLikelyPasswordToken(line[ix[2]:ix[3]]) {
 				out = append(out, Match{Type: "generic_password", Value: line[ix[2]:ix[3]], Start: base + ix[2], End: base + ix[3], Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
 			}
 		}
 		if len(out) == beforeCount && strings.HasPrefix(strings.ToLower(strings.TrimSpace(line)), "credentials ") {
 			fields := strings.Fields(line)
-			if len(fields) == 2 && isLikelyPasswordToken(fields[1]) {
+			if len(fields) == 2 && d.Tuning().isLikelyPasswordToken(fields[1]) {
 				start := strings.LastIndex(line, fields[1])
 				out = append(out, Match{Type: "generic_password", Value: fields[1], Start: base + start, End: base + start + len(fields[1]), Confidence: 0.6, Category: "generic", Stage: "L1-context-pw"})
 			}

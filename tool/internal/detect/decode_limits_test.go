@@ -112,9 +112,9 @@ func TestViewBudgetsAndCancellation(t *testing.T) {
 }
 
 func TestViewCollectCapSurvivesFiltering(t *testing.T) {
-	old := maxScanMatches
-	maxScanMatches = 1
-	t.Cleanup(func() { maxScanMatches = old })
+	old := MaxScanMatches()
+	ApplyTuning(0, 0, 1)
+	t.Cleanup(func() { ApplyTuning(0, 0, old) })
 	text := strings.Repeat(`{\"api_key\":\"your_api_key_here_your_key\"}`+"\n", 4)
 	_, limited := newDetector(t).scanViewsStatus(t.Context(), text)
 	if !limited {

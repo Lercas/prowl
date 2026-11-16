@@ -74,6 +74,9 @@ type Pipeline struct{ options Options }
 // New takes a value snapshot of options, including the disclosure policy.
 func New(options Options) *Pipeline {
 	options.IdentityKey = append([]byte(nil), options.IdentityKey...)
+	if options.Detector != nil {
+		options.Detector = options.Detector.Snapshot()
+	}
 	if options.Config != nil {
 		if options.Allow != nil {
 			options.configError = true

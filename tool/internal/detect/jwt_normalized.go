@@ -37,7 +37,7 @@ func (d *Detector) jwtMappedView(ctx context.Context, v *view, transform string,
 	children, limited := d.jwtPayloadFindings(ctx, v.text, nil, local)
 	local.jwtOnly = true
 	_, encoded, capped := d.base64OccurrencesWithJWT(ctx, v.text, local)
-	children, mergedLimited := mergeJWTPayloadMatches(children, encoded)
+	children, mergedLimited := d.Tuning().mergeJWTPayloadMatches(children, encoded)
 	for i := range children {
 		m := &children[i]
 		left, right := v.sourceSpan(m.jwtContainer.Start, m.jwtContainer.End)

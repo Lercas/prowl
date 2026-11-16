@@ -1,0 +1,211 @@
+{
+  "recorded_at": "2026-11-16T13:10:23.760422+00:00",
+  "scope": "Freeze detector tuning per Pipeline and explicit CLI/LSP construction; full 1.5.0 migration remains open.",
+  "runtime_source_commit": "e0fcd4b2c8b05c8bdc089ee0040a9167e144810a",
+  "runtime_tool_tree": "6823e47cdbc0ff4d5a3f446d231c8910318a8452",
+  "binary": {
+    "path": "/tmp/prowl-detector-tuning-verified-20261116-bin",
+    "sha256": "a794af4095a57dcd9fb92aa28bbe318c1b4c56fb419e03c37cf814f8eb59cac9"
+  },
+  "logs": {
+    "verified-go": {
+      "path": "/tmp/prowl-detector-tuning-verified-go-20261116.log",
+      "sha256": "5fdbdef3bc618cc32f44aec7b0cda51478f9c9790830e67449636dc457e3d604"
+    },
+    "verified-race": {
+      "path": "/tmp/prowl-detector-tuning-verified-race-20261116.log",
+      "sha256": "f92ccfffddff73d07b14191b587749bd7a17c5165fde1d9e78386ff37b1c7848"
+    },
+    "verified-min-go": {
+      "path": "/tmp/prowl-detector-tuning-verified-min-go-20261116.log",
+      "sha256": "ac52a2ac358c8da7b7acf20921022907e0f7b198711cadc4e4df26f738eb8041"
+    },
+    "verified-lint": {
+      "path": "/tmp/prowl-detector-tuning-verified-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "verified-native": {
+      "path": "/tmp/prowl-detector-tuning-verified-native-20261116.log",
+      "sha256": "96938c181bc7988c7fb9fe80af1800194a4d1586f1f60d027b36c101fd16a9a6"
+    },
+    "verified-quality": {
+      "path": "/tmp/prowl-detector-tuning-verified-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "verified-corpus": {
+      "path": "/tmp/prowl-detector-tuning-verified-corpus-20261116.log",
+      "sha256": "97e88bf183efc9d08ff42cf4a4ae0b9e9d331770432e5c98cf836ddca4ac55c2"
+    },
+    "verified-build-info": {
+      "path": "/tmp/prowl-detector-tuning-verified-build-info-20261116.log",
+      "sha256": "7b718998c0e6167aaf4ccfe5309f4de8bb48f8ee809efc79bc041809ff3ebd97"
+    },
+    "race": {
+      "path": "/tmp/prowl-detector-tuning-race-20261116.log",
+      "sha256": "f50a9795d7ddf02730e3759cf616babb56c2270b9507def475829e7572af5e44"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-detector-tuning-min-go-20261116.log",
+      "sha256": "51d8d6ae3adccb46ad4eba6e8b632230ddb44226e6a40ad0b89f65e2c7d9c52c"
+    },
+    "legacy": {
+      "path": "/tmp/prowl-detector-tuning-legacy-20261116.log",
+      "sha256": "2db79cd06bd9aa9c1a8785a9d4db1f0e218487ddfe1f724a533c528abd63f978"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-detector-tuning-targeted-20261116.log",
+      "sha256": "3cf08af28710d0d2da9e91fad7342fe1447f99d1c89d2f0b68281d992b41ac87"
+    },
+    "perf": {
+      "path": "/tmp/prowl-detector-tuning-perf-20261116.log",
+      "sha256": "7180b6784fe883ba1ab0078cc092fa365be10cf379789c4b08cf1a4e2822709d"
+    }
+  },
+  "controlled_regression": {
+    "source_parent": "c70808c4217dd1c9e5e8db1a1c2634e70d8cb670",
+    "test": "TestPipelineTuningIsIndependentOfLaterLegacyChanges",
+    "before": "Existing Pipeline followed later global entropy threshold; old and new Pipelines both returned zero entropy findings.",
+    "after": "Previously created Pipeline retains findings and policy scope; different tuning cannot certify absent_in_scope.",
+    "log": {
+      "path": "/tmp/prowl-detector-tuning-legacy-20261116.log",
+      "sha256": "2db79cd06bd9aa9c1a8785a9d4db1f0e218487ddfe1f724a533c528abd63f978"
+    }
+  },
+  "contract": {
+    "snapshot": [
+      "generic_entropy_min",
+      "placeholder_max_entropy",
+      "max_matches_per_file"
+    ],
+    "nested_views": "frozen detector and combined candidate cap",
+    "verification": "candidate tuning retained for plain/structured/decoded/JWT/unbound/component paths",
+    "legacy_apply_tuning": "atomic coherent tuple captured at direct Scan entry; existing Pipelines unaffected",
+    "cli_lsp": "explicit defaults plus selected configuration, no preceding configuration inheritance",
+    "default_digest_preserved": true,
+    "nondefault_digest_includes_all_dimensions": true,
+    "missing_detector": "defensive defaults; nonempty scans remain incomplete"
+  },
+  "validation": {
+    "final_full_go": "passed",
+    "final_targeted_race": "passed: all new regression cases and legacy TestApplyTuning across detect/scan/lsp/cmd",
+    "final_targeted_minimum_go": "passed: Go 1.26.11, same regression cases",
+    "final_full_lint": "passed, 0 issues",
+    "preceding_full_race_and_minimum_go": {
+      "source_commit": "4e1179c3f926bdbe1d563d53060d28dbd6981026",
+      "packages": [
+        "internal/detect",
+        "internal/scan",
+        "internal/lsp",
+        "cmd/prowl"
+      ],
+      "passed": true,
+      "later_runtime_delta": "nil-detector Tuning returns built-in defaults; final targeted race/min-Go checks preserve incomplete scan behavior"
+    }
+  },
+  "native": {
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-config-policy-native-jc_c0y91/evidence.json",
+      "sha256": "2e7cb992fdd5ee5ed2bfda3c3eb6f6900cb424734b0b423a3345530a96a1bc0d"
+    },
+    "checks": 289,
+    "passed": 289,
+    "network": "OS denies all network"
+  },
+  "quality": {
+    "artifact": {
+      "path": "/tmp/prowl-detector-tuning-verified-quality-20261116.json",
+      "sha256": "cd65920a725fae4994f06f9079a87ff85a817d2d8e9a501801a0fef2ea232ad5"
+    },
+    "equal_to_parent_except_binary_sha256": true,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "performance": {
+    "artifact": {
+      "path": "/tmp/prowl-detector-tuning-perf-20261116/report.json",
+      "sha256": "f2096978bd1b9fc07dadabce7ff0fa547ef7c8d41533cf5dc4f205478454ce4c"
+    },
+    "status": "passed",
+    "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+    "pairs": 3,
+    "ratios": {
+      "ns/op": 1.1516838456507152,
+      "B/op": 0.9790148514003925,
+      "allocs/op": 1.030619269117874
+    },
+    "limits": {
+      "time": 1.2,
+      "bytes": 1.25,
+      "allocations": 1.25
+    }
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/builds.json",
+      "sha256": "68ee6002629d4baa69b9bdeeed4117f81ae9fe957d658c0fa4ab6d0210b1d882"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "5301469b2d4d8030066ffbc08198811d2b83ba839cb4a6cd6fad19c305c01145",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "a794af4095a57dcd9fb92aa28bbe318c1b4c56fb419e03c37cf814f8eb59cac9",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "f436a35a049f273e7473e69eba25b3d7c45b42395392685b04ff77e006668988",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "367d0aca1c2600e286123ab1de898115403dde544671cad5061c947f22a48267",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "e2f19fa55a9f8dbda6923dacde9086bff9517dd6007ceee52c633b30ad2cc8fb",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-detector-tuning-verified-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "ee4ad718483e7a4638d8b86de99bda807707780ba682660dd39e33325b2be8de",
+        "executed": false
+      }
+    ],
+    "foreign_binaries_executed": false
+  },
+  "remaining_boundaries": [
+    "forge.SetMaxPages",
+    "verify.SetConcurrency",
+    "source.SetCloneTimeout",
+    "final-source release factory and native foreign-platform execution",
+    "full TODO 1.5.0 migration"
+  ],
+  "publication": false
+}

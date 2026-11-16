@@ -103,7 +103,11 @@ func loadDetector(c commonFlags, cfg *config.Config) (*detect.Detector, *taxonom
 			})
 		}
 	}
-	return detect.New(tax), tax, nil
+	settings := detect.DefaultTuning()
+	if cfg != nil {
+		settings = settings.With(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)
+	}
+	return detect.NewWithTuning(tax, settings), tax, nil
 }
 
 // loadConfiguredEngine applies config suppression to templates before candidates or verifiers run.
@@ -280,9 +284,8 @@ func loadConfig(c *commonFlags) (*config.Config, error) {
 	if !c.explicitFlags["--workers"] && c.workers == 0 && cfg.Performance.Workers > 0 {
 		c.workers = cfg.Performance.Workers
 	}
-	// Apply config-file detection thresholds + operational limits (zero/empty keeps the default; these
-	// are process-wide). Flags win: the ML threshold and verify timeout come from config only if unset.
-	detect.ApplyTuning(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)
+	// Apply legacy operational limits. Detection thresholds belong to loadDetector.
+	// Flags win: the ML threshold and verify timeout come from config only if unset.
 	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
 	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
 	if !c.mlThresholdSet && cfg.Performance.MLThreshold > 0 {

@@ -125,7 +125,7 @@ func (d *Detector) comparisonMatch(text string, ix []int, reverse bool) (Match, 
 		return Match{}, false
 	}
 	value, ok := comparisonValue(text[vs:ve])
-	if !ok || strings.ContainsAny(value, " \t\r\n\v\f") || IsExampleOrPlaceholder(value) || IsTemplatePlaceholder(value) {
+	if !ok || strings.ContainsAny(value, " \t\r\n\v\f") || d.Tuning().IsExampleOrPlaceholder(value) || IsTemplatePlaceholder(value) {
 		return Match{}, false
 	}
 	typ, category := "generic_password", "generic"

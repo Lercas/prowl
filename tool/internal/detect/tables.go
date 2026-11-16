@@ -194,7 +194,7 @@ func (d *Detector) tableValue(text string, cell tableCell, field tableField) (Ma
 
 // fieldValue validates logical credential data independently of its source syntax.
 func (d *Detector) fieldValue(value string, lo, hi int, field tableField, stage string) (Match, bool) {
-	if !utf8.ValidString(value) || strings.ContainsAny(value, " \t\r\n\v\f") || IsExampleOrPlaceholder(value) || IsTemplatePlaceholder(value) {
+	if !utf8.ValidString(value) || strings.ContainsAny(value, " \t\r\n\v\f") || d.Tuning().IsExampleOrPlaceholder(value) || IsTemplatePlaceholder(value) {
 		return Match{}, false
 	}
 	typ, category := "generic_password", "generic"

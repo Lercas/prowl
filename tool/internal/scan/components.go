@@ -14,7 +14,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/Lercas/prowl/tool/internal/credentialset"
-	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/jsonstrict"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/verify"
@@ -391,19 +390,19 @@ func (b *componentBatch) apply(ctx context.Context, set *verify.Set, doc *litera
 	// A non-literal/derived candidate can still use a standalone verifier, but
 	// receives no context from which to guess companion credentials.
 	if doc == nil || doc != b.docs[candidate.entry] {
-		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, candidate.typ, candidate.value, nil, detect.IsExampleOrPlaceholder(candidate.value)))
+		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, candidate.typ, candidate.value, nil, candidate.isExample()))
 		return
 	}
 	v := doc.locate(candidate.start, candidate.end)
 	if v != nil && v.raw {
-		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, candidate.typ, candidate.value, nil, detect.IsExampleOrPlaceholder(candidate.value)))
+		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, candidate.typ, candidate.value, nil, candidate.isExample()))
 		return
 	}
 	if v == nil || v.value != candidate.value || doc.verificationUnsafe || doc.unsafeGroups[v.group] || !b.allowed[candidate.entry][v.start] {
 		f.Verified, f.Rationale, f.Verification = verificationResult(verify.Result{Status: verify.Errored, Note: "structured literal could not be established"})
 		return
 	}
-	r, evidence := set.VerifyComponents(ctx, candidate.typ, v.name, candidate.value, b.set, b.scopes[candidate.entry][v.group], detect.IsExampleOrPlaceholder(candidate.value))
+	r, evidence := set.VerifyComponents(ctx, candidate.typ, v.name, candidate.value, b.set, b.scopes[candidate.entry][v.group], candidate.isExample())
 	f.Verified, f.Rationale, f.Verification = verificationResult(r)
 	if f.Verification != nil {
 		f.Verification.Components = evidence

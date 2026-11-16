@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// TestGlobalMatchCap proves maxScanMatches is GLOBAL to one Scan: contextualPassword (one match per
+// TestGlobalMatchCap proves the match cap is GLOBAL to one Scan: contextualPassword (one match per
 // cue line, previously uncapped) and unmaskBase64 honor the running budget, so a dense input can no
 // longer push the result far past the cap. Before the fix a 4 MB block of password-cue lines yielded
 // ~120k matches against a 50k cap; now the combined result is bounded by the cap.

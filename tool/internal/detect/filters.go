@@ -39,8 +39,10 @@ var placeholderSubstrWeak = []string{"insert", "replace", "fake", "sample", "tod
 
 // weakPlaceholderToken reports whether v is a placeholder: a weak word AND low enough entropy to be
 // text, not a random secret. Takes the original value (entropy is case-sensitive); match is case-fold.
-func weakPlaceholderToken(v string) bool {
-	if ShannonEntropy(v) >= weakPlaceholderMaxEntropy {
+func weakPlaceholderToken(v string) bool { return currentTuning().weakPlaceholderToken(v) }
+
+func (policyTuning Tuning) weakPlaceholderToken(v string) bool {
+	if ShannonEntropy(v) >= policyTuning.WeakPlaceholderMaxEntropy {
 		return false // high-entropy: a real secret that merely contains the fragment
 	}
 	low := strings.ToLower(v)
@@ -187,7 +189,9 @@ func placeholderRunDominates(v string) bool {
 }
 
 // IsExampleOrPlaceholder reports whether a value is a documentation example / placeholder.
-func IsExampleOrPlaceholder(v string) bool {
+func IsExampleOrPlaceholder(v string) bool { return currentTuning().IsExampleOrPlaceholder(v) }
+
+func (policyTuning Tuning) IsExampleOrPlaceholder(v string) bool {
 	low := strings.ToLower(v)
 	if exampleValues[low] {
 		return true
@@ -197,7 +201,7 @@ func IsExampleOrPlaceholder(v string) bool {
 			return true
 		}
 	}
-	if weakPlaceholderToken(v) { // pass the original value: entropy is case-sensitive
+	if policyTuning.weakPlaceholderToken(v) { // pass the original value: entropy is case-sensitive
 		return true
 	}
 	if reFillerRun.MatchString(v) {
@@ -623,8 +627,10 @@ func placeholderRampTail(v string) bool {
 // IsPlaceholderAPIKey reports whether a generic_api_key value is an instructional placeholder. It layers
 // three checks on IsExampleOrPlaceholder: a standalone placeholder token (…_here, your_key), a glued
 // uppercase HERE/YOUR tail, and a low-entropy ramp tail — all keeping the placeholder-dominates discipline.
-func IsPlaceholderAPIKey(v string) bool {
-	if IsExampleOrPlaceholder(v) {
+func IsPlaceholderAPIKey(v string) bool { return currentTuning().IsPlaceholderAPIKey(v) }
+
+func (policyTuning Tuning) IsPlaceholderAPIKey(v string) bool {
+	if policyTuning.IsExampleOrPlaceholder(v) {
 		return true
 	}
 	if reGluedUpperPlaceholder.MatchString(v) {

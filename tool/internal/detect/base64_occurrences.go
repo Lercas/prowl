@@ -96,7 +96,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 			if depth == 0 && IsKnownNonSecretBlob(text, start) {
 				continue
 			}
-			if work+end-start > maxBase64Work || len(out)+len(jwtChildren) >= maxScanMatches {
+			if work+end-start > maxBase64Work || len(out)+len(jwtChildren) >= d.Tuning().MaxMatches {
 				limited, exhausted = true, true
 				return
 			}
@@ -118,7 +118,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				children, capped := d.jwtHexCandidate(ctx, text, start, end, local)
 				limited = limited || capped
 				for _, m := range children {
-					if len(out)+len(jwtChildren) >= maxScanMatches {
+					if len(out)+len(jwtChildren) >= d.Tuning().MaxMatches {
 						limited, exhausted = true, true
 						return
 					}
@@ -169,7 +169,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				limited = limited || capped
 				left, right := parent.sourceSpan(start, end)
 				for _, m := range children {
-					if len(out)+len(jwtChildren) >= maxScanMatches {
+					if len(out)+len(jwtChildren) >= d.Tuning().MaxMatches {
 						limited, exhausted = true, true
 						return
 					}
@@ -196,7 +196,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 			if !printableText(dec) {
 				continue
 			}
-			if candidates >= maxScanMatches {
+			if candidates >= d.Tuning().MaxMatches {
 				limited, exhausted = true, true
 				return
 			}
@@ -221,7 +221,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				}
 				limited = limited || capped
 				for _, m := range children {
-					if len(out)+len(jwtChildren) >= maxScanMatches {
+					if len(out)+len(jwtChildren) >= d.Tuning().MaxMatches {
 						limited, exhausted = true, true
 						return
 					}
@@ -262,7 +262,7 @@ func (d *Detector) base64OccurrencesWithJWT(ctx context.Context, text string, op
 				if taxonomy.GenericLast[m.Type] || depth == 0 && !HasSecretNameContext(text, start) && m.Confidence < 0.9 {
 					continue
 				}
-				if len(out)+len(jwtChildren) >= maxScanMatches {
+				if len(out)+len(jwtChildren) >= d.Tuning().MaxMatches {
 					limited, exhausted = true, true
 					return
 				}

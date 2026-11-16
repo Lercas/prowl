@@ -20,6 +20,14 @@ type verificationCandidate struct {
 	entry        int
 	decodedText  string
 	decodedStart int
+	tuning       *detect.Tuning
+}
+
+func (c verificationCandidate) isExample() bool {
+	if c.tuning != nil {
+		return c.tuning.IsExampleOrPlaceholder(c.value)
+	}
+	return detect.IsExampleOrPlaceholder(c.value)
 }
 
 func unboundVerificationView(it model.Item) string {
@@ -34,7 +42,7 @@ func unboundVerificationView(it model.Item) string {
 
 func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
 	if (c.jwtPayload || c.unboundView != "") && set != nil {
-		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, detect.IsExampleOrPlaceholder(c.value)))
+		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, c.isExample()))
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
 	}
@@ -48,12 +56,12 @@ func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *
 		if c.decodedStart < 0 || end < c.decodedStart || end > len(c.decodedText) || c.decodedText[c.decodedStart:end] != c.value {
 			f.Verified, f.Rationale, f.Verification = verificationResult(verify.Result{Status: verify.Errored, Note: "decoded literal could not be established"})
 		} else {
-			f.Verified, f.Rationale, f.Verification = verificationResult(set.Verify(ctx, c.typ, c.value, c.decodedText, detect.IsExampleOrPlaceholder(c.value)))
+			f.Verified, f.Rationale, f.Verification = verificationResult(set.Verify(ctx, c.typ, c.value, c.decodedText, c.isExample()))
 		}
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
 	}
-	f.Verified, f.Rationale, f.Verification = applyLiteralVerify(ctx, set, doc, c.typ, c.value, c.start, c.end, original)
+	f.Verified, f.Rationale, f.Verification = applyLiteralVerify(ctx, set, doc, c.typ, c.value, c.start, c.end, original, c.tuning)
 	noteVerificationFailure(ctx, path, f.Verification)
 }
 

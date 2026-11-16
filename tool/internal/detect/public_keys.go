@@ -8,6 +8,10 @@ import (
 // Public application keys are audit subjects only under an explicit scan option.
 // Boundaries reject overlong values whole instead of manufacturing a prefix key.
 func publicKeyCandidates(ctx context.Context, text string) ([]Match, bool) {
+	return currentTuning().publicKeyCandidates(ctx, text)
+}
+
+func (policyTuning Tuning) publicKeyCandidates(ctx context.Context, text string) ([]Match, bool) {
 	const prefix = "sb_publishable_"
 	var out []Match
 	for cursor := 0; cursor < len(text) && ctx.Err() == nil; {
@@ -24,7 +28,7 @@ func publicKeyCandidates(ctx context.Context, text string) ([]Match, bool) {
 		if start > 0 && publicKeyByte(text[start-1]) || end-start < len(prefix)+20 || end-start > len(prefix)+128 {
 			continue
 		}
-		if len(out) >= maxScanMatches {
+		if len(out) >= policyTuning.MaxMatches {
 			return out, true
 		}
 		out = append(out, Match{Type: "supabase-publishable-key", Value: text[start:end], Start: start, End: end, Confidence: 1, Category: "public", Stage: "public-audit-subject"})

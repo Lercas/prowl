@@ -167,7 +167,7 @@ func buildWithBundled(bundled bool) (*engine, error) {
 	if cfg.Performance.MaxSize > 0 { // CLI --max-size parity: a .prowl.yaml can raise/lower the cap
 		maxBytes = int(cfg.Performance.MaxSize)
 	}
-	e := &engine{det: detect.New(tax), maxBytes: maxBytes}
+	e := &engine{det: detect.NewWithTuning(tax, detect.DefaultTuning().With(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)), maxBytes: maxBytes}
 	var dir string
 	if !bundled {
 		dir, err = installedRulesDir()
@@ -243,14 +243,12 @@ func enableResolvesToZero(cfg *config.Config, tax *taxonomy.Taxonomy) bool {
 	return true // a non-empty enable list left zero detectors active: total kill-switch
 }
 
-// applyTuning applies the config's detection thresholds and operational limits the same way the CLI
-// does, so in-editor diagnostics don't diverge from `prowl scan`. These are process-wide and set
-// once before any scan; zero/empty values are ignored, preserving the built-in default.
+// applyTuning applies legacy process-wide operational limits. Detection thresholds
+// are explicit immutable settings on each workspace detector.
 func applyTuning(cfg *config.Config) {
 	if cfg == nil {
 		return
 	}
-	detect.ApplyTuning(cfg.Detection.GenericEntropyMin, cfg.Detection.PlaceholderMaxEntropy, cfg.Detection.MaxMatchesPerFile)
 	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
 	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
 }

@@ -172,9 +172,17 @@
     и correlation 46/46. Full Go/race/min-Go/lint, шесть static builds,
     прежние quality IDs и GOROOT digest проходят. [Контракт](wiki/Configuration-Policy-Identity.md),
     `wiki/evidence/1.5.0-config-policy-20261116.json`.
-  - [ ] Проверить оставшиеся process-wide detection tuning/operational setters
-    и их boundaries при совместном использовании pipelines/requests.
-    Config/allowlist snapshot не делает эти зависимости per-Pipeline.
+  - [x] Изолировать detection tuning между pipelines/requests: immutable снимок
+    entropy floor, placeholder threshold и candidate cap, включая вложенные
+    decode/literal/reconstruction и verification. CLI/LSP получают явные defaults;
+    `ApplyTuning` совместим для прямого legacy Scan. Эффективные настройки входят
+    в detector policy digest; default IDs сохранены.
+    [Контракт и границы](wiki/Detector-Tuning-Isolation.md),
+    `wiki/evidence/1.5.0-detector-tuning-20261116.json`.
+  - [ ] Проверить оставшиеся process-wide operational setters `forge.SetMaxPages`,
+    `verify.SetConcurrency`, `source.SetCloneTimeout` и их boundaries при
+    совместном использовании pipelines/requests. Detection/Config snapshots
+    не делают эти зависимости per-request.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

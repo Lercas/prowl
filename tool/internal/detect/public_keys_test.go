@@ -28,8 +28,8 @@ func TestPublicSubjectWholeBoundaryLimitsAndCancellation(t *testing.T) {
 			t.Fatal("invalid public key prefix accepted")
 		}
 	}
-	got, limited := publicKeyCandidates(t.Context(), strings.Repeat(publicSubjectFixture+" ", maxScanMatches+1))
-	if len(got) != maxScanMatches || !limited {
+	got, limited := publicKeyCandidates(t.Context(), strings.Repeat(publicSubjectFixture+" ", MaxScanMatches()+1))
+	if len(got) != MaxScanMatches() || !limited {
 		t.Fatal("public candidate cap failed open")
 	}
 	ctx, cancel := context.WithCancel(t.Context())

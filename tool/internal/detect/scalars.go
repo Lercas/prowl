@@ -75,7 +75,7 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 			if ctx.Err() != nil {
 				return kept, true
 			}
-			if len(kept) >= maxScanMatches {
+			if len(kept) >= d.Tuning().MaxMatches {
 				return kept, true
 			}
 			v := scalars[start]
@@ -86,13 +86,13 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 				if hasNonASCII(v.Value) {
 					uniLower = strings.ToLower(v.Value)
 				}
-				prose := d.contextualPassword(v.Value, lower, uniLower, nil, maxScanMatches-len(kept))
+				prose := d.contextualPassword(v.Value, lower, uniLower, nil, d.Tuning().MaxMatches-len(kept))
 				d.lowerPool.Put(lb)
 				for _, m := range prose {
 					m.Start, m.End = m.Start+start, m.End+start
 					kept = append(kept, m)
 				}
-				if len(kept) >= maxScanMatches {
+				if len(kept) >= d.Tuning().MaxMatches {
 					return kept, true
 				}
 			}

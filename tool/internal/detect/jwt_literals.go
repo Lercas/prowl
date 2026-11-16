@@ -141,7 +141,7 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			}
 		}
 		for _, m := range local.Matches {
-			if len(kept) >= maxScanMatches {
+			if len(kept) >= d.Tuning().MaxMatches {
 				limited = true
 				break
 			}
@@ -184,9 +184,9 @@ func (d *Detector) jwtEscapedFindings(ctx context.Context, text string, inner Sc
 			}
 		}
 	}
-	if len(ordinary)+len(kept) > maxScanMatches {
+	if len(ordinary)+len(kept) > d.Tuning().MaxMatches {
 		limited = true
-		kept = kept[:min(len(kept), maxScanMatches-len(ordinary))]
+		kept = kept[:min(len(kept), d.Tuning().MaxMatches-len(ordinary))]
 	}
 	kept = append(ordinary, kept...)
 

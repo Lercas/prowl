@@ -77,7 +77,7 @@ func TestWeakPlaceholderUsesOriginalCaseEntropy(t *testing.T) {
 		"SampleAbCdEfGhIjKlMnOpQr", // orig 4.418, low 4.168
 		"FakeAaBbCcDdEeFfGgHhIiJj", // orig 4.335, low 3.407
 	} {
-		if ShannonEntropy(v) < weakPlaceholderMaxEntropy {
+		if ShannonEntropy(v) < DefaultTuning().WeakPlaceholderMaxEntropy {
 			t.Fatalf("test value %q has true entropy %.3f below the ceiling — pick a higher-entropy value", v, ShannonEntropy(v))
 		}
 		if weakPlaceholderToken(v) {
