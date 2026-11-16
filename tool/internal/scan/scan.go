@@ -878,18 +878,18 @@ func literalModelLine(m detect.Match, text, original, value string) string {
 		return original
 	}
 	prefix, suffix := original, ""
-	lo := max(0, m.Start-400)
-	nl := strings.LastIndexByte(text[lo:m.Start], '\n')
-	if nl >= 0 || lo == 0 {
-		pos := m.Start - (lo + nl + 1)
-		if pos <= len(original) {
-			prefix = original[:pos]
-			end := pos + m.End - m.Start
-			if end < len(original) {
-				suffix = original[end:]
+	pos := m.Start - sourceContextStart(text, m.Start)
+	if pos <= len(original) {
+		prefix = original[:pos]
+		end := pos + m.End - m.Start
+		if end < len(original) {
+			suffix = original[end:]
+			if boundary := strings.IndexByte(suffix, ';'); boundary >= 0 {
+				suffix = suffix[:boundary+1]
 			}
 		}
 	}
+
 	if len(prefix) > 128 {
 		prefix = prefix[:128]
 	}
@@ -925,7 +925,7 @@ func recordFor(value string, it model.Item, start int) mlscore.Record {
 	return mlscore.Record{
 		Value: value,
 		Context: mlscore.Context{
-			Name:   leadingName(line),
+			Name:   contextBindingName(it.Text, start, line),
 			Line:   line,
 			Path:   it.Path,
 			Source: it.Source,
@@ -941,7 +941,7 @@ func (p *Pipeline) revealContext(it model.Item, start int) *model.FindingContext
 		return nil
 	}
 	line := lineText(it.Text, start)
-	return &model.FindingContext{Name: leadingName(line), Line: line}
+	return &model.FindingContext{Name: contextBindingName(it.Text, start, line), Line: line}
 }
 
 // lineText returns the (length-capped) source line containing byte offset start.
@@ -949,19 +949,33 @@ func lineText(text string, start int) string {
 	if start < 0 || start > len(text) {
 		return ""
 	}
-	b := start
-	for b > 0 && text[b-1] != '\n' {
-		b--
-	}
+	b := sourceContextStart(text, start)
 	e := start
-	for e < len(text) && text[e] != '\n' {
+	for e < len(text) && e-b < 400 && text[e] != '\n' && text[e] != '\r' {
 		e++
 	}
-	s := text[b:e]
-	if len(s) > 400 { // bound the context sent to the model
-		s = s[:400]
+	return text[b:e]
+}
+
+func sourceContextStart(text string, start int) int {
+	b := start
+	for b > 0 && start-b < 400 && text[b-1] != '\n' && text[b-1] != '\r' {
+		b--
 	}
-	return s
+	if start-b >= 400 {
+		return start - 160
+	}
+	return b
+}
+
+// Preserve the trained short-line context. Recenter only when the old window
+// omitted the candidate, then use its own adjacent binding rather than a prefix.
+func contextBindingName(text string, start int, line string) string {
+	b := sourceContextStart(text, start)
+	if b > 0 && text[b-1] != '\n' && text[b-1] != '\r' {
+		return detect.BindingName(text, start)
+	}
+	return leadingName(line)
 }
 
 var reAssignName = regexp.MustCompile(`([A-Za-z_][\w.-]*)\s*[:=]`)

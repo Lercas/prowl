@@ -127,6 +127,18 @@
       `wiki/evidence/1.5.0-released-boundaries-20261116.json`.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
+    - [x] Возвращены два неизменённых noise-корпуса: 644 примера, nomination/ML-transport
+      fixtures и точные repeated occurrences через новый API. Контекст длинной строки
+      смещается к пропущенному кандидату; короткий trained context сохранён.
+      Оригинальные 8 tests проходят на 1.4.0. Full Go, targeted race, min-Go,
+      lint и native 232/232 проходят; quality IDs прежние: 1560/2094, FP 57/982.
+      [Границы](wiki/Released-Noise-and-Context.md),
+      `wiki/evidence/1.5.0-released-context-20261116.json`.
+    - [ ] Отдельно квалифицировать L2 на released noise positives: настоящая новая
+      модель сохраняет 201/308; 107 кандидатов отсекаются. Среди 334 negatives
+      находок нет; 2 ambiguous не считаются доказанными секретами. Nomination
+      fixtures с recording scorer не закрывают этот пункт. Общий quality gate
+      проходит, но не доказывает паритет с прежней моделью на каждом примере.
     - [x] Восстановлены released suppression/encoded boundaries: allow-маркер только
       в operator comment, JWT structure без checksum/authenticity claim, child proof
       сохраняет parent nomination без повышения reported confidence, CRC-факт

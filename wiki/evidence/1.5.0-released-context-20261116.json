@@ -1,0 +1,133 @@
+{
+  "schema_version": "prowl-released-context-v1",
+  "date": "2026-11-16",
+  "status": "local_bounded_context_and_nomination_qualified_with_L2_gap_open",
+  "source_base": "39f33490e93e494605a7a4582440b6dbfe5f5bbd",
+  "qualified_runtime_commit": "d9f3ba5b7378f792fc790b633dbee2666df0cb11",
+  "binary": {
+    "path": "/tmp/prowl-released-context-final-20261116-bin",
+    "sha256": "0661bcae5ac49f534331a76e68df4d93f5643fd26be757115f831d1e9ef917b2"
+  },
+  "buildinfo": "/tmp/prowl-released-context-final-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=d9f3ba5b7378f792fc790b633dbee2666df0cb11\n\tbuild\tvcs.time=2026-11-16T04:16:01Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "final-go": {
+      "path": "/tmp/prowl-released-context-final-go-20261116.log",
+      "sha256": "a380db92ce4568151c511d266ff60f19f2efa034d60c04200a3dec2b198cb024"
+    },
+    "final-race": {
+      "path": "/tmp/prowl-released-context-final-race-20261116.log",
+      "sha256": "19f3315a4a534fb9907124fdcfffa8710c8bc9c9108f866123e7533295a5d579"
+    },
+    "final-min-go": {
+      "path": "/tmp/prowl-released-context-final-min-go-20261116.log",
+      "sha256": "21ab679214b640c5be1c3e9a1530c4f2b7946da241909e8ce4d0b8d680386533"
+    },
+    "final-lint": {
+      "path": "/tmp/prowl-released-context-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "final-native": {
+      "path": "/tmp/prowl-released-context-final-native-20261116.log",
+      "sha256": "1682bee4aacea830782808025c2fe2d5a929d0599c188749e0c89dbf6cd91e26"
+    },
+    "final-quality": {
+      "path": "/tmp/prowl-released-context-final-quality-20261116.log",
+      "sha256": "79b225a51b4a4c1ae06b382a7d0bc66de98031ae5ed8767a6e917092dbc72394"
+    },
+    "qualified-race": {
+      "path": "/tmp/prowl-released-context-qualified-race-20261116.log",
+      "sha256": "6ca87fdbe4e60ee7335c45b068a1f0968682124aa8d2e65f627732ddaadd3aee"
+    },
+    "reference": {
+      "path": "/tmp/prowl-released-context-reference-20261116.log",
+      "sha256": "53aa7250f239dcb8cf6b78266313ac25b37e913d60ed8ff9f1abe7d7d119f1a9"
+    }
+  },
+  "reference": {
+    "tag": "refs/tags/v1.4.0",
+    "commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "original_top_level_tests_passed": 8,
+    "scope": "selected scan noise/context/occurrence tests, not complete reference suite"
+  },
+  "fixtures": [
+    {
+      "path": "tool/internal/scan/testdata/noise-1.4.0.json",
+      "sha256": "d030d08dd14ba1fbcc36f3ce087d4cecc08fa84fb1379425120c9099e1ff1be0"
+    },
+    {
+      "path": "tool/internal/scan/testdata/noise-deep-1.4.0.json",
+      "sha256": "79ed1475c880a238d2ed7684332a51011b287ab206ba23c2170acaa1f73dac84"
+    }
+  ],
+  "nomination_cases": 644,
+  "nomination_labels": {
+    "positive": 308,
+    "negative": 334,
+    "ambiguous": 2
+  },
+  "adaptations": [
+    "immutable Pipeline API",
+    "explicit AllOccurrences and RegisterPolicy",
+    "ten entropy-only cases accept qualified generic_api_key type",
+    "recording scorer validates nomination and transport, not real model parity"
+  ],
+  "context": {
+    "revision": "1.5.0-bounded-context-v1",
+    "shift_when_candidate_start_at_or_after_byte": 400,
+    "preceding_bytes": 160,
+    "maximum_bytes": 400,
+    "short_line_trained_context_preserved": true,
+    "boundary_test_offsets": [
+      400,
+      401,
+      20000
+    ],
+    "decoded_literal_suffix": "retain terminator, omit subsequent statement after semicolon"
+  },
+  "validation": {
+    "full_go": "final runtime, all tool packages",
+    "race": "final runtime targeted released/context/charcode tests; full scan race at 7f3d46ad59f694e38f0a8c3275c855953785e50e before two boundary comparisons were corrected",
+    "minimum_go": "1.26.11 full scan package, final runtime",
+    "lint": "2.15.0, zero issues",
+    "native_cli": 232,
+    "network_boundary": "native and quality runs under sandbox-exec deny network*"
+  },
+  "quality": {
+    "passed": true,
+    "secret_hits": 1560,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "all_ids_unchanged": true
+  },
+  "real_model_noise_audit": {
+    "positive_hits": 201,
+    "positives": 308,
+    "misses": 107,
+    "negative_findings": 0,
+    "negatives": 334,
+    "ambiguous": 2,
+    "all_308_positive_outcomes_identical_to_parent": true,
+    "scope": "diagnostic, not parity qualification",
+    "open_followup": "L2 recall on released noise positives"
+  },
+  "rejected_broader_context_trial": {
+    "secret_hits": 1552,
+    "hard_negative_hits": 62,
+    "passed": false,
+    "report": {
+      "path": "/tmp/prowl-released-context-quality-20261116.json",
+      "sha256": "7c7827839a58d102e26ed1a7ef06135cb2861b863f25b0db1852105004c0bbff"
+    },
+    "final_source_excludes_trial": true
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "limits": [
+    "No new performance measurement; context functions run only for ML or explicit disclosure, previous no-ML performance receipt is historical",
+    "No legacy-model L2 parity claim",
+    "No hosted CI, live provider acceptance, publication, deployment or installed model replacement"
+  ]
+}

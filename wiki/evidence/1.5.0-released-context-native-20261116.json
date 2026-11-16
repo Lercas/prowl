@@ -1,0 +1,936 @@
+{
+  "passed": 232,
+  "checks": [
+    {
+      "case": "py-string-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "py-string-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-string-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "py-string-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-string-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "py-string-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-string-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "py-string-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-string-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-string-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-string-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-string-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-string-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-string-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-string-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-string-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-triple-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "py-triple-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-triple-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "py-triple-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-triple-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "py-triple-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "py-triple-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "py-triple-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-template-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-template-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-template-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-template-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-template-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-template-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-template-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-template-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "json-string-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "json-string-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "json-string-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "json-string-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "json-string-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "json-string-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "json-string-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "json-string-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-comment-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-inline-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "toml-multiline-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-prefix-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-word-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-word-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-word-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-word-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-word-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-word-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-word-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-word-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-comment-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-comment-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-comment-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-comment-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-slash-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-slash-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-slash-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-slash-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-slash-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-slash-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-slash-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-slash-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-block-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-block-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-block-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-block-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-block-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "env-block-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "env-block-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "env-block-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-block-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-block-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-block-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-block-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-block-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "js-block-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "js-block-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "js-block-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "html-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "html-comment-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "html-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "html-comment-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "html-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "html-comment-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "html-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "html-comment-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "sql-comment-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-json-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-json-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-sarif-mlFalse-privacy",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "ini-comment-sarif-mlTrue-privacy",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedFalse-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-False-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedFalse-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-False-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedFalse-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-False-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedFalse-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-False-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedTrue-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-True-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedTrue-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-True-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedTrue-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-True-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-valid-encodedTrue-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-valid-True-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedFalse-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-False-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedFalse-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-False-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedFalse-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-False-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedFalse-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-False-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedTrue-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-True-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedTrue-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-True-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedTrue-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-True-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-nested-alg-encodedTrue-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-nested-alg-True-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedFalse-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-False-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedFalse-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-False-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedFalse-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-False-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedFalse-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-False-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedTrue-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-True-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedTrue-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-True-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedTrue-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-True-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-boolean-alg-encodedTrue-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-boolean-alg-True-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedFalse-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-False-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedFalse-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-False-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedFalse-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-False-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedFalse-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-False-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedTrue-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-True-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedTrue-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-True-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedTrue-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-True-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-empty-alg-encodedTrue-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-empty-alg-True-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedFalse-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-False-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedFalse-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-False-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedFalse-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-False-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedFalse-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-False-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedTrue-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-True-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedTrue-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-True-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedTrue-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-True-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "jwt-none-signed-encodedTrue-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "jwt-private-none-signed-True-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-comment-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-severity-comment-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-comment-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-severity-comment-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-comment-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-comment-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-fixture-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-severity-fixture-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-fixture-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-severity-fixture-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "checksum-fixture-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "checksum-fixture-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "base64-limit-json",
+      "passed": true
+    },
+    {
+      "case": "base64-limit-sarif",
+      "passed": true
+    },
+    {
+      "case": "dense-yaml-complete",
+      "passed": true
+    },
+    {
+      "case": "dense-yaml-private",
+      "passed": true
+    }
+  ],
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-released-encoded-xxpzjclz",
+  "binary_sha256": "0661bcae5ac49f534331a76e68df4d93f5643fd26be757115f831d1e9ef917b2",
+  "scope": "Local CLI only; no provider acceptance; caller network boundary recorded separately"
+}
