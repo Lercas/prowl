@@ -10,10 +10,7 @@ import (
 
 // ComponentEvidence identifies roles without echoing a source-supplied property
 // name, which may itself contain another credential.
-type ComponentEvidence struct {
-	Primary []string            `json:"primary"`
-	Fields  map[string][]string `json:"fields"`
-}
+type ComponentEvidence = credentialset.Evidence
 
 // VerifyComponents uses a sealed, current-acquisition inventory instead of
 // searching unrelated source context. The caller must establish the primary's

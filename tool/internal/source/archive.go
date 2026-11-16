@@ -43,6 +43,9 @@ func emitPayload(ctx context.Context, ch chan<- model.Item, itemPath string, dat
 }
 
 func emitPayloadDepth(ctx context.Context, ch chan<- model.Item, itemPath string, data []byte, maxBytes int64, exclude []string, meta map[string]any, depth int) bool {
+	if depth > 0 {
+		ctx = withoutCredentialScope(ctx)
+	}
 	if ctx.Err() != nil {
 		return false
 	}

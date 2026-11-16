@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"regexp"
 	"strings"
+
+	"github.com/Lercas/prowl/tool/internal/credentialset"
 )
 
 // AgentProvenance labels a selected agent configuration or text export.
@@ -36,6 +38,9 @@ type Item struct {
 	ImageEntry int
 	ImageScope *ImageScope `json:"-"`
 	ImagePath  string      `json:"-"`
+	// CredentialScope is producer-declared acquisition isolation for opt-in assembly.
+	CredentialScope *credentialset.Scope `json:"-"`
+	CredentialEntry int                  `json:"-"`
 }
 
 // IsIncompleteFinding identifies scan diagnostics that filtering must not hide as accepted secrets.
@@ -164,11 +169,12 @@ func (a *PublicKeyAudit) HasAccessObservation() bool {
 }
 
 type Verification struct {
-	Status       string   `json:"status"`
-	Verifier     string   `json:"verifier,omitempty"`
-	CheckedAt    string   `json:"checked_at,omitempty"`
-	Capabilities []string `json:"capabilities,omitempty"`
-	Reason       string   `json:"reason,omitempty"`
+	Status       string                  `json:"status"`
+	Verifier     string                  `json:"verifier,omitempty"`
+	CheckedAt    string                  `json:"checked_at,omitempty"`
+	Capabilities []string                `json:"capabilities,omitempty"`
+	Reason       string                  `json:"reason,omitempty"`
+	Components   *credentialset.Evidence `json:"components,omitempty"`
 }
 
 // FindingContext mirrors mlscore.Context's value-dependent fields (path/source are already on Finding).

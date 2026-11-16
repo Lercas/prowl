@@ -294,6 +294,9 @@ func (li *lineIndex) isComment(pos int) bool {
 // suppresses a match by its raw value+path before redaction. Stops on ctx cancellation with
 // partial results.
 func (p *Pipeline) Run(ctx context.Context, items <-chan model.Item) []model.Finding {
+	if p.options.CrossFile && p.options.components == nil {
+		return p.runComponents(ctx, items)
+	}
 	workers := p.options.Workers
 	if workers <= 0 {
 		workers = runtime.NumCPU()
@@ -356,6 +359,9 @@ func processingError(it model.Item, reason string) model.Finding {
 // Findings scans a single Item under a panic guard and applies the allowlist + inline pragmas.
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
+	if p.options.CrossFile && p.options.components == nil {
+		return []model.Finding{processingError(it, "cross-file verification requires a complete source stream")}
+	}
 	if it.Error == nil && ctx.Err() == nil {
 		model.CoverageFrom(ctx).Processed(len(it.Text))
 	}
@@ -438,8 +444,18 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			Rationale: "source content could not be read; scan results are incomplete",
 		}}
 	}
-	if literalDoc == nil && literalFormat(it) != "" {
-		if doc := parseLiterals(ctx, it, p.options.PublicAuditor != nil); doc != nil {
+	if literalDoc == nil && (literalFormat(it) != "" || p.options.components != nil && componentEnv(it)) {
+		var doc *literalDocument
+		if p.options.components != nil {
+			doc = p.options.components.docs[it.CredentialEntry]
+			if doc != nil && doc.original != it.Text {
+				doc = nil
+			}
+		}
+		if doc == nil {
+			doc = parseLiterals(ctx, it, p.options.PublicAuditor != nil)
+		}
+		if doc != nil {
 			return p.literalFindings(ctx, it, doc)
 		}
 		// A failed parser cannot establish a value safe for provider submission.
@@ -745,6 +761,11 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if ml != nil {
 				reqs = append(reqs, h.record(it, literalDoc))
 			}
+		}
+	}
+	if p.options.components != nil {
+		for i := range pending {
+			pending[i].components, pending[i].entry = p.options.components, it.CredentialEntry
 		}
 	}
 	if vset != nil && verifyBeforeML {

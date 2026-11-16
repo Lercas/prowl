@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/config"
+	"github.com/Lercas/prowl/tool/internal/credentialset"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/resilience"
@@ -77,6 +78,7 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 	attachBucketOrigin(ctx, &it)
 	attachMobileOrigin(ctx, &it)
 	attachImageOrigin(ctx, &it)
+	it.CredentialScope, _ = ctx.Value(credentialScopeKey{}).(*credentialset.Scope)
 	select {
 	case ch <- it:
 		return true
@@ -115,7 +117,11 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 			MaxBytes int64
 		}{exclude, maxBytes})
 	}
-	ch := make(chan model.Item, 128)
+	capacity := 128
+	if enabled, _ := ctx.Value(credentialModeKey{}).(bool); enabled {
+		capacity = 1
+	}
+	ch := make(chan model.Item, capacity)
 	go func() {
 		defer close(ch)
 		// Guard the whole walk: a panic in the callback must not crash the process or skip close(ch).
@@ -132,7 +138,7 @@ func Filesystem(ctx context.Context, roots, exclude []string, maxBytes int64) <-
 
 func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []string, maxBytes int64) {
 	for _, root := range roots {
-		rootCtx := ctx
+		rootCtx := credentialRootContext(ctx)
 		if stateDirectoryExcluded(ctx, root) {
 			model.Note(ctx, "state_directory", root, false)
 			continue
@@ -158,7 +164,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				}
 				continue
 			}
-			rootCtx, err = withFilesystemOrigin(ctx, root, resolved)
+			rootCtx, err = withFilesystemOrigin(rootCtx, root, resolved)
 			if err != nil {
 				if !emitSourceError(ctx, ch, root, err) {
 					return
@@ -199,6 +205,10 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 			}
 			continue
 		}
+		credentialScopes := make(map[string]*credentialset.Scope)
+		if scope, _ := rootCtx.Value(credentialScopeKey{}).(*credentialset.Scope); scope != nil {
+			credentialScopes[filepath.Clean(root)] = scope
+		}
 		walkErr := filepath.WalkDir(walkRoot, func(path string, d fs.DirEntry, err error) error {
 			if ctx.Err() != nil {
 				return filepath.SkipAll
@@ -238,6 +248,11 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 					model.Note(ctx, "excluded_directory", path, false)
 					logx.Debug("skipped: default-skip dir (name it explicitly as a root to scan it)", "path", path)
 					return filepath.SkipDir
+				}
+				if err := nestedCredentialRoot(rootCtx, rootFS, root, path, credentialScopes); err != nil {
+					if !emitSourceError(rootCtx, ch, path, err) {
+						return filepath.SkipAll
+					}
 				}
 				return nil
 			}
@@ -283,7 +298,7 @@ func walkRoots(ctx context.Context, ch chan<- model.Item, roots, exclude []strin
 				}
 				return nil
 			}
-			if !emitPayload(rootCtx, ch, path, data, maxBytes, exclude, nil) {
+			if !emitPayload(credentialFileContext(rootCtx, path, credentialScopes), ch, path, data, maxBytes, exclude, nil) {
 				return filepath.SkipAll
 			}
 			return nil

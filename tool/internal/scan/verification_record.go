@@ -16,6 +16,8 @@ type verificationCandidate struct {
 	start, end  int
 	jwtPayload  bool
 	unboundView string
+	components  *componentBatch
+	entry       int
 }
 
 func unboundVerificationView(it model.Item) string {
@@ -31,6 +33,11 @@ func unboundVerificationView(it model.Item) string {
 func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *literalDocument, original, path string, f *model.Finding) {
 	if (c.jwtPayload || c.unboundView != "") && set != nil {
 		f.Verified, f.Rationale, f.Verification = verificationResult(set.VerifyLiteral(ctx, c.typ, c.value, nil, detect.IsExampleOrPlaceholder(c.value)))
+		noteVerificationFailure(ctx, path, f.Verification)
+		return
+	}
+	if c.components != nil && set != nil {
+		c.components.apply(ctx, set, doc, c, path, f)
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
 	}

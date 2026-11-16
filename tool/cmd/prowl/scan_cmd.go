@@ -236,6 +236,16 @@ func checkSourceModes(c commonFlags, rest []string) int {
 
 // stdinModeError validates the label before configuration, reports or input I/O.
 func stdinModeError(c commonFlags, rest []string) error {
+	if c.crossFile {
+		if len(rest) == 0 && !isTTY(os.Stdin) {
+			return fmt.Errorf("--cross-file requires explicit local filesystem roots when stdin is piped")
+		}
+		for _, path := range rest {
+			if path == "-" {
+				return fmt.Errorf("--cross-file does not support stdin")
+			}
+		}
+	}
 	if c.stdinName != "" && (c.staged || c.since != "" || c.history || c.gitTimeline || len(rest) > 1 || (len(rest) == 1 && rest[0] != "-")) {
 		return fmt.Errorf("--stdin-name applies to stdin only; it cannot be combined with paths or Git modes")
 	}
@@ -316,6 +326,9 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if c.crossFile {
+		ctx = source.WithCredentialScopes(ctx)
 	}
 	switch {
 	case c.staged || c.since != "":

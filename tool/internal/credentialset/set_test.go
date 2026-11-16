@@ -287,3 +287,30 @@ func TestConcurrentIntakeReadAndClose(t *testing.T) {
 	s.Close()
 	wg.Wait()
 }
+
+func TestUnknownRoleCannotBorrowAnotherFilesKnownAlias(t *testing.T) {
+	for _, name := range []string{"unrelated", "pass_word"} {
+		t.Run(name, func(t *testing.T) {
+			ctx, scope, s := context.Background(), NewScope(), newSet(t)
+			for _, p := range []struct{ n, v string }{{"account", "owned"}, {"password", "Owned123"}} {
+				if err := s.Observe(ctx, scope, p.n, p.v, "opaque"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := s.ObserveUnknown(ctx, scope, name, "unknown-location"); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.Seal(ctx, true); err != nil {
+				t.Fatal(err)
+			}
+			called := false
+			err := s.With(ctx, scope, newSchema(t, pair), "account", "owned", func(map[string]string, map[string][]string) error { called = true; return nil })
+			if name == "unrelated" && (err != nil || !called) {
+				t.Fatal("irrelevant unknown field blocked complete credential")
+			}
+			if name == "pass_word" && (!errors.Is(err, ErrAmbiguous) || called) {
+				t.Fatal("unknown role borrowed another file's value")
+			}
+		})
+	}
+}

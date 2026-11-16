@@ -38,6 +38,10 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.Reconstruct = flags.reconstruct
 	options.Semantic, options.SemanticEngine = flags.semantic, flags.semanticEngine
 	options.VerifyAll = flags.verifyAll || flags.failOnVerified
+	options.CrossFile = flags.crossFile
+	if flags.crossFile {
+		flags.coverage.RegisterScope("components", "local-filesystem", map[string]any{"revision": "cross-file-literals-v1", "max_items": 10000, "max_bytes": 32 << 20})
+	}
 	var auditErr error
 	if flags.auditPublic {
 		// Parsing has already validated the immutable collection selection.
@@ -55,6 +59,10 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 		} else {
 			options.ValueFingerprint = store.Identity().Fingerprint
 			options.LocationFingerprint = store.Identity().Location
+			if flags.crossFile {
+				identity := store.Identity()
+				options.ComponentLocationFingerprint = func(raw string) string { return identity.Location("prowl:scope:"+flags.indexScope, raw, 0, 0) }
+			}
 			if flags.indexEvidence == nil {
 				flags.indexEvidence = &indexEvidence{}
 			}

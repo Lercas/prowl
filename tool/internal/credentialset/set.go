@@ -36,6 +36,7 @@ type Limits struct {
 
 type observation struct {
 	name, value, location string
+	known                 bool
 }
 
 // Set is owned by one scan invocation. A fresh set is required for the next run.
@@ -88,6 +89,16 @@ func validName(name string) bool {
 // location identity, never a source path or raw source text. Values are copied to
 // avoid retaining a whole source buffer through a substring.
 func (s *Set) Observe(ctx context.Context, scope *Scope, name, value, location string) error {
+	return s.observe(ctx, scope, name, value, location, true)
+}
+
+// ObserveUnknown preserves a declared non-string/empty role instead of silently
+// borrowing that role from another file. Unrelated unknown fields do not block it.
+func (s *Set) ObserveUnknown(ctx context.Context, scope *Scope, name, location string) error {
+	return s.observe(ctx, scope, name, "", location, false)
+}
+
+func (s *Set) observe(ctx context.Context, scope *Scope, name, value, location string, known bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if err := s.state(ctx); err != nil {
@@ -96,7 +107,7 @@ func (s *Set) Observe(ctx context.Context, scope *Scope, name, value, location s
 	if s.sealed {
 		return ErrSealed
 	}
-	if scope == nil || !validName(name) || value == "" || len(value) > 65536 || location == "" || len(location) > 256 {
+	if scope == nil || !validName(name) || known && value == "" || len(value) > 65536 || location == "" || len(location) > 256 {
 		s.failure = ErrInvalid
 		return s.failure
 	}
@@ -105,7 +116,7 @@ func (s *Set) Observe(ctx context.Context, scope *Scope, name, value, location s
 		s.failure = ErrLimit
 		return s.failure
 	}
-	s.observed[scope] = append(s.observed[scope], observation{normalized(name), strings.Clone(value), strings.Clone(location)})
+	s.observed[scope] = append(s.observed[scope], observation{normalized(name), strings.Clone(value), strings.Clone(location), known})
 	s.count++
 	s.bytes += retained
 	return nil
@@ -233,7 +244,7 @@ func (s *Set) resolve(ctx context.Context, scope *Scope, schema *Schema, primary
 			if !f.aliases[o.name] {
 				continue
 			}
-			if !f.pattern.MatchString(o.value) || (values[f.name] != "" && values[f.name] != o.value) {
+			if !o.known || !f.pattern.MatchString(o.value) || (values[f.name] != "" && values[f.name] != o.value) {
 				return nil, nil, ErrAmbiguous
 			}
 			values[f.name], places[o.location] = o.value, true

@@ -16,7 +16,7 @@ var flagGroups = []struct {
 	{"Output", []string{"--format", "--output", "--show-secrets", "--no-color", "--identity-key-file"}},
 	{"Exit code", []string{"--fail-on", "--ci", "--fail-on-verified", "--strict"}},
 	{"Noise control", []string{"--min-severity", "--min-confidence", "--disable", "--max-per-file", "--dedupe", "--no-dedupe", "--baseline", "--write-baseline"}},
-	{"Live verification", []string{"--verify", "--verify-all", "--verified-only", "--verifiers"}},
+	{"Live verification", []string{"--verify", "--verify-all", "--verified-only", "--cross-file", "--verifiers"}},
 	{"ML filter", []string{"--ml", "--ml-model", "--ml-url", "--ml-threshold"}},
 	{"Semantic search", []string{"--semantic", "--semantic-url", "--semantic-model", "--semantic-allow-remote"}},
 	{"OCR", []string{"--ocr", "--ocr-url", "--ocr-model", "--ocr-allow-remote", "--ocr-all-pages", "--ocr-max-pages", "--ocr-timeout"}},

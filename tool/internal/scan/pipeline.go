@@ -27,6 +27,7 @@ type Options struct {
 	PublicAuditor  PublicAuditor
 	Verifiers      *verify.Set
 	VerifyAll      bool // verify before ML; observers also retain this mode for index evidence
+	CrossFile      bool // opt-in bounded current-acquisition component assembly
 	ML             mlscore.Scorer
 	Allow          func(value, path string) bool
 	Workers        int
@@ -44,12 +45,16 @@ type Options struct {
 	beforeML        func([]model.Finding) bool
 	resultSink      func([]model.Finding)
 	candidateBudget *int
+	components      *componentBatch
 	// IgnorePragmas is for untrusted in-flight payloads which cannot grant themselves exceptions.
 	IgnorePragmas bool
 	// ValueFingerprint is optional and must be safe for concurrent calls. It
 	// receives a raw value in memory, before redaction, but must never retain it.
 	ValueFingerprint    func(string) string
 	LocationFingerprint func(source, path string, line, col int) string
+	// ComponentLocationFingerprint maps a raw keyed location into an optional
+	// persistent acquisition namespace, without changing ordinary index inputs.
+	ComponentLocationFingerprint func(string) string
 	// ObserveVerification receives only sanitized keyed evidence, before ML can
 	// suppress a provider-rejected credential. The callback must be concurrency-safe.
 	ObserveVerification func(model.Finding)
