@@ -20,6 +20,7 @@ func TestReleasedQuickScanRouting(t *testing.T) {
 	}
 	for _, tc := range []struct{ args, want []string }{
 		{nil, []string{"scan"}},
+		{[]string{"--format", "json"}, []string{"scan", "--format", "json"}},
 		{[]string{"sample.env"}, []string{"scan", "sample.env"}},
 		{[]string{filepath.Join(root, "missing")}, []string{"scan", filepath.Join(root, "missing")}},
 		{[]string{"./missing"}, []string{"scan", "./missing"}},
@@ -58,7 +59,7 @@ func TestReleasedCIGateDefaultsAndOverrides(t *testing.T) {
 		{[]string{"--ci=false", "--ci"}, "high"},
 	} {
 		c, _, err := parseCommand("scan", tc.args)
-		if err != nil || c.failOn != tc.want || c.verify || c.mlEmbed || c.ocrEnabled {
+		if err != nil || c.failOn != tc.want || c.verify || c.mlEmbed || c.ocrEnabled || c.semantic {
 			t.Fatalf("%v: CI policy changed: %+v err=%v", tc.args, c, err)
 		}
 		if code := gate([]model.Finding{{Type: "source_error"}}, c.failOn, false); code != 2 {

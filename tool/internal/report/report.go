@@ -33,7 +33,7 @@ func WriteWithCoverage(w io.Writer, findings []model.Finding, format string, col
 	case "defectdojo", "dojo":
 		return writeDefectDojo(w, findings)
 	case "pretty", "":
-		return writePretty(w, findings, PrettyOptions{Color: color})
+		return writePretty(w, findings, PrettyOptions{Color: color, Coverage: coverage})
 	default:
 		return fmt.Errorf("unsupported report format %q", format)
 	}
@@ -102,6 +102,8 @@ func (w *reportWriter) Write(p []byte) (int, error) {
 // PrettyOptions tunes the human report.
 type PrettyOptions struct {
 	Color bool
+	// Coverage distinguishes a completed clean scan from empty, filtered and incomplete inputs.
+	Coverage *model.Coverage
 	// Snippet returns the source line of a finding with its secrets already masked, or "".
 	// The caller owns the masking; the report only strips terminal escapes and prints it.
 	Snippet func(model.Finding) string
@@ -128,14 +130,24 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 			fs = append(fs, f)
 		}
 	}
+	result := model.NewResult(all, options.Coverage)
 	if len(fs) == 0 {
-		if len(gaps) == 0 {
-			fmt.Fprintln(w, paint(color, "\x1b[32m", "✓ no secrets found"))
+		if !result.Complete {
+			if len(gaps) > 0 {
+				fmt.Fprintln(w)
+				writeGaps(w, gaps, color)
+			}
+			writeCoverageDiagnostics(w, result, len(gaps) > 0, color)
 			return nil
 		}
-		fmt.Fprintln(w)
-		writeGaps(w, gaps, color)
-		fmt.Fprintln(w, "  "+paint(color, cBold, "no secrets found in what was scanned"))
+		switch {
+		case result.Filtered:
+			fmt.Fprintln(w, "no findings after filters and suppressions")
+		case options.Coverage != nil && result.Stats.Processed == 0:
+			fmt.Fprintln(w, "no objects to scan")
+		default:
+			fmt.Fprintln(w, paint(color, "\x1b[32m", "✓ no secrets found"))
+		}
 		return nil
 	}
 	byFile := map[string][]model.Finding{}
@@ -229,6 +241,9 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 	if len(gaps) > 0 {
 		writeGaps(w, gaps, color)
 	}
+	if !result.Complete {
+		writeCoverageDiagnostics(w, result, len(gaps) > 0, color)
+	}
 	fmt.Fprintf(w, "  %s  %s  %s\n",
 		paint(color, cBold, fmt.Sprintf("%d finding%s", len(fs), plural(len(fs)))),
 		strings.Join(parts, paint(color, cDim, " · ")),
@@ -236,7 +251,40 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 	if line := bbSummary(fs, color); line != "" {
 		fmt.Fprintln(w, line)
 	}
+	for _, f := range fs {
+		if f.Verified == nil {
+			fmt.Fprintln(w, "  "+paint(color, cDim, "Candidates without a provider verdict are unconfirmed."))
+			break
+		}
+	}
 	return nil
+}
+
+// Coverage diagnostics may exist without synthetic findings. Keep their output
+// bounded and prioritize incomplete checks over informational policy skips.
+func writeCoverageDiagnostics(w io.Writer, result model.ScanResult, hasGaps, color bool) {
+	if !hasGaps {
+		fmt.Fprintln(w, "  "+paint(color, "\x1b[33m", "! scan incomplete — coverage diagnostics"))
+	}
+	if len(result.Diagnostics) == 0 {
+		return
+	}
+	if hasGaps {
+		fmt.Fprintln(w, "  coverage diagnostics:")
+	}
+	diagnostics := append([]model.Diagnostic(nil), result.Diagnostics...)
+	sort.SliceStable(diagnostics, func(i, j int) bool { return diagnostics[i].Incomplete && !diagnostics[j].Incomplete })
+	const maxRows = 5
+	for _, d := range diagnostics[:min(len(diagnostics), maxRows)] {
+		where := sanitizeTerminal(d.Path)
+		if where == "" {
+			where = "scan"
+		}
+		fmt.Fprintf(w, "    %s: %s\n", sanitizeTerminal(d.Code), where)
+	}
+	if remaining := result.Stats.DiagnosticCount - int64(min(len(diagnostics), maxRows)); remaining > 0 {
+		fmt.Fprintf(w, "    … and %d more (use --format json for the full list)\n", remaining)
+	}
 }
 
 // maxGapRows bounds the diagnostics block: past it the remaining inputs are only counted.

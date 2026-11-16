@@ -46,7 +46,7 @@ func writeReport(c commonFlags, findings []model.Finding) error {
 	if interactiveReport(c) {
 		// Source lines are shown to a person at a terminal only: a piped or stored report keeps its
 		// shape and never gains file content.
-		err = report.WritePretty(os.Stdout, findings, report.PrettyOptions{Color: color, Snippet: sourceLines(findings)})
+		err = report.WritePretty(os.Stdout, findings, report.PrettyOptions{Color: color, Coverage: c.coverage, Snippet: sourceLines(findings)})
 	} else {
 		err = report.WriteWithCoverage(os.Stdout, findings, c.format, color, c.coverage)
 	}

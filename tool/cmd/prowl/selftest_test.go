@@ -12,7 +12,7 @@ func TestOfflineSelftestProfilesAndML(t *testing.T) {
 	for _, profile := range []string{"all", "web", "mobile", "enterprise"} {
 		for _, ml := range []bool{false, true} {
 			result, err := runSelftest(profile, ml)
-			if err != nil || !result.Passed || result.Network || len(result.Cases) == 0 {
+			if err != nil || !result.Passed || result.Network || len(result.Cases) < 2 {
 				t.Fatalf("profile=%s ml=%v result=%+v err=%v", profile, ml, result, err)
 			}
 			for _, c := range result.Cases {
