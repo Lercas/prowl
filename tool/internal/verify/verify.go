@@ -33,7 +33,7 @@ const (
 	Verified    Status = "verified"    // provider confirmed the credential is live
 	Invalid     Status = "invalid"     // provider rejected it — likely revoked/fake
 	Unsupported Status = "unsupported" // no verifier matches this type
-	Errored     Status = "error"       // network/timeout — inconclusive
+	Errored     Status = "error"       // transport or provider response is inconclusive
 	Skipped     Status = "skipped"     // example/placeholder — not attempted
 )
 
@@ -195,6 +195,12 @@ func valueMatchOK(anchor, value string) bool {
 // wrong provider. A genuine short provider value-prefix (sk_live_, re_, …) still routes.
 func (s *Set) find(typeID, value string) *Verifier {
 	lt, lv := strings.ToLower(typeID), strings.ToLower(value)
+	// Generic language/semantic candidates carry no provider identity. Only
+	// entropy candidates may retain fallback for an explicit provider prefix.
+	generic := strings.HasPrefix(lt, "generic_") || strings.HasPrefix(lt, "generic-")
+	if generic && lt != "generic_high_entropy" {
+		return nil
+	}
 	var best *Verifier
 	bestScore := 0
 	for _, v := range s.verifiers {
@@ -206,9 +212,9 @@ func (s *Set) find(typeID, value string) *Verifier {
 			}
 			score := 0
 			switch {
-			case strings.Contains(lt, lm) && typeMatchOK(lm, lid):
+			case !generic && strings.Contains(lt, lm) && typeMatchOK(lm, lid):
 				score = 1000 + len(lm) // TYPE match is authoritative; longer = more specific
-			case strings.Contains(lv, lm) && valueMatchOK(lm, lv):
+			case strings.Contains(lv, lm) && valueMatchOK(lm, lv) && (!generic || strings.HasPrefix(lv, lm)):
 				score = len(lm) // value-only fallback, never beats a type match
 			}
 			if score > bestScore {
@@ -231,12 +237,31 @@ type cachedVerification struct {
 	result Result
 }
 
-func extractedVars(v *Verifier, value, context string) map[string]string {
+func extractedVars(v *Verifier, value, context string) (map[string]string, string) {
 	vars := map[string]string{"secret": value}
-	for name, re := range v.extractRes {
-		vars[name] = re.FindString(context)
+	names := make([]string, 0, len(v.extractRes))
+	for name := range v.extractRes {
+		names = append(names, name)
 	}
-	return vars
+	sort.Strings(names)
+	for _, name := range names {
+		matches := v.extractRes[name].FindAllString(context, 1025)
+		if len(matches) > 1024 {
+			return nil, "companion extraction limit"
+		}
+		companion := ""
+		for _, match := range matches {
+			if match == "" {
+				continue
+			}
+			if companion != "" && match != companion {
+				return nil, "ambiguous companion context"
+			}
+			companion = match
+		}
+		vars[name] = companion
+	}
+	return vars, ""
 }
 
 func makeVerificationKey(v *Verifier, vars map[string]string) verificationKey {
@@ -288,12 +313,18 @@ func (s *Set) verify(ctx context.Context, typeID, value, text string, bindings m
 	if v == nil {
 		return Result{Status: Unsupported}
 	}
-	vars := extractedVars(v, value, text)
+	var vars map[string]string
 	if bindings != nil {
 		var ok bool
 		vars, ok = literalVars(v, typeID, value, bindings)
 		if !ok {
 			return Result{Status: Errored, Verifier: v.ID, Note: "structured companion binding is missing, ambiguous or invalid"}
+		}
+	} else {
+		var note string
+		vars, note = extractedVars(v, value, text)
+		if note != "" {
+			return Result{Status: Errored, Verifier: v.ID, Note: note}
 		}
 	}
 	key := makeVerificationKey(v, vars)
@@ -392,6 +423,9 @@ func classifyErr(err error) string {
 	if errors.Is(err, errProviderUnavailable) {
 		return "provider unavailable"
 	}
+	if errors.Is(err, errProviderResponse) {
+		return "provider response inconclusive"
+	}
 	if errors.Is(err, errResponseTooLarge) {
 		return "response too large"
 	}
@@ -448,6 +482,7 @@ var errBadInterpolation = errors.New("interpolated value contains invalid charac
 var errRateLimited = errors.New("rate limited")
 var errProviderUnavailable = errors.New("provider unavailable")
 var errResponseTooLarge = errors.New("provider response exceeds limit")
+var errProviderResponse = errors.New("provider response inconclusive")
 var errIncompleteResponse = errors.New("provider response is incomplete")
 
 const maxResponseBytes = 1 << 16
@@ -582,7 +617,13 @@ func (s *Set) probe(ctx context.Context, v *Verifier, r *Request, vars map[strin
 		if len(respBody) > maxResponseBytes {
 			return false, errResponseTooLarge
 		}
-		return matchResponse(r, resp, respBody), nil
+		if matchResponse(r, resp, respBody) {
+			return true, nil
+		}
+		if resp.StatusCode == http.StatusUnauthorized {
+			return false, nil
+		}
+		return false, errProviderResponse
 	}
 }
 
