@@ -1,0 +1,817 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "source_commit": "2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+  "source_clean_at_build": true,
+  "source_tree": "ee290b48de5d610453dd5cb9a0e121ff0bc21c7a",
+  "scope": "Fresh local Docker builds of all three shipped Dockerfiles for both Linux architectures; not release publication",
+  "docker_context": "desktop-linux",
+  "docker_engine": "29.9.2",
+  "build_manifest": {
+    "source": "2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+    "version": "1.5.0-dev.2f7e8cc",
+    "images": [
+      {
+        "kind": "action-root",
+        "arch": "arm64",
+        "tag": "prowl-qualification:action-root-arm64-20261116-2f7e8cc",
+        "id": "sha256:c4d60c8a9c0008ecbcf5c9b117789ab94d205972c560febd2fd86a72f3a3080d",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/arm64",
+          "--build-arg",
+          "TARGETARCH=arm64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/action-root-arm64.iid",
+          "-t",
+          "prowl-qualification:action-root-arm64-20261116-2f7e8cc",
+          "-f",
+          "Dockerfile",
+          "."
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/action-root-arm64.log"
+      },
+      {
+        "kind": "action-tool",
+        "arch": "arm64",
+        "tag": "prowl-qualification:action-tool-arm64-20261116-2f7e8cc",
+        "id": "sha256:6b6aa4ad7dd2e692665e5a2bc3b93e35c155061c43874a68970eaff2bda1d608",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/arm64",
+          "--build-arg",
+          "TARGETARCH=arm64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/action-tool-arm64.iid",
+          "-t",
+          "prowl-qualification:action-tool-arm64-20261116-2f7e8cc",
+          "-f",
+          "tool/Dockerfile.action",
+          "tool"
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/action-tool-arm64.log"
+      },
+      {
+        "kind": "cli",
+        "arch": "arm64",
+        "tag": "prowl-qualification:cli-arm64-20261116-2f7e8cc",
+        "id": "sha256:246481de4dd060e61e09ce19599b93a609cff5e3ffb6c23772a2be7b208c9ec9",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/arm64",
+          "--build-arg",
+          "TARGETARCH=arm64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/cli-arm64.iid",
+          "-t",
+          "prowl-qualification:cli-arm64-20261116-2f7e8cc",
+          "-f",
+          "tool/Dockerfile",
+          "tool"
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/cli-arm64.log"
+      },
+      {
+        "kind": "action-root",
+        "arch": "amd64",
+        "tag": "prowl-qualification:action-root-amd64-20261116-2f7e8cc",
+        "id": "sha256:07c4de3d3afa709ce6efdb7b335f2c7bb9a18dedd0be029c7dad0d0ce00bb003",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/amd64",
+          "--build-arg",
+          "TARGETARCH=amd64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/action-root-amd64.iid",
+          "-t",
+          "prowl-qualification:action-root-amd64-20261116-2f7e8cc",
+          "-f",
+          "Dockerfile",
+          "."
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/action-root-amd64.log"
+      },
+      {
+        "kind": "action-tool",
+        "arch": "amd64",
+        "tag": "prowl-qualification:action-tool-amd64-20261116-2f7e8cc",
+        "id": "sha256:1b28f86facd0e87941051cce336126d7b3c4166e7ba9540449b78d01d4788a00",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/amd64",
+          "--build-arg",
+          "TARGETARCH=amd64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/action-tool-amd64.iid",
+          "-t",
+          "prowl-qualification:action-tool-amd64-20261116-2f7e8cc",
+          "-f",
+          "tool/Dockerfile.action",
+          "tool"
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/action-tool-amd64.log"
+      },
+      {
+        "kind": "cli",
+        "arch": "amd64",
+        "tag": "prowl-qualification:cli-amd64-20261116-2f7e8cc",
+        "id": "sha256:6051d837013c0b5c1404f991f7b174649f8c261c0bca12639925acdda690cf63",
+        "build_args": [
+          "docker",
+          "build",
+          "--progress=plain",
+          "--platform",
+          "linux/amd64",
+          "--build-arg",
+          "TARGETARCH=amd64",
+          "--build-arg",
+          "VERSION=1.5.0-dev.2f7e8cc",
+          "--label",
+          "org.opencontainers.image.revision=2f7e8cc69c993f586c1f3334632758b1e11d39ba",
+          "--iidfile",
+          "/tmp/prowl-docker-current-build-20261116/cli-amd64.iid",
+          "-t",
+          "prowl-qualification:cli-amd64-20261116-2f7e8cc",
+          "-f",
+          "tool/Dockerfile",
+          "tool"
+        ],
+        "log": "/tmp/prowl-docker-current-build-20261116/cli-amd64.log"
+      }
+    ]
+  },
+  "build_logs": [
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/action-root-arm64.log",
+      "sha256": "ec9e39730d89e9b9c60c515a19e857ce4fba33837ee3f96ed83dc43229d239fc",
+      "base_images": [
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280"
+      ]
+    },
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/action-tool-arm64.log",
+      "sha256": "1c7cc223f921ee09a83bee179a5955e78bd9ab23ae9fedcd431c03998208244e",
+      "base_images": [
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280",
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+      ]
+    },
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/cli-arm64.log",
+      "sha256": "532705386437899052bea4cc9e3e7705051ed6a7df8e10859366bddacc25410e",
+      "base_images": [
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280",
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+      ]
+    },
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/action-root-amd64.log",
+      "sha256": "d69e0ec4eeb5ab42f73bed6215952473f962f88d60e88bc6a333585da8996c04",
+      "base_images": [
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280",
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+      ]
+    },
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/action-tool-amd64.log",
+      "sha256": "fffefb7462df725d5ea7201a6911ca6f2eacdc3dbf09c54df2f810e626203b61",
+      "base_images": [
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280",
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+      ]
+    },
+    {
+      "path": "/tmp/prowl-docker-current-build-20261116/cli-amd64.log",
+      "sha256": "641252138a6490986be600ae8ac728f7766b6cf89433fc246dfd3322caa2a2f5",
+      "base_images": [
+        "docker.io/library/golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280",
+        "docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+      ]
+    }
+  ],
+  "runtime_binary_inspection": [
+    {
+      "id": "sha256:c4d60c8a9c0008ecbcf5c9b117789ab94d205972c560febd2fd86a72f3a3080d",
+      "kind": "action-root",
+      "arch": "arm64",
+      "binary_sha256": "c999c568c66e3ec2348919d1b6a74e23f7ba1a2555c2b8c0f5a766dcecc11c07",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/action-root-arm64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=linux\n\tbuild\tGOARM64=v8.0\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    },
+    {
+      "id": "sha256:6b6aa4ad7dd2e692665e5a2bc3b93e35c155061c43874a68970eaff2bda1d608",
+      "kind": "action-tool",
+      "arch": "arm64",
+      "binary_sha256": "c999c568c66e3ec2348919d1b6a74e23f7ba1a2555c2b8c0f5a766dcecc11c07",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/action-tool-arm64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=linux\n\tbuild\tGOARM64=v8.0\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    },
+    {
+      "id": "sha256:246481de4dd060e61e09ce19599b93a609cff5e3ffb6c23772a2be7b208c9ec9",
+      "kind": "cli",
+      "arch": "arm64",
+      "binary_sha256": "c999c568c66e3ec2348919d1b6a74e23f7ba1a2555c2b8c0f5a766dcecc11c07",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/cli-arm64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=linux\n\tbuild\tGOARM64=v8.0\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    },
+    {
+      "id": "sha256:07c4de3d3afa709ce6efdb7b335f2c7bb9a18dedd0be029c7dad0d0ce00bb003",
+      "kind": "action-root",
+      "arch": "amd64",
+      "binary_sha256": "64bf6055f612b5d2e7da2b70dd1d8b3ed32913cad5b08f02d96b6b589d991fbb",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/action-root-amd64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    },
+    {
+      "id": "sha256:1b28f86facd0e87941051cce336126d7b3c4166e7ba9540449b78d01d4788a00",
+      "kind": "action-tool",
+      "arch": "amd64",
+      "binary_sha256": "64bf6055f612b5d2e7da2b70dd1d8b3ed32913cad5b08f02d96b6b589d991fbb",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/action-tool-amd64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    },
+    {
+      "id": "sha256:6051d837013c0b5c1404f991f7b174649f8c261c0bca12639925acdda690cf63",
+      "kind": "cli",
+      "arch": "amd64",
+      "binary_sha256": "64bf6055f612b5d2e7da2b70dd1d8b3ed32913cad5b08f02d96b6b589d991fbb",
+      "build_info": "/tmp/prowl-docker-current-build-20261116/cli-amd64.binary: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\t-trimpath=true\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=linux\n\tbuild\tGOAMD64=v1\n",
+      "version_stdout": "prowl 1.5.0-dev.2f7e8cc\nrules:     175 bundled (offline)\nverifiers: 84 bundled (offline)\n",
+      "legacy_model_exit": 2,
+      "legacy_model_actionable": true,
+      "network": "none",
+      "read_only": true
+    }
+  ],
+  "runtime_qualification": {
+    "arm64": {
+      "passed": 48,
+      "total": 48,
+      "checks": [
+        {
+          "case": "action.yml/fixed-safety-flags",
+          "passed": true
+        },
+        {
+          "case": "action.yml/literal-path",
+          "passed": true
+        },
+        {
+          "case": "tool/action.yml/fixed-safety-flags",
+          "passed": true
+        },
+        {
+          "case": "tool/action.yml/literal-path",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-root-arm64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-root-arm64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-tool-arm64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-tool-arm64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:cli-arm64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:cli-arm64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "cli-nonroot-default",
+          "passed": true
+        },
+        {
+          "case": "0-default/gate",
+          "passed": true
+        },
+        {
+          "case": "0-default/owner-private",
+          "passed": true
+        },
+        {
+          "case": "0-default/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/gate",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/owner-private",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-gate",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-redacted",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-private",
+          "passed": true
+        },
+        {
+          "case": "0/reconstruction",
+          "passed": true
+        },
+        {
+          "case": "0/incomplete-baseline",
+          "passed": true
+        },
+        {
+          "case": "1-default/gate",
+          "passed": true
+        },
+        {
+          "case": "1-default/owner-private",
+          "passed": true
+        },
+        {
+          "case": "1-default/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/gate",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/owner-private",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-gate",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-redacted",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-private",
+          "passed": true
+        },
+        {
+          "case": "1/reconstruction",
+          "passed": true
+        },
+        {
+          "case": "1/incomplete-baseline",
+          "passed": true
+        },
+        {
+          "case": "0/host-init",
+          "passed": true
+        },
+        {
+          "case": "0/host-stage",
+          "passed": true
+        },
+        {
+          "case": "0/git-index",
+          "passed": true
+        },
+        {
+          "case": "0/host-commit",
+          "passed": true
+        },
+        {
+          "case": "0/git-history-ml",
+          "passed": true
+        },
+        {
+          "case": "1/host-init",
+          "passed": true
+        },
+        {
+          "case": "1/host-stage",
+          "passed": true
+        },
+        {
+          "case": "1/git-index",
+          "passed": true
+        },
+        {
+          "case": "1/host-commit",
+          "passed": true
+        },
+        {
+          "case": "1/git-history-ml",
+          "passed": true
+        },
+        {
+          "case": "2/host-init",
+          "passed": true
+        },
+        {
+          "case": "2/host-stage",
+          "passed": true
+        },
+        {
+          "case": "2/git-index",
+          "passed": true
+        },
+        {
+          "case": "2/host-commit",
+          "passed": true
+        },
+        {
+          "case": "2/git-history-ml",
+          "passed": true
+        }
+      ],
+      "images": {
+        "prowl-qualification:action-root-arm64-20261116-2f7e8cc": {
+          "id": "sha256:c4d60c8a9c0008ecbcf5c9b117789ab94d205972c560febd2fd86a72f3a3080d",
+          "architecture": "arm64",
+          "user": "",
+          "entrypoint": [
+            "/usr/local/bin/prowl-action"
+          ]
+        },
+        "prowl-qualification:action-tool-arm64-20261116-2f7e8cc": {
+          "id": "sha256:6b6aa4ad7dd2e692665e5a2bc3b93e35c155061c43874a68970eaff2bda1d608",
+          "architecture": "arm64",
+          "user": "",
+          "entrypoint": [
+            "/usr/local/bin/prowl-action"
+          ]
+        },
+        "prowl-qualification:cli-arm64-20261116-2f7e8cc": {
+          "id": "sha256:246481de4dd060e61e09ce19599b93a609cff5e3ffb6c23772a2be7b208c9ec9",
+          "architecture": "arm64",
+          "user": "65532:65532",
+          "entrypoint": [
+            "/usr/local/bin/prowl"
+          ]
+        }
+      },
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-action-native-6zi_voqx",
+      "containers_retained": [
+        "prowl-action-native-6zi_voqx-1",
+        "prowl-action-native-6zi_voqx-2",
+        "prowl-action-native-6zi_voqx-3",
+        "prowl-action-native-6zi_voqx-4",
+        "prowl-action-native-6zi_voqx-5",
+        "prowl-action-native-6zi_voqx-6",
+        "prowl-action-native-6zi_voqx-7",
+        "prowl-action-native-6zi_voqx-8",
+        "prowl-action-native-6zi_voqx-9",
+        "prowl-action-native-6zi_voqx-10",
+        "prowl-action-native-6zi_voqx-11",
+        "prowl-action-native-6zi_voqx-12",
+        "prowl-action-native-6zi_voqx-13",
+        "prowl-action-native-6zi_voqx-14",
+        "prowl-action-native-6zi_voqx-15",
+        "prowl-action-native-6zi_voqx-16",
+        "prowl-action-native-6zi_voqx-17",
+        "prowl-action-native-6zi_voqx-18",
+        "prowl-action-native-6zi_voqx-19"
+      ],
+      "scope": "local Docker linux runtime, synthetic files and host-created Git index, no network/provider requests",
+      "containers_after_qualification": "removed after terminal-state and exact synthetic mount checks; fixtures/logs retained"
+    },
+    "amd64": {
+      "passed": 48,
+      "total": 48,
+      "checks": [
+        {
+          "case": "action.yml/fixed-safety-flags",
+          "passed": true
+        },
+        {
+          "case": "action.yml/literal-path",
+          "passed": true
+        },
+        {
+          "case": "tool/action.yml/fixed-safety-flags",
+          "passed": true
+        },
+        {
+          "case": "tool/action.yml/literal-path",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-root-amd64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-root-amd64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-tool-amd64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:action-tool-amd64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:cli-amd64-20261116-2f7e8cc/inspect",
+          "passed": true
+        },
+        {
+          "case": "prowl-qualification:cli-amd64-20261116-2f7e8cc/static-ml",
+          "passed": true
+        },
+        {
+          "case": "cli-nonroot-default",
+          "passed": true
+        },
+        {
+          "case": "0-default/gate",
+          "passed": true
+        },
+        {
+          "case": "0-default/owner-private",
+          "passed": true
+        },
+        {
+          "case": "0-default/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/gate",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/owner-private",
+          "passed": true
+        },
+        {
+          "case": "0-explicit/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-gate",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-redacted",
+          "passed": true
+        },
+        {
+          "case": "0/literal-path-private",
+          "passed": true
+        },
+        {
+          "case": "0/reconstruction",
+          "passed": true
+        },
+        {
+          "case": "0/incomplete-baseline",
+          "passed": true
+        },
+        {
+          "case": "1-default/gate",
+          "passed": true
+        },
+        {
+          "case": "1-default/owner-private",
+          "passed": true
+        },
+        {
+          "case": "1-default/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/gate",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/owner-private",
+          "passed": true
+        },
+        {
+          "case": "1-explicit/sarif-redacted",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-gate",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-redacted",
+          "passed": true
+        },
+        {
+          "case": "1/literal-path-private",
+          "passed": true
+        },
+        {
+          "case": "1/reconstruction",
+          "passed": true
+        },
+        {
+          "case": "1/incomplete-baseline",
+          "passed": true
+        },
+        {
+          "case": "0/host-init",
+          "passed": true
+        },
+        {
+          "case": "0/host-stage",
+          "passed": true
+        },
+        {
+          "case": "0/git-index",
+          "passed": true
+        },
+        {
+          "case": "0/host-commit",
+          "passed": true
+        },
+        {
+          "case": "0/git-history-ml",
+          "passed": true
+        },
+        {
+          "case": "1/host-init",
+          "passed": true
+        },
+        {
+          "case": "1/host-stage",
+          "passed": true
+        },
+        {
+          "case": "1/git-index",
+          "passed": true
+        },
+        {
+          "case": "1/host-commit",
+          "passed": true
+        },
+        {
+          "case": "1/git-history-ml",
+          "passed": true
+        },
+        {
+          "case": "2/host-init",
+          "passed": true
+        },
+        {
+          "case": "2/host-stage",
+          "passed": true
+        },
+        {
+          "case": "2/git-index",
+          "passed": true
+        },
+        {
+          "case": "2/host-commit",
+          "passed": true
+        },
+        {
+          "case": "2/git-history-ml",
+          "passed": true
+        }
+      ],
+      "images": {
+        "prowl-qualification:action-root-amd64-20261116-2f7e8cc": {
+          "id": "sha256:07c4de3d3afa709ce6efdb7b335f2c7bb9a18dedd0be029c7dad0d0ce00bb003",
+          "architecture": "amd64",
+          "user": "",
+          "entrypoint": [
+            "/usr/local/bin/prowl-action"
+          ]
+        },
+        "prowl-qualification:action-tool-amd64-20261116-2f7e8cc": {
+          "id": "sha256:1b28f86facd0e87941051cce336126d7b3c4166e7ba9540449b78d01d4788a00",
+          "architecture": "amd64",
+          "user": "",
+          "entrypoint": [
+            "/usr/local/bin/prowl-action"
+          ]
+        },
+        "prowl-qualification:cli-amd64-20261116-2f7e8cc": {
+          "id": "sha256:6051d837013c0b5c1404f991f7b174649f8c261c0bca12639925acdda690cf63",
+          "architecture": "amd64",
+          "user": "65532:65532",
+          "entrypoint": [
+            "/usr/local/bin/prowl"
+          ]
+        }
+      },
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-action-native-q075lmiv",
+      "containers_retained": [
+        "prowl-action-native-q075lmiv-1",
+        "prowl-action-native-q075lmiv-2",
+        "prowl-action-native-q075lmiv-3",
+        "prowl-action-native-q075lmiv-4",
+        "prowl-action-native-q075lmiv-5",
+        "prowl-action-native-q075lmiv-6",
+        "prowl-action-native-q075lmiv-7",
+        "prowl-action-native-q075lmiv-8",
+        "prowl-action-native-q075lmiv-9",
+        "prowl-action-native-q075lmiv-10",
+        "prowl-action-native-q075lmiv-11",
+        "prowl-action-native-q075lmiv-12",
+        "prowl-action-native-q075lmiv-13",
+        "prowl-action-native-q075lmiv-14",
+        "prowl-action-native-q075lmiv-15",
+        "prowl-action-native-q075lmiv-16",
+        "prowl-action-native-q075lmiv-17",
+        "prowl-action-native-q075lmiv-18",
+        "prowl-action-native-q075lmiv-19"
+      ],
+      "scope": "local Docker linux runtime, synthetic files and host-created Git index, no network/provider requests",
+      "containers_after_qualification": "removed after terminal-state and exact synthetic mount checks; fixtures/logs retained"
+    }
+  },
+  "cleanup": {
+    "removed": 38,
+    "source_manifest": "/tmp/prowl-docker-current-container-cleanup-20261116.json",
+    "running_services": [
+      "416a77a6886f kindest/node:v1.34.8 Up 10 hours",
+      "eba8f6bc362e artex:local Up 10 hours",
+      "d5d1f07e308e 0cefaabd882e Up 10 hours (healthy)"
+    ]
+  },
+  "limitations": [
+    "amd64 executes under Docker Desktop emulation on Apple Silicon",
+    "No hosted GitHub Action execution",
+    "No GHCR push, release signatures, registry readback, Homebrew install or deployment",
+    "Existing 96-case action/CLI contract plus six-image metadata/version/legacy checks do not qualify every scanner command",
+    "Docker build context omits .git; binaries do not embed a VCS revision. Clean source tree, build logs and OCI revision labels establish the local build provenance. Labels alone are not proof of authenticity.",
+    "Source modifications after this commit require proportionate requalification"
+  ]
+}

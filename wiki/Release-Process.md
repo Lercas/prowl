@@ -169,3 +169,17 @@ source потребуют соответствующей переквалифи�
 Структурные константы сверены с [Go ELF](https://go.dev/src/debug/elf/elf.go),
 [Go Mach-O](https://go.dev/src/debug/macho/macho.go) и
 [Microsoft PE/COFF](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format).
+
+
+## Текущая локальная Docker factory
+
+После snapshot-квалификации отдельно собраны все три shipped Dockerfile из чистого
+`2f7e8cc` для Linux arm64/amd64: root Action, tool Action и nonroot CLI. Текущие
+образы прошли 96 action/CLI contracts без сети и проверку build-info, версии и
+legacy-model rejection для каждого из шести image IDs. Binary SHA-256 одинаков
+в трёх образах одной архитектуры. Это новая сборка factory, а не использование
+старых runtime carriers из предыдущего snapshot-прогона.
+
+Источник, base digests, image IDs, hashes и границы:
+`evidence/1.5.0-docker-current-source-20261116.json`. Эта локальная проверка
+не подтверждает hosted Action, опубликованный GHCR digest или signatures.

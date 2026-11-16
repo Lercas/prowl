@@ -216,6 +216,21 @@ static ML smoke, redaction, gate, reconstruction, владелец/права SA
 на синтетическом значении и закрыта для обоих Action descriptors.
 Evidence — `evidence/1.5.0-docker-action-20261116.json`.
 
+Повторный текущий source build: чистый `2f7e8cc`, версия `1.5.0-dev.2f7e8cc`,
+все три Dockerfile × обе архитектуры. 48/48 arm64 и 48/48 amd64 contracts проходят
+на шести новых immutable image IDs. Извлечённые binaries содержат Go 1.27.4,
+`CGO_ENABLED=0` и ожидаемые GOOS/GOARCH; в пределах архитектуры SHA-256 совпадает
+между root Action, tool Action и CLI. Каждый образ отдельно подтвердил версию
+и отказ legacy zlib model под `--network none --read-only` со свежим tmpfs.
+Docker context исключает `.git`, поэтому VCS revision не встроен в binaries:
+локальное происхождение фиксируют clean source tree, build logs с base digests
+и OCI revision labels; сами labels не являются проверкой подлинности.
+
+38 остановленных synthetic containers этого прогона удалены после проверки
+точного manifest, состояния и mounts; fixtures и stdout/stderr сохранены.
+Рабочие контейнеры и volumes не менялись. Hosted CI и GHCR остаются отдельными
+непроверенными стадиями. Evidence — `evidence/1.5.0-docker-current-source-20261116.json`.
+
 ## Scanning remote sources in CI
 
 `prowl image`, `prowl org`, `prowl repo`, and `prowl bucket` gate exactly like `scan`: they run the same pipeline and exit through the same gate — `0` clean (or no finding reached `--fail-on`), `1` when a finding is `>= --fail-on`, `2` on error (bad ref, clone/listing/download failure, bad flag). The same caveat applies: **without `--fail-on` the command never returns `1`**, so always set a threshold to fail the build.

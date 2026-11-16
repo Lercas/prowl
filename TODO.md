@@ -417,6 +417,14 @@
       под эмуляцией, включая static ML, staged и history с ML. CI gate добавлен;
       hosted runner, GHCR/tag и публикация этим не подтверждены.
       `wiki/evidence/1.5.0-docker-action-20261116.json`.
+    - [x] Docker factory повторно проверена из чистого текущего source `2f7e8cc`:
+      root Action, tool Action и nonroot CLI × Linux arm64/amd64, 6 новых image IDs.
+      48/48 + 48/48 runtime contracts без сети; все binaries имеют Go 1.27.4,
+      CGO=0, правильные GOOS/GOARCH/version и отвергают legacy model. В пределах
+      архитектуры binary SHA-256 совпадает во всех трёх образах. Удалены только
+      38 остановленных synthetic containers текущего прогона; evidence/fixtures
+      сохранены. Hosted Action, GHCR и подписанный финальный release не проверены.
+      `wiki/evidence/1.5.0-docker-current-source-20261116.json`.
     - [x] Восстановлены причины неполноты Git index и архивов, читаемый plaintext
       fallback повреждённого архива и context cancellation в unpack. Возвращены
       выпущенные source/unpack boundary regressions. Нативная матрица — 17/17:
