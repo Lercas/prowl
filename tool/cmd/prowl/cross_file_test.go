@@ -16,7 +16,7 @@ func TestCrossFileFlagsRequireExplicitVerificationAndSupportedInput(t *testing.T
 			t.Fatal("valid cross-file flags rejected", args, err)
 		}
 	}
-	for _, command := range []string{"repo", "org", "image", "mobile", "bucket", "domain", "cicd", "agents", "serve", "mcp", "compare"} {
+	for _, command := range []string{"image", "mobile", "bucket", "domain", "cicd", "agents", "serve", "mcp", "compare"} {
 		if _, _, err := parseCommand(command, []string{"--cross-file", "--verify"}); err == nil {
 			t.Fatal("unsupported command accepted cross-file acquisition", command)
 		}
@@ -46,5 +46,22 @@ func TestCrossFileStagedDoesNotReadPipedStdin(t *testing.T) {
 	}
 	if err := stdinModeError(c, []string{"-"}); err == nil {
 		t.Fatal("staged acquisition accepted stdin")
+	}
+}
+
+func TestCrossFileRepositoryFlagsRejectHistoryAndPreservePipedInvocation(t *testing.T) {
+	for _, command := range []string{"repo", "org"} {
+		c, _, err := parseCommand(command, []string{"--cross-file", "--verify"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := stdinModeError(c, nil); err != nil {
+			t.Fatal(err)
+		}
+		for _, extra := range []string{"--history", "--git-timeline"} {
+			if _, _, err := parseCommand(command, []string{"--cross-file", "--verify", extra}); err == nil {
+				t.Fatal("history accepted as one composite snapshot")
+			}
+		}
 	}
 }

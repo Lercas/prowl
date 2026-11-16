@@ -205,7 +205,9 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 		initial = append(initial, model.Item{Source: "code", Path: label, Error: revisionErr})
 	}
 	var items <-chan model.Item
-	if c.history {
+	if c.crossFile {
+		items = source.RepositoryCredentialFiles(ctx, dir, c.exclude, c.maxSize)
+	} else if c.history {
 		if c.gitTimeline {
 			items = source.GitTimelineBlobs(ctx, dir, c.exclude, c.maxSize)
 		} else {
@@ -215,7 +217,7 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 		items = source.Filesystem(ctx, []string{dir}, c.exclude, c.maxSize)
 	}
 	items = mapSourcePaths(ctx, items, func(p string) (string, error) {
-		if !c.history {
+		if !c.history && !c.crossFile {
 			var err error
 			p, err = relativeSourcePath(dir, p)
 			if err != nil {

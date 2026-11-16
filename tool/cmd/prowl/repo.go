@@ -55,7 +55,12 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: err}), nil
 		}
 		ctx, revisionErr := source.RepositoryContext(ctx, dir, o)
-		items, err := scanInputAt(ctx, c, []string{dir}, dir)
+		var items <-chan model.Item
+		if c.crossFile {
+			items = source.RepositoryCredentialFiles(ctx, dir, c.exclude, c.maxSize)
+		} else {
+			items, err = scanInputAt(ctx, c, []string{dir}, dir)
+		}
 		if err != nil {
 			return mapSourcePaths(ctx, nil, nil, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: err}), nil
 		}
@@ -64,7 +69,7 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 			initial = append(initial, model.Item{Source: "code", Path: source.RepositoryLocator(o.URL), Error: revisionErr})
 		}
 		return mapSourcePaths(ctx, items, func(p string) (string, error) {
-			if c.history || c.staged || c.since != "" {
+			if c.crossFile || c.history || c.staged || c.since != "" {
 				return p, nil // Git sources already carry repository-relative locators
 			}
 			return relativeSourcePath(dir, p)

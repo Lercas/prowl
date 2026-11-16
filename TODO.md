@@ -693,6 +693,16 @@
     baseline guard, empty selection и subdirectory. Full Go, targeted race,
     Go 1.26.11/lint проходят; quality IDs и полный GOROOT digest сохранены.
     `wiki/evidence/1.5.0-cross-file-staged-20261116.json`.
+  - [x] `repo/org --cross-file --verify`: regular blobs закреплённого commit,
+    без чтения изменённого checkout, с отдельным scope каждой repository acquisition.
+    Выбранный branch/tag сохраняет собственный commit; одинаковый primary с разными
+    companions в параллельном org получает раздельные LIVE/dead verdicts.
+    Symlink/archive роли, недостоверная revision metadata, duplicate tree paths,
+    item/byte limits не разрешают полную composite inventory. Native — 144/144;
+    прежние cross-file 910/910 и repository 99/99 проходят. Full Go, targeted race,
+    Go 1.26.11/lint, quality IDs и полный GOROOT digest подтверждены.
+    History/timeline и прочие источники остаются открыты.
+    `wiki/evidence/1.5.0-cross-file-repositories-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

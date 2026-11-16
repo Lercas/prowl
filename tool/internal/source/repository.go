@@ -18,8 +18,10 @@ import (
 
 type repositoryOriginKey struct{}
 type repositoryOrigin struct {
-	roots []string
-	url   string
+	roots         []string
+	url           string
+	revision      string
+	pinned, empty bool
 }
 
 // RepositoryLocator strips transport credentials without changing the resource's path identity.
@@ -160,5 +162,7 @@ func RepositoryContext(ctx context.Context, dir string, opts CloneOpts) (context
 	if snapshotErr != nil {
 		model.Note(ctx, "repository_revision_unavailable", origin.url, true)
 	}
+	origin.revision, origin.empty, origin.pinned = commit, empty, snapshotErr == nil && !opts.Full
+	ctx = context.WithValue(ctx, repositoryOriginKey{}, origin)
 	return ctx, snapshotErr
 }

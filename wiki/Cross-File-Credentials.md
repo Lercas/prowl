@@ -1,9 +1,10 @@
 # Составные credentials между файлами
 
 CLI `scan --cross-file --verify` собирает компоненты из выбранных локальных корней
-или выбранных staged blobs одного Git index (`--staged`).
+или выбранных staged blobs одного Git index (`--staged`). В CLI `repo`/`org`
+доступно связывание внутри закреплённого commit каждого репозитория.
 Включение явно разрешает связывание однозначных именованных ролей внутри каждого
-корня или одного выбранного индекса; выбирайте область одной связанной конфигурации.
+корня, выбранного индекса или commit; выбирайте область одной связанной конфигурации.
 Единственность значений сама
 по себе не доказывает, что приложение использует их вместе. Режим использует
 `credentialset` и `verify.Set.VerifyComponents`, не перебирает возможные пары.
@@ -14,8 +15,8 @@ prowl scan --staged --cross-file --verify --ml --format json
 prowl scan ./config --cross-file --verify --index "$HOME/.prowl/index" --scope app:config
 ```
 
-Без `--cross-file` поведение `--verify` не меняется. Флаг доступен только у `scan`:
-stdin, history/`--since`, `repo/org`, remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
+Без `--cross-file` поведение `--verify` не меняется. Флаг доступен у CLI `scan`, `repo`, `org`:
+stdin, history/`--since`, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
 не включены. Общий пункт TODO остаётся открытым до остальных источников и форматов.
 
 ## Поддержанные входы CLI
@@ -246,3 +247,55 @@ baseline guards, empty selection и subdirectory. Source unit test меняет 
 Full Go, targeted race, Go 1.26.11 и lint проходят; pinned quality metrics/IDs и
 полный GOROOT digest сохранены. Новый performance gate этим этапом не заявляется.
 Квалификация: `evidence/1.5.0-cross-file-staged-20261116.json`.
+
+
+## Закреплённый commit `repo`/`org`
+
+```sh
+prowl repo https://github.com/org/app --branch release --cross-file --verify --ml
+prowl org github:owned --cross-file --verify --format json
+```
+
+Флаг явно разрешает считать выбранные файлы каждого репозитория одной конфигурацией.
+Однозначность ролей сама по себе не устанавливает совместное использование приложением.
+Если в repository находятся независимые конфигурации с одинаковыми namespace, выберите
+подходящие exclude-фильтры или не включайте такое связывание для этого набора.
+Наследование namespace, joins и overlays между файлами не выполняются.
+
+`RepositoryContext` фиксирует commit выбранного HEAD/branch/tag до начала intake.
+Producer читает `ls-tree -r -z COMMIT` и сами blobs по immutable object IDs. Изменения
+HEAD и файлов checkout после фиксации не заменяют данные. Настройки `.prowl.yaml`
+клонированного репозитория не управляют сканером. Provenance сохраняет commit/blob
+и безопасный source URL; временный путь clone не становится report identity.
+
+Один repository acquisition получает новый scope. Параллельные repositories в `org`
+не поставляют друг другу companions, даже при одинаковых primary, display labels
+или содержимом. Cache верификатора сохраняет точные компоненты каждой попытки:
+LIVE одного репозитория не заменяет dead verdict другого. С `--index` primary
+location IDs разрешаются в постоянном индексе; plaintext туда не передаётся.
+
+Принимаются regular modes `100644`/`100755`; link text остаётся входом обычного L1,
+но не конфигурационным companion. Archive members не наследуют repository scope.
+Submodule entries отмечаются policy-пропуском и не читаются как конфигурационные файлы.
+History/`--git-timeline` вместе с `--cross-file` отклоняются до clone: общая история
+blobs не доказывает их сосуществование в одной revision. MCP `prowl_repo` новый
+режим не включает.
+
+Tree listing ограничен 64 MiB до материализации. Дополнительно producer ограничивает
+выбранные scannable blob entries 10000 файлами и 32 MiB сырых bytes; действуют также
+общие intake, literal и namespace budgets. Пути должны быть каноническими относительными
+Git paths; дубликаты выбранного пути отвергаются. Ошибка metadata/object acquisition,
+лимит или недостоверный config inventory сохраняют неполноту и baseline guard.
+Подтверждённый пустой repository остаётся полным пустым выбранным сканом.
+
+Native matrix — 144/144: положительные repo/org JSON/SARIF ±ML, index privacy,
+выбранный старый tag, параллельные repository verdicts, отрицательные bindings,
+revision failures и baseline guards. Предыдущий бинарник отвергает новый opt-in.
+Прежние 910 cross-file и 99 repository checks, full Go, целевые race, Go 1.26.11
+и lint проходят. Unit-проверки закрепляют commit при смене HEAD/checkout, разделяют
+acquisitions и проверяют item/byte bounds и duplicate tree paths. Quality metrics/IDs
+и полный GOROOT digest сохранены; новый performance gate этим этапом не заявляется.
+Это локальные Git origins/forge inventory и собственный loopback verifier, не
+acceptance реального provider account или hosted Git service.
+
+Квалификация: `evidence/1.5.0-cross-file-repositories-20261116.json`.
