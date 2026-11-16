@@ -127,6 +127,17 @@
       `wiki/evidence/1.5.0-released-boundaries-20261116.json`.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
+    - [x] Декодированный typed primary проверяется с companions собственного blob,
+      без заимствования внешнего текста или соседнего blob. Base64/nested Base64,
+      hex, gzip/zlib+Base64 и Base64-of-hex: CLI 228/228 с ML, JSON/SARIF,
+      verify-all/index и отдельными occurrence verdicts. JWT/unbound/cross-file guards
+      сохранены. Private context включён только при verification и ограничен
+      32 MiB на non-linear sweep; обычный L1/ML/disclosure contract не меняется.
+      Четыре released pipeline tests проходят на исходном 1.4.0 и после API-адаптации;
+      дополнительные coverage markers 1.5 не скрываются в production.
+      Full Go/race/min-Go/lint проходят, quality IDs и GOROOT digest прежние,
+      performance +15,61% при лимите +20%. [Контракт](wiki/Decoded-Verification-Contexts.md),
+      `wiki/evidence/1.5.0-verification-contexts-20261116.json`.
     - [x] Producer provenance передаётся в Item/Finding; восстановлены report HMAC
       `secret_id`, `identity_scope`, `occurrence_id`, keyed fingerprint и
       `identity init` / `--identity-key-file`. Ключ snapshot-копируется в Pipeline,

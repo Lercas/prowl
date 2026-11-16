@@ -1,0 +1,921 @@
+{
+  "passed": 228,
+  "checks": [
+    {
+      "case": "base64-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "base64/no-outer-borrowing",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "nested-base64-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "nested-base64/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "nested-base64/no-outer-borrowing",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "hex-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "hex/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "hex/no-outer-borrowing",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "gzip-base64/no-outer-borrowing",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "zlib-base64/no-outer-borrowing",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-json-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlFalse-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-default/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-default/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-default/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-all/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-all/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-all/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-index/verdicts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-index/contexts",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex-sarif-mlTrue-index/private",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex/dedupe-occurrences",
+      "passed": true
+    },
+    {
+      "case": "base64-of-hex/no-outer-borrowing",
+      "passed": true
+    }
+  ],
+  "binary_sha256": "f9a7df62fbc71a6d2e370a452ec92201ddd2ed7b05096a96afe4552e347f8736",
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-decoded-verification-2mcgawr7",
+  "requests": 156,
+  "scope": "Owned loopback only; no real provider/account acceptance"
+}
