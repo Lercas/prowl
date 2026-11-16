@@ -20,12 +20,22 @@ import (
 
 // Legacy counts concern credentials; 1.5 also emits explicit coverage markers.
 // Keep those markers in the production result and ignore them only in this fixture's counts.
-func releasedVerificationCredentials(fs []model.Finding) []model.Finding {
+func releasedVerificationCredentials(t *testing.T, fs []model.Finding, wantMarkers int) []model.Finding {
+	t.Helper()
 	var out []model.Finding
+	markers := 0
 	for _, f := range fs {
 		if !model.IsIncompleteFinding(f) {
 			out = append(out, f)
+		} else {
+			markers++
+			if f.Type != "response_truncated" || f.Detector != "scan" || f.Stage != "intake" || f.SecretID != "" || f.Verified != nil || f.Verification != nil {
+				t.Fatalf("unexpected marker in released credential fixture: type=%s detector=%s stage=%s", f.Type, f.Detector, f.Stage)
+			}
 		}
+	}
+	if markers != wantMarkers {
+		t.Fatalf("released fixture has %d coverage markers, want %d", markers, wantMarkers)
 	}
 	return out
 }
@@ -182,7 +192,7 @@ func TestStructuredVerificationUsesCanonicalValueAndImmediateObject(t *testing.T
 	requests = nil
 	mu.Unlock()
 	fs := New(Options{Detector: detector(t), Verifiers: vset, VerifyAll: true, IdentityKey: identityKey, ML: rejectingScorer{}}).Findings(ctx, item)
-	fs = releasedVerificationCredentials(fs)
+	fs = releasedVerificationCredentials(t, fs, 1)
 	mu.Lock()
 	requestCount := len(requests)
 	mu.Unlock()
@@ -201,7 +211,7 @@ func TestStructuredVerificationUsesCanonicalValueAndImmediateObject(t *testing.T
 	item.Text = "value: &token " + raw + "\ndefinition: &a\n  first: {account: account-A, token: *token}\n  second: {account: account-B, token: *token}\ncopy: *a\n"
 	identityKey = []byte(strings.Repeat("k", 32))
 	fs = New(Options{Detector: detector(t), Verifiers: vset, VerifyAll: true, IdentityKey: identityKey}).Findings(ctx, item)
-	fs = releasedVerificationCredentials(fs)
+	fs = releasedVerificationCredentials(t, fs, 1)
 	if len(fs) != 5 {
 		t.Fatal("shared alias reference collapsed distinct account-scoped occurrences")
 	}

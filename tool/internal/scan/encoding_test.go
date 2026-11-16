@@ -167,7 +167,11 @@ func TestYAMLScalarsHaveCanonicalValuesAndOriginalSpans(t *testing.T) {
 		}
 	}
 	for _, text := range []string{"password: *vaultKey", `password: "${PASSWORD}"`, `password: "abc"`, "password: {source: configuration}", "password: [Winter42, Autumn53]", "password: # commentText"} {
-		if fs := releasedVerificationCredentials(restoredFindings(context.Background(), detector(t), nil, nil, model.Item{Path: "config.yaml", Text: text, Source: "code"}, nil, nil)); len(fs) != 0 {
+		wantMarkers := 0
+		if text == "password: *vaultKey" {
+			wantMarkers = 1
+		}
+		if fs := releasedVerificationCredentials(t, restoredFindings(context.Background(), detector(t), nil, nil, model.Item{Path: "config.yaml", Text: text, Source: "code"}, nil, nil), wantMarkers); len(fs) != 0 {
 			t.Fatalf("unsupported/nonliteral YAML construct reported as literal password: %q", text)
 		}
 	}

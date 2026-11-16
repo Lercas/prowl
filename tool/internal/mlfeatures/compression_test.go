@@ -38,6 +38,9 @@ func TestFeatureExtractionDeterministic(t *testing.T) {
 			want := Extract(value, ctx)
 			for range 100 {
 				got := Extract(value, ctx)
+				if len(got) != len(want) {
+					t.Fatal("feature extraction changed its length on repetition")
+				}
 				for i := range got {
 					if got[i] != want[i] {
 						t.Fatalf("feature %s is not deterministic", FeatureNames[i])
