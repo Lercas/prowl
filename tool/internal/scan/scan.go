@@ -473,6 +473,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if pathIsFilesystem(it.Source) {
 				opts = DetectionOptions(it.Path)
 			}
+			opts.CaptureVerificationContext = vset != nil
 			if literalDoc != nil {
 				opts.PasswordScalars = literalDoc.scalars
 			}
@@ -638,7 +639,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			out[len(out)-1].Rationale = "Model candidate with an exact match in the source text; validity is not confirmed"
 		}
 		if vset != nil || auditor != nil {
-			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, unboundView: unboundVerificationView(it)})
+			decodedText, decodedStart := m.VerificationContext()
+			pending = append(pending, verificationCandidate{typ: m.Type, value: m.Value, start: m.Start, end: m.End, jwtPayload: m.JWTPayload, unboundView: unboundVerificationView(it), decodedText: decodedText, decodedStart: decodedStart})
 		}
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {

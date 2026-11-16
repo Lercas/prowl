@@ -169,6 +169,10 @@ func (d *Detector) bestDecoded(ctx context.Context, decoded string, depth int) (
 }
 
 func (d *Detector) bestDecodedBudget(ctx context.Context, decoded string, depth int, remaining *int) (best Match, found, capped bool) {
+	return d.bestDecodedContextBudget(ctx, decoded, depth, remaining, false)
+}
+
+func (d *Detector) bestDecodedContextBudget(ctx context.Context, decoded string, depth int, remaining *int, capture bool) (best Match, found, capped bool) {
 	if ctx.Err() != nil {
 		return best, false, false
 	}
@@ -179,6 +183,9 @@ func (d *Detector) bestDecodedBudget(ctx context.Context, decoded string, depth 
 			continue
 		}
 		if !found || m.Confidence > best.Confidence {
+			if context, _ := m.VerificationContext(); capture && context == "" {
+				m.verificationText, m.verificationStart = decoded, m.Start
+			}
 			best, found = m, true
 		}
 	}
@@ -203,7 +210,7 @@ func (d *Detector) bestDecodedBudget(ctx context.Context, decoded string, depth 
 		if !ok {
 			continue
 		}
-		m, ok, limited := d.bestDecodedBudget(ctx, inner, depth+1, remaining)
+		m, ok, limited := d.bestDecodedContextBudget(ctx, inner, depth+1, remaining, capture)
 		capped = capped || limited
 		if ok && nonLinearBlob(val) {
 			m.decodedNonLinear = true

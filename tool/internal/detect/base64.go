@@ -8,22 +8,30 @@ import (
 const (
 	minBase64CandidateBytes = 16
 	maxBase64CandidateBytes = 8192
+	// Each non-linear sweep retains only bounded decoded contexts for
+	// verification. Repeated compressed blobs must not multiply retained RAM.
+	maxNonLinearContextBytes = 32 << 20
 )
 
 // unmaskBase64 finds structured secrets hidden inside encoded blobs: base64 or hex, optionally
 // compressed, optionally nested (see decodeBlob / bestDecoded). Findings report the outer blob
 // position; generic hits inside are dropped.
 func (d *Detector) unmaskBase64(ctx context.Context, candidates []Match) ([]Match, bool) {
-	return d.unmaskBlobs(ctx, candidates, false)
+	return d.unmaskBlobs(ctx, candidates, false, false)
 }
 
 func (d *Detector) unmaskNonLinear(ctx context.Context, candidates []Match) ([]Match, bool) {
-	return d.unmaskBlobs(ctx, candidates, true)
+	return d.unmaskNonLinearContext(ctx, candidates, false)
 }
 
-func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinearOnly bool) ([]Match, bool) {
+func (d *Detector) unmaskNonLinearContext(ctx context.Context, candidates []Match, capture bool) ([]Match, bool) {
+	return d.unmaskBlobs(ctx, candidates, true, capture)
+}
+
+func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinearOnly, capture bool) ([]Match, bool) {
 	var out []Match
 	capped := false
+	contextBytes := 0
 	for _, c := range candidates {
 		if ctx.Err() != nil {
 			break
@@ -39,7 +47,14 @@ func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinea
 		// All decoded findings use the same outer span, so only its highest-confidence
 		// typed match can survive the final overlap pass. Choose that winner here instead
 		// of retaining candidates * decoded matches entries until the global sort.
-		best, found, limited := d.bestDecoded(ctx, decoded, 1)
+		var best Match
+		var found, limited bool
+		if capture {
+			remaining := maxNestedBlobs
+			best, found, limited = d.bestDecodedContextBudget(ctx, decoded, 1, &remaining, true)
+		} else {
+			best, found, limited = d.bestDecoded(ctx, decoded, 1)
+		}
 		capped = capped || limited
 		if found && c.needsStrong && best.Confidence < 0.9 {
 			// No secret-like name vouches for this blob, so only a precise typed hit may speak for it.
@@ -49,6 +64,14 @@ func (d *Detector) unmaskBlobs(ctx context.Context, candidates []Match, nonLinea
 			// Linear Base64 occurrences are mapped independently, including padding and inner spans.
 			if nonLinearOnly && !best.decodedNonLinear && !nonLinearBlob(c.Value) {
 				continue
+			}
+			if capture {
+				verificationText, _ := best.VerificationContext()
+				if len(verificationText) > maxNonLinearContextBytes-contextBytes {
+					capped = true
+					break
+				}
+				contextBytes += len(verificationText)
 			}
 			best.decodedNonLinear = nonLinearOnly || best.decodedNonLinear || nonLinearBlob(c.Value)
 			best.Start, best.End = c.Start, c.End

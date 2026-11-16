@@ -49,26 +49,38 @@ func hasNonASCII(s string) bool {
 
 // Match is one L1 detection in a text block.
 type Match struct {
-	Transform        string
-	DecodedText      string
-	DecodedStart     int
-	DecodeSpans      []Base64Span
-	DecodeSteps      []DecodeStep // authoritative mixed-codec proof when non-empty
-	jwtContainer     Base64Span
-	decodedNonLinear bool
-	ContextName      string // semantic source label when the value is in a table column
-	Type             string
-	Value            string
-	Start, End       int
-	Confidence       float64
-	ChecksumValid    bool
-	LiteralContext   bool // source span is a decoded constant expression for ML context
-	JWTPayload       bool // decoded claims cannot borrow companion bindings from the enclosing token
-	Category         string
-	Stage            string
+	verificationText  string
+	verificationStart int
+	Transform         string
+	DecodedText       string
+	DecodedStart      int
+	DecodeSpans       []Base64Span
+	DecodeSteps       []DecodeStep // authoritative mixed-codec proof when non-empty
+	jwtContainer      Base64Span
+	decodedNonLinear  bool
+	ContextName       string // semantic source label when the value is in a table column
+	Type              string
+	Value             string
+	Start, End        int
+	Confidence        float64
+	ChecksumValid     bool
+	LiteralContext    bool // source span is a decoded constant expression for ML context
+	JWTPayload        bool // decoded claims cannot borrow companion bindings from the enclosing token
+	Category          string
+	Stage             string
 	// needsStrong marks a decode candidate with no secret-like name on its line: only a precise typed
 	// hit inside it is reported. Internal to the decode stage; never set on a returned Match.
 	needsStrong bool
+}
+
+// VerificationContext is the exact decoded blob containing this primary.
+// Non-linear verification context stays private and does not replace the
+// existing ML/disclosure context or the observed source-coordinate mapping.
+func (m Match) VerificationContext() (string, int) {
+	if m.verificationText != "" {
+		return m.verificationText, m.verificationStart
+	}
+	return m.DecodedText, m.DecodedStart
 }
 
 // compiledType pairs a secret type with its keyword pre-filter.
@@ -211,10 +223,11 @@ func (d *Detector) ScanCtxWithStatus(ctx context.Context, text string) ([]Match,
 }
 
 type ScanOptions struct {
-	BarePasswordLiterals bool
-	PasswordScalars      map[int]PasswordScalar
-	YAML                 bool
-	PublicKeys           bool // Explicit public-audit subjects, never ordinary secret detection.
+	CaptureVerificationContext bool // opt-in bounded private context for provider companions
+	BarePasswordLiterals       bool
+	PasswordScalars            map[int]PasswordScalar
+	YAML                       bool
+	PublicKeys                 bool // Explicit public-audit subjects, never ordinary secret detection.
 	// ObserveJWTPayload receives bounded, validated JSON views with source projections.
 	// It must not retain credentials beyond the current item or trust claims as bindings.
 	ObserveJWTPayload func(JWTPayloadView)
@@ -282,13 +295,13 @@ func (d *Detector) ScanWithStatus(ctx context.Context, text string, opts ScanOpt
 	d.lowerPool.Put(lb) // `lower` views lb and must not be used past here
 	// unmaskBase64 is not budget-gated: a base64-embedded structured secret (conf ~0.94) must compete on
 	// confidence in the sort below, not be starved by a cap full of 0.55 generic noise.
-	b64, base64Capped := d.unmaskNonLinear(ctx, all)
+	b64, base64Capped := d.unmaskNonLinearContext(ctx, all, opts.CaptureVerificationContext)
 	all = append(all, b64...)
 	// Both alphabets must be decoded whole: the entropy net omits short blobs, '-'/'_' split it,
 	// and generic assignment regexes can truncate the value or exhaust their budget first.
 	// These independent candidates never become generic findings.
 	decodeCandidates, decodeCandidateCapped := base64Candidates(ctx, text, sig.b64decodeRuns)
-	decodedMatches, decodedCapped := d.unmaskNonLinear(ctx, decodeCandidates)
+	decodedMatches, decodedCapped := d.unmaskNonLinearContext(ctx, decodeCandidates, opts.CaptureVerificationContext)
 	all = append(all, decodedMatches...)
 	occurrences, indirectJWT, occurrenceLimited := d.base64OccurrencesWithJWT(ctx, text, opts)
 	all = append(all, occurrences...)

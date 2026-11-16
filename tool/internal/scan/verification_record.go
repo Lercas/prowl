@@ -12,12 +12,14 @@ import (
 
 // Keep original prepared spans even after findings are mapped to source coordinates.
 type verificationCandidate struct {
-	typ, value  string
-	start, end  int
-	jwtPayload  bool
-	unboundView string
-	components  *componentBatch
-	entry       int
+	typ, value   string
+	start, end   int
+	jwtPayload   bool
+	unboundView  string
+	components   *componentBatch
+	entry        int
+	decodedText  string
+	decodedStart int
 }
 
 func unboundVerificationView(it model.Item) string {
@@ -38,6 +40,16 @@ func (c verificationCandidate) apply(ctx context.Context, set *verify.Set, doc *
 	}
 	if c.components != nil && set != nil {
 		c.components.apply(ctx, set, doc, c, path, f)
+		noteVerificationFailure(ctx, path, f.Verification)
+		return
+	}
+	if c.decodedText != "" && set != nil {
+		end := c.decodedStart + len(c.value)
+		if c.decodedStart < 0 || end < c.decodedStart || end > len(c.decodedText) || c.decodedText[c.decodedStart:end] != c.value {
+			f.Verified, f.Rationale, f.Verification = verificationResult(verify.Result{Status: verify.Errored, Note: "decoded literal could not be established"})
+		} else {
+			f.Verified, f.Rationale, f.Verification = verificationResult(set.Verify(ctx, c.typ, c.value, c.decodedText, detect.IsExampleOrPlaceholder(c.value)))
+		}
 		noteVerificationFailure(ctx, path, f.Verification)
 		return
 	}
