@@ -83,6 +83,9 @@ func send(ctx context.Context, ch chan<- model.Item, it model.Item) bool {
 		if identity == "" {
 			identity = it.Path
 		}
+		if graph, _ := ctx.Value(credentialHistoryGraphKey{}).(*model.GitHistoryGraph); graph != nil {
+			it.TimelineIdentityPath = identity
+		}
 		it.IdentityPath = identity + "\x00history-commit\x00" + commit
 	}
 	it.CredentialScope, _ = ctx.Value(credentialScopeKey{}).(*credentialset.Scope)

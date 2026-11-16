@@ -42,7 +42,9 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.CrossFile = flags.crossFile
 	if flags.crossFile {
 		acquisition := "local-filesystem"
-		if flags.history {
+		if flags.gitTimeline {
+			acquisition = "git-history-timeline"
+		} else if flags.history {
 			acquisition = "git-history-commits"
 		} else if flags.staged {
 			acquisition = "git-index"

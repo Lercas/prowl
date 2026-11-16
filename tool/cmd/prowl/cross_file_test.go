@@ -6,12 +6,12 @@ import (
 )
 
 func TestCrossFileFlagsRequireExplicitVerificationAndSupportedInput(t *testing.T) {
-	for _, args := range [][]string{{"--cross-file"}, {"--cross-file", "--verify=false"}, {"--cross-file", "--verify", "--git-timeline"}, {"--cross-file", "--verify", "--stdin-name=prod.json"}} {
+	for _, args := range [][]string{{"--cross-file"}, {"--cross-file", "--verify=false"}, {"--cross-file", "--verify", "--stdin-name=prod.json"}} {
 		if _, _, err := parseCommand("scan", args); err == nil || !strings.Contains(err.Error(), "--cross-file") {
 			t.Fatal("unsafe cross-file flags accepted", args, err)
 		}
 	}
-	for _, args := range [][]string{{"--cross-file", "--verify"}, {"--cross-file", "--verify-all"}, {"--cross-file", "--verified-only"}, {"--cross-file=false"}, {"--cross-file", "--verify", "--staged"}, {"--cross-file", "--verify", "--since=HEAD"}, {"--cross-file", "--verify", "--history"}} {
+	for _, args := range [][]string{{"--cross-file", "--verify"}, {"--cross-file", "--verify-all"}, {"--cross-file", "--verified-only"}, {"--cross-file=false"}, {"--cross-file", "--verify", "--staged"}, {"--cross-file", "--verify", "--since=HEAD"}, {"--cross-file", "--verify", "--history"}, {"--cross-file", "--verify", "--git-timeline"}} {
 		if _, _, err := parseCommand("scan", args); err != nil {
 			t.Fatal("valid cross-file flags rejected", args, err)
 		}
@@ -62,7 +62,7 @@ func TestCrossFileSinceDoesNotReadPipedStdin(t *testing.T) {
 	}
 }
 
-func TestCrossFileRepositoryFlagsRejectTimelineAndPreservePipedInvocation(t *testing.T) {
+func TestCrossFileRepositoryFlagsSupportTimelineAndPreservePipedInvocation(t *testing.T) {
 	for _, command := range []string{"repo", "org"} {
 		c, _, err := parseCommand(command, []string{"--cross-file", "--verify"})
 		if err != nil {
@@ -72,8 +72,8 @@ func TestCrossFileRepositoryFlagsRejectTimelineAndPreservePipedInvocation(t *tes
 			t.Fatal(err)
 		}
 		for _, extra := range []string{"--git-timeline"} {
-			if _, _, err := parseCommand(command, []string{"--cross-file", "--verify", extra}); err == nil {
-				t.Fatal("timeline accepted as one composite snapshot")
+			if _, _, err := parseCommand(command, []string{"--cross-file", "--verify", extra}); err != nil {
+				t.Fatal("per-commit timeline mode rejected", err)
 			}
 		}
 	}

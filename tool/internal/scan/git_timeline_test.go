@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -40,6 +41,41 @@ func TestGitTimelineUnionsValuesAcrossBlobEditsAndReappearance(t *testing.T) {
 	}
 	if fs[1].Git != a || fs[0].GitRecord != nil {
 		t.Fatal("shared timeline or private graph cleanup failed")
+	}
+}
+
+func TestGitTimelineRevisionLocationsShareOnlyLifecycleIdentity(t *testing.T) {
+	_, fs := timelineFixture()
+	for i := range fs {
+		fs[i].GitFingerprint = "logical-lifecycle"
+		fs[i].Fingerprint = []string{"revision-one", "revision-two"}[i]
+		fs[i].IndexLocationID = fs[i].Fingerprint
+		fs[i].Verification = &model.Verification{Status: []string{"verified", "invalid"}[i]}
+	}
+	fs = FinalizeGitTimeline(fs)
+	if fs[0].Git != fs[1].Git || !fs[0].Git.Complete || len(fs[0].Git.Appearances) != 2 || len(fs[0].Git.Removals) != 1 {
+		t.Fatal("revision identities split one logical lifecycle")
+	}
+	if fs[0].Fingerprint != "revision-one" || fs[1].Fingerprint != "revision-two" || fs[0].IndexLocationID == fs[1].IndexLocationID || fs[0].Verification.Status != "verified" || fs[1].Verification.Status != "invalid" || fs[0].GitFingerprint != "" || fs[1].GitFingerprint != "" {
+		t.Fatal("lifecycle grouping changed revision-specific evidence")
+	}
+}
+
+func TestGitTimelineScopedObservationsPreventFilteredRemoval(t *testing.T) {
+	g, fs := timelineFixture()
+	p := New(Options{IdentityKey: []byte(strings.Repeat("k", 32))})
+	it := model.Item{Path: "prod.env", Source: "code", IdentityPath: "owned/prod.env\x00history-commit\x00revision", TimelineIdentityPath: "owned/prod.env"}
+	for i := range fs {
+		fs[i].Type = "owned"
+		p.annotateIdentity(t.Context(), &fs[i], "OWNED_TEST_VALUE", it)
+		if fs[i].GitFingerprint == "" || fs[i].GitFingerprint == fs[i].Fingerprint {
+			t.Fatal("logical and revision identities were not separated")
+		}
+	}
+	p.observeGitCandidate(&model.GitRecord{Graph: g, Object: model.GitObject{Path: "prod.env", Blob: "clean"}}, "owned", timelineIdentityPath(it), "OWNED_TEST_VALUE")
+	fs = FinalizeGitTimeline(fs)
+	if !fs[0].Git.Complete || len(fs[0].Git.Appearances) != 1 || len(fs[0].Git.Removals) != 0 {
+		t.Fatal("an observed pre-filter candidate became a removal")
 	}
 }
 

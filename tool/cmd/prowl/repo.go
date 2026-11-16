@@ -57,7 +57,9 @@ func scanCheckout(ctx context.Context, c commonFlags, o source.CloneOpts) int {
 		ctx, revisionErr := source.RepositoryContext(ctx, dir, o)
 		var items <-chan model.Item
 		if c.crossFile {
-			if c.history {
+			if c.gitTimeline {
+				items = source.GitCredentialTimeline(ctx, dir, c.exclude, c.maxSize)
+			} else if c.history {
 				items = source.GitCredentialHistory(ctx, dir, c.exclude, c.maxSize)
 			} else {
 				items = source.RepositoryCredentialFiles(ctx, dir, c.exclude, c.maxSize)

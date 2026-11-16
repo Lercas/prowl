@@ -8,7 +8,7 @@ prowl org github:org --git-timeline --ml --format json
 
 `--git-timeline` включает `--history` и доступен для `scan`, `repo`, `org`. Локальный
 `scan` читает Git текущего каталога; позиционные пути, stdin, `--staged` и `--since`
-несовместимы с историей. Обычный `--history` сохраняет прежний быстрый сбор уникальных
+несовместимы с историей. Обычный `--history` без `--cross-file` сохраняет прежний быстрый сбор уникальных
 объектов без хронологии. Репозитории для `repo` и `org` клонируются с полной историей.
 
 В JSON у находки появляется `git`; в SARIF та же структура лежит в
@@ -68,3 +68,36 @@ Shallow-клон, ошибка чтения, отмена и лимиты дет
 `--max-size`. Превышение не выдаётся за полный результат. Используются локальные
 Git-объекты; external diff и textconv отключены. Режим не обращается к провайдерам,
 пока отдельно не включён `--verify`.
+
+
+## Составные credentials и ревизии
+
+```sh
+prowl scan --git-timeline --cross-file --verify --ml --format json
+prowl repo https://github.com/org/repo --git-timeline --cross-file --verify --format sarif
+```
+
+С `--cross-file` используется полный tree каждого commit, поэтому неизменённый
+primary сканируется повторно с companions именно этой ревизии. Граф и деревья
+разделяют один captured список commit. Отдельный приватный logical fingerprint
+связывает detection lifecycle; revision location IDs и provider verdicts сохраняют
+свою раздельность. Формат `git` и `basis` остаются прежними. Разные verdicts одного
+primary в двух commit не становятся appearance/removal событиями.
+
+Lifecycle разрешается до `--verified-only`. Pre-filter observations не становятся
+удалениями при скрытии кандидата, а provider invalid не доказывает отсутствие
+primary в дереве. Проверки у провайдера выполняются сейчас, не на дату commit;
+`git` описывает распознавание в Git, а `verification` — текущий ответ на tuple.
+
+К графовым лимитам добавляются component budgets: 10000 выбранных tree entries
+и 32 MiB raw bytes суммарно по всем ревизиям, не на каждый tree. Unborn без refs
+даёт полный пустой scan, shallow не разрешает полный composite intake. Source
+ошибки блокируют composite probes; дальнейшая неполнота детектора/разрешения
+lifecycle сохраняется после уже выполненных валидных запросов и запрещает baseline
+и отрицательные lifecycle выводы. [Полный контракт](Cross-File-Credentials.md).
+
+Локальная matrix 1304/1304 + repo/org 386/386, real Git fixtures и owned loopback
+provider; unit checks, race/min-Go/lint, шесть сборок, quality/corpus и fixed
+performance gate обычного per-item pipeline проходят. Стоимость timeline acquisition
+отдельно не измерялась. Hosted CI и реальный аккаунт этим не квалифицированы.
+Evidence — `evidence/1.5.0-cross-file-timeline-20261116.json`.

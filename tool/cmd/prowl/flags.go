@@ -453,8 +453,8 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.verifiedOnly || c.verifyAll {
 		c.verify = true
 	}
-	if c.crossFile && (!c.verify || c.gitTimeline || c.stdinName != "") {
-		return c, nil, errors.New("--cross-file requires --verify and local roots, --staged, --since or repository commits; --git-timeline and stdin are not supported")
+	if c.crossFile && (!c.verify || c.stdinName != "") {
+		return c, nil, errors.New("--cross-file requires --verify and local roots, --staged, --since or repository commits; stdin is not supported")
 	}
 	if c.auditGoogleRestrictions && !c.auditPublic {
 		return c, nil, errors.New("--audit-google-restrictions requires --audit-public")

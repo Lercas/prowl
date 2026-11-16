@@ -153,7 +153,11 @@ func readRepositoryCredentialFiles(ctx context.Context, ch chan<- model.Item, di
 		if fields[0] == "120000" {
 			emitCtx = withoutCredentialScope(ctx)
 		}
-		if !emitPayload(emitCtx, ch, path, data, maxBytes, exclude, map[string]any{"blob": fields[2], "commit": commit}) {
+		meta := map[string]any{"blob": fields[2], "commit": commit}
+		if graph, _ := ctx.Value(credentialHistoryGraphKey{}).(*model.GitHistoryGraph); graph != nil {
+			meta["git_history"] = &model.GitRecord{Graph: graph, Object: model.GitObject{Path: path, Blob: fields[2]}}
+		}
+		if !emitPayload(emitCtx, ch, path, data, maxBytes, exclude, meta) {
 			return ctx.Err()
 		}
 	}

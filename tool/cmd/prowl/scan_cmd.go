@@ -355,6 +355,9 @@ func scanInputAt(ctx context.Context, c commonFlags, rest []string, repoDir stri
 			return nil, fmt.Errorf("--history needs a git repository, but this is not one")
 		}
 		if c.crossFile {
+			if c.gitTimeline {
+				return source.GitCredentialTimeline(ctx, repoDir, c.exclude, c.maxSize), nil
+			}
 			return source.GitCredentialHistory(ctx, repoDir, c.exclude, c.maxSize), nil
 		}
 		if c.gitTimeline {

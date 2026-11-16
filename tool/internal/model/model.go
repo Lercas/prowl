@@ -30,6 +30,8 @@ type Item struct {
 	ArtifactURI string `json:"-"`
 	// IdentityPath is producer-declared private identity material, never report text.
 	IdentityPath string `json:"-"`
+	// TimelineIdentityPath joins lifecycle observations without collapsing revision locations.
+	TimelineIdentityPath string `json:"-"`
 	// MobileEntry separates ZIP central-directory observations without publishing ordinals.
 	MobileEntry int `json:"-"`
 	// Error marks unreadable source content; it must not be treated as a clean empty item.
@@ -55,17 +57,19 @@ func IsIncompleteFinding(f Finding) bool {
 
 // Finding is a single detected secret.
 type Finding struct {
-	Agent      *AgentProvenance `json:"agent,omitempty"`
-	Git        *GitTimeline     `json:"git,omitempty"`
-	GitRecord  *GitRecord       `json:"-"`
-	Detector   string           `json:"detector"`
-	Type       string           `json:"type"`
-	Confidence float64          `json:"confidence"`
-	Severity   string           `json:"severity"`
-	Source     string           `json:"source"`
-	Path       string           `json:"path"`
-	Line       int              `json:"line"`
-	Col        int              `json:"col"`
+	Agent     *AgentProvenance `json:"agent,omitempty"`
+	Git       *GitTimeline     `json:"git,omitempty"`
+	GitRecord *GitRecord       `json:"-"`
+	// GitFingerprint groups lifecycle observations independently of revision locations.
+	GitFingerprint string  `json:"-"`
+	Detector       string  `json:"detector"`
+	Type           string  `json:"type"`
+	Confidence     float64 `json:"confidence"`
+	Severity       string  `json:"severity"`
+	Source         string  `json:"source"`
+	Path           string  `json:"path"`
+	Line           int     `json:"line"`
+	Col            int     `json:"col"`
 	// ByteStart/ByteEnd refer to the original source snapshot, never a normalized view.
 	ByteStart int `json:"-"`
 	ByteEnd   int `json:"-"`

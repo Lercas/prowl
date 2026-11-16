@@ -13,10 +13,20 @@ import (
 )
 
 type credentialHistoryCommitKey struct{}
+type credentialHistoryGraphKey struct{}
 
 // GitCredentialHistory reads complete immutable trees with an independent scope
 // for every commit. It never joins parts across revisions or the working tree.
 func GitCredentialHistory(ctx context.Context, dir string, exclude []string, maxBytes int64) <-chan model.Item {
+	return gitCredentialHistory(ctx, dir, exclude, maxBytes, false)
+}
+
+// GitCredentialTimeline preserves per-commit credentials while collecting one lifecycle graph.
+func GitCredentialTimeline(ctx context.Context, dir string, exclude []string, maxBytes int64) <-chan model.Item {
+	return gitCredentialHistory(ctx, dir, exclude, maxBytes, true)
+}
+
+func gitCredentialHistory(ctx context.Context, dir string, exclude []string, maxBytes int64, timeline bool) <-chan model.Item {
 	ctx = WithCredentialScopes(ctx)
 	registerGitScope(ctx, "git-component-history", dir, nil, exclude, maxBytes)
 	ch := make(chan model.Item, 64)
@@ -27,7 +37,16 @@ func GitCredentialHistory(ctx context.Context, dir string, exclude []string, max
 			send(ctx, ch, model.Item{Source: "code", Error: errors.New("cross-file history intake failed")})
 		}
 		resilience.Guard(func() {
-			commits, digest, err := credentialHistoryCommits(ctx, dir)
+			var commits []string
+			var digest string
+			var graph *model.GitHistoryGraph
+			var err error
+			if timeline {
+				commits, digest, graph, err = credentialTimelineCommits(ctx, dir)
+				ctx = context.WithValue(ctx, credentialHistoryGraphKey{}, graph)
+			} else {
+				commits, digest, err = credentialHistoryCommits(ctx, dir)
+			}
 			if err != nil {
 				fail()
 				return
@@ -38,8 +57,9 @@ func GitCredentialHistory(ctx context.Context, dir string, exclude []string, max
 			}
 			model.CoverageFrom(ctx).RegisterScope("components-history-snapshot", target, struct {
 				Revision, CommitsSHA256                 string
+				Timeline                                bool
 				Commits, MaxCommits, MaxItems, MaxBytes int
-			}{"complete-commit-trees-v1", digest, len(commits), maxTimelineCommits, maxComponentRepositoryItems, maxComponentRepositoryBytes})
+			}{"complete-commit-trees-v2-timeline", digest, timeline, len(commits), maxTimelineCommits, maxComponentRepositoryItems, maxComponentRepositoryBytes})
 			budget := &repositoryComponentBudget{}
 			for _, commit := range commits {
 				itemCtx := credentialRootContext(WithCredentialScopes(model.WithProvenance(ctx, map[string]any{"commit": commit})))

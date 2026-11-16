@@ -11,6 +11,9 @@ import (
 
 func (p *Pipeline) annotateIdentity(ctx context.Context, f *model.Finding, raw string, it model.Item) {
 	o := p.options
+	if it.TimelineIdentityPath != "" {
+		f.GitFingerprint = p.reportFingerprint(f.Type, it.TimelineIdentityPath, raw)
+	}
 	if len(o.IdentityKey) >= 32 {
 		mac := hmac.New(sha256.New, o.IdentityKey)
 		_, _ = mac.Write([]byte(raw))

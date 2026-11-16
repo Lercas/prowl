@@ -769,6 +769,16 @@
     Quality IDs/GOROOT digest прежние. `--git-timeline`, другие adapters,
     реальные provider accounts и hosted CI остаются открытыми.
     `wiki/evidence/1.5.0-cross-file-history-20261116.json`.
+  - [x] `scan/repo/org --git-timeline --cross-file --verify`: полные деревья
+    выбранного graph с раздельными component scopes/verdicts по commit и общим
+    logical lifecycle. Приватные logical/revision identities не смешиваются;
+    изменение companion не создаёт removal. Pre-filter observations и
+    `--verified-only` сохраняют detector lifecycle, без исторического LIVE claim.
+    Native local — 1304/1304, repo/org — 386/386; full Go, race/min-Go/lint,
+    actionlint, 6 builds, quality IDs и GOROOT digest проходят. Fixed performance
+    gate: +15,33% времени при +20%, bytes −4,19%, allocs +1,97%.
+    Hosted CI/real accounts/Windows runtime/Docker publication остаются отдельно.
+    `wiki/evidence/1.5.0-cross-file-timeline-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

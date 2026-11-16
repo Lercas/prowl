@@ -36,10 +36,14 @@ func FinalizeGitTimeline(findings []model.Finding) []model.Finding {
 		if groups[record.Graph] == nil {
 			groups[record.Graph] = make(map[string]*timelineGroup)
 		}
-		group := groups[record.Graph][f.Fingerprint]
+		fingerprint := f.GitFingerprint
+		if fingerprint == "" {
+			fingerprint = f.Fingerprint
+		}
+		group := groups[record.Graph][fingerprint]
 		if group == nil {
-			group = &timelineGroup{fingerprint: f.Fingerprint, record: record, blobs: make(map[string]bool)}
-			groups[record.Graph][f.Fingerprint] = group
+			group = &timelineGroup{fingerprint: fingerprint, record: record, blobs: make(map[string]bool)}
+			groups[record.Graph][fingerprint] = group
 		}
 		group.blobs[record.Object.Blob] = true
 		group.indices = append(group.indices, i)
@@ -72,6 +76,7 @@ func FinalizeGitTimeline(findings []model.Finding) []model.Finding {
 	}
 	for i := range findings {
 		findings[i].GitRecord = nil
+		findings[i].GitFingerprint = ""
 	}
 	return findings
 }
@@ -140,6 +145,13 @@ func gitObserved(graph *model.GitHistoryGraph, fingerprint string, object model.
 }
 
 const maxGitObservations = 1000000
+
+func timelineIdentityPath(it model.Item) string {
+	if it.TimelineIdentityPath != "" {
+		return it.TimelineIdentityPath
+	}
+	return it.Path
+}
 
 func (p *Pipeline) observeGitCandidate(record *model.GitRecord, typ, path, value string) {
 	if record.Graph.ObservationCount.Add(1) > maxGitObservations {

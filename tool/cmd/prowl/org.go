@@ -206,7 +206,9 @@ func scanOrgRepo(ctx context.Context, prepared preparedScan, url string) (findin
 	}
 	var items <-chan model.Item
 	if c.crossFile {
-		if c.history {
+		if c.gitTimeline {
+			items = source.GitCredentialTimeline(ctx, dir, c.exclude, c.maxSize)
+		} else if c.history {
 			items = source.GitCredentialHistory(ctx, dir, c.exclude, c.maxSize)
 		} else {
 			items = source.RepositoryCredentialFiles(ctx, dir, c.exclude, c.maxSize)

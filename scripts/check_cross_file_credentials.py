@@ -117,28 +117,30 @@ def main():
             git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'owned second complete tree')
             second = git(source, 'rev-parse', 'HEAD').decode().strip()
             account.write_text(text.replace('tenant_a', 'uncommitted'))
-            for fmt in ('json', 'sarif'):
-                for ml in (False, True):
-                    before = len(Handler.calls)
-                    p = run([], extra=['--history'], fmt=fmt, ml=ml, cwd=source)
-                    fs, complete = report(p, fmt)
-                    label = f'history-{extension}-{fmt}-ml{ml}'
-                    occurrences = [o for f in fs for o in f.get('occurrences', [f])]
-                    verdicts = {o['provenance']['commit']: o['verification']['status'] for o in occurrences}
-                    check(label + '-commit-verdicts', p.returncode == 0 and complete and len(occurrences) == 2 and verdicts == {first: 'verified', second: 'invalid'})
-                    ids = {i for o in occurrences for i in o['verification']['components']['primary']}
-                    check(label + '-separate-ids', len(ids) == 2 and len(Handler.calls) == before + 2 and sorted(Handler.calls[before:]) == [False, True])
-                    check(label + '-private', all(value.encode() not in p.stdout for value in (KEY, 'tenant_a', 'tenant_b', 'uncommitted')))
-            index = root / ('history-index-' + extension)
-            p = run([], extra=['--history', '--index', index, '--scope', 'owned-history'], cwd=source)
-            fs, complete = report(p, 'json')
-            indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
-            places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
-            ids = {i for f in fs for o in f.get('occurrences', [f]) for i in o['verification']['components']['primary']}
-            check('history-index-' + extension, p.returncode == 0 and complete and len(ids) == 2 and ids <= places and len({f['value_fingerprint'] for f in fs}) == 1)
-            with sqlite3.connect(index / 'index.sqlite') as database:
-                raw = '\n'.join(database.iterdump()).encode()
-            check('history-index-private-' + extension, all(value.encode() not in raw for value in (KEY, 'tenant_a', 'tenant_b')))
+            for history_flag in ('--history', '--git-timeline'):
+                for fmt in ('json', 'sarif'):
+                    for ml in (False, True):
+                        before = len(Handler.calls)
+                        p = run([], extra=[history_flag], fmt=fmt, ml=ml, cwd=source)
+                        fs, complete = report(p, fmt)
+                        label = f'{history_flag[2:]}-{extension}-{fmt}-ml{ml}'
+                        occurrences = [o for f in fs for o in f.get('occurrences', [f])]
+                        verdicts = {o['provenance']['commit']: o['verification']['status'] for o in occurrences}
+                        check(label + '-commit-verdicts', p.returncode == 0 and complete and len(occurrences) == 2 and verdicts == {first: 'verified', second: 'invalid'})
+                        ids = {i for o in occurrences for i in o['verification']['components']['primary']}
+                        check(label + '-separate-ids', len(ids) == 2 and len(Handler.calls) == before + 2 and sorted(Handler.calls[before:]) == [False, True])
+                        check(label + '-private', all(value.encode() not in p.stdout for value in (KEY, 'tenant_a', 'tenant_b', 'uncommitted')))
+                        check(label + '-lifecycle-opt-in', all(f.get('git', {}).get('complete') and f['git'].get('in_head') is True and f['git']['head'] == second and [c['hash'] for c in f['git']['appearances']] == [first] and not f['git']['removals'] for f in fs) if history_flag == '--git-timeline' else all('git' not in f for f in fs))
+                index = root / (history_flag[2:] + '-index-' + extension)
+                p = run([], extra=[history_flag, '--index', index, '--scope', 'owned-history'], cwd=source)
+                fs, complete = report(p, 'json')
+                indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+                places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
+                ids = {i for f in fs for o in f.get('occurrences', [f]) for i in o['verification']['components']['primary']}
+                check(history_flag[2:] + '-index-' + extension, p.returncode == 0 and complete and len(ids) == 2 and ids <= places and len({f['value_fingerprint'] for f in fs}) == 1)
+                with sqlite3.connect(index / 'index.sqlite') as database:
+                    raw = '\n'.join(database.iterdump()).encode()
+                check(history_flag[2:] + '-index-private-' + extension, all(value.encode() not in raw for value in (KEY, 'tenant_a', 'tenant_b')))
 
         for mode in ('split-revisions', 'shallow', 'archive', 'symlink'):
             source = staged_fixture('history-negative-' + mode)
@@ -162,21 +164,56 @@ def main():
                 (source / '.git/shallow').write_bytes(git(source, 'rev-parse', 'HEAD'))
             baseline = root / ('history-' + mode + '.baseline')
             baseline.write_bytes(b'owned history baseline')
-            for fmt in ('json', 'sarif'):
-                for ml in (False, True):
-                    before = len(Handler.calls)
-                    p = run([], extra=['--history', '--verified-only', '--write-baseline', baseline], fmt=fmt, ml=ml, cwd=source)
-                    fs, complete = report(p, fmt)
-                    label = f'history-negative-{mode}-{fmt}-ml{ml}'
-                    check(label + '-incomplete', p.returncode == 2 and not complete and not fs)
-                    check(label + '-no-probe', len(Handler.calls) == before)
-                    check(label + '-baseline', baseline.read_bytes() == b'owned history baseline')
+            for history_flag in ('--history', '--git-timeline'):
+                for fmt in ('json', 'sarif'):
+                    for ml in (False, True):
+                        before = len(Handler.calls)
+                        p = run([], extra=[history_flag, '--verified-only', '--write-baseline', baseline], fmt=fmt, ml=ml, cwd=source)
+                        fs, complete = report(p, fmt)
+                        label = f'{history_flag[2:]}-negative-{mode}-{fmt}-ml{ml}'
+                        check(label + '-incomplete', p.returncode == 2 and not complete and not fs)
+                        check(label + '-no-probe', len(Handler.calls) == before)
+                        check(label + '-baseline', baseline.read_bytes() == b'owned history baseline')
         source = staged_fixture('history-empty')
+        for history_flag in ('--history', '--git-timeline'):
+            for fmt in ('json', 'sarif'):
+                before = len(Handler.calls)
+                p = run([], extra=[history_flag], fmt=fmt, cwd=source)
+                fs, complete = report(p, fmt)
+                check(history_flag[2:] + '-empty-' + fmt, p.returncode == 0 and complete and not fs and len(Handler.calls) == before)
+
+        source = staged_fixture('timeline-lifecycle')
+        key_bytes = (source / 'key.json').read_bytes()
+        account_bytes = (source / 'account.json').read_bytes()
+        def commit_lifecycle(label):
+            git(source, 'add', '--all')
+            git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', label)
+            return git(source, 'rev-parse', 'HEAD').decode().strip()
+        introduced = commit_lifecycle('owned appearance')
+        (source / 'account.json').write_bytes(account_bytes.replace(b'tenant_a', b'tenant_b'))
+        changed = commit_lifecycle('owned companion changes without primary changes')
+        (source / 'key.json').write_text('{}')
+        removed = commit_lifecycle('owned detector absence')
+        (source / 'key.json').write_bytes(key_bytes)
+        (source / 'account.json').write_bytes(account_bytes)
+        reappeared = commit_lifecycle('owned reappearance')
+        def lifecycle_ok(findings):
+            return bool(findings) and all(f.get('git', {}).get('complete') and f['git'].get('in_head') is True and f['git']['head'] == reappeared and [c['hash'] for c in f['git']['appearances']] == [introduced, reappeared] and [r['commit']['hash'] for r in f['git']['removals']] == [removed] and f['git']['removals'][0]['introduced_in'] == introduced for f in findings)
         for fmt in ('json', 'sarif'):
-            before = len(Handler.calls)
-            p = run([], extra=['--history'], fmt=fmt, cwd=source)
-            fs, complete = report(p, fmt)
-            check('history-empty-' + fmt, p.returncode == 0 and complete and not fs and len(Handler.calls) == before)
+            for ml in (False, True):
+                before = len(Handler.calls)
+                p = run([], extra=['--git-timeline'], fmt=fmt, ml=ml, cwd=source)
+                fs, complete = report(p, fmt)
+                occurrences = [o for f in fs for o in f.get('occurrences', [f])]
+                label = f'timeline-lifecycle-{fmt}-ml{ml}'
+                check(label + '-events', p.returncode == 0 and complete and lifecycle_ok(fs))
+                check(label + '-current-verdicts', {o['provenance']['commit']: o['verification']['status'] for o in occurrences} == {introduced: 'verified', changed: 'invalid', reappeared: 'verified'})
+                check(label + '-cache-keeps-identity', len({i for o in occurrences for i in o['verification']['components']['primary']}) == 3 and len(Handler.calls) == before + 2)
+                p = run([], extra=['--git-timeline', '--verified-only'], fmt=fmt, ml=ml, cwd=source)
+                fs, complete = report(p, fmt)
+                retained = [o for f in fs for o in f.get('occurrences', [f])]
+                check(label + '-verified-filter-keeps-lifecycle', p.returncode == 0 and complete and lifecycle_ok(fs) and {o['provenance']['commit'] for o in retained} == {introduced, reappeared} and len({i for o in retained for i in o['verification']['components']['primary']}) == 2)
+
 
         for extension in ('json', 'yaml', 'toml', 'env'):
             source = staged_fixture('since-' + extension, extension)
@@ -609,7 +646,7 @@ def main():
         _, complete = report(p, 'json')
         check('source-not-reread', p.returncode == 0 and complete and len(Handler.calls) == before + 2 and all(Handler.calls[before:]))
 
-        for args in (['scan', '--cross-file'], ['scan', '-', '--cross-file', '--verify'], ['scan', '--cross-file', '--verify', '--git-timeline'], ['repo', '--cross-file', '--verify']):
+        for args in (['scan', '--cross-file'], ['scan', '-', '--cross-file', '--verify'], ['scan', '--cross-file', '--verify', '--history', '--since=HEAD'], ['repo', '--cross-file', '--verify']):
             before = len(Handler.calls)
             p = subprocess.run([str(binary), *args], input=b'', capture_output=True, cwd=root, env=env, timeout=10)
             check('flag-guard-' + str(len(checks)), p.returncode == 2 and len(Handler.calls) == before)

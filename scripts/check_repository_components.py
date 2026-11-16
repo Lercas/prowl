@@ -130,31 +130,33 @@ os.execv(real,[real,'-c','core.hooksPath=/dev/null',*args])
         return all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'tenant_b', 'private-url', 'private-query', 'OWNED_INVALID_PRIVATE_REVISION', 'prowl-repo-'))
     try:
         for command in ('repo', 'org'):
-            for fmt in ('json', 'sarif'):
-                for ml in (False, True):
-                    before = len(state['calls'])
-                    p = run(command, fmt=fmt, ml=ml, extra=['--history'])
-                    meta, fs = report(p, fmt)
-                    label = f'{command}-history-{fmt}-ml{ml}'
-                    check(label + '-complete', p.returncode == 0 and meta['complete'] and bool(fs))
-                    occurrences = [o for f in fs for o in f.get('occurrences', [f])]
-                    verdicts = {o['provenance']['commit']: o['verification']['status'] for o in occurrences}
-                    check(label + '-commit-verdicts', len(occurrences) == 2 and verdicts == {revisions['old']: 'invalid', revisions['app']: 'verified'})
-                    ids = {i for o in occurrences for i in o['verification']['components']['primary']}
-                    check(label + '-separate-component-ids', len(ids) == 2)
-                    check(label + '-probe', len(state['calls']) == before + 2 and sorted(state['calls'][before:]) == [False, True])
-                    check(label + '-scope', any(s['kind'] == 'components' and s['target'] == 'git-history-commits' for s in meta['scope']) and any(s['kind'] == 'components-history-snapshot' for s in meta['scope']))
-                    check(label + '-private', private(p))
-            index = root / (command + '-history-index')
-            p = run(command, extra=['--history', '--index', index, '--scope', 'owned-history'])
-            meta, fs = report(p, 'json')
-            indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
-            places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
-            ids = {i for f in fs for o in f.get('occurrences', [f]) for i in o['verification']['components']['primary']}
-            check(command + '-history-index', p.returncode == 0 and meta['complete'] and len(ids) == 2 and ids <= places)
-            with sqlite3.connect(index / 'index.sqlite') as db:
-                raw = '\n'.join(db.iterdump()).encode()
-            check(command + '-history-index-private', all(value.encode() not in raw for value in (KEY, 'tenant_a', 'tenant_b')))
+            for history_flag in ('--history', '--git-timeline'):
+                for fmt in ('json', 'sarif'):
+                    for ml in (False, True):
+                        before = len(state['calls'])
+                        p = run(command, fmt=fmt, ml=ml, extra=[history_flag])
+                        meta, fs = report(p, fmt)
+                        label = f'{command}-{history_flag[2:]}-{fmt}-ml{ml}'
+                        check(label + '-complete', p.returncode == 0 and meta['complete'] and bool(fs))
+                        occurrences = [o for f in fs for o in f.get('occurrences', [f])]
+                        verdicts = {o['provenance']['commit']: o['verification']['status'] for o in occurrences}
+                        check(label + '-commit-verdicts', len(occurrences) == 2 and verdicts == {revisions['old']: 'invalid', revisions['app']: 'verified'})
+                        ids = {i for o in occurrences for i in o['verification']['components']['primary']}
+                        check(label + '-separate-component-ids', len(ids) == 2)
+                        check(label + '-probe', len(state['calls']) == before + 2 and sorted(state['calls'][before:]) == [False, True])
+                        check(label + '-scope', any(s['kind'] == 'components' and s['target'] == ('git-history-timeline' if history_flag == '--git-timeline' else 'git-history-commits') for s in meta['scope']) and any(s['kind'] == 'components-history-snapshot' for s in meta['scope']))
+                        check(label + '-private', private(p))
+                        check(label + '-lifecycle-opt-in', all(f.get('git', {}).get('complete') and f['git'].get('in_head') is True and f['git']['head'] == revisions['app'] and [c['hash'] for c in f['git']['appearances']] == [revisions['old']] and not f['git']['removals'] for f in fs) if history_flag == '--git-timeline' else all('git' not in f for f in fs))
+                index = root / (command + '-' + history_flag[2:] + '-index')
+                p = run(command, extra=[history_flag, '--index', index, '--scope', 'owned-history'])
+                meta, fs = report(p, 'json')
+                indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+                places = {place['id'] for secret in json.loads(indexed.stdout)['secrets'] for place in secret['locations']}
+                ids = {i for f in fs for o in f.get('occurrences', [f]) for i in o['verification']['components']['primary']}
+                check(command + '-' + history_flag[2:] + '-index', p.returncode == 0 and meta['complete'] and len(ids) == 2 and ids <= places)
+                with sqlite3.connect(index / 'index.sqlite') as db:
+                    raw = '\n'.join(db.iterdump()).encode()
+                check(command + '-' + history_flag[2:] + '-index-private', all(value.encode() not in raw for value in (KEY, 'tenant_a', 'tenant_b')))
         for command in ('repo', 'org'):
             for fmt in ('json', 'sarif'):
                 for ml in (False, True):
@@ -200,25 +202,26 @@ os.execv(real,[real,'-c','core.hooksPath=/dev/null',*args])
                 env['PROWL_REPO_BAD_METADATA'] = '1' if mode == 'metadata' else '0'
                 name = 'key-only' if mode == 'split-repositories' else state['repos'][0]
                 baseline = root / (command + '-' + mode + '.baseline'); baseline.write_bytes(b'owned baseline')
-                for history in (False, True):
+                for history in (None, '--history', '--git-timeline'):
                     for fmt in ('json', 'sarif'):
-                        before = len(state['calls']); p = run(command, name, fmt=fmt, extra=['--verified-only', '--write-baseline', baseline, *(['--history'] if history else [])])
+                        before = len(state['calls']); p = run(command, name, fmt=fmt, extra=['--verified-only', '--write-baseline', baseline, *([history] if history else [])])
                         meta, _ = report(p, fmt)
-                        label = f'{command}-{mode}-{fmt}' + ('-history' if history else '')
+                        label = f'{command}-{mode}-{fmt}' + ('-' + history[2:] if history else '')
                         check(label + '-no-probe', p.returncode == 2 and not meta['complete'] and len(state['calls']) == before)
                         check(label + '-baseline', baseline.read_bytes() == b'owned baseline')
                         check(label + '-private', private(p))
             env['PROWL_REPO_BAD_METADATA'] = '0'; state['repos'] = ['empty']
             p = run(command, 'empty'); meta, fs = report(p, 'json')
             check(command + '-empty', p.returncode == 0 and meta['complete'] and not fs)
-            p = run(command, 'empty', extra=['--history']); meta, fs = report(p, 'json')
-            check(command + '-history-empty', p.returncode == 0 and meta['complete'] and not fs)
-            for flag in ('--git-timeline',):
+            for history_flag in ('--history', '--git-timeline'):
+                p = run(command, 'empty', extra=[history_flag]); meta, fs = report(p, 'json')
+                check(command + '-' + history_flag[2:] + '-empty', p.returncode == 0 and meta['complete'] and not fs)
+            for flag in ('--stdin-name=owned.json',):
                 before = len(state['calls']); p = run(command, extra=[flag])
                 check(command + flag + '-guard', p.returncode == 2 and not p.stdout and len(state['calls']) == before)
         evidence = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'model_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'passed': len(checks), 'failed': 0, 'checks': checks, 'fixture_root': str(root),
-                    'scope': 'repo/org pinned-commit and per-revision history cross-file with owned Git origins, forge inventory and loopback verifier; no real provider acceptance'}
+                    'scope': 'repo/org pinned-commit, per-revision history and timeline cross-file with owned Git origins, forge inventory and loopback verifier; no real provider acceptance'}
         (root / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
         print(json.dumps({'passed': len(checks), 'evidence': str(root / 'evidence.json')}))
     finally:

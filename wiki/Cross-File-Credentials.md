@@ -16,11 +16,12 @@ prowl scan ./config --cross-file --verify --ml --format json
 prowl scan --staged --cross-file --verify --ml --format json
 prowl scan --since HEAD~1 --cross-file --verify --ml --format json
 prowl scan --history --cross-file --verify --ml --format json
+prowl scan --git-timeline --cross-file --verify --ml --format json
 prowl scan ./config --cross-file --verify --index "$HOME/.prowl/index" --scope app:config
 ```
 
 Без `--cross-file` поведение `--verify` не меняется. Флаг доступен у CLI `scan`, `repo`, `org`:
-stdin, `--git-timeline`, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
+stdin, остальные remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
 не включены. Общий пункт TODO остаётся открытым до остальных источников и форматов.
 
 ## Поддержанные входы CLI
@@ -282,8 +283,7 @@ location IDs разрешаются в постоянном индексе; plai
 но не конфигурационным companion. Archive members не наследуют repository scope.
 Submodule entries отмечаются policy-пропуском и не читаются как конфигурационные файлы.
 Первоначальная static-commit квалификация не покрывала history. Отдельный режим
-полных исторических деревьев добавлен ниже; `--git-timeline` по-прежнему отклоняется
-вместе с `--cross-file` до clone.
+полных исторических деревьев и их timeline-интеграция описаны ниже.
 
 Tree listing ограничен 64 MiB до материализации. Дополнительно producer ограничивает
 выбранные scannable blob entries 10000 файлами и 32 MiB сырых bytes; действуют также
@@ -388,8 +388,8 @@ commit, репозиториями, symlink и archive members companions не �
 читаются только перечисленные immutable trees/blobs; новые commits и рабочие файлы
 не дополняют уже собранный intake. SHA-256 списка фиксируется в scope
 `components-history-snapshot`. Составной set закрывается до первого provider call.
-`--git-timeline` остаётся отдельным неподдержанным сочетанием: его события появления
-и исчезновения не получают исторический LIVE verdict из этой возможности.
+`--git-timeline` имеет отдельную интеграцию ниже. События появления и исчезновения
+не получают исторический LIVE verdict из текущего provider ответа.
 Provider verdict отражает проверку сейчас, а не состояние ключа на дату commit.
 
 Приватная identity нового history reader включает commit. Одинаковое значение
@@ -424,3 +424,42 @@ Full Go, race/min-Go/lint/actionlint и шесть CGO=0 builds проходят
 metrics/IDs и GOROOT digest сохранены. Hosted CI и реальные provider accounts
 не квалифицированы. Новый performance gate и Docker rebuild не выполнялись.
 Evidence — `evidence/1.5.0-cross-file-history-20261116.json`.
+
+
+## Совместный `--git-timeline --cross-file --verify`
+
+Команды `scan`, `repo` и `org` поддерживают это сочетание. Один captured timeline
+Graph определяет список commit и first-parent changes; полные деревья читаются
+из того же списка. Компоненты и provider verdicts остаются раздельными по commit,
+а detection lifecycle объединяется по отдельному приватному logical fingerprint.
+Это не меняет location IDs и не публикует приватный selector/fingerprint.
+Source scope `complete-commit-trees-v2-timeline` различает history и timeline.
+
+Изменение companion без изменения primary может дать другой текущий verdict,
+сохраняя непрерывное наблюдение primary. Его реальное исчезновение и повторное
+появление остаются detector events. `--verified-only` фильтрует результаты после
+сборки lifecycle: сохранённые LIVE occurrences получают полную историю наблюдений,
+в том числе через commit с invalid tuple. Это не историческая проверка LIVE и не
+интервал работоспособности credential. Pre-filter observations используют тот же
+logical key, поэтому фильтрация кандидата не доказывает исчезновение.
+
+Unborn repository без refs остаётся полным пустым выбранным сканом; shallow graph
+и ошибки source/intake не разрешают composite probes или baseline. После корректного
+intake всё ещё возможны detector/timeline resolution limits: они не отменяют уже
+выполненных provider requests, но дают неполноту и запрещают отрицательные lifecycle
+выводы и baseline. Прежние графовые лимиты действуют вместе с глобальными component
+budgets. Обычный timeline без `--cross-file` сохраняет прежний reader и grouping.
+
+Квалификация из чистого `63463be`: 1304/1304 local/staged/since/history/timeline
+CLI checks и 386/386 repo/org checks, JSON/SARIF ±ML/index под OS deny-network с
+исключением localhost. Проверены разные verdicts двух commit, появление/исчезновение/
+повторное появление, повтор tuple через verifier cache с тремя distinct component
+locations и сохранение lifecycle после `--verified-only`. Дополнительный unit
+проверяет pre-filter observation при раздельных logical/revision identities.
+Full Go, race/min-Go/lint/actionlint, шесть CGO=0 builds проходят. Quality metrics/IDs
+и полный GOROOT digest прежние. Три alternating benchmark pairs обычного per-item
+GOROOT pipeline против pinned `e0f05cd` проходят: time +15,33% при лимите +20%, bytes −4,19%, allocs +1,97%.
+Стоимость Git acquisition/verification в timeline-mode отдельно не измерялась.
+Новые Windows runtime, Docker build, hosted CI, real-provider acceptance и публикация
+этой локальной квалификацией не подтверждаются.
+Evidence — `evidence/1.5.0-cross-file-timeline-20261116.json`.

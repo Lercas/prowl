@@ -565,7 +565,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			continue
 		}
 		if gitRecord != nil {
-			p.observeGitCandidate(gitRecord, m.Type, it.Path, m.Value)
+			p.observeGitCandidate(gitRecord, m.Type, timelineIdentityPath(it), m.Value)
 		}
 		if allow != nil && allow(m.Value, it.Path) {
 			model.CoverageFrom(ctx).Filtered()
@@ -677,7 +677,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				break
 			}
 			if gitRecord != nil {
-				p.observeGitCandidate(gitRecord, h.RuleID, it.Path, h.Value)
+				p.observeGitCandidate(gitRecord, h.RuleID, timelineIdentityPath(it), h.Value)
 			}
 			if allow != nil && allow(h.Value, it.Path) {
 				model.CoverageFrom(ctx).Filtered()
