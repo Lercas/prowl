@@ -62,3 +62,22 @@ func TestEmptyStreamChecksumFailureCannotHideUnreadGzipMember(t *testing.T) {
 		}
 	}
 }
+
+func TestZlibLookingWordsDoNotMarkScansIncomplete(t *testing.T) {
+	d := newDetector(t)
+	// These decode to a valid zlib header followed by a few bytes of garbage.
+	for _, text := range []string{"iban SA07123456789012\n", "note: SA07000000000000\n", `{"note":"SA07000000000001"}`, "SA0y000000000000", "SA070710000A0000000"} {
+		if _, limited := d.ScanCtxWithStatus(t.Context(), text); limited {
+			t.Fatalf("ordinary word marked the scan incomplete: %q", text)
+		}
+	}
+}
+
+func TestTruncatedNonASCIIStreamKeepsUncertainty(t *testing.T) {
+	for _, gzipFormat := range []bool{false, true} {
+		good := compressedFixture(t, "пароль: "+strings.Repeat("секретное значение ", 8), gzipFormat)
+		if _, _, limited := inflateStatus(good[:len(good)-6]); !limited {
+			t.Fatalf("truncated UTF-8 document lost uncertainty: gzip=%v", gzipFormat)
+		}
+	}
+}

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
 )
@@ -48,6 +49,29 @@ func decodeBlobStatus(s string) (string, bool, bool) {
 		return "", false, limited
 	}
 	return string(dec), true, limited
+}
+
+// inflatedText reports whether a partial inflate result reads as text: ASCII-printable, or
+// UTF-8 without C0 controls (a rune cut at the damage point is allowed).
+func inflatedText(b []byte) bool {
+	if printableText(b) {
+		return true
+	}
+	if len(b) < 8 {
+		return false
+	}
+	for cut := 0; cut < utf8.UTFMax && len(b) > 0 && !utf8.Valid(b); cut++ {
+		b = b[:len(b)-1]
+	}
+	if !utf8.Valid(b) {
+		return false
+	}
+	for _, c := range b {
+		if c < 0x20 && c != '\n' && c != '\r' && c != '\t' || c == 0x7f {
+			return false
+		}
+	}
+	return true
 }
 
 func isHex(s string) bool {
@@ -97,12 +121,20 @@ func inflateStatusLimit(b []byte, limit int) ([]byte, bool, bool) {
 	// A plausible header followed only by invalid data is not evidence of a
 	// compressed document. Random provider tokens can have those bytes too.
 	oversized := len(out) > limit
-	// Even a short or low-entropy prefix can come from a real damaged stream.
-	// Entropy and printability must not turn an integrity failure into a clean scan.
-	// A validated empty deflate stream with a bad checksum is also evidence of
-	// damage; in gzip it can stop inspection before a later member holding text.
+	// Damage is evidence of a document only behind a header real encoders emit:
+	// gzip, or zlib with the default 32 KiB window (0x78). Ordinary words such as
+	// an IBAN ("SA07…" -> 0x48 0x0d) decode to a rarer but valid zlib header
+	// followed by garbage that can even end in a failed checksum; that is not a
+	// document and must not make the scan incomplete.
+	commonHeader := b[0] == 0x1f || b[0] == 0x78
+	failed := err != nil || closeErr != nil
+	// A checksum failure means the whole stream decoded: evidence of damage
+	// regardless of content, including an empty deflate stream whose gzip damage
+	// can stop inspection before a later member holding text.
 	checksumFailure := errors.Is(err, gzip.ErrChecksum) || errors.Is(err, zlib.ErrChecksum)
-	damaged := (len(out) > 0 || checksumFailure) && (err != nil || closeErr != nil)
+	// A truncated or corrupt stream counts only when its inflated prefix is text.
+	streamFailure := len(out) > 0 && inflatedText(out)
+	damaged := commonHeader && failed && (checksumFailure || streamFailure)
 	limited := oversized || damaged
 	if len(out) > limit {
 		out = out[:limit]
