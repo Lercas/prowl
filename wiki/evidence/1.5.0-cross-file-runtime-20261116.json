@@ -1,0 +1,168 @@
+{
+  "schema_version": "prowl-cross-file-runtime-v1",
+  "date": "2026-11-16",
+  "qualification_status": "local_flat_configuration_cli_only",
+  "source_base": "545286fc50d7fbc4c7d37bbcdb3bfb9f28d31012",
+  "initial_runtime_commit": "31e418ea0be94c493437bf42b6d12c27898c9173",
+  "qualified_runtime_commit": "f6a38cfe211a372b94d4b6ef9c888080596a3e49",
+  "binary": {
+    "path": "/tmp/prowl-cross-file-final-20261116-bin",
+    "sha256": "a12b2bc26fb5b8b4c28df66b59b7852af411c3b2d12258bf935e987a1fa9d56b"
+  },
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-cross-file-final-go-20261116.log",
+      "sha256": "960ffc077f4c74ca36e37b576052b1205a3e625bd655dd54106204a1c584af9a"
+    },
+    "initial_core_race": {
+      "path": "/tmp/prowl-cross-file-race-20261116.log",
+      "sha256": "0040db7185b08f7d8af5d40814698bda85c21b69d745883be22b0b4e90057726"
+    },
+    "final_delta_race": {
+      "path": "/tmp/prowl-cross-file-final-race-20261116.log",
+      "sha256": "6e513d51e176da759e185bad0e7b1a45775e2bfb656175378b978876cc15a201"
+    },
+    "initial_core_minimum_go": {
+      "path": "/tmp/prowl-cross-file-min-go-20261116.log",
+      "sha256": "34a4b7859726fc4bb82a0a5403588e2a53148668e0582627c8df33cf52ce0854"
+    },
+    "final_delta_minimum_go": {
+      "path": "/tmp/prowl-cross-file-final-min-go-20261116.log",
+      "sha256": "6059f9aa5b7e5bca66a2591d1a39b4c752aa81183815d8e7330074a31b185860"
+    },
+    "lint": {
+      "path": "/tmp/prowl-cross-file-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-cross-file-final-native-20261116.log",
+      "sha256": "64666f619866ed3b2c563ba02a9de4d04c34d2d13655e5677d6f87044af8abb4"
+    },
+    "build": {
+      "path": "/tmp/prowl-cross-file-final-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "buildinfo": {
+      "path": "/tmp/prowl-cross-file-final-buildinfo-20261116.log",
+      "sha256": "b3d195d1fc26bf7fece812ac022f5980fa3041b7f2965548483a8aca70a4aa6e"
+    },
+    "corpus": {
+      "path": "/tmp/prowl-cross-file-final-corpus-20261116.log",
+      "sha256": "36c894897df0225a459b703238d89d32abc8daff33b72e953ea3d45d20bb0465"
+    },
+    "quality": {
+      "path": "/tmp/prowl-cross-file-final-quality-20261116.log",
+      "sha256": "54ea3a54896a0acee3e9e2082e4581b339d4b32fdfcbbdb783b546628c7125c1"
+    },
+    "literal_bounds": {
+      "path": "/tmp/prowl-cross-file-bounds-final-20261116.log",
+      "sha256": "10106a87fa47004f2c2fda7e93f304caf105b271f6943bc5b050880b28eac289"
+    }
+  },
+  "validation": {
+    "native": {
+      "passed": 152,
+      "evidence": "wiki/evidence/1.5.0-cross-file-native-20261116.json",
+      "provider": "owned loopback stub only"
+    },
+    "full_go": "passed on final commit, CGO_ENABLED=0 go1.27.4",
+    "race": {
+      "initial_core_packages": [
+        "credentialset",
+        "verify",
+        "scan",
+        "source",
+        "model",
+        "report",
+        "cmd/prowl"
+      ],
+      "final_changed_packages": [
+        "scan",
+        "cmd/prowl"
+      ],
+      "status": "passed"
+    },
+    "minimum_go": {
+      "version": "go1.26.11",
+      "initial_core_packages": [
+        "credentialset",
+        "verify",
+        "scan",
+        "source",
+        "model",
+        "report",
+        "cmd/prowl"
+      ],
+      "final_changed_packages": [
+        "scan",
+        "cmd/prowl"
+      ],
+      "status": "passed"
+    },
+    "lint": "repository-pinned golangci-lint v2.15.0; 0 issues",
+    "default_quality": {
+      "report": "wiki/evidence/1.5.0-cross-file-quality-20261116.json",
+      "secret_hits": 1563,
+      "secrets": 2094,
+      "hard_negative_hits": 57,
+      "hard_negatives": 982,
+      "missed_positive_and_false_positive_ids_equal_parent": true,
+      "parent_evidence": "wiki/evidence/1.5.0-image-quality-20261116.json"
+    },
+    "default_corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "findings": 420,
+      "incomplete": 85,
+      "digest": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+      "equals_parent": true
+    },
+    "fixed_performance": {
+      "report": "wiki/evidence/1.5.0-cross-file-performance-20261116.json",
+      "status": "passed",
+      "ratios": {
+        "ns/op": 1.1585860756660862,
+        "B/op": 0.9606664830234175,
+        "allocs/op": 0.9839582511375324
+      },
+      "policy_unchanged": true,
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "f6a38cfe211a372b94d4b6ef9c888080596a3e49",
+      "note": "Fixed older detector baseline produces 1132 findings; current default produces 420. Immediate-parent parity is established separately by quality IDs and full corpus digest."
+    }
+  },
+  "contracts": [
+    "--cross-file requires explicit provider verification and local filesystem roots",
+    "Flat JSON/YAML/TOML and literal dotenv only; unknown/non-string/empty fields shadow aliases instead of borrowing a value",
+    "Each selected root and nested .git has an opaque acquisition scope; archive/derived/JWT views cannot borrow components",
+    "One source intake completes before provider calls; pending candidate record and original literal survive ML filtering",
+    "JSON/SARIF and occurrences preserve role/location evidence without values or source primary field names",
+    "Ephemeral keyed IDs create no state; --index uses existing scoped location identities and never persists raw components",
+    "Intake capped at 10000 Items/32 MiB and snapshots at 100000 literals; invalid inventory is discarded before L1 fallback",
+    "Incomplete binding/source/limit retains exit 2 and blocks baseline even with --verified-only"
+  ],
+  "limits": {
+    "items": 10000,
+    "source_text_bytes": 33554432,
+    "retained_literals": 100000,
+    "component_observations": 100000,
+    "retained_component_bytes": 33554432,
+    "document_bytes": 1048576
+  },
+  "not_qualified": [
+    "Git/repo/org and other remote/image/mobile acquisition adapters",
+    "Nested config tables/objects/arrays and import relationships",
+    "Missing actual OAuth/DB provider implementations or live-account acceptance",
+    "Final Docker images, hosted CI and publication"
+  ],
+  "goal_status": "Parent cross-file TODO and full 1.5.0 transition remain open",
+  "models": {
+    "stock_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "installed_legacy_sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25",
+    "unchanged": true
+  },
+  "qualification_history": [
+    "Initial native runner corrected to use authoritative structured SARIF verification and explicit provider type anchors",
+    "Before integration added aggregate literal cap for comment-heavy dotenv documents and ASCII whitespace mapping; final binary and gates replayed"
+  ]
+}

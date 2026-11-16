@@ -1,0 +1,620 @@
+{
+  "binary_sha256": "a12b2bc26fb5b8b4c28df66b59b7852af411c3b2d12258bf935e987a1fa9d56b",
+  "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+  "passed": 152,
+  "failed": 0,
+  "checks": [
+    {
+      "case": "json-json-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "json-json-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "json-sarif-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "toml-json-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "toml-sarif-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "yaml-json-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "yaml-sarif-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "env-json-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlFalse-status",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlFalse-verdict",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlFalse-roles",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlFalse-owned-request",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlFalse-redaction",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlTrue-status",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlTrue-verdict",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlTrue-roles",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlTrue-owned-request",
+      "passed": true
+    },
+    {
+      "case": "env-sarif-mlTrue-redaction",
+      "passed": true
+    },
+    {
+      "case": "duplicates-json",
+      "passed": true
+    },
+    {
+      "case": "duplicate-evidence-json",
+      "passed": true
+    },
+    {
+      "case": "duplicates-sarif",
+      "passed": true
+    },
+    {
+      "case": "duplicate-evidence-sarif",
+      "passed": true
+    },
+    {
+      "case": "conflict-json-closed",
+      "passed": true
+    },
+    {
+      "case": "conflict-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "conflict-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "conflict-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "conflict-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "conflict-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "unknown-json-closed",
+      "passed": true
+    },
+    {
+      "case": "unknown-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "unknown-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "unknown-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "unknown-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "unknown-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "empty-json-closed",
+      "passed": true
+    },
+    {
+      "case": "empty-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "empty-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "empty-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "nested-json-closed",
+      "passed": true
+    },
+    {
+      "case": "nested-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "nested-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "nested-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "nested-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "nested-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-closed",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "duplicate-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "duplicate-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "interpolation-json-closed",
+      "passed": true
+    },
+    {
+      "case": "interpolation-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "interpolation-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "interpolation-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "interpolation-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "interpolation-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-json-closed",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "foreign-root-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-json-closed",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "nested-repo-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "archive-json-closed",
+      "passed": true
+    },
+    {
+      "case": "archive-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "archive-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "archive-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "archive-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "archive-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "missing-source-json-closed",
+      "passed": true
+    },
+    {
+      "case": "missing-source-json-baseline",
+      "passed": true
+    },
+    {
+      "case": "missing-source-json-redaction",
+      "passed": true
+    },
+    {
+      "case": "missing-source-sarif-closed",
+      "passed": true
+    },
+    {
+      "case": "missing-source-sarif-baseline",
+      "passed": true
+    },
+    {
+      "case": "missing-source-sarif-redaction",
+      "passed": true
+    },
+    {
+      "case": "index-complete",
+      "passed": true
+    },
+    {
+      "case": "index-evidence-resolves-primary",
+      "passed": true
+    },
+    {
+      "case": "index-no-plaintext",
+      "passed": true
+    },
+    {
+      "case": "source-not-reread",
+      "passed": true
+    },
+    {
+      "case": "flag-guard-148",
+      "passed": true
+    },
+    {
+      "case": "flag-guard-149",
+      "passed": true
+    },
+    {
+      "case": "flag-guard-150",
+      "passed": true
+    },
+    {
+      "case": "flag-guard-151",
+      "passed": true
+    }
+  ],
+  "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-47q2rkl8",
+  "provider": "Owned loopback stub only; no real provider/account acceptance",
+  "owned_requests": 21,
+  "scope": "Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Other adapters are not qualified."
+}
