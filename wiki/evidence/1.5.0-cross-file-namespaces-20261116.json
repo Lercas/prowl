@@ -1,0 +1,109 @@
+{
+  "schema_version": "prowl-cross-file-namespaces-v2",
+  "date": "2026-11-16",
+  "status": "local_nested_configuration_cli_qualified",
+  "source_base": "fde2096",
+  "initial_runtime_commit": "2f93b7c33a6776bcee710b33ee525c1ce1a21b2e",
+  "qualified_runtime_commit": "f82bae86c38cc89c89ca3a704edcdfa12c13debd",
+  "binary": {
+    "path": "/tmp/prowl-cross-namespaces-final-20261116-bin",
+    "sha256": "df3fb965927a06675ca4a518703345413d44112ad230b476b5537f6e89626627"
+  },
+  "buildinfo": "/tmp/prowl-cross-namespaces-final-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=f82bae86c38cc89c89ca3a704edcdfa12c13debd\n\tbuild\tvcs.time=2026-11-16T02:20:30Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-cross-namespaces-full-go-20261116.log",
+      "sha256": "c38baf6aa739b76887a30043364b16193828a03532f50dd7442b6f24e8937392"
+    },
+    "core_race": {
+      "path": "/tmp/prowl-cross-namespaces-race-20261116.log",
+      "sha256": "c4a870cfb187d366f8f225d82a8383989fd13f73e72f1be91af8ec58125dd151"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-cross-namespaces-min-go-20261116.log",
+      "sha256": "c2f11dd33f18050052a599dececcb4a4715a0cc22225d3d725e4b4cf993b2ee1"
+    },
+    "final_delta_race": {
+      "path": "/tmp/prowl-cross-namespaces-final-race-20261116.log",
+      "sha256": "2a3f1f9c830a88a3b2db5e2f50b5e9c513f93cacc3295293a13468caf0edf64f"
+    },
+    "final_delta_minimum_go": {
+      "path": "/tmp/prowl-cross-namespaces-final-min-go-20261116.log",
+      "sha256": "9f60c137bfe04508c1ef48cd0d539c05932eb0e91174152f9ebd75abfe6ad8c1"
+    },
+    "final_lint": {
+      "path": "/tmp/prowl-cross-namespaces-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "bounds": {
+      "path": "/tmp/prowl-cross-namespaces-bounds-20261116.log",
+      "sha256": "77b2e8e9a1563b1939d58bcf4d245c1076791f117215a6549d4dbe031f7cac82"
+    },
+    "corpus": {
+      "path": "/tmp/prowl-cross-namespaces-corpus-20261116.log",
+      "sha256": "de84dfad315cb5502b267bfd134182d1cae9bacbc1b9719c867a8c7aaf26447c"
+    },
+    "native": {
+      "path": "/tmp/prowl-cross-namespaces-final-native-20261116.log",
+      "sha256": "96dd370d381cd08c93dd00dd0a33510b87f522112feaa84022fbea0c1f7f6638"
+    },
+    "quality": {
+      "path": "/tmp/prowl-cross-namespaces-final-quality-20261116.log",
+      "sha256": "54ea3a54896a0acee3e9e2082e4581b339d4b32fdfcbbdb783b546628c7125c1"
+    },
+    "build": {
+      "path": "/tmp/prowl-cross-namespaces-final-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "native": {
+    "passed": 310,
+    "report": "wiki/evidence/1.5.0-cross-file-namespaces-native-20261116.json"
+  },
+  "quality": {
+    "report": "wiki/evidence/1.5.0-cross-file-namespaces-quality-20261116.json",
+    "secret_hits": 1563,
+    "secrets": 2094,
+    "hard_negative_hits": 57,
+    "hard_negatives": 982,
+    "exact_ids_unchanged": true
+  },
+  "performance": {
+    "report": "wiki/evidence/1.5.0-cross-file-namespaces-performance-20261116.json",
+    "ratios": {
+      "ns/op": 1.1493650469893177,
+      "B/op": 0.9724233920310229,
+      "allocs/op": 0.9846489584329496
+    },
+    "passed": true
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "digest": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "unchanged": true
+  },
+  "limits": {
+    "namespace_metadata_bytes": 33554432,
+    "namespace_segments": 64,
+    "namespace_raw_name_bytes": 4096,
+    "existing_intake_limits_unchanged": true
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "limits_of_evidence": [
+    "Owned loopback verifier, no live provider/account acceptance",
+    "Local filesystem acquisition only; no Git/repo/remote adapters",
+    "No namespace inheritance/import/overlay semantics, arrays or YAML aliases",
+    "No hosted CI/publication/release or installed CLI activation"
+  ],
+  "validation_scope": {
+    "full_go_and_initial_core_checks": "initial runtime; final delta covered by bounds, targeted race/minimum Go and lint",
+    "final_native_and_quality_and_performance": "qualified runtime commit",
+    "corpus_digest": "final runtime content before commit; documentation/test-only bookkeeping does not change runtime"
+  }
+}

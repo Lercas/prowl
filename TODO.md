@@ -557,7 +557,16 @@
     evidence и scoped index IDs. SQLite не получает raw values; неполнота блокирует
     baseline даже с `--verified-only`. Локальная native qualification —
     `wiki/evidence/1.5.0-cross-file-runtime-20261116.json`.
-  - [ ] Остальные source adapters/revisions, nested config/import relationships
+  - [x] Вложенные JSON/YAML/TOML namespaces: точные сегменты пути внутри acquisition,
+    без наследования между parent/child/siblings, с межформатным дополнением.
+    Quoted dots не становятся вложенным путём; unknown/container roles блокируют
+    заимствование. Namespace metadata ограничены 32 MiB до provider calls.
+    Native CLI — 310/310; full Go, targeted race/min-Go/lint проходят.
+    Default quality IDs и полный GOROOT digest сохранены; финальный performance
+    gate +14,94% времени при лимите +20%, без изменения модели/порогов.
+    `wiki/evidence/1.5.0-cross-file-namespaces-20261116.json`.
+  - [ ] Остальные source adapters/revisions, import/overlay relationships,
+    arrays/aliases и сложные namespace
     и реальные OAuth/DB verifiers; текущий local-filesystem этап их не закрывает.
 - [x] **Хронология наблюдений в Git.** Явный `--git-timeline` для `scan/repo/org` включает
   историю; все достижимые ветки и зафиксированный HEAD, события относительно первого родителя.

@@ -118,6 +118,13 @@ JSON/SARIF, ML, occurrences, scoped index IDs, отсутствие plaintext в
 immutable observed intake, source boundaries и baseline guards на собственном
 loopback verifier. Это локальная квалификация сканера, не live-provider acceptance.
 
+Расширение для вложенных namespace прошло 310/310 native CLI-проверок, полный
+Go-набор и целевые race/minimum-Go/lint. Проверены совпадающие сегменты в трёх
+форматах, смешанные форматы, quoted dots, независимые siblings, запрет наследования,
+unknown/container roles, index privacy и namespace budget до provider calls.
+Обычные quality IDs и полный GOROOT digest сохранены; performance gate проходит.
+Текущий отчёт: `evidence/1.5.0-cross-file-namespaces-20261116.json`.
+
 До закрытия общего пункта остаются остальные acquisition adapters/revisions,
 import relationships, массивы/индексированные namespace, aliases/overlays,
 а также отсутствующие
