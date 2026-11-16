@@ -1,0 +1,3788 @@
+{
+  "schema_version": "prowl-cross-file-indexed-qualification-v1",
+  "source": {
+    "qualified_commit": "00d345b1739bf4c6e6847381b2b4eeb19450022e",
+    "runtime_commit": "3a43131f2b417df884b2bcebf2f1962645c05de8",
+    "runner_commit": "0f4cc37c3ac30a045ef0f9dabf2d137127058f90",
+    "parent_commit": "374baf2e232bc16ca14c151979590511f10a3efd",
+    "build_vcs_modified": false
+  },
+  "binary": {
+    "path": "/tmp/prowl-indexed-qualified-20261116-bin",
+    "sha256": "43176c496b661679426671e22230190acc8c0e7dea1b321ab5f260e63a453af0",
+    "os": "darwin",
+    "arch": "arm64"
+  },
+  "policy": "indexed-namespaces-yaml-v2",
+  "contract": {
+    "formats": [
+      "JSON arrays",
+      "YAML sequences and aliases",
+      "TOML arrays of tables and inline tables"
+    ],
+    "namespace": "Exact typed object-key and zero-based array-index path inside one acquisition; numeric string keys remain distinct",
+    "relationship": "Explicit --cross-file root selection requires consistent ordinal ordering in one configuration; no content matching, joins, imports or overlays",
+    "unknown_roles": "Empty/null/non-string/container declarations block borrowing; anonymous scalar elements never establish roles",
+    "default_behavior": "No cross-file metadata retained unless opted in; complete default envelope digest unchanged"
+  },
+  "native": {
+    "binary_sha256": "43176c496b661679426671e22230190acc8c0e7dea1b321ab5f260e63a453af0",
+    "model_sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3",
+    "passed": 760,
+    "failed": 0,
+    "checks": [
+      {
+        "case": "json-json-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "json-json-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "json-sarif-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "toml-json-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "toml-sarif-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "yaml-json-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "yaml-sarif-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "env-json-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlFalse-status",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlFalse-verdict",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlFalse-roles",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlFalse-owned-request",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlFalse-redaction",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlTrue-status",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlTrue-verdict",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlTrue-roles",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlTrue-owned-request",
+        "passed": true
+      },
+      {
+        "case": "env-sarif-mlTrue-redaction",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-json-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-root-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-alias-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-sequence-alias-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-yaml-merge-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-tables-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-inline-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-nested-tables-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-array-toml-table-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-json-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-toml-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-dotted-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-inline-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-mixed-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-quoted-dot-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-map-alias-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-scalar-alias-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-nested-alias-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-override-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlFalse-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlFalse-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlTrue-verified",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlTrue-request",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-index-primary",
+        "passed": true
+      },
+      {
+        "case": "namespace-yaml-merge-sequence-index-private",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-sibling-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-sibling-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-sibling-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-sibling-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-parent-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-parent-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-parent-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-parent-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-child-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-child-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-child-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-child-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-case-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-case-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-case-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-case-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-dots-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-dots-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-dots-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-dots-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-null-shadow-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-null-shadow-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-null-shadow-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-null-shadow-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-container-shadow-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-container-shadow-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-container-shadow-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-container-shadow-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-array-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-array-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-array-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-array-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-sibling-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-sibling-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-sibling-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-sibling-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-null-override-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-null-override-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-null-override-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-null-override-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-unknown-case-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-unknown-case-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-unknown-case-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-unknown-case-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-cycle-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-cycle-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-cycle-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-cycle-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-missing-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-missing-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-missing-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-missing-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-cross-document-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-cross-document-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-cross-document-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-cross-document-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-duplicate-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-duplicate-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-duplicate-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-duplicate-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-expansion-budget-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-expansion-budget-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-expansion-budget-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-expansion-budget-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-invalid-nested-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-invalid-nested-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-invalid-nested-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-invalid-nested-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-invalid-sequence-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-invalid-sequence-merge-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-alias-invalid-sequence-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-alias-invalid-sequence-merge-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-documents-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-documents-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-documents-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-documents-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-array-tables-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-array-tables-json",
+        "passed": true
+      },
+      {
+        "case": "namespace-negative-array-tables-sarif",
+        "passed": true
+      },
+      {
+        "case": "namespace-baseline-array-tables-sarif",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-index-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-numeric-key-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-root-object-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-primary-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-scalar-account-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-null-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-container-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-empty-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-depth-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-json-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-json-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-json-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-json-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-sarif-mlFalse-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-sarif-mlFalse-baseline",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-sarif-mlTrue-no-request",
+        "passed": true
+      },
+      {
+        "case": "indexed-negative-alias-index-sarif-mlTrue-baseline",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlFalse-verdicts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlFalse-contexts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlTrue-verdicts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlTrue-contexts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlFalse-verdicts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlFalse-contexts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlTrue-verdicts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlTrue-contexts",
+        "passed": true
+      },
+      {
+        "case": "yaml-primary-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlFalse-verdicts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlFalse-contexts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlTrue-verdicts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlTrue-contexts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-json-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlFalse-complete",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlFalse-verdicts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlFalse-contexts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlFalse-private",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlTrue-complete",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlTrue-verdicts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlTrue-contexts",
+        "passed": true
+      },
+      {
+        "case": "indexed-primary-alias-sarif-mlTrue-private",
+        "passed": true
+      },
+      {
+        "case": "duplicates-json",
+        "passed": true
+      },
+      {
+        "case": "duplicate-evidence-json",
+        "passed": true
+      },
+      {
+        "case": "duplicates-sarif",
+        "passed": true
+      },
+      {
+        "case": "duplicate-evidence-sarif",
+        "passed": true
+      },
+      {
+        "case": "conflict-json-closed",
+        "passed": true
+      },
+      {
+        "case": "conflict-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "conflict-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "conflict-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "conflict-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "conflict-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "unknown-json-closed",
+        "passed": true
+      },
+      {
+        "case": "unknown-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "unknown-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "unknown-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "unknown-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "unknown-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "empty-json-closed",
+        "passed": true
+      },
+      {
+        "case": "empty-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "empty-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "empty-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "empty-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "empty-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "nested-json-closed",
+        "passed": true
+      },
+      {
+        "case": "nested-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "nested-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "nested-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "nested-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "nested-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "duplicate-json-closed",
+        "passed": true
+      },
+      {
+        "case": "duplicate-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "duplicate-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "duplicate-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "duplicate-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "duplicate-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "interpolation-json-closed",
+        "passed": true
+      },
+      {
+        "case": "interpolation-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "interpolation-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "interpolation-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "interpolation-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "interpolation-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-json-closed",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "foreign-root-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-json-closed",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "nested-repo-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "archive-json-closed",
+        "passed": true
+      },
+      {
+        "case": "archive-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "archive-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "archive-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "archive-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "archive-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "missing-source-json-closed",
+        "passed": true
+      },
+      {
+        "case": "missing-source-json-baseline",
+        "passed": true
+      },
+      {
+        "case": "missing-source-json-redaction",
+        "passed": true
+      },
+      {
+        "case": "missing-source-sarif-closed",
+        "passed": true
+      },
+      {
+        "case": "missing-source-sarif-baseline",
+        "passed": true
+      },
+      {
+        "case": "missing-source-sarif-redaction",
+        "passed": true
+      },
+      {
+        "case": "index-complete",
+        "passed": true
+      },
+      {
+        "case": "index-evidence-resolves-primary",
+        "passed": true
+      },
+      {
+        "case": "index-no-plaintext",
+        "passed": true
+      },
+      {
+        "case": "source-not-reread",
+        "passed": true
+      },
+      {
+        "case": "flag-guard-756",
+        "passed": true
+      },
+      {
+        "case": "flag-guard-757",
+        "passed": true
+      },
+      {
+        "case": "flag-guard-758",
+        "passed": true
+      },
+      {
+        "case": "flag-guard-759",
+        "passed": true
+      }
+    ],
+    "fixture_root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-wdm1orek",
+    "provider": "Owned loopback stub only; no real provider/account acceptance",
+    "owned_requests": 149,
+    "scope": "Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Other adapters are not qualified."
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "43176c496b661679426671e22230190acc8c0e7dea1b321ab5f260e63a453af0",
+    "passed": true,
+    "recall": 0.7932187201528176,
+    "t4_fp_rate": 0.062118126272912425,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982,
+    "missed_positive_ids": [
+      "pb-00016",
+      "pb-00160",
+      "pb-00184",
+      "pb-00304",
+      "pb-00312",
+      "pb-00480",
+      "pb-00560",
+      "pb-00584",
+      "pb-00592",
+      "pb-00632",
+      "pb-00680",
+      "pb-00696",
+      "pb-00720",
+      "pb-00760",
+      "pb-00824",
+      "pb-00960",
+      "pb-01080",
+      "pb-01128",
+      "pb-01160",
+      "pb-01168",
+      "pb-01208",
+      "pb-01216",
+      "pb-01248",
+      "pb-01280",
+      "pb-01288",
+      "pb-01352",
+      "pb-01384",
+      "pb-01416",
+      "pb-01424",
+      "pb-01536",
+      "pb-01568",
+      "pb-01576",
+      "pb-01640",
+      "pb-01664",
+      "pb-01728",
+      "pb-01808",
+      "pb-01872",
+      "pb-01904",
+      "pb-01968",
+      "pb-01992",
+      "pb-02008",
+      "pb-02016",
+      "pb-02024",
+      "pb-02072",
+      "pb-02208",
+      "pb-02224",
+      "pb-02248",
+      "pb-02320",
+      "pb-02448",
+      "pb-02488",
+      "pb-02544",
+      "pb-02560",
+      "pb-02568",
+      "pb-02648",
+      "pb-02656",
+      "pb-02664",
+      "pb-02728",
+      "pb-02760",
+      "pb-02800",
+      "pb-02976",
+      "pb-02992",
+      "pb-03032",
+      "pb-03040",
+      "pb-03056",
+      "pb-03160",
+      "pb-03224",
+      "pb-03304",
+      "pb-03328",
+      "pb-03352",
+      "pb-03432",
+      "pb-03512",
+      "pb-03544",
+      "pb-03560",
+      "pb-03696",
+      "pb-03832",
+      "pb-03848",
+      "pb-03880",
+      "pb-03976",
+      "pb-04072",
+      "pb-04136",
+      "pb-04192",
+      "pb-04240",
+      "pb-04328",
+      "pb-04336",
+      "pb-04344",
+      "pb-04448",
+      "pb-04528",
+      "pb-04552",
+      "pb-04576",
+      "pb-04624",
+      "pb-04688",
+      "pb-04720",
+      "pb-04728",
+      "pb-04776",
+      "pb-04816",
+      "pb-04840",
+      "pb-04976",
+      "pb-04992",
+      "pb-05008",
+      "pb-05176",
+      "pb-05224",
+      "pb-05432",
+      "pb-05480",
+      "pb-05504",
+      "pb-05536",
+      "pb-05568",
+      "pb-05584",
+      "pb-05592",
+      "pb-05640",
+      "pb-05656",
+      "pb-05760",
+      "pb-05808",
+      "pb-05912",
+      "pb-06008",
+      "pb-06056",
+      "pb-06112",
+      "pb-06120",
+      "pb-06168",
+      "pb-06200",
+      "pb-06208",
+      "pb-06216",
+      "pb-06224",
+      "pb-06328",
+      "pb-06336",
+      "pb-06464",
+      "pb-06512",
+      "pb-06584",
+      "pb-06784",
+      "pb-06928",
+      "pb-07088",
+      "pb-07096",
+      "pb-07160",
+      "pb-07216",
+      "pb-07248",
+      "pb-07464",
+      "pb-07560",
+      "pb-07656",
+      "pb-07680",
+      "pb-07768",
+      "pb-07832",
+      "pb-07840",
+      "pb-07864",
+      "pb-07872",
+      "pb-07928",
+      "pb-08064",
+      "pb-08144",
+      "pb-08160",
+      "pb-08208",
+      "pb-08336",
+      "pb-08344",
+      "pb-08368",
+      "pb-08384",
+      "pb-08440",
+      "pb-08448",
+      "pb-08496",
+      "pb-08568",
+      "pb-08616",
+      "pb-08696",
+      "pb-08720",
+      "pb-08824",
+      "pb-08832",
+      "pb-08864",
+      "pb-08896",
+      "pb-08960",
+      "pb-08968",
+      "pb-08976",
+      "pb-09024",
+      "pb-09032",
+      "pb-09152",
+      "pb-09176",
+      "pb-09256",
+      "pb-09288",
+      "pb-09304",
+      "pb-09384",
+      "pb-09392",
+      "pb-09424",
+      "pb-09432",
+      "pb-09632",
+      "pb-09776",
+      "pb-09936",
+      "pb-09952",
+      "pb-10040",
+      "pb-10064",
+      "pb-10080",
+      "pb-10104",
+      "pb-10240",
+      "pb-10256",
+      "pb-10432",
+      "pb-10440",
+      "pb-10448",
+      "pb-10464",
+      "pb-10512",
+      "pb-10520",
+      "pb-10560",
+      "pb-10616",
+      "pb-10632",
+      "pb-10672",
+      "pb-10880",
+      "pb-10976",
+      "pb-11000",
+      "pb-11168",
+      "pb-11248",
+      "pb-11296",
+      "pb-11312",
+      "pb-11384",
+      "pb-11392",
+      "pb-11432",
+      "pb-11448",
+      "pb-11656",
+      "pb-11760",
+      "pb-11816",
+      "pb-12056",
+      "pb-12312",
+      "pb-12344",
+      "pb-12544",
+      "pb-12656",
+      "pb-12800",
+      "pb-12880",
+      "pb-12976",
+      "pb-12992",
+      "pb-13008",
+      "pb-13016",
+      "pb-13136",
+      "pb-13160",
+      "pb-13184",
+      "pb-13240",
+      "pb-13376",
+      "pb-13464",
+      "pb-13624",
+      "pb-13720",
+      "pb-13728",
+      "pb-13744",
+      "pb-13768",
+      "pb-13816",
+      "pb-13848",
+      "pb-13888",
+      "pb-13904",
+      "pb-13944",
+      "pb-13976",
+      "pb-14144",
+      "pb-14272",
+      "pb-14344",
+      "pb-14392",
+      "pb-14416",
+      "pb-14544",
+      "pb-14576",
+      "pb-14648",
+      "pb-14688",
+      "pb-14776",
+      "pb-14848",
+      "pb-14880",
+      "pb-14896",
+      "pb-15072",
+      "pb-15080",
+      "pb-15088",
+      "pb-15112",
+      "pb-15136",
+      "pb-15144",
+      "pb-15184",
+      "pb-15192",
+      "pb-15216",
+      "pb-15248",
+      "pb-15328",
+      "pb-15352",
+      "pb-15400",
+      "pb-15424",
+      "pb-15448",
+      "pb-15544",
+      "pb-15592",
+      "pb-15952",
+      "pb-16032",
+      "pb-16128",
+      "pb-16224",
+      "pb-16272",
+      "pb-16304",
+      "pb-16320",
+      "pb-16408",
+      "pb-16496",
+      "pb-16512",
+      "pb-16520",
+      "pb-16616",
+      "pb-16672",
+      "pb-16688",
+      "pb-16704",
+      "pb-16712",
+      "pb-16728",
+      "pb-16816",
+      "pb-16848",
+      "pb-16864",
+      "pb-16944",
+      "pb-16960",
+      "pb-16984",
+      "pb-17032",
+      "pb-17112",
+      "pb-17192",
+      "pb-17200",
+      "pb-17248",
+      "pb-17280",
+      "pb-17288",
+      "pb-17304",
+      "pb-17328",
+      "pb-17424",
+      "pb-17568",
+      "pb-17608",
+      "pb-17616",
+      "pb-17632",
+      "pb-17672",
+      "pb-17696",
+      "pb-17704",
+      "pb-17720",
+      "pb-17824",
+      "pb-17832",
+      "pb-17840",
+      "pb-17888",
+      "pb-17904",
+      "pb-17944",
+      "pb-17992",
+      "pb-18008",
+      "pb-18024",
+      "pb-18160",
+      "pb-18208",
+      "pb-18232",
+      "pb-18336",
+      "pb-18360",
+      "pb-18472",
+      "pb-18512",
+      "pb-18608",
+      "pb-18656",
+      "pb-18672",
+      "pb-18688",
+      "pb-18712",
+      "pb-18736",
+      "pb-18792",
+      "pb-18800",
+      "pb-18848",
+      "pb-18960",
+      "pb-18968",
+      "pb-18976",
+      "pb-19016",
+      "pb-19192",
+      "pb-19216",
+      "pb-19232",
+      "pb-19280",
+      "pb-19392",
+      "pb-19552",
+      "pb-19616",
+      "pb-19648",
+      "pb-19752",
+      "pb-19808",
+      "pb-19864",
+      "pb-19936",
+      "pb-19944",
+      "pb-20080",
+      "pb-20088",
+      "pb-20176",
+      "pb-20200",
+      "pb-20256",
+      "pb-20320",
+      "pb-20344",
+      "pb-20352",
+      "pb-20392",
+      "pb-20408",
+      "pb-20432",
+      "pb-20520",
+      "pb-20672",
+      "pb-20816",
+      "pb-20896",
+      "pb-20944",
+      "pb-21120",
+      "pb-21240",
+      "pb-21248",
+      "pb-21264",
+      "pb-21368",
+      "pb-21536",
+      "pb-21544",
+      "pb-21584",
+      "pb-21592",
+      "pb-21640",
+      "pb-21768",
+      "pb-21888",
+      "pb-21912",
+      "pb-21928",
+      "pb-21944",
+      "pb-21952",
+      "pb-21960",
+      "pb-22024",
+      "pb-22088",
+      "pb-22128",
+      "pb-22144",
+      "pb-22208",
+      "pb-22224",
+      "pb-22240",
+      "pb-22328",
+      "pb-22336",
+      "pb-22344",
+      "pb-22376",
+      "pb-22472",
+      "pb-22568",
+      "pb-22760",
+      "pb-22888",
+      "pb-22904",
+      "pb-22952",
+      "pb-22968",
+      "pb-23008",
+      "pb-23048",
+      "pb-23152",
+      "pb-23160",
+      "pb-23216",
+      "pb-23248",
+      "pb-23328",
+      "pb-23568",
+      "pb-23584",
+      "pb-23696",
+      "pb-23704",
+      "pb-23744",
+      "pb-23840",
+      "pb-23904",
+      "pb-23944",
+      "pb-24088",
+      "pb-24128",
+      "pb-24136",
+      "pb-24160",
+      "pb-24176",
+      "pb-24208",
+      "pb-24240",
+      "pb-24248",
+      "pb-24256",
+      "pb-24368",
+      "pb-24392",
+      "pb-24432",
+      "pb-24456",
+      "pb-24472",
+      "pb-24496"
+    ],
+    "false_positive_ids": [
+      "pb-00496",
+      "pb-00848",
+      "pb-00968",
+      "pb-01088",
+      "pb-01464",
+      "pb-01488",
+      "pb-01624",
+      "pb-01752",
+      "pb-01984",
+      "pb-02040",
+      "pb-02576",
+      "pb-02640",
+      "pb-03096",
+      "pb-03856",
+      "pb-04560",
+      "pb-05784",
+      "pb-05792",
+      "pb-05976",
+      "pb-06136",
+      "pb-06152",
+      "pb-06184",
+      "pb-07016",
+      "pb-07272",
+      "pb-07608",
+      "pb-07672",
+      "pb-07816",
+      "pb-08280",
+      "pb-08760",
+      "pb-09200",
+      "pb-09296",
+      "pb-09320",
+      "pb-09464",
+      "pb-09944",
+      "pb-10408",
+      "pb-10816",
+      "pb-12136",
+      "pb-12944",
+      "pb-13128",
+      "pb-14736",
+      "pb-15288",
+      "pb-15408",
+      "pb-15560",
+      "pb-16040",
+      "pb-16184",
+      "pb-17072",
+      "pb-17504",
+      "pb-17648",
+      "pb-18176",
+      "pb-18544",
+      "pb-19008",
+      "pb-19240",
+      "pb-19520",
+      "pb-19824",
+      "pb-19952",
+      "pb-20400",
+      "pb-20568",
+      "pb-20640",
+      "pb-20712",
+      "pb-22920",
+      "pb-23464",
+      "pb-23912"
+    ],
+    "status": "passed"
+  },
+  "quality_exact_ids_equal_to_parent": true,
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "digest": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "equal_to_parent": true
+  },
+  "checks": {
+    "full_go": "passed",
+    "targeted_race": "scan/server/cmd passed",
+    "minimum_go": "go1.26.11 scan/server/cmd passed",
+    "lint": "0 issues",
+    "yaml_differential_fuzz": {
+      "executions": 30699,
+      "limit_seconds": 10,
+      "elapsed_seconds": 11.409,
+      "passed": true
+    }
+  },
+  "performance": {
+    "policy": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "go": "go1.27.4",
+      "pairs": 3,
+      "max_time_ratio": 1.2,
+      "max_bytes_ratio": 1.25,
+      "max_allocs_ratio": 1.25,
+      "min_corpus_files": 1000,
+      "min_corpus_bytes": 67108864
+    },
+    "samples": {
+      "reference": [
+        {
+          "ns/op": 10891485083.0,
+          "B/op": 577981056.0,
+          "allocs/op": 1160601.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10734266833.0,
+          "B/op": 586144368.0,
+          "allocs/op": 1161254.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        },
+        {
+          "ns/op": 10710884708.0,
+          "B/op": 588946768.0,
+          "allocs/op": 1161301.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 1132.0
+        }
+      ],
+      "candidate": [
+        {
+          "ns/op": 12722566708.0,
+          "B/op": 558496680.0,
+          "allocs/op": 1183648.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 420.0
+        },
+        {
+          "ns/op": 12629018000.0,
+          "B/op": 561287520.0,
+          "allocs/op": 1184262.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 420.0
+        },
+        {
+          "ns/op": 12440541542.0,
+          "B/op": 559654640.0,
+          "allocs/op": 1183832.0,
+          "corpus-files": 12044.0,
+          "corpus-bytes": 132407542.0,
+          "findings/op": 420.0
+        }
+      ]
+    },
+    "status": "passed",
+    "runtime": {
+      "go": "go1.27.4",
+      "os": "darwin",
+      "arch": "arm64",
+      "gomaxprocs": 2
+    },
+    "corpus": {
+      "files": 12044,
+      "bytes": 132407542,
+      "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+    },
+    "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+    "commits": {
+      "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+      "candidate": "3a43131f2b417df884b2bcebf2f1962645c05de8"
+    },
+    "medians": {
+      "reference": {
+        "ns/op": 10734266833.0,
+        "B/op": 586144368.0,
+        "allocs/op": 1161254.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      "candidate": {
+        "ns/op": 12629018000.0,
+        "B/op": 559654640.0,
+        "allocs/op": 1183832.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 420.0
+      }
+    },
+    "ratios": {
+      "ns/op": 1.1765142600307856,
+      "B/op": 0.9548068198788869,
+      "allocs/op": 1.019442774793456
+    },
+    "regressions": []
+  },
+  "performance_context": "Fixed policy reference; not an isolated estimate of array feature cost. Targeted race overlapped part of the shared-host run.",
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-indexed-go-20261116.log",
+      "sha256": "19cc0d5c89f8fff8e1882825b9e50b4aa55b73498975fe3f7c5c67b424400d26"
+    },
+    "race": {
+      "path": "/tmp/prowl-indexed-race-20261116.log",
+      "sha256": "ba40f51db17a8deafbba6472a12d2d7ab0996311061eb0259c4003300a54dd40"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-indexed-min-go-20261116.log",
+      "sha256": "2706c3f2516e7cedbdba28e689bf2a90224d27723694fc45801665caf67c5396"
+    },
+    "lint": {
+      "path": "/tmp/prowl-indexed-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "fuzz": {
+      "path": "/tmp/prowl-indexed-fuzz-20261116.log",
+      "sha256": "51322d112534211937f076582c514d5db79a41907a6fb8a6700c8a951483a185"
+    },
+    "default_corpus": {
+      "path": "/tmp/prowl-indexed-corpus-20261116.log",
+      "sha256": "b0bf6114526acf884fe35e889247660f1180794e5ce76f12c6dc86450599a298"
+    },
+    "build": {
+      "path": "/tmp/prowl-indexed-qualified-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native": {
+      "path": "/tmp/prowl-indexed-qualified-native-20261116.log",
+      "sha256": "a5e6659eb1fea0090276eb0d6bb70df6952a2f39eac9213ee487f51226a09e84"
+    },
+    "quality": {
+      "path": "/tmp/prowl-indexed-qualified-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "parent_native_expected_failure": {
+      "path": "/tmp/prowl-indexed-parent-native-complete-20261116.log",
+      "sha256": "e5672909d2f2af6edd8b91d769dc85a6e0d8bdac0952179eff8c7dccd5ee49fd"
+    },
+    "performance": {
+      "path": "/tmp/prowl-indexed-performance-20261116.log",
+      "sha256": "d7c69aea1db429ff500c5127f9d13f6113d22586c29aa8f0af7b90dcc9727f45"
+    }
+  },
+  "limits_of_evidence": [
+    "Owned loopback verifier only; no real provider account acceptance",
+    "Local filesystem --cross-file only; other acquisition adapters/revisions and imports/overlays remain open",
+    "No actual OAuth/DB provider verifiers added",
+    "No hosted CI, release artifact rebuild, Docker rebuild, installed CLI activation, publication or deployment"
+  ]
+}
