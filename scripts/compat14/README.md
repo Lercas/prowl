@@ -53,3 +53,19 @@ JSON, encoding, TOML, YAML, password roles и две noise fixtures. Кажды�
 квалификации конечных image/source digests. Опциональный `--check-hook` старого
 acceptance runner здесь не включён. Полный аудит изменённых Go test bodies/helpers
 остаётся отдельным открытым пунктом TODO.
+
+
+## Exported Go API inventory
+
+`api_inventory.go` фиксирует AST экспортированных funcs/methods/types/values
+для двух `tool/` деревьев, исключая tests и комментарии. Build tags не применяются;
+это review inventory, а не доказательство поведенческой совместимости.
+
+```sh
+GOTOOLCHAIN=go1.27.4 go run scripts/compat14/api_inventory.go \
+  /path/to/immutable-v1.4.0/tool tool > /new/path/inventory.json
+```
+
+Rules public matching contracts, известные API-различия и reference overlay
+описаны в `wiki/Rules-API-Compatibility.md`. Старые runners в `fixtures/`
+этой работой не меняются.

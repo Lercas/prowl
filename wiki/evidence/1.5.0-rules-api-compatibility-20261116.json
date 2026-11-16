@@ -1,0 +1,1638 @@
+{
+  "recorded_at": "2026-11-16T18:27:34.687375+00:00",
+  "scope": "Read-only exported AST inventory plus rules public matching contracts; full migration and remaining API audit stay open.",
+  "base_source_commit": "1984d87dd78480b66c806d309db43f37dfc86dd8",
+  "test_helper_commit": "f9b76f05f55a8dec2961efe3d53910ad9e743be9",
+  "runtime_changed": false,
+  "reference_source": {
+    "reference_head": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "tool_blobs_verified_after_tests": 694,
+    "test_source_sha256": "070132f705d9afc4157bab73530ec1f56f60577c3287079427795b4c961ef363",
+    "test_commit": "f9b76f05f55a8dec2961efe3d53910ad9e743be9",
+    "reference_virtual_file_still_absent": true
+  },
+  "reference_source_receipt": {
+    "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/reference-source-after.json",
+    "sha256": "baf4f414ae1378076dd88d4016a2c7160966d0ebb4fa4e3ae0ef378c4cf12b69"
+  },
+  "reference_go_list": {
+    "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/reference-go-list.json",
+    "sha256": "51e3033034b67a9266da19837a7eba35846dc97830c55320dc66c828a09b37db"
+  },
+  "final_overlay": {
+    "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/overlay-final.json",
+    "sha256": "3ae5d2297a042aa250ca4467319fbc1d6201bcd53ad4e941bea6aa63052d52cb"
+  },
+  "new_sources": {
+    "tool/internal/rules/released_api_test.go": {
+      "path": "/Users/sugar/dev/prowl-rules-api-compat-20261116/tool/internal/rules/released_api_test.go",
+      "sha256": "070132f705d9afc4157bab73530ec1f56f60577c3287079427795b4c961ef363"
+    },
+    "scripts/compat14/api_inventory.go": {
+      "path": "/Users/sugar/dev/prowl-rules-api-compat-20261116/scripts/compat14/api_inventory.go",
+      "sha256": "c7347d8826781db4d6d010bf24ad281f1d05975d0c1b87814894ce8dbaba11bb"
+    }
+  },
+  "inventory": {
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/committed-inventory.json",
+      "sha256": "1b10a6dca8c19b7d07e19a7bf2c250ce52cb30f1635994f57987e669c8850308"
+    },
+    "reference": 501,
+    "candidate": 690,
+    "changed": 90,
+    "removed": [
+      "cmd/prowl/*hermesAuditList.Set",
+      "cmd/prowl/*hermesAuditList.String",
+      "internal/mlfeatures/BuiltWithCgo",
+      "internal/mlfeatures/ExtractPortable",
+      "internal/mlmodel/*Model.Portable",
+      "internal/scan/Findings",
+      "internal/scan/RefreshOccurrence",
+      "internal/scan/RegisterDetectionPolicy",
+      "internal/scan/Run",
+      "internal/scan/SetRevealSecrets",
+      "internal/scan/WithOptions",
+      "internal/server/*losslessJSONReader.Read",
+      "internal/verify/*Set.PolicyID"
+    ],
+    "added": [
+      "cmd/prowl-ml-corpus/*capture.Local",
+      "cmd/prowl-ml-corpus/*capture.Score",
+      "cmd/prowl-ml-corpus/*capture.Threshold",
+      "cmd/prowl/*commandHelpRequest.Error",
+      "cmd/prowl/indexReportWriter.Write",
+      "cmd/prowl/mobileHTTPStatusError.Error",
+      "cmd/prowl/preparedScan.Collect",
+      "cmd/prowl/preparedScan.Run",
+      "cmd/prowl/preparedScan.WithFinalizer",
+      "cmd/prowl/progressLog.Write",
+      "internal/agentguard/BlockReason",
+      "internal/agentguard/Check",
+      "internal/agentguard/ErrorReason",
+      "internal/agentguard/MaxBytes",
+      "internal/agentguard/Parts",
+      "internal/agentguard/Result",
+      "internal/ahocorasick/*Matcher.Contains",
+      "internal/ahocorasick/*Matcher.ContainsLower",
+      "internal/ahocorasick/*Matcher.MatchLowerInto",
+      "internal/config/*Config.Snapshot",
+      "internal/config/*Config.TypeDisabled",
+      "internal/config/*Policy.Allowed",
+      "internal/config/*Policy.PolicyID",
+      "internal/config/*Policy.Restrictive",
+      "internal/config/Policy",
+      "internal/correlation/ReadMany",
+      "internal/credentialset/*Set.Close",
+      "internal/credentialset/*Set.GoString",
+      "internal/credentialset/*Set.MarshalJSON",
+      "internal/credentialset/*Set.Observe",
+      "internal/credentialset/*Set.ObserveUnknown",
+      "internal/credentialset/*Set.Seal",
+      "internal/credentialset/*Set.String",
+      "internal/credentialset/*Set.With",
+      "internal/credentialset/ErrAmbiguous",
+      "internal/credentialset/ErrClosed",
+      "internal/credentialset/ErrIncomplete",
+      "internal/credentialset/ErrInvalid",
+      "internal/credentialset/ErrLimit",
+      "internal/credentialset/ErrPrivate",
+      "internal/credentialset/ErrSealed",
+      "internal/credentialset/ErrUnsealed",
+      "internal/credentialset/Evidence",
+      "internal/credentialset/Field",
+      "internal/credentialset/Limits",
+      "internal/credentialset/New",
+      "internal/credentialset/NewSchema",
+      "internal/credentialset/NewScope",
+      "internal/credentialset/Schema",
+      "internal/credentialset/Scope",
+      "internal/credentialset/Set",
+      "internal/detect/*Detector.IsExampleOrPlaceholder",
+      "internal/detect/*Detector.MaxScanMatches",
+      "internal/detect/*Detector.PolicyDigest",
+      "internal/detect/*Detector.RecognizesPasswordBinding",
+      "internal/detect/*Detector.ScanWithScalars",
+      "internal/detect/*Detector.Snapshot",
+      "internal/detect/*Detector.Tuning",
+      "internal/detect/DecodeStep",
+      "internal/detect/DefaultTuning",
+      "internal/detect/JWTPayloadString",
+      "internal/detect/JWTPayloadView",
+      "internal/detect/JWTPayloadView.ContainerSpan",
+      "internal/detect/JWTPayloadView.ContainerValue",
+      "internal/detect/JWTPayloadView.DecodeSteps",
+      "internal/detect/JWTPayloadView.EncodedSpans",
+      "internal/detect/JWTPayloadView.SourceSpan",
+      "internal/detect/JWTPayloadView.Strings",
+      "internal/detect/Match.ProofSteps",
+      "internal/detect/Match.VerificationContext",
+      "internal/detect/NewWithTuning",
+      "internal/detect/Tuning",
+      "internal/detect/Tuning.IsExampleOrPlaceholder",
+      "internal/detect/Tuning.IsPlaceholderAPIKey",
+      "internal/detect/Tuning.MaxScanMatches",
+      "internal/detect/Tuning.With",
+      "internal/forge/*apiRequestError.Error",
+      "internal/forge/*apiRequestError.Unwrap",
+      "internal/forge/DefaultMaxPages",
+      "internal/forge/ListGistsWithOptions",
+      "internal/forge/ListReposWithOptions",
+      "internal/forge/Options",
+      "internal/linewin/*Set.Len",
+      "internal/linewin/*Set.Plan",
+      "internal/linewin/*Set.Prepare",
+      "internal/linewin/*Windows.FindAll",
+      "internal/linewin/*Windows.FindAllGated",
+      "internal/linewin/*Windows.Match",
+      "internal/linewin/*Windows.Release",
+      "internal/linewin/Analyze",
+      "internal/linewin/Lit",
+      "internal/linewin/New",
+      "internal/linewin/Plan",
+      "internal/linewin/Set",
+      "internal/linewin/Windows",
+      "internal/mlfeatures/*compressionCounter.Write",
+      "internal/mlfeatures/CompressionFeature",
+      "internal/mlfeatures/HasSecretNameKeyword",
+      "internal/model/*PublicKeyAudit.HasAccessObservation",
+      "internal/model/AgentProvenance",
+      "internal/model/GitCommit",
+      "internal/model/GitHistoryGraph",
+      "internal/model/GitObject",
+      "internal/model/GitObservation",
+      "internal/model/GitRecord",
+      "internal/model/GitRemoval",
+      "internal/model/GitTimeline",
+      "internal/model/ImageScope",
+      "internal/model/PublicAuditCheck",
+      "internal/model/PublicKeyAudit",
+      "internal/model/UpdateOccurrenceIdentity",
+      "internal/model/WithSourceLocator",
+      "internal/model/WithoutProvenance",
+      "internal/ownedcmd/RunWithStdout",
+      "internal/publicaudit/*Auditor.Audit",
+      "internal/publicaudit/*Auditor.Policy",
+      "internal/publicaudit/Auditor",
+      "internal/publicaudit/GoogleType",
+      "internal/publicaudit/Inconclusive",
+      "internal/publicaudit/New",
+      "internal/publicaudit/NewWithCollections",
+      "internal/publicaudit/NewWithGoogleRestrictions",
+      "internal/publicaudit/NewWithTargets",
+      "internal/publicaudit/Revision",
+      "internal/publicaudit/Supports",
+      "internal/publicaudit/ValidateCollections",
+      "internal/publicaudit/ValidateTables",
+      "internal/reconstruct/*ObjectBindings.ForSpan",
+      "internal/reconstruct/ObjectBindings",
+      "internal/reconstruct/ParseObjectBindings",
+      "internal/reconstruct/Revision",
+      "internal/report/PrettyOptions",
+      "internal/report/WritePretty",
+      "internal/rules/*Engine.MatchOccurrencesN",
+      "internal/rules/*Engine.PolicyDigest",
+      "internal/scan/*Pipeline.Capabilities",
+      "internal/scan/*Pipeline.Compare",
+      "internal/scan/*Pipeline.Findings",
+      "internal/scan/*Pipeline.RegisterPolicy",
+      "internal/scan/*Pipeline.Run",
+      "internal/scan/*Pipeline.WithRevealSecrets",
+      "internal/scan/Comparison",
+      "internal/scan/DetectionRevision",
+      "internal/scan/FinalizeGitTimeline",
+      "internal/scan/New",
+      "internal/scan/Pipeline",
+      "internal/scan/PublicAuditor",
+      "internal/scan/comparisonScorer.Local",
+      "internal/scan/comparisonScorer.PolicyID",
+      "internal/scan/comparisonScorer.Score",
+      "internal/scan/comparisonScorer.Threshold",
+      "internal/secretindex/*Identity.Fingerprint",
+      "internal/secretindex/*Identity.Location",
+      "internal/secretindex/*Store.Close",
+      "internal/secretindex/*Store.Diff",
+      "internal/secretindex/*Store.Identity",
+      "internal/secretindex/*Store.Record",
+      "internal/secretindex/*Store.Scans",
+      "internal/secretindex/*Store.Secrets",
+      "internal/secretindex/*Store.SecretsThrough",
+      "internal/secretindex/Diff",
+      "internal/secretindex/Identity",
+      "internal/secretindex/LoadIdentity",
+      "internal/secretindex/Location",
+      "internal/secretindex/Open",
+      "internal/secretindex/Scan",
+      "internal/secretindex/Secret",
+      "internal/secretindex/Store",
+      "internal/secretindex/Transition",
+      "internal/secretindex/VerificationChange",
+      "internal/semantic/*Engine.Policy",
+      "internal/source/*bucketCommandFailure.Error",
+      "internal/source/*bucketCommandFailure.Unwrap",
+      "internal/source/*repositoryDataWriter.Write",
+      "internal/source/AgentOptions",
+      "internal/source/AgentSurface",
+      "internal/source/BucketArtifactURI",
+      "internal/source/BucketContext",
+      "internal/source/DefaultFetchTimeout",
+      "internal/source/GitCredentialHistory",
+      "internal/source/GitCredentialTimeline",
+      "internal/source/GitTimelineBlobs",
+      "internal/source/ImageFailure",
+      "internal/source/ImageLocator",
+      "internal/source/MobileFailure",
+      "internal/source/RepositoryContext",
+      "internal/source/RepositoryCredentialFiles",
+      "internal/source/RepositoryLocator",
+      "internal/source/ValidateBucketTarget",
+      "internal/source/WithCredentialScopes",
+      "internal/source/WithFetchTimeout",
+      "internal/source/WithStateDirectory",
+      "internal/verify/*Set.Concurrency",
+      "internal/verify/*Set.PolicyDigest",
+      "internal/verify/*Set.VerifyComponents",
+      "internal/verify/*Set.VerifyLiteral",
+      "internal/verify/ComponentEvidence",
+      "internal/verify/LoadEmbeddedWithOptions",
+      "internal/verify/LoadWithOptions",
+      "internal/verify/LoadWithPolicyAndOptions",
+      "internal/verify/NewWithOptions",
+      "internal/verify/Options"
+    ],
+    "unchanged_count": 398,
+    "changed_declarations": [
+      {
+        "declaration": "internal/atlassian/Collect",
+        "reference": {
+          "file": "internal/atlassian/atlassian.go",
+          "line": 39,
+          "sha256": "cd5aeddca350edc099c3975014cfa0241ecc5e2e309b1ddf90e3711d0a479e28"
+        },
+        "candidate": {
+          "file": "internal/atlassian/atlassian.go",
+          "line": 38,
+          "sha256": "82d2c70547feda94e5822ed0251f4aadaa7b43947ae88796ca615efe2b1491a2"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/cicd/Collect",
+        "reference": {
+          "file": "internal/cicd/cicd.go",
+          "line": 69,
+          "sha256": "fa8dd135a3d91e2de3d3270054ae7ec0fcf944090804acd9805be27feccdbe28"
+        },
+        "candidate": {
+          "file": "internal/cicd/cicd.go",
+          "line": 77,
+          "sha256": "e3abc3a075fe55acfeffdfc133f328e188ef61b2c888283897eed91277a70c8c"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/config/*Config.TypeEnabled",
+        "reference": {
+          "file": "internal/config/config.go",
+          "line": 634,
+          "sha256": "b45e1f520bc6c965f448f83afe7e18e49db41c12ab71c58b67f353bcd70c47a1"
+        },
+        "candidate": {
+          "file": "internal/config/config.go",
+          "line": 651,
+          "sha256": "84c450c1ab1a6995e78acda58e8ee11d95c55520e65a3cd9c06cda66ff525631"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/correlation/Compare",
+        "reference": {
+          "file": "internal/correlation/reports.go",
+          "line": 177,
+          "sha256": "4e639109b826e50973b56648881897491102e5d499770cc57f377937f0d3d033"
+        },
+        "candidate": {
+          "file": "internal/correlation/reports.go",
+          "line": 229,
+          "sha256": "f61036b6aafa3071df8cc53f76685414757794de8561ade780eb3f3b1560523b"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/correlation/Join",
+        "reference": {
+          "file": "internal/correlation/reports.go",
+          "line": 74,
+          "sha256": "b936094590df0bc9b81a2e19d0aa353e102d0bd4b6b3055817c3d1b371964438"
+        },
+        "candidate": {
+          "file": "internal/correlation/reports.go",
+          "line": 126,
+          "sha256": "4298d0f38fe1485f954d2cece5249b76de948fa52245cdde364170293ed6d0af"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/correlation/Read",
+        "reference": {
+          "file": "internal/correlation/reports.go",
+          "line": 43,
+          "sha256": "6df887427c0a678f53d488852b1c4fda84a5ecbe89ea0755d473380e567e0076"
+        },
+        "candidate": {
+          "file": "internal/correlation/reports.go",
+          "line": 51,
+          "sha256": "2f413e3a6449206339df14e62cf637d27a13ee265a9e3284e9b35c2311cf6fd9"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/*Detector.ScanCtx",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 154,
+          "sha256": "0b815cfdcf284d290d46f27f68651f6dbb8e3d6db88562500f008eff4ac8c9dc"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 223,
+          "sha256": "556abd4f8f364420d2f24247a3a70d997eb8cc08d5eceae99fd57c59b3dbd7af"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/*Detector.ScanCtxWithStatus",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 184,
+          "sha256": "36d5ece45e9e96baa31049f9fb39c13d0b5e3380061a8da004c6726490da2d59"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 231,
+          "sha256": "cb8ca60540a3f362fdb90d42fa412e89b9e06b63a744755c23d55eb8a121f0f9"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/*Detector.ScanWithStatus",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 190,
+          "sha256": "8c332bbbb47d202a1c6eba280c8378b27434c2213fcd0f65863ed90e4bd1d1b2"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 267,
+          "sha256": "de5b380f68820e2e1afd589436c1d833418532a61fd0cff193fef1dc32ff2a96"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/ApplyTuning",
+        "reference": {
+          "file": "internal/detect/tuning.go",
+          "line": 13,
+          "sha256": "ab23d4376d45fbc6989c6e90d788c3ba7a34b189e8aa6cbe5f15dceab66fbdc9"
+        },
+        "candidate": {
+          "file": "internal/detect/tuning.go",
+          "line": 44,
+          "sha256": "f0e245f22843494707ac1116cee60e903b17cf16d2a5ffc8120c31b8bf5f91d8"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/Detector",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 71,
+          "sha256": "cd083158be556a9189b5dcd6ca56c5475e0cfc502a833539faccd93dbba4cf08"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 97,
+          "sha256": "769e21054f4bf1857efe7423a3047060a5645485e30fddaac44e5fdcaf98ea06"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/HasSecretNameContext",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 446,
+          "sha256": "e348397b6892a95982dfe0e672ab35d722d483ea82b48e6ff006875ef7cc440b"
+        },
+        "candidate": {
+          "file": "internal/detect/filters.go",
+          "line": 434,
+          "sha256": "5d002790211e6fef0a30fb75f126c95d587f19e041f0939eed6281b4726536a9"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/IsExampleOrPlaceholder",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 184,
+          "sha256": "471ded3580227fba2619aa5d65f03485f5706ba0dcbe97fabd19024b1845a8f4"
+        },
+        "candidate": {
+          "file": "internal/detect/filters.go",
+          "line": 192,
+          "sha256": "de35842d8257fd75896421b61948445bb8be08e0af316eb38f0e1d2ac3370623"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/IsKnownNonSecretBlob",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 481,
+          "sha256": "8c686f1ad9ef4310e6e3ec96e28315baed172a116e07104f138a5550ba70cd99"
+        },
+        "candidate": {
+          "file": "internal/detect/filters.go",
+          "line": 502,
+          "sha256": "a70e5de859e7cbd9349e1e447824a64c26b45596b4eaa206beb7d3c68337292e"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/IsLiteralPasswordPlaceholder",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 208,
+          "sha256": "85d038f72cbdef386ff65a3e34cbfaa553815eb2ef0d0704b96ab8d162e65aff"
+        },
+        "candidate": {
+          "file": "internal/detect/password_literals.go",
+          "line": 5,
+          "sha256": "6d263ffd0b0a033d7d017226413fefdc2ecbeb060ba73414c11cc6c05ee9ff3c"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/IsPlaceholderAPIKey",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 656,
+          "sha256": "0d608eed06139e3a79a74dad91dc851d8b8ef3573d78eeac6e5a864288567731"
+        },
+        "candidate": {
+          "file": "internal/detect/filters.go",
+          "line": 630,
+          "sha256": "5dea745d22649287a1c79dacaa66a9de9be5c7686918c831be31bd912d607c4f"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/JWTStructuralOK",
+        "reference": {
+          "file": "internal/detect/checksum.go",
+          "line": 58,
+          "sha256": "7f0c0a4dcac64a7d4c83595d8c1871aabb5138c3dd8ea0b49076ce927bb293e8"
+        },
+        "candidate": {
+          "file": "internal/detect/checksum.go",
+          "line": 57,
+          "sha256": "047db564df2494ba66add9ea768f766ed13a7a55f74ba5add25276cb37e82593"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/Match",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 48,
+          "sha256": "8503f7f4828aec5ea630c39cf19660726b7237edb6d33b0cf237b2cec6c9ca15"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 51,
+          "sha256": "82deb69e34048e564531b46fe07fecee02f9417982bbcf97bd3461b687e7f049"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/MaxScanMatches",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 145,
+          "sha256": "cd2da1cd9358776011032e3686c4f6bca194d0b4d33100ba537e7ac8e6faf319"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 212,
+          "sha256": "af86021145166be4a43b0fab75e0d52cea8c65788d580684085f6735bd4ba64d"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/New",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 82,
+          "sha256": "cb0afcf38a28e0dda296b928da92d3f6b5ad6d618d0a9f2a5bc95e7f3be54837"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 131,
+          "sha256": "178dc17905522a8efdd7f55b958fe9975897c9e398c1abb37920f9a289d77fbe"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/PasswordScalar",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 166,
+          "sha256": "49ffb016e7e7e6d10269497f0cc6ac5c38dc2652871e4f2f05d88a924dc0cf9b"
+        },
+        "candidate": {
+          "file": "internal/detect/scalars.go",
+          "line": 13,
+          "sha256": "8ea5511519fda7d763b80366003a7df99c8a0ef4e3f5e3648da634de8711ed6a"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/ScanOptions",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 159,
+          "sha256": "ff7c88ed6d0c2c11d44e81195f3d33bf41ad492075f428bdc3e79fe8a5c32401"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 235,
+          "sha256": "05dba9bb802e19cd2e02e5b8b0c95ddf43504baee4f13d832319a974d8c31246"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/ScanResult",
+        "reference": {
+          "file": "internal/detect/rules.go",
+          "line": 177,
+          "sha256": "f2239b85a5742e404a33b47e02a1b3dc0f402208f0e916088d130ad559ae8b92"
+        },
+        "candidate": {
+          "file": "internal/detect/rules.go",
+          "line": 253,
+          "sha256": "3f4df2cadc7f22615230d871f756297a80aa9fe923c5117c080ecc523a716553"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/detect/ShannonEntropy",
+        "reference": {
+          "file": "internal/detect/filters.go",
+          "line": 560,
+          "sha256": "f4df85d9c6769b1790c4fe9cb89d0c75df8bd72b73d5405d2743f2a03800f070"
+        },
+        "candidate": {
+          "file": "internal/detect/filters.go",
+          "line": 514,
+          "sha256": "fac47a1b9fbf20939687d68fb0af46325f4e4bc656666a098a7191bf0341bb5f"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/domain/Discover",
+        "reference": {
+          "file": "internal/domain/domain.go",
+          "line": 50,
+          "sha256": "05a4b88b01321f2ba2581cff6ea6083f6c90ef06cbc65bfb5c208655b3b9452b"
+        },
+        "candidate": {
+          "file": "internal/domain/domain.go",
+          "line": 56,
+          "sha256": "dc59d0b4e36f587590126def8ec6b34ecbc6e0c493e1eff67e9f30a59b6d2137"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/forge/ListGists",
+        "reference": {
+          "file": "internal/forge/forge.go",
+          "line": 62,
+          "sha256": "6d9f1638a9a42833021545a7c3280bebac35563935e5c2be90af7dd1e04311f9"
+        },
+        "candidate": {
+          "file": "internal/forge/forge.go",
+          "line": 98,
+          "sha256": "ef7d18e51969832e7527ded44e4ecc84e154a7c376277307e6573a05582a5029"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/forge/ListRepos",
+        "reference": {
+          "file": "internal/forge/forge.go",
+          "line": 43,
+          "sha256": "08dc5ac3015813a0f16acd21156c1d57a039ce098fa577be291997f028e8c98f"
+        },
+        "candidate": {
+          "file": "internal/forge/forge.go",
+          "line": 77,
+          "sha256": "02883549b946b1420c30b34046a8843f18b0236731f6f7710c9931aefcd676be"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/forge/SetMaxPages",
+        "reference": {
+          "file": "internal/forge/forge.go",
+          "line": 35,
+          "sha256": "1108aec31c640f9eca757c700db779e71753815e78c8f3e05b6f477aca6ba919"
+        },
+        "candidate": {
+          "file": "internal/forge/forge.go",
+          "line": 38,
+          "sha256": "f5e38f2aea4504eb1c1536b877c46019392d1eecc8e4234d03ddac0bca56760a"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlfeatures/Context",
+        "reference": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 12,
+          "sha256": "b0e876cbcc8d30697bae645e4546c8a4779f4d677ad4803dca7538f2eb1467a8"
+        },
+        "candidate": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 12,
+          "sha256": "d920925f38400c2d54f7b611bd552afc9f72d5e226ccccfac6b21522c5de9999"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlfeatures/Extract",
+        "reference": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 152,
+          "sha256": "a9fff82b0f56c1d92d2ff67b25ac3fb9c8121ab005361f897fdba28d24560298"
+        },
+        "candidate": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 161,
+          "sha256": "539572cb5c19b337bdfbe0b40db24e038b608c4bc0bd424a0d49afa6a1f82b2d"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlfeatures/FeatureNames",
+        "reference": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 21,
+          "sha256": "2b7b659fb39c20ab52f48d31ed41b3b352318739ea9143f42c8b5c4f0c66e322"
+        },
+        "candidate": {
+          "file": "internal/mlfeatures/extract.go",
+          "line": 23,
+          "sha256": "37b5babd6b2a92bad2227a62b68b545468dcc6d9238f267b63bd3a135b8340ec"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlmodel/Model",
+        "reference": {
+          "file": "internal/mlmodel/mlmodel.go",
+          "line": 90,
+          "sha256": "567107d65a6d702bf1ef1c31a129b61cbdae6223828bab9d05691cb005db3cac"
+        },
+        "candidate": {
+          "file": "internal/mlmodel/mlmodel.go",
+          "line": 89,
+          "sha256": "60417ace9da3d526826ec5212101f8279e9ae3ab4577414c6fb12c38a59820f1"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlmodel/NumFeatures",
+        "reference": {
+          "file": "internal/mlmodel/mlmodel.go",
+          "line": 29,
+          "sha256": "483963af35d7eed1035898b95d26b82a0f9d7ec6b5dbdc5c3d652cb2236c2b23"
+        },
+        "candidate": {
+          "file": "internal/mlmodel/mlmodel.go",
+          "line": 29,
+          "sha256": "83ee172fd69772e1e6369ee235248296d759d1803e822414e4e795094cb7e1cc"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlscore/*Embedded.Score",
+        "reference": {
+          "file": "internal/mlscore/embedded.go",
+          "line": 97,
+          "sha256": "8846fcf18c625104b1e68e80ec8473941e2a9a6b1f817046dedddc2f2ecafddc"
+        },
+        "candidate": {
+          "file": "internal/mlscore/embedded.go",
+          "line": 98,
+          "sha256": "70e2df8b54b2274343429f98e27c0bc3c8deee7c7814f6ed39c3e81505fa63c6"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlscore/Context",
+        "reference": {
+          "file": "internal/mlscore/mlscore.go",
+          "line": 29,
+          "sha256": "e9f463a30d7cd2b868b2132183f4d64a0f8cd55c3f5ac54ffcf1e7db4a0dcf96"
+        },
+        "candidate": {
+          "file": "internal/mlscore/mlscore.go",
+          "line": 32,
+          "sha256": "939c2891790565885377d81159d21291d0a4f82b078203225bb82fb26c8b858e"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlscore/NewEmbedded",
+        "reference": {
+          "file": "internal/mlscore/embedded.go",
+          "line": 37,
+          "sha256": "8e41c7b92c8c3b9633f819f7a29bbce89ae338c3ebe009f1c3da072ad2d4d038"
+        },
+        "candidate": {
+          "file": "internal/mlscore/embedded.go",
+          "line": 39,
+          "sha256": "72a11fa1d427c708ecebbacad2a551fce39c50ea042292e0b74b6e8430756153"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/mlscore/Record",
+        "reference": {
+          "file": "internal/mlscore/mlscore.go",
+          "line": 23,
+          "sha256": "4fc512b3295d30bcd9d6092a395fb9a46029bc218b3741d8b150b5c76a0b386f"
+        },
+        "candidate": {
+          "file": "internal/mlscore/mlscore.go",
+          "line": 23,
+          "sha256": "b43525515ae9d914eeb5e7e18d0ffc009ff5b51c59961869da77cb0e85d1d7c2"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/*Coverage.RegisterScope",
+        "reference": {
+          "file": "internal/model/coverage.go",
+          "line": 96,
+          "sha256": "7b1a6d51e5f72a60e05304058537234550ebcad5b061df048b9da9fd3ea7a056"
+        },
+        "candidate": {
+          "file": "internal/model/coverage.go",
+          "line": 111,
+          "sha256": "7ed76a30efffb5939096f516e89c7cce8e7cf0cdbb268638c571d86de1dd70de"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Finding",
+        "reference": {
+          "file": "internal/model/model.go",
+          "line": 36,
+          "sha256": "cc1a3c7924c0f1e3e94c1cf5e4706b89a21e623d469cb58c32873e22d1bd3b1f"
+        },
+        "candidate": {
+          "file": "internal/model/model.go",
+          "line": 59,
+          "sha256": "c3bba7a9e0cfef6478ec718349d34b48169d13e92de499c5b736d53bd5edf583"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Finding.Occurrence",
+        "reference": {
+          "file": "internal/model/provenance.go",
+          "line": 85,
+          "sha256": "fe61f6e647662a023d15b3deb3e8af8c26cb4780900d3bc706c488d9eee77b37"
+        },
+        "candidate": {
+          "file": "internal/model/provenance.go",
+          "line": 94,
+          "sha256": "6cb7b946784a811af27be1d48a9bcd7bcef54463274e315c0870fffa6e04079b"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/FindingContext",
+        "reference": {
+          "file": "internal/model/model.go",
+          "line": 105,
+          "sha256": "33bd6a25467ddafa5b6938cf9cdcee3ce162fd844a22e83d90cff46245eff3e8"
+        },
+        "candidate": {
+          "file": "internal/model/model.go",
+          "line": 185,
+          "sha256": "4c9260dfeb31694f7d40ff1559def7e4aa78d406ec805f24228907e0ea8ab183"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Item",
+        "reference": {
+          "file": "internal/model/model.go",
+          "line": 12,
+          "sha256": "aeaa9c3ee4fa02614200201d91d7325175175e8b8ea8045defeb2e8155790022"
+        },
+        "candidate": {
+          "file": "internal/model/model.go",
+          "line": 23,
+          "sha256": "c90a6637c07a7db1d3087c8ec9782a3f27793f18aa11ff215a9faf9895b4bc73"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/NewResult",
+        "reference": {
+          "file": "internal/model/coverage.go",
+          "line": 159,
+          "sha256": "7c471df57d938b79e9763dac45d45c25ed5ee37085a3a9fbc60de34bfeffe4bf"
+        },
+        "candidate": {
+          "file": "internal/model/coverage.go",
+          "line": 179,
+          "sha256": "37298ada2d59545eaa357863b7fb239d5f28626e7c244ead55f271150fba5cc1"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Note",
+        "reference": {
+          "file": "internal/model/coverage.go",
+          "line": 51,
+          "sha256": "8b487cafda727aa45faa87dc431ba0310723831453ce6e2b744cd75a3070a8a5"
+        },
+        "candidate": {
+          "file": "internal/model/coverage.go",
+          "line": 63,
+          "sha256": "3de57e1c86b39311beb8b7aac7382f7f918f1a237fce8cf9a6d2cdc9035efd9b"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Occurrence",
+        "reference": {
+          "file": "internal/model/provenance.go",
+          "line": 74,
+          "sha256": "b9ab957ca38f0d5335ad62d59d51042347344d7cecbcff349e6efd1766eb360f"
+        },
+        "candidate": {
+          "file": "internal/model/provenance.go",
+          "line": 80,
+          "sha256": "8a821296d35a10373383bc39a246fbde8eb924c49de303bd0ebcd33b8bf73118"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/ValidImmutableMetadata",
+        "reference": {
+          "file": "internal/model/provenance.go",
+          "line": 26,
+          "sha256": "63455726902777154e587be942d4ccc408b135c07cfb926c191295846c3e8153"
+        },
+        "candidate": {
+          "file": "internal/model/provenance.go",
+          "line": 32,
+          "sha256": "8ccd79b0bcc592a6faa534e731ce99b509fbc505bd8bcf66a4cfc8c962cffdc5"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/model/Verification",
+        "reference": {
+          "file": "internal/model/model.go",
+          "line": 96,
+          "sha256": "5e86279f5855497cafa42fcd678cbbc8cbf91f8ee767793617b20d95a9f5b62b"
+        },
+        "candidate": {
+          "file": "internal/model/model.go",
+          "line": 175,
+          "sha256": "e5a4ce26dc7e3c935a2420611025d077b887ea59ff10bddbd834b11ae1347bf6"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/ownedcmd/Run",
+        "reference": {
+          "file": "internal/ownedcmd/command.go",
+          "line": 45,
+          "sha256": "2e7ac301dec8cde01f838d8d7c41cc0885e4c54a095123fd46fd9167841d1c9f"
+        },
+        "candidate": {
+          "file": "internal/ownedcmd/command.go",
+          "line": 46,
+          "sha256": "cafe53f97a54bd6077f42610493d54de150421590c5517b97cb653f85d6745b3"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/post/*Baseline.Suppress",
+        "reference": {
+          "file": "internal/post/baseline.go",
+          "line": 124,
+          "sha256": "ec9936682d4fc819c314c8f9e2e70ae9fd5b0bfc5da21c908b190ea816ad5816"
+        },
+        "candidate": {
+          "file": "internal/post/baseline.go",
+          "line": 128,
+          "sha256": "d8b5579f5b68fd488fd088bd443279e6656caf74f91621e2d85eb16d65198b6e"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/post/WriteBaselineContext",
+        "reference": {
+          "file": "internal/post/baseline.go",
+          "line": 78,
+          "sha256": "a2aabbf2d14f0f5bb0eda92065cdc4f81cccccce010f0a2a85098988768ccfd1"
+        },
+        "candidate": {
+          "file": "internal/post/baseline.go",
+          "line": 78,
+          "sha256": "8bc9bc5008f0ad3aba9168a7d81edf2bedaf2f083a5cd89386540a9b5adc952f"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/reconstruct/Extract",
+        "reference": {
+          "file": "internal/reconstruct/strings.go",
+          "line": 45,
+          "sha256": "2e30de16e93a769e4aca3c62023810e5924de819a878325d4f46bbef59bdbf1a"
+        },
+        "candidate": {
+          "file": "internal/reconstruct/strings.go",
+          "line": 47,
+          "sha256": "5084eac40cbffe717bc45cd1e3e51161d3c36291b4600ee7fdd6289c92e06d12"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/reconstruct/Value",
+        "reference": {
+          "file": "internal/reconstruct/strings.go",
+          "line": 20,
+          "sha256": "7b7612af84038db0389c94a15caa11814fb60671b36fa18084fb95952d8b8428"
+        },
+        "candidate": {
+          "file": "internal/reconstruct/strings.go",
+          "line": 20,
+          "sha256": "7ad6c8e1a09386c614e38cf7c9b0d50548ace356eda971e3d9621227ae262549"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/report/WriteWithCoverage",
+        "reference": {
+          "file": "internal/report/report.go",
+          "line": 26,
+          "sha256": "c4409bd28d0c19c99dcf6e991518c3f71e91652f7f1570019df92d2e9208a221"
+        },
+        "candidate": {
+          "file": "internal/report/report.go",
+          "line": 27,
+          "sha256": "ef3d35c54d4ed0518cc9ecdf8dd406bcd431d84ed53cfac0ad7977e07337d1dd"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/rules/*Engine.Filter",
+        "reference": {
+          "file": "internal/rules/engine.go",
+          "line": 131,
+          "sha256": "82c5925c45ea0974359ef16a65b0d96e893c6a6fa1760565b387def4e94725d1"
+        },
+        "candidate": {
+          "file": "internal/rules/engine.go",
+          "line": 152,
+          "sha256": "416642ebeb64f0c5164cad989478103fa08fafcd63b37f46573f7673912a61ad"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/*Engine.MatchN",
+        "reference": {
+          "file": "internal/rules/engine.go",
+          "line": 207,
+          "sha256": "1ca53b4219df9e57b1c702920d9819aa4e85533cec3c80d761f9d1810bce4e2d"
+        },
+        "candidate": {
+          "file": "internal/rules/engine.go",
+          "line": 275,
+          "sha256": "656be18257d922d659395322d1b0ddbb9113dc89c1f5c5437e1a147bd14c8657"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/*Template.Match",
+        "reference": {
+          "file": "internal/rules/template.go",
+          "line": 259,
+          "sha256": "27d33d55f653291d610c740812673701a23fc65b2b891b4c216f33721731de7c"
+        },
+        "candidate": {
+          "file": "internal/rules/template.go",
+          "line": 263,
+          "sha256": "e60f6c3f36bb84e7a039c4b3199368bd3817662ddf66ac26a57a9cac8936ed41"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/Engine",
+        "reference": {
+          "file": "internal/rules/engine.go",
+          "line": 19,
+          "sha256": "2fd386896cf8e304dc6aea2fc9615c51499817caec4dbd0610ac8f610541844a"
+        },
+        "candidate": {
+          "file": "internal/rules/engine.go",
+          "line": 22,
+          "sha256": "73892ec63760b6fc1437efb56a80f3d4f1878beff1a877d8100fae44006d090a"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/Extractor",
+        "reference": {
+          "file": "internal/rules/template.go",
+          "line": 45,
+          "sha256": "e4cdacd1e4d3747b4ca084961c300e46089f56c38e45739aa340fe44a52c748e"
+        },
+        "candidate": {
+          "file": "internal/rules/template.go",
+          "line": 48,
+          "sha256": "a58373a380ca7959b9931cc908d62c37e90d35270088aac38218191325c9ef1b"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/LoadEmbedded",
+        "reference": {
+          "file": "internal/rules/embedded.go",
+          "line": 16,
+          "sha256": "96f3f1e3ae8d9f08f870c855c23dc5a4b7ca6fdf5ebc8bccbc3dea676f3e18f8"
+        },
+        "candidate": {
+          "file": "internal/rules/embedded.go",
+          "line": 16,
+          "sha256": "ad16be4b349e053d7e8e1bd328c1b00e71ea43a976412176e4579276bee5275e"
+        },
+        "scope_of_this_step": "schema delta outside new shared matrix"
+      },
+      {
+        "declaration": "internal/rules/Matcher",
+        "reference": {
+          "file": "internal/rules/template.go",
+          "line": 33,
+          "sha256": "92939db3f9281896768a2aff380e43fdc5daa5baf04adeda24bb5258938c0170"
+        },
+        "candidate": {
+          "file": "internal/rules/template.go",
+          "line": 34,
+          "sha256": "e331e5c5a4cadad1dce975f95547a297edb497941314a14e876303d34b73eb61"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/rules/Template",
+        "reference": {
+          "file": "internal/rules/template.go",
+          "line": 78,
+          "sha256": "56f7337f8e0c114369de84621ecbf51a1053f6704902352cb48daa118592f72f"
+        },
+        "candidate": {
+          "file": "internal/rules/template.go",
+          "line": 82,
+          "sha256": "9c78933a20aaa8807d01030bd286ba4a582882db0f12a3d73416de5a054b0c57"
+        },
+        "scope_of_this_step": "selected public matching contracts"
+      },
+      {
+        "declaration": "internal/safehttp/InferenceClient",
+        "reference": {
+          "file": "internal/safehttp/inference.go",
+          "line": 15,
+          "sha256": "f716d863738a375c1e6df2d5c67ec401fdde6c0ef402076644bd478d7818f91a"
+        },
+        "candidate": {
+          "file": "internal/safehttp/inference.go",
+          "line": 15,
+          "sha256": "8b7282214067889c80bee6d82d6e3a843e49c3d4062d64c594fd4f75861bcbe8"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/scan/Options",
+        "reference": {
+          "file": "internal/scan/options.go",
+          "line": 14,
+          "sha256": "e60fdc3364380725bb506438a217a77d7372be5ea80f9483165821a7fb2f960f"
+        },
+        "candidate": {
+          "file": "internal/scan/pipeline.go",
+          "line": 23,
+          "sha256": "8ec6e3e8bae5543817866642b5414c723cb846ae73b239aaa9f336deea8ad79c"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/server/*scanItem.UnmarshalJSON",
+        "reference": {
+          "file": "internal/server/json.go",
+          "line": 20,
+          "sha256": "cce00a5b7273e04f8b4e8d8c08a0e7c01d79bba6a0de943854bf3d39b92f54f9"
+        },
+        "candidate": {
+          "file": "internal/server/json.go",
+          "line": 20,
+          "sha256": "2bf0eacf200729981af5b373249e022d32fb0b44af8959f45ba0c58bcffac93d"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/server/New",
+        "reference": {
+          "file": "internal/server/server.go",
+          "line": 73,
+          "sha256": "3d945fc4b96a9a4e3c135ca1b19c4228e27b3430d6729567b1649f7ddc5fe0fb"
+        },
+        "candidate": {
+          "file": "internal/server/server.go",
+          "line": 69,
+          "sha256": "ea92a34d09ba84bfe0627dce61a481cfa2fa32533c95f6b3398f3acf6e20c466"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/server/Server",
+        "reference": {
+          "file": "internal/server/server.go",
+          "line": 62,
+          "sha256": "545710a2ff7dff89f12104796454630311db68fb00e433a8f424f74774746525"
+        },
+        "candidate": {
+          "file": "internal/server/server.go",
+          "line": 62,
+          "sha256": "343d663456ad3071bd6e1c62e2f2789ccdf52607e8b6b6d83b6fd6b6670171bd"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/CloneRepo",
+        "reference": {
+          "file": "internal/source/clone.go",
+          "line": 49,
+          "sha256": "89fc0bf31ef9e0dd49e32e59133cabbb0f5df38df18d60ae163fed9be3ff0661"
+        },
+        "candidate": {
+          "file": "internal/source/clone.go",
+          "line": 69,
+          "sha256": "f698b2b37a3d235fc39df473cdbd4eae43962641b78da4444d8c7f7c5ff8c2c0"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/Extract",
+        "reference": {
+          "file": "internal/source/mobile.go",
+          "line": 95,
+          "sha256": "4457acbf8fe9913e40665f1cb8a2294c7bd2ab9cb7711bc45e6f6d384e9afce1"
+        },
+        "candidate": {
+          "file": "internal/source/mobile.go",
+          "line": 96,
+          "sha256": "822ca0d56f74df93742cf7c4d9c4b36f07ca05c882c873fbad506ebf7c318b3a"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/FilesFromListFiltered",
+        "reference": {
+          "file": "internal/source/git.go",
+          "line": 314,
+          "sha256": "006ddc57bc2116cec991068a0eee5e755d30707e83fd8082842d09fbc3a065ee"
+        },
+        "candidate": {
+          "file": "internal/source/git.go",
+          "line": 321,
+          "sha256": "0deb1c7d9c1e171f817f48225d7f30cc16c3dbacafdcc10598d0ea58b762fc49"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/Filesystem",
+        "reference": {
+          "file": "internal/source/filesystem.go",
+          "line": 92,
+          "sha256": "2ccbcd288e0cd49d7afcf3eb518c087ea47fd5865a17221e21cc3487ede98c0e"
+        },
+        "candidate": {
+          "file": "internal/source/filesystem.go",
+          "line": 122,
+          "sha256": "2f9d00465d7bf233b244666a1bd94650fd8aff1b63cf1956aec3c6a1a414c356"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/FinalIndex",
+        "reference": {
+          "file": "internal/source/image.go",
+          "line": 303,
+          "sha256": "5c13fa79b2949e31515650bf062a64b15e1696c5566d42d83379953e0965174e"
+        },
+        "candidate": {
+          "file": "internal/source/image.go",
+          "line": 305,
+          "sha256": "311cbe0d142fef0854ae356f8caef49563ac02498a72c1c6dcbb40f5c3106616"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/GitChangedFilesIn",
+        "reference": {
+          "file": "internal/source/git.go",
+          "line": 48,
+          "sha256": "c5afcbd19eb218b8ce83c78a0b1c2a1dbd19ace264c6e67cfe8356310755ace7"
+        },
+        "candidate": {
+          "file": "internal/source/git.go",
+          "line": 49,
+          "sha256": "f88de6366d2e008abcc5e6e193ce44f615cc5d4b92b8126808a0d39b6275bf2d"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/GitHistoryBlobs",
+        "reference": {
+          "file": "internal/source/git.go",
+          "line": 91,
+          "sha256": "d63fc35d23a26c0c585b64c8f47524ca9daf0a5906acff191d1f3590a4422684"
+        },
+        "candidate": {
+          "file": "internal/source/git.go",
+          "line": 102,
+          "sha256": "d638bd37c129bc813fef7bc7fd89b27e8f5c70679c0bccdc02a11ae18ffd6cfb"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/GitIndexFilesIn",
+        "reference": {
+          "file": "internal/source/index_robust.go",
+          "line": 62,
+          "sha256": "3147914e81a7e4058fb0517f7629c5fbe8bfdb4ea1fb6f72b6919b363feb4e74"
+        },
+        "candidate": {
+          "file": "internal/source/index.go",
+          "line": 84,
+          "sha256": "f5f3c08f669387add0e098170ab0b1db6155a2ac14fbeb5876ad16267b945079"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/GitWorktreeFilesIn",
+        "reference": {
+          "file": "internal/source/index_robust.go",
+          "line": 43,
+          "sha256": "63bc3fdab3c7f6b847cae6438b1205cadc9cbce09f8ebed979c39959982ed85a"
+        },
+        "candidate": {
+          "file": "internal/source/index.go",
+          "line": 46,
+          "sha256": "bb166e9dbabebd2dc5878f20d32454fe7f8d741f0f88d11f8d7f72db51e85de6"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/Image",
+        "reference": {
+          "file": "internal/source/image.go",
+          "line": 90,
+          "sha256": "d79005de6c75186bd30f583e385d9795c677827d2b52c7a1a8bdfdc3a8459ea0"
+        },
+        "candidate": {
+          "file": "internal/source/image.go",
+          "line": 93,
+          "sha256": "2315a2c7eb0542df0240c04d89fef1386a1bfc74559cd1c01ebd63f867973271"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/MarkFinalImage",
+        "reference": {
+          "file": "internal/source/image.go",
+          "line": 478,
+          "sha256": "9fb7ada05cf8b4f734abe89a4c56adf5d6c86549b7e5bff13c1f23c6b8b8b7c1"
+        },
+        "candidate": {
+          "file": "internal/source/image.go",
+          "line": 482,
+          "sha256": "777a7286f746d8d666847482ad7c8b353cac30644ad8cbaf3124cefc67981a3a"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/MobileBytes",
+        "reference": {
+          "file": "internal/source/mobile.go",
+          "line": 336,
+          "sha256": "a0ec39196c6870f4d571699e568df2e86fce2f08e716f6d0d31fa1d1d6a6c51c"
+        },
+        "candidate": {
+          "file": "internal/source/mobile_bytes.go",
+          "line": 14,
+          "sha256": "67bfd85c9c40cfb9f19b1c2b334003d9edaaa26d0875e7f41f6e1e25c000c9d4"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/MobileOptions",
+        "reference": {
+          "file": "internal/source/mobile.go",
+          "line": 45,
+          "sha256": "9bb45ddd43d730668902f7a756de0e8707525d18beb548588820b667113ee88d"
+        },
+        "candidate": {
+          "file": "internal/source/mobile.go",
+          "line": 45,
+          "sha256": "b4939578832e693fafc215aa7cb3fb446ebaf540a2d7c3a4156ad33fef05b60c"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/Payload",
+        "reference": {
+          "file": "internal/source/payload.go",
+          "line": 10,
+          "sha256": "2ee56d86e16b5b99e03192f22f59abfce45c76ae4fc86309d85576c591e5edcf"
+        },
+        "candidate": {
+          "file": "internal/source/payload.go",
+          "line": 12,
+          "sha256": "5fabd590f73c331a21b5b21fbad6791137d8cd26d77ba059b730a53a39dda224"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/SetCloneTimeout",
+        "reference": {
+          "file": "internal/source/clone.go",
+          "line": 22,
+          "sha256": "e3d8b0a7c460717dd4f06f438adb6f72c6bcd03bf9ec2f774ec576791c7d2b93"
+        },
+        "candidate": {
+          "file": "internal/source/clone.go",
+          "line": 24,
+          "sha256": "806807c2618db1669e50a295b1417befcbdc1d25100f20e42fb17c6e881e0c6c"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/StdinNamed",
+        "reference": {
+          "file": "internal/source/filesystem.go",
+          "line": 26,
+          "sha256": "5113373d3a6f5010fe7b9dc014c995711b4552d824aba963a48873bfd562277c"
+        },
+        "candidate": {
+          "file": "internal/source/filesystem.go",
+          "line": 38,
+          "sha256": "448dfc870069ded76a30f5e2a7837f612daaf71e36a7d6564ca60eae9f310116"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/source/SyncBucket",
+        "reference": {
+          "file": "internal/source/bucket.go",
+          "line": 47,
+          "sha256": "8ebe8ca1c613dc48d31cbcfccf4676b6682f3a9bb66873467c800b6fd5973f99"
+        },
+        "candidate": {
+          "file": "internal/source/bucket.go",
+          "line": 47,
+          "sha256": "b0bc82ff2c6eb25dc0fe541f59f43ff25dcdc310eba7e886c7b4e3e03ad3a222"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/taxonomy/GenericLast",
+        "reference": {
+          "file": "internal/taxonomy/taxonomy.go",
+          "line": 91,
+          "sha256": "af703ead9563c64ec259c95aae8bfa91c59f174a0e4e5d30c793399557c9e7b6"
+        },
+        "candidate": {
+          "file": "internal/taxonomy/taxonomy.go",
+          "line": 91,
+          "sha256": "6ea43ba97436922dfed09eca575da3256f850257f6a7c2397e409ae1b4f38a82"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/*Set.Verify",
+        "reference": {
+          "file": "internal/verify/verify.go",
+          "line": 271,
+          "sha256": "f9e07d5b9f7709cd0bdbe658584a2ecd34eaab14b3d40ae6eaa1b5c4e6a8ce38"
+        },
+        "candidate": {
+          "file": "internal/verify/verify.go",
+          "line": 312,
+          "sha256": "af12b15212681a94970d2dc256cb5cee298a9afe277e553c88641c8413a20236"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/LoadEmbedded",
+        "reference": {
+          "file": "internal/verify/embedded.go",
+          "line": 15,
+          "sha256": "92d440ac540af632d001c9f26effa1da05337d52e4d4508e44a9bfab58de71d9"
+        },
+        "candidate": {
+          "file": "internal/verify/embedded.go",
+          "line": 18,
+          "sha256": "487173a7edbd7cd6a86339d621228125ac13db6c15c693314080ff65401aef2b"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/LoadWithPolicy",
+        "reference": {
+          "file": "internal/verify/loader.go",
+          "line": 34,
+          "sha256": "999debd3c60982b235a29f2aec54370c91851962b7788fa84653393ee92bebeb"
+        },
+        "candidate": {
+          "file": "internal/verify/loader.go",
+          "line": 33,
+          "sha256": "373243ac076978587f2ac040926744f3874b1abc8a8018765f58ecadaaf7bc64"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/New",
+        "reference": {
+          "file": "internal/verify/verify.go",
+          "line": 692,
+          "sha256": "ebab199e8f634e2eb5f6d584b224f3c80f688650e7132be57a2f549f61bd1421"
+        },
+        "candidate": {
+          "file": "internal/verify/verify.go",
+          "line": 738,
+          "sha256": "a399102a46db251e95a4b1fd59eb5bd402b3d0688bbba609ed6e676ddebc6bd3"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/Result",
+        "reference": {
+          "file": "internal/verify/verify.go",
+          "line": 43,
+          "sha256": "10ac01b2ddb8590488b1ed524820fd0d08b583febbefa7e41d67183572eaecd7"
+        },
+        "candidate": {
+          "file": "internal/verify/verify.go",
+          "line": 42,
+          "sha256": "06124612601aacc65b21667469e94ab0675ed2fd4497e11b01485880ff026775"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      },
+      {
+        "declaration": "internal/verify/SetConcurrency",
+        "reference": {
+          "file": "internal/verify/verify.go",
+          "line": 119,
+          "sha256": "bd9cf8effec5b70794a615b75e1a7f8df8740e2daec857ed518c4759fb4cc90c"
+        },
+        "candidate": {
+          "file": "internal/verify/verify.go",
+          "line": 115,
+          "sha256": "95b6a9c20be607e7be9d88157e5bc1dc0a3bd4b299424ead632f570c708c397a"
+        },
+        "scope_of_this_step": "outside new runtime checks"
+      }
+    ],
+    "rules_subset": [
+      "internal/rules/*Engine.Filter",
+      "internal/rules/*Engine.MatchN",
+      "internal/rules/*Template.Match",
+      "internal/rules/Engine",
+      "internal/rules/Extractor",
+      "internal/rules/LoadEmbedded",
+      "internal/rules/Matcher",
+      "internal/rules/Template"
+    ],
+    "limit": "All non-test source files, build tags ignored, comments omitted. No statement that AST equality or declaration count proves behavior."
+  },
+  "shared_reference": {
+    "failures": [],
+    "skips": [],
+    "package_failed": false,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/reference-shared.jsonl",
+      "sha256": "3cfc298283b2a9fb7361d5fdb6d97bbda0cc31f29fb075690d58860f262d4a7b"
+    },
+    "passed_tests_and_subtests": 402
+  },
+  "candidate_shared_and_extension": {
+    "failures": [],
+    "skips": [],
+    "package_failed": false,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/candidate-shared-and-extension.jsonl",
+      "sha256": "88484aba47b27905ce76ae8503dc36b358a211335ae0eb40f5ae4581ddf4b56e"
+    },
+    "passed_tests_and_subtests": 459
+  },
+  "reference_empty_word_expected_failure": {
+    "failures": [
+      "TestReleasedAPIEmptyWordActivation",
+      "TestReleasedAPIEmptyWordActivation/and-and-negative-false-group-0-text-1",
+      "TestReleasedAPIEmptyWordActivation/and-and-negative-false-group-0-text-2",
+      "TestReleasedAPIEmptyWordActivation/and-and-negative-false-group-0-text-3",
+      "TestReleasedAPIEmptyWordActivation/and-and-negative-false-group-0-text-4",
+      "TestReleasedAPIEmptyWordActivation/and-and-negative-false-group-0-text-5",
+      "TestReleasedAPIEmptyWordActivation/and-or-negative-false-group-0-text-1",
+      "TestReleasedAPIEmptyWordActivation/and-or-negative-false-group-0-text-2",
+      "TestReleasedAPIEmptyWordActivation/and-or-negative-false-group-0-text-3",
+      "TestReleasedAPIEmptyWordActivation/and-or-negative-false-group-0-text-4",
+      "TestReleasedAPIEmptyWordActivation/and-or-negative-false-group-0-text-5"
+    ],
+    "skips": [],
+    "package_failed": true,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/reference-empty-word.jsonl",
+      "sha256": "e55070011684ab9660b6052eccc91bc94cfca44c2d3b8d5a31f66cdc1b320634"
+    },
+    "passed_tests_and_subtests": 46
+  },
+  "race": {
+    "failures": [],
+    "skips": [],
+    "package_failed": false,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/race-final.jsonl",
+      "sha256": "bbd4e941b54680eb99792ee8a7e78de5451e189670925c75ee6364030ab66353"
+    },
+    "passed_tests_and_subtests": 460
+  },
+  "minimum_go": {
+    "failures": [],
+    "skips": [],
+    "package_failed": false,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/min-go-final.jsonl",
+      "sha256": "28306c0364c91fe6639cccbcec1ba6dd4ff8d9dfc29e704207abfdc08853d143"
+    },
+    "passed_tests_and_subtests": 459
+  },
+  "full_rules": {
+    "failures": [],
+    "skips": [
+      "TestWordIndexCorpusParity"
+    ],
+    "package_failed": false,
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/rules-final.jsonl",
+      "sha256": "e12d8ddde2da3a817fb3b8dd44a14987e30c37b71348f89fcd499fc45b996b3b"
+    },
+    "passed_tests_and_subtests": 593
+  },
+  "declared_adaptation": "Selection/occurrence test detects MatchOccurrencesN availability: old MatchN retains repeated spans; new default deduplicates values and explicit occurrence mode retains spans. Word/regex, spans, metadata, filters and budget assertions are shared.",
+  "empty_word": "Separate current extension: positive empty-word AND activation. Reference fails exactly ten child cases plus parent, with nonzero package exit; this is not counted as a passing reference suite.",
+  "logs": {
+    "lint-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/lint-final.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "min-go.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/min-go.log",
+      "sha256": "5e68988efa5f9bbfb9bc214b08daf081b72bbd71a14166bbf1e263e28390243d"
+    },
+    "rules-go.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/compat-api-20261116/rules-go.log",
+      "sha256": "a2bc95827a5b83275ad2708fe5c4106030b0a218ac7ad6f079fa76816ba462f1"
+    }
+  },
+  "excluded_attempts": {
+    "candidate.jsonl": "Initial oracle assumed capture group 1 while YAML explicitly serialized group 0. Test fixture corrected to explicit group 1 only for capture patterns; no production change.",
+    "reference.jsonl": "Initial combined run exposed ten actual released empty-word failures. Shared and extension suites were split without dropping cases; raw attempt retained."
+  },
+  "limits": [
+    "No runtime changes: binaries, ML vectors/weights, detector/provider behavior or release factory not rerun.",
+    "New public matching matrix covers selected contracts of seven changed rules declarations. LoadEmbedded schema strictness and the broader 90-declaration audit remain separate.",
+    "Full rules package has one opt-in corpus skip; no full GOROOT/performance claim.",
+    "OS denies all network during Go test runs. Reference physical source blobs unchanged. Frozen historical evidence JSON unchanged."
+  ]
+}

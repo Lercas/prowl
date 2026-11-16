@@ -373,6 +373,15 @@
   - [ ] Проверить остальные разошедшиеся компоненты: MCP/LSP, источники, отчёты,
     correlation, integrity шаблонов и release checks. Намеренные замены ML/cgo
     не откатывать: сохранить квалифицированную Go-flate-v2 модель и security-обновления.
+    - [x] Восстановлен воспроизводимый exported-AST inventory: 501/690,
+      90 changed/13 removed/202 added; это не runtime certification всех API.
+      Для семи rules declarations — shared public matrix 402/402 на неизменённом
+      теге и candidate с явной value/occurrence адаптацией. Candidate empty-word
+      extension — 57 passes; десять legacy subcase failures сохранены отдельно.
+      Rules — 593 passes/один opt-in skip, targeted race — 460, min-Go — 459;
+      lint проходит. Runtime неизменён; остальные API и LoadEmbedded schema delta
+      новой матрицей не закрыты. [Контракт](wiki/Rules-API-Compatibility.md),
+      `wiki/evidence/1.5.0-rules-api-compatibility-20261116.json`.
     - [x] Устранена неоднозначность наблюдения bucket cancellation в acceptance test:
       actual completion timestamp и `context.Canceled`, прежний deadline 500 ms,
       одинаковая оценка при готовых result/timer. Baseline race — 100/100,
