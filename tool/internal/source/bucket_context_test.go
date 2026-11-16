@@ -124,3 +124,17 @@ func TestBucketRelativeRootUsesLogicalScopes(t *testing.T) {
 		t.Fatal("relative root leaked local scope")
 	}
 }
+
+func TestValidateBucketTargetKeepsReleasedSchemeWordingWithoutEchoingTarget(t *testing.T) {
+	const target = "ftp://user:hunter2secret@host/prefix"
+	err := ValidateBucketTarget(target)
+	if err == nil {
+		t.Fatal("unsupported scheme accepted")
+	}
+	if !strings.Contains(err.Error(), "unsupported bucket URI") {
+		t.Fatalf("released 1.4 wording lost: %q", err)
+	}
+	if strings.Contains(err.Error(), "hunter2secret") || strings.Contains(err.Error(), "ftp://") {
+		t.Fatalf("error echoes the raw target: %q", err)
+	}
+}

@@ -265,7 +265,7 @@ exits "test -s $R/bl.json"       0           "baseline written"
 norep "$BIN scan $R --baseline $R/bl.json"   "[" "baseline suppresses all known findings"
 
 echo "==> 13. nuclei-style install / update / auto-discovery"
-cli   "$BIN version"                          "not installed"   "version before install"
+cli   "$BIN version"                          "bundled (offline)" "version before install uses bundled snapshot"
 # Security: an explicit --source is an UNTRUSTED third party. It is REFUSED without --allow-unsigned even
 # when it ships its OWN matching MANIFEST.sha256 (a self-signed manifest authenticates nothing — exactly
 # the attacker's `sha256sum > MANIFEST.sha256`). Reproduce the closed theater with a self-signed evil dir.

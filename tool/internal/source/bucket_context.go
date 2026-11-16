@@ -24,7 +24,8 @@ type bucketOrigin struct {
 func ValidateBucketTarget(raw string) error {
 	scheme, rest, ok := strings.Cut(raw, "://")
 	if !ok || (scheme != "s3" && scheme != "gs") || !utf8.ValidString(raw) || strings.ContainsRune(raw, 0) {
-		return errors.New("bucket target must be s3://bucket/prefix or gs://bucket/prefix")
+		// Keep the released 1.4 wording, but never echo the raw target: it may carry credentials.
+		return errors.New("unsupported bucket URI (use s3://bucket/prefix or gs://bucket/prefix)")
 	}
 	host, _, _ := strings.Cut(rest, "/")
 	if host == "" || strings.ContainsAny(host, "@?#\\ \t\r\n") {

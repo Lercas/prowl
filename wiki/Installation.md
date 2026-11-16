@@ -84,7 +84,7 @@ rules:     159 installed (version 1.0.0) at /Users/you/.prowl/rules
 verifiers: 78 installed (version 1.0.0) at /Users/you/.prowl/verifiers
 ```
 
-Before setup, the `rules` / `verifiers` lines instead read `not installed — run 'prowl rules update'`.
+Before setup, prowl uses the embedded snapshot and the lines read `175 bundled (offline)` / `84 bundled (offline)`.
 
 ## Install directory
 
