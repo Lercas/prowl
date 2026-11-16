@@ -72,8 +72,19 @@ func componentNamespace(path []string) string {
 	return string(raw)
 }
 
+func componentChildNamespace(parent, name string) string {
+	var path []string
+	if parent != "" && json.Unmarshal([]byte(parent), &path) != nil {
+		return invalidComponentNamespace
+	}
+	if name != "" {
+		path = append(path, name)
+	}
+	return componentNamespace(path)
+}
+
 // Object namespaces match only by exact segment path within one acquisition.
-// Arrays, aliases and multi-document YAML need an explicit relationship model.
+// Arrays and multi-document YAML need an explicit relationship model.
 // Every declared non-string role remains unknown, including container fields.
 func componentFields(ctx context.Context, it model.Item) (map[string]map[string]*string, bool) {
 	text := strings.TrimPrefix(it.Text, "\uFEFF")
@@ -136,38 +147,13 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 }
 
 func componentYAMLMapping(ctx context.Context, node *yaml.Node, depth int) (map[string]any, bool) {
-	if ctx.Err() != nil || depth > 64 || node.Kind != yaml.MappingNode || node.Tag != "!!map" {
+	d := componentYAMLDecoder{ctx: ctx, active: make(map[*yaml.Node]bool), mergeSequences: make(map[*yaml.Node]bool)}
+	if !d.findMergeSequences(node, depth) {
 		return nil, false
 	}
-	out := make(map[string]any)
-	for i := 0; i+1 < len(node.Content); i += 2 {
-		key, value := node.Content[i], node.Content[i+1]
-		if key.Kind != yaml.ScalarNode || key.Tag != "!!str" {
-			return nil, false
-		}
-		if _, duplicate := out[key.Value]; duplicate {
-			return nil, false
-		}
-		switch value.Kind {
-		case yaml.MappingNode:
-			child, ok := componentYAMLMapping(ctx, value, depth+1)
-			if !ok {
-				return nil, false
-			}
-			out[key.Value] = child
-		case yaml.ScalarNode:
-			if !yamlKnownTag(value.Tag) {
-				return nil, false
-			}
-			out[key.Value] = nil
-			if value.Tag == "!!str" {
-				out[key.Value] = value.Value
-			}
-		default:
-			return nil, false
-		}
-	}
-	return out, true
+	v, ok := d.value(node, depth)
+	out, mapping := v.(map[string]any)
+	return out, ok && mapping
 }
 
 func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) []model.Finding {

@@ -341,6 +341,11 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				group++
 				mappingGroup = group
 				roles[group] = roles[gid].child(name)
+				if componentNamespaces != nil {
+					if parent, known := componentNamespaces[gid]; known {
+						componentNamespaces[group] = componentChildNamespace(parent, name)
+					}
+				}
 			}
 			mapping(n, mappingGroup, ref, proof, depth+1, nil)
 		case yaml.AliasNode:

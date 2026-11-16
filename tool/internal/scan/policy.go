@@ -21,6 +21,9 @@ func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
 	if o.PublicAuditor != nil {
 		stages["public_key_audit"] = true
 	}
+	if o.CrossFile {
+		stages["cross_file"] = true
+	}
 	return !o.RevealSecrets, stages
 }
 
@@ -56,11 +59,15 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) context.Context {
 		}
 	}
 	_, stages := p.Capabilities()
-	c.RegisterScope("detection_policy", "1.5.0", map[string]any{
+	policy := map[string]any{
 		"revision": DetectionRevision, "taxonomy": taxonomy, "stages": stages,
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 		"all_occurrences": o.AllOccurrences,
-	})
+	}
+	if o.CrossFile {
+		policy["cross_file"] = componentYAMLRevision
+	}
+	c.RegisterScope("detection_policy", "1.5.0", policy)
 	if o.PublicAuditor != nil {
 		var policy any = "structured-siblings-and-static-js-groups"
 		if configured, ok := o.PublicAuditor.(interface{ Policy() map[string]any }); ok {

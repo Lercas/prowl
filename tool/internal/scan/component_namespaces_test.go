@@ -67,7 +67,7 @@ func TestCrossFileNestedNamespacesNeverBorrow(t *testing.T) {
 		{"null-shadow", "b.json", `{"prod":{"Account":null,"account":"tenant_a"}}`},
 		{"container-shadow", "b.json", `{"prod":{"Account":{},"account":"tenant_a"}}`},
 		{"duplicate", "b.json", `{"prod":{"account":"tenant_a"},"prod":{"account":"tenant_a"}}`},
-		{"yaml-alias", "b.yaml", "defaults: &d {account: tenant_a}\nprod: *d\n"},
+		{"yaml-alias-sibling", "b.yaml", "defaults: &d {account: tenant_a}\ndev: *d\n"},
 		{"yaml-multiple", "b.yaml", "prod: {account: tenant_a}\n---\nprod: {account: tenant_b}\n"},
 		{"toml-array", "b.toml", "[[prod]]\naccount='tenant_a'\n"},
 		{"comment", "b.yaml", "# prod: {account: tenant_a}\nprod: {timeout: 30}\n"},

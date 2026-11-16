@@ -114,6 +114,13 @@ def main():
             ('inline', 'a.toml', f'prod={{service={{accessKeyId="{KEY}"}}}}\n', 'b.toml', 'prod={service={account="tenant_a"}}\n'),
             ('mixed', 'a.json', json.dumps({'prod': {'service': {'accessKeyId': KEY}}}), 'b.yaml', 'prod:\n  service:\n    account: tenant_a\n'),
             ('quoted-dot', 'a.json', json.dumps({'prod.service': {'accessKeyId': KEY}}), 'b.toml', '["prod.service"]\naccount="tenant_a"\n'),
+            ('yaml-map-alias', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: *d\n'),
+            ('yaml-scalar-alias', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'value: &a tenant_a\nprod: {account: *a}\n'),
+            ('yaml-nested-alias', 'a.json', json.dumps({'prod': {'service': {'accessKeyId': KEY}}}), 'b.yaml', 'defaults: &d {service: {account: tenant_a}}\nprod: *d\n'),
+            ('yaml-merge', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d}\n'),
+            ('yaml-override', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'defaults: &d {account: tenant_b}\nprod: {<<: *d, account: tenant_a}\n'),
+            ('yaml-merge-sequence', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nprod: {<<: [*a, *b]}\n'),
+            ('yaml-sequence-alias', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nlist: &l [*a, *b]\nprod: {<<: *l}\n'),
         )
         for name, key_name, key_text, account_name, account_text in nested_cases:
             source = root / ('namespace-' + name)
@@ -131,18 +138,20 @@ def main():
                     check(label + '-verified', detail['status'] == 'verified' and len(detail['components']['fields']['account']) == 1)
                     check(label + '-request', len(Handler.calls) == before + 1 and Handler.calls[-1])
                     check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'accessKeyId')))
-            if name == 'mixed':
-                nested_index = root / 'namespace-index'
+            if name in ('mixed', 'yaml-map-alias', 'yaml-scalar-alias', 'yaml-nested-alias', 'yaml-merge-sequence'):
+                nested_index = root / ('namespace-index-' + name)
                 p = run([source], extra=['--index', nested_index, '--scope', 'owned-nested'])
                 fs, complete = report(p, 'json')
                 ids = fs[0]['verification']['components']['primary']
                 indexed = subprocess.run([str(binary), 'index', '--index', str(nested_index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
                 places = {p['id'] for s in json.loads(indexed.stdout)['secrets'] for p in s['locations']}
-                check('namespace-index-primary', p.returncode == 0 and complete and indexed.returncode == 0 and set(ids) <= places)
+                check(f'namespace-{name}-index-primary', p.returncode == 0 and complete and indexed.returncode == 0 and set(ids) <= places)
                 with sqlite3.connect(nested_index / 'index.sqlite') as database:
                     raw = '\n'.join(database.iterdump()).encode()
-                check('namespace-index-private', all(v.encode() not in raw for v in (KEY, 'tenant_a', 'accessKeyId')))
+                check(f'namespace-{name}-index-private', all(v.encode() not in raw for v in (KEY, 'tenant_a', 'accessKeyId')))
 
+        alias_bomb = 'base: &n0 {account: tenant_a}\n' + ''.join(
+            f'node{i}: &n{i} {{left: *n{i-1}, right: *n{i-1}}}\n' for i in range(1, 21))
         for name, account_name, account_text in (
             ('sibling', 'b.json', '{"dev":{"account":"tenant_a"}}'),
             ('parent', 'b.json', '{"account":"tenant_a"}'),
@@ -152,7 +161,14 @@ def main():
             ('null-shadow', 'b.json', '{"prod":{"Account":null,"account":"tenant_a"}}'),
             ('container-shadow', 'b.json', '{"prod":{"Account":{},"account":"tenant_a"}}'),
             ('array', 'b.json', '{"prod":[{"account":"tenant_a"}]}'),
-            ('alias', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: *d\n'),
+            ('alias-sibling', 'b.yaml', 'defaults: &d {account: tenant_a}\ndev: *d\n'),
+            ('alias-null-override', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d, account: null}\n'),
+            ('alias-unknown-case', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d, Account: null}\n'),
+            ('alias-cycle', 'b.yaml', 'defaults: &d {child: *d}\nprod: {account: tenant_a}\n'),
+            ('alias-missing', 'b.yaml', 'prod: {account: *missing}\n'),
+            ('alias-cross-document', 'b.yaml', 'value: &a tenant_a\n---\nprod: {account: *a}\n'),
+            ('alias-duplicate-merge', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d, <<: *d}\n'),
+            ('alias-expansion-budget', 'b.yaml', alias_bomb),
             ('documents', 'b.yaml', 'prod: {account: tenant_a}\n---\nprod: {account: tenant_b}\n'),
             ('array-tables', 'b.toml', '[[prod]]\naccount="tenant_a"\n'),
         ):
