@@ -529,6 +529,15 @@
   местах: AWS key ID + secret, `client_id` + `client_secret` + tenant, хост БД + пользователь +
   пароль. Сейчас верификатор ищет пару только в контексте рядом с находкой. Строится поверх
   сквозного индекса.
+  - [x] Подготовлены bounded ephemeral resolver и provider adapter: непрозрачные
+    acquisition scopes, seal после полного intake, exact literal roles, запрет
+    конфликтов/перебора и plaintext persistence. Unit-схемы AWS/OAuth/DB и mock HTTP
+    с AWS SigV4 проходят; CLI ещё не собирает компоненты между файлами.
+    [Контракт и остаток интеграции](wiki/Cross-File-Credentials.md),
+    `wiki/evidence/1.5.0-credential-components-20261116.json`.
+  - [ ] Подключить сбор компонентов и deferred verification к источникам и CLI,
+    сохранить source/revision isolation, ML/report/index/coverage/baseline guards;
+    подтвердить нативной матрицей. Persistent SQLite не должен хранить raw values.
 - [x] **Хронология наблюдений в Git.** Явный `--git-timeline` для `scan/repo/org` включает
   историю; все достижимые ветки и зафиксированный HEAD, события относительно первого родителя.
   - [x] Коммиты появления и повторного появления: hash, родители, имя автора, авторская дата
