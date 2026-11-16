@@ -750,6 +750,14 @@
     шесть CGO=0 builds проходят; quality IDs и GOROOT digest прежние. CI runner
     добавлен, hosted run не выполнен. History/timeline и другие adapters открыты.
     `wiki/evidence/1.5.0-cross-file-since-20261116.json`.
+    - [x] Исправлена late-Stat граница reader: исходные parent/leaf inode/type
+      и наличие/identity `.git` сохраняются до open, проверяются после open/read
+      и при повторном наблюдении. Восемь deterministic interleavings нового helper
+      отвергают прежнее принятие подмены; metadata budgets отражены в policy v2.
+      Native 1044/1044, full Go recheck, race/min-Go/lint и шесть сборок проходят;
+      quality IDs и GOROOT digest прежние. Один bucket timing failure сохранён
+      в evidence, отдельно 5/5 и полный повтор проходят; причина не объявлена
+      исправленной. `wiki/evidence/1.5.0-since-path-boundaries-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

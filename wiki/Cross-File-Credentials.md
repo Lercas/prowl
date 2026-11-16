@@ -318,8 +318,11 @@ acceptance реального provider account или hosted Git service.
 даже когда их каталоги отсутствуют в diff. Файлы с symlink в любом компоненте пути
 могут читаться только внутри закреплённого `os.Root` и не передают межфайловые роли;
 внешний alias оставляет неполноту. Archive members также не заимствуют scope.
-Сверка file identity между stat и открытым дескриптором отклоняет замену inode;
-это не обещание атомарности содержимого изменяемого файла.
+Reader сохраняет исходные Lstat identities родителей и файла, а также наличие
+и identity вложенных `.git`. Descriptor сравнивается с исходным regular file;
+границы повторно проверяются после open и после read. При следующем наблюдении
+того же parent/marker его identity должна совпасть с первым наблюдением.
+Это не обещание атомарности содержимого изменяемого файла.
 
 Selection ограничен прежними 64 MiB stdout Git; reader принимает максимум 10000
 выбранных scannable paths и 32 MiB суммарных исходных байтов. `--max-size`, excludes
@@ -338,3 +341,25 @@ Full Go, целевые race/min-Go/lint, шесть CGO=0 builds проходя
 и точные IDs прежние: 1661/2094, FP 61/982. Полный GOROOT digest прежний.
 Новый performance gate не выполнялся: изменения reader включаются только opt-in.
 Evidence — `evidence/1.5.0-cross-file-since-20261116.json`.
+
+
+### Исправление поздней проверки identity
+
+Первый reader (`2b11e6c`) делал Stat после Lstat-проверки symlink/nested-repo
+границы. При подмене пути между ними Stat и fstat могли оба увидеть новый inode,
+поэтому равенство этих двух поздних наблюдений не подтверждало исходную границу.
+Revision `selected-working-files-v2-stable-boundaries` сохраняет исходные identity
+и типы; nested-repo scope выбирается по тому же наблюдению `.git`, без второго
+независимого Lstat при назначении scope. Отсутствие marker также запоминается.
+Метаданные ограничены 100000 observations и 32 MiB суммарных байтов путей;
+лимиты включены в coverage policy. Публичного test hook или mutable callback нет.
+
+Восемь детерминированных перестановок воспроизводят прежний порядок Stat/open/fstat
+и отвергаются новым helper: замена leaf файлом/symlink, родителя каталогом/symlink,
+в том числе hardlink на тот же leaf inode, появление/исчезновение/замена `.git`.
+Это source-level replay, не модифицированный old-binary CLI run. Текущий чистый
+binary проходит прежние 1044 CLI checks, quality IDs и GOROOT digest сохранены,
+race/min-Go/lint и шесть сборок проходят. Полный Go-набор прошёл повторно после
+однократного timing failure существующего bucket-cancellation теста; отдельно
+он прошёл 5/5. Причина этого сбоя не установлена и исправленной не заявляется.
+Evidence — `evidence/1.5.0-since-path-boundaries-20261116.json`.

@@ -21,10 +21,12 @@ func readCredentialWorktree(ctx context.Context, ch chan<- model.Item, root stri
 	defer rootFS.Close()
 	ctx = credentialRootContext(ctx)
 	model.CoverageFrom(ctx).RegisterScope("components-worktree", root, struct {
-		Revision string
-		MaxItems int
-		MaxBytes int
-	}{"selected-working-files-v1", maxComponentRepositoryItems, maxComponentRepositoryBytes})
+		Revision             string
+		MaxItems             int
+		MaxBytes             int
+		MaxBoundaries        int
+		MaxBoundaryPathBytes int
+	}{"selected-working-files-v2-stable-boundaries", maxComponentRepositoryItems, maxComponentRepositoryBytes, maxComponentWorktreeObservations, maxComponentRepositoryBytes})
 	scopes := map[string]*credentialset.Scope{root: ctx.Value(credentialScopeKey{}).(*credentialset.Scope)}
 	selected := make([]string, 0, len(paths))
 	seen := make(map[string]bool)
@@ -41,6 +43,7 @@ func readCredentialWorktree(ctx context.Context, ch chan<- model.Item, root stri
 			return errors.New("working-tree component item limit reached")
 		}
 	}
+	observations := &worktreeObservations{}
 	var total int64
 	for _, path := range selected {
 		if err := ctx.Err(); err != nil {
@@ -49,29 +52,41 @@ func readCredentialWorktree(ctx context.Context, ch chan<- model.Item, root stri
 		// Check every traversed directory, including parents absent from the diff.
 		// Symlink aliases can be scanned within os.Root, but cannot lend roles.
 		linked := false
+		var before os.FileInfo
+		var boundaries []string
 		parts := strings.Split(path, "/")
 		for i := 1; i <= len(parts); i++ {
 			prefix := filepath.Join(parts[:i]...)
-			info, err := rootFS.Lstat(prefix)
-			if err != nil {
-				return err
+			info, err := observations.observe(rootFS, prefix)
+			if err != nil || info == nil {
+				return errors.New("working-tree path boundary unavailable")
 			}
+			boundaries = append(boundaries, prefix)
+			before = info
 			if info.Mode()&os.ModeSymlink != 0 {
 				linked = true
 				break
 			}
 			if i < len(parts) {
-				full := filepath.Join(root, prefix)
-				if _, exists := scopes[full]; exists {
-					continue
-				}
-				if err := nestedCredentialRoot(ctx, rootFS, root, full, scopes); err != nil {
+				marker := filepath.Join(prefix, ".git")
+				gitInfo, err := observations.observe(rootFS, marker)
+				if err != nil {
 					return err
+				}
+				boundaries = append(boundaries, marker)
+				full := filepath.Join(root, prefix)
+				if gitInfo != nil && scopes[full] == nil {
+					if len(scopes) >= maxComponentRepositoryItems {
+						return errors.New("working-tree repository scope limit reached")
+					}
+					scopes[full] = credentialset.NewScope()
 				}
 			}
 		}
-		before, err := rootFS.Stat(filepath.FromSlash(path))
-		if err != nil || !before.Mode().IsRegular() {
+		if linked {
+			before, err = rootFS.Stat(filepath.FromSlash(path))
+		}
+		if err != nil || before == nil || !before.Mode().IsRegular() {
 			return errors.New("working-tree component is not a readable regular file")
 		}
 		if before.Size() > maxBytes {
@@ -82,18 +97,12 @@ func readCredentialWorktree(ctx context.Context, ch chan<- model.Item, root stri
 			return errors.New("working-tree component byte limit reached")
 		}
 		data, err := readSourceFile(func() (*os.File, error) {
-			file, err := rootFS.OpenFile(filepath.FromSlash(path), os.O_RDONLY|sourceOpenFlags, 0)
-			if err != nil {
-				return nil, err
-			}
-			after, err := file.Stat()
-			if err != nil || !os.SameFile(before, after) {
-				_ = file.Close()
-				return nil, errors.New("working-tree component changed during open")
-			}
-			return file, nil
+			return observations.open(rootFS, filepath.FromSlash(path), before, boundaries)
 		}, min(maxBytes, maxComponentRepositoryBytes-total))
 		if err != nil {
+			return err
+		}
+		if err := observations.validate(rootFS, boundaries); err != nil {
 			return err
 		}
 		total += int64(len(data))
