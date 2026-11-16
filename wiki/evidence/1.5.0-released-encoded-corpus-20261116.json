@@ -1,0 +1,51 @@
+{
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn",
+  "sources": {
+    "parent": {
+      "commit": "fc5510e2c8b3fd4cad191a78f8dd80d1d2bbd77d",
+      "verified_blobs": 947,
+      "snapshot": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/parent.jsonl",
+      "sha256": "fd64599049c52b8551d69a5639bf783be3cb4537afc3a32c0802302a0a4e516d",
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/parent.log",
+      "log_receipt": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/parent.log",
+        "sha256": "5eede94548961755ca4175df5ffac74a57b6a2433cb73862872ded3e04aab2f5"
+      }
+    },
+    "candidate": {
+      "commit": "3e665a737af4f138cfcb4cd213f4a18c88f907e4",
+      "verified_blobs": 952,
+      "snapshot": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/candidate.jsonl",
+      "sha256": "6bf3c1b18567018d146917f8cecb32295b93189553ba7133ce70c873156abc3e",
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/candidate.log",
+      "log_receipt": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/candidate.log",
+        "sha256": "25b06d4a8fd944ca97e5796c076c16031113bc6885da949ea0afa155860452e4"
+      }
+    }
+  },
+  "files": 12044,
+  "changed_files": 13,
+  "diff": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-corpus-_wtk3rrn/diff.json",
+  "classification": "Only results_truncated -> base64_limit diagnostic code in 13 already incomplete files; all other serialized fields identical",
+  "findings_identical_for_all_files": true,
+  "changed_paths": [
+    "cmd/internal/buildid/testdata/a.elf.base64",
+    "cmd/internal/buildid/testdata/a.macho.base64",
+    "compress/gzip/testdata/issue6550.gz.base64",
+    "compress/testdata/e.txt",
+    "compress/testdata/pi.txt",
+    "debug/buildinfo/testdata/go117/go117.base64",
+    "debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+    "debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+    "debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+    "debug/macho/testdata/gcc-386-darwin-exec.base64",
+    "debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+    "debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+    "internal/trace/traceviewer/static/trace_viewer_full.html"
+  ],
+  "harness": {
+    "path": "scripts/quality/corpus_snapshot_test.go",
+    "sha256": "fdd7116676b9ffbb6feea37fa60b6bdcba4551642d8644cec35ea4ec6064e2d0"
+  }
+}

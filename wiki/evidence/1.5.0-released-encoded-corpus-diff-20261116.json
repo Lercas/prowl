@@ -1,0 +1,1029 @@
+[
+  {
+    "path": "cmd/internal/buildid/testdata/a.elf.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.elf.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 17025,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.elf.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.elf.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 17025,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.elf.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "cmd/internal/buildid/testdata/a.macho.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.macho.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 17965,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.macho.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.macho.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 17965,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/cmd/internal/buildid/testdata/a.macho.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "compress/gzip/testdata/issue6550.gz.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/gzip/testdata/issue6550.gz.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 87385,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/gzip/testdata/issue6550.gz.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/gzip/testdata/issue6550.gz.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 87385,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/gzip/testdata/issue6550.gz.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "compress/testdata/e.txt",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/e.txt",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 100003,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/e.txt",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/e.txt",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 100003,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/e.txt",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "compress/testdata/pi.txt",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/pi.txt",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 100003,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/pi.txt",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/pi.txt",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 100003,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/compress/testdata/pi.txt",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/buildinfo/testdata/go117/go117.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/buildinfo/testdata/go117/go117.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 1564142,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/buildinfo/testdata/go117/go117.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/buildinfo/testdata/go117/go117.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 1564142,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/buildinfo/testdata/go117/go117.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11225,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11225,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-386-darwin-exec-with-rpath.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11245,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11245,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/clang-amd64-darwin-exec-with-rpath.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 38657,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 38657,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/fat-gcc-386-amd64-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/gcc-386-darwin-exec.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-386-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 16785,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-386-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-386-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 16785,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-386-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11352,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11352,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec-with-bad-dysym.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11353,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 11353,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/debug/macho/testdata/gcc-amd64-darwin-exec.base64",
+          "incomplete": true
+        }
+      ]
+    }
+  },
+  {
+    "path": "internal/trace/traceviewer/static/trace_viewer_full.html",
+    "parent": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/internal/trace/traceviewer/static/trace_viewer_full.html",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 2618942,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "results_truncated",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/internal/trace/traceviewer/static/trace_viewer_full.html",
+          "incomplete": true
+        }
+      ]
+    },
+    "candidate": {
+      "secrets_revealed": false,
+      "scope": [],
+      "filtered": false,
+      "schema_version": "1.4",
+      "complete": false,
+      "completion_reason": "incomplete",
+      "count": 1,
+      "findings": [
+        {
+          "detector": "scan",
+          "type": "results_truncated",
+          "confidence": 0,
+          "severity": "info",
+          "source": "code",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/internal/trace/traceviewer/static/trace_viewer_full.html",
+          "line": 0,
+          "col": 0,
+          "redacted": "",
+          "stage": "intake",
+          "rationale": "a candidate, decoding, or normalization limit was reached for this file; some secrets may not be reported"
+        }
+      ],
+      "truncated": true,
+      "stats": {
+        "processed": 1,
+        "bytes": 2618942,
+        "skipped": 1,
+        "diagnostic_count": 1
+      },
+      "diagnostics": [
+        {
+          "code": "base64_limit",
+          "path": "/Users/sugar/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.27.4.darwin-arm64/src/internal/trace/traceviewer/static/trace_viewer_full.html",
+          "incomplete": true
+        }
+      ]
+    }
+  }
+]

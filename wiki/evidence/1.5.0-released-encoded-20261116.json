@@ -1,0 +1,205 @@
+{
+  "schema_version": "prowl-released-encoded-v1",
+  "date": "2026-11-16",
+  "status": "local_released_pragma_structure_and_encoding_contracts_qualified",
+  "source_base": "fc5510e2c8b3fd4cad191a78f8dd80d1d2bbd77d",
+  "initial_runtime_commit": "14035d2",
+  "qualified_core_commit": "3e665a737af4f138cfcb4cd213f4a18c88f907e4",
+  "qualified_runtime_commit": "7b42951c3e7e6799c705c843395ca0e6b5d55c4f",
+  "core_to_final_tool_delta": [
+    "tool/cmd/prowl/rules_cmd.go",
+    "tool/internal/doctor/doctor.go"
+  ],
+  "binary": {
+    "path": "/tmp/prowl-remaining-fixtures-qualified-20261116-bin",
+    "sha256": "b06b075cfd76daccc7f89c44bb17370ced91ca66f1105c39bee1a584c3eb167f"
+  },
+  "buildinfo": "/tmp/prowl-remaining-fixtures-qualified-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=7b42951c3e7e6799c705c843395ca0e6b5d55c4f\n\tbuild\tvcs.time=2026-11-16T03:56:42Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "before": {
+      "path": "/tmp/prowl-remaining-fixtures-before-20261116.log",
+      "sha256": "b01bc26a6e1845016df06e8d0afad4e28102ffa31c234872ed36db1cd8f21434"
+    },
+    "restored": {
+      "path": "/tmp/prowl-remaining-fixtures-restored-20261116.log",
+      "sha256": "5e7bc3e23d95bfe616c04788082e3e43e5ff01972395d6adad7e9c8934ed9927"
+    },
+    "corrected": {
+      "path": "/tmp/prowl-remaining-fixtures-corrected-20261116.log",
+      "sha256": "dcd3f980e7167f56183a721cd35e5dccdbb24e7a0691ec01154f23e707059030"
+    },
+    "reference": {
+      "path": "/tmp/prowl-remaining-fixtures-reference-20261116.log",
+      "sha256": "89e3c72700ab2b57d55cb8bc2daffc791db33869f976f55ef4865716ecb41490"
+    },
+    "final-go": {
+      "path": "/tmp/prowl-remaining-fixtures-final-go-20261116.log",
+      "sha256": "b4206a414f3313948dc2e523436c006bff93142b913aee0c5561f63b8058ce1f"
+    },
+    "final-race": {
+      "path": "/tmp/prowl-remaining-fixtures-final-race-20261116.log",
+      "sha256": "946a99a942db16fe04a6155bffd5d11ffe549d857af7e080e78261745453146b"
+    },
+    "final-min-go": {
+      "path": "/tmp/prowl-remaining-fixtures-final-min-go-20261116.log",
+      "sha256": "aebe5eaaeda7f112eb89550b9c153b9e9c44dec53ab60ef3e3fabe4b96eca119"
+    },
+    "ui-go": {
+      "path": "/tmp/prowl-remaining-fixtures-ui-go-20261116.log",
+      "sha256": "7f4b7800f0cf4672f65d6a1c40339193aadbd3602778cce34f9034e4521e9933"
+    },
+    "qualified-lint": {
+      "path": "/tmp/prowl-remaining-fixtures-qualified-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "qualified-build": {
+      "path": "/tmp/prowl-remaining-fixtures-qualified-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "qualified-native": {
+      "path": "/tmp/prowl-remaining-fixtures-qualified-native-20261116.log",
+      "sha256": "bfa76e83919484ae877ec4446ffe9b55fb467bef080fce212062c5ade7ea8d21"
+    },
+    "qualified-quality": {
+      "path": "/tmp/prowl-remaining-fixtures-qualified-quality-20261116.log",
+      "sha256": "79b225a51b4a4c1ae06b382a7d0bc66de98031ae5ed8767a6e917092dbc72394"
+    }
+  },
+  "native": {
+    "passed": 232,
+    "report": "wiki/evidence/1.5.0-released-encoded-native-20261116.json",
+    "network_boundary": "sandbox-exec (version 1)(allow default)(deny network*)"
+  },
+  "ui": {
+    "detectors": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-ui-s3q6rd77/detectors.log",
+      "sha256": "05d7c2a63d11455acad7fe95b22ad8233a198c60d125f8bc01fa456412d67739",
+      "exit": 0
+    },
+    "doctor": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-remaining-ui-s3q6rd77/doctor.log",
+      "sha256": "f32320f76822ea821cd49e16e0ccdfcebb97356ae1e0313bf92b2f8cca984b84",
+      "exit": 0
+    },
+    "network_boundary": "sandbox-exec deny network*"
+  },
+  "reference": {
+    "commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "original_tests_passed": 15,
+    "fixtures": [
+      {
+        "path": "tool/internal/detect/jwt_structure_test.go",
+        "original_sha256": "a70f7d246d6510edc9c541d709b046637affe2f94172f36af90cc874ce822e4b",
+        "current_sha256": "a70f7d246d6510edc9c541d709b046637affe2f94172f36af90cc874ce822e4b"
+      },
+      {
+        "path": "tool/internal/scan/encoding_test.go",
+        "original_sha256": "75c096440bb87b2567113200cf72255479e776a4f4df95f5d6a2b7bf375a1e1b",
+        "current_sha256": "858c848eaa03a5f29a83b57f14763e4a2e82f270bc3cb70c304fd0447cef7091"
+      },
+      {
+        "path": "tool/internal/scan/literal_roles_test.go",
+        "original_sha256": "e7d2a5aa9a8850be04e47eea05c0352080ed22b652c3a29015a86c4edbc880cd",
+        "current_sha256": "5e4ac497eb775ab97f8bb1a87795ec6c7ebbeea3e372e10452e3a55b673a1472"
+      },
+      {
+        "path": "tool/internal/scan/pragmas_test.go",
+        "original_sha256": "034922de262c73f36fb53ad0f36904ba936c89e39eedae0a455c32634148f1a9",
+        "current_sha256": "cc9ad3d9802ff6201de1e931ec05c56cf44d64af3b6ccd1e340fcf26bfff24ec"
+      }
+    ],
+    "adaptations": [
+      "immutable Pipeline API",
+      "explicit qualified 51-feature model and shipped threshold 0.3 instead of legacy 0.5",
+      "ignore service coverage markers in unsupported YAML credential counts",
+      "short Unicode password follows intentional 1.5 short-password support",
+      "physical YAML inventory API replaces deleted helper; 18000 physical scalar count retained"
+    ],
+    "corrected_existing_unit_fixtures": [
+      "Python comment uses # instead of //",
+      "synthetic compact JWS signature has a decodable Base64URL length"
+    ]
+  },
+  "quality": {
+    "passed": true,
+    "secret_hits": 1560,
+    "secrets": 2094,
+    "false_positive_hits": 57,
+    "hard_negatives": 982,
+    "lost_positive_ids": [
+      "pb-03032",
+      "pb-05640",
+      "pb-23840"
+    ],
+    "invalid_signature_examples": [
+      {
+        "id": "pb-03032",
+        "token_sha256": "d1e36767ebada0ceb24e95afc3017777d3fe19f6826bd1909420e8ce5f293e92",
+        "signature_length": 57,
+        "signature_length_mod_4": 1,
+        "classification": "signature segment is not decodable Base64URL; no claim about cryptographic signature validity"
+      },
+      {
+        "id": "pb-05640",
+        "token_sha256": "4aaa53135faf259b8a208bdc5aa218939316ab425b7fbd5e2ddb7962679367bf",
+        "signature_length": 45,
+        "signature_length_mod_4": 1,
+        "classification": "signature segment is not decodable Base64URL; no claim about cryptographic signature validity"
+      },
+      {
+        "id": "pb-23840",
+        "token_sha256": "b6c42fd802c2680e4148ff2a0cc3a6eff06c6e84dca3765bf449f950df501a90",
+        "signature_length": 45,
+        "signature_length_mod_4": 1,
+        "classification": "signature segment is not decodable Base64URL; no claim about cryptographic signature validity"
+      }
+    ],
+    "all_other_ids_unchanged": true,
+    "dataset_and_baseline_unchanged": true,
+    "report": "wiki/evidence/1.5.0-released-encoded-quality-20261116.json"
+  },
+  "corpus": {
+    "report": "wiki/evidence/1.5.0-released-encoded-corpus-20261116.json",
+    "diff": "wiki/evidence/1.5.0-released-encoded-corpus-diff-20261116.json",
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "all_findings_and_other_fields_identical": true,
+    "only_difference": "13 diagnostic codes results_truncated -> base64_limit",
+    "parent_digest": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "candidate_digest": "d825686eaa54df100925e4e5499e7b42328bf4b2b855bc1afa1842408ab38ae2"
+  },
+  "performance": {
+    "report": "wiki/evidence/1.5.0-released-encoded-performance-20261116.json",
+    "ratios": {
+      "ns/op": 1.1804715200484681,
+      "B/op": 0.977087817745426,
+      "allocs/op": 1.0197643645285568
+    },
+    "passed": true
+  },
+  "validation_scope": {
+    "full_go_race_minimum_go": "qualified_core_commit",
+    "core_minimum_go": "1.26.11 detect/scan",
+    "final_ui_go": "cmd/prowl and doctor at qualified_runtime_commit",
+    "final_lint": "all tool at qualified_runtime_commit",
+    "source_equivalence": "only two UI Go files changed after core qualification; scan/detect source unchanged"
+  },
+  "bounds": {
+    "yaml_alias_free_values": 100000,
+    "yaml_with_aliases_values": 10000,
+    "yaml_retained_content_bytes": 8388608,
+    "yaml_document_bytes": 1048576,
+    "existing_node_depth_bounds_unchanged": true
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "limits": [
+    "Local CLI/source qualification, not hosted CI or live provider acceptance",
+    "Rebuilt reference tag, not downloaded published release",
+    "No publication, installed CLI activation, deployment or user model replacement"
+  ]
+}

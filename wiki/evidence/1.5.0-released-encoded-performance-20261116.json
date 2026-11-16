@@ -1,0 +1,107 @@
+{
+  "policy": {
+    "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+    "go": "go1.27.4",
+    "pairs": 3,
+    "max_time_ratio": 1.2,
+    "max_bytes_ratio": 1.25,
+    "max_allocs_ratio": 1.25,
+    "min_corpus_files": 1000,
+    "min_corpus_bytes": 67108864
+  },
+  "samples": {
+    "reference": [
+      {
+        "ns/op": 10286724875.0,
+        "B/op": 583404568.0,
+        "allocs/op": 1160693.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      {
+        "ns/op": 10389740708.0,
+        "B/op": 575690360.0,
+        "allocs/op": 1160852.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      },
+      {
+        "ns/op": 10333070833.0,
+        "B/op": 578518792.0,
+        "allocs/op": 1160776.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 1132.0
+      }
+    ],
+    "candidate": [
+      {
+        "ns/op": 12222262458.0,
+        "B/op": 555272040.0,
+        "allocs/op": 1183812.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 420.0
+      },
+      {
+        "ns/op": 12060195125.0,
+        "B/op": 565263664.0,
+        "allocs/op": 1183680.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 420.0
+      },
+      {
+        "ns/op": 12197895833.0,
+        "B/op": 565320080.0,
+        "allocs/op": 1183718.0,
+        "corpus-files": 12044.0,
+        "corpus-bytes": 132407542.0,
+        "findings/op": 420.0
+      }
+    ]
+  },
+  "status": "passed",
+  "runtime": {
+    "go": "go1.27.4",
+    "os": "darwin",
+    "arch": "arm64",
+    "gomaxprocs": 2
+  },
+  "corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "sha256": "c26013c29e692dffa4a495c2845f1888d5f68e82edc1937463938a1cff0c5507"
+  },
+  "harness_sha256": "d5ccb610c1eea372fac993cc8f98b572f27516ae7efd8274af35329b1425d2bf",
+  "commits": {
+    "reference": "e0f05cd3bb4195ddf602d58614c09d31d435a024",
+    "candidate": "3e665a737af4f138cfcb4cd213f4a18c88f907e4"
+  },
+  "medians": {
+    "reference": {
+      "ns/op": 10333070833.0,
+      "B/op": 578518792.0,
+      "allocs/op": 1160776.0,
+      "corpus-files": 12044.0,
+      "corpus-bytes": 132407542.0,
+      "findings/op": 1132.0
+    },
+    "candidate": {
+      "ns/op": 12197895833.0,
+      "B/op": 565263664.0,
+      "allocs/op": 1183718.0,
+      "corpus-files": 12044.0,
+      "corpus-bytes": 132407542.0,
+      "findings/op": 420.0
+    }
+  },
+  "ratios": {
+    "ns/op": 1.1804715200484681,
+    "B/op": 0.977087817745426,
+    "allocs/op": 1.0197643645285568
+  },
+  "regressions": []
+}

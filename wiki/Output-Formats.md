@@ -73,7 +73,7 @@ The trailing tag is conditional, in priority order:
 - A **checksum-verified** hit — one whose value passed a checksum (such as GitHub CRC, stage `L1-checksum`; confidence ~`0.99`) — is tagged `✓ checksum` (green). This is consistency evidence, not proof of provider liveness.
 - A parsed JWT uses structural nomination, without a checksum badge or an authenticity claim. Its signature is not verified by L1.
 - Without verification or a checksum, a finding whose confidence is below `0.7` shows that confidence as a percentage (e.g. `60%`).
-- High-confidence regex matches (`0.7`–`0.98`) carry no tag — a bare row already means a confident match.
+- High-confidence candidates (`0.7`–`0.98`) carry no tag. A bare row is not a provider liveness claim.
 
 ### Private-key redaction
 

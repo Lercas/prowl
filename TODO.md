@@ -127,6 +127,17 @@
       `wiki/evidence/1.5.0-released-boundaries-20261116.json`.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
+    - [x] Восстановлены released suppression/encoded boundaries: allow-маркер только
+      в operator comment, JWT structure без checksum/authenticity claim, child proof
+      сохраняет parent nomination без повышения reported confidence, CRC-факт
+      проходит через Base64 без demotion; Base64 limit имеет свой diagnostic code.
+      Alias-free YAML: 9000 maps/18000 scalars, alias expansion сохраняет 10000 bound.
+      15 original tests проходят на 1.4.0; native CLI 232/232 под OS network deny,
+      full Go/race/min-Go/lint проходят. Quality 1560/2094 и прежние 57 FP: исключены
+      три структурно невалидных JWT, без смены baseline. Во всём GOROOT findings
+      прежние; ровно 13 diagnostic codes уточнены. Performance +18,05% при +20%.
+      [Контракт](wiki/Released-Suppression-and-JWT.md),
+      `wiki/evidence/1.5.0-released-encoded-20261116.json`.
     - [x] Декодированный typed primary проверяется с companions собственного blob,
       без заимствования внешнего текста или соседнего blob. Base64/nested Base64,
       hex, gzip/zlib+Base64 и Base64-of-hex: CLI 228/228 с ML, JSON/SARIF,
