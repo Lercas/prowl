@@ -14,7 +14,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/rules"
-	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"gopkg.in/yaml.v3"
 )
@@ -32,10 +31,18 @@ func Load(timeout time.Duration, paths ...string) (*Set, error) {
 // passes the zero value; `verifiers update <remote>` passes TrustUntrusted, refusing a third-party
 // set unless --allow-unsigned is given.
 func LoadWithPolicy(timeout time.Duration, policy LoadPolicy, paths ...string) (*Set, error) {
+	return LoadWithPolicyAndOptions(timeout, policy, Options{Concurrency: currentConcurrency()}, paths...)
+}
+
+func LoadWithOptions(timeout time.Duration, options Options, paths ...string) (*Set, error) {
+	return LoadWithPolicyAndOptions(timeout, LoadPolicy{}, options, paths...)
+}
+
+func LoadWithPolicyAndOptions(timeout time.Duration, policy LoadPolicy, options Options, paths ...string) (*Set, error) {
 	if timeout <= 0 {
 		timeout = 8 * time.Second
 	}
-	s := &Set{client: safehttp.Client(timeout), sem: make(chan struct{}, concurrency)}
+	s := NewWithOptions(timeout, options)
 	var errs []string
 	seen := map[string]string{}
 	// add parses one verifier file. signed reports whether the file came from a manifest-verified set,

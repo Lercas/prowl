@@ -38,6 +38,7 @@ func cmdImage(args []string) int {
 		fmt.Fprintln(os.Stderr, "config error:", err)
 		return 2
 	}
+	ctx = source.WithFetchTimeout(ctx, c.cloneTimeout)
 	det, tax, err := loadDetector(c, cfg)
 	if err != nil {
 		logx.Error("failed to load detector", "err", err)

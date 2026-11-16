@@ -148,10 +148,10 @@ func TestAPITransportAndCloseErrorsArePrivateAndIncomplete(t *testing.T) {
 }
 
 func TestPageConfigurationHasHardUpperBound(t *testing.T) {
-	previous := maxPages
-	t.Cleanup(func() { maxPages = previous })
+	previous := currentMaxPages()
+	t.Cleanup(func() { SetMaxPages(previous) })
 	SetMaxPages(hardMaxPages + 100)
-	if maxPages != hardMaxPages {
+	if currentMaxPages() != hardMaxPages {
 		t.Fatal("page cap unbounded")
 	}
 }

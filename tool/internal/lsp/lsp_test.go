@@ -203,7 +203,7 @@ func TestConfigTuningHonoredInLSP(t *testing.T) {
 		}
 	}
 
-	// Raise generic_entropy_min to 7.5 (as applyTuning would); the value's entropy (~5.0) is now below
+	// Raise the legacy test engine entropy floor to 7.5; the value's entropy (~5.0) is now below
 	// the threshold, so it must be suppressed.
 	detect.ApplyTuning(7.5, 0, 0)
 	tuned := scanDiagnostics(e, uri, genericSecretLine)

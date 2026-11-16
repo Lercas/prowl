@@ -582,6 +582,8 @@ func splitCSV(s string) []string {
 }
 
 type commonFlags struct {
+	orgMaxPages, verifyConcurrency           int
+	cloneTimeout                             time.Duration
 	command                                  string
 	coverage                                 *model.Coverage
 	identityKeyFile                          string

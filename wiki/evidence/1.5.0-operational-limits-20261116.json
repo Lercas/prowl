@@ -1,0 +1,203 @@
+{
+  "recorded_at": "2026-11-16T13:24:35.993116+00:00",
+  "scope": "Isolate forge page limit, source acquisition timeout and verifier concurrency per CLI invocation; preserve legacy APIs with atomic entry snapshots. Full 1.5.0 migration remains open.",
+  "runtime_source_commit": "188001754eb78024f702e9bfd6c17a44fdb8a0f4",
+  "runtime_tool_tree": "0e255e06855ef92dde32af1cc7e7fbf9c87b40b0",
+  "binary": {
+    "path": "/tmp/prowl-operational-limits-qualified-20261116-bin",
+    "sha256": "9051fd50a00f46494663204806bcb145be0e87b403f88eb15f23f996e5dff594"
+  },
+  "logs": {
+    "go": {
+      "path": "/tmp/prowl-operational-limits-go-20261116.log",
+      "sha256": "efaf8cdbaecee205801eb5a21034a1cd17835ef63534ab892054328f79491081"
+    },
+    "race": {
+      "path": "/tmp/prowl-operational-limits-race-20261116.log",
+      "sha256": "9e7b2f2459da4b7e12205a9f0c1c3fcb393c18c1b572328a4414d073d0d4041e"
+    },
+    "race-wiring": {
+      "path": "/tmp/prowl-operational-limits-race-wiring-20261116.log",
+      "sha256": "12c28df34c729b70084e438caee6c5506e2d69a21977659945579cb09e091872"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-operational-limits-min-go-20261116.log",
+      "sha256": "374ab70ee332dc46e2533b030e07de2526b2fc705506585a8ae7b727161f5102"
+    },
+    "lint": {
+      "path": "/tmp/prowl-operational-limits-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-operational-limits-native-20261116.log",
+      "sha256": "d42d4a62516803a62c071ce2d9da696931caef446703dae15c5badb4d4fff048"
+    },
+    "loaded-native": {
+      "path": "/tmp/prowl-operational-limits-loaded-native-20261116.log",
+      "sha256": "23bb11c56950adab256d4c8dff13be7babb2341f1bae3aecf8dfa124b15d6004"
+    },
+    "config-native": {
+      "path": "/tmp/prowl-operational-limits-config-native-20261116.log",
+      "sha256": "0ba643ecbc9d0bd54adc6cb45b267bced301a13fd1692eccebd41d76f0d0d9cd"
+    },
+    "quality": {
+      "path": "/tmp/prowl-operational-limits-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "build-info": {
+      "path": "/tmp/prowl-operational-limits-build-info-20261116.log",
+      "sha256": "ac04645cf2042850fbe800dcee0beb9cab7d8ed8475e93c03d07fc4a59d9d2cb"
+    },
+    "legacy": {
+      "path": "/tmp/prowl-operational-limits-legacy-20261116.log",
+      "sha256": "22dd0bed3c02f10f11a71dd2d2f030985ffaba91ac8cd65c6357798c9d80e9c3"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-operational-limits-targeted-20261116.log",
+      "sha256": "f53036c4e0ae8baa28d636f808a1cf105a667e052ca7521dbca6ac0fcc8ac2d2"
+    },
+    "wiring": {
+      "path": "/tmp/prowl-operational-limits-wiring-20261116.log",
+      "sha256": "5df20bf5eee81e1760db3865212254a1fac1b029a265a0f96947b9c528774fc9"
+    }
+  },
+  "controlled_regression": {
+    "source_parent": "b5977068631dd7c2dddd867cee9aac6b7235d995",
+    "test": "TestListingRetainsEntryPageLimit",
+    "before": "SetMaxPages(1) inside page-one response truncated an in-flight listing that entered at cap=2; only one repository returned with exceeded-1-pages error.",
+    "after": "Both repositories retained, with API/inventory scopes using entry cap=2. Explicit cap=1 still retains incomplete partial inventory.",
+    "log": {
+      "path": "/tmp/prowl-operational-limits-legacy-20261116.log",
+      "sha256": "22dd0bed3c02f10f11a71dd2d2f030985ffaba91ac8cd65c6357798c9d80e9c3"
+    }
+  },
+  "contract": {
+    "forge": "Explicit Options default 200, hard cap 4096. A single captured page limit drives pagination and both scopes.",
+    "source": "WithFetchTimeout value in acquisition context; default 5 minutes, positive operation timeout wins, parent cancellation/deadline preserved. Legacy public operations snapshot defaults at entry.",
+    "verification": "Explicit Options default 8; each constructor owns a fixed semaphore. Definition digest remains definition-only.",
+    "cli_lsp": "Configuration populates invocation-local value settings. Production CLI/LSP no longer call legacy setters. LSP construction does not alter other callers.",
+    "legacy": "Atomic setters affect future legacy calls only; unchanged exported legacy signatures.",
+    "absence": "Partial listings, acquisition failures and verification errors preserve incomplete guards. No remote absence certification is inferred."
+  },
+  "validation": {
+    "full_go": "passed, Go 1.27.4",
+    "full_race_packages": [
+      "internal/forge",
+      "internal/verify",
+      "internal/source"
+    ],
+    "targeted_race_packages": [
+      "cmd/prowl",
+      "internal/lsp"
+    ],
+    "minimum_go": "Go 1.26.11 full forge/verify/source/cmd/lsp suites passed",
+    "full_lint": "passed, 0 issues",
+    "actual_provider_concurrency": "Owned loopback server observed maximum 2 simultaneous calls after later legacy setting changed to 1.",
+    "owned_command_deadlines": "Clone, bucket sync and repository metadata use selected budget; explicit clone timeout still wins."
+  },
+  "native": {
+    "operational": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-operational-native-wljaj8wb/evidence.json",
+        "sha256": "62d2a19938cad947bcb10daa392a0f870f4a876a40c231a217d258f65f958b8b"
+      },
+      "passed": 41,
+      "checks": 41,
+      "network": "OS denies all network except owned loopback"
+    },
+    "loaded_policy": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-loaded-policy-native-j2xpl5zb/evidence.json",
+        "sha256": "d74ab050a9ab00d27b5bca046d044a96673f6ea2a3112ee169f980e8585f9f35"
+      },
+      "passed": 134,
+      "checks": 134,
+      "network": "OS deny outside loopback, checked by denied bind; owned loopback verifier and sidecar only"
+    },
+    "configuration_policy": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-config-policy-native-oy1o2899/evidence.json",
+        "sha256": "cc117a6a33379889dcfec6ad757335fd31dd87d016aa63c2d22d0ac3741523d9"
+      },
+      "passed": 289,
+      "checks": 289,
+      "network": "OS deny, checked by loopback bind"
+    }
+  },
+  "native_runner": {
+    "path": "scripts/check_operational_limits_native.py",
+    "sha256": "0cb1060ba5f5eeafa82864503a3431fa5eb7cf4cabf0c11c6121bd9545cafb2d"
+  },
+  "quality": {
+    "artifact": {
+      "path": "/tmp/prowl-operational-limits-quality-20261116.json",
+      "sha256": "ef28e5fdcb73890df8e53ceabe3ebf9eefc269edffad94a0130ae80435e5f84f"
+    },
+    "equal_to_parent_except_binary_sha256": true,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-operational-limits-cross-build-20261116/builds.json",
+      "sha256": "f0eb345206e2f5729612f57f03f4236dc7edc352b7a5b2ad70e28a80a6b16857"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "2908cfa990a5ed4d8a1782a0648ebfc881abb9cee476332dd57e84bded4305a8",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "9051fd50a00f46494663204806bcb145be0e87b403f88eb15f23f996e5dff594",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "a1b71b42096d70f535007747dd40dfe36684cf32433b7661b252643c09e0afc8",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "707f28fdce5d8d5ebfdceff4a4df0f944578ee5201f982d485de795ad30bfb51",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "074b90f7ae73ee95f06e58b5ba29e8d5293f51643791f144852f6cfbb08fd748",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-operational-limits-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "d98635d2ad225101b2cc43068b6616264194c380db3f2ae50ff5934f270e141b",
+        "executed": false
+      }
+    ],
+    "foreign_binaries_executed": false
+  },
+  "not_rerun": {
+    "GOROOT_digest_and_performance": "No detector/scan/rules/model runtime source changes in this patch. Current CLI quality gate rerun; prior corpus/performance records are historical, not requalified here."
+  },
+  "remaining_boundaries": [
+    "full TODO 1.5.0 migration",
+    "real external provider/registry/cloud-bucket qualification",
+    "final-source Docker/release artifact factory",
+    "native foreign-platform execution and publication"
+  ],
+  "publication": false
+}

@@ -10,7 +10,6 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/detect"
-	"github.com/Lercas/prowl/tool/internal/forge"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
@@ -171,9 +170,9 @@ func loadVerifySet(c commonFlags) (*verify.Set, error) {
 	}
 	var vs *verify.Set
 	if len(dirs) == 0 {
-		vs, err = verify.LoadEmbedded(c.verifyTimeout, bundledverifiers.Files)
+		vs, err = verify.LoadEmbeddedWithOptions(c.verifyTimeout, bundledverifiers.Files, verify.Options{Concurrency: c.verifyConcurrency})
 	} else {
-		vs, err = verify.Load(c.verifyTimeout, dirs...)
+		vs, err = verify.LoadWithOptions(c.verifyTimeout, verify.Options{Concurrency: c.verifyConcurrency}, dirs...)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("--verify needs a complete verifier set: %w", err)
@@ -218,6 +217,7 @@ func rootContext(c commonFlags) (context.Context, context.CancelFunc) {
 	c.coverage.SetIdentityScope(c.identityKey)
 	ctx, stop := signal.NotifyContext(model.WithCoverage(context.Background(), c.coverage), scanSignals()...)
 	ctx = source.WithStateDirectory(ctx, c.indexDir)
+	ctx = source.WithFetchTimeout(ctx, c.cloneTimeout)
 	if c.timeout > 0 {
 		tctx, cancel := context.WithTimeout(ctx, c.timeout)
 		return tctx, func() { cancel(); stop() }
@@ -284,10 +284,11 @@ func loadConfig(c *commonFlags) (*config.Config, error) {
 	if !c.explicitFlags["--workers"] && c.workers == 0 && cfg.Performance.Workers > 0 {
 		c.workers = cfg.Performance.Workers
 	}
-	// Apply legacy operational limits. Detection thresholds belong to loadDetector.
+	// Capture operational settings on this invocation. Detection thresholds belong to loadDetector.
 	// Flags win: the ML threshold and verify timeout come from config only if unset.
-	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
-	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
+	c.orgMaxPages = cfg.Limits.OrgMaxPages
+	c.verifyConcurrency = cfg.Performance.VerifyConcurrency
+	c.cloneTimeout = 0
 	if !c.mlThresholdSet && cfg.Performance.MLThreshold > 0 {
 		c.mlThreshold = cfg.Performance.MLThreshold
 	}
@@ -297,7 +298,7 @@ func loadConfig(c *commonFlags) (*config.Config, error) {
 		}
 	}
 	if d, err := time.ParseDuration(cfg.Limits.CloneTimeout); err == nil && d > 0 {
-		source.SetCloneTimeout(d)
+		c.cloneTimeout = d
 	}
 	return cfg, nil
 }

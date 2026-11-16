@@ -45,6 +45,7 @@ func BucketBudget(maxSize int64) int64 {
 // Retried for transient failures, each attempt bounded by its own timeout; the CLI resumes from disk,
 // so a retry reuses the partial download. Ctx cancellation aborts immediately and is never retried.
 func SyncBucket(ctx context.Context, uri, destDir string, budget int64, timeout time.Duration) error {
+	ctx = snapshotFetchTimeout(ctx)
 	if err := ValidateBucketTarget(uri); err != nil {
 		return err
 	}
@@ -76,7 +77,7 @@ func runSync(ctx context.Context, destDir string, budget int64, timeout time.Dur
 	if _, err := exec.LookPath(bin); err != nil {
 		return fmt.Errorf("%s (%q) is required to scan this bucket but is not on PATH; install it and configure your cloud credentials", label, bin)
 	}
-	perAttempt := fetchTimeout(timeout)
+	perAttempt := contextFetchTimeout(ctx, timeout)
 	err := resilience.Retry(ctx, 3, time.Second, 10*time.Second, func() error {
 		if _, err := measureBucketDir(ctx, destDir, budget, true); err != nil {
 			return resilience.Permanent(err)

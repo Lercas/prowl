@@ -8,28 +8,49 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/resilience"
 )
 
-// defaultFetchTimeout bounds a single remote-fetch attempt (clone / image pull / bucket sync) when
-// --timeout is unset. Overridable via config (limits.clone_timeout); set once at startup.
-var defaultFetchTimeout = 5 * time.Minute
+const DefaultFetchTimeout = 5 * time.Minute
 
-// SetCloneTimeout overrides the default per-attempt fetch deadline; a non-positive value is ignored.
+var legacyFetchTimeout atomic.Int64
+
+func init() { legacyFetchTimeout.Store(int64(DefaultFetchTimeout)) }
+
+// SetCloneTimeout changes defaults for future legacy source acquisitions.
 func SetCloneTimeout(d time.Duration) {
 	if d > 0 {
-		defaultFetchTimeout = d
+		legacyFetchTimeout.Store(int64(d))
 	}
 }
 
-// fetchTimeout returns the per-attempt deadline: the user's --timeout when set, else the default.
-func fetchTimeout(d time.Duration) time.Duration {
-	if d > 0 {
+type fetchTimeoutKey struct{}
+
+// WithFetchTimeout selects one acquisition's default, independent of legacy setters.
+// An explicit per-operation timeout still takes priority.
+func WithFetchTimeout(ctx context.Context, d time.Duration) context.Context {
+	if d <= 0 {
+		d = DefaultFetchTimeout
+	}
+	return context.WithValue(ctx, fetchTimeoutKey{}, d)
+}
+func snapshotFetchTimeout(ctx context.Context) context.Context {
+	if _, ok := ctx.Value(fetchTimeoutKey{}).(time.Duration); ok {
+		return ctx
+	}
+	return WithFetchTimeout(ctx, time.Duration(legacyFetchTimeout.Load()))
+}
+func contextFetchTimeout(ctx context.Context, explicit time.Duration) time.Duration {
+	if explicit > 0 {
+		return explicit
+	}
+	if d, ok := ctx.Value(fetchTimeoutKey{}).(time.Duration); ok {
 		return d
 	}
-	return defaultFetchTimeout
+	return time.Duration(legacyFetchTimeout.Load())
 }
 
 // CloneOpts configures a repository clone for scanning.
@@ -38,7 +59,7 @@ type CloneOpts struct {
 	Branch  string        // clone a single branch/tag (default: the remote's default branch)
 	Full    bool          // full history (needed for --history); default is a shallow depth-1 clone
 	Depth   int           // shallow depth override (0 = 1 when !Full)
-	Timeout time.Duration // per-attempt clone deadline (0 = defaultFetchTimeout)
+	Timeout time.Duration // per-attempt clone deadline (0 = acquisition default)
 }
 
 // CloneRepo clones a git repository into a temp directory for scanning, disabling the ext/file remote
@@ -46,6 +67,7 @@ type CloneOpts struct {
 // transports. Returns the checkout dir and a cleanup func. Retried for transient failures, each attempt
 // bounded by its own timeout; ctx cancellation aborts immediately and is never retried.
 func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), err error) {
+	ctx = snapshotFetchTimeout(ctx)
 	noop := func() {}
 	if !isCloneURL(o.URL) {
 		return "", noop, errors.New("unsupported repo URL (use https://, ssh://, or git@host:path)")
@@ -77,7 +99,7 @@ func CloneRepo(ctx context.Context, o CloneOpts) (dir string, cleanup func(), er
 	}
 	args = append(args, "--", o.URL, tmp) // "--" stops the URL being parsed as a flag
 
-	perAttempt := fetchTimeout(o.Timeout)
+	perAttempt := contextFetchTimeout(ctx, o.Timeout)
 	runErr := resilience.Retry(ctx, 3, 500*time.Millisecond, 5*time.Second, func() error {
 		// Each retry starts from a clean target dir: `git clone` refuses a non-empty destination, and a
 		// failed attempt can leave a partial tree behind.

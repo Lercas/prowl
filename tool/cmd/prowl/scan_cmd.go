@@ -65,6 +65,7 @@ func cmdCompare(args []string) int {
 		fmt.Fprintln(os.Stderr, "config error:", err)
 		return 2
 	}
+	ctx = source.WithFetchTimeout(ctx, c.cloneTimeout)
 	setupLogging(c)
 	if c.format != "pretty" && c.format != "json" {
 		logx.Error("compare supports only pretty or json output")
@@ -271,6 +272,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		fmt.Fprintln(os.Stderr, "config error:", err)
 		return 2
 	}
+	ctx = source.WithFetchTimeout(ctx, c.cloneTimeout)
 	setupLogging(c)
 	ocrEngine, err := setupOCR(c)
 	if err != nil {

@@ -96,7 +96,7 @@ func (w *repositoryDataWriter) Write(p []byte) (int, error) {
 	return n, err
 }
 func repositoryData(ctx context.Context, dir string, opts CloneOpts, writer io.Writer, limit int64, args ...string) error {
-	actx, cancel := context.WithTimeout(ctx, fetchTimeout(opts.Timeout))
+	actx, cancel := context.WithTimeout(ctx, contextFetchTimeout(ctx, opts.Timeout))
 	defer cancel()
 	cmd := gitCmd(actx, dir, args...)
 	_, err := ownedcmd.RunWithStdout(cmd, &repositoryDataWriter{writer, limit, cancel})
@@ -110,6 +110,7 @@ func repositoryData(ctx context.Context, dir string, opts CloneOpts, writer io.W
 // their own blob IDs; the collection's HEAD is never asserted as each historical blob's commit.
 // The returned context remains usable on metadata failure so readable files can still be scanned.
 func RepositoryContext(ctx context.Context, dir string, opts CloneOpts) (context.Context, error) {
+	ctx = snapshotFetchTimeout(ctx)
 	origin := repositoryOrigin{roots: []string{filepath.Clean(dir)}, url: RepositoryLocator(opts.URL)}
 	if physical, err := filepath.EvalSymlinks(dir); err == nil && physical != origin.roots[0] {
 		origin.roots = append(origin.roots, physical)

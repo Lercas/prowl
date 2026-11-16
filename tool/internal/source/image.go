@@ -91,6 +91,7 @@ func (b *imageBudget) addBytes(bodyBytes int64) bool {
 // config and EVERY layer's files as Items — a secret COPYd then rm'd survives in the earlier layer. Only
 // remote refs hit the network (SSRF-guarded); one anti-bomb budget is shared across all images.
 func Image(ctx context.Context, arg string, kind ImageInput, maxBytes int64, timeout time.Duration, exclude []string) (<-chan model.Item, *FinalIndex, error) {
+	ctx = snapshotFetchTimeout(ctx)
 	var err error
 	ctx, kind, err = imageContext(ctx, arg, kind, maxBytes, timeout, exclude)
 	if err != nil {
@@ -174,7 +175,7 @@ func resolveImages(ctx context.Context, arg string, kind ImageInput, timeout tim
 // pullRemote pulls a ref through the SSRF-guarded transport (blocks internal addrs like 169.254.169.254),
 // retried per-attempt. keepAlive isn't cancelled here — crane reuses the ctx for lazy reads — but returned.
 func pullRemote(ctx context.Context, ref string, timeout time.Duration) ([]v1.Image, func(), error) {
-	perAttempt := fetchTimeout(timeout)
+	perAttempt := contextFetchTimeout(ctx, timeout)
 	var (
 		img       v1.Image
 		keepAlive context.CancelFunc

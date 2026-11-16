@@ -20,7 +20,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/checkedio"
 	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/detect"
-	"github.com/Lercas/prowl/tool/internal/forge"
 	"github.com/Lercas/prowl/tool/internal/localfile"
 	"github.com/Lercas/prowl/tool/internal/logx"
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -29,7 +28,6 @@ import (
 	"github.com/Lercas/prowl/tool/internal/saferegex"
 	"github.com/Lercas/prowl/tool/internal/scan"
 	"github.com/Lercas/prowl/tool/internal/taxonomy"
-	"github.com/Lercas/prowl/tool/internal/verify"
 	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
@@ -162,7 +160,6 @@ func buildWithBundled(bundled bool) (*engine, error) {
 	if err := applyConfig(tax, cfg); err != nil {
 		return nil, err
 	} // Same policy validation as the CLI.
-	applyTuning(cfg) // detection thresholds + operational limits, exactly as loadConfig does
 	maxBytes := defaultMaxScanBytes
 	if cfg.Performance.MaxSize > 0 { // CLI --max-size parity: a .prowl.yaml can raise/lower the cap
 		maxBytes = int(cfg.Performance.MaxSize)
@@ -241,16 +238,6 @@ func enableResolvesToZero(cfg *config.Config, tax *taxonomy.Taxonomy) bool {
 		}
 	}
 	return true // a non-empty enable list left zero detectors active: total kill-switch
-}
-
-// applyTuning applies legacy process-wide operational limits. Detection thresholds
-// are explicit immutable settings on each workspace detector.
-func applyTuning(cfg *config.Config) {
-	if cfg == nil {
-		return
-	}
-	forge.SetMaxPages(cfg.Limits.OrgMaxPages)
-	verify.SetConcurrency(cfg.Performance.VerifyConcurrency)
 }
 
 // applyConfig filters the taxonomy by the config's enable/disable lists and appends its custom

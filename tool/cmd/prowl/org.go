@@ -54,6 +54,7 @@ func cmdOrg(args []string) int {
 		fmt.Fprintln(os.Stderr, "config error:", err)
 		return 2
 	}
+	ctx = source.WithFetchTimeout(ctx, c.cloneTimeout)
 	ocrEngine, err := setupOCR(c)
 	if err != nil {
 		logx.Error("OCR setup failed", "err", err)
@@ -99,10 +100,10 @@ func cmdOrg(args []string) int {
 	listed := startStage(c, "listing repositories")
 	if gists {
 		logx.Info("listing gists", "target", target)
-		urls, err = forge.ListGists(ctx, target)
+		urls, err = forge.ListGistsWithOptions(ctx, target, forge.Options{MaxPages: c.orgMaxPages})
 	} else {
 		logx.Info("listing repositories", "target", target)
-		urls, err = forge.ListRepos(ctx, target)
+		urls, err = forge.ListReposWithOptions(ctx, target, forge.Options{MaxPages: c.orgMaxPages})
 	}
 	listed()
 	var listingDiagnostics []model.Finding

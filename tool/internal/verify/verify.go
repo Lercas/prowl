@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -103,17 +104,36 @@ type Set struct {
 	sem       chan struct{} // bounds concurrent provider calls
 }
 
-// DefaultConcurrency bounds simultaneous verification HTTP calls. concurrency holds the active value,
-// overridable via config (performance.verify_concurrency); set once at startup before any verify.
+// DefaultConcurrency bounds simultaneous verification HTTP calls.
 const DefaultConcurrency = 8
 
-var concurrency = DefaultConcurrency
+var legacyConcurrency atomic.Int64
 
-// SetConcurrency overrides the live-verification concurrency; a non-positive value is ignored.
+func init() { legacyConcurrency.Store(DefaultConcurrency) }
+
+// SetConcurrency affects only future legacy constructors. Existing Sets retain their limiter.
 func SetConcurrency(n int) {
 	if n > 0 {
-		concurrency = n
+		legacyConcurrency.Store(int64(n))
 	}
+}
+func currentConcurrency() int { return int(legacyConcurrency.Load()) }
+
+type Options struct{ Concurrency int }
+
+func (o Options) concurrency() int {
+	if o.Concurrency > 0 {
+		return o.Concurrency
+	}
+	return DefaultConcurrency
+}
+
+// Concurrency reports this Set's fixed provider-call ceiling.
+func (s *Set) Concurrency() int {
+	if s == nil {
+		return 0
+	}
+	return cap(s.sem)
 }
 
 // Supports reports whether any verifier could match the type id.
@@ -716,8 +736,12 @@ func listCond(n int, cond string, ok func(int) bool) bool {
 
 // New returns an empty set with the given per-request timeout.
 func New(timeout time.Duration) *Set {
+	return NewWithOptions(timeout, Options{Concurrency: currentConcurrency()})
+}
+
+func NewWithOptions(timeout time.Duration, options Options) *Set {
 	if timeout <= 0 {
 		timeout = 8 * time.Second
 	}
-	return &Set{client: safehttp.Client(timeout), sem: make(chan struct{}, concurrency)}
+	return &Set{client: safehttp.Client(timeout), sem: make(chan struct{}, options.concurrency())}
 }

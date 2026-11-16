@@ -179,10 +179,15 @@
     в detector policy digest; default IDs сохранены.
     [Контракт и границы](wiki/Detector-Tuning-Isolation.md),
     `wiki/evidence/1.5.0-detector-tuning-20261116.json`.
-  - [ ] Проверить оставшиеся process-wide operational setters `forge.SetMaxPages`,
-    `verify.SetConcurrency`, `source.SetCloneTimeout` и их boundaries при
-    совместном использовании pipelines/requests. Detection/Config snapshots
-    не делают эти зависимости per-request.
+  - [x] Изолировать operational limits `forge.SetMaxPages`, `verify.SetConcurrency`,
+    `source.SetCloneTimeout`: CLI получает собственные value settings, LSP не меняет
+    defaults; legacy setters атомарны и влияют только на следующие вызовы.
+    Pagination и её scopes фиксируют один cap, acquisitions — один timeout,
+    verifier Set — свой semaphore. Reproduced late-cap regression исправлен;
+    native org/history — 41/41 под OS deny except loopback, loaded-policy — 134/134,
+    config-policy — 289/289. Full Go, scoped race/min-Go/lint, шесть static builds
+    и прежние quality IDs проходят. [Контракт и границы](wiki/Operational-Limits-Isolation.md),
+    `wiki/evidence/1.5.0-operational-limits-20261116.json`.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

@@ -15,6 +15,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/jsonstrict"
@@ -27,20 +28,54 @@ import (
 // Self-hosted forge on an internal IP uses PROWL_ALLOW_PRIVATE_IPS; the redirect guard still applies.
 var client = safehttp.Client(30 * time.Second)
 
-// maxPages caps pagination so a malicious/compromised API can't drive an unbounded fetch loop.
-// Overridable via config (limits.org_max_pages); set once at startup before ListRepos.
-var maxPages = 200
+const DefaultMaxPages = 200
 
-// SetMaxPages overrides the pagination cap (limits.org_max_pages); a non-positive value is ignored.
+var legacyMaxPages atomic.Int64
+
+func init() { legacyMaxPages.Store(DefaultMaxPages) }
+
+// SetMaxPages changes only defaults for future legacy listing calls.
 func SetMaxPages(n int) {
 	if n > 0 {
-		maxPages = min(n, hardMaxPages)
+		legacyMaxPages.Store(int64(min(n, hardMaxPages)))
 	}
+}
+func currentMaxPages() int { return int(legacyMaxPages.Load()) }
+
+// Options describes one listing's immutable operational limits.
+type Options struct{ MaxPages int }
+type pageLimitKey struct{}
+
+func withPageLimit(ctx context.Context, n int) context.Context {
+	if n <= 0 {
+		n = DefaultMaxPages
+	}
+	return context.WithValue(ctx, pageLimitKey{}, min(n, hardMaxPages))
+}
+func snapshotPageLimit(ctx context.Context) context.Context {
+	if _, ok := ctx.Value(pageLimitKey{}).(int); ok {
+		return ctx
+	}
+	return withPageLimit(ctx, currentMaxPages())
+}
+func pageLimit(ctx context.Context) int {
+	if n, ok := ctx.Value(pageLimitKey{}).(int); ok {
+		return n
+	}
+	return currentMaxPages()
+}
+
+func ListReposWithOptions(ctx context.Context, target string, options Options) ([]string, error) {
+	return ListRepos(withPageLimit(ctx, options.MaxPages), target)
+}
+func ListGistsWithOptions(ctx context.Context, target string, options Options) ([]string, error) {
+	return ListGists(withPageLimit(ctx, options.MaxPages), target)
 }
 
 // ListRepos returns the https clone URLs of every repository under target, where target is
 // "<platform>:<name>" — github:<org-or-user>, gitlab:<group>, or bitbucket:<workspace>.
 func ListRepos(ctx context.Context, target string) (urls []string, err error) {
+	ctx = snapshotPageLimit(ctx)
 	defer func() { recordInventory(ctx, target, false, urls, err) }()
 	platform, name, ok := strings.Cut(target, ":")
 	if !ok || name == "" {
@@ -61,6 +96,7 @@ func ListRepos(ctx context.Context, target string) (urls []string, err error) {
 // ListGists returns the clone URLs of every public gist of a github:<user> target. Gists are
 // user-scoped (orgs have none) and clone from git_pull_url, not clone_url.
 func ListGists(ctx context.Context, target string) (urls []string, err error) {
+	ctx = snapshotPageLimit(ctx)
 	defer func() { recordInventory(ctx, target, true, urls, err) }()
 	platform, name, ok := strings.Cut(target, ":")
 	if !ok || name == "" || platform != "github" {
@@ -115,12 +151,13 @@ func accountRepos(ctx context.Context, host, kind, name, resource, field string,
 }
 
 func listArrays(ctx context.Context, first string, hdr map[string]string, field string) ([]string, int, error) {
+	ctx = snapshotPageLimit(ctx)
 	next := first
 	seen := map[string]bool{}
 	repos := map[string]bool{}
 	var urls []string
 	var problems error
-	for page := 0; next != "" && page < maxPages; page++ {
+	for page := 0; next != "" && page < pageLimit(ctx); page++ {
 		if seen[next] {
 			return urls, 200, errors.Join(problems, errors.New("repository pagination cycle"))
 		}
@@ -163,12 +200,13 @@ func listArrays(ctx context.Context, first string, hdr map[string]string, field 
 		next = continuation
 	}
 	if next != "" {
-		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", maxPages))
+		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", pageLimit(ctx)))
 	}
 	return urls, 200, problems
 }
 
 func bitbucketRepos(ctx context.Context, name string) ([]string, error) {
+	ctx = snapshotPageLimit(ctx)
 	first := fmt.Sprintf("https://api.bitbucket.org/2.0/repositories/%s?pagelen=100", url.PathEscape(name))
 	return bitbucketList(ctx, first, map[string]string{"Authorization": bearer(os.Getenv("BITBUCKET_TOKEN"))})
 }
@@ -179,7 +217,7 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 	repos := map[string]bool{}
 	var urls []string
 	var problems error
-	for n := 0; next != "" && n < maxPages; n++ {
+	for n := 0; next != "" && n < pageLimit(ctx); n++ {
 		if seen[next] {
 			return urls, errors.Join(problems, errors.New("repository pagination cycle"))
 		}
@@ -229,7 +267,7 @@ func bitbucketList(ctx context.Context, first string, hdr map[string]string) ([]
 		}
 	}
 	if next != "" {
-		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", maxPages))
+		problems = errors.Join(problems, fmt.Errorf("repository pagination exceeded %d pages", pageLimit(ctx)))
 	}
 	return urls, problems
 }

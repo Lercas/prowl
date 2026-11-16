@@ -26,11 +26,11 @@ func localAPI(t *testing.T, h http.HandlerFunc) *httptest.Server {
 func TestPaginationRetainsPartialLists(t *testing.T) {
 	for _, mode := range []string{"cap", "server-error", "late-404", "short-page", "cycle"} {
 		t.Run(mode, func(t *testing.T) {
-			old := maxPages
-			maxPages = 2
-			t.Cleanup(func() { maxPages = old })
+			old := currentMaxPages()
+			SetMaxPages(2)
+			t.Cleanup(func() { SetMaxPages(old) })
 			if mode == "cap" {
-				maxPages = 1
+				SetMaxPages(1)
 			}
 			calls := 0
 			localAPI(t, func(w http.ResponseWriter, r *http.Request) {
@@ -128,9 +128,9 @@ func TestFullTerminalPageIsComplete(t *testing.T) {
 		entries[i] = fmt.Sprintf(`{"clone_url":"https://owned.invalid/%d.git"}`, i)
 	}
 	localAPI(t, func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "["+strings.Join(entries, ",")+"]") })
-	old := maxPages
-	maxPages = 1
-	t.Cleanup(func() { maxPages = old })
+	old := currentMaxPages()
+	SetMaxPages(1)
+	t.Cleanup(func() { SetMaxPages(old) })
 	urls, err := ListRepos(context.Background(), "github:owned")
 	if err != nil || len(urls) != 100 {
 		t.Fatalf("complete page falsely truncated: %d %v", len(urls), err)

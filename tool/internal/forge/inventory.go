@@ -41,7 +41,7 @@ func recordInventory(ctx context.Context, target string, gists bool, urls []stri
 		Complete           bool
 		Observed           int
 		RepositoriesDigest string
-	}{"1.5.0-forge-v1", gists, maxPages, err == nil, len(urls), hex.EncodeToString(sum[:])})
+	}{"1.5.0-forge-v1", gists, pageLimit(ctx), err == nil, len(urls), hex.EncodeToString(sum[:])})
 	if err != nil {
 		model.Note(ctx, "forge_inventory_incomplete", target, true)
 	}
@@ -58,7 +58,7 @@ func registerAPI(ctx context.Context, raw string, hdr map[string]string) {
 		Revision              string
 		MaxPages, Rows, Bytes int
 		CredentialsConfigured bool
-	}{"1.5.0-forge-v1", maxPages, maxListingRows, maxJSONBody, authenticated})
+	}{"1.5.0-forge-v1", pageLimit(ctx), maxListingRows, maxJSONBody, authenticated})
 }
 
 func validCloneEntry(raw string) bool {

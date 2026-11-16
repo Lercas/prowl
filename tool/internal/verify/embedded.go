@@ -10,20 +10,23 @@ import (
 	"time"
 
 	"github.com/Lercas/prowl/tool/internal/bundle"
-	"github.com/Lercas/prowl/tool/internal/safehttp"
 	"gopkg.in/yaml.v3"
 )
 
 // LoadEmbedded trusts only the immutable snapshot anchored in the binary's manifest.
 // Loading compiles policy without contacting any provider.
 func LoadEmbedded(timeout time.Duration, files fs.FS) (*Set, error) {
+	return LoadEmbeddedWithOptions(timeout, files, Options{Concurrency: currentConcurrency()})
+}
+
+func LoadEmbeddedWithOptions(timeout time.Duration, files fs.FS, options Options) (*Set, error) {
 	if err := bundle.Verify(files); err != nil {
 		return nil, err
 	}
 	if timeout <= 0 {
 		timeout = 8 * time.Second
 	}
-	s := &Set{client: safehttp.Client(timeout), sem: make(chan struct{}, concurrency)}
+	s := NewWithOptions(timeout, options)
 	seen := map[string]bool{}
 	err := fs.WalkDir(files, ".", func(name string, d fs.DirEntry, err error) error {
 		if err != nil {
