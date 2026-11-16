@@ -100,8 +100,11 @@ func TestBucketCancellationDoesNotWaitForChildPipes(t *testing.T) {
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	done := make(chan error, 1)
-	go func() { done <- SyncBucket(ctx, "s3://owned/prefix", t.TempDir(), 4096, 30*time.Second) }()
+	done := make(chan bucketCancellationObservation, 1)
+	go func() {
+		err := SyncBucket(ctx, "s3://owned/prefix", t.TempDir(), 4096, 30*time.Second)
+		done <- bucketCancellationObservation{err: err, finished: time.Now()}
+	}()
 	deadline := time.After(3 * time.Second)
 	for {
 		if _, err := os.Stat(started); err == nil {
@@ -115,13 +118,19 @@ func TestBucketCancellationDoesNotWaitForChildPipes(t *testing.T) {
 		case <-time.After(10 * time.Millisecond):
 		}
 	}
+
+	// Check the operation's completion time, not which ready select branch won.
+	cancelledAt := time.Now()
+	cancellationDeadline := cancelledAt.Add(500 * time.Millisecond)
 	cancel()
-	select {
-	case err := <-done:
-		if err == nil {
-			t.Fatal("cancelled sync certified success")
+	timer := time.NewTimer(time.Until(cancellationDeadline))
+	defer timer.Stop()
+	observation, received := awaitBucketCancellation(done, timer.C)
+	if received {
+		if !observation.metDeadline(cancellationDeadline) {
+			t.Fatalf("cancelled sync missed its deadline or lost cancellation: elapsed=%s err=%v", observation.finished.Sub(cancelledAt), observation.err)
 		}
-	case <-time.After(500 * time.Millisecond):
+	} else {
 		// Release the test-owned child so the original implementation cannot leave it behind.
 		if err := os.WriteFile(release, nil, 0o600); err != nil {
 			t.Fatal(err)
@@ -131,7 +140,7 @@ func TestBucketCancellationDoesNotWaitForChildPipes(t *testing.T) {
 		case <-time.After(3 * time.Second):
 			t.Fatal("cancelled fake cloud CLI did not terminate")
 		}
-		t.Fatal("cancellation waited for a surviving child to close inherited pipes")
+		t.Fatal("bucket cancellation was not observed within 500ms; child-pipe survival is not inferred from this timeout")
 	}
 }
 

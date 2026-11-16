@@ -1,0 +1,116 @@
+{
+  "recorded_at": "2026-11-16T14:35:37.967611+00:00",
+  "scope": "Strengthen cancellation acceptance observation without changing production runtime. Historical timeout cause and full 1.5.0 migration remain open.",
+  "test_source_commit": "fbddd00fb154ff9a5aee6457451de74a9aaf067e",
+  "parent_commit": "e8ba152134b4c2f50a03e534a987302f08e0fe10",
+  "runtime_integrity": {
+    "artifact": {
+      "path": "/tmp/prowl-bucket-cancel-runtime-integrity-20261116.json",
+      "sha256": "95a941275417ceea1879519f65e4282d13803c1c1297f440891cb0aea055df30"
+    },
+    "parent": "e8ba152134b4c2f50a03e534a987302f08e0fe10",
+    "test_source": "fbddd00fb154ff9a5aee6457451de74a9aaf067e",
+    "changed_paths": [
+      "tool/internal/source/bucket_cancellation_observation_test.go",
+      "tool/internal/source/bucket_test.go"
+    ],
+    "non_test_tool_manifest_sha256": "083824ee0ae25934dc7c42c50272d82aad59ef1d55328c76448d56f9c1bab745",
+    "non_test_tool_bytes_unchanged": true
+  },
+  "observation_contract": {
+    "deadline_ms": 500,
+    "deadline_start": "Immediately before cancel, rather than after it.",
+    "completion": "Worker records return timestamp and error; requires context.Canceled at/before deadline.",
+    "both_ready": "Result is recovered if already queued when timer is selected; actual timestamp still enforced.",
+    "late_ready_result": "Rejected even when the result branch wins.",
+    "timeout_without_result": "Failure and existing test-owned child release/cleanup preserved."
+  },
+  "baseline": {
+    "events": {
+      "path": "/tmp/prowl-bucket-cancel-baseline-20261116.jsonl",
+      "sha256": "ab19cad005bbebbbec597591ef6a0790e2b15f75638f2d5c40e5424550350fa2"
+    },
+    "integration_passes": 100,
+    "integration_failures": 0,
+    "boundary": "Historical sporadic failure was not reproduced; this is not proof of its root cause."
+  },
+  "fixed_repetition": {
+    "events": {
+      "path": "/tmp/prowl-bucket-cancel-fixed-20261116.jsonl",
+      "sha256": "f51eab4edfcf9102657c59b8023818c6e389b0f359748ae45e4598c6a115540d"
+    },
+    "integration_passes": 20,
+    "integration_failures": 0,
+    "ready_queue_cases": [
+      "early",
+      "at-boundary",
+      "late",
+      "success-is-not-cancellation",
+      "unrelated-error"
+    ],
+    "iterations_per_case_per_test": 1000,
+    "no_result_timeout_also_checked": true
+  },
+  "counterfactual": {
+    "receipt": {
+      "path": "/tmp/prowl-bucket-cancel-mutation-receipt-20261116.json",
+      "sha256": "54deaf9d2485de133c2aaa6b37bd46cfaddb950eaf42607dcd593bbd47e1e25d"
+    },
+    "overlay": {
+      "path": "/tmp/prowl-bucket-cancel-parent-only-overlay-20261116.json",
+      "sha256": "df5482481414a11ba111aee07e916ee7471767c4b1474adf274ea686fc83494a"
+    },
+    "mutant": {
+      "path": "/tmp/prowl-bucket-cancel-parent-only-20261116.go",
+      "sha256": "1408dcad7e262b17b4dec702b9861c8e25ca2d4dd75a5dc027858587cbcd65a1"
+    },
+    "events": {
+      "path": "/tmp/prowl-bucket-cancel-parent-only-20261116.jsonl",
+      "sha256": "66c9f67405f35a3b54deddba39971c0fa991fb81074875a1ab247015a07f93b5"
+    },
+    "expected_deadline_failure": true,
+    "physical_runtime_unchanged": true
+  },
+  "qualification": {
+    "packages": [
+      "internal/source",
+      "internal/ownedcmd"
+    ],
+    "go": "1.27.4",
+    "minimum_go": "1.26.11",
+    "normal": "passed",
+    "race": "passed",
+    "minimum": "passed",
+    "lint": "passed, 0 issues",
+    "logs": {
+      "go": {
+        "path": "/tmp/prowl-bucket-cancel-go-20261116.log",
+        "sha256": "e392330780c9bf842f33caad62a1b9ce7ce2064fbc64a8863671ba2634db8b6c"
+      },
+      "race": {
+        "path": "/tmp/prowl-bucket-cancel-race-20261116.log",
+        "sha256": "3a462cd9232e331bc73a838d95a3be358df136532f37f31141aad48933f68ca6"
+      },
+      "min-go": {
+        "path": "/tmp/prowl-bucket-cancel-min-go-20261116.log",
+        "sha256": "25b1338122953911dbf762a1368c28a434fda41e801288049bef3252e6b4f910"
+      },
+      "lint": {
+        "path": "/tmp/prowl-bucket-cancel-lint-20261116.log",
+        "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+      }
+    }
+  },
+  "not_rerun": [
+    "CLI binary factory",
+    "quality gate",
+    "GOROOT/performance",
+    "cross-builds; no non-test runtime bytes changed"
+  ],
+  "remaining_boundaries": [
+    "historical bucket timeout root cause",
+    "broader released API/CLI/source audit",
+    "full TODO 1.5.0 migration and release qualification"
+  ],
+  "publication": false
+}

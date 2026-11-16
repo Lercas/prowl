@@ -355,6 +355,14 @@
   - [ ] Проверить остальные разошедшиеся компоненты: MCP/LSP, источники, отчёты,
     correlation, integrity шаблонов и release checks. Намеренные замены ML/cgo
     не откатывать: сохранить квалифицированную Go-flate-v2 модель и security-обновления.
+    - [x] Устранена неоднозначность наблюдения bucket cancellation в acceptance test:
+      actual completion timestamp и `context.Canceled`, прежний deadline 500 ms,
+      одинаковая оценка при готовых result/timer. Baseline race — 100/100,
+      новый integration race — 20/20; parent-only Cancel mutation ожидаемо падает.
+      Полные source/ownedcmd Go/race/min-Go/lint проходят. Runtime bytes неизменны;
+      причина прежнего timing failure не объявляется установленной/исправленной.
+      [Проверки и границы](wiki/Bucket-Cancellation-Observation.md),
+      `wiki/evidence/1.5.0-bucket-cancellation-observation-20261116.json`.
     - [x] Возвращён общий short-write guard `report.Write/WriteWithCoverage`:
       JSON/SARIF/DefectDojo/dojo больше не возвращают nil после неполной записи;
       исходная I/O-ошибка сохраняется, повторов после отказа нет. Восемь failures
