@@ -112,6 +112,17 @@
     `wiki/evidence/1.5.0-released-native-contracts-20261116.json`.
   - [ ] Проверить изменения same-name Go test bodies/helpers;
     закрытые карты имён и native runners не закрывают всю совместимость релиза.
+    - [x] AST/token inventory текущей базы: 1009 совпавших имён, 841 одинаковое
+      тело, 38 эквивалентных string spellings, 130 остальных изменений и 15
+      изменённых/удалённых helpers. Fixture hashes включены; одинаковые токены
+      не считаются доказательством runtime compatibility.
+    - [x] Возвращены real-ML и keyed-identity assertions YAML/TOML, исходные
+      determinism inputs, raw occurrence counts и parser assertion `--bundled`.
+      Noise type adapters сужены до 10 fixture names; LSP entropy/redaction
+      проверяет фактические detector/value. На reference/candidate по 163 passes
+      и 3 явных optional parity skips; пять packages, race/min-Go/lint проходят.
+      [Состав и границы](wiki/Same-Name-Test-Audit.md),
+      `wiki/evidence/1.5.0-same-name-restored-assertions-20261116.json`.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,
