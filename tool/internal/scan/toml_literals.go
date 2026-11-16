@@ -66,6 +66,7 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		array      bool
 		keyMode    bool
 		awaitValue bool
+		arrayIndex int
 	}
 	type arrayTable struct {
 		path []string
@@ -74,6 +75,30 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 	stack := []frame{{keyMode: true}}
 	var active []arrayTable
 	serial := 0
+	captureComponents := captureComponentNamespaces(ctx)
+	type arrayPosition struct {
+		path  []string
+		index int
+	}
+	var positions map[int]arrayPosition
+	var tableCounts map[string]int
+	if captureComponents {
+		positions = make(map[int]arrayPosition)
+		tableCounts = make(map[string]int)
+	}
+	indexedPath := func(path []string, instances []int) []any {
+		var out []any
+		for i, name := range path {
+			out = append(out, name)
+			for _, instance := range instances {
+				position, known := positions[instance]
+				if known && len(position.path) == i+1 && tomlPathPrefix(position.path, path) {
+					out = append(out, position.index)
+				}
+			}
+		}
+		return out
+	}
 	groups := map[string]int{}
 	groupFor := func(path []string, instances []int) int {
 		encoded, _ := json.Marshal(struct {
@@ -91,11 +116,11 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			role = role.child(segment)
 		}
 		doc.roles[id] = role
-		if captureComponentNamespaces(ctx) && len(instances) == 0 {
+		if captureComponents {
 			if doc.componentNamespaces == nil {
 				doc.componentNamespaces = make(map[int]string)
 			}
-			doc.componentNamespaces[id] = componentNamespace(path)
+			doc.componentNamespaces[id] = componentIndexedNamespace(indexedPath(path, instances))
 		}
 		return id
 	}
@@ -146,6 +171,17 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			}
 			if array {
 				i++ // The complete document parser already validated the second closing bracket.
+				if captureComponents {
+					var parents []int
+					for _, old := range active {
+						if len(old.path) < len(path) && tomlPathPrefix(old.path, path) {
+							parents = append(parents, old.id)
+						}
+					}
+					collection := componentIndexedNamespace(indexedPath(path, parents))
+					positions[serial+1] = arrayPosition{path: path, index: tableCounts[collection]}
+					tableCounts[collection]++
+				}
 				kept := active[:0]
 				for _, old := range active {
 					if !tomlPathPrefix(path, old.path) {
@@ -199,6 +235,9 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			instances := append([]int(nil), f.instances...)
 			if t.kind == '[' || f.array {
 				serial++
+				if captureComponents && f.array {
+					positions[serial] = arrayPosition{path: path, index: f.arrayIndex}
+				}
 				instances = append(instances, serial)
 			}
 			f.awaitValue = false
@@ -209,6 +248,9 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			}
 			stack = stack[:len(stack)-1]
 		case ',':
+			if f.array && captureComponents {
+				f.arrayIndex++
+			}
 			if !f.array {
 				f.keys, f.keyMode, f.awaitValue = nil, true, false
 			}

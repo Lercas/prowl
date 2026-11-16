@@ -144,6 +144,8 @@ func FuzzComponentYAMLEffectiveMappings(f *testing.F) {
 		"a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nprod: {<<: [*a, *b]}\n",
 		"a: &a {account: tenant_a}\nlist: &l [*a]\nprod: {<<: *l}\n",
 		"prod: {<<: [[{account: tenant_a}]]}\n",
+		"rows: &r [{account: tenant_a}]\ncopy: *r\n",
+		"- - account: tenant_a\n",
 		"prod: {account: value, 'a.b': {key: ordinary}}\n",
 	} {
 		f.Add(seed)
@@ -177,21 +179,27 @@ func FuzzComponentYAMLEffectiveMappings(f *testing.F) {
 		if !stringsOnly(&root) {
 			return
 		}
-		var decoded map[string]any
+		var decoded any
 		if err := root.Decode(&decoded); err != nil {
 			t.Fatal("component relationships accepted a merge rejected by the YAML decoder")
 		}
 		want := make(map[string]map[string]*string)
-		var walk func(map[string]any, []string)
-		walk = func(fields map[string]any, path []string) {
-			values := make(map[string]*string)
-			want[componentNamespace(path)] = values
-			for name, value := range fields {
-				values[name] = nil
-				if child, ok := value.(map[string]any); ok {
-					walk(child, append(append([]string(nil), path...), name))
-				} else if s, ok := value.(string); ok && s != "" {
-					values[name] = &s
+		var walk func(any, []any)
+		walk = func(node any, path []any) {
+			switch fields := node.(type) {
+			case []any:
+				for i, value := range fields {
+					walk(value, append(append([]any(nil), path...), i))
+				}
+			case map[string]any:
+				values := make(map[string]*string)
+				want[componentIndexedNamespace(path)] = values
+				for name, value := range fields {
+					values[name] = nil
+					walk(value, append(append([]any(nil), path...), name))
+					if s, ok := value.(string); ok && s != "" {
+						values[name] = &s
+					}
 				}
 			}
 		}

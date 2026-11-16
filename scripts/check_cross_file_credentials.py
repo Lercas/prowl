@@ -107,6 +107,17 @@ def main():
                     check(label + '-redaction', all(v.encode() not in p.stdout + p.stderr for v in (KEY, OTHER, 'tenant_a', 'accessKeyId')))
 
         nested_cases = (
+            ('array-json', 'a.json', json.dumps({'rows': [None, 7, {'accessKeyId': KEY}]}), 'b.json', '{"rows":[false,"skip",{"account":"tenant_a"}]}'),
+            ('array-root', 'a.json', json.dumps([[{'accessKeyId': KEY}]]), 'b.yaml', '- - account: tenant_a\n'),
+            ('array-yaml', 'a.yaml', f'rows: [ignored, {{accessKeyId: {KEY}}}]\n', 'b.json', '{"rows":[null,{"account":"tenant_a"}]}'),
+            ('array-yaml-alias', 'a.json', json.dumps({'rows': [{'accessKeyId': KEY}]}), 'b.yaml', 'defaults: &d {account: tenant_a}\nrows: [*d]\n'),
+            ('array-yaml-sequence-alias', 'a.json', json.dumps({'rows': [{'accessKeyId': KEY}]}), 'b.yaml', 'defaults: &d [{account: tenant_a}]\nrows: *d\n'),
+            ('array-yaml-merge', 'a.json', json.dumps({'rows': [{'accessKeyId': KEY}]}), 'b.yaml', 'defaults: &d {account: tenant_a}\nrows: [{<<: *d}]\n'),
+            ('array-toml-tables', 'a.toml', f'[[rows]]\nignored=7\n[[rows]]\naccessKeyId="{KEY}"\n', 'b.json', '{"rows":[{}, {"account":"tenant_a"}]}'),
+            ('array-toml-inline', 'a.toml', f'rows=[1,2,{{accessKeyId="{KEY}"}}]\n', 'b.yaml', 'rows: [null, false, {account: tenant_a}]\n'),
+            ('array-toml-nested', 'a.toml', f'rows=[[{{accessKeyId="{KEY}"}}]]\n', 'b.json', '{"rows":[[{"account":"tenant_a"}]]}'),
+            ('array-toml-nested-tables', 'a.toml', f'[[rows]]\n[[rows.db]]\n[[rows]]\n[[rows.db]]\naccessKeyId="{KEY}"\n', 'b.json', '{"rows":[{"db":[{}]},{"db":[{"account":"tenant_a"}]}]}'),
+            ('array-toml-table', 'a.toml', f'[[rows]]\n[rows.service]\naccessKeyId="{KEY}"\n', 'b.json', '{"rows":[{"service":{"account":"tenant_a"}}]}'),
             ('json', 'a.json', json.dumps({'prod': {'service': {'accessKeyId': KEY}}}), 'b.json', '{"prod":{"service":{"account":"tenant_a"}}}'),
             ('yaml', 'a.yaml', f'prod:\n  service:\n    accessKeyId: {KEY}\n', 'b.yaml', 'prod:\n  service:\n    account: tenant_a\n'),
             ('toml', 'a.toml', f'[prod.service]\naccessKeyId="{KEY}"\n', 'b.toml', '[prod.service]\naccount="tenant_a"\n'),
@@ -137,7 +148,7 @@ def main():
                     check(label + '-verified', detail['status'] == 'verified' and len(detail['components']['fields']['account']) == 1)
                     check(label + '-request', len(Handler.calls) == before + 1 and Handler.calls[-1])
                     check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'accessKeyId')))
-            if name in ('mixed', 'yaml-map-alias', 'yaml-scalar-alias', 'yaml-nested-alias', 'yaml-merge-sequence'):
+            if name.startswith('array-') or name in ('mixed', 'yaml-map-alias', 'yaml-scalar-alias', 'yaml-nested-alias', 'yaml-merge-sequence'):
                 nested_index = root / ('namespace-index-' + name)
                 p = run([source], extra=['--index', nested_index, '--scope', 'owned-nested'])
                 fs, complete = report(p, 'json')
@@ -185,6 +196,33 @@ def main():
                 _, complete = report(p, fmt)
                 check(f'namespace-negative-{name}-{fmt}', p.returncode == 2 and not complete and len(Handler.calls) == before)
                 check(f'namespace-baseline-{name}-{fmt}', baseline.read_bytes() == b'owned namespace baseline')
+
+        for name, primary, account_name, account_text in (
+            ('index', {'rows': [{}, {'accessKeyId': KEY}]}, 'b.json', '{"rows":[{"account":"tenant_a"},{}]}'),
+            ('numeric-key', {'rows': [{'accessKeyId': KEY}]}, 'b.json', '{"rows":{"0":{"account":"tenant_a"}}}'),
+            ('root-object', [{'accessKeyId': KEY}], 'b.json', '{"account":"tenant_a"}'),
+            ('scalar-primary', {'rows': [KEY]}, 'b.json', '{"rows":[{"account":"tenant_a"}]}'),
+            ('scalar-account', {'rows': [{'accessKeyId': KEY}]}, 'b.json', '{"rows":["tenant_a"]}'),
+            ('null', {'rows': [{'accessKeyId': KEY, 'account': None}]}, 'b.yaml', 'rows: [{account: tenant_a}]\n'),
+            ('container', {'rows': [{'accessKeyId': KEY, 'account': []}]}, 'b.toml', '[[rows]]\naccount="tenant_a"\n'),
+            ('empty', {'rows': [{'accessKeyId': KEY, 'account': ''}]}, 'b.json', '{"rows":[{"account":"tenant_a"}]}'),
+            ('depth', {'rows': [[{'accessKeyId': KEY}]]}, 'b.toml', 'rows=[{account="tenant_a"}]\n'),
+            ('alias-index', {'rows': [{}, {'accessKeyId': KEY}]}, 'b.yaml', 'defaults: &d {account: tenant_a}\nrows: [*d, {}]\n'),
+        ):
+            source = root / ('indexed-negative-' + name)
+            source.mkdir()
+            (source / 'a.json').write_text(json.dumps(primary))
+            (source / account_name).write_text(account_text)
+            baseline = source / 'sentinel.baseline'
+            baseline.write_bytes(b'owned indexed baseline')
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([source], extra=['--verified-only', '--write-baseline', baseline], fmt=fmt, ml=ml)
+                    _, complete = report(p, fmt)
+                    label = f'indexed-negative-{name}-{fmt}-ml{ml}'
+                    check(label + '-no-request', p.returncode == 2 and not complete and len(Handler.calls) == before)
+                    check(label + '-baseline', baseline.read_bytes() == b'owned indexed baseline')
 
         source = root / 'yaml-primary-alias'
         source.mkdir()

@@ -6,10 +6,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const componentYAMLRevision = "yaml-explicit-alias-merge-v1"
+const componentYAMLRevision = "indexed-namespaces-yaml-v2"
 
 // Resolve only explicit edges inside the one document accepted by componentFields.
-// Arrays remain unsupported; sequences are accepted only as YAML merge operands.
+// Arrays retain their exact ordinal positions; merge operands must still be mappings.
 type componentYAMLDecoder struct {
 	ctx    context.Context
 	active map[*yaml.Node]bool
@@ -39,6 +39,19 @@ func (d *componentYAMLDecoder) value(node *yaml.Node, depth int) (any, bool) {
 			return node.Value, true
 		}
 		return nil, true // An explicit unknown role must still poison borrowing.
+	case yaml.SequenceNode:
+		if node.Tag != "!!seq" || len(node.Content) > componentMaxLiterals-d.visits {
+			return nil, false
+		}
+		out := make([]any, len(node.Content))
+		for i, child := range node.Content {
+			value, ok := d.value(child, depth+1)
+			if !ok {
+				return nil, false
+			}
+			out[i] = value
+		}
+		return out, true
 	case yaml.MappingNode:
 		if node.Tag != "!!map" || len(node.Content)%2 != 0 {
 			return nil, false

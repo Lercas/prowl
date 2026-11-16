@@ -17,6 +17,17 @@ import (
 func TestCrossFileNestedNamespaces(t *testing.T) {
 	allowOrderFixture(t)
 	for _, tc := range []struct{ name, keyPath, key, accountPath, account string }{
+		{"json-array", "a.json", `{"rows":[null,7,{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.json", `{"rows":[false,"skip",{"account":"tenant_a"}]}`},
+		{"json-root-array", "a.json", `[[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]]`, "b.yaml", "- - account: tenant_a\n"},
+		{"yaml-sequence", "a.yaml", "rows:\n  - ignored\n  - accessKeyId: AKIANAFGYOEYPXU1DSYP\n", "b.json", `{"rows":[null,{"account":"tenant_a"}]}`},
+		{"yaml-sequence-alias", "a.json", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.yaml", "defaults: &d {account: tenant_a}\nrows: [*d]\n"},
+		{"yaml-array-alias", "a.json", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.yaml", "defaults: &d [{account: tenant_a}]\nrows: *d\n"},
+		{"yaml-array-merge", "a.json", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.yaml", "defaults: &d {account: tenant_a}\nrows: [{<<: *d}]\n"},
+		{"toml-array-tables", "a.toml", "[[rows]]\nignored=7\n[[rows]]\naccessKeyId='AKIANAFGYOEYPXU1DSYP'\n", "b.json", `{"rows":[{}, {"account":"tenant_a"}]}`},
+		{"toml-inline-arrays", "a.toml", "rows=[1,2,{accessKeyId='AKIANAFGYOEYPXU1DSYP'}]\n", "b.yaml", "rows: [null, false, {account: tenant_a}]\n"},
+		{"toml-nested-arrays", "a.toml", "rows=[[{accessKeyId='AKIANAFGYOEYPXU1DSYP'}]]\n", "b.json", `{"rows":[[{"account":"tenant_a"}]]}`},
+		{"toml-nested-array-tables", "a.toml", "[[rows]]\n[[rows.db]]\n[[rows]]\n[[rows.db]]\naccessKeyId='AKIANAFGYOEYPXU1DSYP'\n", "b.json", `{"rows":[{"db":[{}]},{"db":[{"account":"tenant_a"}]}]}`},
+		{"toml-table-under-array", "a.toml", "[[rows]]\n[rows.service]\naccessKeyId='AKIANAFGYOEYPXU1DSYP'\n", "b.json", `{"rows":[{"service":{"account":"tenant_a"}}]}`},
 		{"json", "a.json", `{"prod":{"service":{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}}}`, "b.json", `{"prod":{"service":{"account":"tenant_a","timeout":30}}}`},
 		{"yaml", "a.yaml", "prod:\n  service:\n    accessKeyId: AKIANAFGYOEYPXU1DSYP\n", "b.yaml", "prod:\n  service:\n    account: tenant_a\n"},
 		{"toml-tables", "a.toml", "[prod.service]\naccessKeyId='AKIANAFGYOEYPXU1DSYP'\n", "b.toml", "[prod.service]\naccount='tenant_a'\n"},
@@ -160,5 +171,68 @@ func TestCrossFileSiblingNamespacesCanVerifyIndependently(t *testing.T) {
 	defer mu.Unlock()
 	if !complete || accounts["tenant_a"] != 1 || accounts["tenant_b"] != 1 || len(accounts) != 2 {
 		t.Fatalf("siblings mixed or conflicted: complete=%v accounts=%v findings=%v", complete, accounts, fs)
+	}
+}
+
+func TestCrossFileIndexedNamespacesNeverBorrow(t *testing.T) {
+	allowOrderFixture(t)
+	for _, tc := range []struct{ name, primary, path, account string }{
+		{"different-index", `{"rows":[{}, {"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.json", `{"rows":[{"account":"tenant_a"}, {}]}`},
+		{"numeric-key", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.json", `{"rows":{"0":{"account":"tenant_a"}}}`},
+		{"root-object", `[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]`, "b.json", `{"account":"tenant_a"}`},
+		{"scalar-primary", `{"rows":["AKIANAFGYOEYPXU1DSYP"]}`, "b.json", `{"rows":[{"account":"tenant_a"}]}`},
+		{"scalar-companion", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.json", `{"rows":["tenant_a"]}`},
+		{"null-role", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP","account":null}]}`, "b.yaml", "rows: [{account: tenant_a}]\n"},
+		{"container-role", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP","account":[]}]}`, "b.toml", "[[rows]]\naccount='tenant_a'\n"},
+		{"empty-role", `{"rows":[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP","account":""}]}`, "b.json", `{"rows":[{"account":"tenant_a"}]}`},
+		{"array-depth", `{"rows":[[{"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]]}`, "b.toml", "rows=[{account='tenant_a'}]\n"},
+		{"alias-other-index", `{"rows":[{}, {"accessKeyId":"AKIANAFGYOEYPXU1DSYP"}]}`, "b.yaml", "defaults: &d {account: tenant_a}\nrows: [*d, {}]\n"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls atomic.Int32
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(200) }))
+			defer srv.Close()
+			scope := credentialset.NewScope()
+			fs, coverage := runComponentItems(t, Options{Detector: detector(t), Verifiers: orderVerifier(t, srv.URL, "extract:\n  account: 'tenant_[ab]'\n"), CrossFile: true}, []model.Item{
+				{Source: "code", Path: "a.json", Text: tc.primary, CredentialScope: scope},
+				{Source: "code", Path: tc.path, Text: tc.account, CredentialScope: scope},
+			})
+			complete, _, _ := coverage.Snapshot()
+			if calls.Load() != 0 || complete || !hasIncompleteFinding(fs) {
+				t.Fatal("unrelated indexed role reached verifier or certified complete")
+			}
+		})
+	}
+}
+
+func TestCrossFileIndexedSiblingsKeepIndependentVerdicts(t *testing.T) {
+	allowOrderFixture(t)
+	var mu sync.Mutex
+	accounts := map[string]int{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		accounts[r.Header.Get("X-Account")]++
+		if r.Header.Get("X-Account") == "tenant_a" {
+			w.WriteHeader(200)
+		} else {
+			w.WriteHeader(401)
+		}
+	}))
+	defer srv.Close()
+	scope := credentialset.NewScope()
+	fs, coverage := runComponentItems(t, Options{Detector: detector(t), Verifiers: orderVerifier(t, srv.URL, "extract:\n  account: 'tenant_[ab]'\n"), CrossFile: true}, []model.Item{
+		{Source: "code", Path: "a.yaml", Text: "rows:\n  - &d {accessKeyId: AKIANAFGYOEYPXU1DSYP}\n  - *d\n", CredentialScope: scope},
+		{Source: "code", Path: "b.toml", Text: "[[rows]]\naccount='tenant_a'\n[[rows]]\naccount='tenant_b'\n", CredentialScope: scope},
+	})
+	complete, _, _ := coverage.Snapshot()
+	verdicts := map[bool]int{}
+	for _, f := range fs {
+		if f.Type == "aws_access_key_id" && f.Verified != nil {
+			verdicts[*f.Verified]++
+		}
+	}
+	if !complete || accounts["tenant_a"] != 1 || accounts["tenant_b"] != 1 || verdicts[true] != 1 || verdicts[false] != 1 {
+		t.Fatal("indexed aliases mixed component contexts or verdicts")
 	}
 }

@@ -40,10 +40,10 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 	docGroups := map[*yaml.Node]int{}
 	roles := map[int]literalRole{}
 	var componentNamespaces map[int]string
-	var componentPaths map[*yaml.Node][]string
+	var componentPaths map[*yaml.Node][]any
 	if captureComponentNamespaces(ctx) {
 		componentNamespaces = make(map[int]string)
-		componentPaths = make(map[*yaml.Node][]string)
+		componentPaths = make(map[*yaml.Node][]any)
 	}
 	group := 0
 	decoder := yaml.NewDecoder(strings.NewReader(it.Text))
@@ -74,14 +74,14 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			f := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			n := f.node
-			var componentPath []string
+			var componentPath []any
 			if componentPaths != nil {
 				componentPath = componentPaths[n]
 			}
 			if f.key != nil && (n.Kind == yaml.MappingNode || n.Kind == yaml.SequenceNode) {
 				f.role = f.role.child(f.key.Value)
 				if componentNamespaces != nil {
-					componentPath = append(append([]string(nil), componentPath...), f.key.Value)
+					componentPath = append(append([]any(nil), componentPath...), f.key.Value)
 				}
 			}
 			if n.Kind == yaml.DocumentNode {
@@ -103,7 +103,7 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				mapGroups[n] = group
 				roles[group] = f.role
 				if componentNamespaces != nil {
-					componentNamespaces[group] = componentNamespace(componentPath)
+					componentNamespaces[group] = componentIndexedNamespace(componentPath)
 				}
 				for i := 0; i+1 < len(n.Content); i += 2 {
 					key, value := n.Content[i], n.Content[i+1]
@@ -114,9 +114,13 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 					stack = append(stack, frame{node: key, depth: f.depth + 1, flow: flow, group: group, role: f.role}, frame{node: value, depth: f.depth + 1, flow: flow, group: group, key: key, role: f.role})
 				}
 			} else {
-				for _, child := range n.Content {
+				for i, child := range n.Content {
 					if componentPaths != nil {
-						componentPaths[child] = componentPath
+						childPath := componentPath
+						if n.Kind == yaml.SequenceNode {
+							childPath = append(append([]any(nil), componentPath...), i)
+						}
+						componentPaths[child] = childPath
 					}
 					stack = append(stack, frame{node: child, depth: f.depth + 1, flow: f.flow || n.Style&yaml.FlowStyle != 0, group: f.group, role: f.role})
 				}
@@ -233,10 +237,10 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		add(v)
 	}
 	path := map[*yaml.Node]bool{}
-	var walk func(*yaml.Node, string, int, *yamlPhysical, []model.Evidence, int)
-	var mapping func(*yaml.Node, int, *yamlPhysical, []model.Evidence, int, map[string]bool)
-	var merge func(*yaml.Node, int, *yamlPhysical, []model.Evidence, int, map[string]bool)
-	merge = func(n *yaml.Node, gid int, ref *yamlPhysical, proof []model.Evidence, depth int, assigned map[string]bool) {
+	var walk func(*yaml.Node, string, int, *yamlPhysical, []model.Evidence, int, string)
+	var mapping func(*yaml.Node, int, *yamlPhysical, []model.Evidence, int, map[string]bool, string)
+	var merge func(*yaml.Node, int, *yamlPhysical, []model.Evidence, int, map[string]bool, string)
+	merge = func(n *yaml.Node, gid int, ref *yamlPhysical, proof []model.Evidence, depth int, assigned map[string]bool, location string) {
 		if ctx.Err() != nil || limited {
 			return
 		}
@@ -261,18 +265,18 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				ref = physical[n]
 			}
 			proof = append(append([]model.Evidence(nil), proof...), evidence(physical[n], "yaml-alias-reference"))
-			merge(n.Alias, gid, ref, proof, depth+1, assigned)
+			merge(n.Alias, gid, ref, proof, depth+1, assigned, location)
 		case yaml.MappingNode:
-			mapping(n, gid, ref, proof, depth+1, assigned)
+			mapping(n, gid, ref, proof, depth+1, assigned, location)
 		case yaml.SequenceNode:
 			for _, child := range n.Content {
-				merge(child, gid, ref, proof, depth+1, assigned)
+				merge(child, gid, ref, proof, depth+1, assigned, location)
 			}
 		default:
 			note("yaml_merge_unresolved")
 		}
 	}
-	mapping = func(n *yaml.Node, gid int, ref *yamlPhysical, proof []model.Evidence, depth int, assigned map[string]bool) {
+	mapping = func(n *yaml.Node, gid int, ref *yamlPhysical, proof []model.Evidence, depth int, assigned map[string]bool, location string) {
 		keys := map[string]bool{}
 		for i := 0; i+1 < len(n.Content); i += 2 {
 			key := n.Content[i]
@@ -291,9 +295,13 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			if assigned != nil && assigned[name] {
 				continue
 			}
-			walk(key, "", gid, ref, proof, depth+1)
+			walk(key, "", gid, ref, proof, depth+1, location)
 			valueProof := append(append([]model.Evidence(nil), proof...), keyProof...)
-			walk(n.Content[i+1], name, gid, ref, valueProof, depth+1)
+			childLocation := ""
+			if componentNamespaces != nil {
+				childLocation = componentChildNamespace(location, name)
+			}
+			walk(n.Content[i+1], name, gid, ref, valueProof, depth+1, childLocation)
 		}
 		if assigned == nil {
 			assigned = map[string]bool{}
@@ -308,11 +316,11 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 					primary = physical[n.Content[i]]
 					mergeProof = append(append([]model.Evidence(nil), proof...), evidence(primary, "yaml-merge-reference"))
 				}
-				merge(n.Content[i+1], gid, primary, mergeProof, depth+1, assigned)
+				merge(n.Content[i+1], gid, primary, mergeProof, depth+1, assigned, location)
 			}
 		}
 	}
-	walk = func(n *yaml.Node, name string, gid int, ref *yamlPhysical, proof []model.Evidence, depth int) {
+	walk = func(n *yaml.Node, name string, gid int, ref *yamlPhysical, proof []model.Evidence, depth int, location string) {
 		if capturePublic && (n.Kind == yaml.MappingNode || n.Kind == yaml.SequenceNode || n.Kind == yaml.ScalarNode && n.Tag != "!!str") {
 			doc.markPublicUnknown(gid, name)
 		}
@@ -332,8 +340,12 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		defer delete(path, n)
 		switch n.Kind {
 		case yaml.DocumentNode, yaml.SequenceNode:
-			for _, child := range n.Content {
-				walk(child, name, gid, ref, proof, depth+1)
+			for i, child := range n.Content {
+				childLocation := location
+				if componentNamespaces != nil && n.Kind == yaml.SequenceNode {
+					childLocation = componentAppendNamespace(location, i)
+				}
+				walk(child, name, gid, ref, proof, depth+1, childLocation)
 			}
 		case yaml.MappingNode:
 			mappingGroup := mapGroups[n]
@@ -342,12 +354,10 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				mappingGroup = group
 				roles[group] = roles[gid].child(name)
 				if componentNamespaces != nil {
-					if parent, known := componentNamespaces[gid]; known {
-						componentNamespaces[group] = componentChildNamespace(parent, name)
-					}
+					componentNamespaces[group] = location
 				}
 			}
-			mapping(n, mappingGroup, ref, proof, depth+1, nil)
+			mapping(n, mappingGroup, ref, proof, depth+1, nil, location)
 		case yaml.AliasNode:
 			if n.Alias == nil || membership[n] != membership[n.Alias] {
 				note("yaml_alias_cross_document")
@@ -357,7 +367,7 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				ref = physical[n]
 			}
 			proof = append(append([]model.Evidence(nil), proof...), evidence(physical[n], "yaml-alias-reference"))
-			walk(n.Alias, name, gid, ref, proof, depth+1)
+			walk(n.Alias, name, gid, ref, proof, depth+1, location)
 		case yaml.ScalarNode:
 			if ref == nil {
 				return // The physical declaration is already in the inventory.
@@ -379,7 +389,7 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		}
 	}
 	for _, root := range roots {
-		walk(root, "", docGroups[root], nil, nil, 0)
+		walk(root, "", docGroups[root], nil, nil, 0, "")
 	}
 	// Keep the source outside literal bodies, including comments, anchors, tags and alias names.
 	// This complement prevents normalization from hiding credentials carried by presentation data.

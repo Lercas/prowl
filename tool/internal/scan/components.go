@@ -58,46 +58,79 @@ func captureComponentNamespaces(ctx context.Context) bool {
 
 // Encode segments, not dotted names: ["a.b"] and ["a", "b"] are unrelated.
 func componentNamespace(path []string) string {
+	segments := make([]any, len(path))
+	for i, segment := range path {
+		segments[i] = segment
+	}
+	return componentIndexedNamespace(segments)
+}
+
+// JSON numbers encode array indices; quoted numeric keys remain strings.
+func componentIndexedNamespace(path []any) string {
 	if len(path) == 0 {
 		return ""
 	}
 	bytes := 0
 	for _, segment := range path {
-		bytes += len(segment)
+		switch value := segment.(type) {
+		case string:
+			bytes += len(value)
+		case int:
+			if value < 0 || value >= componentMaxLiterals {
+				return invalidComponentNamespace
+			}
+			bytes += 6
+		case json.Number:
+			index, err := value.Int64()
+			if err != nil || index < 0 || index >= componentMaxLiterals {
+				return invalidComponentNamespace
+			}
+			bytes += 6
+		default:
+			return invalidComponentNamespace
+		}
 	}
 	if len(path) > 64 || bytes > 4096 {
 		return invalidComponentNamespace
 	}
-	raw, _ := json.Marshal(path)
+	raw, err := json.Marshal(path)
+	if err != nil {
+		return invalidComponentNamespace
+	}
 	return string(raw)
 }
 
 func componentChildNamespace(parent, name string) string {
-	var path []string
-	if parent != "" && json.Unmarshal([]byte(parent), &path) != nil {
+	return componentAppendNamespace(parent, name)
+}
+
+func componentAppendNamespace(parent string, segment any) string {
+	var path []any
+	decoder := json.NewDecoder(strings.NewReader(parent))
+	decoder.UseNumber()
+	if parent != "" && decoder.Decode(&path) != nil {
 		return invalidComponentNamespace
 	}
-	if name != "" {
-		path = append(path, name)
-	}
-	return componentNamespace(path)
+	return componentIndexedNamespace(append(path, segment))
 }
 
 // Object namespaces match only by exact segment path within one acquisition.
-// Arrays and multi-document YAML need an explicit relationship model.
+// Object keys and array indices are distinct exact path segments.
 // Every declared non-string role remains unknown, including container fields.
 func componentFields(ctx context.Context, it model.Item) (map[string]map[string]*string, bool) {
 	text := strings.TrimPrefix(it.Text, "\uFEFF")
-	fields := make(map[string]any)
+	var fields any
 	switch literalFormat(it) {
 	case ".json":
 		if jsonstrict.UnmarshalContext(ctx, []byte(text), &fields) != nil || fields == nil {
 			return nil, false
 		}
 	case ".toml":
-		if _, err := toml.Decode(text, &fields); err != nil {
+		mapping := make(map[string]any)
+		if _, err := toml.Decode(text, &mapping); err != nil {
 			return nil, false
 		}
+		fields = mapping
 	case ".yaml", ".yml":
 		var doc, extra yaml.Node
 		decoder := yaml.NewDecoder(strings.NewReader(text))
@@ -105,7 +138,7 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 			return nil, false
 		}
 		var ok bool
-		fields, ok = componentYAMLMapping(ctx, doc.Content[0], 0)
+		fields, ok = componentYAMLValue(ctx, doc.Content[0], 0)
 		if !ok {
 			return nil, false
 		}
@@ -113,12 +146,40 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 		return nil, false
 	}
 	out := make(map[string]map[string]*string)
-	var walk func(map[string]any, []string, int) bool
-	walk = func(fields map[string]any, path []string, depth int) bool {
+	visits := 0
+	var walk func(any, []any, int) bool
+	walk = func(node any, path []any, depth int) bool {
+		visits++
 		if ctx.Err() != nil || depth > 64 || len(out) >= componentMaxLiterals {
 			return false
 		}
-		namespace := componentNamespace(path)
+		if visits > componentMaxLiterals {
+			return false
+		}
+		fields, mapping := node.(map[string]any)
+		if !mapping {
+			if node == nil {
+				return false
+			}
+			array := reflect.ValueOf(node)
+			if array.Kind() != reflect.Slice && array.Kind() != reflect.Array || array.Len() > componentMaxLiterals {
+				return false
+			}
+			for i := 0; i < array.Len(); i++ {
+				value := array.Index(i).Interface()
+				if value == nil {
+					continue
+				}
+				kind := reflect.TypeOf(value).Kind()
+				if kind == reflect.Map || kind == reflect.Slice || kind == reflect.Array {
+					if !walk(value, append(append([]any(nil), path...), i), depth+1) {
+						return false
+					}
+				}
+			}
+			return true
+		}
+		namespace := componentIndexedNamespace(path)
 		if namespace == invalidComponentNamespace {
 			return false
 		}
@@ -126,14 +187,12 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 		out[namespace] = values
 		for name, v := range fields {
 			values[name] = nil
-			if child, ok := v.(map[string]any); ok {
-				if !walk(child, append(append([]string(nil), path...), name), depth+1) {
-					return false
-				}
-			} else if v != nil {
+			if v != nil {
 				k := reflect.TypeOf(v).Kind()
 				if k == reflect.Map || k == reflect.Slice || k == reflect.Array {
-					return false
+					if !walk(v, append(append([]any(nil), path...), name), depth+1) {
+						return false
+					}
 				}
 				if s, ok := v.(string); ok && s != "" {
 					values[name] = &s
@@ -147,10 +206,14 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 }
 
 func componentYAMLMapping(ctx context.Context, node *yaml.Node, depth int) (map[string]any, bool) {
-	d := componentYAMLDecoder{ctx: ctx, active: make(map[*yaml.Node]bool)}
-	v, ok := d.value(node, depth)
+	v, ok := componentYAMLValue(ctx, node, depth)
 	out, mapping := v.(map[string]any)
 	return out, ok && mapping
+}
+
+func componentYAMLValue(ctx context.Context, node *yaml.Node, depth int) (any, bool) {
+	d := componentYAMLDecoder{ctx: ctx, active: make(map[*yaml.Node]bool)}
+	return d.value(node, depth)
 }
 
 func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) []model.Finding {

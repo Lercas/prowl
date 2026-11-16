@@ -81,17 +81,20 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		group       int
 		role        literalRole
 		keys        map[string]bool
+		index       int
 	}
 	var stack []frame
-	var componentPaths map[int][]string
+	var componentPaths map[int][]any
 	if captureComponentNamespaces(ctx) {
-		componentPaths = make(map[int][]string)
+		componentPaths = make(map[int][]any)
 	}
 	group := 0
 	consume := func() {
 		if len(stack) > 0 && stack[len(stack)-1].object {
 			stack[len(stack)-1].key = true
 			stack[len(stack)-1].name = ""
+		} else if len(stack) > 0 && componentPaths != nil {
+			stack[len(stack)-1].index++
 		}
 	}
 	doc := &literalDocument{original: it.Text, lines: newLineIndex(it.Text), transform: "json-string", roles: map[int]literalRole{}, unsafeGroups: map[int]bool{}}
@@ -120,12 +123,16 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 					return fail("json_literal_limit")
 				}
 				role := literalRole{}
-				var componentPath []string
+				var componentPath []any
 				if len(stack) > 0 {
 					parent := stack[len(stack)-1]
 					role = parent.role.child(parent.name)
 					if componentPaths != nil {
-						componentPath = append(append([]string(nil), componentPaths[parent.group]...), parent.name)
+						segment := any(parent.name)
+						if !parent.object {
+							segment = parent.index
+						}
+						componentPath = append(append([]any(nil), componentPaths[parent.group]...), segment)
 					}
 				}
 				if capturePublic && len(stack) > 0 {
@@ -141,7 +148,7 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 					if doc.componentNamespaces == nil {
 						doc.componentNamespaces = make(map[int]string)
 					}
-					doc.componentNamespaces[group] = componentNamespace(componentPath)
+					doc.componentNamespaces[group] = componentIndexedNamespace(componentPath)
 					componentPaths[group] = componentPath
 				}
 				stack = append(stack, frame{object: token == '{', key: token == '{', group: group, role: role, keys: map[string]bool{}})
