@@ -95,7 +95,7 @@ func cmdCompare(args []string) int {
 	if code := mlC.mlPreflight(); code != 0 {
 		return code
 	}
-	prepared := prepareScan(mlC, scan.Options{Detector: det, Rules: eng, Allow: cfg.Allowed})
+	prepared := prepareScan(mlC, scan.Options{Detector: det, Rules: eng, Config: cfg})
 	if prepared.mlError != nil {
 		logx.Error("ML setup failed", "err", prepared.mlError)
 		return 2
@@ -311,7 +311,7 @@ func scanItemStream(ctx context.Context, c commonFlags, acquire func(context.Con
 		logx.Error("scan source failed", "err", err)
 		return 2
 	}
-	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}).Run(ctx, items)
+	code := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Config: cfg}).Run(ctx, items)
 	return finalizeOCR(ocrEngine, code)
 }
 

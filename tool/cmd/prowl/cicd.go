@@ -87,7 +87,7 @@ func cmdCICD(args []string) int {
 
 	ctx, stop := rootContext(c)
 	defer stop()
-	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Config: cfg})
 	if prepared.indexError != nil {
 		return indexError(prepared.indexError)
 	}

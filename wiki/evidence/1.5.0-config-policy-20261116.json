@@ -1,0 +1,254 @@
+{
+  "recorded_at": "2026-11-16T12:42:34.864858+00:00",
+  "scope": "Restore released detector_config/declared suppression boundaries and freeze effective allowlist; full 1.5.0/P0 migration remains open.",
+  "runtime_source_commit": "99325cf4cdb6f49c4136c61500ed4569bb7a3e65",
+  "runtime_tool_tree": "da0d145b8152744bebfa537b47996bff930a449e",
+  "binary": {
+    "path": "/tmp/prowl-config-policy-qualified-20261116-bin",
+    "sha256": "d8e8401e4310e481ce3364dace79035580c56775ce9d5c9fad40ffd2beefcb70"
+  },
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-config-policy-go-20261116.log",
+      "sha256": "f9e6d78d27a02764fdd6059be56b176bd80e283a5929f88c4dd9ebd780735d76"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-config-policy-targeted-qualified-20261116.log",
+      "sha256": "7cc3da39838e1cddcd6f3b19c75d23c12f568c370ca5e7625152fa2c55f9d010"
+    },
+    "race": {
+      "path": "/tmp/prowl-config-policy-race-20261116.log",
+      "sha256": "d3606ef62f92c4a13d8dcb8da130dbc9e1943c13e3f2084430c89cf72661ad17"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-config-policy-min-go-20261116.log",
+      "sha256": "e19b796112dda14fc37abb20111edaa9c1fac5fdc435a173194d6afaa6384ccd"
+    },
+    "lint": {
+      "path": "/tmp/prowl-config-policy-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-config-policy-native-20261116.log",
+      "sha256": "81a8d8a80fb579951a591a09e2b1fd5f45ae8db6acd965246018594fb34a8774"
+    },
+    "default_corpus": {
+      "path": "/tmp/prowl-config-policy-corpus-20261116.log",
+      "sha256": "ebdf37ac67f1e9293201b1123b5a69145595447c7aa24a2d9de3d67f6e922f59"
+    },
+    "build_metadata": {
+      "path": "/tmp/prowl-config-policy-build-info-20261116.log",
+      "sha256": "fd019997a163f4cc858aa476efdde2c19eecb2a2cfbfa3fb50e48a79cc91ee8f"
+    }
+  },
+  "policy_revision": "loaded-config-v1",
+  "controlled_regression": {
+    "reproduction": {
+      "path": "/tmp/prowl-config-policy-legacy-20261116.json",
+      "sha256": "fb29d09027b910b378bb0c73a75d980fe1ce3c3280618f7de2aca27806eed401"
+    },
+    "reference_binary_sha256": "3f12d0bcd59be2f77572ca580c0c4f518865f8ecf361b42639432cdc9c2046d5",
+    "reference_source_commit": "92884b6b953e281ac45a83d2480cb6863ea88921",
+    "reference_tool_tree_matches_parent": true,
+    "cases": [
+      {
+        "case": "allowlist",
+        "both_complete_unfiltered": true,
+        "same_scope": true,
+        "comparable": true,
+        "presence": "absent_in_scope"
+      },
+      {
+        "case": "config",
+        "both_complete_unfiltered": true,
+        "same_scope": true,
+        "comparable": true,
+        "presence": "absent_in_scope"
+      }
+    ],
+    "fixture_boundary": "Synthetic secret actually removed from source; lost policy/suppression metadata allowed comparison of different declared policies. Existing actual-drop filtered guards were not bypassed."
+  },
+  "native": {
+    "runner": {
+      "path": "/tmp/prowl-config-policy-20261116/scripts/check_config_policy_native.py",
+      "sha256": "efe8a022bc08850674301454582ad8d60e362eadca4996c575f3cd364199c954"
+    },
+    "report": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-config-policy-native-dm5csvg_/evidence.json",
+      "sha256": "655c4621f7412fc2e5ddcc884ca9babe9dac04fe3da557e93d15d49f182d002d"
+    },
+    "passed": 289,
+    "total": 289,
+    "network": "OS deny, checked by loopback bind",
+    "checks": [
+      "default matching policy controls preserve absence in scope",
+      "unused values/paths/regexes/stopwords/disable preserve declared filtered guard",
+      "same selected config path with content drift changes scope",
+      "different filename does not change loaded config identity",
+      "gitleaks merged allowlist is included",
+      "JSON/SARIF with and without canonical L2",
+      "policy budget failure before scanning and existing baseline preservation",
+      "private exception values and model/config paths absent from output"
+    ]
+  },
+  "nonregression": {
+    "coverage": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-coverage-native-1y_poezn/qualification.json",
+        "sha256": "389ed94f120e6f1bfd76455ee8cc5b195fc88921147cc113e7be9e66a8fb4dcd"
+      },
+      "passed": 90,
+      "total": 90
+    },
+    "http": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-http-native-149_2tgb/qualification.json",
+        "sha256": "752db1d7ec99f2b0cdf61685dea79a4975eb57cca814292934d20ed66e5c873f"
+      },
+      "passed": 57,
+      "total": 57
+    },
+    "mcp": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-mcp-native-w2bx6gpu/qualification.json",
+        "sha256": "9530aa1e043a2ebb47040a1da96bf9c5270f7ef5920d55afa58d699754b21f7d"
+      },
+      "passed": 80,
+      "total": 80
+    },
+    "loaded_policy": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-loaded-policy-native-1ii3_7ca/evidence.json",
+        "sha256": "0561f6aca315a97915c7771d1701085ef825e74784a5162f2a6921ab19617019"
+      },
+      "passed": 134,
+      "total": 134
+    },
+    "correlation": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-correlation-native-fe45_0_7/qualification.json",
+        "sha256": "7a689e86d915f0f182ae069bd8b0c1cbc19937772ee1118013ff113fb74ea785"
+      },
+      "passed": 46,
+      "total": 46
+    },
+    "lsp": {
+      "report": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-lsp-native-4jjtaxwm/qualification.json",
+        "sha256": "4dd7ad4037703c1a54977d1aa4904e04a48cd010ca5d1d177ae2d556df6902df"
+      },
+      "passed": 2332,
+      "total": 2332
+    }
+  },
+  "runner_schema_adaptations": {
+    "scripts/check_coverage.py": "Exact expected scope set gains detector_config; other checks unchanged.",
+    "scripts/check_http_contract.py": "Exact expected item/empty-batch scope sets gain detector_config; other checks unchanged.",
+    "scripts/check_correlation_contract.py": "Policy-only fixture includes detector_config and remains non-source evidence."
+  },
+  "source_contracts": [
+    "declared and effective allowlist copied independently, including map, slice and scalar pointer",
+    "regexp dependencies read-only; imported merge snapshot stable after caller mutation",
+    "active state differs from a declaration without compilation",
+    "YAML binary string identity is byte-preserving; source filename/comments/raw YAML omitted",
+    "declared suppression remains filtered with empty input and unused matches",
+    "arbitrary Allow remains executable but unversioned and cannot certify absence",
+    "Config plus arbitrary callback rejected before callback/provider, including empty/cross-file paths",
+    "Config snapshot byte/entry limits checked before copying; encoded bound checked separately",
+    "production CLI/HTTP/LSP constructors use frozen config; LSP reuses built workspace pipeline"
+  ],
+  "bounds": {
+    "input_string_bytes": 33554432,
+    "string_entries": 100000,
+    "canonical_yaml_bytes": 33554432,
+    "heap_bound_claim": false
+  },
+  "quality": {
+    "report": {
+      "path": "/tmp/prowl-config-policy-quality-20261116.json",
+      "sha256": "6def063fb922adbde0db5099925b1346b8a02d3c1a5c906a849016ffda610bb9"
+    },
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "false_positives": 61,
+    "hard_negatives": 982,
+    "all_keys_except_binary_sha_identical_to": {
+      "path": "/tmp/prowl-loaded-policy-quality-20261116.json",
+      "sha256": "cb3a89661ada53f0f5697e0753c40466e8717b4e8fc714829e63e80969346923"
+    }
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "model": {
+    "path": "/tmp/prowl-config-policy-20261116/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-config-policy-cross-build-20261116/builds.json",
+      "sha256": "b608704c26e2f1da441f60f3aaf3678c1b18a54dd27ee9090bf9b2392059561f"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "bb0cfa64bad073ec9d334e60675b81f6a4c3c99bc00e559a248484bcb4de2115",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "d8e8401e4310e481ce3364dace79035580c56775ce9d5c9fad40ffd2beefcb70",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "aef87cba6b0d760c8b1b62d8e5dc75053c76c5f0e133658840a9175f79bdbc4e",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "8f22a95b3073ad9fb32fada57352fa44b07eb5d5bd02689447b305401f099981",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "82ad52d1f11ea5a4305c07ac1835a74c66ad320a2a1d7d921ebee26e0f486b8f",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-config-policy-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "71ad79ef3fb34e62393c3a341e732f73dfc41920d5fd8f64642d26085bc52516",
+        "executed": false
+      }
+    ],
+    "native_arm64_sha_matches": true,
+    "foreign_execution": false
+  },
+  "limitations": [
+    "Snapshot describes already-applied configuration and freezes effective allowlist, not every dependency of execution.",
+    "Process-wide detection tuning/operational setters and shared-request boundaries remain an open P0 audit.",
+    "Arbitrary callbacks are unversioned, not authenticated or introspected as deterministic policies.",
+    "Historical JSON evidence unchanged; no retroactive recertification.",
+    "No real providers, production activation, hosted CI, current-source Docker rebuild, signing or publication.",
+    "Foreign binaries compile only; native runtime qualification is darwin/arm64.",
+    "No new inference, model/threshold change, parser/fuzz algorithm or paired performance run; default digest and all quality result keys unchanged."
+  ],
+  "passed": true
+}

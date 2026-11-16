@@ -90,7 +90,7 @@ func cmdOrg(args []string) int {
 		return 2
 	}
 
-	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Config: cfg})
 	if prepared.indexError != nil {
 		logx.Error("index setup failed", "err", prepared.indexError)
 		return 2

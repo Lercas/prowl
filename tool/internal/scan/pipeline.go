@@ -3,6 +3,7 @@ package scan
 import (
 	"context"
 
+	"github.com/Lercas/prowl/tool/internal/config"
 	"github.com/Lercas/prowl/tool/internal/detect"
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -30,8 +31,14 @@ type Options struct {
 	CrossFile      bool // opt-in bounded current-acquisition component assembly
 	ML             mlscore.Scorer
 	Allow          func(value, path string) bool
-	Workers        int
-	RevealSecrets  bool
+	// Config describes already-applied configuration. New snapshots it and its
+	// effective allowlist after all configuration/rule merges.
+	// It cannot be combined with an arbitrary Allow callback.
+	Config        *config.Config
+	configPolicy  *config.Policy
+	configError   bool
+	Workers       int
+	RevealSecrets bool
 	// IdentityKey scopes the released report identities; it is independent of the local index.
 	IdentityKey []byte
 	// Reconstruct enables bounded static string reconstruction for JS/TS sources.
@@ -67,6 +74,19 @@ type Pipeline struct{ options Options }
 // New takes a value snapshot of options, including the disclosure policy.
 func New(options Options) *Pipeline {
 	options.IdentityKey = append([]byte(nil), options.IdentityKey...)
+	if options.Config != nil {
+		if options.Allow != nil {
+			options.configError = true
+		} else {
+			var err error
+			options.configPolicy, err = options.Config.Snapshot()
+			options.configError = err != nil
+			if err == nil {
+				options.Allow = options.configPolicy.Allowed
+			}
+		}
+		options.Config = nil
+	}
 	return &Pipeline{options: options}
 }
 

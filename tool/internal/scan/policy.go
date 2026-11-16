@@ -74,6 +74,17 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) context.Context {
 	if o.CrossFile {
 		policy["cross_file"] = componentYAMLRevision
 	}
+	if o.configError {
+		c.Note("configuration_policy_failed", "", true)
+	}
+	if o.configPolicy != nil {
+		c.RegisterScope("detector_config", "", map[string]string{"revision": "loaded-config-v1", "digest": o.configPolicy.PolicyID()})
+		if o.configPolicy.Restrictive() {
+			c.Filtered()
+		}
+	} else if o.Allow != nil {
+		c.RegisterScope("unversioned_policy", "allow", "unidentified-allow-callback-v1")
+	}
 	c.RegisterScope("detection_policy", "1.5.0", policy)
 	if o.PublicAuditor != nil {
 		var policy any = "structured-siblings-and-static-js-groups"

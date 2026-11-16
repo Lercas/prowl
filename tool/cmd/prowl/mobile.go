@@ -75,7 +75,7 @@ func cmdMobile(args []string) int {
 		return 2
 	}
 
-	options := scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed}
+	options := scan.Options{Detector: det, Rules: eng, Verifiers: vset, Config: cfg}
 	prepared := prepareScan(c, options)
 	if c.auditPublic {
 		if prepared.auditError != nil {

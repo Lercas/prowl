@@ -274,6 +274,9 @@ func (li *lineIndex) isComment(pos int) bool {
 // partial results.
 func (p *Pipeline) Run(ctx context.Context, items <-chan model.Item) []model.Finding {
 	ctx = p.RegisterPolicy(ctx)
+	if p.options.configError {
+		return []model.Finding{processingError(model.Item{Path: "configuration"}, "configuration snapshot failed")}
+	}
 	if p.options.CrossFile && p.options.components == nil {
 		return p.runComponents(ctx, items)
 	}
@@ -340,6 +343,9 @@ func processingError(it model.Item, reason string) model.Finding {
 // Used by both the worker pool and the HTTP server as one self-contained unit of work.
 func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.Finding) {
 	ctx = p.RegisterPolicy(ctx)
+	if p.options.configError {
+		return []model.Finding{processingError(it, "configuration snapshot failed")}
+	}
 	if p.options.CrossFile && p.options.components == nil {
 		return []model.Finding{processingError(it, "cross-file verification requires a complete source stream")}
 	}

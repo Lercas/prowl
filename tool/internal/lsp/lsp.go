@@ -48,6 +48,7 @@ const debounceWindow = 200 * time.Millisecond
 // engine bundles the detector, rule engine, and allowlist so LSP diagnostics match `prowl scan` for
 // the same workspace.
 type engine struct {
+	pipeline *scan.Pipeline
 	det      *detect.Detector
 	eng      *rules.Engine
 	allow    func(value, path string) bool // cfg.Allowed: allowlisted values/paths/regex/stopwords
@@ -166,7 +167,7 @@ func buildWithBundled(bundled bool) (*engine, error) {
 	if cfg.Performance.MaxSize > 0 { // CLI --max-size parity: a .prowl.yaml can raise/lower the cap
 		maxBytes = int(cfg.Performance.MaxSize)
 	}
-	e := &engine{det: detect.New(tax), allow: cfg.Allowed, maxBytes: maxBytes}
+	e := &engine{det: detect.New(tax), maxBytes: maxBytes}
 	var dir string
 	if !bundled {
 		dir, err = installedRulesDir()
@@ -197,6 +198,7 @@ func buildWithBundled(bundled bool) (*engine, error) {
 	if e.eng != nil && e.eng.Len() > 0 {
 		logx.Info("lsp: loaded rule templates", "count", e.eng.Len(), "dir", dir)
 	}
+	e.pipeline = scan.New(scan.Options{Detector: e.det, Rules: e.eng, Config: cfg, AllOccurrences: true})
 	return e, nil
 }
 
@@ -577,7 +579,11 @@ func collectDiagnostics(e *engine, uri, text string) []map[string]any {
 	// Share final suppression and collision handling with CLI. No verifier or ML is attached here,
 	// so typing a document cannot make provider calls or send its contents to a sidecar.
 	coverage := model.NewCoverage()
-	findings := scan.New(scan.Options{Detector: e.det, Rules: e.eng, Allow: e.allow, AllOccurrences: true}).Findings(model.WithCoverage(context.Background(), coverage), model.Item{Path: path, Text: text, Source: "code"})
+	pipeline := e.pipeline
+	if pipeline == nil || e.allow != nil {
+		pipeline = scan.New(scan.Options{Detector: e.det, Rules: e.eng, Allow: e.allow, AllOccurrences: true})
+	}
+	findings := pipeline.Findings(model.WithCoverage(context.Background(), coverage), model.Item{Path: path, Text: text, Source: "code"})
 	offsets := make([]int, 0, len(findings)*2)
 	for _, f := range findings {
 		offsets = append(offsets, f.ByteStart, f.ByteEnd)

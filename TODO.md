@@ -162,9 +162,19 @@
     Full Go/race/min-Go/lint, шесть static builds, прежние quality IDs и GOROOT
     digest проходят. [Контракт](wiki/Loaded-Policy-Identity.md),
     `wiki/evidence/1.5.0-loaded-policy-20261116.json`.
-  - [ ] Сопоставить остальные policy boundaries, включая released `detector_config`
-    и identity allow/config callbacks. Восстановление ML/verifiers не закрывает
-    их и не переквалифицирует старые отчёты без loaded digests.
+  - [x] Восстановлены `detector_config` и declared-suppression `filtered` из 1.4.0.
+    Pipeline копирует итоговую декларацию и эффективную allowlist после gitleaks
+    merges; исходный Config не удерживается. CLI/HTTP/LSP используют снимок;
+    callback без identity не подтверждает отсутствие, ambiguous Config+Allow
+    и budget failure остаются неполными до callbacks/ML/provider и baseline.
+    Два scope gaps воспроизведены на предыдущем binary. Native — 289/289;
+    coverage 90/90, HTTP 57/57, MCP 80/80, LSP 2332/2332, loaded-policy 134/134
+    и correlation 46/46. Full Go/race/min-Go/lint, шесть static builds,
+    прежние quality IDs и GOROOT digest проходят. [Контракт](wiki/Configuration-Policy-Identity.md),
+    `wiki/evidence/1.5.0-config-policy-20261116.json`.
+  - [ ] Проверить оставшиеся process-wide detection tuning/operational setters
+    и их boundaries при совместном использовании pipelines/requests.
+    Config/allowlist snapshot не делает эти зависимости per-Pipeline.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

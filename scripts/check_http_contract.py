@@ -92,7 +92,7 @@ def main():
                     ok = (status == 200 and data["schema_version"] == "1.4" and data["complete"] == complete
                           and data["filtered"] == filtered and not data["secrets_revealed"]
                           and data["stats"]["processed"] == 1 and data["stats"]["bytes"] == len(content.encode())
-                          and {s["kind"] for s in data["scope"]} == {"detection_policy", "rules", "http-input"}
+                          and {s["kind"] for s in data["scope"]} == {"detection_policy", "rules", "detector_config", "http-input"}
                           and (count is None or data["count"] == count) and value.encode() not in raw
                           and (complete or data["diagnostics"] and data["truncated"]))
                     if name == "custom-rule":
@@ -101,7 +101,7 @@ def main():
             status, data, _ = request("/scan/batch", b"[]")
             checks.append(dict(case="empty-batch", passed=status == 200 and data["complete"]
                                and data["findings"] == [] and data["stats"]["processed"] == 0
-                               and {s["kind"] for s in data["scope"]} == {"detection_policy", "rules"}))
+                               and {s["kind"] for s in data["scope"]} == {"detection_policy", "rules", "detector_config"}))
             status, data, _ = request("/scan/batch", b"[" + b'{"content":""},' * 10000 + b'{"content":""}]')
             checks.append(dict(case="batch-item-limit", passed=status == 413 and "error" in data))
             large = "x" * ((4 << 20) + 1)

@@ -81,7 +81,7 @@ def main():
                           and meta["secrets_revealed"] == case.get("revealed", False)
                           and meta["stats"]["processed"] == case["processed"] and meta["stats"]["bytes"] == expected_bytes
                           and isinstance(meta["scope"], list) and isinstance(meta["diagnostics"], list)
-                          and {s["kind"] for s in meta["scope"]} == {"command", "pipeline", "detection_policy", "rules", "stdin" if stdin else "filesystem"}
+                          and {s["kind"] for s in meta["scope"]} == {"command", "pipeline", "detection_policy", "rules", "detector_config", "stdin" if stdin else "filesystem"}
                           and sum(s["kind"] == "detection_policy" and s["target"] == "1.5.0" for s in meta["scope"]) == 1
                           and sum(s["kind"] == "rules" for s in meta["scope"]) == 1
                           and all(len(s["policy"]) == 64 for s in meta["scope"])

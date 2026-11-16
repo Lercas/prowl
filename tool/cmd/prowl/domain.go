@@ -87,7 +87,7 @@ func cmdDomain(args []string) int {
 		return 2
 	}
 
-	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Allow: cfg.Allowed})
+	prepared := prepareScan(c, scan.Options{Detector: det, Rules: eng, Verifiers: vset, Config: cfg})
 	if prepared.auditError != nil {
 		logx.Error("public audit setup failed", "err", prepared.auditError)
 		return 2

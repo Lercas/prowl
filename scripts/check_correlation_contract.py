@@ -92,7 +92,7 @@ def main():
     keyless.mkdir()
     scan('unkeyed', use_env=dict(env, PROWL_HOME=str(keyless)))
     correlate('keyless-refused', ['before', 'unkeyed'], 2, None)
-    policy_kinds = {'command', 'pipeline', 'detection_policy', 'rules', 'semantic'}
+    policy_kinds = {'command', 'pipeline', 'detection_policy', 'rules', 'semantic', 'detector_config'}
     policy_before = dict(before, scope=[s for s in before['scope'] if s['kind'] in policy_kinds])
     policy_after = dict(after, scope=policy_before['scope'])
     save('policy-before', policy_before)
