@@ -40,7 +40,7 @@ func prepareScan(flags commonFlags, options scan.Options) preparedScan {
 	options.VerifyAll = flags.verifyAll || flags.failOnVerified
 	options.CrossFile = flags.crossFile
 	if flags.crossFile {
-		flags.coverage.RegisterScope("components", "local-filesystem", map[string]any{"revision": "cross-file-literals-v1", "max_items": 10000, "max_bytes": 32 << 20, "max_literals": 100000})
+		flags.coverage.RegisterScope("components", "local-filesystem", map[string]any{"revision": "cross-file-namespaces-v2", "max_items": 10000, "max_bytes": 32 << 20, "max_literals": 100000})
 	}
 	var auditErr error
 	if flags.auditPublic {

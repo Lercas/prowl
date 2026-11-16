@@ -106,6 +106,69 @@ def main():
                     check(label + '-owned-request', len(Handler.calls) == before + 1 and Handler.calls[-1])
                     check(label + '-redaction', all(v.encode() not in p.stdout + p.stderr for v in (KEY, OTHER, 'tenant_a', 'accessKeyId')))
 
+        nested_cases = (
+            ('json', 'a.json', json.dumps({'prod': {'service': {'accessKeyId': KEY}}}), 'b.json', '{"prod":{"service":{"account":"tenant_a"}}}'),
+            ('yaml', 'a.yaml', f'prod:\n  service:\n    accessKeyId: {KEY}\n', 'b.yaml', 'prod:\n  service:\n    account: tenant_a\n'),
+            ('toml', 'a.toml', f'[prod.service]\naccessKeyId="{KEY}"\n', 'b.toml', '[prod.service]\naccount="tenant_a"\n'),
+            ('dotted', 'a.toml', f'prod.service.accessKeyId="{KEY}"\n', 'b.toml', 'prod.service.account="tenant_a"\n'),
+            ('inline', 'a.toml', f'prod={{service={{accessKeyId="{KEY}"}}}}\n', 'b.toml', 'prod={service={account="tenant_a"}}\n'),
+            ('mixed', 'a.json', json.dumps({'prod': {'service': {'accessKeyId': KEY}}}), 'b.yaml', 'prod:\n  service:\n    account: tenant_a\n'),
+            ('quoted-dot', 'a.json', json.dumps({'prod.service': {'accessKeyId': KEY}}), 'b.toml', '["prod.service"]\naccount="tenant_a"\n'),
+        )
+        for name, key_name, key_text, account_name, account_text in nested_cases:
+            source = root / ('namespace-' + name)
+            source.mkdir()
+            (source / key_name).write_text(key_text)
+            (source / account_name).write_text(account_text)
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([source], fmt=fmt, ml=ml)
+                    fs, complete = report(p, fmt)
+                    label = f'namespace-{name}-{fmt}-ml{ml}'
+                    check(label + '-complete', p.returncode == 0 and complete and len(fs) == 1)
+                    detail = fs[0]['verification']
+                    check(label + '-verified', detail['status'] == 'verified' and len(detail['components']['fields']['account']) == 1)
+                    check(label + '-request', len(Handler.calls) == before + 1 and Handler.calls[-1])
+                    check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'accessKeyId')))
+            if name == 'mixed':
+                nested_index = root / 'namespace-index'
+                p = run([source], extra=['--index', nested_index, '--scope', 'owned-nested'])
+                fs, complete = report(p, 'json')
+                ids = fs[0]['verification']['components']['primary']
+                indexed = subprocess.run([str(binary), 'index', '--index', str(nested_index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+                places = {p['id'] for s in json.loads(indexed.stdout)['secrets'] for p in s['locations']}
+                check('namespace-index-primary', p.returncode == 0 and complete and indexed.returncode == 0 and set(ids) <= places)
+                with sqlite3.connect(nested_index / 'index.sqlite') as database:
+                    raw = '\n'.join(database.iterdump()).encode()
+                check('namespace-index-private', all(v.encode() not in raw for v in (KEY, 'tenant_a', 'accessKeyId')))
+
+        for name, account_name, account_text in (
+            ('sibling', 'b.json', '{"dev":{"account":"tenant_a"}}'),
+            ('parent', 'b.json', '{"account":"tenant_a"}'),
+            ('child', 'b.json', '{"prod":{"service":{"account":"tenant_a"}}}'),
+            ('case', 'b.json', '{"Prod":{"account":"tenant_a"}}'),
+            ('dots', 'b.json', '{"prod.account":"tenant_a"}'),
+            ('null-shadow', 'b.json', '{"prod":{"Account":null,"account":"tenant_a"}}'),
+            ('container-shadow', 'b.json', '{"prod":{"Account":{},"account":"tenant_a"}}'),
+            ('array', 'b.json', '{"prod":[{"account":"tenant_a"}]}'),
+            ('alias', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: *d\n'),
+            ('documents', 'b.yaml', 'prod: {account: tenant_a}\n---\nprod: {account: tenant_b}\n'),
+            ('array-tables', 'b.toml', '[[prod]]\naccount="tenant_a"\n'),
+        ):
+            source = root / ('namespace-negative-' + name)
+            source.mkdir()
+            (source / 'a.json').write_text(json.dumps({'prod': {'accessKeyId': KEY}}))
+            (source / account_name).write_text(account_text)
+            baseline = source / 'sentinel.baseline'
+            baseline.write_bytes(b'owned namespace baseline')
+            for fmt in ('json', 'sarif'):
+                before = len(Handler.calls)
+                p = run([source], extra=['--verified-only', '--write-baseline', baseline], fmt=fmt)
+                _, complete = report(p, fmt)
+                check(f'namespace-negative-{name}-{fmt}', p.returncode == 2 and not complete and len(Handler.calls) == before)
+                check(f'namespace-baseline-{name}-{fmt}', baseline.read_bytes() == b'owned namespace baseline')
+
         source = fixture('duplicates')
         (source / 'key.json').write_text(json.dumps({'accessKeyId': KEY, 'secondKey': KEY}))
         for fmt in ('json', 'sarif'):

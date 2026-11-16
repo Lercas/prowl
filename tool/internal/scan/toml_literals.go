@@ -91,6 +91,12 @@ func tomlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			role = role.child(segment)
 		}
 		doc.roles[id] = role
+		if captureComponentNamespaces(ctx) && len(instances) == 0 {
+			if doc.componentNamespaces == nil {
+				doc.componentNamespaces = make(map[int]string)
+			}
+			doc.componentNamespaces[id] = componentNamespace(path)
+		}
 		return id
 	}
 	copyAppend := func(a, b []string) []string {

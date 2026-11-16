@@ -17,10 +17,19 @@ stdin, Git modes, `repo/org`, remote adapters, image/mobile и MCP/HTTP/LSP эт
 
 ## Поддержанные входы CLI
 
-Принимаются плоские JSON/YAML/TOML mapping и dotenv (`.env`, `.env.*`, `*.env`).
+Принимаются JSON/YAML/TOML mappings, включая вложенные объекты/таблицы,
+и dotenv (`.env`, `.env.*`, `*.env`). Межфайловое связывание выполняется только
+внутри одинакового точного пути namespace: `prod.service` в двух документах
+обозначает одну явно выбранную область. Родитель/ребёнок и соседние namespace
+не наследуют поля друг друга. Сегменты различаются: ключ `"prod.service"`
+не равен вложенным `prod` → `service`. Регистр и Unicode не нормализуются.
+JSON, YAML и TOML могут дополнять друг друга при одинаковых сегментах.
+Dotenv принадлежит только корневому namespace.
 Non-string и пустой scalar сохраняются как неизвестная роль; потребовать её из
-другого файла нельзя. Вложенные объекты, массивы, таблицы и YAML aliases не
-flatten-ятся и дают неполноту. Имена компонентных полей должны быть простыми
+другого файла нельзя. Объект, объявленный под именем роли, также оставляет
+эту роль неизвестной в родительском namespace. Массивы, TOML arrays of tables,
+YAML aliases/merge и несколько YAML documents не сопоставляются и дают неполноту.
+Имена компонентных полей и namespace должны быть простыми
 идентификаторами, допустимыми в resolver.
 
 Dotenv поддерживает `export`, literal single quotes, double quotes без expansion,
@@ -107,7 +116,8 @@ immutable observed intake, source boundaries и baseline guards на собст�
 loopback verifier. Это локальная квалификация сканера, не live-provider acceptance.
 
 До закрытия общего пункта остаются остальные acquisition adapters/revisions,
-сложные конфигурационные namespace и import relationships, а также отсутствующие
+import relationships, массивы/индексированные namespace, aliases/overlays,
+а также отсутствующие
 реальные OAuth/DB verifiers. Текущая локальная матрица не квалифицирует эти области.
 Автоматически связывать исторические plaintext-значения нельзя:
 сквозной SQLite-индекс хранит только HMAC и metadata.

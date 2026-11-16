@@ -39,6 +39,12 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 	mapGroups := map[*yaml.Node]int{}
 	docGroups := map[*yaml.Node]int{}
 	roles := map[int]literalRole{}
+	var componentNamespaces map[int]string
+	var componentPaths map[*yaml.Node][]string
+	if captureComponentNamespaces(ctx) {
+		componentNamespaces = make(map[int]string)
+		componentPaths = make(map[*yaml.Node][]string)
+	}
 	group := 0
 	decoder := yaml.NewDecoder(strings.NewReader(it.Text))
 	count := 0
@@ -68,8 +74,15 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 			f := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			n := f.node
+			var componentPath []string
+			if componentPaths != nil {
+				componentPath = componentPaths[n]
+			}
 			if f.key != nil && (n.Kind == yaml.MappingNode || n.Kind == yaml.SequenceNode) {
 				f.role = f.role.child(f.key.Value)
+				if componentNamespaces != nil {
+					componentPath = append(append([]string(nil), componentPath...), f.key.Value)
+				}
 			}
 			if n.Kind == yaml.DocumentNode {
 				group++
@@ -89,13 +102,22 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				group++
 				mapGroups[n] = group
 				roles[group] = f.role
+				if componentNamespaces != nil {
+					componentNamespaces[group] = componentNamespace(componentPath)
+				}
 				for i := 0; i+1 < len(n.Content); i += 2 {
 					key, value := n.Content[i], n.Content[i+1]
 					flow := f.flow || n.Style&yaml.FlowStyle != 0
+					if componentPaths != nil {
+						componentPaths[key], componentPaths[value] = componentPath, componentPath
+					}
 					stack = append(stack, frame{node: key, depth: f.depth + 1, flow: flow, group: group, role: f.role}, frame{node: value, depth: f.depth + 1, flow: flow, group: group, key: key, role: f.role})
 				}
 			} else {
 				for _, child := range n.Content {
+					if componentPaths != nil {
+						componentPaths[child] = componentPath
+					}
 					stack = append(stack, frame{node: child, depth: f.depth + 1, flow: f.flow || n.Style&yaml.FlowStyle != 0, group: f.group, role: f.role})
 				}
 			}
@@ -149,6 +171,7 @@ func yamlLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		v.value, v.sourceStarts, v.sourceEnds, v.transform = string(decoded), starts, ends, "yaml-binary"
 	}
 	doc := &literalDocument{original: it.Text, lines: newLineIndex(it.Text), transform: "yaml-scalar", roles: roles, unsafeGroups: map[int]bool{}}
+	doc.componentNamespaces = componentNamespaces
 	doc.lines.resetPragmas()
 	doc.pragmas = &lineIndex{text: it.Text, starts: source.starts, pragmaCache: make([]int8, len(source.starts))}
 	visits, work := 0, 0

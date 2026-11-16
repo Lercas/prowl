@@ -33,20 +33,21 @@ type sourceLiteral struct {
 }
 
 type literalDocument struct {
-	publicUnknown      map[int]map[string]bool
-	firebaseSchema     *firebaseSchemaBindings
-	original           string
-	text               string
-	values             []sourceLiteral
-	scalars            map[int]detect.PasswordScalar
-	contexts           map[int]string
-	bindings           map[int]map[string]string
-	roles              map[int]literalRole
-	unsafeGroups       map[int]bool
-	verificationUnsafe bool
-	lines              *lineIndex
-	pragmas            *lineIndex // Optional parser-specific logical line boundaries.
-	transform          string
+	componentNamespaces map[int]string
+	publicUnknown       map[int]map[string]bool
+	firebaseSchema      *firebaseSchemaBindings
+	original            string
+	text                string
+	values              []sourceLiteral
+	scalars             map[int]detect.PasswordScalar
+	contexts            map[int]string
+	bindings            map[int]map[string]string
+	roles               map[int]literalRole
+	unsafeGroups        map[int]bool
+	verificationUnsafe  bool
+	lines               *lineIndex
+	pragmas             *lineIndex // Optional parser-specific logical line boundaries.
+	transform           string
 }
 
 func (doc *literalDocument) hasPragma(pos int) bool {
@@ -82,6 +83,10 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 		keys        map[string]bool
 	}
 	var stack []frame
+	var componentPaths map[int][]string
+	if captureComponentNamespaces(ctx) {
+		componentPaths = make(map[int][]string)
+	}
 	group := 0
 	consume := func() {
 		if len(stack) > 0 && stack[len(stack)-1].object {
@@ -115,9 +120,13 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 					return fail("json_literal_limit")
 				}
 				role := literalRole{}
+				var componentPath []string
 				if len(stack) > 0 {
 					parent := stack[len(stack)-1]
 					role = parent.role.child(parent.name)
+					if componentPaths != nil {
+						componentPath = append(append([]string(nil), componentPaths[parent.group]...), parent.name)
+					}
 				}
 				if capturePublic && len(stack) > 0 {
 					parent := stack[len(stack)-1]
@@ -128,6 +137,13 @@ func jsonLiteralsWithPublic(ctx context.Context, it model.Item, capturePublic bo
 				consume()
 				group++
 				doc.roles[group] = role
+				if componentPaths != nil {
+					if doc.componentNamespaces == nil {
+						doc.componentNamespaces = make(map[int]string)
+					}
+					doc.componentNamespaces[group] = componentNamespace(componentPath)
+					componentPaths[group] = componentPath
+				}
 				stack = append(stack, frame{object: token == '{', key: token == '{', group: group, role: role, keys: map[string]bool{}})
 			} else {
 				stack = stack[:len(stack)-1]

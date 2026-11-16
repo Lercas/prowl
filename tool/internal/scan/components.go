@@ -6,7 +6,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
@@ -26,7 +28,7 @@ const componentMaxLiterals = 100000
 type componentBatch struct {
 	set     *credentialset.Set
 	docs    map[int]*literalDocument
-	scopes  map[int]*credentialset.Scope
+	scopes  map[int]map[int]*credentialset.Scope
 	allowed map[int]map[int]bool
 }
 
@@ -45,10 +47,26 @@ func (p *Pipeline) componentLocation(it model.Item, line, col int) string {
 	return id
 }
 
-// Only an explicitly selected flat configuration namespace can establish
-// cross-document roles. Nested objects/tables and aliases require a relationship
-// model; non-string scalar roles stay unknown instead of being silently omitted.
-func flatComponentFields(ctx context.Context, it model.Item) (map[string]*string, bool) {
+type componentNamespaceKey struct{}
+
+func captureComponentNamespaces(ctx context.Context) bool {
+	value, _ := ctx.Value(componentNamespaceKey{}).(bool)
+	return value
+}
+
+// Encode segments, not dotted names: ["a.b"] and ["a", "b"] are unrelated.
+func componentNamespace(path []string) string {
+	if len(path) == 0 {
+		return ""
+	}
+	raw, _ := json.Marshal(path)
+	return string(raw)
+}
+
+// Object namespaces match only by exact segment path within one acquisition.
+// Arrays, aliases and multi-document YAML need an explicit relationship model.
+// Every declared non-string role remains unknown, including container fields.
+func componentFields(ctx context.Context, it model.Item) (map[string]map[string]*string, bool) {
 	text := strings.TrimPrefix(it.Text, "\uFEFF")
 	fields := make(map[string]any)
 	switch literalFormat(it) {
@@ -61,39 +79,79 @@ func flatComponentFields(ctx context.Context, it model.Item) (map[string]*string
 			return nil, false
 		}
 	case ".yaml", ".yml":
-		var doc yaml.Node
-		if yaml.Unmarshal([]byte(text), &doc) != nil || len(doc.Content) != 1 || doc.Content[0].Kind != yaml.MappingNode {
+		var doc, extra yaml.Node
+		decoder := yaml.NewDecoder(strings.NewReader(text))
+		if decoder.Decode(&doc) != nil || len(doc.Content) != 1 || decoder.Decode(&extra) != io.EOF {
 			return nil, false
 		}
-		for i := 0; i < len(doc.Content[0].Content); i += 2 {
-			key, value := doc.Content[0].Content[i], doc.Content[0].Content[i+1]
-			if key.Kind != yaml.ScalarNode || key.Tag != "!!str" || value.Kind != yaml.ScalarNode {
-				return nil, false
-			}
-			if _, duplicate := fields[key.Value]; duplicate {
-				return nil, false
-			}
-			if value.Tag == "!!str" {
-				fields[key.Value] = value.Value
-			} else {
-				fields[key.Value] = nil
-			}
+		var ok bool
+		fields, ok = componentYAMLMapping(ctx, doc.Content[0], 0)
+		if !ok {
+			return nil, false
 		}
 	default:
 		return nil, false
 	}
-	out := make(map[string]*string, len(fields))
-	for name, v := range fields {
-		if v != nil {
-			k := reflect.TypeOf(v).Kind()
-			if k == reflect.Map || k == reflect.Slice || k == reflect.Array {
-				return nil, false
+	out := make(map[string]map[string]*string)
+	var walk func(map[string]any, []string, int) bool
+	walk = func(fields map[string]any, path []string, depth int) bool {
+		if ctx.Err() != nil || depth > 64 || len(out) >= componentMaxLiterals {
+			return false
+		}
+		values := make(map[string]*string, len(fields))
+		out[componentNamespace(path)] = values
+		for name, v := range fields {
+			values[name] = nil
+			if child, ok := v.(map[string]any); ok {
+				if !walk(child, append(append([]string(nil), path...), name), depth+1) {
+					return false
+				}
+			} else if v != nil {
+				k := reflect.TypeOf(v).Kind()
+				if k == reflect.Map || k == reflect.Slice || k == reflect.Array {
+					return false
+				}
+				if s, ok := v.(string); ok && s != "" {
+					values[name] = &s
+				}
 			}
 		}
-		if s, ok := v.(string); ok && s != "" {
-			out[name] = &s
-		} else {
-			out[name] = nil
+		return true
+	}
+	valid := walk(fields, nil, 0)
+	return out, valid
+}
+
+func componentYAMLMapping(ctx context.Context, node *yaml.Node, depth int) (map[string]any, bool) {
+	if ctx.Err() != nil || depth > 64 || node.Kind != yaml.MappingNode || node.Tag != "!!map" {
+		return nil, false
+	}
+	out := make(map[string]any)
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		key, value := node.Content[i], node.Content[i+1]
+		if key.Kind != yaml.ScalarNode || key.Tag != "!!str" {
+			return nil, false
+		}
+		if _, duplicate := out[key.Value]; duplicate {
+			return nil, false
+		}
+		switch value.Kind {
+		case yaml.MappingNode:
+			child, ok := componentYAMLMapping(ctx, value, depth+1)
+			if !ok {
+				return nil, false
+			}
+			out[key.Value] = child
+		case yaml.ScalarNode:
+			if !yamlKnownTag(value.Tag) {
+				return nil, false
+			}
+			out[key.Value] = nil
+			if value.Tag == "!!str" {
+				out[key.Value] = value.Value
+			}
+		default:
+			return nil, false
 		}
 	}
 	return out, true
@@ -105,7 +163,8 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 	}
 	set, _ := credentialset.New(credentialset.Limits{Observations: 100000, Bytes: componentMaxBytes})
 	defer set.Close()
-	batch := &componentBatch{set: set, docs: make(map[int]*literalDocument), scopes: make(map[int]*credentialset.Scope), allowed: make(map[int]map[int]bool)}
+	batch := &componentBatch{set: set, docs: make(map[int]*literalDocument), scopes: make(map[int]map[int]*credentialset.Scope), allowed: make(map[int]map[int]bool)}
+	namespaces := make(map[*credentialset.Scope]map[string]*credentialset.Scope)
 	options := p.options
 	if options.LocationFingerprint == nil {
 		// No filesystem state is created without --index. These keyed IDs belong
@@ -155,15 +214,23 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 				continue
 			}
 			var doc *literalDocument
-			var fields map[string]*string
-			flat := false
+			var fields map[string]map[string]*string
+			supported := false
 			if componentEnv(it) {
-				doc, fields = envComponents(ctx, it)
-				flat = doc != nil
+				var envFields map[string]*string
+				doc, envFields = envComponents(ctx, it)
+				fields = map[string]map[string]*string{"": envFields}
+				if doc != nil {
+					doc.componentNamespaces = make(map[int]string)
+					for _, v := range doc.values {
+						doc.componentNamespaces[v.group] = ""
+					}
+				}
+				supported = doc != nil
 			} else {
-				doc = parseLiterals(ctx, it, false)
+				doc = parseLiterals(context.WithValue(ctx, componentNamespaceKey{}, true), it, false)
 				if doc != nil && len(it.Text) <= 1<<20 {
-					fields, flat = flatComponentFields(ctx, it)
+					fields, supported = componentFields(ctx, it)
 				}
 			}
 			if doc != nil {
@@ -176,38 +243,54 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 				literals += len(doc.values)
 				batch.docs[it.CredentialEntry] = doc
 			}
-			if it.CredentialScope == nil || doc == nil || doc.verificationUnsafe || len(it.Text) > 1<<20 || !flat {
+			if it.CredentialScope == nil || doc == nil || doc.verificationUnsafe || len(it.Text) > 1<<20 || !supported {
 				model.Note(ctx, "cross_file_literal_unavailable", it.Path, true)
 				valid = false
 				continue
 			}
-			batch.scopes[it.CredentialEntry] = it.CredentialScope
+			if namespaces[it.CredentialScope] == nil {
+				namespaces[it.CredentialScope] = map[string]*credentialset.Scope{"": it.CredentialScope}
+			}
+			scopes := namespaces[it.CredentialScope]
+			batch.scopes[it.CredentialEntry] = make(map[int]*credentialset.Scope)
 			batch.allowed[it.CredentialEntry] = make(map[int]bool)
-			for name, value := range fields {
-				if value == nil {
-					id := collector.componentLocation(it, 1, 1)
-					if set.ObserveUnknown(ctx, it.CredentialScope, name, id) != nil {
+			for namespace, values := range fields {
+				if scopes[namespace] == nil {
+					if len(scopes) >= componentMaxLiterals {
 						valid = false
+						break
+					}
+					scopes[namespace] = credentialset.NewScope()
+				}
+				for name, value := range values {
+					if value == nil {
+						id := collector.componentLocation(it, 1, 1)
+						if set.ObserveUnknown(ctx, scopes[namespace], name, id) != nil {
+							valid = false
+						}
 					}
 				}
 			}
 			for _, v := range doc.values {
-				if fields[v.name] == nil {
+				namespace, mapped := doc.componentNamespaces[v.group]
+				value := fields[namespace][v.name]
+				if !mapped || value == nil || v.raw {
 					continue
 				}
-				if doc.unsafeGroups[v.group] || v.noPassword || v.uiPassword {
+				if *value != v.value || doc.unsafeGroups[v.group] || v.noPassword || v.uiPassword {
 					valid = false
 					model.Note(ctx, "cross_file_literal_ambiguous", it.Path, true)
 					continue
 				}
 				line, col := doc.lines.cols(v.start)
 				id := collector.componentLocation(it, line, col)
-				if err := set.Observe(ctx, it.CredentialScope, v.name, v.value, id); err != nil {
+				if err := set.Observe(ctx, scopes[namespace], v.name, v.value, id); err != nil {
 					model.Note(ctx, "cross_file_component_limit_or_invalid", it.Path, true)
 					valid = false
 					break
 				}
 				batch.allowed[it.CredentialEntry][v.start] = true
+				batch.scopes[it.CredentialEntry][v.group] = scopes[namespace]
 			}
 		}
 	}
@@ -247,7 +330,7 @@ func (b *componentBatch) apply(ctx context.Context, set *verify.Set, doc *litera
 		f.Verified, f.Rationale, f.Verification = verificationResult(verify.Result{Status: verify.Errored, Note: "structured literal could not be established"})
 		return
 	}
-	r, evidence := set.VerifyComponents(ctx, candidate.typ, v.name, candidate.value, b.set, b.scopes[candidate.entry], detect.IsExampleOrPlaceholder(candidate.value))
+	r, evidence := set.VerifyComponents(ctx, candidate.typ, v.name, candidate.value, b.set, b.scopes[candidate.entry][v.group], detect.IsExampleOrPlaceholder(candidate.value))
 	f.Verified, f.Rationale, f.Verification = verificationResult(r)
 	if f.Verification != nil {
 		f.Verification.Components = evidence
