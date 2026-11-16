@@ -17,7 +17,7 @@ stdin, Git modes, `repo/org`, remote adapters, image/mobile и MCP/HTTP/LSP эт
 
 ## Поддержанные входы CLI
 
-Принимаются JSON/YAML/TOML mappings, включая вложенные объекты/таблицы,
+Принимаются JSON/YAML/TOML mappings, включая вложенные объекты/таблицы и массивы,
 и dotenv (`.env`, `.env.*`, `*.env`). Межфайловое связывание выполняется только
 внутри одинакового точного пути namespace: `prod.service` в двух документах
 обозначает одну явно выбранную область. Родитель/ребёнок и соседние namespace
@@ -27,10 +27,10 @@ JSON, YAML и TOML могут дополнять друг друга при од
 Dotenv принадлежит только корневому namespace.
 Non-string и пустой scalar сохраняются как неизвестная роль; потребовать её из
 другого файла нельзя. Объект, объявленный под именем роли, также оставляет
-эту роль неизвестной в родительском namespace. Массивы, TOML arrays of tables
-и несколько YAML documents не сопоставляются и дают неполноту.
-Имена компонентных полей и namespace должны быть простыми
-идентификаторами, допустимыми в resolver.
+эту роль неизвестной в родительском namespace. Несколько YAML documents
+не сопоставляются и дают неполноту.
+Имена компонентных полей должны быть простыми идентификаторами,
+допустимыми в resolver.
 
 YAML scalar/mapping aliases и merge поддерживаются по явным ссылкам внутри одного
 документа. Namespace определяется местом использования: `prod: *defaults`
@@ -42,7 +42,8 @@ YAML scalar/mapping aliases и merge поддерживаются по явны�
 заимствование строкового значения из других файлов. Дубликаты полей/merge,
 неизвестные ссылки, циклы и выход за бюджет не разрешают composite probes.
 Вложенная sequence в merge и alias на sequence отвергаются, как и в используемом
-`yaml.Node.Decode`. Обычные array namespaces этим не включаются.
+`yaml.Node.Decode`. Это ограничение merge operands; обычные sequences и их aliases
+разрешены с индексированными namespace.
 
 Физическая декларация primary и её alias-use сохраняют свои namespace, component
 evidence и отдельные provider verdicts. Декларация сама по себе не наследует
@@ -145,7 +146,7 @@ unknown/container roles, index privacy и namespace budget до provider calls.
 Текущий отчёт: `evidence/1.5.0-cross-file-namespaces-20261116.json`.
 
 До закрытия общего пункта остаются остальные acquisition adapters/revisions,
-import relationships, массивы/индексированные namespace и межфайловые overlays,
+import relationships, другие сложные namespace и межфайловые overlays,
 а также отсутствующие
 реальные OAuth/DB verifiers. Текущая локальная матрица не квалифицирует эти области.
 Автоматически связывать исторические plaintext-значения нельзя:
@@ -153,7 +154,7 @@ import relationships, массивы/индексированные namespace и
 
 ## Квалификация YAML relationships
 
-Версия opt-in policy — `yaml-explicit-alias-merge-v1`. Она записывается только
+Первоначальная версия opt-in policy — `yaml-explicit-alias-merge-v1`. Она записывалась только
 при `CrossFile`, вместе с configured stage. Default policy и обычный scan не меняются.
 Разрешение графа ограничено 100000 посещений, глубиной 64 и 32 MiB учитываемых
 строк; существующие parser/intake/namespace bounds могут остановить его раньше.
@@ -176,3 +177,34 @@ digest GOROOT совпал: 12044 файла, 132407542 байта, 420 findings
 
 Точные source/binary hashes и логи:
 `evidence/1.5.0-cross-file-yaml-relationships-20261116.json`.
+
+## Индексированные namespace
+
+Policy `indexed-namespaces-yaml-v2` добавляет JSON/YAML sequences, в том числе
+корневые и вложенные, TOML arrays of tables и arrays of inline tables.
+Путь содержит типизированные сегменты: `rows` → индекс `0` отличается от `rows` →
+строковый ключ `"0"`. Scalar/null/пустые элементы сохраняют свою позицию, поэтому
+последующие объекты не сдвигаются. Другая глубина массива тоже означает другой путь.
+
+`--cross-file` разрешает связывание только одинаковых порядковых позиций внутри
+выбранного root одной конфигурации. Пользователь должен выбирать файлы, в которых
+порядок записей соответствует одной конфигурации. Режим не сопоставляет записи
+по содержимому, имени/ID внутри объекта или сходству значений, не выполняет join
+и не применяет merge/overlay между файлами. Если порядок отличается, общий root
+для такого связывания выбирать нельзя.
+
+YAML mapping/sequence aliases используют путь места применения с его индексом.
+Два primary с одинаковым значением на позициях 0 и 1 сохраняют собственные companions,
+location IDs и provider verdicts. Безымянный scalar внутри массива не становится
+именованной ролью. Пустое/null/container поле роли по-прежнему запрещает заимствование
+из другого файла. Остальные acquisition boundaries и budgets сохраняются.
+
+Native CLI — 760/760, включая JSON/SARIF ±ML, index privacy, baseline guards,
+независимые LIVE/dead verdicts двух одинаковых primary на разных индексах.
+Parent binary не проходит новый положительный array-сценарий. Full Go, targeted
+race, Go 1.26.11 и lint проходят; differential YAML fuzz — 30699 исполнений за
+11,409s при лимите 10s. Pinned quality metrics/IDs и полный GOROOT digest выше
+сохранились. Fixed-reference performance gate проходит: время +17,65% при лимите
++20%, bytes -4,52%, allocations +1,94%. Это сравнение с фиксированной policy
+reference, а не измерение стоимости одного array-расширения относительно parent.
+Квалификация: `evidence/1.5.0-cross-file-indexed-20261116.json`.

@@ -675,9 +675,18 @@
     differential fuzz — 80908, full Go/race/min-Go/lint проходят. Quality IDs
     прежние; полный JSON digest GOROOT совпал с parent.
     `wiki/evidence/1.5.0-cross-file-yaml-relationships-20261116.json`.
+  - [x] Индексированные JSON/YAML/TOML namespace: root/nested sequences, TOML arrays
+    of tables/inline tables, YAML aliases/merge в позиции использования. Числовой
+    индекс отличается от строкового ключа; scalar/null slots не сдвигают позиции.
+    Контракт требует совпадающего порядка записей одной выбранной конфигурации;
+    content joins и overlays не выполняются. Native CLI JSON/SARIF ±ML/index —
+    760/760; full Go/race/min-Go/lint проходят, differential fuzz — 30699.
+    Quality metrics/IDs и полный GOROOT digest сохранены. Fixed-reference performance
+    gate +17,65% времени при лимите +20%, bytes -4,52%, allocations +1,94%.
+    `wiki/evidence/1.5.0-cross-file-indexed-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
-    arrays/индексированные и другие сложные namespace
-    и реальные OAuth/DB verifiers; текущий local-filesystem этап их не закрывает.
+    другие сложные namespace и реальные OAuth/DB verifiers;
+    текущий local-filesystem этап их не закрывает.
 - [x] **Хронология наблюдений в Git.** Явный `--git-timeline` для `scan/repo/org` включает
   историю; все достижимые ветки и зафиксированный HEAD, события относительно первого родителя.
   - [x] Коммиты появления и повторного появления: hash, родители, имя автора, авторская дата
