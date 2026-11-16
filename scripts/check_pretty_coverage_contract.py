@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import pty
+import re
 import select
 import struct
 import subprocess
@@ -54,21 +55,26 @@ def main():
         ('candidate', [str(secret)], 0, 'Candidates without a provider verdict are unconfirmed.', False),
     ]
     checks = []
-    for mode in ('pipe', 'file', 'pty'):
+    for mode in ('pipe', 'file', 'pty', 'pty-color'):
         for name, args, expected_exit, expected_text, clean_banner in cases:
-            command = [str(binary), 'scan', *args, '--bundled', '--quiet', '--no-color', '--format=pretty']
+            command = [str(binary), 'scan', *args, '--bundled', '--quiet', '--format=pretty']
+            child_env = env.copy()
+            if mode == 'pty-color':
+                child_env.pop('NO_COLOR', None)
+            else:
+                command.append('--no-color')
             path = root / (mode + '-' + name + '.log')
             if mode == 'file':
                 command += ['--output', str(path)]
-            if mode != 'pty':
-                result = subprocess.run(command, cwd=root, env=env, capture_output=True, timeout=30)
+            if not mode.startswith('pty'):
+                result = subprocess.run(command, cwd=root, env=child_env, capture_output=True, timeout=30)
                 status = result.returncode
                 body = path.read_bytes() if mode == 'file' else result.stdout
                 assert key.encode() not in result.stderr
             else:
                 master, slave = pty.openpty()
                 fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 32, 100, 0, 0))
-                process = subprocess.Popen(command, cwd=root, env=env, stdin=subprocess.DEVNULL,
+                process = subprocess.Popen(command, cwd=root, env=child_env, stdin=subprocess.DEVNULL,
                                            stdout=slave, stderr=slave)
                 os.close(slave)
                 body = bytearray()
@@ -95,6 +101,10 @@ def main():
                         process.wait()
                 body = bytes(body)
             text = body.decode().replace('\r\n', '\n')
+            if mode == 'pty-color':
+                if clean_banner:
+                    assert '\x1b[32m' in text, (mode, name, 'color path not exercised')
+                text = re.sub(r'\x1b\[[0-9;]*m', '', text)
             assert status == expected_exit, (mode, name, status)
             assert expected_text in text, (mode, name, 'missing state')
             assert ('✓ no secrets found' in text) == clean_banner, (mode, name, 'false clean state')
@@ -105,7 +115,7 @@ def main():
                            'sha256': hashlib.sha256(body).hexdigest(), 'path': str(path)})
     report = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
               'passed': len(checks), 'checks': checks,
-              'scope': 'Local CLI, real PTY at 100 columns, quiet/no-color; caller records the network boundary.'}
+              'scope': 'Local CLI, real PTY at 100 columns with/without color, quiet mode; caller records the network boundary.'}
     output = root / 'qualification.json'
     output.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({'passed': len(checks), 'evidence': str(output)}))

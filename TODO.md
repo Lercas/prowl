@@ -93,9 +93,17 @@
     Оставшиеся 45 имён требуют сопоставления assertions, включая известные
     переименования. Это не 45 доказанных регрессий и не квалификация контрактов.
     `wiki/evidence/1.5.0-reference-test-inventory-20261116.json`.
-  - [ ] Завершить assertion-level сопоставление этих 45 имён: JSON literals,
-    реконструкция, transport Unicode/cancellation, output guards, CLI и намеренные
-    замены ML/compression. Родительские пункты остаются открыты до проверки.
+  - [x] Завершено assertion-level сопоставление 45 имён: 30 checks восстановлены,
+    11 сопоставлены с переименованными проверками, 4 — с намеренными заменами
+    ML/compression. Все 45 original checks плюс canonical JSON проходят на
+    неизменённом теге: 46 top-level passes, 694 tool blobs сверены.
+    Найдена и исправлена pretty-coverage регрессия: empty/filtered/incomplete
+    больше не выдаются за чистый скан; terminal renderer получает coverage.
+    Native pipe/file/PTY/color — 40/40, full Go/targeted race/min-Go/lint проходят.
+    [Карта и границы](wiki/Released-Assertion-Audit.md),
+    `wiki/evidence/1.5.0-reference-assertions-20261116.json`.
+  - [ ] Проверить изменения same-name test bodies/helpers и покрытие удалённых
+    native runners; закрытая карта 45 имён не закрывает всю совместимость релиза.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

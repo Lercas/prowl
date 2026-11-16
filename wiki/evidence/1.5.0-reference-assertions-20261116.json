@@ -1,0 +1,530 @@
+{
+  "schema_version": "prowl-reference-assertions-v1",
+  "date": "2026-11-16",
+  "status": "45_name_inventory_mapped_and_pretty_coverage_qualified",
+  "source_base": "bc6dbe43c30d9d4cc0f9e7c2cac67e71e0705457",
+  "qualified_runtime_commit": "79fa4fd2c6cd05d46822f0ad12c4bf6afb7c35b3",
+  "initial_runtime_commit": "75bcc80",
+  "core_to_final_delta": "only report metadata deduplication and its test; current native script also checks colored PTY",
+  "binary": {
+    "path": "/tmp/prowl-reference-assertions-final-20261116-bin",
+    "sha256": "9649a01b9a1cd44254af9dc50ea14090754bd0294bf1e6103d7f8aaa446d6ecc"
+  },
+  "buildinfo": "/tmp/prowl-reference-assertions-final-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=79fa4fd2c6cd05d46822f0ad12c4bf6afb7c35b3\n\tbuild\tvcs.time=2026-11-16T04:58:53Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "qualified-go": {
+      "path": "/tmp/prowl-reference-assertions-qualified-go-20261116.log",
+      "sha256": "68135d49be897b5193e89dfd444f9d78e25ac1af9e6a521705dfe1769bd86c12"
+    },
+    "qualified-race": {
+      "path": "/tmp/prowl-reference-assertions-qualified-race-20261116.log",
+      "sha256": "462a751fd071a3f46723bb035d398e41ded11a804d7ae7122f065ee6f4ace57c"
+    },
+    "qualified-min-go": {
+      "path": "/tmp/prowl-reference-assertions-qualified-min-go-20261116.log",
+      "sha256": "406c3aa8ffecc800a1c56005a5f2e4f9774427426694180306c32ebb2a389007"
+    },
+    "qualified-lint": {
+      "path": "/tmp/prowl-reference-assertions-qualified-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "qualified-fuzz": {
+      "path": "/tmp/prowl-reference-assertions-qualified-fuzz-20261116.log",
+      "sha256": "d3640831f4cfd019aa0d3a281e70a9ec65b9cd9630226413e62c2191968b4a7d"
+    },
+    "final-go": {
+      "path": "/tmp/prowl-reference-assertions-final-go-20261116.log",
+      "sha256": "4e4f1a90d2b1942e46f151d7d5bf88bb199feff9527d7a2e406aff5cd169dbb1"
+    },
+    "final-race": {
+      "path": "/tmp/prowl-reference-assertions-final-race-20261116.log",
+      "sha256": "3ea399b166ab0f9eb3502dfbbe7ffb0a92027463a4e9146e0ebe137c2216ae1e"
+    },
+    "final-min-go": {
+      "path": "/tmp/prowl-reference-assertions-final-min-go-20261116.log",
+      "sha256": "3484990f8500724925ec0fc1e588310c7f882496a19a5e694accc3471d085b89"
+    },
+    "final-lint": {
+      "path": "/tmp/prowl-reference-assertions-final-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "final-native": {
+      "path": "/tmp/prowl-reference-assertions-final-native-20261116.log",
+      "sha256": "75b78acb4c3cf865dbd9e94036f3dd72b5cad623c29f14b60ba3a54b2ffaf90a"
+    }
+  },
+  "reference_source": {
+    "reference_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-integrity-v140-kgv2vub7",
+    "verified_blobs": 694,
+    "manifest_sha256": "6eb491cb9bd276b8654e05425827141a5a1ae48b8cc6740a485f4a35054cb4c0",
+    "extra_files": []
+  },
+  "named_test_qualification": {
+    "original": {
+      "passed": 46,
+      "tests": [
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/report",
+          "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/report",
+          "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONCanonicalValuesIdentityAndSourceSpans"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONEscapedPlaceholdersAndNonBindings"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONComposedEncodingKeepsOriginalEvidence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONCredentialsInObjectKeysSurviveNormalization"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONTypedRulesRetainExistingCorpusRecall"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONDensePositionsAndCancellationAreBounded"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestNoiseCorpusDefaultAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestDeepNoiseCorpusDefaultAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestMultilineAndMultilingualWeakPasswordsSurviveML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionFindsSplitCredentialAndEvidence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionOccurrencesUseExpressionCoordinates"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructedPragmaSetsFiltered"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestBase64NoiseAndLimits"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestNestedBase64DepthAndRepeatedValues"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestMixedConfidenceDedupeAvoidsInsertionShifts"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestDedupeConfidenceDominanceAcrossDenseOverlaps"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestIndexUsesStagedBytesAndNames"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestIndexOversizeIsIncomplete"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestFilesystemCompleteness"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestExplicitSymlinkDirectoryRootIsScanned"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/server",
+          "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/server",
+          "name": "FuzzLosslessJSONUTF8"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestParallelBulkRequestsConcurrent"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/lsp",
+          "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestSplitBoundaryContract"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestPortablePythonPredictionParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestReleasePythonFeatureAndPredictionParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestPinnedCompressorIntegrity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestNormalizeHermesArgsMovesPositionalTargetsAfterFlags"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestMustIntStrict"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestFailOnVerifiedIsKnownFlag"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestHasFlagEqualsForm"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestSelftestProfiles"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestMCPAsyncOutputFailureInterruptsBlockedInput"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestQuickScanRouting"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestScanEndOfOptions"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestExplicitDefaultFlagsBeatConfig"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestCIGateDefaultsAndOverrides"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestNamedStdinRejectsOtherInputs"
+        }
+      ],
+      "receipt": {
+        "path": "/tmp/prowl-reference-assertions-all-original-20261116.jsonl",
+        "sha256": "a9084de375f930d33b974442fe338adfab3c7c9cf4cab31d02126622fbb75d95"
+      }
+    },
+    "mapped-current": {
+      "passed": 49,
+      "tests": [
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestRepeatedFlagsAndFalseAuthorization"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestExplicitDefaultsOverrideOperatorConfiguration"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestHermesParserKeepsPositionalTargetsAndExplicitBooleans"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestIntegerValueStrict"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestBooleanFlagsHonorExplicitValues"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestReleasedQuickScanRouting"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestReleasedCIGateDefaultsAndOverrides"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestFailOnVerifiedIsKnownFlag"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestScanEndOfOptions"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestMCPAsyncOutputFailureInterruptsBlockedInput"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestOfflineSelftestProfilesAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/cmd/prowl",
+          "name": "TestNamedStdinFlagScopeAndInputModes"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestParallelBulkRequestsConcurrent"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestBase64NoiseAndLimits"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestNestedBase64DepthAndRepeatedValues"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestMixedConfidenceDedupeAvoidsInsertionShifts"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/detect",
+          "name": "TestDedupeConfidenceDominanceAcrossDenseOverlaps"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/lsp",
+          "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestCompressionPoolResetsStreams"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestExtractorParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestPortableExtractorParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestCanonicalSplitBoundaryContract"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestPortablePredictionParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/report",
+          "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/report",
+          "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/report",
+          "name": "TestPrettyDoesNotRepeatCoverageAlreadyShownAsInputGap"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReleasedNoiseCorpusDefaultAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReleasedDeepNoiseCorpusDefaultAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReleasedMultilingualPasswordDefaultAndML"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReleasedJSONCanonicalMLIdentityAndSourceSpans"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONEscapedPlaceholdersAndNonBindings"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONComposedEncodingKeepsOriginalEvidence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONCredentialsInObjectKeysSurviveNormalization"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONTypedRulesRetainExistingCorpusRecall"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestJSONDensePositionsAndCancellationAreBounded"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionFindsSplitCredentialAndEvidence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionOccurrencesUseExpressionCoordinates"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructedPragmaSetsFiltered"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/server",
+          "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/server",
+          "name": "FuzzLosslessJSONUTF8"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestIndexUsesStagedBytesAndNames"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestIndexOversizeIsIncomplete"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestFilesystemCompleteness"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestExplicitSymlinkDirectoryRootIsScanned"
+        }
+      ],
+      "receipt": {
+        "path": "/tmp/prowl-reference-assertions-mapped-current-20261116.jsonl",
+        "sha256": "f156e95a9828992c4acce75d5fbdb0dce4be219fd120f29b5793690dc43dcb00"
+      }
+    }
+  },
+  "mapping": {
+    "path": "wiki/evidence/1.5.0-reference-assertion-map-20261116.json",
+    "restored": 30,
+    "renamed": 11,
+    "intentional_model_replacements": 4
+  },
+  "regressions_reproduced": {
+    "unit_before": {
+      "path": "/tmp/prowl-pretty-coverage-before-20261116.log",
+      "sha256": "a51f1e34e52fb719d98dcdd45a62107bcc896380c86f7770c7fdbd82cebbe75f"
+    },
+    "native_parent": {
+      "path": "/tmp/prowl-reference-assertions-parent-native-20261116.log",
+      "sha256": "f56f667f3167779530542518a546b62c4a424234b3d53d8386f71ff4b3ce958f"
+    },
+    "cases": [
+      "empty input falsely green",
+      "filtered findings falsely green",
+      "metadata-only incomplete falsely green",
+      "diagnostic bounds/provider explanation lost"
+    ]
+  },
+  "native": {
+    "passed": 40,
+    "transports": [
+      "pipe",
+      "report file",
+      "PTY no-color",
+      "PTY color"
+    ],
+    "terminal_columns": 100,
+    "network_boundary": "sandbox-exec deny network*",
+    "report": "wiki/evidence/1.5.0-reference-assertions-native-20261116.json"
+  },
+  "fuzz": {
+    "target": "server/FuzzLosslessJSONUTF8",
+    "configured_seconds": 10,
+    "executions": 208769,
+    "runtime_commit": "75bcc80",
+    "server_source_unchanged_at_final": true
+  },
+  "validation_scope": {
+    "full_go": "all tool packages at final runtime",
+    "broad_race": "new/restored assertions across nine packages at 75bcc80",
+    "final_race": "report/CLI targeted tests after metadata deduplication",
+    "minimum_go": "1.26.11 nine packages at 75bcc80; final report/CLI packages after deduplication",
+    "lint": "2.15.0, zero issues"
+  },
+  "runtime_changed_files": [
+    "tool/cmd/prowl/report.go",
+    "tool/internal/report/report.go"
+  ],
+  "machine_writer_functions_unchanged": {
+    "writeJSON": "c415a0f31ca05e4ccbca8fec7500a61256b10ef01a08ac708f2e5ac0e0c07760",
+    "writeSARIF": "e6ce3ba8fd006233927d5bdebe59b4db12a9a26e946736b8e611e2ca659a0bde",
+    "writeDefectDojo": "df585fb90056867562d84927a9aca7efd9182631efb878074fa78f4f63384bda"
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "limits": [
+    "46 reference passes are selected contracts, not the complete 1.4 suite",
+    "45-name mapping does not cover all same-name changed test bodies/helpers or removed native scripts",
+    "No new quality/performance measurement; scan/detect/ML runtime is source-equivalent to parent",
+    "No release publication, hosted CI, live-provider acceptance or installed runtime activation"
+  ]
+}

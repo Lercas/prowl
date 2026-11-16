@@ -1,0 +1,859 @@
+{
+  "schema_version": "prowl-reference-assertion-map-v1",
+  "reference_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "qualified_runtime_commit": "79fa4fd2c6cd05d46822f0ad12c4bf6afb7c35b3",
+  "inventory_source": "wiki/evidence/1.5.0-reference-test-inventory-20261116.json",
+  "resolved_names": 45,
+  "unresolved_names": 0,
+  "statuses": {
+    "intentional_model_replacement": 4,
+    "restored_assertions_qualified": 30,
+    "verified_renamed_contract": 11
+  },
+  "rows": [
+    {
+      "original": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 71,
+        "name": "TestCIGateDefaultsAndOverrides",
+        "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/release_cli_test.go",
+          "line": 49,
+          "name": "TestReleasedCIGateDefaultsAndOverrides",
+          "file_sha256": "9ec68fa69f5cf72b9264159cc66a93416f3954dbc03a645299d85ebf7f475168"
+        }
+      ],
+      "notes": "CI severity and stage defaults are tested; incomplete scans always exit 2, including explicit false, instead of exposing an internal strict boolean."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 54,
+        "name": "TestExplicitDefaultFlagsBeatConfig",
+        "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/flags_test.go",
+          "line": 124,
+          "name": "TestExplicitDefaultsOverrideOperatorConfiguration",
+          "file_sha256": "4fa7d4c0902c9e05e7220c587655bdd01e6507fae34528ddc2026492362aab11"
+        }
+      ],
+      "notes": "Explicit pretty/10MB/zero workers override operator defaults; implicit values inherit configuration."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 540,
+        "name": "TestFailOnVerifiedIsKnownFlag",
+        "file_sha256": "9e01cefcd7beda96380cb7d7eda38545c51499fd66d24d431c3f0f707b7a5611"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/released_flag_contract_test.go",
+          "line": 10,
+          "name": "TestFailOnVerifiedIsKnownFlag",
+          "file_sha256": "8243f43320b8e7bc5194f3f069f0903b8670a47f860b5b7809e27cac65e6bb75"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 602,
+        "name": "TestHasFlagEqualsForm",
+        "file_sha256": "9e01cefcd7beda96380cb7d7eda38545c51499fd66d24d431c3f0f707b7a5611"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/main_test.go",
+          "line": 605,
+          "name": "TestBooleanFlagsHonorExplicitValues",
+          "file_sha256": "87e0a4a232edd87b2c94093ad9da1ea19dedcc3a5c4a71b0778f37805c4adccb"
+        },
+        {
+          "path": "tool/cmd/prowl/flags_test.go",
+          "line": 52,
+          "name": "TestRepeatedFlagsAndFalseAuthorization",
+          "file_sha256": "4fa7d4c0902c9e05e7220c587655bdd01e6507fae34528ddc2026492362aab11"
+        }
+      ],
+      "notes": "Equals/bare forms and yes/no/on/off/0 are covered; invalid boolean values now reject before execution rather than silently falling back to false."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/mcp_transport_test.go",
+        "line": 85,
+        "name": "TestMCPAsyncOutputFailureInterruptsBlockedInput",
+        "file_sha256": "7e86fe12999ab4927969afd46facde314b91c082257e041f814dba928216f006"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/released_mcp_async_test.go",
+          "line": 11,
+          "name": "TestMCPAsyncOutputFailureInterruptsBlockedInput",
+          "file_sha256": "c1774cc7d6bd8bafe881e0efe19d0b092c7ad9d06636ecc73865834b0b3ae2fc"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 496,
+        "name": "TestMustIntStrict",
+        "file_sha256": "9e01cefcd7beda96380cb7d7eda38545c51499fd66d24d431c3f0f707b7a5611"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/main_test.go",
+          "line": 496,
+          "name": "TestIntegerValueStrict",
+          "file_sha256": "87e0a4a232edd87b2c94093ad9da1ea19dedcc3a5c4a71b0778f37805c4adccb"
+        }
+      ],
+      "notes": "All three original valid values retained; actual parser rejects malformed/negative/empty/overflow instead of testing strconv in isolation."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 84,
+        "name": "TestNamedStdinRejectsOtherInputs",
+        "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/stdin_named_test.go",
+          "line": 10,
+          "name": "TestNamedStdinFlagScopeAndInputModes",
+          "file_sha256": "1edb884ebdffa075f59e52b72ea21296f4c50712b8896c079eb9f6e9d19d2375"
+        }
+      ],
+      "notes": "Valid names and dash accepted; paths/history/since/staged/timeline combinations rejected at parser/source selector."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/hermes_audit_test.go",
+        "line": 8,
+        "name": "TestNormalizeHermesArgsMovesPositionalTargetsAfterFlags",
+        "file_sha256": "20f67c0a2f6fdb0d992aa984416981ac329c5300fb3de9cadb2399008e82ae53"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/hermes_audit_test.go",
+          "line": 8,
+          "name": "TestHermesParserKeepsPositionalTargetsAndExplicitBooleans",
+          "file_sha256": "254d1fcbbfd51d41f40b16944745dea33e3e33d3fe752f670420093a433ce015"
+        }
+      ],
+      "notes": "Same original argument vector now checks parsed positional order, provider selection and explicit false instead of an intermediate argv normalizer."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 10,
+        "name": "TestQuickScanRouting",
+        "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/release_cli_test.go",
+          "line": 13,
+          "name": "TestReleasedQuickScanRouting",
+          "file_sha256": "9ec68fa69f5cf72b9264159cc66a93416f3954dbc03a645299d85ebf7f475168"
+        }
+      ],
+      "notes": "Short forms and command precedence retained; restored explicit format/json case. Native upgrade matrix separately covered real paths/TTY/stdin."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 44,
+        "name": "TestScanEndOfOptions",
+        "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/released_flag_contract_test.go",
+          "line": 26,
+          "name": "TestScanEndOfOptions",
+          "file_sha256": "8243f43320b8e7bc5194f3f069f0903b8670a47f860b5b7809e27cac65e6bb75"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/cmd/prowl/mcp_runtime_test.go",
+        "line": 178,
+        "name": "TestSelftestProfiles",
+        "file_sha256": "d63d76287f044173d9e61653d75175d5f85d290d391ff6fe2cebbcfcf956d4ab"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/cmd/prowl/selftest_test.go",
+          "line": 9,
+          "name": "TestOfflineSelftestProfilesAndML",
+          "file_sha256": "aee3543faf14930d1da85152be18201d4b35a4c2862c53098f11874c96421b6b"
+        }
+      ],
+      "notes": "web/mobile/enterprise plus all, with and without ML; minimum two complete cases, no reported network stage, isolated home."
+    },
+    {
+      "original": {
+        "path": "tool/internal/atlassian/bench_test.go",
+        "line": 101,
+        "name": "TestParallelBulkRequestsConcurrent",
+        "file_sha256": "9e4f6dde99ff44c936207f6a23b26c17be7a97cab328ce3da853bdf79bbadc37"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/atlassian/released_concurrency_test.go",
+          "line": 60,
+          "name": "TestParallelBulkRequestsConcurrent",
+          "file_sha256": "7897b7731fdccfa8cbc9ef735cefcf1f1ee2301b5ce677e0f73b280e4627f9b4"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/detect/base64_test.go",
+        "line": 45,
+        "name": "TestBase64NoiseAndLimits",
+        "file_sha256": "19a7bb01e0e7a518f9145460dc63663d2c46070821b21c555f44732ca16050d9"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/detect/released_base64_contract_test.go",
+          "line": 10,
+          "name": "TestBase64NoiseAndLimits",
+          "file_sha256": "01e0832fbb39d76dc1fd14008cf90ee9f3addaabfff4c36a1b6e89dbab65bfac"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Old unmaskBase64(text) is adapted to base64Occurrences(text), the current linear source-mapping API."
+    },
+    {
+      "original": {
+        "path": "tool/internal/detect/cap_test.go",
+        "line": 155,
+        "name": "TestDedupeConfidenceDominanceAcrossDenseOverlaps",
+        "file_sha256": "a2f3f605158ac73dbb6a4d5b03ee5b359b96883c17ebebce8128ae522f77641f"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/detect/released_overlap_contract_test.go",
+          "line": 36,
+          "name": "TestDedupeConfidenceDominanceAcrossDenseOverlaps",
+          "file_sha256": "f652dc0456232420e439570136563837d30b07ae362680565943147fa06555e7"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/detect/cap_test.go",
+        "line": 128,
+        "name": "TestMixedConfidenceDedupeAvoidsInsertionShifts",
+        "file_sha256": "a2f3f605158ac73dbb6a4d5b03ee5b359b96883c17ebebce8128ae522f77641f"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/detect/released_overlap_contract_test.go",
+          "line": 9,
+          "name": "TestMixedConfidenceDedupeAvoidsInsertionShifts",
+          "file_sha256": "f652dc0456232420e439570136563837d30b07ae362680565943147fa06555e7"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/detect/base64_test.go",
+        "line": 78,
+        "name": "TestNestedBase64DepthAndRepeatedValues",
+        "file_sha256": "19a7bb01e0e7a518f9145460dc63663d2c46070821b21c555f44732ca16050d9"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/detect/released_base64_contract_test.go",
+          "line": 43,
+          "name": "TestNestedBase64DepthAndRepeatedValues",
+          "file_sha256": "01e0832fbb39d76dc1fd14008cf90ee9f3addaabfff4c36a1b6e89dbab65bfac"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Old unmaskBase64(text) is adapted to base64Occurrences(text), the current linear source-mapping API."
+    },
+    {
+      "original": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 71,
+        "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall",
+        "file_sha256": "3a180fea1e535375fee0318ffb8e9b7d91b7b5ab0a5cddc2b70b3331da857410"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/lsp/released_editor_contract_test.go",
+          "line": 5,
+          "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall",
+          "file_sha256": "782959be1a0d2ce680a938d6691090d20f652660fca49d56a4cd897bc0c61f45"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/mlfeatures/portable_integrity_test.go",
+        "line": 13,
+        "name": "TestPinnedCompressorIntegrity",
+        "file_sha256": "be88e1bbfab3f11142347d8e0cd37458940f18fc3fa590c96148dbc23c2f3118"
+      },
+      "status": "intentional_model_replacement",
+      "current_tests": [
+        {
+          "path": "tool/internal/mlfeatures/compression_test.go",
+          "line": 11,
+          "name": "TestCompressionPoolResetsStreams",
+          "file_sha256": "bc507dfb05f6f90f83cc6d366f12c9bae8a549ea3c70e15406f9ef5077012cf8"
+        },
+        {
+          "path": "tool/internal/mlfeatures/portable_test.go",
+          "line": 11,
+          "name": "TestPortableExtractorParity",
+          "file_sha256": "9a85b8ed77d0fb9697b2b66f1eeee477c77e4cc618a8e8e0801a4c164904abe2"
+        }
+      ],
+      "notes": "Intentional removal of zlib/WASM artifact. Go-flate-v2 uses checksum-pinned module, independent stream reset checks and mandatory canonical feature goldens."
+    },
+    {
+      "original": {
+        "path": "tool/internal/mlmodel/portable_test.go",
+        "line": 11,
+        "name": "TestPortablePythonPredictionParity",
+        "file_sha256": "360fcc1dec62a4fdf902b4ba3db76deebae5f435780cc348af8e7e9f0812e0be"
+      },
+      "status": "intentional_model_replacement",
+      "current_tests": [
+        {
+          "path": "tool/internal/mlmodel/portable_test.go",
+          "line": 14,
+          "name": "TestPortablePredictionParity",
+          "file_sha256": "1c0030bb2911d76cc728ef6152fcd0a67a42a7fe8de0580946bf20ca57a5ee44"
+        }
+      ],
+      "notes": "Intentional replacement of compression-independent legacy portable model by qualified 51-feature forest; 768 committed Python/Go score goldens and exact embedded-model SHA. Legacy compression invariance is not claimed."
+    },
+    {
+      "original": {
+        "path": "tool/internal/mlmodel/release_parity_test.go",
+        "line": 15,
+        "name": "TestReleasePythonFeatureAndPredictionParity",
+        "file_sha256": "5082bbebe81c638e951ef7045a0ca7893250501a9ef662c9527528edf89e315a"
+      },
+      "status": "intentional_model_replacement",
+      "current_tests": [
+        {
+          "path": "tool/internal/mlmodel/portable_test.go",
+          "line": 14,
+          "name": "TestPortablePredictionParity",
+          "file_sha256": "1c0030bb2911d76cc728ef6152fcd0a67a42a7fe8de0580946bf20ca57a5ee44"
+        },
+        {
+          "path": "tool/internal/mlfeatures/portable_test.go",
+          "line": 11,
+          "name": "TestPortableExtractorParity",
+          "file_sha256": "9a85b8ed77d0fb9697b2b66f1eeee477c77e4cc618a8e8e0801a4c164904abe2"
+        },
+        {
+          "path": "tool/internal/mlfeatures/paritydump_test.go",
+          "line": 13,
+          "name": "TestExtractorParity",
+          "file_sha256": "c4b6818003015e8ac20fe7b746c639f10329727bec24f3a65b496636674819a1"
+        }
+      ],
+      "notes": "Intentional replacement of the legacy release model. Mandatory feature and prediction fixtures cover the current schema; unchanged features retain Python reference parity and compression uses versioned Go canonical goldens."
+    },
+    {
+      "original": {
+        "path": "tool/internal/mlmodel/numeric_contract_test.go",
+        "line": 8,
+        "name": "TestSplitBoundaryContract",
+        "file_sha256": "870cd8ff0e3e86f1eea066e49c13dd69cf6f08acd4e1e2c8bffb62ab22227c17"
+      },
+      "status": "intentional_model_replacement",
+      "current_tests": [
+        {
+          "path": "tool/internal/mlmodel/numeric_contract_test.go",
+          "line": 11,
+          "name": "TestCanonicalSplitBoundaryContract",
+          "file_sha256": "2ad134441ef132ea346da8ff6da24dbd31ad9d7ceea56217a2e0ce840263ad18"
+        }
+      ],
+      "notes": "Intentional canonical-model change: exact <= including adjacent floats, both missing-value directions and large thresholds; old absolute 1e-12 split reconciliation is not restored."
+    },
+    {
+      "original": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 83,
+        "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete",
+        "file_sha256": "d6de6ad68f2fd638fcabca8a6ca450cce32e2a2387a2d2324d8a12e517b3db18"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/report/released_pretty_contract_test.go",
+          "line": 10,
+          "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete",
+          "file_sha256": "8b4b6c2c75680aa79ad552e21c9c09dff4b4495eefc3098c91a81ea500371328"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. English strings follow project UI policy. Empty/filtered/incomplete states, five diagnostic rows, terminal sanitization and unconfirmed-provider explanation are restored."
+    },
+    {
+      "original": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 114,
+        "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics",
+        "file_sha256": "d6de6ad68f2fd638fcabca8a6ca450cce32e2a2387a2d2324d8a12e517b3db18"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/report/released_pretty_contract_test.go",
+          "line": 41,
+          "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics",
+          "file_sha256": "8b4b6c2c75680aa79ad552e21c9c09dff4b4495eefc3098c91a81ea500371328"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. English strings follow project UI policy. Empty/filtered/incomplete states, five diagnostic rows, terminal sanitization and unconfirmed-provider explanation are restored."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 84,
+        "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific",
+        "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+          "line": 88,
+          "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific",
+          "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 20,
+        "name": "TestDeepNoiseCorpusDefaultAndML",
+        "file_sha256": "c304ca5b60d67ae17e0e56769a0fa47c84de05ed7fb0a0167bedb7c3fe9ce168"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/noise_test.go",
+          "line": 21,
+          "name": "TestReleasedDeepNoiseCorpusDefaultAndML",
+          "file_sha256": "6fe8f6df20d132239e255a168a8b720f4d0e8cb7736929009e6b68c6bac7e3d4"
+        }
+      ],
+      "notes": "Same immutable fixture and all original positive/negative assertions; real model/cascade tested, not a recording scorer."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 120,
+        "name": "TestJSONComposedEncodingKeepsOriginalEvidence",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 113,
+          "name": "TestJSONComposedEncodingKeepsOriginalEvidence",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 152,
+        "name": "TestJSONCredentialsInObjectKeysSurviveNormalization",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 146,
+          "name": "TestJSONCredentialsInObjectKeysSurviveNormalization",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 219,
+        "name": "TestJSONDensePositionsAndCancellationAreBounded",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 213,
+          "name": "TestJSONDensePositionsAndCancellationAreBounded",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 79,
+        "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 67,
+          "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 107,
+        "name": "TestJSONEscapedPlaceholdersAndNonBindings",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 100,
+          "name": "TestJSONEscapedPlaceholdersAndNonBindings",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 197,
+        "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 191,
+          "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 136,
+        "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 129,
+          "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 163,
+        "name": "TestJSONTypedRulesRetainExistingCorpusRecall",
+        "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_json_contract_test.go",
+          "line": 157,
+          "name": "TestJSONTypedRulesRetainExistingCorpusRecall",
+          "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 138,
+        "name": "TestMultilineAndMultilingualWeakPasswordsSurviveML",
+        "file_sha256": "c304ca5b60d67ae17e0e56769a0fa47c84de05ed7fb0a0167bedb7c3fe9ce168"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/noise_test.go",
+          "line": 151,
+          "name": "TestReleasedMultilingualPasswordDefaultAndML",
+          "file_sha256": "6fe8f6df20d132239e255a168a8b720f4d0e8cb7736929009e6b68c6bac7e3d4"
+        }
+      ],
+      "notes": "Same values and language/binding cases with real embedded .3 model; retained candidates never claim LIVE."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 16,
+        "name": "TestNoiseCorpusDefaultAndML",
+        "file_sha256": "c304ca5b60d67ae17e0e56769a0fa47c84de05ed7fb0a0167bedb7c3fe9ce168"
+      },
+      "status": "verified_renamed_contract",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/noise_test.go",
+          "line": 17,
+          "name": "TestReleasedNoiseCorpusDefaultAndML",
+          "file_sha256": "6fe8f6df20d132239e255a168a8b720f4d0e8cb7736929009e6b68c6bac7e3d4"
+        }
+      ],
+      "notes": "Same immutable fixture; real qualified 51-feature model at shipped threshold .3; ten qualified generic_api_key substitutions, direct-binding retention restored separately."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 48,
+        "name": "TestReconstructedPragmaSetsFiltered",
+        "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+          "line": 50,
+          "name": "TestReconstructedPragmaSetsFiltered",
+          "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 63,
+        "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials",
+        "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+          "line": 66,
+          "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials",
+          "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 12,
+        "name": "TestReconstructionFindsSplitCredentialAndEvidence",
+        "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+          "line": 12,
+          "name": "TestReconstructionFindsSplitCredentialAndEvidence",
+          "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 28,
+        "name": "TestReconstructionOccurrencesUseExpressionCoordinates",
+        "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+          "line": 29,
+          "name": "TestReconstructionOccurrencesUseExpressionCoordinates",
+          "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 16,
+        "name": "FuzzLosslessJSONUTF8",
+        "file_sha256": "17afe5eac72d4152365dc516306d75f28b0614b8c6ffd39e2914615168c4eef8"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/server/unicode_test.go",
+          "line": 18,
+          "name": "FuzzLosslessJSONUTF8",
+          "file_sha256": "9ef3dc57dce26a6e9d6e50a5f6b6bf82fea37908823e535b055ce7d88510957b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Replaced removed streaming validator with the actual bounded HTTP decode path into RawMessage; chunk sizes, Unicode validity and byte identity remain asserted."
+    },
+    {
+      "original": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 58,
+        "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize",
+        "file_sha256": "17afe5eac72d4152365dc516306d75f28b0614b8c6ffd39e2914615168c4eef8"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/server/unicode_test.go",
+          "line": 59,
+          "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize",
+          "file_sha256": "9ef3dc57dce26a6e9d6e50a5f6b6bf82fea37908823e535b055ce7d88510957b"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required. Replaced removed streaming validator with the actual bounded HTTP decode path into RawMessage; chunk sizes, Unicode validity and byte identity remain asserted."
+    },
+    {
+      "original": {
+        "path": "tool/internal/source/symlink_root_test.go",
+        "line": 13,
+        "name": "TestExplicitSymlinkDirectoryRootIsScanned",
+        "file_sha256": "eaa69e41b0d9bed61254df24fb3fe7b2ce0fd3c99f4d46180713e976ba2ccb13"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/source/symlink_root_test.go",
+          "line": 13,
+          "name": "TestExplicitSymlinkDirectoryRootIsScanned",
+          "file_sha256": "eaa69e41b0d9bed61254df24fb3fe7b2ce0fd3c99f4d46180713e976ba2ccb13"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/source/index_test.go",
+        "line": 64,
+        "name": "TestFilesystemCompleteness",
+        "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/source/released_index_contract_test.go",
+          "line": 64,
+          "name": "TestFilesystemCompleteness",
+          "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/source/index_test.go",
+        "line": 47,
+        "name": "TestIndexOversizeIsIncomplete",
+        "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/source/released_index_contract_test.go",
+          "line": 47,
+          "name": "TestIndexOversizeIsIncomplete",
+          "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    },
+    {
+      "original": {
+        "path": "tool/internal/source/index_test.go",
+        "line": 12,
+        "name": "TestIndexUsesStagedBytesAndNames",
+        "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+      },
+      "status": "restored_assertions_qualified",
+      "current_tests": [
+        {
+          "path": "tool/internal/source/released_index_contract_test.go",
+          "line": 12,
+          "name": "TestIndexUsesStagedBytesAndNames",
+          "file_sha256": "99fd41a334266ebb0d0193a07a58bed15fab96e0e471d6152b26f22fafb0ce98"
+        }
+      ],
+      "notes": "Original assertions restored with documented API adaptation where required."
+    }
+  ],
+  "extra_restored_assertions": [
+    "TestReleasedJSONCanonicalMLIdentityAndSourceSpans adds real ML and keyed identity to the same-name canonical JSON contract",
+    "Selftest keeps the original minimum of two cases",
+    "Pretty gap/metadata deduplication has a dedicated test"
+  ],
+  "limits": [
+    "This resolves the 45-name inventory only; same-name changed bodies/helpers and removed native runners still need the broader release-contract audit",
+    "Restored tests use intended 1.5 immutable APIs and stricter completeness semantics",
+    "No claim of legacy/new raw model prediction equality or published-release acceptance"
+  ]
+}
