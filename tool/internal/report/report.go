@@ -137,7 +137,7 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 				fmt.Fprintln(w)
 				writeGaps(w, gaps, color)
 			}
-			writeCoverageDiagnostics(w, result, len(gaps) > 0, color)
+			writeCoverageDiagnostics(w, result, gaps, color)
 			return nil
 		}
 		switch {
@@ -242,7 +242,7 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 		writeGaps(w, gaps, color)
 	}
 	if !result.Complete {
-		writeCoverageDiagnostics(w, result, len(gaps) > 0, color)
+		writeCoverageDiagnostics(w, result, gaps, color)
 	}
 	fmt.Fprintf(w, "  %s  %s  %s\n",
 		paint(color, cBold, fmt.Sprintf("%d finding%s", len(fs), plural(len(fs)))),
@@ -262,17 +262,30 @@ func writePretty(w io.Writer, all []model.Finding, options PrettyOptions) (err e
 
 // Coverage diagnostics may exist without synthetic findings. Keep their output
 // bounded and prioritize incomplete checks over informational policy skips.
-func writeCoverageDiagnostics(w io.Writer, result model.ScanResult, hasGaps, color bool) {
-	if !hasGaps {
+func writeCoverageDiagnostics(w io.Writer, result model.ScanResult, gaps []model.Finding, color bool) {
+	if len(gaps) == 0 {
 		fmt.Fprintln(w, "  "+paint(color, "\x1b[33m", "! scan incomplete — coverage diagnostics"))
 	}
-	if len(result.Diagnostics) == 0 {
+	type location struct{ code, path string }
+	represented := make(map[location]bool, len(gaps))
+	for _, gap := range gaps {
+		represented[location{gap.Type, gap.Path}] = true
+	}
+	diagnostics := make([]model.Diagnostic, 0, len(result.Diagnostics))
+	omitted := int64(0)
+	for _, diagnostic := range result.Diagnostics {
+		if represented[location{diagnostic.Code, diagnostic.Path}] {
+			omitted++
+			continue
+		}
+		diagnostics = append(diagnostics, diagnostic)
+	}
+	if len(diagnostics) == 0 && result.Stats.DiagnosticCount <= omitted {
 		return
 	}
-	if hasGaps {
+	if len(gaps) > 0 {
 		fmt.Fprintln(w, "  coverage diagnostics:")
 	}
-	diagnostics := append([]model.Diagnostic(nil), result.Diagnostics...)
 	sort.SliceStable(diagnostics, func(i, j int) bool { return diagnostics[i].Incomplete && !diagnostics[j].Incomplete })
 	const maxRows = 5
 	for _, d := range diagnostics[:min(len(diagnostics), maxRows)] {
@@ -282,8 +295,8 @@ func writeCoverageDiagnostics(w io.Writer, result model.ScanResult, hasGaps, col
 		}
 		fmt.Fprintf(w, "    %s: %s\n", sanitizeTerminal(d.Code), where)
 	}
-	if remaining := result.Stats.DiagnosticCount - int64(min(len(diagnostics), maxRows)); remaining > 0 {
-		fmt.Fprintf(w, "    … and %d more (use --format json for the full list)\n", remaining)
+	if remaining := result.Stats.DiagnosticCount - omitted - int64(min(len(diagnostics), maxRows)); remaining > 0 {
+		fmt.Fprintf(w, "    … and %d more (use --format json for coverage metadata)\n", remaining)
 	}
 }
 

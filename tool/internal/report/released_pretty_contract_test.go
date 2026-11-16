@@ -55,3 +55,16 @@ func TestPrettySanitizesImportedTypeAndBoundsDiagnostics(t *testing.T) {
 		t.Fatal("unverified candidates lack an explanation")
 	}
 }
+
+func TestPrettyDoesNotRepeatCoverageAlreadyShownAsInputGap(t *testing.T) {
+	c := model.NewCoverage()
+	c.Note("source_error", "missing.env", true)
+	c.Note("source_error", "missing.env", true)
+	var out bytes.Buffer
+	if err := WriteWithCoverage(&out, []model.Finding{{Type: "source_error", Path: "missing.env"}}, "pretty", false, c); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(out.String(), "missing.env") != 1 || strings.Contains(out.String(), "coverage diagnostics:") {
+		t.Fatal("one missing input was displayed repeatedly")
+	}
+}
