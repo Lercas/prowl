@@ -1,0 +1,206 @@
+{
+  "recorded_at": "2026-11-16T14:01:27.715915+00:00",
+  "scope": "Restore released report short-write failures across all formats; full 1.5.0 migration remains open.",
+  "runtime_source_commit": "cd88737e1e52efe6456a7c700e4786b7cdc8ba98",
+  "runtime_tool_tree": "c75b326d0ea56c372e2f7c24543262595d21c82f",
+  "binary": {
+    "path": "/tmp/prowl-report-write-qualified-20261116-bin",
+    "sha256": "819acce492fceedbf3579895eb6153d4389a3b2399adeea1876de8adb7031572"
+  },
+  "logs": {
+    "go": {
+      "path": "/tmp/prowl-report-write-go-20261116.log",
+      "sha256": "6e2aa8b4171f68586fd1ace3415073707bd2df330e9891c09ad01d5489d63e94"
+    },
+    "race": {
+      "path": "/tmp/prowl-report-write-race-20261116.log",
+      "sha256": "d48a537302671c6b71f1f76dd502eadf3bfec49a3660b1867d1969e2aeda2aa3"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-report-write-min-go-20261116.log",
+      "sha256": "b78a46e0b03d737e25798e17cddbbe4678cfe44f61227c2afd5f7eb01f4a76cb"
+    },
+    "lint": {
+      "path": "/tmp/prowl-report-write-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-report-write-native-20261116.log",
+      "sha256": "c20dca4a3e0a4b66ff67cf5d3fd424ac28fe071fabc1c3917c6ec058017f4367"
+    },
+    "quality": {
+      "path": "/tmp/prowl-report-write-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "build-info": {
+      "path": "/tmp/prowl-report-write-build-info-20261116.log",
+      "sha256": "54e4697669061c8ef02497578587c8a1a801f8f854dca68ec7e1f015eb8cc5e5"
+    },
+    "legacy": {
+      "path": "/tmp/prowl-report-write-legacy-20261116.log",
+      "sha256": "8df463bb6bbe23e18e2ccf6d538c1306aed479184be164058696bb7bff4be480"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-report-write-targeted-20261116.log",
+      "sha256": "22a40acf43da7dd366248784e9d459541d5a988338ee1278e5ed55b877cf8b35"
+    },
+    "regressions": {
+      "path": "/tmp/prowl-report-write-regressions-20261116.log",
+      "sha256": "48bcd57dd4613989b4b0d11928de081c4a640da33bf87b01c5a7cf0c0cf80e76"
+    }
+  },
+  "controlled_regression": {
+    "source_parent": "3eef1e67571f2e85946cd7d8e57fe7a2b91289b1",
+    "test": "TestAllReportFormatsRejectShortWrites",
+    "before": "Eight failures: json/sarif/defectdojo/dojo, each empty and nonempty findings, returned nil after custom io.Writer short count with nil error. Pretty already rejected.",
+    "after": "All six format spellings return io.ErrShortWrite and stop after first failure; original nonnil causes and unsupported-format errors preserved.",
+    "log": {
+      "path": "/tmp/prowl-report-write-legacy-20261116.log",
+      "sha256": "8df463bb6bbe23e18e2ccf6d538c1306aed479184be164058696bb7bff4be480"
+    }
+  },
+  "reference_validation": {
+    "commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "verified_tool_blobs": 694,
+    "physical_source_unchanged": true,
+    "supplemental_test_overlay": {
+      "path": "/tmp/prowl-report-write-reference-canonical-overlay-20261116.json",
+      "sha256": "46b8682d13f665bcd53f315605853be5e543b9ffaf894bb4503061a1d231ad24"
+    },
+    "receipt": {
+      "path": "/tmp/prowl-report-write-reference-receipt-20261116.json",
+      "sha256": "cbc0ef8bf08093cc7294780517b73cce398c5b772f7f00477d6b9921b0c3ae58"
+    },
+    "events": {
+      "path": "/tmp/prowl-report-write-reference-verified-20261116.jsonl",
+      "sha256": "9f42805435e0cf4ae5ae7ef90c0bc8fdb0993ef3b10f983fd256f1df6a13cddd"
+    },
+    "passed_tests": [
+      "TestAllReportEntrypointsPreserveWriteCauses",
+      "TestAllReportFormatsRejectShortWrites",
+      "TestReportUnsupportedFormatDoesNotWriteOrLoseError"
+    ],
+    "excluded_attempts": "Earlier /var overlay paths did not match canonical /private/var; no tests ran. These attempts are not qualification evidence."
+  },
+  "validation": {
+    "full_go": "passed, Go 1.27.4",
+    "full_race_packages": [
+      "internal/report",
+      "cmd/prowl"
+    ],
+    "minimum_go": "Go 1.26.11, same full package suites passed",
+    "full_lint": "passed, 0 issues",
+    "error_matrix": "96 combinations of format/findings/budget/cause/entrypoint, plus short-write first-failure and unsupported-format checks"
+  },
+  "native": {
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-report-write-native-e6qkfuzk/evidence.json",
+      "sha256": "451c0ecd3c33de41ac49760d6f597a96a6d0b09feb401c2a5e1eba4352fa00e9"
+    },
+    "passed": 135,
+    "checks": 135,
+    "runner": {
+      "path": "scripts/check_report_write_native.py",
+      "sha256": "c9adfaa9d77d3eb7ce4ac162e9278f8706d354f881036822baf64ac014c88c03"
+    },
+    "network": "OS denies all network",
+    "boundary": "Native CLI checks actual broken stdout and nonregular destinations. The short-count-with-nil-error regression is exercised by Go io.Writer tests, not by an OS file claim.",
+    "before_binary": {
+      "path": "/private/tmp/prowl-ml-sidecar-policy-qualified-20261116-bin",
+      "sha256": "f0a0256af0527f5830ff0ad38932164eec383d81348b0ad74e52297fe57c5dfc"
+    },
+    "successful_report_bytes_unchanged": true
+  },
+  "api_inventory": {
+    "raw": {
+      "path": "/tmp/prowl-export-audit-20261116.json",
+      "sha256": "e4d8add512da75678efcc3b4cbbd8332e5c8737ec7de5a6b6cc47efcccd6824f"
+    },
+    "tool": {
+      "path": "/tmp/prowl-export-audit-20261116.go",
+      "sha256": "7a9ff5e1ecb80759ea50ab6fc2ddf0f571424485d2837cd1cd0c3717315856aa"
+    },
+    "removed_map": {
+      "path": "/tmp/prowl-report-write-api-map-20261116.json",
+      "sha256": "d6291ab427f6d19f1dcecf70164794e8e6c7703173af5ada0ab8d82851f8246f"
+    },
+    "reference_entries": 501,
+    "candidate_entries": 690,
+    "removed": 13,
+    "unmapped_removed": 0,
+    "changed": 93,
+    "boundary": "Removed-name replacement mapping only. No full behavior qualification of all changed declarations."
+  },
+  "quality": {
+    "artifact": {
+      "path": "/tmp/prowl-report-write-quality-20261116.json",
+      "sha256": "5fc2bc4ab717a34c18fd62cad53a872c6722c46dcd73599ddc10bda4c1b434f8"
+    },
+    "equal_to_parent_except_binary_sha256": true,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-report-write-cross-build-20261116/builds.json",
+      "sha256": "2d5a72c18452fae98ab874b00d5ac78f26adff8a9ccccc8a1741b3f0de02e5e6"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "cdcccbd1638d49e0e3a3a6f1ea1938cc88e90ed1ca9bc9a34186ca18e487457c",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "819acce492fceedbf3579895eb6153d4389a3b2399adeea1876de8adb7031572",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "fff4c87b71d568a97e38e34c5c81dffb06f184dbf22ccb3e63dc298458d8ebd2",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "defebaad5e13b1f0872e19e8b37a82bb6f20f3f080fa344dd28370b048b5354a",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "1429a865368317ecd92037aa97ee10010e8f9bdd80a0d99f948d6703ae288fdf",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-report-write-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "84f87608c3a83c99427624ca5714a0972b8a7761a35dfcef4a48b15b25c554eb",
+        "executed": false
+      }
+    ],
+    "foreign_binaries_executed": false
+  },
+  "not_rerun": {
+    "GOROOT_digest_and_performance": "No detector/scan/model runtime changes; report I/O qualified directly. Prior corpus/performance records remain historical."
+  },
+  "remaining_boundaries": [
+    "broader changed-API/CLI/runtime audit",
+    "final-source Docker/release factory",
+    "native foreign-platform execution",
+    "full TODO 1.5.0 migration and publication"
+  ],
+  "publication": false
+}

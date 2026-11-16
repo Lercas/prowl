@@ -24,7 +24,14 @@ func Write(w io.Writer, findings []model.Finding, format string, color bool) err
 }
 
 // WriteWithCoverage preserves the released machine envelope for one scan ledger.
-func WriteWithCoverage(w io.Writer, findings []model.Finding, format string, color bool, coverage *model.Coverage) error {
+func WriteWithCoverage(w io.Writer, findings []model.Finding, format string, color bool, coverage *model.Coverage) (err error) {
+	output := &reportWriter{w: w}
+	w = output
+	defer func() {
+		if err == nil {
+			err = output.err
+		}
+	}()
 	switch format {
 	case "json":
 		return writeJSON(w, findings, coverage)

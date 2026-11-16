@@ -347,6 +347,17 @@
   - [ ] Проверить остальные разошедшиеся компоненты: MCP/LSP, источники, отчёты,
     correlation, integrity шаблонов и release checks. Намеренные замены ML/cgo
     не откатывать: сохранить квалифицированную Go-flate-v2 модель и security-обновления.
+    - [x] Возвращён общий short-write guard `report.Write/WriteWithCoverage`:
+      JSON/SARIF/DefectDojo/dojo больше не возвращают nil после неполной записи;
+      исходная I/O-ошибка сохраняется, повторов после отказа нет. Восемь failures
+      воспроизведены до исправления; три tests реально выполнены на released
+      source и candidate, 694 reference blobs неизменны. Native IO — 135/135,
+      успешные report bytes совпали с предыдущим binary. Full Go/scoped
+      race/min-Go/lint, шесть static builds и quality IDs проходят.
+      AST inventory: 13 удалённых exports сопоставлены с намеренными заменами;
+      93 изменённых declarations остаются границей общего аудита.
+      [Контракт](wiki/Report-Write-Contract.md),
+      `wiki/evidence/1.5.0-report-write-20261116.json`.
     - [x] Integrity выбранных rules/verifiers: native CLI candidate и неизменённый
       пересобранный тег 1.4.0 — по 182/182 под OS network deny. Проверены
       installed/explicit selection, повреждённые manifests/files, list/validate,
