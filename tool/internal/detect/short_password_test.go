@@ -167,3 +167,22 @@ func FuzzShortPasswordSourceIdentity(f *testing.F) {
 		}
 	})
 }
+
+func TestUnpairedEmphasisStarsStayInPasswordValues(t *testing.T) {
+	d := newDetector(t)
+	for _, value := range []string{":**0", "a:**0", "0`:", "x**:", "``:", "`a`:", " `a`:", "**a**"} {
+		payload, _ := json.Marshal(map[string]string{"password": value})
+		for _, text := range []string{string(payload), jwtFixture(string(payload))} {
+			for _, m := range d.Scan(text) {
+				if m.Type == "generic_password" && m.Value != value {
+					t.Fatalf("emphasis normalization changed %q into %q", value, m.Value)
+				}
+			}
+		}
+	}
+	for _, text := range []string{"**Password:** Tr0ub4dor&3xKq9\n", "**Password**: Tr0ub4dor&3xKq9\n", "`password`: Tr0ub4dor&3xKq9\n"} {
+		if namedMatch(d.Scan(text), "generic_password", "Tr0ub4dor&3xKq9") == nil {
+			t.Fatal("paired Markdown emphasis no longer normalized", text)
+		}
+	}
+}

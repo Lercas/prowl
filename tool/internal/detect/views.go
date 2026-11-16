@@ -168,12 +168,31 @@ func blockScalarAt(text string, i int) (lo, hi int, ok bool) {
 // markers or a backtick directly before it, and after it (past one optional space) bold markers or a
 // backticked value. Each returned span is removed from the view.
 func markupAt(text string, i int) (spans [][2]int) {
+	// lineBefore returns the same-line text ending at hi, bounded by viewContext.
+	lineBefore := func(hi int) string {
+		b := text[max(0, hi-viewContext):hi]
+		if nl := strings.LastIndexByte(b, '\n'); nl >= 0 {
+			b = b[nl+1:]
+		}
+		return b
+	}
+	// A separator inside a double-quoted string is value data (`{"password":"`a`:"}`), not a
+	// Markdown key/value boundary: wrappers there are bytes of the value.
+	if insideDoubleQuotes(lineBefore(i)) {
+		return nil
+	}
 	// exactly two stars: a longer run is a mask (`user:***@host`) or a rule, not emphasis
+	// A closing wrapper before the separator must pair with an opening one on the same line
+	// (`**key**:`, `` `key`: ``); an unpaired one is part of a value (`"password":"0`:"`).
 	switch {
 	case i >= 2 && text[i-1] == '*' && text[i-2] == '*' && (i < 3 || text[i-3] != '*'):
-		spans = append(spans, [2]int{i - 2, i})
+		if strings.Contains(lineBefore(i-2), "**") {
+			spans = append(spans, [2]int{i - 2, i})
+		}
 	case i >= 1 && text[i-1] == '`':
-		spans = append(spans, [2]int{i - 1, i})
+		if strings.IndexByte(lineBefore(i-1), '`') >= 0 {
+			spans = append(spans, [2]int{i - 1, i})
+		}
 	}
 	j := i + 1
 	if j < len(text) && text[j] == ' ' {
@@ -181,7 +200,17 @@ func markupAt(text string, i int) (spans [][2]int) {
 	}
 	switch {
 	case j+1 < len(text) && text[j] == '*' && text[j+1] == '*' && (j+2 >= len(text) || text[j+2] != '*'):
-		spans = append(spans, [2]int{j, j + 2})
+		// The stars must pair on the same line: closing a `**key:**` opened before, or opening a
+		// `: **value**` closed after. Unpaired stars are value bytes (`"password":":**0"`) and
+		// deleting them would mint a different spelling.
+		before := lineBefore(i)
+		after := text[j+2 : min(len(text), j+2+viewContext)]
+		if nl := strings.IndexByte(after, '\n'); nl >= 0 {
+			after = after[:nl]
+		}
+		if strings.Count(before, "**")%2 == 1 || strings.Contains(after, "**") {
+			spans = append(spans, [2]int{j, j + 2})
+		}
 	case j < len(text) && text[j] == '`':
 		// a backticked value: drop both ticks, but only when it closes on the same line nearby
 		if k := strings.IndexAny(text[j+1:min(len(text), j+1+viewContext)], "`\n"); k > 0 && text[j+1+k] == '`' {
@@ -189,6 +218,22 @@ func markupAt(text string, i int) (spans [][2]int) {
 		}
 	}
 	return spans
+}
+
+// insideDoubleQuotes reports whether a line prefix ends inside an unterminated "..." string.
+func insideDoubleQuotes(prefix string) bool {
+	in := false
+	for k := 0; k < len(prefix); k++ {
+		switch prefix[k] {
+		case '\\':
+			if in {
+				k++
+			}
+		case '"':
+			in = !in
+		}
+	}
+	return in
 }
 
 // buildView finds the constructs and assembles the view, or returns nil when the text has none.
