@@ -1,0 +1,1211 @@
+{
+  "reference": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "manifest_sha256": "8a5dfdfa5a2ffc6f0a49ff5884d5d204d054e4f5fbaddab17fcc8a6a2f2021bf",
+  "binaries": [
+    {
+      "label": "candidate",
+      "path": "/private/tmp/prowl-native-compat-qualified-20261116-bin",
+      "sha256": "ed9520d32fac71b0436557bd9798dc325ab1f9630ee4fb17f8d87e312ad02882"
+    },
+    {
+      "label": "reference",
+      "path": "/private/tmp/prowl-integrity-v140-20261116-bin",
+      "sha256": "3c04238314d376d571e5d0c7b5d02e3b31c931f6df7e577bf8cb5baf24ada59c"
+    }
+  ],
+  "adapters": {
+    "benchmark-1.4.0.py": [],
+    "check-1.4.0.py": [],
+    "check-encoding-1.4.0.py": [
+      {
+        "before": "assert result.returncode == 2 and not report['complete'] and len(report['findings']) == 1",
+        "after": "assert result.returncode == 2 and not report['complete'] and len(report['findings']) == 2\n    assert sum(f['type'] == 'aws_access_key_id' for f in report['findings']) == 1\n    markers = [f for f in report['findings'] if f['type'] == 'results_truncated']\n    assert len(markers) == 1 and markers[0]['detector'] == 'scan' and markers[0]['stage'] == 'intake'\n    assert not markers[0].get('secret_id')",
+        "count": 1
+      }
+    ],
+    "check-interfaces-1.4.0.py": [],
+    "check-json-literals-1.4.0.py": [
+      {
+        "before": "assert result.returncode == 2 and not report['complete'] and not report['truncated'], tag",
+        "after": "assert result.returncode == 2 and not report['complete'] and report['truncated'], tag",
+        "count": 1
+      },
+      {
+        "before": "                assert all('_duplicates_' in Path(d['path']).name for d in report['diagnostics']), tag\n",
+        "after": "                assert all('_duplicates_' in Path(d['path']).name for d in report['diagnostics']), tag\n                markers = [f for f in report['findings'] if f['type'] == 'response_truncated']\n                duplicate_paths = {p for p, c in by_path.items() if '_duplicates_' in c['name']}\n                assert len(markers) == len(duplicate_paths) and {f['path'] for f in markers} == duplicate_paths\n                assert all(f['detector'] == 'scan' and f['stage'] == 'intake' and not f.get('secret_id') for f in markers)\n                report['findings'] = [f for f in report['findings'] if f['type'] != 'response_truncated']\n",
+        "count": 1
+      },
+      {
+        "before": "    identity_groups = {}\n    for f in report['findings']:\n",
+        "after": "    identity_groups = {}\n    for f in report['findings']:\n        if f['type'] == 'response_truncated':\n            continue\n",
+        "count": 1
+      }
+    ],
+    "check-noise-1.4.0.py": [
+      {
+        "before": "if not any(f['type'] in row['types'] for f in same):",
+        "after": "if not any(f['type'] in row['types'] or (row['name'] in ['140014_positive_after_data.json', '140014_positive_after_integrity.html', '140014_positive_after_public.env', '140014_positive_longkey.env', '140014_positive_tokenvalue.env', '741913_positive_after_data.json', '741913_positive_after_integrity.html', '741913_positive_after_public.env', '741913_positive_longkey.env', '741913_positive_tokenvalue.env'] and 'generic_high_entropy' in row['types'] and f['type'] == 'generic_api_key') for f in same):",
+        "count": 1
+      }
+    ],
+    "check-password-roles-1.4.0.py": [],
+    "check-pipeline-evidence-1.4.0.py": [],
+    "check-quick-scan-1.4.0.py": [
+      {
+        "before": "Нет объектов для проверки",
+        "after": "no objects to scan",
+        "count": 1
+      },
+      {
+        "before": "БЫСТРЫЙ СТАРТ",
+        "after": "Quick start:",
+        "count": 1
+      },
+      {
+        "before": "Базовый скан без настройки",
+        "after": "prowl scan [path...]",
+        "count": 2
+      },
+      {
+        "before": "Находок после фильтров и подавлений нет",
+        "after": "no findings after filters and suppressions",
+        "count": 3
+      },
+      {
+        "before": "supported only by the local scan command",
+        "after": "does not apply to command \"repo\"",
+        "count": 1
+      },
+      {
+        "before": "contains='source_error'",
+        "after": "contains='could not be read'",
+        "count": 1
+      },
+      {
+        "before": "applies only to stdin",
+        "after": "applies to stdin only",
+        "count": 2
+      },
+      {
+        "before": "        run('reject_false_' + flag[2:], [flag + '=false', 'production.json'], code=2,\n            contains='does not accept a value')",
+        "after": "        report = run('explicit_false_' + flag[2:], [flag + '=false', 'production.json', '--format', 'json'], json_output=True)\n        assert report['complete'] and report['count'] == 1\n        assert report['findings'][0].get('verified') is None and report['findings'][0]['redacted'] != value\n        partial = run('explicit_false_incomplete_' + flag[2:], [flag + '=false', 'production.json', '--max-size', '1', '--format', 'json'], code=2, json_output=True)\n        assert not partial['complete'] and partial['stats']['skipped'] > 0",
+        "count": 1
+      }
+    ],
+    "check-toml-literals-1.4.0.py": [],
+    "check-yaml-literals-1.4.0.py": []
+  },
+  "runs": [
+    {
+      "label": "candidate",
+      "suite": "acceptance",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/acceptance.log",
+      "log_sha256": "b95728f29ed2d2fa2a282e3a6a34ddb63e16839390e6c8700c172bbb8560293c",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-acceptance",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-acceptance/acceptance.json",
+          "sha256": "b95728f29ed2d2fa2a282e3a6a34ddb63e16839390e6c8700c172bbb8560293c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-acceptance/after.json",
+          "sha256": "39686fb35dc52a6410e1561530ef806acacc9cd0c74f62d66df842e62feaddd8"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-acceptance/before.json",
+          "sha256": "97a56d5bbfb99208934d8bb696119d67e8559beaf8a352a09f62219443bdb9bc"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "quick",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/quick.log",
+      "log_sha256": "c7b481c16d8d8bc953aa3ba65b84ac2260857b2170c659cd41b8e4d410f361f1",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-quick",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-quick/baseline.json",
+          "sha256": "ad820badc973470a391c413acc6f12b61451cb8f28a5f2fed2f162a02b8e01f5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-quick/evidence.json",
+          "sha256": "7523fd2799c49d7c67fca9915b40a08f274a1244431aff409d3750aca2c5cdcc"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "interfaces",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/interfaces.log",
+      "log_sha256": "1e52c8e4a4cf6f3060d3620d9fb41e7a05d08913c7b4b73bcdb81b4baa6c8180",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-interfaces",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-interfaces/interfaces.json",
+          "sha256": "1b1425a1ef7145d56d4ea9955dbe70a1b8ae021d35d887a7203e5aa03f18df3d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-interfaces/production.json",
+          "sha256": "c130463c54faf50cdf69d80838172eb67904593012c82374aa3b214a5cb4bcd4"
+        }
+      ],
+      "network_boundary": "reviewed owned loopback; proxy environment cleared"
+    },
+    {
+      "label": "candidate",
+      "suite": "pipeline",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/pipeline.log",
+      "log_sha256": "9b65326b5386269233df644ad6099b1df6d6bcf08c5d7ae620cc65ce4c9b54d9",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/0-False.json",
+          "sha256": "8506ea026bf74137e19ed2b7af08a23a7fc5137194853e1b58d96e36ea44f586"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/0-True.json",
+          "sha256": "225628639fe54426b8ddbeb66b044f1d8f391e222f4cd5f23036710177918564"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/1-False.json",
+          "sha256": "48cf04e3acc39063b7a3759d0b34ea5c366e4f7c572f1fc64b5a818289c957e8"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/1-True.json",
+          "sha256": "f7619e1ec2043f20c2568f7c6a1db8c9d916c34620c188cc623252152a73f6c3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/10-False.json",
+          "sha256": "3e1323e47fe1d40f27cbf59ccff5ad1cb6b48dba3c2505af74e4bc6270fcc843"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/10-True.json",
+          "sha256": "904b6ee75033bdfdd261dd4d24cec685a5575dfeb737987614672957ef0cc3d6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/11-False.json",
+          "sha256": "ce79c0e3dd2239562d33f98dbc43f31ebcd79cb3c03939d7eedb8c2b31f3c4cd"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/11-True.json",
+          "sha256": "cad305370d4fea12fcaed1261751bc86c0bb1497cba258d09392f38484583702"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/12-False.json",
+          "sha256": "8e817f4903f1066e52a222406fcf6c3a3a821cf81e5a31c788ad26704d61f194"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/12-True.json",
+          "sha256": "0112449bd9244640257a152d6b94a15b593af749242f06ca593c1b5ee5426db7"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/13-False.json",
+          "sha256": "aff114a5d2a51facde7aef9cb5675a174614ff5c6ed8ff8ebf9d8c2f2a9fa710"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/13-True.json",
+          "sha256": "c4a66db65ce7a5fbe3755b1cb72215be5479afcd1bf2621b5a601f90fc1bb7c3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/14-False.json",
+          "sha256": "49a28e55dcb7feac3ff3a1794f6df670e1ca65b37600c4f4c1809b6609e8dd93"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/14-True.json",
+          "sha256": "abc24843ed1abe6bdfffea4e1f214e43665e1cc9bdc1432d4c05e9c85d3cb547"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/15-False.json",
+          "sha256": "529355b653a6c01974aa030cc5eb9c21e1f2a0f18397c765073253ecabf707ea"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/15-True.json",
+          "sha256": "f7c16177e318e33c85749a0b2b5318a1b9e1196d9e35aa99f79f0b09f30f260d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/16-False.json",
+          "sha256": "4c2b4e50b72c239211b77c33f1a7ab2842b4b50c129502b959b7d1374aae2411"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/16-True.json",
+          "sha256": "d4bb7fc8d372348ab57e5d07a986ea4ba3ed765c406764555692a1e4c44d08e2"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/17-False.json",
+          "sha256": "d9bf8bcd373cc6da048647f50cbda43c0fffd1b42c4ee9d37adfb636352e656a"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/17-True.json",
+          "sha256": "26b744042503018929830a1964df0bd28f3332a724bbcf225e5ed96e9c2439b0"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/18-False.json",
+          "sha256": "0c56c247488878a475ff7e51e04e0e1f1293648b7ff23228257641dac3a3c68f"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/18-True.json",
+          "sha256": "e0f9c2fa05f183c5a602ce45f3b1bc3562ab27a31f95eb55f143f3f9d830de96"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/19-False.json",
+          "sha256": "933c4888fd1b6fefaa4c380c32516f6fe7a75f0993bca0dd87ff246983b4016b"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/19-True.json",
+          "sha256": "d2eb5d3298120d6df71d3e325b3f9ea15d5ed3f9ec414ccf7d844c07f7405d50"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/2-False.json",
+          "sha256": "d9c2a5140a0359523c03c1509d4718ac95cac3e8bb409b520d75160bc7b0bf5a"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/2-True.json",
+          "sha256": "2e01eb8e9ed53d67cd1749bceb3f24d3ed73047bceeeca3711b441880aa87105"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/20-False.json",
+          "sha256": "0f58725b67e72b206d858e7b01fc9f7d62cef8e6141a84029a3593eb14407787"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/20-True.json",
+          "sha256": "008aef5b866e9b46fd635edab491503005032b16a3248cb4fc8191c7436361cc"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/21-False.json",
+          "sha256": "0a16c843ce71c13372478ca8f212e388d98ce8ff6ce2a46cd5654f3d9e8e6cef"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/21-True.json",
+          "sha256": "c5b5e80d9129a0d4a823ece214ab489b450c15c7f9966c5adc0d031a6e005199"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/22-False.json",
+          "sha256": "1f45404cced1bec9588c0cf2f71cdaa7543a3d02d51898073013e5602884dbbe"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/22-True.json",
+          "sha256": "2001a198782162bf106f47eb77e3ab243c916874c70b37708b7b4e0441456a9a"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/3-False.json",
+          "sha256": "ccfddb9ac4844a1b2dd00d6587fa50f9db127403c853d34a3e45d9654ca41b16"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/3-True.json",
+          "sha256": "6a2469a33ddf5097d15ecf6ee64844e726b5665ca8e29f004221b156d4dd119c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/4-False.json",
+          "sha256": "a27954157c6fa6f781aec2b0f6868da26790f734e8d0fb8472d040542b2dca43"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/4-True.json",
+          "sha256": "3456483f45948bb04b4fc2e8b8fe100ee4cb34dab4650ee3eba2121db1a5e83e"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/5-False.json",
+          "sha256": "6efd82cb9caa046a9ecd80c5c0b080a858ea1f260902877daa55745e7055e599"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/5-True.json",
+          "sha256": "9e9bbfe96e447b93120fff77fc7ae82a128976c5932240b7c87f6caa429ffa87"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/6-False.json",
+          "sha256": "d74de97cf470e6d15cf25343dfdf671faa8ba3be02c125a27802568aa132b6fd"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/6-True.json",
+          "sha256": "f8748ef4e5f26a28dc9d98b695b5d14941aca1a976f45e3a656012ed4de8d4e2"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/7-False.json",
+          "sha256": "38f414fc8a288c22f5a5f786df0fa806d9cf65bfd8eea951bea1b8b168336d1b"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/7-True.json",
+          "sha256": "039a4f7e18716ed6057057097cdfe9733673671971738b20b5da5139c87dc88c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/8-False.json",
+          "sha256": "374b947cb44179bb83984d946d0a0b347971fa6e9ab727d787139d9ef8d0a648"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/8-True.json",
+          "sha256": "60d2327ee5cc8b8f55f95ea799603ca61f6c38b78d5d05a20bf2833fc3c040db"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/9-False.json",
+          "sha256": "fcb392f83ff442bfc445de055c38061ad15b5a10236b87491a5c2eca1360142e"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/9-True.json",
+          "sha256": "e5961fbe99ac9e71c706136ac8ef34ff2e2d7f08990a706bf0aa4f7601e384c5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/json_escape_marker.json",
+          "sha256": "0b7dbe2574a665fd00c8c7b820954e1a85585b360ea4dd582775da79d043553d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/json_marker.json",
+          "sha256": "b34aaf47c86fe7dacea274cc97bbb86adf48fb878f241101149591ba9bb268b6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/pipeline-evidence.json",
+          "sha256": "3cd6b4882c31bd3e8b0b5396adade41c2acb59b58ca2e84304e9ef8453a6f573"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_failure.report.json",
+          "sha256": "66229add60ca0971f1d7af0271d73a37e243f3bb2be007399dc3a299971adeef"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_json.json",
+          "sha256": "345b6b2b0a71d22db89ad3b032866abc8571e5123b5ace1c430dfd763f6d2be3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_json.report.json",
+          "sha256": "abb8b8adf0caaac435b27db694a70effc8e468765f9ed4199ac485250d7504fc"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_toml.report.json",
+          "sha256": "737fe7aba9fd5b04f73eb62d67db7cc19359588613bd491f252ecd78d31845be"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_wrapper.report.json",
+          "sha256": "a5ecba9738ca06fcd7672bff23c65958c5f74228c42ea4b9f5731f393ceaf44e"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-pipeline/semantic_yaml.report.json",
+          "sha256": "210f5593bb3964b55ae7c521a3c801f6bf6637a24bfb94c03446411e9259b824"
+        }
+      ],
+      "network_boundary": "reviewed owned loopback; proxy environment cleared"
+    },
+    {
+      "label": "candidate",
+      "suite": "json",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/json.log",
+      "log_sha256": "7c489598d2ebfde81e369f9988d86e3970401de2d9e7e5deedb70c83e843cd46",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/after-default.json",
+          "sha256": "7d46146d1272447e0affaa68a8f9024d268113318f2db10a1aa8d4261d29d849"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/after-ml.json",
+          "sha256": "903345a638dd5ed0a87e4439ffdf6847bf841a3e91bde1b8e2a72b723f6a2a41"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/invalid-unicode.json",
+          "sha256": "17322089f6c6f6d03d5745633559914be250d82b16044fea165e563fbcf897c6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/json-literals.json",
+          "sha256": "45e744096878ae7dad6f75c8c22c4eb9dfc2aa3dfdec95a1cc55b92631f93e5a"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/limited.json",
+          "sha256": "4f26536a730fd0c1e14bca626de8c5a90ed983e4132361456a815e58b29064d1"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-json/truth.json",
+          "sha256": "586f7883fe56aee86147a3bbded5bad5ebae3bc87eed33f311e967577c46062e"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "encoding",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/encoding.log",
+      "log_sha256": "ec181d911bd22a9411461e274f97fa197cdc4a9b7bc003a1f80010251bcc1f6e",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/after-default.json",
+          "sha256": "dbd1eaac22c03d063819500f5af502c649e235a5003b760eb887174f9038c171"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/after-ml.json",
+          "sha256": "0b4bbc75563a1a01ade67154a351665854f2d7686b8fa14ab77a2a340c2630f7"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/aggregated-repeated.json",
+          "sha256": "584c972a5a45f2dc76614d2919e8ca287c0c978a04364ee3fe3e7e282e798098"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/depth-limited.json",
+          "sha256": "4efac2fc4dd52e16b23433979cb747c60e3d4cae9d8d36961c681d7850efc784"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/encoding.json",
+          "sha256": "667e5d8254b9ae332eb9cbd43c5c98118bb018babc580fcf993b26099854886d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/limited.json",
+          "sha256": "0e26fda2adb1ee3a44e0afaae4c8d2a1f9f3b9b1a911f1b0661350150ba9fafc"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-encoding/truth.json",
+          "sha256": "a3c4dd5bc695577f562475819e78773b5aedc0e86bdb9744a84764a028cebb86"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "toml",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/toml.log",
+      "log_sha256": "b722a790af10bb843605afa0873f0569a72972754abf0d06c4feb05bfe7a6ae4",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml/after-default.json",
+          "sha256": "c6b640b372704183d6defd583576f63d2b104a70cc0f39a29e9613d49021c62f"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml/after-ml.json",
+          "sha256": "ea9caa4fc7b77e681415a09fe34924b2f3d8343bdeccfc8cca6e4df7eb531469"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml/limited.json",
+          "sha256": "251f9d34bebc144140ce2d6a0d6e705bb0b5e2a5f440c685015ffe20118d9f32"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml/toml-literals.json",
+          "sha256": "84cf89bcd8f9c2f223dc2d4c53fb91917cbf3ec423b587b42a032cc3c7d5348b"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-toml/truth.json",
+          "sha256": "a888ce5475a6792e8b95658aa407c07feeb065f5b67bba86572f0351afa19c69"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "yaml",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/yaml.log",
+      "log_sha256": "ba11b1e665d3d949175bf15bd044df92fe71b066ac5b48253f755382a919c053",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml/after-default.json",
+          "sha256": "7ed2a63472c6cbb4bc7e48f8d3b096f9c82b1cceab0290c5dc69b825b757b0e2"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml/after-ml.json",
+          "sha256": "365bdbffa811897e121c877e2b6d94a62338132d6d3fb20b0d8eabdf6ed37fa0"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml/limited.json",
+          "sha256": "b18d37ffa0cdfb7989aa8738b813ed6ec536e6014f17919961ccb4d8076fc2e2"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml/truth.json",
+          "sha256": "19805d641a4dcae4188f589cc997c13ad31d0ee2cd2d225490ca5563c9f82af1"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-yaml/yaml-literals.json",
+          "sha256": "88185797e3b397c605a4685f8f155e878bdd8baa90da6664ba79032c69c82337"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "roles",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/roles.log",
+      "log_sha256": "576f10e4cfcf0d9990855b35dee52790527f447029e898c4563f96565575d06f",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-roles",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-roles/truth.json",
+          "sha256": "e9ca9cccb53ec5525a0caac9966ec5cc2da383cc930e2efe8d2ce0c9bfe9c174"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "noise",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/noise.log",
+      "log_sha256": "2a514ebcd4571328a8d835b77879e148920094139eb80279954fc6421dc96a87",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise/after-default.stdout.json",
+          "sha256": "e2f93c8f9efe43c9ee536af95acf4fa34c2b8367e827717ede7b3f55aab6a07a"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise/after-ml.stdout.json",
+          "sha256": "8184a296b0e419f92480bed0af6f4f397c1a61bd2d30734d66b713d1656acfa4"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise/noise.json",
+          "sha256": "9648f4c21658ca5b7f46ea2341318b5d3218318e43b5386a8b6732b177dbfbe6"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "candidate",
+      "suite": "noise-deep",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/noise-deep.log",
+      "log_sha256": "b379ef2bc7b84fcb756bee300da297d430f707e6942746654c4e62b650cc3395",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise-deep",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise-deep/after-default.stdout.json",
+          "sha256": "1fcd8376ade36c445d0758687c7faf78092edc2db8ae743ed50af3348fd62670"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise-deep/after-ml.stdout.json",
+          "sha256": "052365cb1b53044778233b74588bf9cda722058934435cebc9d7a904e7f0afe0"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/candidate/output-noise-deep/noise.json",
+          "sha256": "6a4dd70e2920173bfb73531452f7cf93d88413a1dbd85c4e398ce67947c395a4"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "acceptance",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/acceptance.log",
+      "log_sha256": "aed69a0afca0cd9c0118b289ea3d76c2f75cbea6c45ac23e6f3cfcf84d414400",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-acceptance",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-acceptance/acceptance.json",
+          "sha256": "aed69a0afca0cd9c0118b289ea3d76c2f75cbea6c45ac23e6f3cfcf84d414400"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-acceptance/after.json",
+          "sha256": "ec8089458311f59b9ab97eed3ed2ffd14563ef2b1f5cb3998f7d7d320e94426c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-acceptance/before.json",
+          "sha256": "6523f2643111a6cd941fe0150e5be97f03028c0c0508bef89d305f45f4e4cc1f"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "quick",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/quick.log",
+      "log_sha256": "497cb4ae04de9007ecd781dc3db96c2b3677eaefb66f9176c3d835c2b25a3830",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-quick",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-quick/baseline.json",
+          "sha256": "ad820badc973470a391c413acc6f12b61451cb8f28a5f2fed2f162a02b8e01f5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-quick/evidence.json",
+          "sha256": "2a8788f018cd2235198532598a28e191d47d99d51a590ab1698dd9345a0468cf"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "interfaces",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/interfaces.log",
+      "log_sha256": "1e52c8e4a4cf6f3060d3620d9fb41e7a05d08913c7b4b73bcdb81b4baa6c8180",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-interfaces",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-interfaces/interfaces.json",
+          "sha256": "1a4f96d1979fad821f70ba1c950d4cdb0de863fdcf2518dbf185b51840e28ad6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-interfaces/production.json",
+          "sha256": "c130463c54faf50cdf69d80838172eb67904593012c82374aa3b214a5cb4bcd4"
+        }
+      ],
+      "network_boundary": "reviewed owned loopback; proxy environment cleared"
+    },
+    {
+      "label": "reference",
+      "suite": "pipeline",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/pipeline.log",
+      "log_sha256": "f9920ac7db9179e001e11fc112e36ffa795757dae970d20ed48f37926ac09e89",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/0-False.json",
+          "sha256": "52fec9cb3b973817f815daf69bf7cb5de4131b1095566bdd65bac9e2d298d769"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/0-True.json",
+          "sha256": "39013f30c40acdd72d6dd1c7bc63d9070cc7d2901c81f583bb50c2712b736f78"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/1-False.json",
+          "sha256": "f223eaa501901d929e17f695eaef16124def53115359915ede026afde2411614"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/1-True.json",
+          "sha256": "e47c44d382a04cbe8a8acf6ff113d1da6d1e74e050d2c6817e5ce4b731e4c3ed"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/10-False.json",
+          "sha256": "36360ccecb10b1eecefadb13daa36c232905bf8480cea22f39ea4b04819bc608"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/10-True.json",
+          "sha256": "7ded5c566c1e3782fcc91f81dfa88494360f23bb1baf88253cd406b69e07a81c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/11-False.json",
+          "sha256": "48586039ae83ed31f0dcccb2ef52880a6785137b3721dcff86d7234d0d20fded"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/11-True.json",
+          "sha256": "b9c38470fee21ffddd1b124f252b7abd99776704c09b6e93503b412d073d116f"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/12-False.json",
+          "sha256": "2afb2381bc3758d03937317cb1daa1d85d5e9ab4d60979231bfe95a297567e5b"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/12-True.json",
+          "sha256": "5a80408869687ff29346915bacfae6d8a1912dafce4ed774a988447df95e7cd5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/13-False.json",
+          "sha256": "6fa3f68df7efb5e73809fbb11c67472f640618aae9d2456fdb062d35e36b6815"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/13-True.json",
+          "sha256": "15ebbcec91f270c4b38da35d26102cf79f59e556075eef5e1cb7bf70430ebb13"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/14-False.json",
+          "sha256": "1ea3ab5f8a94f471ac6533f23fd0f2c4cf19817d3d347c88aa742c43b2bddc0c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/14-True.json",
+          "sha256": "f7e9961a1758eed7ddc9711aea41f5ae2036da4791ac5cfc27c37d21b8009630"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/15-False.json",
+          "sha256": "64e8fb5c0b90960da74414c7d7a3352a4e1c3efbe302fa214cf05fa6db410c7d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/15-True.json",
+          "sha256": "4986de089366317e449542022e346f0a7d0ff8a0c6ae0e04010203335c669b40"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/16-False.json",
+          "sha256": "a82d2b572ac5182fd7e30cd8293f40f4573d9b9cafc1e33ce6d71cb39946bdbb"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/16-True.json",
+          "sha256": "c1647f8b2c84888f4c1e4825894d8a68ef1778180bd34e140f7eb2fa6e4f86a3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/17-False.json",
+          "sha256": "76f5d032a0571483bb6000c7828c96e88b1bd839891b0a60a4453bfb423b397d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/17-True.json",
+          "sha256": "7a0d4cb5ed53b41a1b2c8636e19b1e0484496e8cfb90d66ecd9fda511d94f626"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/18-False.json",
+          "sha256": "33295c3104911c5518eac9c710cf0d0e59902ef1510c9ec4be1750144631ca3d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/18-True.json",
+          "sha256": "cd259558a4d6160534d59dce402225ef5e76597298bc0d30945f53a99817516f"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/19-False.json",
+          "sha256": "c23e16eec9a1773965b21427836f071dcf9af029d9f784f4e73312d0a7af0f47"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/19-True.json",
+          "sha256": "852a7839a37f9f5299d6e2b348065b8f4edd6ae0205a4e880c8b17ea409526aa"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/2-False.json",
+          "sha256": "37c884bcf5d7f04e4e26b1a7b6c5b101f4c91a415a36da9c06cea6b549ac56e5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/2-True.json",
+          "sha256": "8a69382496be308d7513676f8c76fc5c7b1c4d321b26e50f8163d385fe60f6e5"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/20-False.json",
+          "sha256": "b86a6c193403936f877150256fa216ed49130f417c34e6dcb1215d0f009c9022"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/20-True.json",
+          "sha256": "04f97e8aeb3037aa4556f8d87b6f0f64563b36f5ef66b2060aae0b92720a772e"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/21-False.json",
+          "sha256": "d3cb12ec2417a5670c9915d564fd6f3a9ca75f374fea2f38335608ca70d57141"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/21-True.json",
+          "sha256": "a354e237da727f29073df95386680681567e37fb496b981c08ca8f0bfeb34941"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/22-False.json",
+          "sha256": "16f05bd104780bb2ceda1657b42655faf30834116920c9f399095a8647da1ac9"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/22-True.json",
+          "sha256": "5d36a4f38026f15b976bfa37ad445f74d79ebb4660333fd12fba81b95a8ecf93"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/3-False.json",
+          "sha256": "2cb43141928ec3d26bebbdb15c6b9d1dc7c1c18d4cdabe0e850d4375c33ba9a7"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/3-True.json",
+          "sha256": "56f0b4a4fb462b44770df98b646314d1c24202d897e7c97fb0888ce63b601ffc"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/4-False.json",
+          "sha256": "45b1a2d23314c8ae78f6a033842bd3fe5da4adea33b8c5612716ca7bcf576017"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/4-True.json",
+          "sha256": "8b4360c4d013f9134f29592a8631ad808e446fce438efba9bbdb9d4fa20c4a24"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/5-False.json",
+          "sha256": "8029c4d845735869de2a64192f79a8db024ce671607a7c92840c0f87166cd7ce"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/5-True.json",
+          "sha256": "cd12f767e06d9552e03e6b261d773548e606a6d75fc01523799cac6d4d720447"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/6-False.json",
+          "sha256": "1575ba6069b48b94da0e8c3296d33532e17fc27873a6551337e9df78aa380064"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/6-True.json",
+          "sha256": "809361f153828d95550156119dd1424b4d3257c2a9a5d0e159443fece271e371"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/7-False.json",
+          "sha256": "1df9c1df37eb77c5ee020f80dc4a64995381c4dcb476507e8eb19ef6852bb648"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/7-True.json",
+          "sha256": "6088c1304f72bd16fcf38200e601ff22007567bad161928f8abfbe82d5640be3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/8-False.json",
+          "sha256": "49923646b919e017e8e381032f8e26d419ac4f824457d242e8356e2512722b24"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/8-True.json",
+          "sha256": "4dfea33c98d4c7711d6aedef9c94f9fda6987523f3ea726afc05644efa3e5398"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/9-False.json",
+          "sha256": "bbdd0082ae720d51c0ab4b674ad902e676bee6ed7af4b4c65aa83312ea6f159c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/9-True.json",
+          "sha256": "a3f15497dc2eff5b42bcc45e74096250e9edb82545302e406ed5191c89bba5ff"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/json_escape_marker.json",
+          "sha256": "0b7dbe2574a665fd00c8c7b820954e1a85585b360ea4dd582775da79d043553d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/json_marker.json",
+          "sha256": "b34aaf47c86fe7dacea274cc97bbb86adf48fb878f241101149591ba9bb268b6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/pipeline-evidence.json",
+          "sha256": "97d1f9727960623e62a415879d09ff90d22359d93ebd12455b8443ea9147d661"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_failure.report.json",
+          "sha256": "d09e952efbb53a9a1afb51da8a0f7bd9d4bc9f6a3aa932db3a2f21713fd4d6fa"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_json.json",
+          "sha256": "345b6b2b0a71d22db89ad3b032866abc8571e5123b5ace1c430dfd763f6d2be3"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_json.report.json",
+          "sha256": "797617088f2710ef23dbeba720d88ca94135d5024d7b5662d3d850645c10cbea"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_toml.report.json",
+          "sha256": "4fb2c24e957cfb975222937c7607610847b1f748d68f6a541debce3e5aecf23f"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_wrapper.report.json",
+          "sha256": "b8224543389670b11050127161d4db47774a217dd60ed91e350a42a512c26d7b"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-pipeline/semantic_yaml.report.json",
+          "sha256": "e1055334de9df9558e6b743c175fef29a59a71ec0263126491642d3e97a8fea0"
+        }
+      ],
+      "network_boundary": "reviewed owned loopback; proxy environment cleared"
+    },
+    {
+      "label": "reference",
+      "suite": "json",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/json.log",
+      "log_sha256": "e81b0ad74e192d9484952b698ee7c37d2a8065449fb1e040751c0b954b3743b5",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/after-default.json",
+          "sha256": "ca0016dd6a3e8d76b9dbe890e061fc99e1dace8aafafacf3fb4e1aa5b78a5ad2"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/after-ml.json",
+          "sha256": "38c38e1f4f847a06ddc04cdbaf70bc388d9aed1e8a8266d0f0b4165acd22cd5e"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/invalid-unicode.json",
+          "sha256": "17322089f6c6f6d03d5745633559914be250d82b16044fea165e563fbcf897c6"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/json-literals.json",
+          "sha256": "ab0e90e586130d5ac4602a04daec0d644de19671591c5e8852b0ba3a9d5b655c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/limited.json",
+          "sha256": "56fa38d7d6445e8b0b00a95ade4c5a0551ccf0b5c18b77f1a047f90616f4cc86"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-json/truth.json",
+          "sha256": "586f7883fe56aee86147a3bbded5bad5ebae3bc87eed33f311e967577c46062e"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "encoding",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/encoding.log",
+      "log_sha256": "3bff153e207c0e9df568ca31ae3c1c03f97c3dc51bf3aef6ec69c9e4d2cb3f75",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/after-default.json",
+          "sha256": "34ce7925d3ed8f2548e88f210f057c85959cffeb1297c6b3f1ec2a3170ae8f96"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/after-ml.json",
+          "sha256": "50ec38b1829b4026a63078f7b5a12681d35b3f5f9135f7cb0bd98fde82bd7c6d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/aggregated-repeated.json",
+          "sha256": "556a41e8e32360bee210d27541bdca0660fb903500bf511c91b868b027748015"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/depth-limited.json",
+          "sha256": "b7f931d2f1761d2d6e2adcfc511625678a7a15aa73e74cb9e919345548f22877"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/encoding.json",
+          "sha256": "7d339d7b1470b963e99b53c2c754fe178355685a70a05afacefb869ac7bc8425"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/limited.json",
+          "sha256": "a5441f0b988baba21181367f401a7374e6375286907ffb9d63fd20d765ac5df4"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-encoding/truth.json",
+          "sha256": "a3c4dd5bc695577f562475819e78773b5aedc0e86bdb9744a84764a028cebb86"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "toml",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/toml.log",
+      "log_sha256": "5cea9e3e4f0a0ef340a4e08708c41eae6dda4211caed54fb211f4e0b62402d1d",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml/after-default.json",
+          "sha256": "b6d0d99c99b7f3539d52f575111f9b154eae041cf2005599b38e6d6f6bc44b3d"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml/after-ml.json",
+          "sha256": "807d7e6f1e453350698332f4b30da72d8de46166fbcae1fac697a77efc5d7ede"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml/limited.json",
+          "sha256": "3efced739f5cc9a671c060146b60c7cae33b6a0ea9f94eed98079f2d364571c9"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml/toml-literals.json",
+          "sha256": "4d6d7737add341f8d032398c5bad867ab7119dfc4195a49fa30871785c11993c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-toml/truth.json",
+          "sha256": "a888ce5475a6792e8b95658aa407c07feeb065f5b67bba86572f0351afa19c69"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "yaml",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/yaml.log",
+      "log_sha256": "54e93d3e24e4655084bfdc859a03f3c8bc830cf6129649eec398c20c1bbb26cc",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml/after-default.json",
+          "sha256": "0a3c19f95550b31c69bc6f94cff9f33c108ac6f23c9955098fd236fe60051737"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml/after-ml.json",
+          "sha256": "1c98d9b87c993009c96df49514981995e9d892bce23e6de33f11d2866fa0a36c"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml/limited.json",
+          "sha256": "6f471f72c891af49f3ce8699a590984977add2f9c582bd55729030fd863bbf02"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml/truth.json",
+          "sha256": "19805d641a4dcae4188f589cc997c13ad31d0ee2cd2d225490ca5563c9f82af1"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-yaml/yaml-literals.json",
+          "sha256": "5e976d160fb2a02b8701d9e4e6163ac30a7cde9b49916a8f5231b561d784d21b"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "roles",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/roles.log",
+      "log_sha256": "a703fc6db220ab5fa2aa51d1b6602f76f0793c9e0f734d92c16a985505b49c63",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-roles",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-roles/truth.json",
+          "sha256": "e9ca9cccb53ec5525a0caac9966ec5cc2da383cc930e2efe8d2ce0c9bfe9c174"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "noise",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/noise.log",
+      "log_sha256": "fd8573556abb830816c5b09b4d7f047f31152ef3705ae8227f143fb7cca876be",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise/after-default.stdout.json",
+          "sha256": "33d677bbbd86c2b06343a656d95491c541c19cf7a87f9032f8e092df0e004178"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise/after-ml.stdout.json",
+          "sha256": "6eecb04d0a03580f4c2e4019b512b89df90f29b76f311a896f1e07707dfe2208"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise/noise.json",
+          "sha256": "607ed5040f6aad8013421ae4b50acd46868c157fdbb471f5291872216dbab8fe"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    },
+    {
+      "label": "reference",
+      "suite": "noise-deep",
+      "exit": 0,
+      "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/noise-deep.log",
+      "log_sha256": "246d8e2e359123b123ea9faf9018eaad0e6650ed17dbabf18da0d038010846cd",
+      "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise-deep",
+      "json_outputs": [
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise-deep/after-default.stdout.json",
+          "sha256": "ee80e8508b935c761060fed777df29278bfde850298e6579e8701c9ee934fddf"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise-deep/after-ml.stdout.json",
+          "sha256": "fee4352a10a6fef353c2aeec976ed967ac3910d1a3183202d148a4cf422c8fbd"
+        },
+        {
+          "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-nayogs8w/reference/output-noise-deep/noise.json",
+          "sha256": "f4e04306335b49d60c85f1a716786f0b786c310f67a2516bbb80cb73daf668a8"
+        }
+      ],
+      "network_boundary": "OS network deny"
+    }
+  ],
+  "passed": true,
+  "scope": "Historical native contracts with declared UI/type/completeness adapters; no legacy model-score parity or live-provider acceptance claim.",
+  "excluded": {
+    "benchmark-1.4.0.py": "informational benchmark; pinned quality/performance gates qualify current candidates separately",
+    "check-docker-action.sh": "Docker factory qualification must bind the final image source/digests separately"
+  },
+  "candidate_source": "98170a0c3603393397d7f19261009f133dbed777",
+  "candidate_source_clean_at_build": true,
+  "reference_binary_origin": "Unmodified tag rebuilt with Go 1.27.4, CGO_ENABLED=0; not a downloaded release binary.",
+  "regressions_fixed": [
+    "help all rejected a released CLI route",
+    "scan complete summary counted findings before baseline/gitleaksignore suppression"
+  ],
+  "verification": {
+    "cmd": {
+      "log": "/tmp/prowl-native-compat-cmd-20261116.log",
+      "sha256": "d811ae396c7d58536a24f8315d2fd99bdf0a8d67ddec17a192714dba4610befb",
+      "result": "ok  \tgithub.com/Lercas/prowl/tool/cmd/prowl\t19.550s"
+    },
+    "race": {
+      "log": "/tmp/prowl-native-compat-race-20261116.log",
+      "sha256": "660a366ea1168140ca5ac84a3f4ceed5c0c733d2bb32f18a9cfeab955b3f8e15",
+      "result": "ok  \tgithub.com/Lercas/prowl/tool/cmd/prowl\t1.542s"
+    },
+    "min-go": {
+      "log": "/tmp/prowl-native-compat-min-go-20261116.log",
+      "sha256": "f3d7ca6e8be0685b76da77d17138a579b455932dd62cc2e41838d25bc5532e26",
+      "result": "ok  \tgithub.com/Lercas/prowl/tool/cmd/prowl\t0.374s"
+    },
+    "lint": {
+      "log": "/tmp/prowl-native-compat-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "result": "0 issues."
+    },
+    "pretty": {
+      "passed": 40,
+      "evidence": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-pretty-coverage-9y2qsw4p/qualification.json",
+      "log": "/tmp/prowl-native-compat-pretty-20261116.log",
+      "sha256": "4d26cb5f37741d4fae9de487a4a3cd57c3afbd562dbdd1ef3b2ab4cddd0d3f41"
+    }
+  },
+  "raw_before": {
+    "manifest": "/tmp/prowl-original-native-manifest-20261116.json",
+    "results": [
+      {
+        "runner": "check-1.4.0.py",
+        "exit": 0,
+        "seconds": 0.5459487499974784,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-quick-scan-1.4.0.py",
+        "exit": 1,
+        "seconds": 0.5978959999993094,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-quick-scan-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-quick-scan-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-interfaces-1.4.0.py",
+        "exit": 0,
+        "seconds": 0.443261166998127,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-interfaces-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-interfaces-1.4.0",
+        "network_boundary": "owned loopback; proxy env cleared"
+      },
+      {
+        "runner": "check-pipeline-evidence-1.4.0.py",
+        "exit": 0,
+        "seconds": 3.0197194169995782,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-pipeline-evidence-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-pipeline-evidence-1.4.0",
+        "network_boundary": "owned loopback; proxy env cleared"
+      },
+      {
+        "runner": "check-json-literals-1.4.0.py",
+        "exit": 1,
+        "seconds": 0.12968008299867506,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-json-literals-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-json-literals-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-encoding-1.4.0.py",
+        "exit": 1,
+        "seconds": 0.5038075419979577,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-encoding-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-encoding-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-toml-literals-1.4.0.py",
+        "exit": 0,
+        "seconds": 0.29243779099851963,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-toml-literals-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-toml-literals-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-yaml-literals-1.4.0.py",
+        "exit": 0,
+        "seconds": 0.34026141700087464,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-yaml-literals-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-yaml-literals-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-password-roles-1.4.0.py",
+        "exit": 0,
+        "seconds": 0.48884787499991944,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-password-roles-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-password-roles-1.4.0",
+        "network_boundary": "OS network deny"
+      },
+      {
+        "runner": "check-noise-1.4.0.py",
+        "exit": 1,
+        "seconds": 0.286147582999547,
+        "log": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/check-noise-1.4.0.py.candidate.log",
+        "output": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-original-native-vzd056p_/candidate-check-noise-1.4.0",
+        "network_boundary": "OS network deny"
+      }
+    ]
+  },
+  "remaining": [
+    "Changed same-name Go test bodies/helpers",
+    "Optional acceptance hook path",
+    "Final-source Docker factory and release artifacts",
+    "Hosted CI and publication authorization",
+    "Live provider/customer acceptance"
+  ]
+}

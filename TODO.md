@@ -102,8 +102,16 @@
     Native pipe/file/PTY/color — 40/40, full Go/targeted race/min-Go/lint проходят.
     [Карта и границы](wiki/Released-Assertion-Audit.md),
     `wiki/evidence/1.5.0-reference-assertions-20261116.json`.
-  - [ ] Проверить изменения same-name test bodies/helpers и покрытие удалённых
-    native runners; закрытая карта 45 имён не закрывает всю совместимость релиза.
+  - [x] Восстановлено воспроизводимое покрытие удалённых native runners:
+    12 исходных файлов закреплены hashes; 11 suites проходят на candidate
+    и неизменённой пересборке 1.4.0 (22 запуска). Адаптации UI/type/completeness
+    перечислены явно, корпуса сохранены. Исправлены `help all` и summary после
+    baseline/gitleaksignore; LIVE gate сохранён. CLI/race/min-Go/lint проходят.
+    Docker factory, informational benchmark и optional hook имеют отдельные границы.
+    [Runner и адаптации](scripts/compat14/README.md),
+    `wiki/evidence/1.5.0-released-native-contracts-20261116.json`.
+  - [ ] Проверить изменения same-name Go test bodies/helpers;
+    закрытые карты имён и native runners не закрывают всю совместимость релиза.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

@@ -12,7 +12,8 @@
 
 Карта: `evidence/1.5.0-reference-assertion-map-20261116.json`.
 Она закрывает эту инвентаризацию имён, но не доказывает совместимость всех
-изменённых same-name test bodies/helpers или удалённых native runners.
+изменённых same-name test bodies/helpers. Удалённые native runners отдельно
+восстановлены и квалифицированы ниже.
 Родительская проверка выпущенных контрактов остаётся открытой.
 
 ## Восстановленные assertions
@@ -68,3 +69,30 @@ Runner выполнен под OS network deny. Full Go, targeted race, мини
 Новая quality/performance оценка здесь не заявляется: изменился human renderer,
 а модель, JSON/SARIF writers и scan/detect runtime сохранены. Публикация,
 hosted CI и внешняя acceptance остаются отдельными этапами.
+
+## Удалённые native runners
+
+12 исходных файлов 1.4.0 сохранены без изменений с SHA-256 manifest.
+Новый `scripts/check_released_native_contracts.py` выполняет 11 suites
+на каждом binary, включая обе noise fixtures. На source `98170a0` прошли
+все 11 candidate и 11 reference запусков; reference не получает адаптаций.
+Quick runner проверил 61 сценарий кандидата и 54 исходных сценария reference:
+семь дополнительных проверок защищают incomplete exit 2 при boolean `=false`.
+
+Найдены две реальные регрессии. `help all` вновь формируется из актуальной
+схемы команд и вложенных флагов без загрузки конфигурации или установки модели.
+Summary теперь считает findings после baseline/gitleaksignore и восстановления
+LIVE-находок для gate. Дополнительный тест сверяет count отчёта, summary
+и exit code с обоими suppressors и `--fail-on-verified`.
+
+Английские сообщения, явные boolean values, markers неполноты и десять уточнений
+generic type адаптированы явно. Corpus generators и исходные noise bytes
+не менялись; markers проверяются до отделения от credential assertions.
+Legacy model-score parity не заявляется. Все CLI Go-тесты, целевые race checks,
+минимум Go 1.26.11 и lint проходят. Detector/ML runtime не менялся.
+
+Границы optional hook, informational benchmark, Docker factory и сетевой
+изоляции перечислены в [описании runner](../scripts/compat14/README.md).
+Точные adapters, binary/source hashes и результаты:
+`evidence/1.5.0-released-native-contracts-20261116.json`.
+Изменённые same-name Go test bodies/helpers остаются открыты.
