@@ -362,13 +362,22 @@ func (d *Detector) namedSecrets(ctx context.Context, text, lower string, budget 
 			if ix[10] >= 0 && bareValueIsCode(text, vs, ve) {
 				continue
 			}
-			if ve-vs < minNamedSecret && ix[10] < 0 {
+			trim := ".="
+			if vs > 0 && strings.IndexByte("\"'`", text[vs-1]) >= 0 {
+				// A dot inside a complete quoted literal is part of the value, not prose punctuation.
+				if end, complete := literalPasswordEnd(text, vs); complete && end == ve {
+					trim = "="
+				}
+			}
+			val := strings.TrimRight(text[vs:ve], trim)
+			// A short value must be the whole literal after trimming; otherwise the trimmed
+			// dot/padding would mint a prefix identity of a longer scalar.
+			if len(val) < minNamedSecret && ix[10] < 0 {
 				end, complete := literalPasswordEnd(text, vs)
-				if !complete || end != ve {
+				if !complete || end != vs+len(val) {
 					continue
 				}
 			}
-			val := strings.TrimRight(text[vs:ve], ".=")
 			if !d.boundKeyValueOK(name, val, hexOnly) {
 				continue
 			}

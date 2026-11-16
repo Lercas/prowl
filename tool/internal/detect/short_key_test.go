@@ -134,3 +134,20 @@ func FuzzShortKeySourceIdentity(f *testing.F) {
 		}
 	})
 }
+
+func TestQuotedTrailingDotDoesNotMintPrefixIdentity(t *testing.T) {
+	d := newDetector(t)
+	for _, value := range []string{"01789AB2CXYa.", "q7Vx9mK2rP5nC8aH4zL.", "01789A�B2CXYZ��."} {
+		for _, text := range []string{`api_key="` + value + `"`, `{"api_key":"` + value + `"}`} {
+			for _, m := range d.Scan(text) {
+				if m.Type == "generic_api_key" && m.Value != value {
+					t.Fatalf("prefix identity %q minted from %q", m.Value, text)
+				}
+			}
+		}
+	}
+	// Prose punctuation after an unquoted value is still not part of the secret.
+	if namedMatch(d.Scan("api_key=q7Vx9mK2rP5nC8aH4zLx9.\n"), "generic_api_key", "q7Vx9mK2rP5nC8aH4zLx9") == nil {
+		t.Fatal("sentence-ending dot became part of an unquoted key")
+	}
+}
