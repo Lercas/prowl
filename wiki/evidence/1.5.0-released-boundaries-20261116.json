@@ -1,0 +1,156 @@
+{
+  "schema_version": "prowl-released-boundaries-v1",
+  "date": "2026-11-16",
+  "status": "local_released_report_and_literal_boundaries_qualified",
+  "source_base": "6466a8935ad2254673fe51eb04af55acea1a3f5f",
+  "qualified_runtime_commit": "199f4862ada94d4aa999e9097fbb57bfea304e3a",
+  "binary": {
+    "path": "/tmp/prowl-released-boundaries-final-20261116-bin",
+    "sha256": "385c574b69104fc4eea2ac6e21236a50460cf5ee77ca1960fc98ae3f084c9f69"
+  },
+  "buildinfo": "/tmp/prowl-released-boundaries-final-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=199f4862ada94d4aa999e9097fbb57bfea304e3a\n\tbuild\tvcs.time=2026-11-16T02:49:02Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "before": {
+      "path": "/tmp/prowl-released-boundaries-before-20261116.log",
+      "sha256": "3c235b7c8884c11aec429467f2e05d969a5976fec61eb4b3653d632f2411e148"
+    },
+    "binding": {
+      "path": "/tmp/prowl-released-boundaries-binding-20261116.log",
+      "sha256": "50fa86295407a327b86fe7a86a6c53329ea8bd6985517a647a83e5165d637ecc"
+    },
+    "prose": {
+      "path": "/tmp/prowl-released-boundaries-prose-20261116.log",
+      "sha256": "0be5acbd9964b8da7838e3494e35de8eecc9e637673af5debf7632917f515694"
+    },
+    "full-go": {
+      "path": "/tmp/prowl-released-boundaries-full-go-20261116.log",
+      "sha256": "46bdc3393a1b57de7bc56a19d5f016ad679d03ce617674a12cedb4fa5fb2ad6c"
+    },
+    "race": {
+      "path": "/tmp/prowl-released-boundaries-race-20261116.log",
+      "sha256": "b86cd9d13b4aa4dd9bc79fe1307c45036c31b9a0fb697d921678208456d84741"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-released-boundaries-min-go-20261116.log",
+      "sha256": "eebadb08118cca64b4d324070225aee51bd614faae47d86f3d8b269905c0b9ae"
+    },
+    "lint": {
+      "path": "/tmp/prowl-released-boundaries-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "reference": {
+      "path": "/tmp/prowl-released-boundaries-reference-20261116.log",
+      "sha256": "34fbb34f310a2d49fc9e0469e5b283bbe77c3acae07e55b445a850f49b9edea4"
+    },
+    "corpus": {
+      "path": "/tmp/prowl-released-boundaries-corpus-20261116.log",
+      "sha256": "9aa8d4bb27d48b3d47f1315ff21ab495e50bb17afa88f195a76967e641515960"
+    },
+    "final-native": {
+      "path": "/tmp/prowl-released-boundaries-final-native-20261116.log",
+      "sha256": "d189b04aa76b76bbe11300b0dc3e6a60450e1a6dd9081816c2ff1eeaf7a232e0"
+    },
+    "final-quality": {
+      "path": "/tmp/prowl-released-boundaries-final-quality-20261116.log",
+      "sha256": "54ea3a54896a0acee3e9e2082e4581b339d4b32fdfcbbdb783b546628c7125c1"
+    },
+    "final-build": {
+      "path": "/tmp/prowl-released-boundaries-final-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "release_reference": {
+    "revision": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "original_test_functions": 11,
+    "all_selected_original_tests_passed": true,
+    "export": {
+      "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-integrity-v140-kgv2vub7",
+      "revision": "f72ea02d0295e764bec5a32359240e77192073fc",
+      "verified_blobs": 694
+    }
+  },
+  "fixtures": [
+    {
+      "path": "tool/cmd/prowl/release_contract_test.go",
+      "reference_sha256": "3d83b07a4e6af7f9ee9a97ad7eab65ab0552c792d97c6d47f7e3ffd13e7cf4fa",
+      "current_sha256": "3d83b07a4e6af7f9ee9a97ad7eab65ab0552c792d97c6d47f7e3ffd13e7cf4fa",
+      "byte_identical": true
+    },
+    {
+      "path": "tool/cmd/prowl/filesystem_oversize_diagnostic_test.go",
+      "reference_sha256": "42c21fd48ff1dfa11836166c0e0e18641ba95bacbcadf3428191f42c7e5285f7",
+      "current_sha256": "42c21fd48ff1dfa11836166c0e0e18641ba95bacbcadf3428191f42c7e5285f7",
+      "byte_identical": true
+    },
+    {
+      "path": "tool/internal/scan/binding_precision_test.go",
+      "reference_sha256": "25d72741bb7e8f843d46e93d6a6caeffe303218d0d02ad5ef6ea4ff7e6878775",
+      "current_sha256": "9ce2ce2cf87711d0d52cb2b63f59c185031042cf6b6856dd19bafa477112a595",
+      "byte_identical": false
+    },
+    {
+      "path": "tool/internal/scan/verification_literal_safety_test.go",
+      "reference_sha256": "7fde92cca0159d49452a22b70709b90eccf0059e07df5ba6fc4b234854493356",
+      "current_sha256": "0dbc0bc0061d28d9f5eede14041c878f8b7d7ce563060512ed46b4d42ca84e97",
+      "byte_identical": false
+    }
+  ],
+  "fixture_adaptations": [
+    "immutable Pipeline adapter for binding tests",
+    "explicit qualified 51-feature model and shipped threshold 0.3 instead of legacy 0.5; no claim of L2 parity at 0.5",
+    "malformed fixture ignores new coverage markers while requiring lexical findings and error metadata; no provider requests"
+  ],
+  "confirmed_regressions": [
+    "live CI gate could be bypassed by display filters",
+    "verified-only retained unsupported/high and inconclusive credentials",
+    "filesystem oversize lost max_size diagnostic",
+    "malformed literal fallback lost verification refusal metadata",
+    "structured scalar prose lost contextual password evidence"
+  ],
+  "native": {
+    "passed": 303,
+    "report": "wiki/evidence/1.5.0-released-boundaries-native-20261116.json"
+  },
+  "quality": {
+    "passed": true,
+    "exact_ids_unchanged": true,
+    "report": "wiki/evidence/1.5.0-released-boundaries-quality-20261116.json"
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "8ad367825e42113023ff708ccb5488b233250e78c46da968c63d871a935b9926",
+    "unchanged": true
+  },
+  "performance": {
+    "ratios": {
+      "ns/op": 1.1531450165310666,
+      "B/op": 0.9407628447534558,
+      "allocs/op": 0.9940920194457747
+    },
+    "passed": true,
+    "report": "wiki/evidence/1.5.0-released-boundaries-performance-20261116.json"
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "validation": {
+    "full_go": true,
+    "race": [
+      "detect",
+      "scan",
+      "source",
+      "cmd/prowl"
+    ],
+    "minimum_go": "1.26.11 detect/scan/source/cmd/prowl",
+    "lint": "0 issues"
+  },
+  "limits": [
+    "Local CLI and owned loopback stub only, no real provider/account acceptance",
+    "Rebuilt unchanged reference tag, not downloaded published artifact",
+    "Hosted CI, publication and installed CLI activation not performed"
+  ]
+}

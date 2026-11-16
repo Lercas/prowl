@@ -1,0 +1,1416 @@
+{
+  "passed": 303,
+  "checks": [
+    {
+      "case": "200-positiveTrue-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/tristate",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/coverage",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/baseline",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue/coverage",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue/baseline",
+      "passed": true
+    },
+    {
+      "case": "live-gate",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlFalse---min-confidence=0.99",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlFalse---min-severity=critical",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlFalse---disable=aws_access_key_id",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlTrue---min-confidence=0.99",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlTrue---min-severity=critical",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-json-mlTrue---disable=aws_access_key_id",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlFalse---min-confidence=0.99",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlFalse---min-severity=critical",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlFalse---disable=aws_access_key_id",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlTrue---min-confidence=0.99",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlTrue---min-severity=critical",
+      "passed": true
+    },
+    {
+      "case": "live-display-guard-sarif-mlTrue---disable=aws_access_key_id",
+      "passed": true
+    },
+    {
+      "case": "verified-only-verified-json",
+      "passed": true
+    },
+    {
+      "case": "verified-only-verified-sarif",
+      "passed": true
+    },
+    {
+      "case": "verified-only-error-json",
+      "passed": true
+    },
+    {
+      "case": "verified-only-error-sarif",
+      "passed": true
+    },
+    {
+      "case": "verified-only-invalid-json",
+      "passed": true
+    },
+    {
+      "case": "verified-only-invalid-sarif",
+      "passed": true
+    },
+    {
+      "case": "verified-only-unsupported",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-json-json",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-json-json",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-json-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-json-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-json-sarif",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-json-sarif",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-json-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-json-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-yaml-json",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-yaml-json",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-yaml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-yaml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-yaml-sarif",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-yaml-sarif",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-yaml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-yaml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-toml-json",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-toml-json",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-toml-json-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-toml-json-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-toml-sarif",
+      "passed": true
+    },
+    {
+      "case": "structured-prose-private-toml-sarif",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-0-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-0-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-1-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-1-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-toml-sarif-mlFalse",
+      "passed": true
+    },
+    {
+      "case": "long-binding-2-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "long-binding-private-2-toml-sarif-mlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-json-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-json-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-json-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-json-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-sarif-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-sarif-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-sarif-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-json-sarif-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-json-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-json-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-json-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-json-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-sarif-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-sarif-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-sarif-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-yaml-sarif-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-json-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-json-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-json-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-json-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-sarif-beforemlFalse",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-sarif-beforemlFalse-private",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-sarif-beforemlTrue",
+      "passed": true
+    },
+    {
+      "case": "unsafe-literal-toml-sarif-beforemlTrue-private",
+      "passed": true
+    },
+    {
+      "case": "max-size-oversize-json",
+      "passed": true
+    },
+    {
+      "case": "max-size-oversize-sarif",
+      "passed": true
+    },
+    {
+      "case": "max-size-large.txt-json",
+      "passed": true
+    },
+    {
+      "case": "max-size-large.txt-sarif",
+      "passed": true
+    },
+    {
+      "case": "generic-candidate-retained",
+      "passed": true
+    },
+    {
+      "case": "generic-never-submitted",
+      "passed": true
+    },
+    {
+      "case": "generic-redaction",
+      "passed": true
+    }
+  ],
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-verdict-native-h3spqnsd",
+  "binary_sha256": "385c574b69104fc4eea2ac6e21236a50460cf5ee77ca1960fc98ae3f084c9f69",
+  "observations": [
+    {
+      "case": "200-positiveTrue-json-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveTrue-json-mlTrue",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlTrue",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "200-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "401-positiveFalse-json-mlTrue",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlTrue",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "403-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-json-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlTrue",
+      "complete": false,
+      "exit": 2,
+      "status": "error"
+    }
+  ],
+  "legacy_verdict_only": false,
+  "provider": "owned loopback stub only; no live account acceptance",
+  "requests": 75
+}

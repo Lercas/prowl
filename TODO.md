@@ -115,6 +115,16 @@
       проходят; default quality IDs прежние. Строгая отчётность 1.5 сохранена.
       [Контракт](wiki/Verification-Verdicts.md),
       `wiki/evidence/1.5.0-verification-verdicts-20261116.json`.
+    - [x] Восстановлены released report/literal boundaries: LIVE не скрывается
+      display-фильтрами от gate, verified-only оставляет только LIVE и markers,
+      oversize сохраняет max_size, malformed literals — error metadata без probes,
+      contextual passwords внутри structured scalar сохраняют свои spans.
+      Оригинальные 11 tests проходят на пересобранном 1.4.0; текущий native runner
+      — 303/303, full Go/race/min-Go/lint проходят. Default quality IDs и GOROOT
+      digest прежние; performance +15,31% при лимите +20%. Длинные bindings
+      квалифицированы с текущей моделью при штатном 0,3; legacy L2 parity при 0,5
+      не заявляется. [Границы](wiki/Released-Boundaries.md),
+      `wiki/evidence/1.5.0-released-boundaries-20261116.json`.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
     - [x] Producer provenance передаётся в Item/Finding; восстановлены report HMAC
