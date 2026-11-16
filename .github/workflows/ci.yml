@@ -32,6 +32,23 @@ jobs:
           -run 'TestIndex|TestIdentityFiles|TestConcurrentIndex|TestPrivateState|TestIncompleteIndexed|TestAutomaticIndex|TestEmptyCICD'
           -count=1
 
+  docker-action:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: build root action, subdirectory action and nonroot CLI images
+        run: |
+          docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-action-qa:root -f Dockerfile .
+          docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-action-qa:tool -f tool/Dockerfile.action tool
+          docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-action-qa:cli -f tool/Dockerfile tool
+      - name: runtime contracts without network access
+        run: >-
+          python3 scripts/check_action_contract.py
+          --action prowl-action-qa:root --action prowl-action-qa:tool --cli prowl-action-qa:cli
+
   native-precommit:
     runs-on: ubuntu-latest
     timeout-minutes: 15

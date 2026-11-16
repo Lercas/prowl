@@ -1,0 +1,32 @@
+name: Prowl Secret Scan
+description: Secret scanning with completeness diagnostics and SARIF reports.
+author: sugar
+branding:
+  icon: eye
+  color: purple
+inputs:
+  path:
+    description: Path to scan
+    default: '.'
+  format:
+    description: pretty, json or sarif
+    default: sarif
+  fail-on:
+    description: Minimum severity for exit code 1
+    default: high
+  output:
+    description: Report file
+    default: prowl.sarif
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - scan
+    - --strict
+    - --bundled
+    - --reconstruct
+    - --format=${{ inputs.format }}
+    - --fail-on=${{ inputs.fail-on }}
+    - --output=${{ inputs.output }}
+    - --
+    - ${{ inputs.path }}

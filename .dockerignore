@@ -1,0 +1,20 @@
+# GitHub Actions use repository-root build context; only the Go module is needed.
+**
+!tool/
+!tool/**
+.git
+.hook-bin
+**/__pycache__
+**/*.pyc
+**/*.test
+**/*.prof
+tool/prowl
+tool/corpus_*
+tool/carriers*
+tool/.env.prod
+tool/*.test
+tool/*.sarif
+tool/config/
+tool/handlers/
+tool/docs/
+tool/[0-9][0-9]_*

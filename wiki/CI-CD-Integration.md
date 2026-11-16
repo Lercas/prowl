@@ -15,13 +15,13 @@ prowl scan . --fail-on high
 |------|---------|
 | `0` | Clean — no findings, or no finding reached the `--fail-on` level (at or below threshold). Also returned after `--write-baseline`. |
 | `1` | At least one finding is `>= --fail-on` level. |
-| `2` | Error (bad detector/taxonomy load, git error, unreadable output file, bad flag value). |
+| `2` | Ошибка или неполный скан: source/parser/verification/model failure, лимит, Git error, неверный флаг или ошибка записи отчёта. |
 
 Important details from the gate logic:
 
 - **Without `--fail-on`, the scan never returns `1`.** It will report findings but exit `0`. Always set `--fail-on` in CI if you want the build to fail on secrets.
 - The gate compares finding severity against the threshold using the order `info < low < medium < high < critical`. `--fail-on medium` fails on `medium`, `high`, and `critical` findings.
-- `--write-baseline` snapshots findings and exits `0` without gating — it is a "record current state" run, not an enforcement run.
+- `--write-baseline` записывает findings и возвращает `0` только при полном скане. При неполноте возвращается `2`, существующий baseline не заменяется.
 
 ## `--fail-on LEVEL`
 
@@ -85,13 +85,16 @@ Make it executable: `chmod +x .git/hooks/pre-commit`. To check the diff against 
 
 ## CI mode: `-s` / `--silence`
 
-In CI you usually want the exit code to be the only signal. `-s`/`--silence` prints **no output at all** — no report, no summary — so the step's pass/fail is determined entirely by the exit code:
+`-s`/`--silence` скрывает логи и human-readable pretty report. Явный `--format json`
+или `--format sarif` продолжает писать machine-readable отчёт в stdout для CI:
 
 ```sh
 prowl scan . --fail-on high --silence
 ```
 
-Note that `--silence` suppresses stdout reporting but **not** `-o`/`--output`: you can be silent on the console and still write a SARIF/JSON artifact to a file. Related logging flags: `-q`/`--quiet` (warnings+errors only, still prints the report), `-v`/`--verbose` (debug), and `--log-format json` for structured logs you can aggregate.
+`-o`/`--output` также сохраняет отчёт при `--silence`. Другие logging flags:
+`-q`/`--quiet` — только ошибки, отчёт сохраняется; `-v`/`--verbose` — debug;
+`--log-format json` — структурированные логи.
 
 ## Каталог pre-commit для 1.5.0
 
@@ -109,8 +112,9 @@ checkout хука, затем исполняет его из исходного 
 
 Docker hook закреплён на `ghcr.io/lercas/prowl:v1.5.0`; для него нужен Docker,
 без локального Go. Этот тег требует отдельной публикации. Квалификация итогового
-Docker-образа пока не завершена из-за read-only storage Docker Desktop;
-нативные проверки не доказывают работоспособность этого артефакта.
+публикуемого Docker-тега ещё не завершена. Локальные CLI/action кандидаты
+проверены на Linux/arm64 и Linux/amd64 под эмуляцией; это не публикация
+`ghcr.io/lercas/prowl:v1.5.0` и не проверка hosted runner.
 
 После публикации релиза конфигурация потребителя выглядит так:
 
@@ -166,6 +170,51 @@ jobs:
 ```
 
 For GitLab, write SARIF to a path declared as a `sast` report artifact in your `.gitlab-ci.yml` (`artifacts:reports:sast: prowl.sarif`) and gate the job with `--fail-on`.
+
+## Docker Action: контракт 1.5.0
+
+Корневой `action.yml` позволяет использовать репозиторий как Docker Action;
+`tool/action.yml` сохраняет вариант из подкаталога. Оба включают `--strict`,
+`--bundled` и `--reconstruct`, принимают `path`, `format`, `fail-on` и `output`.
+Входы передаются отдельными аргументами без shell interpolation. Путь передаётся
+после `--`, поэтому имя вроде `--show-secrets` не превращается в параметр scanner.
+Остальные значения используют `--flag=VALUE`. Значения по
+умолчанию: `.`, `sarif`, `high` и `prowl.sarif`.
+
+Action-образ содержит Git и entrypoint, который при запуске от root переключается
+на UID/GID владельца `/github/workspace`. SARIF остаётся приватным (`0600`),
+но доступен последующим шагам runner. Явный `--user` сохраняется. Пустой Git index
+и partial staging обрабатываются обычным intake: сканируется staged blob,
+а не текущая версия файла в рабочей директории.
+
+Обычный образ из `tool/Dockerfile` содержит Git, доверяет только точному пути
+`/src` и запускается как `65532:65532`. Для записи отчёта в bind mount укажите
+UID/GID владельца каталога через Docker `--user`. Это Git-enabled Debian runtime;
+он больше прежнего distroless-образа. Бинарник по-прежнему собирается с `CGO_ENABLED=0`,
+встроенный L2 работает без системной zlib.
+
+В CI три локальных образа собираются и проверяются без доступа контейнеров к сети:
+
+```sh
+docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-qa:root -f Dockerfile .
+docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-qa:tool -f tool/Dockerfile.action tool
+docker build --platform linux/amd64 --build-arg TARGETARCH=amd64 -t prowl-qa:cli -f tool/Dockerfile tool
+python3 scripts/check_action_contract.py --action prowl-qa:root --action prowl-qa:tool --cli prowl-qa:cli
+```
+
+Для arm64 замените `TARGETARCH` на `arm64` и выберите соответствующую платформу
+Docker. Скрипт сохраняет синтетические fixtures, отчёты и остановленные именованные
+контейнеры для разбора; автоматической очистки нет. Проверяются аргументы Action,
+static ML smoke, redaction, gate, reconstruction, владелец/права SARIF, staged index
+и отказ обновлять baseline при неполноте. Это локальная квалификация;
+публикация Action и запуск на GitHub runner — отдельные действия.
+
+Квалификация 2026-11-16: 48/48 на native Linux/arm64 и 48/48 на Linux/amd64
+под эмуляцией Docker Desktop. Проверены также literal flag-shaped path,
+исторический Git blob с ML и соответствие owner/mode `0600`. Старый layout
+позволял `inputs.path=--show-secrets` включить disclosure; регрессия воспроизведена
+на синтетическом значении и закрыта для обоих Action descriptors.
+Evidence — `evidence/1.5.0-docker-action-20261116.json`.
 
 ## Scanning remote sources in CI
 
