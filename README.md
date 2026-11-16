@@ -305,7 +305,9 @@ you want them upstreamed).
 - **L2, optional ML filter.** `--ml` scores L1/rule candidates with the embedded
   `HistGradientBoosting` model over 51 value/context features; `--ml-url` delegates the same scoring
   contract to a sidecar. Checksum-confirmed findings and structural JWT candidates are exempt from
-  ML suppression; JWT signatures are not authenticated. L2 does not generate new candidates.
+  ML suppression; JWT signatures are not authenticated. Narrowly established direct credential
+  bindings also retain nominations, as described in [the retention contract](wiki/Released-ML-Evidence.md).
+  L2 does not generate new candidates.
 - **Optional live verification.** `--verify` runs after detection/filtering and checks supported
   credentials using provider templates, producing live/dead/inconclusive state.
 

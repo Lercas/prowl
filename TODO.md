@@ -134,11 +134,16 @@
       lint и native 232/232 проходят; quality IDs прежние: 1560/2094, FP 57/982.
       [Границы](wiki/Released-Noise-and-Context.md),
       `wiki/evidence/1.5.0-released-context-20261116.json`.
-    - [ ] Отдельно квалифицировать L2 на released noise positives: настоящая новая
-      модель сохраняет 201/308; 107 кандидатов отсекаются. Среди 334 negatives
-      находок нет; 2 ambiguous не считаются доказанными секретами. Nomination
-      fixtures с recording scorer не закрывают этот пункт. Общий quality gate
-      проходит, но не доказывает паритет с прежней моделью на каждом примере.
+    - [x] Квалифицирован каскад с настоящей L2 на released noise positives:
+      308/308 и ноль находок на 334 negatives; 2 ambiguous остаются кандидатами.
+      Восстановлено удержание по фактическому binding, а не по чужому ML-контексту;
+      guesses и новые короткие значения проходят прежний отсев. Численные scores
+      и веса модели не менялись; 107 low-score nominations сохраняются отдельно.
+      CLI 656/656 (включая JSON/SARIF при threshold 1), encoded 232/232,
+      verification-order 48/48, cross-file 310/310, decoded 228/228; full Go,
+      race, min-Go и lint проходят. Quality 1661/2094 (+101 без потерь), FP 61/982
+      (+4, в сохранённом допуске). [Контракт](wiki/Released-ML-Evidence.md),
+      `wiki/evidence/1.5.0-ml-evidence-20261116.json`.
     - [x] Восстановлены released suppression/encoded boundaries: allow-маркер только
       в operator comment, JWT structure без checksum/authenticity claim, child proof
       сохраняет parent nomination без повышения reported confidence, CRC-факт

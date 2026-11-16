@@ -1,0 +1,358 @@
+{
+  "schema_version": "prowl-released-ml-evidence-v1",
+  "date": "2026-11-16",
+  "status": "local_cascade_credential_retention_qualified",
+  "source_base": "81143e8d2aaa463a0d7c8ba0db6eb1b9665e3204",
+  "qualified_runtime_commit": "bea3d5d8c1cce4a2f33bc945cf4cbb40eb88699a",
+  "binary": {
+    "path": "/tmp/prowl-ml-evidence-qualified-20261116-bin",
+    "sha256": "58669174f8da11fd99248556a19d062c155c7d870026bbc1f63e6e34da809fce"
+  },
+  "buildinfo": "/tmp/prowl-ml-evidence-qualified-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bea3d5d8c1cce4a2f33bc945cf4cbb40eb88699a\n\tbuild\tvcs.time=2026-11-16T04:29:50Z\n\tbuild\tvcs.modified=false\n",
+  "logs": {
+    "go": {
+      "path": "/tmp/prowl-ml-evidence-qualified-go-20261116.log",
+      "sha256": "5293bf2ecdd6063e232c3c3b0ab6741d9466381b421b0091344595001901922e"
+    },
+    "race": {
+      "path": "/tmp/prowl-ml-evidence-qualified-race-20261116.log",
+      "sha256": "95e05f874e9726302ea7f90baa3c65dc83eeb91a9d07367ad58e084369e0b390"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-ml-evidence-qualified-min-go-20261116.log",
+      "sha256": "b85a3206cf8d357d5f6a106f72c0359066c03bf43e98c7c13822512b20a748f0"
+    },
+    "lint": {
+      "path": "/tmp/prowl-ml-evidence-qualified-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "vectors": {
+      "path": "/tmp/prowl-ml-evidence-qualified-vectors-20261116.log",
+      "sha256": "4674b1f1f320c2e1663dcefacaababc0b483615f00d05f9fe69e455df7ce2ba1"
+    }
+  },
+  "native": {
+    "noise": {
+      "passed": 656,
+      "receipt": {
+        "path": "/tmp/prowl-ml-evidence-qualified-noise-native-20261116.log",
+        "sha256": "773a140ee0bd7a8ec0f752206dc21d164c2eb6ac4b33c53ff68d1880547dbc49"
+      },
+      "source": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-noise-ml-_kz5su4m/qualification.json",
+        "sha256": "9f8115b762cbb9ec26ffd62eaebd209a9d4bc805309f9ac44f972f77ba2f9782"
+      }
+    },
+    "encoded": {
+      "passed": 232,
+      "receipt": {
+        "path": "/tmp/prowl-ml-evidence-qualified-native-20261116.log",
+        "sha256": "5ed07a5aad945582bfcb8b3aa6c15b01c3fc86c3889d3f408c164f6b5821a250"
+      },
+      "source": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-released-encoded-dp9yqflc/qualification.json",
+        "sha256": "4a2941098e5398e03188e1e5c077708931824421b2ce881096d202cc71a86e3f"
+      }
+    },
+    "order": {
+      "passed": 48,
+      "receipt": {
+        "path": "/tmp/prowl-ml-evidence-order-20261116.log",
+        "sha256": "b1fe30c103bb3b02583899d645fced484fe04c28931a93a0bfe8e959792c1871"
+      },
+      "source": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-verification-order-joztwjsr/qualification.json",
+        "sha256": "bd03f43b4f93bc263fc62b38561fe318ba6a39606c6b33dc0e1c4a3fdb237151"
+      }
+    },
+    "cross-file": {
+      "passed": 310,
+      "receipt": {
+        "path": "/tmp/prowl-ml-evidence-cross-file-20261116.log",
+        "sha256": "3925dd3752eaed8fb9ffcbc42f052f1f01dd7e890ab7fe5042aedf4af49b822f"
+      },
+      "source": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cross-file-native-p19d5pw4/evidence.json",
+        "sha256": "ca5227a101e4d13373380a1b1baf56dddf7993c44eb716eb59658d26e7a26725"
+      }
+    },
+    "decoded": {
+      "passed": 228,
+      "receipt": {
+        "path": "/tmp/prowl-ml-evidence-decoded-20261116.log",
+        "sha256": "54a53edcd43966b68f825167ac62c94ec49f92e919e06a0175adb315d94a34da"
+      },
+      "source": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-decoded-verification-gem58q1z/qualification.json",
+        "sha256": "4ea5f1ef1d8976f6a0a708d7110eac8b28450af1c86acc59bfc06ad3138edc2d"
+      }
+    }
+  },
+  "model": {
+    "path": "tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "installed_legacy_model_unchanged": {
+    "path": "/Users/sugar/.prowl/model_binary.json",
+    "sha256": "9632db1fd09dd0dbf3ad7858f40c877c1e0aeb0191d7865707960c5e550a4a25"
+  },
+  "numeric_model_scores_unchanged": true,
+  "vectors_before": {
+    "path": "/tmp/prowl-noise-model-vectors-20261116.json",
+    "sha256": "e9a46bd45ae1c7829d6c1dc8a6f726bfb8f78b35b3771aa38fe75192ce8e71e3"
+  },
+  "vectors_after": {
+    "path": "/tmp/prowl-ml-evidence-qualified-vectors-20261116.json",
+    "sha256": "758885d17f8b7b4c1f3ef784daa1a2c69a321aa7149ff5d17bf332a5138b3b5c"
+  },
+  "positive_cases": 308,
+  "positive_retained_before": 201,
+  "positive_retained_after": 308,
+  "negative_cases": 334,
+  "negative_findings": 0,
+  "ambiguous_cases": 2,
+  "additional_retention_ids": [
+    "140014_deepgram.env",
+    "140014_deepgram.js",
+    "140014_together.env",
+    "140014_together.json",
+    "140014_together.js",
+    "140014_linode.env",
+    "140014_linode.json",
+    "140014_linode.js",
+    "140014_twitch.js",
+    "140014_positive_weakword.env",
+    "140014_positive_hex.env",
+    "140014_positive_hash_prefix_password.env",
+    "140014_positive_argon_prefix_password.env",
+    "741913_deepgram.env",
+    "741913_deepgram.js",
+    "741913_together.env",
+    "741913_together.json",
+    "741913_together.js",
+    "741913_linode.env",
+    "741913_linode.json",
+    "741913_linode.js",
+    "741913_positive_weakword.env",
+    "741913_positive_hex.env",
+    "741913_positive_hash_prefix_password.env",
+    "741913_positive_argon_prefix_password.env",
+    "260210_password_2_py",
+    "260210_password_5_env",
+    "260210_password_5_py",
+    "260210_password_7_env",
+    "260210_password_7_yaml",
+    "260210_password_7_py",
+    "260210_password_8_env",
+    "260210_password_8_yaml",
+    "260210_password_8_py",
+    "260210_password_9_env",
+    "260210_password_9_yaml",
+    "260210_password_9_py",
+    "260210_password_10_env",
+    "260210_password_10_yaml",
+    "260210_password_10_py",
+    "260210_password_11_env",
+    "260210_password_11_py",
+    "260210_password_12_env",
+    "260210_password_12_yaml",
+    "260210_password_12_py",
+    "260210_password_14_env",
+    "260210_password_14_py",
+    "260210_hex_40_token",
+    "260210_hex_40_credential",
+    "260210_hex_40_private_key",
+    "260210_hex_40_api_key",
+    "260210_hex_56_token",
+    "260210_hex_56_credential",
+    "260210_hex_56_private_key",
+    "260210_hex_56_api_key",
+    "260210_hex_64_token",
+    "260210_hex_64_credential",
+    "260210_hex_64_private_key",
+    "260210_hex_64_api_key",
+    "260210_hex_96_token",
+    "260210_hex_96_credential",
+    "260210_hex_96_private_key",
+    "260210_hex_96_api_key",
+    "260210_hex_128_token",
+    "912741_password_2_py",
+    "912741_password_5_env",
+    "912741_password_5_py",
+    "912741_password_7_env",
+    "912741_password_7_yaml",
+    "912741_password_7_py",
+    "912741_password_8_env",
+    "912741_password_8_yaml",
+    "912741_password_8_py",
+    "912741_password_9_env",
+    "912741_password_9_yaml",
+    "912741_password_9_py",
+    "912741_password_10_env",
+    "912741_password_10_yaml",
+    "912741_password_10_py",
+    "912741_password_11_env",
+    "912741_password_11_py",
+    "912741_password_12_env",
+    "912741_password_12_yaml",
+    "912741_password_12_py",
+    "912741_password_14_env",
+    "912741_password_14_yaml",
+    "912741_password_14_py",
+    "912741_hex_40_token",
+    "912741_hex_40_credential",
+    "912741_hex_40_private_key",
+    "912741_hex_40_api_key",
+    "912741_hex_56_token",
+    "912741_hex_56_credential",
+    "912741_hex_56_private_key",
+    "912741_hex_56_api_key",
+    "912741_hex_64_token",
+    "912741_hex_64_credential",
+    "912741_hex_64_private_key",
+    "912741_hex_64_api_key",
+    "912741_hex_96_token",
+    "912741_hex_96_credential",
+    "912741_hex_96_private_key",
+    "912741_hex_96_api_key",
+    "912741_hex_128_token",
+    "912741_hex_128_credential",
+    "912741_hex_128_private_key",
+    "912741_hex_128_api_key"
+  ],
+  "quality": {
+    "passed": true,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "false_positive_hits": 61,
+    "hard_negatives": 982,
+    "gained_positive_ids": [
+      "pb-00080",
+      "pb-00392",
+      "pb-00712",
+      "pb-00840",
+      "pb-01056",
+      "pb-01776",
+      "pb-01936",
+      "pb-02064",
+      "pb-02216",
+      "pb-02392",
+      "pb-02480",
+      "pb-03064",
+      "pb-03760",
+      "pb-03824",
+      "pb-03864",
+      "pb-04016",
+      "pb-04704",
+      "pb-04760",
+      "pb-04784",
+      "pb-04848",
+      "pb-05152",
+      "pb-05304",
+      "pb-05336",
+      "pb-05520",
+      "pb-05560",
+      "pb-05688",
+      "pb-06368",
+      "pb-06384",
+      "pb-06480",
+      "pb-06488",
+      "pb-07032",
+      "pb-07144",
+      "pb-07264",
+      "pb-07632",
+      "pb-07720",
+      "pb-08056",
+      "pb-08104",
+      "pb-08216",
+      "pb-08408",
+      "pb-08752",
+      "pb-08776",
+      "pb-09040",
+      "pb-09144",
+      "pb-09344",
+      "pb-09656",
+      "pb-09712",
+      "pb-10048",
+      "pb-10592",
+      "pb-10688",
+      "pb-10904",
+      "pb-11056",
+      "pb-11184",
+      "pb-11216",
+      "pb-11712",
+      "pb-11848",
+      "pb-11952",
+      "pb-12400",
+      "pb-13648",
+      "pb-13920",
+      "pb-14096",
+      "pb-14376",
+      "pb-14384",
+      "pb-14424",
+      "pb-14640",
+      "pb-14864",
+      "pb-14872",
+      "pb-15432",
+      "pb-15840",
+      "pb-15856",
+      "pb-15896",
+      "pb-16008",
+      "pb-16016",
+      "pb-16472",
+      "pb-16696",
+      "pb-16792",
+      "pb-16856",
+      "pb-17496",
+      "pb-17664",
+      "pb-17736",
+      "pb-18032",
+      "pb-18384",
+      "pb-18896",
+      "pb-20264",
+      "pb-20472",
+      "pb-20584",
+      "pb-21104",
+      "pb-21168",
+      "pb-22408",
+      "pb-22432",
+      "pb-22624",
+      "pb-22784",
+      "pb-22808",
+      "pb-22944",
+      "pb-23112",
+      "pb-23736",
+      "pb-23864",
+      "pb-23984",
+      "pb-24008",
+      "pb-24312",
+      "pb-24360",
+      "pb-cur-0084"
+    ],
+    "lost_positive_ids": [],
+    "additional_false_positive_ids": [
+      "pb-03856",
+      "pb-05784",
+      "pb-10408",
+      "pb-19952"
+    ],
+    "baseline_unchanged": true
+  },
+  "privacy": {
+    "direct_binding_json": "excluded by json:-",
+    "numeric_audit": "no values, lines or binding names"
+  },
+  "retention_policy": "1.5.0-released-ml-evidence-v1",
+  "validation_scope": {
+    "full_go": "all tool packages",
+    "race": "scan and mlscore",
+    "minimum_go": "1.26.11 scan and mlscore",
+    "lint": "2.15.0, zero issues",
+    "network_boundary": "noise, encoded and quality under sandbox-exec deny network*; verification matrices use owned loopback stubs"
+  },
+  "limits": [
+    "Cascade retention is not equality of legacy/new model predictions",
+    "No new performance measurement; changed paths require ML or explicit disclosure",
+    "No hosted CI, live provider/account acceptance, publication, deployment or installed model replacement"
+  ]
+}
