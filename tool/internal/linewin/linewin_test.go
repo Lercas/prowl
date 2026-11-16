@@ -145,7 +145,9 @@ func TestWindowedEqualsWholeTextRandom(t *testing.T) {
 	}
 	r := rand.New(rand.NewSource(1))
 	iters := 200000
-	if testing.Short() {
+	// The equivalence check is single-goroutine; the race detector adds ~20x
+	// cost without extra coverage, so race runs use the short budget.
+	if testing.Short() || raceEnabled {
 		iters = 20000
 	}
 	for i := 0; i < iters; i++ {
