@@ -1,0 +1,19 @@
+{
+  "schema": "prowl-release-evidence/1",
+  "date": "2026-11-16",
+  "release": "v1.5.0",
+  "commit": "8076302",
+  "tags": ["v1.5.0", "tool/v1.5.0"],
+  "ci_run": {"workflow": "ci", "head": "6868613", "conclusion": "success", "note": "8076302 differs only in scripts/release/sign_image.sh and release.yml timeouts"},
+  "release_run": {"id": 43967947037, "jobs": {"qualify": "success", "binaries": "success", "docker": "success", "publish": "success"}},
+  "assets": 19,
+  "image": {"ref": "ghcr.io/lercas/prowl:v1.5.0", "latest_digest_equals_version": true, "digest": "sha256:fc7be55797ccc388bc9ea8b2169cdc979dac0c725402d01a49c0e4bbb4fff825"},
+  "homebrew_tap_commit": "58936d5 chore: update prowl to v1.5.0",
+  "post_publication_check": "darwin/arm64 archive downloaded from the release: checksum OK, version 1.5.0, selftest --ml OK and ML scan finds aws_access_key_id + aws_secret_access_key with a fresh PROWL_HOME; IBAN-like word scan exits 0",
+  "incidents": [
+    "First tag on 6868613: docker signing step never completed although sign_image.sh had finished; cause reproduced on a runner: cosign verify-attestation printed each multi-megabyte SPDX attestation as one log line. Fixed in 8076302; the unpublished draft and both tags were recreated on 8076302 after confirming via index.golang.org that tool/v1.5.0 was not cached by the Go proxy."
+  ],
+  "known_limits": [
+    "A model_binary.json installed by an earlier version under PROWL_HOME blocks --ml; scan prints a move-away hint, selftest --ml prints only the feature-count error."
+  ]
+}
