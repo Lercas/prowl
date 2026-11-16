@@ -1,0 +1,193 @@
+{
+  "recorded_at": "2026-11-16T11:26:59.960322+00:00",
+  "scope": "Local opt-in literal Algolia Android resources XML and root-dictionary plist; broader 1.5.0 migration remains active.",
+  "runtime_source_commit": "b0a7670f97d53a9db9faf8a71c243cc9e34c4058",
+  "runtime_tool_tree": "cca4d4d6c8abe9d7bbaed85e86b34b1838787c7f",
+  "binary": {
+    "path": "/tmp/prowl-algolia-xml-qualified-20261116-bin",
+    "sha256": "10d684bd9067d311c995147a145c26b2dffd9a3100e12970cecbb6fc0fc2671e"
+  },
+  "audit_revision": "public-acl-v6-algolia-xml",
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-algolia-xml-go-20261116.log",
+      "sha256": "f9a24d4c231755ae7ff3f509aebce9a327b6f0f64137e7aef63bbee6ffa828b2"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-algolia-xml-targeted-20261116.log",
+      "sha256": "3118da5d4a6854c9f3d194b641d0e1825110add2edf4dd9020c3c4eb6338f2cf"
+    },
+    "race": {
+      "path": "/tmp/prowl-algolia-xml-race-20261116.log",
+      "sha256": "7b6245c19a68216ec529df46b1a773e904171bab5f1c024d665eafbf2a1ae6f2"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-algolia-xml-min-go-20261116.log",
+      "sha256": "9ed43db4f2a8fb075b81f0e57c6e4f4fb24e7baedfe6c6c35364cb3f94f18480"
+    },
+    "lint": {
+      "path": "/tmp/prowl-algolia-xml-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "fuzz": {
+      "path": "/tmp/prowl-algolia-xml-fuzz-20261116.log",
+      "sha256": "8b16182653293dc024c1ae6833416aeaeca17c2c0f8b23fd930d786faee98400"
+    },
+    "native": {
+      "path": "/tmp/prowl-algolia-xml-native-qualified-20261116.log",
+      "sha256": "15b869cb75523be938a258d4f8296be313de8c657ac8e0d071cce3abe3751b1b"
+    },
+    "default_corpus": {
+      "path": "/tmp/prowl-algolia-xml-corpus-20261116.log",
+      "sha256": "219fa1f5922c19e28539c72704853028cb62b1052f1c9765d84f2aca0393ea27"
+    },
+    "build_metadata": {
+      "path": "/tmp/prowl-algolia-xml-build-info-20261116.log",
+      "sha256": "1dabc58a1b9e02da1fd5e6c43a94d266aa21656e89fb3ab902dc77ead801eb8e"
+    }
+  },
+  "native": {
+    "report": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-algolia-xml-native-ypjym4vv/evidence.json",
+      "sha256": "906a2a2a530f7821adf997550d08e2cdf7002fdcc38976e35930a9420cbf4b3c"
+    },
+    "passed": 463,
+    "total": 463,
+    "runner": {
+      "path": "/tmp/prowl-algolia-xml-20261116/scripts/check_algolia_xml_native.py",
+      "sha256": "bd81892f87d5934336f8e70172182a3338c11910b61b5367a9049f7c1ebe5225"
+    },
+    "os_network_deny": "sandbox-exec deny network*, loopback bind explicitly rejected",
+    "formats": [
+      "json",
+      "sarif"
+    ],
+    "ml": [
+      false,
+      true
+    ],
+    "checks": [
+      "literal/entities/CDATA/split comments",
+      "missing/duplicate app binding",
+      "malformed XML and Android reference incomplete",
+      "exit 2 and baseline sentinel preserved",
+      "redaction",
+      "audit versus liveness separation",
+      "ordinary scan unchanged",
+      "configuration disable before audit",
+      "CLI disable retains report-filter semantics"
+    ]
+  },
+  "owned_http": {
+    "test": "tool/internal/publicaudit/algolia_xml_pipeline_test.go",
+    "cases": 22,
+    "outcomes": [
+      "search_only",
+      "excess_permissions",
+      "inconclusive without transport"
+    ],
+    "request": "fixed HTTPS Algolia authority, GET self key ACL, no request body; test-only transport rewrites to owned loopback fixture",
+    "real_provider": false
+  },
+  "quality": {
+    "report": {
+      "path": "/tmp/prowl-algolia-xml-quality-20261116.json",
+      "sha256": "0d3b4c0534b4ece66539d49c872eca9b738dc3e24511cf55f11511269e5e7d2c"
+    },
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "false_positives": 61,
+    "hard_negatives": 982,
+    "all_keys_except_binary_sha_identical_to": {
+      "path": "/tmp/prowl-component-timeline-qualified-quality-20261116.json",
+      "sha256": "ca60301592d3f213bad99bd024937548bd3ac31e9dbd6bab9d85ee2594c0bf05"
+    }
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "model": {
+    "path": "/tmp/prowl-algolia-xml-20261116/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-algolia-xml-cross-build-20261116/builds.json",
+      "sha256": "b323f704bdf92b61bc6164f5510ca401a4c46573c8bb9627943d726859e2f69a"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "e88cefaf13f57ff62129612a0a92876fef2dc0090cc1bafbea1a049afc98efd9",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "10d684bd9067d311c995147a145c26b2dffd9a3100e12970cecbb6fc0fc2671e",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "8e8551687a923005278b72713d811dfbdfa8b5131a8264d9aad670824398acd9",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "f996ddac2d00bfb0ce5f7225ab5e3b46d44ef5d43ae60f79d5d254ba472d39b3",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "07e5cd17a4108b0780eb605c1b10c99c8beefad3b2c171b50c0d5b42c5a7a30d",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-algolia-xml-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "ccfb60cc4713c5ac0c0b1baad8ea373099b7d14a6696b3b990d41ff51d948ca2",
+        "executed": false
+      }
+    ],
+    "native_arm64_sha_matches": true,
+    "foreign_execution": false
+  },
+  "fuzz": {
+    "target": "FuzzAlgoliaXMLBindings",
+    "duration_requested_seconds": 10,
+    "executions": 159990,
+    "crash": false
+  },
+  "qualification_correction": {
+    "initial_native_log": {
+      "path": "/tmp/prowl-algolia-xml-native-20261116.log",
+      "sha256": "dee6a511a89cbac958e94191894218b52ab6b22c65cf5d520c313074cbc22cc0"
+    },
+    "reason": "Initial runner incorrectly assumed CLI --disable removes pre-audit candidates. Existing code defines it as a report filter. Corrected runner separately qualifies configuration disable and preserved CLI incomplete coverage; no runtime workaround."
+  },
+  "limitations": [
+    "No production or real-account provider probes.",
+    "No exact distinction of built-in admin versus broad custom ACL.",
+    "No TypeScript/JSX-specific, binary XML/plist, dex, Android references/imports/overlays or cross-file Algolia bindings.",
+    "Foreign builds compile only; no Windows/Linux runtime qualification for this source.",
+    "No final-source Docker images, signatures, publication, installation or hosted CI qualification.",
+    "No new paired performance run: change is opt-in; default digest and all quality result keys are unchanged.",
+    "Full Go/race/minimum-Go/lint ran on the same Go source; native runner contract correction and docs followed without Go changes."
+  ],
+  "passed": true
+}

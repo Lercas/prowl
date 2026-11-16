@@ -14,6 +14,7 @@ import (
 type ruleCandidate struct {
 	rules.Hit
 	payload *jwtRuleContext
+	xmlName string
 }
 
 type jwtRuleContext struct {
@@ -23,6 +24,11 @@ type jwtRuleContext struct {
 }
 
 func (h ruleCandidate) record(it model.Item, outer *literalDocument) mlscore.Record {
+	if h.xmlName != "" {
+		record := recordFor(h.Value, it, h.Start)
+		record.Context.Name, record.DirectBinding = h.xmlName, h.xmlName
+		return record
+	}
 	if h.payload != nil {
 		it.Text = h.payload.view.Text
 		if doc := h.payload.doc; doc != nil {
@@ -50,9 +56,13 @@ func (p *Pipeline) ruleCandidates(ctx context.Context, it model.Item, views []de
 	if p.options.ValueFingerprint != nil || p.options.AllOccurrences {
 		match = engine.MatchOccurrencesN
 	}
-	hits, limited := match(it.Text, limit)
-	work := len(hits)
-	out := make([]ruleCandidate, 0, len(hits))
+	out, limited := p.algoliaXMLCandidates(ctx, limit)
+	if len(out) >= limit {
+		return out, true
+	}
+	hits, rawLimited := match(it.Text, limit-len(out))
+	limited = limited || rawLimited
+	work := len(out) + len(hits)
 	for _, hit := range hits {
 		out = append(out, ruleCandidate{Hit: hit})
 	}

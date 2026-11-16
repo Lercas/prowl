@@ -52,7 +52,7 @@ func firebaseXMLDoctype(d string) bool {
 	return false
 }
 
-func parseFirebaseXML(ctx context.Context, text, kind string) *firebaseXMLBindings {
+func parsePublicXMLRoot(ctx context.Context, text, kind string) *firebaseXMLNode {
 	if len(text) > maxFirebaseXMLBytes || !utf8.ValidString(text) || ctx.Err() != nil {
 		return nil
 	}
@@ -123,6 +123,14 @@ func parseFirebaseXML(ctx context.Context, text, kind string) *firebaseXMLBindin
 		}
 	}
 	if root == nil || len(stack) != 0 {
+		return nil
+	}
+	return root
+}
+
+func parseFirebaseXML(ctx context.Context, text, kind string) *firebaseXMLBindings {
+	root := parsePublicXMLRoot(ctx, text, kind)
+	if root == nil {
 		return nil
 	}
 	if kind == "plist" {

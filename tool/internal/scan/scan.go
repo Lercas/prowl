@@ -349,7 +349,7 @@ func (p *Pipeline) Findings(ctx context.Context, it model.Item) (result []model.
 	coverage := model.NewCoverage()
 	options := p.options
 	localOptions := false
-	if options.PublicAuditor != nil && (reconstructable(it) || firebaseXMLKind(it.Path) != "") && it.Error == nil {
+	if options.PublicAuditor != nil && (reconstructable(it) || publicXMLKind(it.Path) != "") && it.Error == nil {
 		options.publicBindings = &publicBindings{text: it.Text, path: it.Path}
 		localOptions = true
 	}
@@ -662,6 +662,9 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		if p.options.ValueFingerprint != nil {
 			for _, h := range hits {
 				indexValues = append(indexValues, h.Value)
+				if h.xmlName != "" {
+					indexValues = append(indexValues, it.Text[h.Start:h.End])
+				}
 			}
 		}
 		for i, h := range hits {
@@ -717,6 +720,10 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 				MobileEntry: it.MobileEntry,
 				Context:     p.revealContext(it, h.Start),
 			}
+			if h.xmlName != "" {
+				f.Stage = "rule/xml-literal"
+				f.Evidence = append(f.Evidence, model.Evidence{Path: model.SafeLocator(it.Path), Start: h.Start, End: h.End, Line: line, Col: col, Transform: "xml-string"})
+			}
 			if h.payload != nil {
 				f.Stage, f.Context = "rule/jwt-payload", nil
 				for _, step := range h.payload.view.DecodeSteps() {
@@ -729,7 +736,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			// generic builtin but YIELDS to an earlier template, a stronger finding, or a checksum-proven
 			// builtin — a cryptographic L1-checksum hit must never be rewritten by a template's self-declared severity.
 			if collided {
-				if prev := out[idx]; prev.Stage == "rule" || prev.Stage == "rule/jwt-payload" || isChecksumProven(prev) || stronger(prev, f) || eng.Bundled() && !taxonomy.GenericLast[prev.Type] {
+				if prev := out[idx]; prev.Stage == "rule" || prev.Stage == "rule/jwt-payload" || prev.Stage == "rule/xml-literal" || isChecksumProven(prev) || stronger(prev, f) || eng.Bundled() && !taxonomy.GenericLast[prev.Type] {
 					continue
 				}
 				out[idx] = f

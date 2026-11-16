@@ -679,7 +679,15 @@
       `wiki/evidence/1.5.0-public-js-bindings-20261115.json`.
       Обычный scan без opt-in не меняется. Установленная локальная модель с 49
       признаками не заменялась; квалификация использует явную модель с 51.
-    - [ ] Специфичный TypeScript/JSX, XML/plist/dex и другие связи;
+    - [x] Literal Android resources XML и root-dict plist: общий bounded XML-parser
+      с Firebase, исходные spans, XML entities/CDATA, выбранное Algolia-правило
+      и порядок ML → audit. Дубли, чужие/неизвестные ID и unsupported bindings
+      не разрешают HTTP. Owned HTTP проверяет search-only/wide ACL; native APK/IPA
+      JSON/SARIF ±ML под OS network deny — 463/463. Full Go/race/min-Go/lint,
+      159 990 fuzz-входов, прежние quality counts и default corpus digest;
+      `wiki/evidence/1.5.0-algolia-xml-20261116.json`. `detectors.disable` выключает
+      правило до audit; CLI `--disable` сохраняется как report filter.
+    - [ ] Специфичный TypeScript/JSX, binary XML/plist/dex и другие связи;
       точное отличие встроенного admin от широкого custom ACL.
   - [ ] Только read-only пробы; под тем же `--authorized`, что и `domain`.
 - [ ] **Сборка составных учётных данных из разных файлов.** Связывать части, найденные в разных
