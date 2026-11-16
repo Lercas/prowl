@@ -66,7 +66,7 @@ func restoreDetectDefaults() { detect.ApplyTuning(3.5, 4.2, 50000) }
 
 // genericSecretLine holds a generic high-entropy value (~5.0) flagged at the default
 // generic_entropy_min (3.5) and suppressed once the threshold is raised above its entropy.
-const genericSecretLine = `token: "ghp_aB3dEf7Gh1Jk5Lm9Np2Qr6St0Uv4Wx8Yz1234"`
+const genericSecretLine = `The secret is "Kp9aZ2bYwcX4dWqeV8fUmgThS6iRnjQ7sL"`
 
 // drainPublishes reads every framed message from buf and returns the count of publishDiagnostics
 // frames plus the params of the last one.
@@ -196,6 +196,11 @@ func TestConfigTuningHonoredInLSP(t *testing.T) {
 	base := scanDiagnostics(e, uri, genericSecretLine)
 	if len(base) == 0 {
 		t.Fatalf("setup: expected the generic high-entropy value to be flagged at the default threshold, got 0 diagnostics")
+	}
+	for _, diagnostic := range base {
+		if !strings.Contains(diagnostic["message"].(string), "possible secret: generic_high_entropy (") {
+			t.Fatal("entropy tuning fixture was captured by a different detector")
+		}
 	}
 
 	// Raise generic_entropy_min to 7.5 (as applyTuning would); the value's entropy (~5.0) is now below

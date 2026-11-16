@@ -292,7 +292,7 @@ func TestLockfileKeepsCredentialGeneric(t *testing.T) {
 }
 
 // TestChecksumBuiltinSurvivesTemplate guards the fix that a checksum-proven builtin (Stage
-// L1-checksum — cryptographic proof) is NEVER superseded by a colliding template, however high the
+// L1-checksum — best-effort format validation) is NEVER superseded by a colliding template, however high the
 // template's self-declared severity. A non-checksum generic builtin is still superseded by a
 // specific template, so the legit precision case keeps working.
 func TestChecksumBuiltinSurvivesTemplate(t *testing.T) {

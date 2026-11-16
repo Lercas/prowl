@@ -5,20 +5,25 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 func TestYAMLCanonicalMultilineAndAnchoredPasswords(t *testing.T) {
-	eng, err := rules.Load("../../rules")
+	eng, err := rules.LoadEmbedded(bundledrules.Files)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ml := &tableRecordScorer{}
+	ml, err := mlscore.NewEmbedded(.3, filepath.Join("..", "mlmodel", "model_binary_go_literal_v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, c := range []struct{ text, value, source string }{
 		{"password: |-\n  Winter42!Autumn\n  Spring53\n", "Winter42!Autumn\nSpring53", "Winter42!Autumn\n  Spring53"},
 		{"password: >-\n  Winter42!Autumn\n  Spring53\n", "Winter42!Autumn Spring53", "Winter42!Autumn\n  Spring53"},
@@ -32,15 +37,19 @@ func TestYAMLCanonicalMultilineAndAnchoredPasswords(t *testing.T) {
 		{"\ufeffpassword: Winter42!Autumn\n", "Winter42!Autumn", "Winter42!Autumn"},
 		{"password: |-\r\n  Winter42!Autumn\r\n  Spring53\r\n", "Winter42!Autumn\nSpring53", "Winter42!Autumn\r\n  Spring53"},
 	} {
-		for _, scorer := range []mlscore.Scorer{nil, ml} {
+		for _, scorer := range []mlscore.Scorer{nil, &tableRecordScorer{}, ml} {
 			cov := model.NewCoverage()
 			ctx := model.WithCoverage(context.Background(), cov)
-			fs := restoredFindings(ctx, detector(t), eng, nil, model.Item{Path: "production.yaml", Text: c.text, Source: "code"}, nil, scorer)
+			p := New(Options{Detector: detector(t), Rules: eng, ML: scorer, IdentityKey: []byte(strings.Repeat("k", 32))})
+			item := model.Item{Path: "production.yaml", Text: c.text, Source: "code"}
+			fs := p.Findings(ctx, item)
 			complete, _, ds := cov.Snapshot()
 			if !complete || len(fs) != 1 || fs[0].Type != "generic_password" || c.text[fs[0].ByteStart:fs[0].ByteEnd] != c.source {
 				t.Fatalf("YAML multiline value/span lost: %q findings=%+v diagnostics=%+v", c.text, fs, ds)
 			}
-			if fs[0].Fingerprint != model.ComputeFingerprint("generic_password", "production.yaml", c.value) {
+			want := model.Finding{Type: "generic_password"}
+			p.annotateIdentity(ctx, &want, c.value, item)
+			if fs[0].SecretID == "" || fs[0].SecretID != want.SecretID || fs[0].Fingerprint != want.Fingerprint {
 				t.Fatal("YAML multiline identity did not use the parser-established value")
 			}
 		}
@@ -133,7 +142,8 @@ func TestYAMLScalarAndCollectionAliasesKeepDefinitionAndUseEvidence(t *testing.T
 	} {
 		cov := model.NewCoverage()
 		ctx := model.WithCoverage(context.Background(), cov)
-		fs := restoredFindings(ctx, detector(t), nil, nil, model.Item{Path: "production.yaml", Text: text, Source: "code"}, nil, nil)
+		p := New(Options{Detector: detector(t), IdentityKey: []byte(strings.Repeat("k", 32))})
+		fs := p.Findings(ctx, model.Item{Path: "production.yaml", Text: text, Source: "code"})
 		complete, _, ds := cov.Snapshot()
 		want := 2
 		if strings.Contains(text, "&a Winter") {
@@ -143,7 +153,12 @@ func TestYAMLScalarAndCollectionAliasesKeepDefinitionAndUseEvidence(t *testing.T
 			t.Fatalf("YAML alias declarations/uses lost: %q findings=%+v diagnostics=%+v", text, fs, ds)
 		}
 		var use *model.Finding
+		occurrences := map[string]bool{}
 		for i := range fs {
+			if fs[i].SecretID == "" || fs[i].SecretID != fs[0].SecretID || fs[i].OccurrenceID == "" || occurrences[fs[i].OccurrenceID] {
+				t.Fatal("YAML alias lost shared secret identity or distinct occurrence identity")
+			}
+			occurrences[fs[i].OccurrenceID] = true
 			if text[fs[i].ByteStart:fs[i].ByteEnd] == "*a" {
 				use = &fs[i]
 			}

@@ -62,7 +62,7 @@ func TestDenseDiagnosticsShareCorrectPositionsAcrossBothEngines(t *testing.T) {
 		}
 	}
 	raw, err := json.Marshal(diags)
-	if err != nil || strings.Contains(string(raw), "G7hJ9kL2mN5p") || strings.Contains(string(raw), "TEMPLATE_R00000000000") {
+	if err != nil || strings.Contains(string(raw), "G7hJ9kL2mN5p") || strings.Contains(string(raw), "TEMPLATE_R4tV8w") {
 		t.Fatal("diagnostics exposed fixture values or could not serialize")
 	}
 }

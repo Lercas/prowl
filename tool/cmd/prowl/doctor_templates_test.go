@@ -63,6 +63,10 @@ func TestBundledTemplateSelectionIsExplicitAndMCPCompatible(t *testing.T) {
 	if validateTemplateSelection(commonFlags{bundled: true}) != nil {
 		t.Fatal("bundled mode is not a valid CLI option")
 	}
+	parsed, paths, err := parseCommand("scan", []string{"--bundled"})
+	if err != nil || !parsed.bundled || len(paths) != 0 {
+		t.Fatalf("scan did not accept bundled selection: %v", err)
+	}
 	if cmdMCP([]string{"--bundled"}) != 2 {
 		t.Fatal("MCP silently ignored a startup scan flag")
 	}

@@ -33,13 +33,16 @@ func TestCompressionPoolResetsStreams(t *testing.T) {
 }
 
 func TestFeatureExtractionDeterministic(t *testing.T) {
-	value := "Aa0+/Дб123_AbCdEfGhIjKlMnOpQrStUvWxYz"
-	want := Extract(value, Context{Source: "code"})
-	for range 100 {
-		got := Extract(value, Context{Source: "code"})
-		for i := range got {
-			if got[i] != want[i] {
-				t.Fatalf("feature %s is not deterministic", FeatureNames[i])
+	for _, value := range []string{"Autumn!7Road", "ПарольСентябрь42", "aabbccddefghij", "abAB01-_!", "Aa0+/Дб123_AbCdEfGhIjKlMnOpQrStUvWxYz"} {
+		for _, ctx := range []Context{{}, {Source: "code"}} {
+			want := Extract(value, ctx)
+			for range 100 {
+				got := Extract(value, ctx)
+				for i := range got {
+					if got[i] != want[i] {
+						t.Fatalf("feature %s is not deterministic", FeatureNames[i])
+					}
+				}
 			}
 		}
 	}

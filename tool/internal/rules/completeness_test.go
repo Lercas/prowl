@@ -26,6 +26,14 @@ func TestBoundedExtractionRemainsIncompleteAfterDeduplication(t *testing.T) {
 	if limited || len(full) != len(hits) {
 		t.Fatal("normal duplicate extraction was changed or marked incomplete")
 	}
+	occurrences, limited := eng.MatchOccurrencesN(text, 3)
+	if !limited || len(occurrences) != 3 || occurrences[0].RuleID != "owned-first" {
+		t.Fatal("bounded occurrence extraction lost the released raw-count contract")
+	}
+	all, limited := eng.MatchOccurrencesN(text, 100)
+	if limited || len(all) != 9 || all[8].RuleID != "owned-late" {
+		t.Fatal("full occurrence extraction lost repeated credentials or the later rule")
+	}
 }
 
 func TestBoundedExtractionRemainsIncompleteAfterEntropyFiltering(t *testing.T) {

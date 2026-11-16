@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/mlscore"
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/rules"
+	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
 func TestTOMLCanonicalPasswordsAndTypedCredentials(t *testing.T) {
@@ -17,7 +19,14 @@ func TestTOMLCanonicalPasswordsAndTypedCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ml := &tableRecordScorer{}
+	bundled, err := rules.LoadEmbedded(bundledrules.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ml, err := mlscore.NewEmbedded(.3, filepath.Join("..", "mlmodel", "model_binary_go_literal_v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, c := range []struct{ text, value, typ, source string }{
 		{`password = 'Winter42\'`, `Winter42\`, "generic_password", `Winter42\`},
 		{"\ufeffpassword = 'Winter42!Autumn'", "Winter42!Autumn", "generic_password", "Winter42!Autumn"},
@@ -37,18 +46,22 @@ func TestTOMLCanonicalPasswordsAndTypedCredentials(t *testing.T) {
 		{`auth = {password = "Winter\u0034\u0032!Autumn"}`, "Winter42!Autumn", "generic_password", `Winter\u0034\u0032!Autumn`},
 		{`auth.password = "Winter\u0034\u0032!Autumn"`, "Winter42!Autumn", "generic_password", `Winter\u0034\u0032!Autumn`},
 	} {
-		for _, engine := range []*rules.Engine{nil, eng} {
-			for _, scorer := range []mlscore.Scorer{nil, ml} {
+		for _, engine := range []*rules.Engine{nil, eng, bundled} {
+			for _, scorer := range []mlscore.Scorer{nil, &tableRecordScorer{}, ml} {
 				wantType := c.typ
-				if engine != nil && c.typ == "aws_access_key_id" {
+				if engine == eng && c.typ == "aws_access_key_id" {
 					wantType = "aws-access-key-id"
 				}
 				ctx := context.Background()
-				fs := restoredFindings(ctx, detector(t), engine, nil, model.Item{Path: "production.toml", Text: c.text, Source: "code"}, nil, scorer)
+				p := New(Options{Detector: detector(t), Rules: engine, ML: scorer, IdentityKey: []byte(strings.Repeat("k", 32))})
+				item := model.Item{Path: "production.toml", Text: c.text, Source: "code"}
+				fs := p.Findings(ctx, item)
 				if len(fs) != 1 || fs[0].Type != wantType || fs[0].Fingerprint == "" || c.text[fs[0].ByteStart:fs[0].ByteEnd] != c.source {
 					t.Fatalf("TOML value/type/span lost: %q, %+v", c.text, fs)
 				}
-				if fs[0].Fingerprint != model.ComputeFingerprint(wantType, "production.toml", c.value) {
+				want := model.Finding{Type: wantType}
+				p.annotateIdentity(ctx, &want, c.value, item)
+				if fs[0].SecretID == "" || fs[0].SecretID != want.SecretID || fs[0].Fingerprint != want.Fingerprint {
 					t.Fatalf("TOML identity uses escape syntax rather than canonical value: %q", c.text)
 				}
 				serialized, _ := json.Marshal(fs)
@@ -64,17 +77,23 @@ func TestTOMLNormalizationPreservesCommentsAndOccurrences(t *testing.T) {
 	const key = "\x41KIANAFGYOEYPXU1DSYP"
 	text := "# first=" + key + "\npassword='Winter42\\'\n# second=" + key + "\n"
 	ctx := context.Background()
-	fs := restoredFindings(ctx, detector(t), nil, nil, model.Item{Path: "production.toml", Text: text}, nil, nil)
+	p := New(Options{Detector: detector(t), IdentityKey: []byte(strings.Repeat("k", 32))})
+	fs := p.Findings(ctx, model.Item{Path: "production.toml", Text: text})
 	if len(fs) != 3 {
 		t.Fatal("TOML normalization discarded comment credentials")
 	}
 	occurrences := map[string]bool{}
+	keyedOccurrences := map[string]bool{}
 	for _, f := range fs {
 		key := fmt.Sprintf("%d:%d:%s", f.ByteStart, f.ByteEnd, f.Fingerprint)
 		if occurrences[key] {
 			t.Fatal("different TOML source occurrences were collapsed")
 		}
 		occurrences[key] = true
+		if f.SecretID == "" || f.OccurrenceID == "" || keyedOccurrences[f.OccurrenceID] {
+			t.Fatal("different TOML source occurrences lost their keyed identities")
+		}
+		keyedOccurrences[f.OccurrenceID] = true
 	}
 	text = "# password='Winter42Autumn'\nnote='normal'\n"
 	if fs := restoredFindings(context.Background(), detector(t), nil, nil, model.Item{Path: "production.toml", Text: text}, nil, nil); len(fs) != 1 || fs[0].Severity != "low" {

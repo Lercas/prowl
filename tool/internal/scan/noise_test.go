@@ -71,7 +71,7 @@ func testNoiseCorpus(t *testing.T, filename string) {
 						continue
 					}
 					for _, typ := range c.Types {
-						if typ == f.Type || typ == "generic_high_entropy" && f.Type == "generic_api_key" {
+						if typ == f.Type || releasedEntropyTypeUpgrade(c.Name) && typ == "generic_high_entropy" && f.Type == "generic_api_key" {
 							return
 						}
 					}
@@ -80,6 +80,15 @@ func testNoiseCorpus(t *testing.T, filename string) {
 			})
 		}
 	}
+}
+
+func releasedEntropyTypeUpgrade(name string) bool {
+	switch name {
+	case "140014_positive_longkey.env", "140014_positive_tokenvalue.env", "140014_positive_after_public.env", "140014_positive_after_integrity.html", "140014_positive_after_data.json",
+		"741913_positive_longkey.env", "741913_positive_tokenvalue.env", "741913_positive_after_public.env", "741913_positive_after_integrity.html", "741913_positive_after_data.json":
+		return true
+	}
+	return false
 }
 
 func TestMLContextBelongsToCandidate(t *testing.T) {

@@ -20,7 +20,11 @@ func TestEditorNoiseCorporaAndExactSourceRanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, fixture := range []string{"noise-1.4.0.json", "noise-deep-1.4.0.json", "noise-prose-1.5.0.json"} {
-		raw, err := os.ReadFile("testdata/" + fixture)
+		root := "../scan/testdata/"
+		if fixture == "noise-prose-1.5.0.json" {
+			root = "testdata/"
+		}
+		raw, err := os.ReadFile(root + fixture)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -59,7 +63,7 @@ func TestEditorNoiseCorporaAndExactSourceRanges(t *testing.T) {
 					b := rangeValue["end"].(map[string]any)
 					for _, typ := range c.Types {
 						// Named assignments in 1.5 provide more specific evidence than the former entropy-only label.
-						matchesType := strings.Contains(message, "possible secret: "+typ+" (") || typ == "generic_high_entropy" && strings.Contains(message, "possible secret: generic_api_key (") && strings.Contains(message, "L1-context-key")
+						matchesType := strings.Contains(message, "possible secret: "+typ+" (") || releasedEditorEntropyTypeUpgrade(c.Name) && typ == "generic_high_entropy" && strings.Contains(message, "possible secret: generic_api_key (") && strings.Contains(message, "L1-context-key")
 						if matchesType && a["line"] == sl && a["character"] == sc && b["line"] == el && b["character"] == ec {
 							return
 						}
@@ -69,6 +73,15 @@ func TestEditorNoiseCorporaAndExactSourceRanges(t *testing.T) {
 			})
 		}
 	}
+}
+
+func releasedEditorEntropyTypeUpgrade(name string) bool {
+	switch name {
+	case "140014_positive_longkey.env", "140014_positive_tokenvalue.env", "140014_positive_after_public.env", "140014_positive_after_integrity.html", "140014_positive_after_data.json",
+		"741913_positive_longkey.env", "741913_positive_tokenvalue.env", "741913_positive_after_public.env", "741913_positive_after_integrity.html", "741913_positive_after_data.json":
+		return true
+	}
+	return false
 }
 
 func TestEditorSharedPragmasAndRuleDeduplication(t *testing.T) {
