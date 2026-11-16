@@ -19,31 +19,10 @@ import (
 // keepVerified drops findings that were not confirmed live (--verified-only).
 func keepVerified(fs []model.Finding) []model.Finding {
 	out := fs[:0]
-	inconclusive, unverifiable := 0, 0
 	for _, f := range fs {
-		switch {
-		case model.IsIncompleteFinding(f):
-			out = append(out, f)
-		case f.Verified != nil && *f.Verified: // provider-confirmed live
-			out = append(out, f)
-		case f.Verified == nil && strings.HasPrefix(f.Rationale, "verification inconclusive"):
-			// the verifier errored (timeout/rate-limit/WAF) — keep a possibly-live secret rather than
-			// turn a transient failure into a false-negative.
-			inconclusive++
-			out = append(out, f)
-		case f.Verified == nil && model.SeverityOrder[f.Severity] >= model.SeverityOrder["high"]:
-			// no verifier for this type — "couldn't check" is not "confirmed dead", so keep high/critical
-			// (with a warning); low/medium unverifiable findings are still dropped for precision.
-			unverifiable++
+		if model.IsIncompleteFinding(f) || f.Verified != nil && *f.Verified {
 			out = append(out, f)
 		}
-		// else: provider-confirmed dead, or a low/medium finding with no verifier — dropped
-	}
-	if inconclusive > 0 {
-		logx.Warn("verified-only kept findings whose verification was inconclusive (verifier errored, not confirmed dead)", "count", inconclusive)
-	}
-	if unverifiable > 0 {
-		logx.Warn("verified-only kept high/critical findings with no verifier (could not be checked, not confirmed dead)", "count", unverifiable)
 	}
 	return out
 }
@@ -261,7 +240,18 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 	if !model.NewResult(findings, c.coverage).Complete && !containsIncomplete(findings) {
 		findings = append(findings, model.Finding{Detector: "scan", Type: "response_truncated", Severity: "info", Stage: "coverage", Rationale: "requested scan coverage is incomplete"})
 	}
+	var liveBeforeDisplayFilters []model.Finding
+	if c.failOnVerified {
+		for _, f := range findings {
+			if f.Verified != nil && *f.Verified {
+				liveBeforeDisplayFilters = append(liveBeforeDisplayFilters, f)
+			}
+		}
+	}
 	findings = applyReportFilters(c, findings)
+	if c.failOnVerified {
+		findings = restoreMissingLive(findings, liveBeforeDisplayFilters)
+	}
 	summarize(findings, elapsed, interactiveReport(c))
 
 	if c.writeBaseline != "" {

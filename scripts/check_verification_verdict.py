@@ -105,6 +105,71 @@ def main():
         Handler.status, Handler.positive = 200, True
         result = run(source, 'json', False, ['--fail-on-verified'])
         check('live-gate', result.returncode == 1)
+        if not args.legacy_verdict_only:
+            for fmt in ('json', 'sarif'):
+                for ml in ((False,) if args.without_ml else (False, True)):
+                    for flag in ('--min-confidence=0.99', '--min-severity=critical', '--disable=aws_access_key_id'):
+                        result = run(source, fmt, ml, ['--fail-on-verified', flag])
+                        findings, complete = report(result, fmt)
+                        check(f'live-display-guard-{fmt}-ml{ml}-{flag}', result.returncode == 1 and complete and any(f.get('verification', {}).get('status') == 'verified' for f in findings))
+            for status, positive, expected in ((200, True, 'verified'), (200, False, 'error'), (401, False, 'invalid')):
+                Handler.status, Handler.positive = status, positive
+                for fmt in ('json', 'sarif'):
+                    result = run(source, fmt, False, ['--verified-only'])
+                    findings, complete = report(result, fmt)
+                    credentials = [f for f in findings if f.get('verification')]
+                    check(f'verified-only-{expected}-{fmt}', all(f['verification']['status'] == 'verified' for f in credentials) and len(credentials) == (1 if expected == 'verified' else 0) and complete == (expected != 'error') and result.returncode == (2 if expected == 'error' else 0))
+            unsupported = root / 'unsupported.json'
+            unsupported.write_text('{"token":"sk_live_Q5t7U9i2O4p6A8s0D3f5G7h9"}')
+            before = Handler.calls
+            result = run(unsupported, 'json', False, ['--verified-only'])
+            findings, complete = report(result, 'json')
+            check('verified-only-unsupported', result.returncode == 0 and complete and not findings and Handler.calls == before)
+            password = 'Winter42!Autumn'
+            for ext in ('json', 'yaml', 'toml'):
+                for fmt in ('json', 'sarif'):
+                    prose = root / ('prose.' + ext)
+                    prose.write_text({'json': json.dumps({'message': 'Your password is ' + password}),
+                                      'yaml': 'message: "Your password is ' + password + '"\n',
+                                      'toml': 'message="Your password is ' + password + '"\n'}[ext])
+                    before = Handler.calls
+                    result = run(prose, fmt, False)
+                    findings, complete = report(result, fmt)
+                    check(f'structured-prose-{ext}-{fmt}', result.returncode == 0 and complete and len(findings) == 1 and findings[0]['stage'].endswith('L1-context-pw') and Handler.calls == before)
+                    check(f'structured-prose-private-{ext}-{fmt}', password.encode() not in result.stdout + result.stderr)
+                    for name_index, name in enumerate(('service_' * 40 + 'password', 'сервис_' * 40 + 'пароль', 'a' * 150 + '1' * 150 + '_password')):
+                        binding = root / f'binding-{name_index}.{ext}'
+                        binding.write_text({'json': json.dumps({name: password}), 'yaml': name + ': "' + password + '"\n', 'toml': '"' + name + '"="' + password + '"\n'}[ext])
+                        for ml in ((False,) if args.without_ml else (False, True)):
+                            result = run(binding, fmt, ml)
+                            findings, complete = report(result, fmt)
+                            check(f'long-binding-{name_index}-{ext}-{fmt}-ml{ml}', result.returncode == 0 and complete and len(findings) == 1 and Handler.calls == before)
+                            check(f'long-binding-private-{name_index}-{ext}-{fmt}-ml{ml}', password.encode() not in result.stdout + result.stderr)
+            for ext, text in (('json', '{"accessKeyId":"' + key + '\\q"}'),
+                              ('yaml', 'accessKeyId: "' + key + '\\q"\n'),
+                              ('toml', 'accessKeyId="' + key + '\\q"\n')):
+                malformed = root / ('malformed.' + ext)
+                malformed.write_text(text)
+                for fmt in ('json', 'sarif'):
+                    for before_ml in (False, True):
+                        before = Handler.calls
+                        result = run(malformed, fmt, False, ['--verify-all'] if before_ml else [])
+                        findings, complete = report(result, fmt)
+                        credentials = [f for f in findings if f.get('verification')]
+                        label = f'unsafe-literal-{ext}-{fmt}-beforeml{before_ml}'
+                        check(label, result.returncode == 2 and not complete and credentials and all(f['verification']['status'] == 'error' and f['verification']['reason'] == 'structured literal could not be established' for f in credentials) and Handler.calls == before)
+                        check(label + '-private', key.encode() not in result.stdout + result.stderr)
+            oversize_dir = root / 'oversize'
+            oversize_dir.mkdir()
+            oversize_file = oversize_dir / 'large.txt'
+            oversize_file.write_text('owned oversized content')
+            for path in (oversize_dir, oversize_file):
+                for fmt in ('json', 'sarif'):
+                    result = run(path, fmt, False, ['--max-size=4'])
+                    data = json.loads(result.stdout)
+                    envelope = data if fmt == 'json' else data['runs'][0]['properties']
+                    check(f'max-size-{path.name}-{fmt}', result.returncode == 2 and not envelope['complete'] and any(d['code'] == 'max_size' and d['incomplete'] for d in envelope['diagnostics']))
+        Handler.status, Handler.positive = 200, True
         before = Handler.calls
         result = run(generic_source, 'json', False)
         findings, complete = report(result, 'json')

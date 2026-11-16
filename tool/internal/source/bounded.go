@@ -63,5 +63,10 @@ func readSourceFile(open func() (*os.File, error), maxBytes int64) ([]byte, erro
 }
 
 func emitSourceError(ctx context.Context, ch chan<- model.Item, path string, err error) bool {
+	code := "source_error"
+	if errors.Is(err, errSourceTooLarge) {
+		code = "max_size"
+	}
+	model.Note(ctx, code, path, true)
 	return send(ctx, ch, model.Item{Source: sourceForPath(path), Path: path, Error: err})
 }

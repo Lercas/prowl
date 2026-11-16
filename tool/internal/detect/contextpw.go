@@ -213,7 +213,9 @@ func (d *Detector) contextualPassword(text, lower, uniLower string, present []bo
 	if !d.genericPwd { // taxonomy doesn't declare generic_password (e.g. --rules-only): emit no builtin
 		return nil
 	}
-	if !anyPresent(present, d.cueIdx) { // reuse the AC pass: no cue anywhere
+	// A nil presence inventory is reserved for one bounded parser-established
+	// scalar. Its own lines must still contain a real cue below.
+	if present != nil && !anyPresent(present, d.cueIdx) { // reuse the AC pass: no cue anywhere
 		return nil
 	}
 	var out []Match

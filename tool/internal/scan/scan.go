@@ -433,6 +433,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		}()
 	}
 	det, eng, vset, allow, ml := p.options.Detector, p.options.Rules, p.options.Verifiers, p.options.Allow, p.options.ML
+	unsafeLiteralFallback := false
 	if ctx.Err() != nil {
 		return []model.Finding{processingError(it, "scan interrupted; results are incomplete")}
 	}
@@ -459,6 +460,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			return p.literalFindings(ctx, it, doc)
 		}
 		// A failed parser cannot establish a value safe for provider submission.
+		unsafeLiteralFallback = vset != nil
 		vset = nil
 	}
 	var ms []detect.Match
@@ -574,7 +576,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 
 			break
 		}
-		if literalDoc != nil && !literalDoc.accepts(m.Type, m.Start, m.End) && !(m.JWTPayload && literalDoc.locate(m.Start, m.End) != nil) {
+		if literalDoc != nil && !literalDoc.accepts(m.Type, m.Start, m.End, m.Stage == "L1-context-pw") && !(m.JWTPayload && literalDoc.locate(m.Start, m.End) != nil) {
 			continue
 		}
 		if gitRecord != nil {
@@ -680,7 +682,7 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			if i&1023 == 0 && ctx.Err() != nil {
 				break
 			}
-			if literalDoc != nil && !literalDoc.accepts(h.RuleID, h.Start, h.End) && !(h.payload != nil && literalDoc.locate(h.Start, h.End) != nil) {
+			if literalDoc != nil && !literalDoc.accepts(h.RuleID, h.Start, h.End, false) && !(h.payload != nil && literalDoc.locate(h.Start, h.End) != nil) {
 				continue
 			}
 			// backstop the combined cap during accumulation (collisions update in place; distinct hits grow out)
@@ -771,6 +773,12 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 	if vset != nil && verifyBeforeML {
 		for i := range out {
 			pending[i].apply(ctx, vset, literalDoc, verificationText, it.Path, &out[i])
+		}
+	}
+	if unsafeLiteralFallback {
+		for i := range out {
+			out[i].Verified, out[i].Rationale, out[i].Verification = verificationResult(verify.Result{Status: verify.Errored, Note: "structured literal could not be established"})
+			noteVerificationFailure(ctx, it.Path, out[i].Verification)
 		}
 	}
 	if literalDoc != nil {

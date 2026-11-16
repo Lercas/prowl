@@ -45,12 +45,12 @@ func parseLiterals(ctx context.Context, it model.Item, capturePublic bool) (doc 
 	return nil
 }
 
-func (doc *literalDocument) accepts(typ string, start, end int) bool {
+func (doc *literalDocument) accepts(typ string, start, end int, contextualPassword bool) bool {
 	v := doc.locate(start, end)
 	if v == nil || v.noPassword && taxonomy.GenericLast[typ] || v.uiPassword && typ == "generic_password" {
 		return false
 	}
-	return typ != "generic_password" || v.raw || start == v.preparedStart && end == v.preparedEnd
+	return typ != "generic_password" || v.raw || start == v.preparedStart && end == v.preparedEnd || contextualPassword && doc.scalars[v.preparedStart].Prose
 }
 
 func applyLiteralVerify(ctx context.Context, vset *verify.Set, doc *literalDocument, typ, value string, start, end int, original string) (*bool, string, *model.Verification) {

@@ -238,7 +238,7 @@ func (doc *literalDocument) prepare() {
 			if v.noPassword || v.uiPassword || !validLiteralBinding(binding) {
 				passwordName = ""
 			}
-			doc.scalars[v.preparedStart] = detect.PasswordScalar{Name: passwordName, Value: v.value, End: v.preparedEnd}
+			doc.scalars[v.preparedStart] = detect.PasswordScalar{Name: passwordName, Value: v.value, End: v.preparedEnd, Prose: !v.noPassword && !v.uiPassword}
 		}
 		if groups[v.group] == nil {
 			groups[v.group] = &strings.Builder{}

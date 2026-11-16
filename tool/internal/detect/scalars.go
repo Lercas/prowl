@@ -14,6 +14,7 @@ type PasswordScalar struct {
 	Name, Value string
 	End         int
 	Raw         bool
+	Prose       bool // allow cues inside this value, never in its synthetic field presentation
 }
 
 // ScanWithScalars preserves parser-established values without asking a lexical
@@ -47,7 +48,7 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 	}
 	starts := make([]int, 0, len(scalars))
 	for start, v := range scalars {
-		if v.Name != "" && !v.Raw {
+		if (v.Name != "" || v.Prose) && !v.Raw {
 			starts = append(starts, start)
 		}
 	}
@@ -64,6 +65,23 @@ func (d *Detector) scalarMatches(ctx context.Context, text string, matches []Mat
 				return kept, true
 			}
 			v := scalars[start]
+			if v.Prose && start >= 0 && v.End >= start && v.End <= len(text) && text[start:v.End] == v.Value && len(v.Value) <= 4096 && containsFoldedPasswordCue(v.Value) {
+				lb := d.lowerPool.Get().(*[]byte)
+				lower := lowerScratch(lb, v.Value)
+				var uniLower string
+				if hasNonASCII(v.Value) {
+					uniLower = strings.ToLower(v.Value)
+				}
+				prose := d.contextualPassword(v.Value, lower, uniLower, nil, maxScanMatches-len(kept))
+				d.lowerPool.Put(lb)
+				for _, m := range prose {
+					m.Start, m.End = m.Start+start, m.End+start
+					kept = append(kept, m)
+				}
+				if len(kept) >= maxScanMatches {
+					return kept, true
+				}
+			}
 			if start < 0 || v.End < start || v.End > len(text) || text[start:v.End] != v.Value ||
 				len(v.Name) > 4096 || len(v.Value) > 4096 || (utf8.RuneCountInString(v.Value) < 6 && !d.shortPasswordAllowed(v.Name, v.Value)) ||
 				!ct.st.RE.MatchString("\""+v.Name+"\": \"Qx7vN8\"") || IsCanonicalPasswordPlaceholder(v.Value) ||
