@@ -147,10 +147,7 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 }
 
 func componentYAMLMapping(ctx context.Context, node *yaml.Node, depth int) (map[string]any, bool) {
-	d := componentYAMLDecoder{ctx: ctx, active: make(map[*yaml.Node]bool), mergeSequences: make(map[*yaml.Node]bool)}
-	if !d.findMergeSequences(node, depth) {
-		return nil, false
-	}
+	d := componentYAMLDecoder{ctx: ctx, active: make(map[*yaml.Node]bool)}
 	v, ok := d.value(node, depth)
 	out, mapping := v.(map[string]any)
 	return out, ok && mapping

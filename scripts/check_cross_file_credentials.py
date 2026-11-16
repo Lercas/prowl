@@ -120,7 +120,6 @@ def main():
             ('yaml-merge', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d}\n'),
             ('yaml-override', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'defaults: &d {account: tenant_b}\nprod: {<<: *d, account: tenant_a}\n'),
             ('yaml-merge-sequence', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nprod: {<<: [*a, *b]}\n'),
-            ('yaml-sequence-alias', 'a.json', json.dumps({'prod': {'accessKeyId': KEY}}), 'b.yaml', 'a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nlist: &l [*a, *b]\nprod: {<<: *l}\n'),
         )
         for name, key_name, key_text, account_name, account_text in nested_cases:
             source = root / ('namespace-' + name)
@@ -169,6 +168,8 @@ def main():
             ('alias-cross-document', 'b.yaml', 'value: &a tenant_a\n---\nprod: {account: *a}\n'),
             ('alias-duplicate-merge', 'b.yaml', 'defaults: &d {account: tenant_a}\nprod: {<<: *d, <<: *d}\n'),
             ('alias-expansion-budget', 'b.yaml', alias_bomb),
+            ('alias-invalid-nested-merge', 'b.yaml', 'prod: {<<: [[{account: tenant_a}]]}\n'),
+            ('alias-invalid-sequence-merge', 'b.yaml', 'a: &a {account: tenant_a}\nlist: &l [*a]\nprod: {<<: *l}\n'),
             ('documents', 'b.yaml', 'prod: {account: tenant_a}\n---\nprod: {account: tenant_b}\n'),
             ('array-tables', 'b.toml', '[[prod]]\naccount="tenant_a"\n'),
         ):

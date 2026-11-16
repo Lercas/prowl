@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -26,7 +27,6 @@ func TestCrossFileYAMLExplicitAliasAndMergeRelationships(t *testing.T) {
 		{"merge-explicit-first", "defaults: &d {account: tenant_b}\nprod: {account: tenant_a, <<: *d}\n", "tenant_a"},
 		{"merge-explicit-last", "defaults: &d {account: tenant_b}\nprod: {<<: *d, account: tenant_a}\n", "tenant_a"},
 		{"merge-sequence", "first: &a {account: tenant_a}\nsecond: &b {account: tenant_b}\nprod: {<<: [*a, *b]}\n", "tenant_a"},
-		{"merge-sequence-alias", "first: &a {account: tenant_a}\nsecond: &b {account: tenant_b}\nlist: &l [*a, *b]\nprod: {<<: *l}\n", "tenant_a"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var calls atomic.Int32
@@ -119,6 +119,8 @@ func TestCrossFileYAMLUnsafeRelationshipsNeverProbe(t *testing.T) {
 		"defaults: &d {account: tenant_a}\nprod: [*d]\n",
 		"value: &a null\nprod: {account: *a}\n",
 		"value: &a 30\nprod: {account: *a}\n",
+		"prod: {<<: [[{account: tenant_a}]]}\n",
+		"first: &a {account: tenant_a}\nlist: &l [*a]\nprod: {<<: *l}\n",
 	} {
 		t.Run(text, func(t *testing.T) {
 			var calls atomic.Int32
@@ -134,6 +136,70 @@ func TestCrossFileYAMLUnsafeRelationshipsNeverProbe(t *testing.T) {
 			}
 		})
 	}
+}
+
+func FuzzComponentYAMLEffectiveMappings(f *testing.F) {
+	for _, seed := range []string{
+		"defaults: &d {account: tenant_a}\nprod: *d\n",
+		"a: &a {account: tenant_a}\nb: &b {account: tenant_b}\nprod: {<<: [*a, *b]}\n",
+		"a: &a {account: tenant_a}\nlist: &l [*a]\nprod: {<<: *l}\n",
+		"prod: {<<: [[{account: tenant_a}]]}\n",
+		"prod: {account: value, 'a.b': {key: ordinary}}\n",
+	} {
+		f.Add(seed)
+	}
+	f.Fuzz(func(t *testing.T, text string) {
+		if len(text) > 8192 {
+			return
+		}
+		got, ok := componentFields(t.Context(), model.Item{Path: "owned.yaml", Source: "code", Text: text})
+		if !ok {
+			return
+		}
+		var root yaml.Node
+		if yaml.Unmarshal([]byte(text), &root) != nil {
+			t.Fatal("accepted fields from invalid YAML")
+		}
+		// The differential contract concerns string mappings. Other scalar tags
+		// intentionally remain unknown roles even when yaml.Decode returns strings.
+		var stringsOnly func(*yaml.Node) bool
+		stringsOnly = func(n *yaml.Node) bool {
+			if n.Kind == yaml.ScalarNode && n.Tag != "!!str" && n.Tag != "!!merge" {
+				return false
+			}
+			for _, child := range n.Content {
+				if !stringsOnly(child) {
+					return false
+				}
+			}
+			return true
+		}
+		if !stringsOnly(&root) {
+			return
+		}
+		var decoded map[string]any
+		if err := root.Decode(&decoded); err != nil {
+			t.Fatal("component relationships accepted a merge rejected by the YAML decoder")
+		}
+		want := make(map[string]map[string]*string)
+		var walk func(map[string]any, []string)
+		walk = func(fields map[string]any, path []string) {
+			values := make(map[string]*string)
+			want[componentNamespace(path)] = values
+			for name, value := range fields {
+				values[name] = nil
+				if child, ok := value.(map[string]any); ok {
+					walk(child, append(append([]string(nil), path...), name))
+				} else if s, ok := value.(string); ok && s != "" {
+					values[name] = &s
+				}
+			}
+		}
+		walk(decoded, nil)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatal("effective string mappings differ from the YAML decoder")
+		}
+	})
 }
 
 func TestComponentYAMLRelationshipGraphBoundAndCancellation(t *testing.T) {
