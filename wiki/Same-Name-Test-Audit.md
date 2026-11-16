@@ -79,6 +79,70 @@ Evidence:
 - `evidence/1.5.0-same-name-test-inventory-20261116.json`.
 - `evidence/1.5.0-same-name-restored-assertions-20261116.json`.
 
-Родительский аудит same-name assertions/helpers остаётся открытым. Его нельзя
-закрыть по этому inventory или по проходу выборки. Release factory, hosted CI,
-публикация и внешняя acceptance также остаются отдельными этапами.
+Первый этап оставлял same-name assertions/helpers открытыми. Следующий этап
+завершил сопоставление, описанное ниже. Release factory, hosted CI,
+публикация и внешняя acceptance остаются отдельными этапами.
+
+## Завершённая карта assertions и helpers
+
+Для всех 130 нетривиальных тел сохранены точные source paths, token hashes и
+review profiles с исходными assertions и явными изменениями. Отдельно разобраны
+15 изменённых/удалённых helpers и шесть введённых adapters. Остальные 841 тело
+совпадают по токенам, 38 отличаются эквивалентной записью строковых констант.
+Неизменённые либо эквивалентные тела учитываются вместе с просмотренными helpers,
+а не как самостоятельное доказательство поведения production runtime.
+
+Исходный JSON-fuzz потерял четыре seeds и проверки `locate`, декодирования
+canonical value непосредственно из физического JSON span и длины byte map.
+Эти assertions возвращены вместе с текущими public-binding, UTF-8 и per-byte
+проверками; расширенный лимит 64KiB сохранён. Fuzz с лимитом 10s выполнил 14768
+проверок за 11,669s без ошибки. Перед разделением credentials и markers helper
+теперь проверяет точное ожидаемое число `response_truncated/scan/intake`,
+отсутствие secret identity и provider verdict. Он не скрывает произвольную неполноту.
+
+Сопоставление подтвердило отдельные намеренные изменения: английский UI,
+scoped flag schemas, точные Base64 source quanta, более строгую literal intake,
+уточнение десяти generic types и текущую Go-flate-v2/51-feature модель.
+Изменившиеся HTML select cases связаны с обновлением x/net v0.52.0 → v0.62.0;
+положительный ресурс и отрицательный чужой base проверяются отдельным тестом.
+Равенство raw scores старой и новой модели не заявляется.
+
+## Исправленная регистрация политики
+
+Ручной `RegisterPolicy` в тесте скрывал реальную регрессию: пустой `Pipeline.Run`
+и прямой `Findings` не регистрировали политику. CLI терял `detection_policy` и
+`rules` scopes, а несериализуемая policy могла пройти без нужной неполноты.
+Без ручной подготовки исходный assertion воспроизводимо падал.
+
+Теперь обе точки входа регистрируют policy. Возвращаемый контекст передаёт
+регистрацию workers и HTTP batch: digest не пересчитывается для каждого Item.
+Marker привязан к конкретным pipeline и coverage ledger. Новый ledger или другой
+pipeline получают свою регистрацию; без report ledger внешняя policy не вызывается.
+Fixture с 64 Items и четырьмя workers проверяет однократный вызов policy, полноту
+и точное число обработанных Items.
+
+Обновлённый native coverage runner проверяет JSON/SARIF, stdin/file, stdout/stored,
+empty directory, обязательные policy scopes и invalid-policy baseline guard.
+На родительском binary — 0/90; после исправления — 90/90 под OS network deny.
+Baseline sentinel при invalid policy сохраняется, exit code — 2.
+
+## Итоговая локальная квалификация
+
+Полный Go-прогон текущего runtime: 1587 top-level passes и 12 явных skips.
+На неизменённой пересборке reference с CGO: 1006 passes и шесть skips.
+В evidence перечислены все skips: live tests не включались, внешние research
+fixtures не подставлялись. Девять benchmark declarations здесь не измерялись;
+два `TestMain` не имеют отдельных событий pass, а исторический `!cgo`
+compressor-integrity test относится к уже разобранной замене WASM/zlib.
+
+Full Go, целевые race checks, Go 1.26.11 и полный lint проходят. Все 22 запуска
+released native suites проходят. Pinned quality gate прошёл с теми же IDs:
+1661/2094 positive hits и 61/982 hard-negative hits. Новая performance-оценка
+здесь не заявляется; ограничение работы policy дополнительно проверяется счётчиком.
+Report identity — 39/39, pretty pipe/file/PTY/color — 40/40. Все 694 tool blobs
+reference повторно сверены после полного Go-прогона.
+
+Карта и точные логи: `evidence/1.5.0-same-name-assertion-map-20261116.json`.
+Закрыт source/assertion аудит same-name bodies/helpers на darwin/arm64.
+Общий пункт восстановления runtime-контрактов, остальные целевые платформы,
+release artifacts, hosted CI и внешняя acceptance этим не закрываются.

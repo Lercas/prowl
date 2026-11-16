@@ -110,7 +110,7 @@
     Docker factory, informational benchmark и optional hook имеют отдельные границы.
     [Runner и адаптации](scripts/compat14/README.md),
     `wiki/evidence/1.5.0-released-native-contracts-20261116.json`.
-  - [ ] Проверить изменения same-name Go test bodies/helpers;
+  - [x] Проверить изменения same-name Go test bodies/helpers;
     закрытые карты имён и native runners не закрывают всю совместимость релиза.
     - [x] AST/token inventory текущей базы: 1009 совпавших имён, 841 одинаковое
       тело, 38 эквивалентных string spellings, 130 остальных изменений и 15
@@ -123,6 +123,16 @@
       и 3 явных optional parity skips; пять packages, race/min-Go/lint проходят.
       [Состав и границы](wiki/Same-Name-Test-Audit.md),
       `wiki/evidence/1.5.0-same-name-restored-assertions-20261116.json`.
+    - [x] Завершена карта 130 нетривиальных тел и 15 helpers, без неразобранных
+      строк. Возвращены исходные JSON-fuzz seeds/locate/decode/byte-map assertions;
+      coverage adapters проверяют точный тип и число markers. Найдена реальная
+      регрессия: test-side RegisterPolicy скрывал отсутствие policy в Run/Findings.
+      Регистрация возвращена в entrypoints с общим контекстом workers.
+      Full Go: candidate 1587 passes/12 explicit skips, reference 1006/6;
+      race/min-Go/lint, native coverage 90/90 и released suites 22/22 проходят.
+      Quality IDs прежние: 1661/2094, FP 61/982. Платформа этой квалификации —
+      darwin/arm64; общий аудит runtime/release artifacts остаётся открытым.
+      `wiki/evidence/1.5.0-same-name-assertion-map-20261116.json`.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

@@ -1,0 +1,4375 @@
+{
+  "schema_version": "prowl-same-name-assertion-map-v1",
+  "source_commit": "a58950a6596045b147715d9453b57d01c44f29d3",
+  "qualified_runtime_commit": "dc5b1151bf86dba2a61fd414f4a8d811e40e0bb7",
+  "reference_commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "inventory_source": "wiki/evidence/1.5.0-same-name-test-inventory-20261116.json",
+  "same_names": 1009,
+  "unchanged_token_bodies": 841,
+  "equivalent_string_spellings": 38,
+  "nontrivial_bodies_reviewed": 130,
+  "changed_helpers_reviewed": 15,
+  "unresolved_body_rows": 0,
+  "unresolved_helper_rows": 0,
+  "profiles": {
+    "pipeline-api": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Original fixture values, outcome counts, cancellation/error/completeness checks, severity, source spans, verification ordering and privacy assertions remain in the corresponding bodies.",
+      "declared_changes": "Positional Run/Findings/WithOptions calls become immutable Pipeline options and methods; escaped literal spelling is equivalent. No detector/model expectation is waived."
+    },
+    "parser-schemas": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Original mobile flags reach archive scanning; OCR endpoint/model/remote/pages/timeout and positional input assertions remain.",
+      "declared_changes": "Global knownFlags/parseCommon replaced by commandFlagNames/parseCommand; parsing errors are checked."
+    },
+    "atlassian-space": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Both Jira and Confluence error paths and console/JSON privacy assertions still run.",
+      "declared_changes": "Confluence uses its actual --space schema instead of Jira-only --project."
+    },
+    "bundled-parser": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Conflicting selections rejected, valid bundled selection accepted, MCP startup flag rejected, MCP argv forwards bundled.",
+      "declared_changes": "Removed global flag table check is restored through the actual scan parser; see e76334a."
+    },
+    "download-name": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "All five released URL filename cases remain.",
+      "declared_changes": "Adds traversal, ADS, NUL and parent-path controls."
+    },
+    "english-ui": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Protocol error codes, output limit, safe generic error message, LIVE/dead/unverified counts and type/severity checks remain.",
+      "declared_changes": "Only user-facing Russian phrases become English."
+    },
+    "portable-no-cgo-skip": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Explicit/installed model snapshot survives file replacement with unchanged prediction and preflight assertions.",
+      "declared_changes": "Obsolete cgo-only skip removed; portable scorer is mandatory."
+    },
+    "repo-url-privacy": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Clone failure remains incomplete, emits exactly one gap, does not expose credentials and does not overwrite the baseline.",
+      "declared_changes": "Safe source URL now removes query as well as userinfo; expected path is https://owned.invalid."
+    },
+    "serve-parser-rejection": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Every verification flag fails before listening.",
+      "declared_changes": "Error comes from scoped parser; exact flag and command name are asserted."
+    },
+    "base64-api": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Same candidates, output counts, confidence/checksum winner, cancellation work bound and limited status.",
+      "declared_changes": "unmaskBase64Candidates renamed to unmaskBase64. Benchmark allocation body preserved; this map makes no timing claim."
+    },
+    "base64-fuzz-api": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "All original seeds, 8192-byte bound, exact source/depth constraints, decoded identity and nested proof containment checks remain.",
+      "declared_changes": "Calls base64Occurrences, the API returning all source occurrences."
+    },
+    "entropy-tuning": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Original synthetic values and default/raised/restored entropy threshold transitions remain.",
+      "declared_changes": "Prose isolates generic_high_entropy from the newer named-assignment detector; LSP asserts the actual detector type."
+    },
+    "base64-source-quanta": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Decoded value, all four encodings, prefixes, complete container range and cap status remain checked.",
+      "declared_changes": "Also checks exact padded/quantum source start/end and decoded text/offset rather than trimming padding."
+    },
+    "unnamed-typed-blob": {
+      "status": "intentional_behavior_change_covered",
+      "preserved_assertions": "Data-URI and ssh-rsa non-secret contexts remain negative.",
+      "declared_changes": "Neutral blob typed hit becomes a positive in TestUnnamedBlobNeedsPreciseTypedHit, which uses the identical decoded fixture and retains benign/generic negative controls."
+    },
+    "html-tree": {
+      "status": "intentional_dependency_change_covered",
+      "preserved_assertions": "Foreign-content/base handling, CDATA exclusion and authorized same-origin scope remain checked.",
+      "declared_changes": "x/net v0.52.0 -> v0.62.0 retains select descendants. The identical select resource case and hostile foreign base are covered by TestExtractAssetsRetainsSelectDescendants."
+    },
+    "diagnostic-message-only": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Counts, original source ranges, distinct editor ranges and redaction checks are unchanged.",
+      "declared_changes": "Failure diagnostics include additional safe context."
+    },
+    "lsp-density": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Original 2000-row/4000-diagnostic count, UTF-16 columns, shared producer cap and exactly one truncation marker remain.",
+      "declared_changes": "Same-length values avoid zero-run placeholder filtering. Redaction assertion now searches the actual TEMPLATE_R4tV8w prefix."
+    },
+    "noise-types": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Both released fixtures, every positive/negative/ambiguous label, exact UTF-16 ranges and redaction remain.",
+      "declared_changes": "Only ten explicit row names permit a more specific generic_api_key type; prose fixture added and canonical released fixtures read directly."
+    },
+    "portable-extractor": {
+      "status": "intentional_model_replacement_covered",
+      "preserved_assertions": "Legacy unchanged features retain Python golden comparison; feature count/order, portable extractor golden and independent compression pool checks are mandatory.",
+      "declared_changes": "Versioned Go-flate-v2 replaces zlib, 51 features replace 49. Legacy compression equality is intentionally rejected; optional external corpus checks may skip."
+    },
+    "determinism": {
+      "status": "restored_and_strengthened",
+      "preserved_assertions": "All four released values, repeated exact length/value equality across all features, and 100 repetitions remain.",
+      "declared_changes": "Adds current mixed-script value and empty/code contexts; omitted original values and length guard restored."
+    },
+    "model-schema": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Reordered, unknown, duplicate and empty feature names all remain rejected.",
+      "declared_changes": "Adds three obsolete schemas and removes cgo skip."
+    },
+    "sidecar-private-error": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Score and Health preserve wrapped cause without exposing it.",
+      "declared_changes": "New transport constructor replaces policy constructor; fixture adds URL userinfo/query containing the private sentinel."
+    },
+    "rule-occurrences": {
+      "status": "restored_and_strengthened",
+      "preserved_assertions": "Released bounded 3 and full 9 source-occurrence counts, limited status and later rule are restored through MatchOccurrencesN.",
+      "declared_changes": "Default dedup checks also remain, including late-template budget use."
+    },
+    "json-fuzz": {
+      "status": "restored_and_strengthened",
+      "preserved_assertions": "All four released seeds, locate identity, canonical JSON decode from source span, source-map length and parent span bounds restored.",
+      "declared_changes": "Keeps six current seeds, public-binding capture variants, UTF-8/per-byte proof checks and larger 64KiB input cap."
+    },
+    "json-canonical-ml": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Original eight credentials, real model, keyed identity, source/evidence span and redacted serialization are covered by TestReleasedJSONCanonicalMLIdentityAndSourceSpans.",
+      "declared_changes": "Same-name test adds reveal/recording-scorer observation; the separate restored test uses shipped 0.3 model, not legacy 0.5 parity."
+    },
+    "real-model-threshold": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "All released fixture values, L1 and real embedded L2 variants, canonical fingerprints, typed identities, occurrence/source spans and negative UI roles remain.",
+      "declared_changes": "Pinned current 51-feature model at shipped 0.3 replaces legacy model at 0.5; raw model parity is not asserted."
+    },
+    "policy-entrypoints": {
+      "status": "runtime_regression_fixed",
+      "preserved_assertions": "Empty Run and direct Findings register a nonempty detection policy without test-side setup.",
+      "declared_changes": "Restored automatic registration at both entrypoints; target revision advances to 1.5.0. Worker/context reuse has explicit tests."
+    },
+    "valid-lockfile": {
+      "status": "intentional_stricter_intake_covered",
+      "preserved_assertions": "Basic-auth URL credentials remain found in lockfile and ordinary file; lockfile generic suppression controls remain.",
+      "declared_changes": "JSON fixtures now have valid braces; malformed literal behavior is separately tested as incomplete, not a clean credential-only result."
+    },
+    "reveal-instance": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Default redaction, explicit raw disclosure and exact feedback/scoring context equality remain.",
+      "declared_changes": "Process-global reveal switch replaced by immutable per-pipeline disclosure; absence/presence of Context also asserted."
+    },
+    "direct-binding": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Every original weak/contextual/semantic/provider-short negative remains rejected as an ML bypass.",
+      "declared_changes": "Private source-proven DirectBinding replaces window-derived Context.Name; separate guards qualify missing/borrowed binding evidence."
+    },
+    "malformed-verification": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Malformed inputs retain lexical credentials, incomplete coverage, error verdicts and zero provider requests.",
+      "declared_changes": "Explicit intake markers are excluded only from credential verdict assertions; at least one lexical credential is required."
+    },
+    "canonical-verification": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Exact account-A/B request context, two requests, individual live/dead verdicts, no alias presentation double-verification, five distinct alias credentials and two account-scoped copy IDs remain.",
+      "declared_changes": "Exactly one expected intake marker is validated before credential-only counts; no arbitrary marker is discarded."
+    },
+    "yaml-toml-keyed": {
+      "status": "restored_and_strengthened",
+      "preserved_assertions": "Original canonical values, real ML, keyed SecretID/Fingerprint, exact physical spans, declaration/use evidence and distinct OccurrenceID checks restored.",
+      "declared_changes": "Adds recording scorer, filesystem/nil/embedded TOML rules and stronger alias identity checks; uses current 0.3 model."
+    },
+    "yaml-short-password": {
+      "status": "intentional_behavior_change_covered",
+      "preserved_assertions": "All original positive values/source spans, unsupported/nonliteral controls and env brace/comma semantics remain.",
+      "declared_changes": "Explicit short Cyrillic password moves to positive. Undefined alias requires exactly one validated intake marker and zero credentials; other negative controls require zero markers."
+    },
+    "yaml-dense": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Same 9000-object input, 18000 physical key/value scalars, original byte slices and five-second bound.",
+      "declared_changes": "Uses parser inventory instead of obsolete scalar-only API; raw non-scalar records are excluded explicitly."
+    },
+    "server-strict-fields": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "All original missing/null/duplicate/lossy/trailing JSON controls remain rejected.",
+      "declared_changes": "Adds case-changed ML, OCR and disclosure fields."
+    },
+    "http-unicode": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "All original seeds/chunk sizes, valid/invalid Unicode decisions and byte-for-byte transport identity checks remain.",
+      "declared_changes": "Uses actual bounded HTTP decode into RawMessage instead of removed stream reader."
+    },
+    "mobile-reader-api": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Original entry/total-byte caps and channel drain counts remain.",
+      "declared_changes": "Passes owned ZIP ReadCloser directly rather than its embedded Reader."
+    },
+    "git-rename": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Same Git base/rename/add workflows and exact changed-file credential expectations remain.",
+      "declared_changes": "Equivalent escaped string spelling is parenthesized differently inside concatenation."
+    },
+    "oci-content-address": {
+      "status": "preserved_and_strengthened",
+      "preserved_assertions": "Metadata caching/read-once and shared budget assertions remain.",
+      "declared_changes": "Fixture hash now matches actual data; TestOCIMetadataRejectsMismatchedContentAddress covers the former mismatched hash as a negative."
+    },
+    "repeated-occurrences": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "All three physical credentials keep exact provider type/spans, common SecretID and distinct OccurrenceID.",
+      "declared_changes": "AllOccurrences explicitly selects the occurrence-preserving pipeline API; source bounds and uniqueness assertions remain."
+    },
+    "yaml-presentation-api": {
+      "status": "preserved_with_api_adaptation",
+      "preserved_assertions": "Every released YAML comment, block, root, binary, anchor-name and alias case retains exact credential count, identity/source coordinates and complete coverage.",
+      "declared_changes": "Positional Findings becomes the immutable pipeline adapter; fixture data and assertions remain."
+    },
+    "legacy-parity:tool/internal/mlfeatures/extract_test.go": {
+      "status": "intentional_model_replacement_covered",
+      "preserved_assertions": "Legacy unaffected extractor features and legacy inference score loop remain in optional local fixture checks. Mandatory portable/canonical tests qualify the actual shipped feature/model schema.",
+      "declared_changes": "Old zlib/49-feature schema is obsolete; mlmodel legacy inference fixture pads two unused slots only inside the test. Optional fixture skips do not establish parity."
+    },
+    "legacy-parity:tool/internal/mlmodel/mlmodel_test.go": {
+      "status": "intentional_model_replacement_covered",
+      "preserved_assertions": "Legacy unaffected extractor features and legacy inference score loop remain in optional local fixture checks. Mandatory portable/canonical tests qualify the actual shipped feature/model schema.",
+      "declared_changes": "Old zlib/49-feature schema is obsolete; mlmodel legacy inference fixture pads two unused slots only inside the test. Optional fixture skips do not establish parity."
+    },
+    "previous-restoration": {
+      "status": "restored_assertions_qualified",
+      "preserved_assertions": "Exact released assertions restored by the separately reviewed 45-name map. Current function is rerun in full Go qualification.",
+      "declared_changes": "Immutable API/source-span and explicit coverage-marker adapters are listed in the prior map."
+    }
+  },
+  "rows": [
+    {
+      "key": "tool/cmd/prowl/main/TestAtlassianConnectionLogsDoNotExposeBaseURL",
+      "reference": {
+        "path": "tool/cmd/prowl/atlassian_errors_test.go",
+        "line": 14,
+        "token_sha256": "8c873d6242c99a06fbdf5861c8bd1ea87170d94471242918912142f75fce0b4a"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/atlassian_errors_test.go",
+        "line": 14,
+        "token_sha256": "248a7758cfdea8f8d55b691e1973706c277eab2d0c625fc231b7fd628c74aba6"
+      },
+      "review_profile": "atlassian-space",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestBundledTemplateSelectionIsExplicitAndMCPCompatible",
+      "reference": {
+        "path": "tool/cmd/prowl/doctor_templates_test.go",
+        "line": 57,
+        "token_sha256": "ce52cb3b7ce34415497f0f036fec81f22265a2da529ff8d90767dcef570b57ed"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/doctor_templates_test.go",
+        "line": 57,
+        "token_sha256": "1288b25fdc410713a6055cbf3ac2ba73ed2961ef9beb0d504ccd06091c6381ee"
+      },
+      "review_profile": "bundled-parser",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestCmdMobileUnknownFlagAccepted",
+      "reference": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 175,
+        "token_sha256": "9a497ae77661d264fabe6deb6ec1bdb534a666b68bcd768a4bddb45681927b5d"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 223,
+        "token_sha256": "543904fb5bd2618078a4a813cafac3e70039860176a93d6226da23ef9c37acfb"
+      },
+      "review_profile": "parser-schemas",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestDownloadName",
+      "reference": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 219,
+        "token_sha256": "83a4319c178a57c2f4aa29ef859443fa3acf41d4fec4a9c1e610b8bf68fff64f"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 267,
+        "token_sha256": "a87b57ff028fdf54bd1cf3c47db0e1517a7c1ec8f4524d31777689a7f64ecdf3"
+      },
+      "review_profile": "download-name",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestFailOnVerifiedIsKnownFlag",
+      "reference": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 540,
+        "token_sha256": "9534fc54e9ae1d9f6d4ca6a6043c49def1500875a533ec32dd58e4de4bf89edf"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/released_flag_contract_test.go",
+        "line": 10,
+        "token_sha256": "234203f244fbd80e94ba0a21b331ab6c8f6eba5c63f1453e883bdbd97daea300"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/cmd/prowl/main_test.go",
+          "line": 540,
+          "name": "TestFailOnVerifiedIsKnownFlag",
+          "file_sha256": "9e01cefcd7beda96380cb7d7eda38545c51499fd66d24d431c3f0f707b7a5611"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/cmd/prowl/released_flag_contract_test.go",
+            "line": 10,
+            "name": "TestFailOnVerifiedIsKnownFlag",
+            "file_sha256": "8243f43320b8e7bc5194f3f069f0903b8670a47f860b5b7809e27cac65e6bb75"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestFinalizationCancellationCannotCreateBaselineOrCleanReport",
+      "reference": {
+        "path": "tool/cmd/prowl/cancel_report_test.go",
+        "line": 14,
+        "token_sha256": "f14bab715a6275b6b8276cc6171177191149fb5e3a32db7acd6b63fa49d0dd20"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/cancel_report_test.go",
+        "line": 14,
+        "token_sha256": "60ac6bbbd1764efaf0cdc814373538e97ea52cd4139aab798fe529785407c17e"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestMCPReportsProtocolAndOutputErrors",
+      "reference": {
+        "path": "tool/cmd/prowl/mcp_runtime_test.go",
+        "line": 38,
+        "token_sha256": "f298504f02564f41a8fc510bd116bfc27f3b271ec36bfdf7765ddae2db2d387a"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mcp_runtime_test.go",
+        "line": 38,
+        "token_sha256": "d66bc04cf2b87b1637eb03c3dc00a524a6fe22c886327d0c4f40c51ac05a1e14"
+      },
+      "review_profile": "english-ui",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestMLPreflightSnapshotSurvivesFileReplacement",
+      "reference": {
+        "path": "tool/cmd/prowl/ml_snapshot_test.go",
+        "line": 29,
+        "token_sha256": "87001492a4861c8878ed9dda4c1ce8812c6a3b1989e0b6ada904f1231956fce2"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/ml_snapshot_test.go",
+        "line": 30,
+        "token_sha256": "3d86384549af3e7e39d97ea94d36e126d9eb868e49f555a19534b32c35d94beb"
+      },
+      "review_profile": "portable-no-cgo-skip",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestParseOCRFlags",
+      "reference": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 552,
+        "token_sha256": "255eb7b3ca027adaec233cdf0419ce9afe0625b06884245fce7591ee6b8e1603"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/main_test.go",
+        "line": 553,
+        "token_sha256": "4f67c9faeacfab11141493158f2a4aba3d797a0cb9865b2726dc769fa56fc02a"
+      },
+      "review_profile": "parser-schemas",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestRepoFailureDiagnosticsAndBaselineRemainSafe",
+      "reference": {
+        "path": "tool/cmd/prowl/repo_errors_test.go",
+        "line": 14,
+        "token_sha256": "d997a9869c25426832b727dfb99464149ecd0ccdd55ff2188688eb9f094da6b6"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/repo_errors_test.go",
+        "line": 14,
+        "token_sha256": "335aec5e9bf39171a0dd934d7437854eb5a0f514ca20fa4e53b776388daac45b"
+      },
+      "review_profile": "repo-url-privacy",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestScanEndOfOptions",
+      "reference": {
+        "path": "tool/cmd/prowl/quick_scan_test.go",
+        "line": 44,
+        "token_sha256": "5241eb905cb536c508b9f40b23229db25bc3f29ac46264b5e19c7f71e547f3f5"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/released_flag_contract_test.go",
+        "line": 26,
+        "token_sha256": "e4b40e982340944fdcad19a0f54d4da942cb2b4dd81ad06a4c45932e448f4253"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/cmd/prowl/quick_scan_test.go",
+          "line": 44,
+          "name": "TestScanEndOfOptions",
+          "file_sha256": "d85b157c7764690824757b452415d7d14f08dd628e340216d6b9fefc59f8b6fa"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/cmd/prowl/released_flag_contract_test.go",
+            "line": 26,
+            "name": "TestScanEndOfOptions",
+            "file_sha256": "8243f43320b8e7bc5194f3f069f0903b8670a47f860b5b7809e27cac65e6bb75"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestServeRejectsVerificationBeforeListen",
+      "reference": {
+        "path": "tool/cmd/prowl/discovery_test.go",
+        "line": 131,
+        "token_sha256": "8a9226683a9e7a7cf7df844d15f1ab8451d10f76c91babaa6a98ee94516b34bb"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/discovery_test.go",
+        "line": 131,
+        "token_sha256": "675807099648b35b76a0c17f8c18df04ff38c4656fab594d2d19dea18cf26760"
+      },
+      "review_profile": "serve-parser-rejection",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/cmd/prowl/main/TestUnpreparedMLCannotProduceACompleteReportOrBaseline",
+      "reference": {
+        "path": "tool/cmd/prowl/ml_snapshot_test.go",
+        "line": 84,
+        "token_sha256": "1f1a4e9c26f1158d14b24c918fe5bc191468a554b61cf22128e3891483ad5d12"
+      },
+      "current": {
+        "path": "tool/cmd/prowl/ml_snapshot_test.go",
+        "line": 82,
+        "token_sha256": "70d42d5004d2f300673855f029a653f7e25e5a72bdfe1819ccb7be981cab4959"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/BenchmarkBase64IntermediateBuffer",
+      "reference": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 74,
+        "token_sha256": "d3ab2f22d3626992a17430ff908fdb1ce7e2e91a3bbf3e699f787e401f68f721"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 74,
+        "token_sha256": "996e76e2511268a7434e6de36fb1a685720f362e893a700d2523064ce80e35e3"
+      },
+      "review_profile": "base64-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/FuzzBoundedBase64SourceMapping",
+      "reference": {
+        "path": "tool/internal/detect/base64_test.go",
+        "line": 110,
+        "token_sha256": "852eab3b0d0caf924635f5be1d22123481cfaed43e4cd32265df859bcdf25dcb"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_occurrences_test.go",
+        "line": 45,
+        "token_sha256": "87f55598cbc95a70d5653f3b883e650598a47872409901971243355817248c85"
+      },
+      "review_profile": "base64-fuzz-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestApplyTuning",
+      "reference": {
+        "path": "tool/internal/detect/tuning_test.go",
+        "line": 6,
+        "token_sha256": "9f2848d8d872e836d584c769d1a84acf9dd86cbb9d0e5c2a3ac3258bba3185cc"
+      },
+      "current": {
+        "path": "tool/internal/detect/tuning_test.go",
+        "line": 6,
+        "token_sha256": "fd907aa081e7b3d5d6e473c1bd3323ca10ab325ff45cc71523685aee722111d0"
+      },
+      "review_profile": "entropy-tuning",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64CancellationStopsBeforeDecodingCandidates",
+      "reference": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 63,
+        "token_sha256": "210c23567968eb85eaed42f05fb99b711da703266c1b6cbaf84b4aca5de45b2b"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 63,
+        "token_sha256": "bdb5727f48f25de64a7d2b3632a4727f67a2217fb1ef78b5ac064cfca24b3475"
+      },
+      "review_profile": "base64-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64IntermediateResultsBoundedByOuterCandidates",
+      "reference": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 25,
+        "token_sha256": "e37a012e3b296d616f4cb2b5dc7c5447020ee3209a3eeea54c85413eb41f5216"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 25,
+        "token_sha256": "ee638205eb00d850ed944780a7eba73cd8a87208d1bae4d66c0fe9884e690244"
+      },
+      "review_profile": "base64-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64KeepsHighestConfidenceAcrossDecodedMatches",
+      "reference": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 38,
+        "token_sha256": "87410c865781e172e680f96f95d8e036bf9c36b227db8efae644249e66e539ba"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_budget_test.go",
+        "line": 38,
+        "token_sha256": "3e5cbd051194a4e5cacf8d64d10cded3e60b3a9226957734aabe07e85ab07256"
+      },
+      "review_profile": "base64-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64NoiseAndLimits",
+      "reference": {
+        "path": "tool/internal/detect/base64_test.go",
+        "line": 45,
+        "token_sha256": "21fcf505af0ca881eed019e3e17fb3958fde0465333c3cfc7667f325d751ef57"
+      },
+      "current": {
+        "path": "tool/internal/detect/released_base64_contract_test.go",
+        "line": 10,
+        "token_sha256": "b4d04e469f13ad4e45f2402d9f6a895e5b0743ffc6d6150b15f56dbfe5d44ecf"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/detect/base64_test.go",
+          "line": 45,
+          "name": "TestBase64NoiseAndLimits",
+          "file_sha256": "19a7bb01e0e7a518f9145460dc63663d2c46070821b21c555f44732ca16050d9"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/detect/released_base64_contract_test.go",
+            "line": 10,
+            "name": "TestBase64NoiseAndLimits",
+            "file_sha256": "01e0832fbb39d76dc1fd14008cf90ee9f3addaabfff4c36a1b6e89dbab65bfac"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Old unmaskBase64(text) is adapted to base64Occurrences(text), the current linear source-mapping API."
+      }
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64URLFullCandidate",
+      "reference": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 14,
+        "token_sha256": "99fa5e83ddfd69f9578464f9a9f3a28d7b45fa5c942f905489754860db3b3ea9"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 14,
+        "token_sha256": "c5fc0a22aeee1a9ed7c2dede2b28bef5519cc2dcee0c1a2add6f2007b4d1065f"
+      },
+      "review_profile": "base64-source-quanta",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestBase64URLRetainsContextAndNonSecretFilters",
+      "reference": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 68,
+        "token_sha256": "8a04ba2cf415ef561316c78bb2024a8134cc45f51d83d381ffa3c668af2f5194"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 71,
+        "token_sha256": "dfea668d999bbd323111b642486c1d951b47c5c61f16face3866592bedbb7177"
+      },
+      "review_profile": "unnamed-typed-blob",
+      "status": "intentional_behavior_change_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestDecodedCandidateCapStatus",
+      "reference": {
+        "path": "tool/internal/detect/completeness_test.go",
+        "line": 43,
+        "token_sha256": "882f3315d5411ca031d6fd645354578235ceb775c3f14fc59c23e9ae54d5a54f"
+      },
+      "current": {
+        "path": "tool/internal/detect/completeness_test.go",
+        "line": 43,
+        "token_sha256": "1fa306859ab927ec48af5cc273b7cdc420ef449187d709f2a5e51297fa7ea4fd"
+      },
+      "review_profile": "base64-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/detect/detect/TestShortBase64AccessKey",
+      "reference": {
+        "path": "tool/internal/detect/base64_short_test.go",
+        "line": 14,
+        "token_sha256": "48930c7f937539a5110236868828855610d58b3124b0677c5d2239d05f89c4cd"
+      },
+      "current": {
+        "path": "tool/internal/detect/base64_short_test.go",
+        "line": 14,
+        "token_sha256": "eb67b0ed7691146d50c8d9a077b1de445cfc9b60aca5f7c016d6cf79fbebf29c"
+      },
+      "review_profile": "base64-source-quanta",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/domain/domain/TestExtractAssetsIgnoresDiscardedElements",
+      "reference": {
+        "path": "tool/internal/domain/html_tree_test.go",
+        "line": 91,
+        "token_sha256": "5320f8349afcd9dd04dc10c9c9cf3a8a4000330d0775e71cc0801bf0c7cfe4b7"
+      },
+      "current": {
+        "path": "tool/internal/domain/html_tree_test.go",
+        "line": 92,
+        "token_sha256": "84bb5bc39b47eed2be5e5e9dff0d028398d3804ca1d91d4f76adf5b614ee54c6"
+      },
+      "review_profile": "html-tree",
+      "status": "intentional_dependency_change_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/domain/domain/TestExtractAssetsUsesDocumentTree",
+      "reference": {
+        "path": "tool/internal/domain/html_tree_test.go",
+        "line": 11,
+        "token_sha256": "24db15260914da3faa392fd96757c1b0774f3b04b685c711854ca74cf3927d8f"
+      },
+      "current": {
+        "path": "tool/internal/domain/html_tree_test.go",
+        "line": 11,
+        "token_sha256": "1aee817f8ea0f4968110891dbb30bbc283d73612f9f53e59660e4274d584dbf4"
+      },
+      "review_profile": "html-tree",
+      "status": "intentional_dependency_change_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestConfigTuningHonoredInLSP",
+      "reference": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 205,
+        "token_sha256": "7bd7bf4a0b0d47b89c2428440874b65371cddce58de4638489fc50f153c10fc9"
+      },
+      "current": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 189,
+        "token_sha256": "3d6fd3962b8392fc9d13194ee32901b42c2c2471cdb8b51941300f057bf86517"
+      },
+      "review_profile": "entropy-tuning",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestDecodedRepeatedCredentialsHaveDifferentEditorRanges",
+      "reference": {
+        "path": "tool/internal/lsp/encoding_test.go",
+        "line": 49,
+        "token_sha256": "5de94b8280c6e36e1619e18b452d93271fc1fedc9d99f8752877b6c96afca28d"
+      },
+      "current": {
+        "path": "tool/internal/lsp/encoding_test.go",
+        "line": 49,
+        "token_sha256": "70fc0dd9426e6b17151c269ca729fdaf8f8fa483a93ba92030639b56561295f3"
+      },
+      "review_profile": "diagnostic-message-only",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestDenseDiagnosticsShareCorrectPositionsAcrossBothEngines",
+      "reference": {
+        "path": "tool/internal/lsp/positions_test.go",
+        "line": 30,
+        "token_sha256": "79b7c71064946c8ddd0f48091570e13f9d840e64f6f3366f89113f41d69927e8"
+      },
+      "current": {
+        "path": "tool/internal/lsp/positions_test.go",
+        "line": 30,
+        "token_sha256": "fef9b7ef6e03332a8cbb523a5231ec15aa58533a057a7dfbec57f8752014f772"
+      },
+      "review_profile": "lsp-density",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestDiagnosticBudgetSharedBetweenProducers",
+      "reference": {
+        "path": "tool/internal/lsp/completeness_test.go",
+        "line": 94,
+        "token_sha256": "a2373818b388d7f1fb6196e4b228dd9649e2a889779f48b90c1e67f0455bae64"
+      },
+      "current": {
+        "path": "tool/internal/lsp/completeness_test.go",
+        "line": 94,
+        "token_sha256": "0c8d6e241624035b75ce4d29289192af25916f4a3787a84df1b12cc06f69f726"
+      },
+      "review_profile": "lsp-density",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestEditorGenericIdentifierNoiseAndLiteralRecall",
+      "reference": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 71,
+        "token_sha256": "36188225dbc6e7698d342700ac8f0a5b561cb4872ac9ea19fc36aa7726d9417e"
+      },
+      "current": {
+        "path": "tool/internal/lsp/released_editor_contract_test.go",
+        "line": 5,
+        "token_sha256": "95196e3f5ae84f2c4f45a15d033239862cb73a7601c110911c4ad51cdc0037a7"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/lsp/lsp_test.go",
+          "line": 71,
+          "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall",
+          "file_sha256": "3a180fea1e535375fee0318ffb8e9b7d91b7b5ab0a5cddc2b70b3331da857410"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/lsp/released_editor_contract_test.go",
+            "line": 5,
+            "name": "TestEditorGenericIdentifierNoiseAndLiteralRecall",
+            "file_sha256": "782959be1a0d2ce680a938d6691090d20f652660fca49d56a4cd897bc0c61f45"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestEditorNoiseCorporaAndExactSourceRanges",
+      "reference": {
+        "path": "tool/internal/lsp/deep_noise_test.go",
+        "line": 15,
+        "token_sha256": "45721d3ac1dc7102a7d611fbbde7f653c0ce565d5e340c66948b1f6fb09fb88e"
+      },
+      "current": {
+        "path": "tool/internal/lsp/deep_noise_test.go",
+        "line": 15,
+        "token_sha256": "35b527f7b96f9b5e1c7974f99ecf59b94d49c45879a9ca9d572320b4c48f27e3"
+      },
+      "review_profile": "noise-types",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/lsp/lsp/TestEncodedCredentialsUseOriginalEditorRanges",
+      "reference": {
+        "path": "tool/internal/lsp/encoding_test.go",
+        "line": 10,
+        "token_sha256": "3b011dcf0bf15cb3c14e11ef07ba356f0f4dd3264f76b0f57b0681b52af2ab62"
+      },
+      "current": {
+        "path": "tool/internal/lsp/encoding_test.go",
+        "line": 10,
+        "token_sha256": "e50a6880dc04a04096954d48d2da4b55f533275d60561e79d5d7de7352a9a667"
+      },
+      "review_profile": "diagnostic-message-only",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlfeatures/mlfeatures/TestCompressionRatioDivergence",
+      "reference": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 94,
+        "token_sha256": "fce3c9ad2bc49aaaa945756f75356e76156885f04ecc1c8f97514bf9e33d9b62"
+      },
+      "current": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 95,
+        "token_sha256": "04a8b336c2db3bb9d03f815cbd9cecb058dfbe3520718771ba28341a53dfb4dc"
+      },
+      "review_profile": "portable-extractor",
+      "status": "intentional_model_replacement_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlfeatures/mlfeatures/TestExtractorParity",
+      "reference": {
+        "path": "tool/internal/mlfeatures/paritydump_test.go",
+        "line": 15,
+        "token_sha256": "8a90ff71efc45ecf94fe1145bd347b67142f711fef58dcdee0dce139f6f16941"
+      },
+      "current": {
+        "path": "tool/internal/mlfeatures/paritydump_test.go",
+        "line": 13,
+        "token_sha256": "7f63080cbe9a7fd2046f95b4b80313ad00467a02117133daaaa92ffd290bb9ab"
+      },
+      "review_profile": "portable-extractor",
+      "status": "intentional_model_replacement_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlfeatures/mlfeatures/TestFeatureCount",
+      "reference": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 125,
+        "token_sha256": "4265c274631212d4df3a8247764349dc8f6fc2f3e3240f1c88ad3c3462911b3b"
+      },
+      "current": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 125,
+        "token_sha256": "685e329c654a67c99e25dad6d5aec2d3316d1f2ed2685ce48a1dd4b0c3a28c5b"
+      },
+      "review_profile": "portable-extractor",
+      "status": "intentional_model_replacement_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlfeatures/mlfeatures/TestFeatureExtractionDeterministic",
+      "reference": {
+        "path": "tool/internal/mlfeatures/entropy_determinism_test.go",
+        "line": 8,
+        "token_sha256": "9f831c4bf28a783973c276a5759edaf9d0351dcbd945a30e8dc01f285107b246"
+      },
+      "current": {
+        "path": "tool/internal/mlfeatures/compression_test.go",
+        "line": 35,
+        "token_sha256": "0a8b3a39e6c096c7d921b69de5b50bc4176747bda1a115714c69710f03095e0f"
+      },
+      "review_profile": "determinism",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlfeatures/mlfeatures/TestParity",
+      "reference": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 65,
+        "token_sha256": "1384c46d07bd73afa814a6e4060549fdce0511b94b7ee112d92adf1a6424dd11"
+      },
+      "current": {
+        "path": "tool/internal/mlfeatures/extract_test.go",
+        "line": 64,
+        "token_sha256": "2887deefe92c551e619020da2b400bbf3b5e9d53347ca62f986fb7281daf006d"
+      },
+      "review_profile": "legacy-parity:tool/internal/mlfeatures/extract_test.go",
+      "status": "intentional_model_replacement_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlmodel/mlmodel/TestParity",
+      "reference": {
+        "path": "tool/internal/mlmodel/mlmodel_test.go",
+        "line": 74,
+        "token_sha256": "782b0735e5ce7c9e7da53156f2adfd7d58102140e04d2ff3206a76a103471bd3"
+      },
+      "current": {
+        "path": "tool/internal/mlmodel/mlmodel_test.go",
+        "line": 74,
+        "token_sha256": "db231c8387321cdc7cea70fa19a1d84d6267245ab09143510c30199d551b0bdb"
+      },
+      "review_profile": "legacy-parity:tool/internal/mlmodel/mlmodel_test.go",
+      "status": "intentional_model_replacement_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlscore/mlscore/TestEmbeddedRejectsIncompatibleFeatureOrder",
+      "reference": {
+        "path": "tool/internal/mlscore/model_loading_test.go",
+        "line": 24,
+        "token_sha256": "e88cd9cde0265a32feaf9760bece73ec878ceb806765b9ebaad3a8fffa374968"
+      },
+      "current": {
+        "path": "tool/internal/mlscore/model_loading_test.go",
+        "line": 24,
+        "token_sha256": "df6f58ecb9732859cc55fe323b50f2c6be21f0c758e3f1f1dafc0300894fb789"
+      },
+      "review_profile": "model-schema",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/mlscore/mlscore/TestSidecarTransportErrorsWithholdCredentialsAndKeepCause",
+      "reference": {
+        "path": "tool/internal/mlscore/response_test.go",
+        "line": 106,
+        "token_sha256": "b7256a43a666822ec5b40278a37e29f528b9946a362148ccf042fa943db19ddb"
+      },
+      "current": {
+        "path": "tool/internal/mlscore/response_test.go",
+        "line": 103,
+        "token_sha256": "78b566214de181449533e7a4cef2ca511c020f4f21fef223fda310f84da65ea6"
+      },
+      "review_profile": "sidecar-private-error",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/report/report/TestBBSummary",
+      "reference": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 59,
+        "token_sha256": "d2ed1a230ec7ff8c27f84521f1a35adf022cf6d5f0459f0fb2e4448234d3a544"
+      },
+      "current": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 60,
+        "token_sha256": "0258fa4b63d5d259a09ff1112e3d666935c3e16205f02205431d0a1afb1e3ddb"
+      },
+      "review_profile": "english-ui",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/report/report/TestPrettyDistinguishesEmptyFilteredAndIncomplete",
+      "reference": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 83,
+        "token_sha256": "32076169e36cd9d50ca3702e8d39a474db49322cee9550b9ad3ff2bf20701ea6"
+      },
+      "current": {
+        "path": "tool/internal/report/released_pretty_contract_test.go",
+        "line": 10,
+        "token_sha256": "00f15f2e3385cda13041e7ec26ab90d25ecbd49c9d0c5d660f3e3d2b7ec1d734"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/report/report_test.go",
+          "line": 83,
+          "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete",
+          "file_sha256": "d6de6ad68f2fd638fcabca8a6ca450cce32e2a2387a2d2324d8a12e517b3db18"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/report/released_pretty_contract_test.go",
+            "line": 10,
+            "name": "TestPrettyDistinguishesEmptyFilteredAndIncomplete",
+            "file_sha256": "8b4b6c2c75680aa79ad552e21c9c09dff4b4495eefc3098c91a81ea500371328"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. English strings follow project UI policy. Empty/filtered/incomplete states, five diagnostic rows, terminal sanitization and unconfirmed-provider explanation are restored."
+      }
+    },
+    {
+      "key": "tool/internal/report/report/TestPrettySanitizesImportedTypeAndBoundsDiagnostics",
+      "reference": {
+        "path": "tool/internal/report/report_test.go",
+        "line": 114,
+        "token_sha256": "8e3c4b2fe2adf274e2fdd7ef85f7311bc8324cc0ef18afc3ea9427ba8dec3c52"
+      },
+      "current": {
+        "path": "tool/internal/report/released_pretty_contract_test.go",
+        "line": 41,
+        "token_sha256": "a36da6624d137edad99fba06c95f44a3a13f4119d1d6953c679b23ae501b77ee"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/report/report_test.go",
+          "line": 114,
+          "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics",
+          "file_sha256": "d6de6ad68f2fd638fcabca8a6ca450cce32e2a2387a2d2324d8a12e517b3db18"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/report/released_pretty_contract_test.go",
+            "line": 41,
+            "name": "TestPrettySanitizesImportedTypeAndBoundsDiagnostics",
+            "file_sha256": "8b4b6c2c75680aa79ad552e21c9c09dff4b4495eefc3098c91a81ea500371328"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. English strings follow project UI policy. Empty/filtered/incomplete states, five diagnostic rows, terminal sanitization and unconfirmed-provider explanation are restored."
+      }
+    },
+    {
+      "key": "tool/internal/rules/rules/TestBoundedExtractionRemainsIncompleteAfterDeduplication",
+      "reference": {
+        "path": "tool/internal/rules/completeness_test.go",
+        "line": 10,
+        "token_sha256": "815421e584a45e2fda248f5e135534e4b79d336ed69779c35bd655e7201d3c86"
+      },
+      "current": {
+        "path": "tool/internal/rules/completeness_test.go",
+        "line": 10,
+        "token_sha256": "6c66ed00494943119c9a7215f89b9ce735f4ef676d4df21c4dc8fd6c7f6c9ee3"
+      },
+      "review_profile": "rule-occurrences",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/FuzzJSONLiteralInventory",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 238,
+        "token_sha256": "184747a8969111a2c6c976bf35d83dde79ae6d93e80ae30b6e5d52aee9ea6b3d"
+      },
+      "current": {
+        "path": "tool/internal/scan/json_fuzz_test.go",
+        "line": 12,
+        "token_sha256": "48a15d3d8d65b32ae645671e07d8c99f5ccefed04872a4eb6ca6065f71293c91"
+      },
+      "review_profile": "json-fuzz",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestAllowPragmasRequireOperatorComments",
+      "reference": {
+        "path": "tool/internal/scan/pragmas_test.go",
+        "line": 12,
+        "token_sha256": "809feff8797b9c3d5b32728e7cfb44fc72df88ecc937090c22d548cdb733fb44"
+      },
+      "current": {
+        "path": "tool/internal/scan/pragmas_test.go",
+        "line": 12,
+        "token_sha256": "7205927cf942edbd0726eab6b127ac526bfc1a7e6d5cbd453dac6855b40c0559"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestBarePasswordsOnOneLineKeepAllOccurrences",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 220,
+        "token_sha256": "698f9454b926c4bdf6b96e0a1db4155e492c1cd87de0273f7ab909bea7b4a314"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 235,
+        "token_sha256": "5efd75ceac634c48cddb7b5661a007b15bb82726591a80de829bfd9b90333dc0"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestBothProducersBounded",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 371,
+        "token_sha256": "d9e6652ed80c7cbadd016a6e9852098d214bbeda9bcba0b4811286dda069260a"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 370,
+        "token_sha256": "5749d02672bf174abd9f2582fa10d2a4c29847e5a968bfd51a37400bd6740a56"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestChecksumBuiltinSurvivesTemplate",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 299,
+        "token_sha256": "31e54ac7ffed785a281af80c075bf8c4f74d3467331fb33200d65639bf19246d"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 298,
+        "token_sha256": "24b0b208886eac80cb66710f020cf0241cf81e52f00edf71fe655c49f0cd3ebe"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestCrossSourceIdentityIsScopedAndOccurrenceSpecific",
+      "reference": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 84,
+        "token_sha256": "946f06f5cde8909c06e5b8d22b4a7c26830f0ff11e08af45c16a94d25cfe3bdf"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+        "line": 88,
+        "token_sha256": "3ef9d709dfbcfb9d9b59990ba48f5d62ceeaa0d4a170d3085a179137c8aeedd4"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/reconstruction_test.go",
+          "line": 84,
+          "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific",
+          "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+            "line": 88,
+            "name": "TestCrossSourceIdentityIsScopedAndOccurrenceSpecific",
+            "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestDecodedChecksumRetainsSeverityInCommentsAndFixtures",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 59,
+        "token_sha256": "5dcb2885d5b79c9ac960aebbdad3d4c3d4da4632b40c1af72dc2f0c7d532acb0"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 60,
+        "token_sha256": "02707217575bcb7b96324e04f749d9b2782ff265289d6f76c29f25a559d4597c"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestDecodedSecretIdentityEvidenceAndML",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 17,
+        "token_sha256": "574717ec71c65c1db008595fe7f1cd125a8be565fc9e154f72336d1582735201"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 18,
+        "token_sha256": "66da308358280a94eeb905232a129ef085a4c802cc5915ed12c5b01b890b48a5"
+      },
+      "review_profile": "real-model-threshold",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestDecodedVerificationUsesEachOriginalBlobContext",
+      "reference": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 77,
+        "token_sha256": "127d8c6f994e50f06f7b15042c3b2d9a70df4c180304158c14606a0c00e3e490"
+      },
+      "current": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 99,
+        "token_sha256": "6aa97e9e42c6006e09fcfb4325da79643b5e892efb25eb0bd3ff5b6918b0fd7a"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestDetectionPolicyIsPresentForEmptyAndDirectScans",
+      "reference": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 158,
+        "token_sha256": "dd39a5e68ea6cb7a1fc88cfdfc9e52df53b08404291fc4477db48c247f7f2991"
+      },
+      "current": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 180,
+        "token_sha256": "af840f1f5bb4d8e595e48fb8cf34c2eebcc5c7e9f725c42523f4992b2170d965"
+      },
+      "review_profile": "policy-entrypoints",
+      "status": "runtime_regression_fixed",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestEncodedOccurrencesThroughAnAliasRetainDeclarationRegions",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 111,
+        "token_sha256": "6514c384b9f66b0ac28ec804810cdeeea7e2eb3ab2e86f6ec20181e5207ce860"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 112,
+        "token_sha256": "bd8d814f90717ebb78a310e80a8afc6525fa3233a501bcfb6fc0b995bd7b842f"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestEncodingLimitsMakeScanIncomplete",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 180,
+        "token_sha256": "65b36c6b295f6513e9b89e653f64da289f274209c92a58a9378e28d48829d224"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 186,
+        "token_sha256": "259fc7f8c74ead5e25520f172d7f6b35188b9b80af917f34830adee8f145b728"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestExplicitMixedSequentialPasswordsAreNotPlaceholders",
+      "reference": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 38,
+        "token_sha256": "f3232475d0f5433c901a4d625ffc9f788d16dacc86051972e1b7aabe6b805a53"
+      },
+      "current": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 41,
+        "token_sha256": "5924bbce8c632ca42986faf62ac19e83552d1d11158e9322841e5f90a4a6674a"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestFileSourceStillDemoted",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 186,
+        "token_sha256": "0d5b716259a7f7a34a84821d3b3032ea722a68f8ae62df69bad5de6fd46730d3"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 187,
+        "token_sha256": "f48666ad2f496867eb936c936ce59fe8822af866296d72cb086af0c6fbca4eda"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestImageEntryIdentitySurvivesDetection",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 65,
+        "token_sha256": "cff875eb067f85c56a2e688645daa98b8186afe6bb450a8bc597b0c58a7f542f"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 66,
+        "token_sha256": "b21dd0bfaedf0762816d3d8c903b0d06e76aa237a102f304a8f1b3dd80a9daae"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONBOMAndCarriageReturnSourceCoordinates",
+      "reference": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 66,
+        "token_sha256": "4d9ac62ddc19e9227f45bb7a7aed7ae42bfa0a0ef449ce14ae75fa6263750395"
+      },
+      "current": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 69,
+        "token_sha256": "8be069d1a2d1c7d08fd423d9e594b7394b6dbca2ca06708a24e9e53320d069eb"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONCanonicalValuesIdentityAndSourceSpans",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 33,
+        "token_sha256": "313e43571d71a61741aae7539eb4cb8d38b1c4a2d1e777627643c1879075b954"
+      },
+      "current": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 24,
+        "token_sha256": "dd66189e92a9661530b3e16c3be3b83152d8057a5b7351fe409987d62f2ec025"
+      },
+      "review_profile": "json-canonical-ml",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONComposedEncodingKeepsOriginalEvidence",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 120,
+        "token_sha256": "a1ea630db9245e6e00d8bc1ab7fa5f4068e7d1718701832f8ea0631c02238b36"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 113,
+        "token_sha256": "6c3d3aa21315c4c7ac236e814f295c8e4baf58156d7f41085a7af814c8399778"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 120,
+          "name": "TestJSONComposedEncodingKeepsOriginalEvidence",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 113,
+            "name": "TestJSONComposedEncodingKeepsOriginalEvidence",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONCredentialsInObjectKeysSurviveNormalization",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 152,
+        "token_sha256": "1f3612239c0cf4ef8b2ac6396a0aae4cc923bb11f6f7616a095c8a540ed41a88"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 146,
+        "token_sha256": "fcad2f86df40897fee074dab5919f85a77385e466bc39d015a8e5238ea12beac"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 152,
+          "name": "TestJSONCredentialsInObjectKeysSurviveNormalization",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 146,
+            "name": "TestJSONCredentialsInObjectKeysSurviveNormalization",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONDensePositionsAndCancellationAreBounded",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 219,
+        "token_sha256": "ce7c720856f6369775a84307e4c853bd27e1ae4bcdf00bb4fcdb40542574d928"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 213,
+        "token_sha256": "6ede52fbd5f20d2de0edc1750200782f79adfd7d04df4eefb9b9c384c5cbedb8"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 219,
+          "name": "TestJSONDensePositionsAndCancellationAreBounded",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 213,
+            "name": "TestJSONDensePositionsAndCancellationAreBounded",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONDuplicatesPragmasAndCanonicalAllowlist",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 79,
+        "token_sha256": "4b8091812347e8221e53000ea28897b3f4230b896516c26b6828a72f48c93c6e"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 67,
+        "token_sha256": "95a5ecff381c6c6e49de868acf3ff06152a9a8278cd30bd9b297a8a360858365"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 79,
+          "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 67,
+            "name": "TestJSONDuplicatesPragmasAndCanonicalAllowlist",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONEscapedPlaceholdersAndNonBindings",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 107,
+        "token_sha256": "ba46f2805a217c6887a3c300dfded420b25d04be408582ebba54c6558986c48f"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 100,
+        "token_sha256": "b330a91a6b1afd2f34b986ea864047086ac51b548fd8ead5cba2cf5a5ba66029"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 107,
+          "name": "TestJSONEscapedPlaceholdersAndNonBindings",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 100,
+            "name": "TestJSONEscapedPlaceholdersAndNonBindings",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONLimitsAndInvalidUnicodeAreExplicit",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 197,
+        "token_sha256": "b8006809b44bf2560d3bcf67795e1bd08a169f9eafda28130768abccdf7edb29"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 191,
+        "token_sha256": "0ba466fe33d0b443cd87c2b3528d96a0bc4a579a2c80cc3b43e8f87dbe1cfe06"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 197,
+          "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 191,
+            "name": "TestJSONLimitsAndInvalidUnicodeAreExplicit",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONRepeatedCredentialInsideOneStringKeepsPositions",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 136,
+        "token_sha256": "1546d9550082b243f73a267e324cf3c5a3e46f563c3a401a521129625e7384fb"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 129,
+        "token_sha256": "37e62607e35a3586ec891ba1e5b75cc76e1b8c6cf9a4d9b2e81f0ea0d0196918"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 136,
+          "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 129,
+            "name": "TestJSONRepeatedCredentialInsideOneStringKeepsPositions",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJSONTypedRulesRetainExistingCorpusRecall",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 163,
+        "token_sha256": "c41c1f37df1db6abcb0076f0139055a93aed8aa9ebf9d7fa2d729c843a7842e1"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_json_contract_test.go",
+        "line": 157,
+        "token_sha256": "9e33b8218dd48cb0fc315895595524e730b0fd8abbcd9fbde6e6651387b08d0e"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/json_literals_test.go",
+          "line": 163,
+          "name": "TestJSONTypedRulesRetainExistingCorpusRecall",
+          "file_sha256": "7351a019016274d44f5f5343fcfeec82670a1d48efb78f16753647a851f8edc4"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_json_contract_test.go",
+            "line": 157,
+            "name": "TestJSONTypedRulesRetainExistingCorpusRecall",
+            "file_sha256": "d958ef33043a687504b3e537c7f719619abdd886a817a0d048e062f0006f1511"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Immutable Pipeline and explicit AllOccurrences/IdentityKey replace context options; JSON parser API changed. Duplicate-key uncertainty now keeps an incomplete marker while preserving original values/allowlist calls. Model threshold is the qualified .3, not legacy .5."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestJWTStructureRetainedByMLWithoutAuthenticityClaim",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 132,
+        "token_sha256": "9f073bf997364c5b4718c34ede5e2c96acb80b0e837f413fbdda66ad0fecd45f"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 133,
+        "token_sha256": "4c676271d090b522c0382d1d391f8beb28fdac338c62c5111d1bb246eb3354a5"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestLiteralUIRolesPreserveConfiguredWeakPasswords",
+      "reference": {
+        "path": "tool/internal/scan/literal_roles_test.go",
+        "line": 14,
+        "token_sha256": "76e6d08f9c487cdfb66039e8c99c94b4b67409f9cff7b5255ab2f48323fafb62"
+      },
+      "current": {
+        "path": "tool/internal/scan/literal_roles_test.go",
+        "line": 15,
+        "token_sha256": "66a71c9861c958c5507568d8498587d7f5e35a7938b51e14c0f224502d214a28"
+      },
+      "review_profile": "real-model-threshold",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestLiveVerificationSurvivesMLWithOrganizationIdentity",
+      "reference": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 42,
+        "token_sha256": "fe018685976b0f6ab7b13b465a1b7b5dbf8faaaafd14c5850692c99205aad970"
+      },
+      "current": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 64,
+        "token_sha256": "7b8a990bdf5b56551e277c359cdd97d55f314cf954faad105fdcf135c3cd8ec4"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestLockfileKeepsCredentialGeneric",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 267,
+        "token_sha256": "0858d016f4e697a972cad4b30c5439c698606fc6c2a0a387a93de1f74b0535c3"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 266,
+        "token_sha256": "d28ac8c58e6ec1f980537d560ebfab71fd8af19ad90afde8e6060af39c72684b"
+      },
+      "review_profile": "valid-lockfile",
+      "status": "intentional_stricter_intake_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestLongParserEstablishedCredentialBindings",
+      "reference": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 13,
+        "token_sha256": "774cd128613ad68ad8e4b333c5d350e36fb23e070d7f34206f9755c89f076940"
+      },
+      "current": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 14,
+        "token_sha256": "79b621e07fc941ac6cae3fc0d460c6cb42d6f97d712152bebc1fab215239845d"
+      },
+      "review_profile": "real-model-threshold",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestMLContextBelongsToCandidate",
+      "reference": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 84,
+        "token_sha256": "033bf7f946597e46ff7373048398f63056fa9f922b21ab2e6e60b29578697759"
+      },
+      "current": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 94,
+        "token_sha256": "4219560b26c351f35e4bb93ced48452b6e02bde2268d1a94ee9c579ee8df3b1c"
+      },
+      "review_profile": "reveal-instance",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestMLEvidenceDoesNotProtectContextualOrSemanticGuesses",
+      "reference": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 124,
+        "token_sha256": "730b32e3787bc5b9c3f6a5d4a284f6ede72a6c167eca221fdaca1cef1c64055f"
+      },
+      "current": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 146,
+        "token_sha256": "5397f2c08597b636b75b23caad5f2839bf09df52b65abbaced1365184ee212e5"
+      },
+      "review_profile": "direct-binding",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestMLSuppressionCannotCertifyCredentialAbsence",
+      "reference": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 29,
+        "token_sha256": "63a4c1a61d5fdf7efe4b5df579ba4f11bc6167fc02aebed9eab25afc2d140e60"
+      },
+      "current": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 51,
+        "token_sha256": "e339638795bfd5851c2a094dd181e86b8d2edee141f6de42ccd12ae809f4ea62"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestMalformedStructuredLiteralsAreNeverSubmitted",
+      "reference": {
+        "path": "tool/internal/scan/verification_literal_safety_test.go",
+        "line": 18,
+        "token_sha256": "763f9add8529e6eca52616e7fac48559ff19154f465ae3564e03d35fd484aa25"
+      },
+      "current": {
+        "path": "tool/internal/scan/verification_literal_safety_test.go",
+        "line": 18,
+        "token_sha256": "123ca546ce0723a8d1239f346a0d0cc0ed025644138a7bcdbe957f4cf1a50f6a"
+      },
+      "review_profile": "malformed-verification",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestNestedAndRepeatedDecodedValuesKeepDistinctOriginalOccurrences",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 73,
+        "token_sha256": "5dd0990ac3345976c73e62f4090a299d9caa85d90ea86bcdd5ce6a17eac0ae54"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 74,
+        "token_sha256": "41bc7e17ab4ab18ee13f566aa557be5e93f7496f23f0976bf4d32e95c5ea2ac7"
+      },
+      "review_profile": "real-model-threshold",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestNormalScanNoTruncationMarker",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 419,
+        "token_sha256": "5d6fb5fb2efc2a392255ee3a485488931f16f8400b2bab62e4b419a716a27c4a"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 418,
+        "token_sha256": "f6e6ed0a73d593e83ad9f3687240c237660420c6eb5d221cd443660bbb7c0707"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestPragmaSuppressionAfterMemoization",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 445,
+        "token_sha256": "c7ef63ba639540558212d0cd33ad4978b9f8e862bddbc3cd41ed01edd3e1e12f"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 444,
+        "token_sha256": "70feb82317cda2fbb87c880a952ea265255043ba9d97d6f2c4e11580132c170e"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestProcessingPanicsPreserveIncompleteMarker",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 50,
+        "token_sha256": "9ad18cb04391f35e374a519e9ee787421be05eb7b78f82ca980b545d854f4c23"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 52,
+        "token_sha256": "54fa1a8d3183dd1f65f58d86d94a295e5db39517cc9322a3d0768acfa33f5def"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRawCandidateCapRemainsVisibleAfterDedupeAndAllowlist",
+      "reference": {
+        "path": "tool/internal/scan/raw_cap_test.go",
+        "line": 13,
+        "token_sha256": "72ea04ad3f5d46744c8812cb5cd8838d828a0a17a8b9cde3b9a0744e0fccf5ab"
+      },
+      "current": {
+        "path": "tool/internal/scan/raw_cap_test.go",
+        "line": 13,
+        "token_sha256": "3bc8f8c6b13a7d11675ff7eb45373f900fdb0926c7bbfbe3f58c03755ef47203"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestReconstructedPragmaSetsFiltered",
+      "reference": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 48,
+        "token_sha256": "68203798d607160e8801562e23d25c3fe682abf8f533b70edab7ec2dc50d8487"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+        "line": 50,
+        "token_sha256": "4b9e3de5560e2c6fc0b7cdd22964cc78e50ad5eeb54d500e451f9db533bf5f10"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/reconstruction_test.go",
+          "line": 48,
+          "name": "TestReconstructedPragmaSetsFiltered",
+          "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+            "line": 50,
+            "name": "TestReconstructedPragmaSetsFiltered",
+            "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestReconstructionEvidenceDoesNotRevealURLCredentials",
+      "reference": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 63,
+        "token_sha256": "7a6f32bdd2ec2f489992eea66b81f7b035c4af678b4e975f97fecb551f16d011"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+        "line": 66,
+        "token_sha256": "a973d76a8de0ddbdf347a90fde8f66bad26e8715e7984fd3c6bc1e4d44a5dca3"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/reconstruction_test.go",
+          "line": 63,
+          "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials",
+          "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+            "line": 66,
+            "name": "TestReconstructionEvidenceDoesNotRevealURLCredentials",
+            "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestReconstructionFindsSplitCredentialAndEvidence",
+      "reference": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 12,
+        "token_sha256": "d81c24ed7bf32f81d10c905ae7bdae64446d1c44392b8280a40d399afc7938c0"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+        "line": 12,
+        "token_sha256": "ad05e3155044b46a5895406cbf6c1cb679f3775448a495268e6b73b190834ad0"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/reconstruction_test.go",
+          "line": 12,
+          "name": "TestReconstructionFindsSplitCredentialAndEvidence",
+          "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+            "line": 12,
+            "name": "TestReconstructionFindsSplitCredentialAndEvidence",
+            "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestReconstructionOccurrencesUseExpressionCoordinates",
+      "reference": {
+        "path": "tool/internal/scan/reconstruction_test.go",
+        "line": 28,
+        "token_sha256": "f48511cbbb4b4bd7cb991d20dbfd97361450d241b4a6f73f7dae9b1172ae526a"
+      },
+      "current": {
+        "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+        "line": 29,
+        "token_sha256": "be9c2e2d832964df1c49bbea5d2c018ab34be225cb1265420f569f42bbb4cb9c"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/scan/reconstruction_test.go",
+          "line": 28,
+          "name": "TestReconstructionOccurrencesUseExpressionCoordinates",
+          "file_sha256": "9b54c7bfdc350ff8be8e5ec3f2afbad6583f36bd5adf1fac920eb8c96125de70"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/scan/released_reconstruction_contract_test.go",
+            "line": 29,
+            "name": "TestReconstructionOccurrencesUseExpressionCoordinates",
+            "file_sha256": "cbf7c47edd629368e51f864e6ac7c7982bcaa2ee88bc9b9179a8c5539c9aff0b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required."
+      }
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRepeatedCredentialKeepsEveryExactOccurrence",
+      "reference": {
+        "path": "tool/internal/scan/occurrence_test.go",
+        "line": 14,
+        "token_sha256": "eec2591a47087b3a057f027f882d293396885889657c572b8e556bd9b06ef7a3"
+      },
+      "current": {
+        "path": "tool/internal/scan/occurrence_test.go",
+        "line": 14,
+        "token_sha256": "ad5202eb49e958ed1f0c6b73e2ba3dce7235ba362f5ef86db0e1102e86ce1e09"
+      },
+      "review_profile": "repeated-occurrences",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRevealSecrets",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 200,
+        "token_sha256": "a44398b02227e43f36cc717106f45ad28e013cecf91e9df143944e8267e93654"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 201,
+        "token_sha256": "40b4c8736181e381898a80639b945751a5882f72379b90952f8a9d7ce5ec7d83"
+      },
+      "review_profile": "reveal-instance",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRunAllowFunc",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 216,
+        "token_sha256": "e924585f473e1b0de82a19c78fb13eccccd06b4334230bf47c31a42b1268f563"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 215,
+        "token_sha256": "0da85bec3da92b4a31877321088814c9d00f17a5025e4f7a9ee168f13eba1623"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRunCancellationDoesNotWaitForSource",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 19,
+        "token_sha256": "b9db0f5029b295f7970058e09239aa32ab44a10dcfaa07054035ffcf829a2931"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 19,
+        "token_sha256": "7c0f600c266b763079e8f1b9d9c86c939b217e485547e9cfddedce48956447fb"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRunCancelledShortCircuits",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 231,
+        "token_sha256": "7c0dd80c5779da6f8077fe99520dd7fb7ddc5ef277168c97939906fcfc44eb76"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 230,
+        "token_sha256": "7ff3c68593f09c2ced60057384e679c68cec2a15bafb46a09b991a20ae530b4f"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRunEmptyInput",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 225,
+        "token_sha256": "63219b3bb76f195dfc5a3720554ae497ce4483954c83b6167c29bc040c1b7996"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 224,
+        "token_sha256": "31e99efab29bbdb5efb13e0e12d0be242404fe2a176cdf162190d42364fe0e7b"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestRunSeverityPragmaAllow",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 132,
+        "token_sha256": "eda71a482c67842873fef005337528d1502bbddfeae517aa9356764aa251cdda"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 133,
+        "token_sha256": "e3978d4aca9abe30a65ba9350ff282708b0ea628dfca630bd3c2357638000910"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSARIFUnicodeColumnsFromBothProducers",
+      "reference": {
+        "path": "tool/internal/scan/sarif_positions_test.go",
+        "line": 21,
+        "token_sha256": "d7143351bf3af8ab6b904c9af8422b87f00797eb1df5e52c6e562ffdcd7f9c43"
+      },
+      "current": {
+        "path": "tool/internal/scan/sarif_positions_test.go",
+        "line": 21,
+        "token_sha256": "7875f43e83a49f55c7ef5de8ed694c180032697fe6a09bf79fb85f29f544a4e8"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSemanticGeneratesCandidateOutsideL1WithLiteralEvidence",
+      "reference": {
+        "path": "tool/internal/scan/semantic_pipeline_test.go",
+        "line": 15,
+        "token_sha256": "a2c2daa5d38836906a0bcb7122291b2c335243c14e5f905a3fe269bfbfaf6a66"
+      },
+      "current": {
+        "path": "tool/internal/scan/semantic_pipeline_test.go",
+        "line": 16,
+        "token_sha256": "aea015daa39affe60f21a576f0850680eea28230738bafae7accc821f5f5c387"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSemanticPreservedAcrossStructuredNormalization",
+      "reference": {
+        "path": "tool/internal/scan/semantic_pipeline_test.go",
+        "line": 40,
+        "token_sha256": "86c106bad0f792564406e702891e43655e64667bff44c006fb2905ed287bd9a6"
+      },
+      "current": {
+        "path": "tool/internal/scan/semantic_pipeline_test.go",
+        "line": 41,
+        "token_sha256": "23e01d3e742b9ec22bc84219ee9f6d14c32c4cffd762eacdedd53ca95604996d"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSeverityDemotion",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 462,
+        "token_sha256": "d035a99a0020d8ab3c23cd68ddb40cb5ee34e0cd15a5ad0f24e4589e5de04dbe"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 461,
+        "token_sha256": "a15706434b902687324b6438da21368082fa724fcde81fb827b6daca4401af3e"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSingleItemCancellationIsIncomplete",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 93,
+        "token_sha256": "3c5b0857d80d84ef022ce7db101a6fb7238644af1291d4227a845482c43cd5b2"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 94,
+        "token_sha256": "dab81f5a3ba56a319e1e72607911f22f07cad7382a1f12e18b0793beb96f4318"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSourceAwareExamplePathAndURL",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 156,
+        "token_sha256": "27451fae3c427b0f7375fd6f820b0922da18cb3fb8930fbfd1acc7e5ddd817c3"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 157,
+        "token_sha256": "4f32f8d1f3421638db623f934787f583343df74d83492d715e1520287a7cdc66"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestSourceErrorIsNotAnEmptyCleanScan",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 36,
+        "token_sha256": "f7acd3822d9c0667847927b459787e9ba54675dc24c3b59bef22ed5d122cd50a"
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 38,
+        "token_sha256": "92e8afafd3949bed4b2f25181b86b574cd3bbb04584f7d02ce9aeef25deb2d6f"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestStructuredProseKeepsContextualPasswordEvidence",
+      "reference": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 52,
+        "token_sha256": "1a023c70abef98dcde0612bb9038e72e1c12c860e2b0d310005ed30e3cce03d2"
+      },
+      "current": {
+        "path": "tool/internal/scan/binding_precision_test.go",
+        "line": 55,
+        "token_sha256": "6641e0aa98d2725113fe3f913ed95f842c96445ef196b849e1be7e6d915cd2e2"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestStructuredProviderNamespacesKeepTypedIdentity",
+      "reference": {
+        "path": "tool/internal/scan/literal_roles_test.go",
+        "line": 52,
+        "token_sha256": "0913abdf32994441900040e3575c8ca75364a15e2742ede0ac7009db89f390e6"
+      },
+      "current": {
+        "path": "tool/internal/scan/literal_roles_test.go",
+        "line": 53,
+        "token_sha256": "205aee63f0278a8ccacbc5f2aace655de9b63e1d3bd89e2bef8a5f6ec8826c7c"
+      },
+      "review_profile": "real-model-threshold",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestStructuredVerificationUsesCanonicalValueAndImmediateObject",
+      "reference": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 110,
+        "token_sha256": "97d004c22922b149c9cb1722938aa602d6b5a1cd8fb8c33ca7904faf1eb543e7"
+      },
+      "current": {
+        "path": "tool/internal/scan/verification_pipeline_test.go",
+        "line": 132,
+        "token_sha256": "6c60ec8ac31d5dfc1da5c1ea9182286f0ebfaa05abf75a04795a00cf66ede290"
+      },
+      "review_profile": "canonical-verification",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestTOMLCanonicalPasswordsAndTypedCredentials",
+      "reference": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 16,
+        "token_sha256": "9ccc3f3577698ecdb43d8b44764c73306b70d6db92ef7451cea37e1ac7c849c1"
+      },
+      "current": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 17,
+        "token_sha256": "c1a57d3e8d7398a15405d30e17d8f826547d75bdc95eb6c6160bb70a7db45fe7"
+      },
+      "review_profile": "yaml-toml-keyed",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestTOMLNormalizationPreservesCommentsAndOccurrences",
+      "reference": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 63,
+        "token_sha256": "eaf660d31f38fe372566342278d8dd4477fcddd1731b1d2bd0afafc1d2c496f0"
+      },
+      "current": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 76,
+        "token_sha256": "3860512e41b18e5e91af43c2cdca283b63765a9ee459a4ac11814dc4fe5136f5"
+      },
+      "review_profile": "yaml-toml-keyed",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestTOMLTemplatesNonliteralAndCoverageBoundaries",
+      "reference": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 84,
+        "token_sha256": "bec86ab89c51c44b62f243d1ef910fa6274d00585f370ac4aecb4c0007765f4f"
+      },
+      "current": {
+        "path": "tool/internal/scan/toml_literals_test.go",
+        "line": 104,
+        "token_sha256": "83739a199fb7e43927b6bfe218e0687da6384fbe7f2161038314bd4c58623ae7"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestUnquotedLiteralDependsOnLanguageAndComments",
+      "reference": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 102,
+        "token_sha256": "3b9233aac92a1dd9ba17b9e38ae5c46784862586354cf7ea90bccf0071ec893b"
+      },
+      "current": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 124,
+        "token_sha256": "12a7c8de6c704f516ad770d86eea2d7a89a9eac46d95d1d13ecaf91d32e51e6d"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLAliasGuardsAndMergeOverrides",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 176,
+        "token_sha256": "29a24edcbd690b453b50e8e2e6bebc8b670cff8856c8c2a512d50fa3cbc1bc24"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 185,
+        "token_sha256": "703957b814dac0860e0876cf27c36cf0802c090f15a1fbae4c202b1ec3a74e19"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLCanonicalMultilineAndAnchoredPasswords",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 17,
+        "token_sha256": "34137b32d83c0c2e38412e6be8e986c34f1e7312f9f14147995b86f7e6977409"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 18,
+        "token_sha256": "032dca9fb8be2ac9725828e80641915cc98900ef75c878eb3ccb418a66470f24"
+      },
+      "review_profile": "yaml-toml-keyed",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLInlineMergeSequenceHasUseProvenance",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 117,
+        "token_sha256": "b05bed4652cadc4d7633873683061dac38ca76acfb77db4b2d47e300c54516d0"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 120,
+        "token_sha256": "8536e5cedabe9ffdd9cde2014931e4244c99e02684238cb2b3fd5d5fd24fbaa9"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLPragmasFollowParserLinesAndCommentRoles",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 95,
+        "token_sha256": "af15c6d1e8dc6e7182818f80717f1cff06c279801a260cd9d917ce44327a2fac"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 98,
+        "token_sha256": "93e9fc653a7fdbac3effbf6159b2909d32df4ecd2dd1378f5301357ae6639aa5"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLPresentationDoesNotHideTypedCredentials",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 56,
+        "token_sha256": "3671544abdb26dc7f0bc0c2511bf2657db9366ff5262d09136c482811152de07"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 59,
+        "token_sha256": "23989efd004543b79c048aae6a9a23ff59e170b6234a346bf4dca5052a5f577c"
+      },
+      "review_profile": "yaml-presentation-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLScalarAndCollectionAliasesKeepDefinitionAndUseEvidence",
+      "reference": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 134,
+        "token_sha256": "64d0b673d108b82103eec2629073ec2c40aa73d2e87376a0582d70f291c4dab5"
+      },
+      "current": {
+        "path": "tool/internal/scan/yaml_literals_test.go",
+        "line": 137,
+        "token_sha256": "a01832a4846b63f605065b342ad6a9df1657033cc9157cf7a6c3a5162f1e2d3a"
+      },
+      "review_profile": "yaml-toml-keyed",
+      "status": "restored_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLScalarsHaveCanonicalValuesAndOriginalSpans",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 142,
+        "token_sha256": "a15642b342454a61daeae9b90471d80f06a94f13f769783a826e57d660635ed9"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 143,
+        "token_sha256": "6801de7b6250c4c7af0b35ffc52682d22ec9117a0b9ba8bfb9979e4900015ae2"
+      },
+      "review_profile": "yaml-short-password",
+      "status": "intentional_behavior_change_covered",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/scan/scan/TestYAMLUnicodeFlowPositionsHaveBoundedCost",
+      "reference": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 203,
+        "token_sha256": "4eaf90161b0212a5346de6430616212bddc718cc2fae26a3c63657f39d850d5f"
+      },
+      "current": {
+        "path": "tool/internal/scan/encoding_test.go",
+        "line": 209,
+        "token_sha256": "ff65fab8cdcb29c470b218ab8ec8ed0230fef17b3f3d04b3b04ad292f851dc9d"
+      },
+      "review_profile": "yaml-dense",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/server/server/FuzzLosslessJSONUTF8",
+      "reference": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 16,
+        "token_sha256": "64ffd85291759dd439f5f7112beefc6e5c30cd25cdbdeaae36f6fe04c487f1d3"
+      },
+      "current": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 18,
+        "token_sha256": "8aab9842b9e10c746461301a0b5a2691e81496346074951d8c2431ff2fa02e98"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/server/unicode_test.go",
+          "line": 16,
+          "name": "FuzzLosslessJSONUTF8",
+          "file_sha256": "17afe5eac72d4152365dc516306d75f28b0614b8c6ffd39e2914615168c4eef8"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/server/unicode_test.go",
+            "line": 18,
+            "name": "FuzzLosslessJSONUTF8",
+            "file_sha256": "9ef3dc57dce26a6e9d6e50a5f6b6bf82fea37908823e535b055ce7d88510957b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Replaced removed streaming validator with the actual bounded HTTP decode path into RawMessage; chunk sizes, Unicode validity and byte identity remain asserted."
+      }
+    },
+    {
+      "key": "tool/internal/server/server/TestIntakeRejectsAmbiguousMissingAndUnsupportedFields",
+      "reference": {
+        "path": "tool/internal/server/request_contract_test.go",
+        "line": 9,
+        "token_sha256": "9b5b95b9159a791ebc3d147c1606484f73f4e57f6c47802690443c5cfada29b6"
+      },
+      "current": {
+        "path": "tool/internal/server/request_contract_test.go",
+        "line": 9,
+        "token_sha256": "fd0e9c23aad0d99643ce68f87422e3ccf619749f01c08ec146a5b1e4f8e32edc"
+      },
+      "review_profile": "server-strict-fields",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/server/server/TestLosslessJSONUnicodeAcrossEveryChunkSize",
+      "reference": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 58,
+        "token_sha256": "bdaacaec71fea5f7d11fd64ad5ecf27d77179409ab765bcbdf13168a4c23b639"
+      },
+      "current": {
+        "path": "tool/internal/server/unicode_test.go",
+        "line": 59,
+        "token_sha256": "9df37e14a51e007a28612dfa87e8c9a5ee3415242cff60313704b421340e6ce7"
+      },
+      "review_profile": "previous-restoration",
+      "status": "restored_assertions_qualified",
+      "prior_map": {
+        "original": {
+          "path": "tool/internal/server/unicode_test.go",
+          "line": 58,
+          "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize",
+          "file_sha256": "17afe5eac72d4152365dc516306d75f28b0614b8c6ffd39e2914615168c4eef8"
+        },
+        "status": "restored_assertions_qualified",
+        "current_tests": [
+          {
+            "path": "tool/internal/server/unicode_test.go",
+            "line": 59,
+            "name": "TestLosslessJSONUnicodeAcrossEveryChunkSize",
+            "file_sha256": "9ef3dc57dce26a6e9d6e50a5f6b6bf82fea37908823e535b055ce7d88510957b"
+          }
+        ],
+        "notes": "Original assertions restored with documented API adaptation where required. Replaced removed streaming validator with the actual bounded HTTP decode path into RawMessage; chunk sizes, Unicode validity and byte identity remain asserted."
+      }
+    },
+    {
+      "key": "tool/internal/server/server/TestServeUsesRuleTemplates",
+      "reference": {
+        "path": "tool/internal/server/server_test.go",
+        "line": 118,
+        "token_sha256": "292e89f97c8db5198964702c8b5ac0511e38c5407265a93a61daac6c3af1d79a"
+      },
+      "current": {
+        "path": "tool/internal/server/server_test.go",
+        "line": 119,
+        "token_sha256": "b514e3a051120e3b9d8088b9bd57e81e6ebf9d9c4fb64421d5c51b7cc9e9c5a0"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestEntryCapAbort",
+      "reference": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 352,
+        "token_sha256": "25be2cbea0179ab16849617030cb3bb270d6a35b6ade969e6aa43db2cd000b4f"
+      },
+      "current": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 352,
+        "token_sha256": "a3551573b7c014fbf6562a62f935b3105c61c64b8a8eba63c0d3972a22fdcc7b"
+      },
+      "review_profile": "mobile-reader-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestExtractPlantedKeyInJSON",
+      "reference": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 195,
+        "token_sha256": "65bf874445665b65d433e369f5bcf99a255e854b42f5d59caf7b3ba56e878dcd"
+      },
+      "current": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 195,
+        "token_sha256": "eb1d46e2ac159cf1a2086629f9bf686a3be1185721c7f47c1a5ccd597a676fe7"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestFilesystemExtractsPDFTextInsideArchive",
+      "reference": {
+        "path": "tool/internal/source/archive_test.go",
+        "line": 259,
+        "token_sha256": "0d9c1d6494dd17c9a62727459d19dce7a2fc831f7d476748abc4a42d517b6014"
+      },
+      "current": {
+        "path": "tool/internal/source/archive_test.go",
+        "line": 259,
+        "token_sha256": "79f923fd33d90b930f4dd369dea3fe609cdabe5484cfee9841ea89c5167be19f"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestFilesystemExtractsSplitSecretFromDOCX",
+      "reference": {
+        "path": "tool/internal/source/archive_test.go",
+        "line": 137,
+        "token_sha256": "941b072e36ef1247d8dab325cd2b52e3c3cb0f4dbca2c620faccb7c8817139ff"
+      },
+      "current": {
+        "path": "tool/internal/source/archive_test.go",
+        "line": 137,
+        "token_sha256": "41180b5d02a6ae7573721c116a07e2cdfea71923d14589ec3042153129c72e79"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestGitChangedFilesRenameWithSecretSince",
+      "reference": {
+        "path": "tool/internal/source/git_test.go",
+        "line": 288,
+        "token_sha256": "b725c6f53b752c9df802ce813984c839b3eaf3eebcbb812d4c243878faaaa16a"
+      },
+      "current": {
+        "path": "tool/internal/source/git_test.go",
+        "line": 288,
+        "token_sha256": "39755e2e9159d3ebfc6542e2f68400638257d022411ea5c0e2ba64d9b9b86bfe"
+      },
+      "review_profile": "git-rename",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestGitChangedFilesRenameWithSecretStaged",
+      "reference": {
+        "path": "tool/internal/source/git_test.go",
+        "line": 242,
+        "token_sha256": "73c7d9f63f241467061d80f212fe61f43853242224d07e910cd80e2769692254"
+      },
+      "current": {
+        "path": "tool/internal/source/git_test.go",
+        "line": 242,
+        "token_sha256": "f7448a2441f9be24dc3d7fbf7a3a29fd6a65a3a870a5d2725e66bf0dcde8cb48"
+      },
+      "review_profile": "git-rename",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestGoogleServicesHighValue",
+      "reference": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 228,
+        "token_sha256": "036c22fc98250bc42ee473208d0ad80763829750d4d13d8916f29375d6c89b43"
+      },
+      "current": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 228,
+        "token_sha256": "d008a415c4a5aefc0c5f54382ab1e8b43f6fe3155e5fcc5140acb9bfcc7f811e"
+      },
+      "review_profile": "pipeline-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestOCIMetadataCacheAndSharedBudget",
+      "reference": {
+        "path": "tool/internal/source/image_oci_test.go",
+        "line": 51,
+        "token_sha256": "66eb71e2855f90508518cf0688f3c5dbc562bad74d1bcfb5774ad6dfc0a60d08"
+      },
+      "current": {
+        "path": "tool/internal/source/image_oci_test.go",
+        "line": 51,
+        "token_sha256": "08aeeac4c1d6a7a6bcfb0c75970feba8c6b8c7729c31ef2b7437003de855e68d"
+      },
+      "review_profile": "oci-content-address",
+      "status": "preserved_and_strengthened",
+      "prior_map": null
+    },
+    {
+      "key": "tool/internal/source/source/TestTotalBytesCapAbort",
+      "reference": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 380,
+        "token_sha256": "35d3fe7191f16f717bcb2552437cdfec9ae77ba2fa18d39d567329796bc2512f"
+      },
+      "current": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 380,
+        "token_sha256": "6124ec3ab16dc6fa1c0ded6f80f3e9dfca948e9fbad0f2c66b9d96ae82f20236"
+      },
+      "review_profile": "mobile-reader-api",
+      "status": "preserved_with_api_adaptation",
+      "prior_map": null
+    }
+  ],
+  "helpers": [
+    {
+      "key": "tool/cmd/prowl/main/mcpTransportSecret",
+      "reference": {
+        "path": "tool/cmd/prowl/mcp_transport_test.go",
+        "line": 14,
+        "name": "mcpTransportSecret",
+        "token_sha256": "8d78ed183aa70c73600a799850d6f387447d3cff9dcab4aa4b6a30be89d808b7",
+        "string_value_token_sha256": "fc83fdc12b72e24b4dcd3f82d6574378ade3cca4bbf615e911e4aa4fd7d081ab",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mcp_transport_test.go",
+        "line": 12,
+        "name": "mcpTransportSecret",
+        "token_sha256": "fc83fdc12b72e24b4dcd3f82d6574378ade3cca4bbf615e911e4aa4fd7d081ab",
+        "string_value_token_sha256": "fc83fdc12b72e24b4dcd3f82d6574378ade3cca4bbf615e911e4aa4fd7d081ab",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/cmd/prowl/main/mobAWSKey",
+      "reference": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 21,
+        "name": "mobAWSKey",
+        "token_sha256": "809e493bb1cf22e3774e34dfe965bb2340a607cc1c9e922ba0a8704dd98ccdf2",
+        "string_value_token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "dependencies": [
+          "tool/cmd/prowl/main/mobAizaKey"
+        ]
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 22,
+        "name": "mobAWSKey",
+        "token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "string_value_token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "dependencies": [
+          "tool/cmd/prowl/main/mobAizaKey"
+        ]
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/cmd/prowl/main/mobAizaKey",
+      "reference": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 21,
+        "name": "mobAizaKey",
+        "token_sha256": "809e493bb1cf22e3774e34dfe965bb2340a607cc1c9e922ba0a8704dd98ccdf2",
+        "string_value_token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "dependencies": [
+          "tool/cmd/prowl/main/mobAWSKey"
+        ]
+      },
+      "current": {
+        "path": "tool/cmd/prowl/mobile_test.go",
+        "line": 22,
+        "name": "mobAizaKey",
+        "token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "string_value_token_sha256": "43c17d965c516757771c6c873e97a06115a3013bab7361954773c7fbbaf13fc8",
+        "dependencies": [
+          "tool/cmd/prowl/main/mobAWSKey"
+        ]
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/atlassian/atlassian/latencyJiraMock",
+      "reference": {
+        "path": "tool/internal/atlassian/bench_test.go",
+        "line": 38,
+        "name": "latencyJiraMock",
+        "token_sha256": "bdfbb8561259eb8ef8ad62a7627f889c604c83872e6c6b120c0b5b0f326b1106",
+        "string_value_token_sha256": "bdfbb8561259eb8ef8ad62a7627f889c604c83872e6c6b120c0b5b0f326b1106",
+        "dependencies": [
+          "tool/internal/atlassian/atlassian/jiraMockWithBulkGate"
+        ]
+      },
+      "current": {
+        "path": "tool/internal/atlassian/bench_test.go",
+        "line": 37,
+        "name": "latencyJiraMock",
+        "token_sha256": "150864318e739a62cb03d9560145d2b0ccf5bc067b58803346e647216f798c27",
+        "string_value_token_sha256": "52d6aab7d626c35b7d59b87595b1af084496abb548c887c6bcfaab2f437d43ab",
+        "dependencies": null
+      },
+      "status": "preserved_fixture",
+      "rationale": "Old forwarding call with nil gate is inlined. All mock endpoints, issue counts, bulk histories and sleep stay identical. The non-nil bulk-gate path is restored separately by TestParallelBulkRequestsConcurrent."
+    },
+    {
+      "key": "tool/internal/detect/detect/base64URLTestKey",
+      "reference": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 12,
+        "name": "base64URLTestKey",
+        "token_sha256": "9c243c833a93bd668d704c51fba40bc4cd812848dd2b08263624381295345871",
+        "string_value_token_sha256": "843e6f608a8b6d143a5b452120fa858cfcbb397e2f3a867731aeb99bd30eca92",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/detect/base64url_test.go",
+        "line": 12,
+        "name": "base64URLTestKey",
+        "token_sha256": "843e6f608a8b6d143a5b452120fa858cfcbb397e2f3a867731aeb99bd30eca92",
+        "string_value_token_sha256": "843e6f608a8b6d143a5b452120fa858cfcbb397e2f3a867731aeb99bd30eca92",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/lsp/lsp/genericSecretLine",
+      "reference": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 69,
+        "name": "genericSecretLine",
+        "token_sha256": "f34dbabdcd98a85c83650b42f3739602deed6e2e120280b830c40c86be878f40",
+        "string_value_token_sha256": "67ba858ac8397f3c7e1a28a617fae83fe1db1eaea520b8b7717d3a3b10737a81",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/lsp/lsp_test.go",
+        "line": 69,
+        "name": "genericSecretLine",
+        "token_sha256": "4152bb7f781f18562477abf74f41468b394749a0294eb6160d3ca932d1f96474",
+        "string_value_token_sha256": "78e67dc616ff450373892f3c747dd0e74d81d85b78f6270d178184c1c260f1f5",
+        "dependencies": null
+      },
+      "status": "restored_entropy_fixture",
+      "rationale": "Original value retained under prose context so generic_high_entropy, rather than a newer named-assignment rule, controls the tuning test. Both threshold transitions and actual detector type are asserted; debounce/session tests retain a detectable secret."
+    },
+    {
+      "key": "tool/internal/lsp/lsp/outputFailureSecret",
+      "reference": {
+        "path": "tool/internal/lsp/output_test.go",
+        "line": 19,
+        "name": "outputFailureSecret",
+        "token_sha256": "96292bdc57a3c9da34ee722ad35979fb92594b3ce6f5e43ecd69069e19a77625",
+        "string_value_token_sha256": "e408a4abd162d288d24dbbc92859fe27bead78702d04961a3453bd36b08cf8d8",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/lsp/output_test.go",
+        "line": 19,
+        "name": "outputFailureSecret",
+        "token_sha256": "e408a4abd162d288d24dbbc92859fe27bead78702d04961a3453bd36b08cf8d8",
+        "string_value_token_sha256": "e408a4abd162d288d24dbbc92859fe27bead78702d04961a3453bd36b08cf8d8",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/mlscore/mlscore/responseClient",
+      "reference": {
+        "path": "tool/internal/mlscore/response_test.go",
+        "line": 16,
+        "name": "responseClient",
+        "token_sha256": "6ff4c72f101e22617bd4db542657c2189988420125e7a1302bd9c29e54716842",
+        "string_value_token_sha256": "6ff4c72f101e22617bd4db542657c2189988420125e7a1302bd9c29e54716842",
+        "dependencies": [
+          "tool/internal/mlscore/mlscore/scoreRoundTripFunc"
+        ]
+      },
+      "current": {
+        "path": "tool/internal/mlscore/response_test.go",
+        "line": 16,
+        "name": "responseClient",
+        "token_sha256": "44be209634d320ae01a3b47fed99291c7c6ad9738fb29e4e37fbc5bf8765571d",
+        "string_value_token_sha256": "44be209634d320ae01a3b47fed99291c7c6ad9738fb29e4e37fbc5bf8765571d",
+        "dependencies": [
+          "tool/internal/mlscore/mlscore/scoreRoundTripFunc"
+        ]
+      },
+      "status": "preserved_transport_fixture",
+      "rationale": "Constructor API changed, but same URL/threshold and owned in-memory RoundTripper return the exact caller body. Response validation/read/close/budget tests keep original assertions."
+    },
+    {
+      "key": "tool/internal/scan/scan/encScanSecret",
+      "reference": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 63,
+        "name": "encScanSecret",
+        "token_sha256": "3711f8d2d83932f6052c2a758296602aceeb6f8735921244b4c44d18fc0d7c51",
+        "string_value_token_sha256": "4047b2f9fbc56f7b44b053d12bc0ea30049a242db56441006c0a72c54c86db7a",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/scan/scan_test.go",
+        "line": 64,
+        "name": "encScanSecret",
+        "token_sha256": "994682eb7858a91a8c58058b68c973e7e82b7426990907e736849307b08bf2ae",
+        "string_value_token_sha256": "4047b2f9fbc56f7b44b053d12bc0ea30049a242db56441006c0a72c54c86db7a",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/scan/scan/escapedJSON",
+      "reference": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 20,
+        "name": "escapedJSON",
+        "token_sha256": "9fad20a3eba124748d58f4dceab26e8a795df263f20c9374f1030737a65356bb",
+        "string_value_token_sha256": "9fad20a3eba124748d58f4dceab26e8a795df263f20c9374f1030737a65356bb",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/scan/json_literals_test.go",
+        "line": 16,
+        "name": "escapedJSON",
+        "token_sha256": "6ca86f878c2c60858614087bda05de2bca87ff99f9f9a9fee90cba9f279b50c4",
+        "string_value_token_sha256": "9c555cf646f9a15b57ac6e5434d7624279096b4e9590ca9286170d3dc4212697",
+        "dependencies": null
+      },
+      "status": "equivalent_unicode_algorithm",
+      "rationale": "Manual BMP/surrogate-pair escaping is replaced by utf16.Encode of the same rune sequence and identical lowercase u%04x formatting; invalid UTF-8 is replaced per decoded rune in both implementations. Canonical/Unicode/fuzz cases exercise the helper."
+    },
+    {
+      "key": "tool/internal/scan/scan/testNoiseCorpus",
+      "reference": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 24,
+        "name": "testNoiseCorpus",
+        "token_sha256": "422ef25c5283b7eb951e96bd6edb6059dad086d0b72d68fa8e43f292d1b08fcf",
+        "string_value_token_sha256": "17c2f048a0a1721757d01ea162e87e594475a24a8b403d400da9be807ddaf1a6",
+        "dependencies": [
+          "tool/internal/scan/scan/detector"
+        ]
+      },
+      "current": {
+        "path": "tool/internal/scan/noise_test.go",
+        "line": 25,
+        "name": "testNoiseCorpus",
+        "token_sha256": "eb71427362b246a7d60f1e0cb49d699403ebe423fb764f2f68719d6455745428",
+        "string_value_token_sha256": "ebec8d49e454b0edeaff7a3cccae4f3986d9c7befa0034ae24bdf91a8392ab32",
+        "dependencies": [
+          "tool/internal/scan/scan/detector",
+          "tool/internal/scan/scan/releasedEntropyTypeUpgrade",
+          "tool/internal/scan/scan/restoredFindings"
+        ]
+      },
+      "status": "restored_real_model_and_scoped_types",
+      "rationale": "Both immutable released fixtures and labels/value equality remain; actual 51-feature model at 0.3 runs in addition to L1. Only ten exact names permit the generic type refinement. No mock scorer or corpus mutation substitutes for L2."
+    },
+    {
+      "key": "tool/internal/server/server/newSrv",
+      "reference": {
+        "path": "tool/internal/server/server_test.go",
+        "line": 17,
+        "name": "newSrv",
+        "token_sha256": "3d879a723430d170db843ecb2bb4cdc53379feb46e0c0cda0dcbd1b3ebf6e341",
+        "string_value_token_sha256": "3d879a723430d170db843ecb2bb4cdc53379feb46e0c0cda0dcbd1b3ebf6e341",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/server/server_test.go",
+        "line": 18,
+        "name": "newSrv",
+        "token_sha256": "5cd31b0b4ceed75733bd02fed90cab2c41b3c3f3ea6d5570ac21f0b5e237ed08",
+        "string_value_token_sha256": "5cd31b0b4ceed75733bd02fed90cab2c41b3c3f3ea6d5570ac21f0b5e237ed08",
+        "dependencies": null
+      },
+      "status": "preserved_constructor_options",
+      "rationale": "Legacy New(det,nil,nil,4) becomes New(scan.New(Detector:det),4); same taxonomy, no rule/ML stages, four workers and complete original HTTP assertions."
+    },
+    {
+      "key": "tool/internal/source/source/awsKey",
+      "reference": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 143,
+        "name": "awsKey",
+        "token_sha256": "be1d2f8da41cceefcf3b549955b338dc93cad1c903814689b600209f817fcc88",
+        "string_value_token_sha256": "2674b5e3a04406f0e3fd392238d32e7ad69f0ab521207ee2218924c5fc12ad39",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/source/mobile_test.go",
+        "line": 143,
+        "name": "awsKey",
+        "token_sha256": "2674b5e3a04406f0e3fd392238d32e7ad69f0ab521207ee2218924c5fc12ad39",
+        "string_value_token_sha256": "2674b5e3a04406f0e3fd392238d32e7ad69f0ab521207ee2218924c5fc12ad39",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/source/source/encSecret",
+      "reference": {
+        "path": "tool/internal/source/source_test.go",
+        "line": 267,
+        "name": "encSecret",
+        "token_sha256": "886082025143b714374782a8d83344fab882994f8a77eb2579f98d4ed614546e",
+        "string_value_token_sha256": "3c4d8a176b13619b5c04c504293f0af2256d9685f119dd85e69268f6e2dcc9aa",
+        "dependencies": null
+      },
+      "current": {
+        "path": "tool/internal/source/source_test.go",
+        "line": 267,
+        "name": "encSecret",
+        "token_sha256": "abad5e312699b9f2f8674919d2e64bd92a050cecaffe0b2fae890c477dace1aa",
+        "string_value_token_sha256": "3c4d8a176b13619b5c04c504293f0af2256d9685f119dd85e69268f6e2dcc9aa",
+        "dependencies": null
+      },
+      "status": "equivalent_string_values",
+      "rationale": "Only equivalent escaped/plain constant spelling changes; enclosing grouped declarations are hashed together. Fixture bytes and consumers remain unchanged."
+    },
+    {
+      "key": "tool/internal/source/source/method:49e7a2f95aa0d870b8609272b199db6de55fc795c3a8e57f90e65ff9a614d9ce:Digest",
+      "reference": {
+        "path": "tool/internal/source/image_errors_test.go",
+        "line": 35,
+        "name": "method:49e7a2f95aa0d870b8609272b199db6de55fc795c3a8e57f90e65ff9a614d9ce:Digest",
+        "token_sha256": "fdcc822818e338bd66450fa1bb925efdccbb6e5b7a201e3ca467af85f2a1af0b",
+        "string_value_token_sha256": "fdcc822818e338bd66450fa1bb925efdccbb6e5b7a201e3ca467af85f2a1af0b",
+        "dependencies": [
+          "tool/internal/source/source/failingLayer"
+        ]
+      },
+      "current": null,
+      "status": "obsolete_mock_method",
+      "rationale": "Removed failingLayer.Digest is no longer consumed by the source path. The unchanged TestImageFailuresReachTheItemStream still asserts error items and aborted index for the same Uncompressed failure; observed content/diff IDs have separate image provenance tests."
+    }
+  ],
+  "additional_adapters": [
+    {
+      "path": "tool/internal/scan/released_literals_test.go",
+      "name": "restoredFindings",
+      "review": "Direct dependency/option forwarding without mutation or filtering; real model supplied by caller.",
+      "file_sha256": "b3e61bf99ec973dcf8481d7bfb1b77e884653e5b0124e455697b7fd061bac924"
+    },
+    {
+      "path": "tool/internal/scan/verification_pipeline_test.go",
+      "name": "releasedVerificationCredentials",
+      "review": "Only exact expected count of response_truncated/scan/intake markers without secret identity or verification may be separated before credential assertions.",
+      "file_sha256": "e7d17b38d0d83a2f6ab53128b7f293630e0d5ce5f006951177f81a730021f8ee"
+    },
+    {
+      "path": "tool/internal/lsp/deep_noise_test.go",
+      "name": "releasedEditorEntropyTypeUpgrade",
+      "review": "Exactly ten names, same values and ranges; no other type alias permitted.",
+      "file_sha256": "2df47fd3085972e9a9012737ce93e42157e2af5fb8c8610ba00b304c82282465"
+    },
+    {
+      "path": "tool/internal/scan/noise_test.go",
+      "name": "releasedEntropyTypeUpgrade",
+      "review": "Exactly the same ten-name exception as native compatibility runner.",
+      "file_sha256": "97d1fde97ea8d870721221f4f35e7ab996dcaae7c5df551a5635e1bda21bcfdf"
+    },
+    {
+      "path": "tool/internal/scan/tables_test.go",
+      "name": "tableRecordScorer",
+      "review": "Recording scorer asserts canonical values/contexts only; real model variants are separately mandatory in released JSON/YAML/TOML and noise tests.",
+      "file_sha256": "334aea1de523d1c0cbc37d07de294356c2adfde5639a2cd8343e7ca62ac35968"
+    },
+    {
+      "path": "tool/internal/server/unicode_test.go",
+      "name": "readReleasedJSONTransport",
+      "review": "Actual bounded HTTP decode, no local surrogate normalizer replacing the production path.",
+      "file_sha256": "9ef3dc57dce26a6e9d6e50a5f6b6bf82fea37908823e535b055ce7d88510957b"
+    }
+  ],
+  "full_go": {
+    "reference": {
+      "log": "/tmp/prowl-same-name-map-reference-go-20261116.jsonl",
+      "sha256": "3a653192413a6c9c6464edd2c9b0ebffa113b9a1af52f339b387353738cef24d",
+      "top_level": {
+        "pass": 1006,
+        "skip": 6
+      },
+      "skips": [
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestLiveJiraServer"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestLiveConfluenceServer"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestCompressionRatioDivergence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestParityDump"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestParity"
+        }
+      ],
+      "cgo_enabled": true
+    },
+    "candidate": {
+      "log": "/tmp/prowl-policy-qualified-go-20261116.jsonl",
+      "sha256": "c1bcf05965fd2acd564573d83e3daf507ef851e61d25e988fd21084303a98be3",
+      "top_level": {
+        "pass": 1587,
+        "skip": 12
+      },
+      "skips": [
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestLiveJiraServer"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/atlassian",
+          "name": "TestLiveConfluenceServer"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestCompressionRatioDivergence"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlfeatures",
+          "name": "TestParityDump"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestCanonicalCompositionFullParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestCanonicalCompositionGolden"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/mlmodel",
+          "name": "TestParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/rules",
+          "name": "TestWordIndexCorpusParity"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestFindingsCorpusDigest"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/scan",
+          "name": "TestReleasedNoiseModelAudit"
+        },
+        {
+          "package": "github.com/Lercas/prowl/tool/internal/source",
+          "name": "TestPrivateStateDoesNotHideDistinctCaseSensitiveSibling"
+        }
+      ],
+      "cgo_enabled": false
+    }
+  },
+  "targeted_logs": {
+    "race": {
+      "path": "/tmp/prowl-policy-qualified-race-20261116.log",
+      "sha256": "f8b0b31b146008f360312f151082ccfbc01034e8cb8d090af15d53f1df354a4c",
+      "result": "ok  \tgithub.com/Lercas/prowl/tool/internal/scan\t2.952s\nok  \tgithub.com/Lercas/prowl/tool/internal/server\t1.646s\nok  \tgithub.com/Lercas/prowl/tool/cmd/prowl\t1.490s"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-policy-qualified-min-go-20261116.log",
+      "sha256": "336600666884f2042dacbf5ce97d43e20f412c7bd60cb9602b55dd17404f0126",
+      "result": "ok  \tgithub.com/Lercas/prowl/tool/internal/scan\t0.436s\nok  \tgithub.com/Lercas/prowl/tool/internal/server\t0.263s\nok  \tgithub.com/Lercas/prowl/tool/cmd/prowl\t0.340s"
+    },
+    "lint": {
+      "path": "/tmp/prowl-policy-qualified-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "result": "0 issues."
+    },
+    "json_fuzz": {
+      "path": "/tmp/prowl-same-name-json-fuzz-20261116.log",
+      "sha256": "178950351f2865d48671ccc22d36ee8d81d1e699c9ef2edc4cf8bd51c1bf324c",
+      "result": "fuzz: elapsed: 0s, gathering baseline coverage: 0/283 completed\nfuzz: elapsed: 1s, gathering baseline coverage: 283/283 completed, now fuzzing with 2 workers\nfuzz: elapsed: 3s, execs: 14768 (4921/sec), new interesting: 10 (total: 293)\nfuzz: elapsed: 6s, execs: 14768 (0/sec), new interesting: 10 (total: 293)\nfuzz: elapsed: 9s, execs: 14768 (0/sec), new interesting: 10 (total: 293)\nfuzz: elapsed: 11s, execs: 14768 (0/sec), new interesting: 10 (total: 293)\nPASS\nok  \tgithub.com/Lercas/prowl/tool/internal/scan\t11.669s"
+    },
+    "regression_before": {
+      "path": "/tmp/prowl-policy-registration-before-20261116.log",
+      "sha256": "e36f5640325ebb53f48c9914bdb3ce6c799b977fe753b3f8311e42f7afc65163",
+      "result": "--- FAIL: TestDetectionPolicyIsPresentForEmptyAndDirectScans (0.01s)\n    noise_test.go:197: detection heuristic revision missing from scope\nFAIL\nFAIL\tgithub.com/Lercas/prowl/tool/internal/scan\t0.455s\nFAIL"
+    }
+  },
+  "native_coverage": {
+    "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-coverage-native-65w1zp2t/qualification.json",
+    "passed": 90,
+    "total": 90,
+    "failures": []
+  },
+  "released_native_suites": {
+    "passed": true,
+    "runs": 22,
+    "evidence": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-compat14-native-2calzatl/qualification.json"
+  },
+  "quality": {
+    "schema_version": "prowl-quality-v1",
+    "dataset": {
+      "repository": "Lercas/prowlbench",
+      "revision": "53d6fc1e2006185c0fadd5cd761af3f1aacfd025",
+      "file": "prowlbench.jsonl",
+      "sha256": "0a66fc09b180261eabb311af04f7be5112895e27dd08dbd18cdcbdd07021b70f",
+      "rows": 24603,
+      "selection_stride": 8,
+      "selected_rows": 3076,
+      "secrets": 2094,
+      "hard_negatives": 982
+    },
+    "baseline": {
+      "recall": 0.7469,
+      "t4_fp_rate": 0.058,
+      "tolerance": 0.005,
+      "provenance": "Existing benchmark/ci_baseline.json; historical cgo baseline retained without lowering thresholds"
+    },
+    "binary_sha256": "f6246fdae365a8a36e55758f02e204463db76a1659a34763cd94a2c3a7f6e702",
+    "passed": true,
+    "recall": 0.7932187201528176,
+    "t4_fp_rate": 0.062118126272912425,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982,
+    "missed_positive_ids": [
+      "pb-00016",
+      "pb-00160",
+      "pb-00184",
+      "pb-00304",
+      "pb-00312",
+      "pb-00480",
+      "pb-00560",
+      "pb-00584",
+      "pb-00592",
+      "pb-00632",
+      "pb-00680",
+      "pb-00696",
+      "pb-00720",
+      "pb-00760",
+      "pb-00824",
+      "pb-00960",
+      "pb-01080",
+      "pb-01128",
+      "pb-01160",
+      "pb-01168",
+      "pb-01208",
+      "pb-01216",
+      "pb-01248",
+      "pb-01280",
+      "pb-01288",
+      "pb-01352",
+      "pb-01384",
+      "pb-01416",
+      "pb-01424",
+      "pb-01536",
+      "pb-01568",
+      "pb-01576",
+      "pb-01640",
+      "pb-01664",
+      "pb-01728",
+      "pb-01808",
+      "pb-01872",
+      "pb-01904",
+      "pb-01968",
+      "pb-01992",
+      "pb-02008",
+      "pb-02016",
+      "pb-02024",
+      "pb-02072",
+      "pb-02208",
+      "pb-02224",
+      "pb-02248",
+      "pb-02320",
+      "pb-02448",
+      "pb-02488",
+      "pb-02544",
+      "pb-02560",
+      "pb-02568",
+      "pb-02648",
+      "pb-02656",
+      "pb-02664",
+      "pb-02728",
+      "pb-02760",
+      "pb-02800",
+      "pb-02976",
+      "pb-02992",
+      "pb-03032",
+      "pb-03040",
+      "pb-03056",
+      "pb-03160",
+      "pb-03224",
+      "pb-03304",
+      "pb-03328",
+      "pb-03352",
+      "pb-03432",
+      "pb-03512",
+      "pb-03544",
+      "pb-03560",
+      "pb-03696",
+      "pb-03832",
+      "pb-03848",
+      "pb-03880",
+      "pb-03976",
+      "pb-04072",
+      "pb-04136",
+      "pb-04192",
+      "pb-04240",
+      "pb-04328",
+      "pb-04336",
+      "pb-04344",
+      "pb-04448",
+      "pb-04528",
+      "pb-04552",
+      "pb-04576",
+      "pb-04624",
+      "pb-04688",
+      "pb-04720",
+      "pb-04728",
+      "pb-04776",
+      "pb-04816",
+      "pb-04840",
+      "pb-04976",
+      "pb-04992",
+      "pb-05008",
+      "pb-05176",
+      "pb-05224",
+      "pb-05432",
+      "pb-05480",
+      "pb-05504",
+      "pb-05536",
+      "pb-05568",
+      "pb-05584",
+      "pb-05592",
+      "pb-05640",
+      "pb-05656",
+      "pb-05760",
+      "pb-05808",
+      "pb-05912",
+      "pb-06008",
+      "pb-06056",
+      "pb-06112",
+      "pb-06120",
+      "pb-06168",
+      "pb-06200",
+      "pb-06208",
+      "pb-06216",
+      "pb-06224",
+      "pb-06328",
+      "pb-06336",
+      "pb-06464",
+      "pb-06512",
+      "pb-06584",
+      "pb-06784",
+      "pb-06928",
+      "pb-07088",
+      "pb-07096",
+      "pb-07160",
+      "pb-07216",
+      "pb-07248",
+      "pb-07464",
+      "pb-07560",
+      "pb-07656",
+      "pb-07680",
+      "pb-07768",
+      "pb-07832",
+      "pb-07840",
+      "pb-07864",
+      "pb-07872",
+      "pb-07928",
+      "pb-08064",
+      "pb-08144",
+      "pb-08160",
+      "pb-08208",
+      "pb-08336",
+      "pb-08344",
+      "pb-08368",
+      "pb-08384",
+      "pb-08440",
+      "pb-08448",
+      "pb-08496",
+      "pb-08568",
+      "pb-08616",
+      "pb-08696",
+      "pb-08720",
+      "pb-08824",
+      "pb-08832",
+      "pb-08864",
+      "pb-08896",
+      "pb-08960",
+      "pb-08968",
+      "pb-08976",
+      "pb-09024",
+      "pb-09032",
+      "pb-09152",
+      "pb-09176",
+      "pb-09256",
+      "pb-09288",
+      "pb-09304",
+      "pb-09384",
+      "pb-09392",
+      "pb-09424",
+      "pb-09432",
+      "pb-09632",
+      "pb-09776",
+      "pb-09936",
+      "pb-09952",
+      "pb-10040",
+      "pb-10064",
+      "pb-10080",
+      "pb-10104",
+      "pb-10240",
+      "pb-10256",
+      "pb-10432",
+      "pb-10440",
+      "pb-10448",
+      "pb-10464",
+      "pb-10512",
+      "pb-10520",
+      "pb-10560",
+      "pb-10616",
+      "pb-10632",
+      "pb-10672",
+      "pb-10880",
+      "pb-10976",
+      "pb-11000",
+      "pb-11168",
+      "pb-11248",
+      "pb-11296",
+      "pb-11312",
+      "pb-11384",
+      "pb-11392",
+      "pb-11432",
+      "pb-11448",
+      "pb-11656",
+      "pb-11760",
+      "pb-11816",
+      "pb-12056",
+      "pb-12312",
+      "pb-12344",
+      "pb-12544",
+      "pb-12656",
+      "pb-12800",
+      "pb-12880",
+      "pb-12976",
+      "pb-12992",
+      "pb-13008",
+      "pb-13016",
+      "pb-13136",
+      "pb-13160",
+      "pb-13184",
+      "pb-13240",
+      "pb-13376",
+      "pb-13464",
+      "pb-13624",
+      "pb-13720",
+      "pb-13728",
+      "pb-13744",
+      "pb-13768",
+      "pb-13816",
+      "pb-13848",
+      "pb-13888",
+      "pb-13904",
+      "pb-13944",
+      "pb-13976",
+      "pb-14144",
+      "pb-14272",
+      "pb-14344",
+      "pb-14392",
+      "pb-14416",
+      "pb-14544",
+      "pb-14576",
+      "pb-14648",
+      "pb-14688",
+      "pb-14776",
+      "pb-14848",
+      "pb-14880",
+      "pb-14896",
+      "pb-15072",
+      "pb-15080",
+      "pb-15088",
+      "pb-15112",
+      "pb-15136",
+      "pb-15144",
+      "pb-15184",
+      "pb-15192",
+      "pb-15216",
+      "pb-15248",
+      "pb-15328",
+      "pb-15352",
+      "pb-15400",
+      "pb-15424",
+      "pb-15448",
+      "pb-15544",
+      "pb-15592",
+      "pb-15952",
+      "pb-16032",
+      "pb-16128",
+      "pb-16224",
+      "pb-16272",
+      "pb-16304",
+      "pb-16320",
+      "pb-16408",
+      "pb-16496",
+      "pb-16512",
+      "pb-16520",
+      "pb-16616",
+      "pb-16672",
+      "pb-16688",
+      "pb-16704",
+      "pb-16712",
+      "pb-16728",
+      "pb-16816",
+      "pb-16848",
+      "pb-16864",
+      "pb-16944",
+      "pb-16960",
+      "pb-16984",
+      "pb-17032",
+      "pb-17112",
+      "pb-17192",
+      "pb-17200",
+      "pb-17248",
+      "pb-17280",
+      "pb-17288",
+      "pb-17304",
+      "pb-17328",
+      "pb-17424",
+      "pb-17568",
+      "pb-17608",
+      "pb-17616",
+      "pb-17632",
+      "pb-17672",
+      "pb-17696",
+      "pb-17704",
+      "pb-17720",
+      "pb-17824",
+      "pb-17832",
+      "pb-17840",
+      "pb-17888",
+      "pb-17904",
+      "pb-17944",
+      "pb-17992",
+      "pb-18008",
+      "pb-18024",
+      "pb-18160",
+      "pb-18208",
+      "pb-18232",
+      "pb-18336",
+      "pb-18360",
+      "pb-18472",
+      "pb-18512",
+      "pb-18608",
+      "pb-18656",
+      "pb-18672",
+      "pb-18688",
+      "pb-18712",
+      "pb-18736",
+      "pb-18792",
+      "pb-18800",
+      "pb-18848",
+      "pb-18960",
+      "pb-18968",
+      "pb-18976",
+      "pb-19016",
+      "pb-19192",
+      "pb-19216",
+      "pb-19232",
+      "pb-19280",
+      "pb-19392",
+      "pb-19552",
+      "pb-19616",
+      "pb-19648",
+      "pb-19752",
+      "pb-19808",
+      "pb-19864",
+      "pb-19936",
+      "pb-19944",
+      "pb-20080",
+      "pb-20088",
+      "pb-20176",
+      "pb-20200",
+      "pb-20256",
+      "pb-20320",
+      "pb-20344",
+      "pb-20352",
+      "pb-20392",
+      "pb-20408",
+      "pb-20432",
+      "pb-20520",
+      "pb-20672",
+      "pb-20816",
+      "pb-20896",
+      "pb-20944",
+      "pb-21120",
+      "pb-21240",
+      "pb-21248",
+      "pb-21264",
+      "pb-21368",
+      "pb-21536",
+      "pb-21544",
+      "pb-21584",
+      "pb-21592",
+      "pb-21640",
+      "pb-21768",
+      "pb-21888",
+      "pb-21912",
+      "pb-21928",
+      "pb-21944",
+      "pb-21952",
+      "pb-21960",
+      "pb-22024",
+      "pb-22088",
+      "pb-22128",
+      "pb-22144",
+      "pb-22208",
+      "pb-22224",
+      "pb-22240",
+      "pb-22328",
+      "pb-22336",
+      "pb-22344",
+      "pb-22376",
+      "pb-22472",
+      "pb-22568",
+      "pb-22760",
+      "pb-22888",
+      "pb-22904",
+      "pb-22952",
+      "pb-22968",
+      "pb-23008",
+      "pb-23048",
+      "pb-23152",
+      "pb-23160",
+      "pb-23216",
+      "pb-23248",
+      "pb-23328",
+      "pb-23568",
+      "pb-23584",
+      "pb-23696",
+      "pb-23704",
+      "pb-23744",
+      "pb-23840",
+      "pb-23904",
+      "pb-23944",
+      "pb-24088",
+      "pb-24128",
+      "pb-24136",
+      "pb-24160",
+      "pb-24176",
+      "pb-24208",
+      "pb-24240",
+      "pb-24248",
+      "pb-24256",
+      "pb-24368",
+      "pb-24392",
+      "pb-24432",
+      "pb-24456",
+      "pb-24472",
+      "pb-24496"
+    ],
+    "false_positive_ids": [
+      "pb-00496",
+      "pb-00848",
+      "pb-00968",
+      "pb-01088",
+      "pb-01464",
+      "pb-01488",
+      "pb-01624",
+      "pb-01752",
+      "pb-01984",
+      "pb-02040",
+      "pb-02576",
+      "pb-02640",
+      "pb-03096",
+      "pb-03856",
+      "pb-04560",
+      "pb-05784",
+      "pb-05792",
+      "pb-05976",
+      "pb-06136",
+      "pb-06152",
+      "pb-06184",
+      "pb-07016",
+      "pb-07272",
+      "pb-07608",
+      "pb-07672",
+      "pb-07816",
+      "pb-08280",
+      "pb-08760",
+      "pb-09200",
+      "pb-09296",
+      "pb-09320",
+      "pb-09464",
+      "pb-09944",
+      "pb-10408",
+      "pb-10816",
+      "pb-12136",
+      "pb-12944",
+      "pb-13128",
+      "pb-14736",
+      "pb-15288",
+      "pb-15408",
+      "pb-15560",
+      "pb-16040",
+      "pb-16184",
+      "pb-17072",
+      "pb-17504",
+      "pb-17648",
+      "pb-18176",
+      "pb-18544",
+      "pb-19008",
+      "pb-19240",
+      "pb-19520",
+      "pb-19824",
+      "pb-19952",
+      "pb-20400",
+      "pb-20568",
+      "pb-20640",
+      "pb-20712",
+      "pb-22920",
+      "pb-23464",
+      "pb-23912"
+    ],
+    "status": "passed"
+  },
+  "quality_ids_unchanged_from_prior": true,
+  "benchmark_and_build_limits": {
+    "benchmark_declarations_not_run": 9,
+    "testmain_declarations_no_individual_go_json_event": 2,
+    "reference_cgo_excluded": [
+      "TestPinnedCompressorIntegrity"
+    ],
+    "reference_cgo_excluded_disposition": "Intentional WASM/zlib replacement covered in the previous 45-name map.",
+    "build_constraint_changes": "Removed historical !cgo compressor test; new unix/filesystem and !race allocation tests do not remove an original same-name assertion.",
+    "platform": "darwin/arm64; this is not a full target-platform runtime qualification"
+  },
+  "scope": "Completed source/assertion review of changed same-name test bodies and test helpers. This does not certify all released production behavior, publication artifacts or live provider acceptance.",
+  "binary": {
+    "path": "/tmp/prowl-policy-qualified-20261116-bin",
+    "sha256": "f6246fdae365a8a36e55758f02e204463db76a1659a34763cd94a2c3a7f6e702"
+  },
+  "native_parent_failure": {
+    "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-coverage-native-_xc4rpxy/qualification.json",
+    "passed": 0,
+    "total": 90,
+    "failures": [
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "clean",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "finding",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "aggregate",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "pragma",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "report-filter",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "reveal",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "malformed",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "limit",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "missing",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "structured",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "empty-directory",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "empty-directory",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "empty-directory",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "empty-directory",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": false,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": false,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": false,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": false,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": true,
+        "stored": false,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": true,
+        "stored": false,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": true,
+        "stored": true,
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy",
+        "stdin": true,
+        "stored": true,
+        "format": "sarif",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy-baseline",
+        "format": "json",
+        "passed": false
+      },
+      {
+        "case": "invalid-policy-baseline",
+        "format": "sarif",
+        "passed": false
+      }
+    ]
+  },
+  "json_fuzz_source_commit": "c812a0ace3961d087874004a6c5e931d6877af64",
+  "native_identity": {
+    "report": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-report-identity-eblga9dw/qualification.json",
+    "passed": 39,
+    "total": 39,
+    "failures": []
+  },
+  "native_pretty": {
+    "passed": 40,
+    "evidence": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-pretty-coverage-oflx6vv1/qualification.json"
+  },
+  "reference_integrity_after_full_go": {
+    "checked_blobs": 694,
+    "extra_files": 0
+  }
+}
