@@ -52,6 +52,15 @@
     selftest. Локально macOS arm64 проходит под OS deny-network, 11 helper tests
     и actionlint зелёные. Hosted jobs, включая Windows, ещё не выполнены;
     `wiki/evidence/1.5.0-release-native-ci-20261116.json`.
+  - [x] Обновлён локальный snapshot после scope-encoding fix: чистый `c0c9099`,
+    `1.5.0-dev.c0c9099`, шесть архивов + шесть SPDX SBOM + checksums;
+    реальный config/Syft/build под OS network deny. Все шесть build-info
+    подтверждают commit/GOOS/GOARCH/CGO=0/trimpath/clean; macOS arm64 и amd64
+    через Rosetta проходят static ML/redaction/legacy rejection, selftest 7/7
+    и прежние quality metrics/IDs. Formula syntax и 11 helper tests проходят.
+    Docker daemon недоступен: Linux/Windows runtime, новая Docker factory,
+    signing/hosted CI/publication этим срезом не закрыты.
+    `wiki/evidence/1.5.0-release-source-snapshot-c0c9099-20261116.json`.
 
 
 - [x] **Вернуть совместимость `--stdin-name` с 1.4.0.** В `refs/tags/v1.4.0`

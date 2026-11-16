@@ -183,3 +183,42 @@ legacy-model rejection для каждого из шести image IDs. Binary S
 Источник, base digests, image IDs, hashes и границы:
 `evidence/1.5.0-docker-current-source-20261116.json`. Эта локальная проверка
 не подтверждает hosted Action, опубликованный GHCR digest или signatures.
+
+
+## Обновлённый локальный snapshot c0c9099
+
+После scope-encoding исправления из чистого
+`c0c9099eda9e2d6a61c9c4e3416ce8be622000b7` собран
+`1.5.0-dev.c0c9099`. Это новый локальный срез, а не завершение всего TODO
+или опубликованный релиз. Старые evidence-файлы сохранены побитово.
+
+Полный комплект находится в
+`/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts`:
+шесть архивов, шесть SPDX SBOM и `checksums.txt`. GoReleaser 2.20.2 и Syft 1.57.1
+загружены из официальных release assets с проверкой checksum manifests.
+Реальный release config, snapshot build, Syft и runtime checks выполнялись
+под OS-запретом всей сети; Go dependencies использовались из локального cache.
+Signing и publication пропущены штатным snapshot-режимом.
+
+Проверены layout, headers, CPU, checksums и SBOM. Для каждого из шести архивных
+бинарников независимо прочитаны Go build info: Go 1.27.4, точные GOOS/GOARCH,
+`CGO_ENABLED=0`, `-trimpath=true`, исходный VCS commit и `vcs.modified=false`.
+Сгенерирована локальная macOS/Linux Homebrew formula, `ruby -c` проходит;
+formula не устанавливалась и не отправлялась в tap. 11 release-helper tests
+проходят; workflow в этой работе не изменялся и hosted jobs не запускались.
+
+| Архивная платформа | Проверка запуска |
+| --- | --- |
+| macOS arm64 | Native helper: version, static ML/redaction/legacy rejection, selftest 7/7 |
+| macOS amd64 | Те же проверки на arm64 host через Rosetta |
+| Linux amd64/arm64 | Build metadata и packaging; в этом запуске не исполнялись |
+| Windows amd64/arm64 | Build metadata и packaging; в этом запуске не исполнялись |
+
+Оба macOS binaries сохраняют все quality metrics и ID квалифицированного source,
+кроме собственного binary SHA-256: 1661/2094 positive hits и 61/982 negative hits.
+Docker daemon недоступен; новая Dockerfile factory и Linux runtime здесь
+не квалифицированы. Native Windows, signatures/OIDC, hosted CI и публикация
+остаются открытыми. Новый исходный код после этого коммита потребует своего
+snapshot; данный результат привязан к указанной ревизии.
+
+[Машинный отчёт](evidence/1.5.0-release-source-snapshot-c0c9099-20261116.json).

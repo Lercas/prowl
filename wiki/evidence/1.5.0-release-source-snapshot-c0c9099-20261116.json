@@ -1,0 +1,484 @@
+{
+  "recorded_at": "2026-11-16T18:12:32.464032+00:00",
+  "scope": "Refresh local six-platform release snapshot for pinned current source; full 1.5.0 migration and publication remain open.",
+  "qualification": {
+    "source_commit": "c0c9099eda9e2d6a61c9c4e3416ce8be622000b7",
+    "source_tool_tree": "2028026e7f0c3e16fc9a0637875511660d46fa89",
+    "version": "1.5.0-dev.c0c9099",
+    "binaries": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+        "archive_sha256": "c891fd9cace915ebba5d203dda326d31abfa2c0df4781510bee8bac221348c45",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/darwin-amd64/prowl",
+        "binary_sha256": "a6482b2d8d7be258cd5b2b2e4baa5dc5fb08759bcf8d90948299853a4be88642",
+        "build_info_log": "final-darwin-amd64-buildinfo.stdout",
+        "executed": true,
+        "runtime": "macOS amd64 on arm64 host via Rosetta",
+        "quality": {
+          "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/darwin-amd64-quality-final.json",
+          "sha256": "ab2d3734c722038e843bd82a3c710ed2873717d406e526a828d7b8f7936db8a1",
+          "equal_to_qualified_source_except_binary_sha256": true,
+          "secret_hits": 1661,
+          "hard_negative_hits": 61
+        }
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+        "archive_sha256": "54f72e7089ddc9413ccb2bcaddb71dde13e6653c1a140a44ed6e4af08667ddda",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/darwin-arm64/prowl",
+        "binary_sha256": "c0528403d743a1f65a46c06dcd0199e96874d4d1d6e79fba9dccd6522b431a05",
+        "build_info_log": "final-darwin-arm64-buildinfo.stdout",
+        "executed": true,
+        "runtime": "native macOS arm64",
+        "quality": {
+          "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/darwin-arm64-quality-final.json",
+          "sha256": "7db55f4fc7d5eff2bf223bbc65298a5c969f75500b71c83c2faee1a8f4fe1818",
+          "equal_to_qualified_source_except_binary_sha256": true,
+          "secret_hits": 1661,
+          "hard_negative_hits": 61
+        }
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+        "archive_sha256": "cffec43116f559051fefb1ea5e01644b289d83c49e5b724e0d0a100e690bdcc6",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/linux-amd64/prowl",
+        "binary_sha256": "387a9ade978324734f1d5155cf91de87d6505396c020208298468d6d46f618c9",
+        "build_info_log": "final-linux-amd64-buildinfo.stdout",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+        "archive_sha256": "d1c920f20d2f64ab8c22a6d56733c1c222232783982339e884ebd7c68d026e0c",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/linux-arm64/prowl",
+        "binary_sha256": "2f272f5e2bfcf0a243e2e9bade2ec68ef98931b7de8ee48d64052c6178a9bb5e",
+        "build_info_log": "final-linux-arm64-buildinfo.stdout",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+        "archive_sha256": "4cc951db300d4d5bb24978658defaad9d74c860a0ac3153e3c19858037e93cb7",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/windows-amd64/prowl.exe",
+        "binary_sha256": "caea35c30dcc39a48c166176133637e5e8df46501aad34b68965443ecbe96e42",
+        "build_info_log": "final-windows-amd64-buildinfo.stdout",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "archive": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+        "archive_sha256": "b66e38854c4312a2504316afddf56605eec59c1ea2d625424b8d1f585c645ed0",
+        "binary": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/windows-arm64/prowl.exe",
+        "binary_sha256": "083d4db8d7de1bd284b08e6cb0da86df0e3527ac081391855a64267adef89382",
+        "build_info_log": "final-windows-arm64-buildinfo.stdout",
+        "executed": false
+      }
+    ],
+    "logs_sha256": {
+      "final-verify-offline.stdout": "912da624a89962bfff37da0e62a218d4b8e7fe174b1fc7e010eeb503df2d8bfb",
+      "final-verify-offline.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-amd64-buildinfo.stdout": "1e7b04251bf5338d33d742aefe83419cb3ea644a96b8507fa1ebd150171c40c6",
+      "final-darwin-amd64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-amd64-version.stdout": "3b9988ee01f2ae5851f0348e4ce350a32856af9b5f0680d358ce9dd214893159",
+      "final-darwin-amd64-version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-amd64-ml-smoke.stdout": "053e7ffe48907085a6c13855b087dfbcf90d75e820546b4bded30525a77152f9",
+      "final-darwin-amd64-ml-smoke.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-amd64-selftest.stdout": "958116d3aa462e19bf971a950f899acb39c825b5a7d29b96e6d944848c17600d",
+      "final-darwin-amd64-selftest.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-amd64-quality.stdout": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade",
+      "final-darwin-amd64-quality.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-arm64-buildinfo.stdout": "c6447bc42641bcf56dff13f16e93bfc65ea555271af2c2950f97d1c96b5ef2b8",
+      "final-darwin-arm64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-arm64-version.stdout": "3b9988ee01f2ae5851f0348e4ce350a32856af9b5f0680d358ce9dd214893159",
+      "final-darwin-arm64-version.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-arm64-native-smoke.stdout": "6d39df7dbb0956f08abb197411ca4c13f1994622f4806714ca3b5eacb9984532",
+      "final-darwin-arm64-native-smoke.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-darwin-arm64-quality.stdout": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade",
+      "final-darwin-arm64-quality.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-linux-amd64-buildinfo.stdout": "fe69a1921fc87f0545fd8ab596c5c1e68dd4120d9362e07d372787edf94a4bff",
+      "final-linux-amd64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-linux-arm64-buildinfo.stdout": "75a809ff26726bc4fb473d677272757a5fcf80a0d0020bc6a105cfb40bf15671",
+      "final-linux-arm64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-windows-amd64-buildinfo.stdout": "c44b8addeb7313525c624143e1a074e08075ce60ca035bd4724923c4a0efa63c",
+      "final-windows-amd64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final-windows-arm64-buildinfo.stdout": "211e90e4561a3827be3859a4be4645f4506a8eb1f19c05fdd2a3e7dbf1690aa9",
+      "final-windows-arm64-buildinfo.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "network": "OS denies all network during artifact verification, metadata inspection and runtime/quality checks",
+    "limits": [
+      "Linux and Windows binaries inspected, not executed in this run. Docker daemon unavailable.",
+      "No signature, external release, upload, tag, tap update or installation.",
+      "This snapshot is a local candidate for the exact pinned source commit; full TODO migration remains open."
+    ]
+  },
+  "qualification_artifact": {
+    "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/qualification.json",
+    "sha256": "e22b8a743a5d6968f702db50b1affb5031d67277fd66f845889a86e36c197710"
+  },
+  "tool_supply": [
+    {
+      "name": "goreleaser",
+      "version": "2.20.2",
+      "archive_url": "https://github.com/goreleaser/goreleaser/releases/download/v2.20.2/goreleaser_Darwin_arm64.tar.gz",
+      "archive_sha256": "4e68482f6bbdb2d3ce7f835be50a4eb7287ee999cefc563c49c5f42ad3778c78",
+      "manifest_url": "https://github.com/goreleaser/goreleaser/releases/download/v2.20.2/checksums.txt",
+      "manifest_sha256": "7b092a182d80e6fb1d4419c17b893f7994a6eabd648e61280d44dec63854f2e5",
+      "binary_sha256": "e96c6b05ef9fe272deba4a9b9c81b40051682b87e59bd3e6ab89303b5c546f51",
+      "version_output": "  ____       ____      _\n / ___| ___ |  _ \\ ___| | ___  __ _ ___  ___ _ __\n| |  _ / _ \\| |_) / _ \\ |/ _ \\/ _` / __|/ _ \\ '__|\n| |_| | (_) |  _ <  __/ |  __/ (_| \\__ \\  __/ |\n \\____|\\___/|_| \\_\\___|_|\\___|\\__,_|___/\\___|_|\ngoreleaser: Release engineering, simplified.\nhttps://goreleaser.com\n\nGitVersion:    2.20.2\nGitCommit:     1bf59683fabedd7b446d089ec31b1e343b472ce6\nGitTreeState:  false\nBuildDate:     2026-11-12T02:21:08Z\nBuiltBy:       goreleaser\nGoVersion:     go1.27.4\nCompiler:      gc\nModuleSum:     h1:OGfLr7nC5OFIC4I06DTTUAxos5PNxomSb0MmxvUMa6E=\nPlatform:      darwin/arm64\n"
+    },
+    {
+      "name": "syft",
+      "version": "1.57.1",
+      "archive_url": "https://github.com/anchore/syft/releases/download/v1.57.1/syft_1.57.1_darwin_arm64.tar.gz",
+      "archive_sha256": "e0a74a5d2688d1254b4e17b71f068a83215e3625f846265bf6614c7ba06f3a96",
+      "manifest_url": "https://github.com/anchore/syft/releases/download/v1.57.1/syft_1.57.1_checksums.txt",
+      "manifest_sha256": "92466b2b1a4695ee908f8a1567f4ff074e0fbb4f34da28463927a2630901fe2c",
+      "binary_sha256": "d991548e2410d494c2a0da0bf0ac433111fe842f3475f59aee1904484a3aa549",
+      "version_output": "Application:   syft\nVersion:       1.57.1\nBuildDate:     2026-11-09T14:36:35Z\nGitCommit:     a0c0d3890a9d79421c403e8fcadec50a2e55bf21\nGitDescription: v1.57.1\nPlatform:      darwin/arm64\nGoVersion:     go1.27.3\nCompiler:      gc\nSchemaVersion: 16.1.13\n"
+    }
+  ],
+  "tool_supply_receipt": {
+    "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/tool-receipt.json",
+    "sha256": "66ff0ecb24267b0e45c8876cfc2905853c606d3240b25438278b2bcef4045462"
+  },
+  "source_inputs": {
+    "README.md": {
+      "path": "/Users/sugar/dev/prowl/README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636"
+    },
+    "README.ru.md": {
+      "path": "/Users/sugar/dev/prowl/README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0"
+    },
+    "LICENSE": {
+      "path": "/Users/sugar/dev/prowl/LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919"
+    },
+    "tool/README.md": {
+      "path": "/Users/sugar/dev/prowl/tool/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25"
+    },
+    "tool/.goreleaser.yaml": {
+      "path": "/Users/sugar/dev/prowl/tool/.goreleaser.yaml",
+      "sha256": "2848bcc91f9089f187c7566b20f963373d5b725c363e894a34e89ca4dd93f721"
+    },
+    "scripts/release/snapshot.py": {
+      "path": "/Users/sugar/dev/prowl/scripts/release/snapshot.py",
+      "sha256": "12c53ab4b87ca4c1cd53fdc8d5e819c85c07ce13dbe99a06f519a274a5898d63"
+    },
+    "scripts/release/verify_artifacts.py": {
+      "path": "/Users/sugar/dev/prowl/scripts/release/verify_artifacts.py",
+      "sha256": "55509ae8b7d0156dff2dbd2da85b4751050d6a3f7dfcce52bbaf468ee9d7c1e4"
+    },
+    "scripts/release/smoke_archive.py": {
+      "path": "/Users/sugar/dev/prowl/scripts/release/smoke_archive.py",
+      "sha256": "7daeb52d25b737fc87a2fa68819a505368fa630a966daf201f42bd49201c65b7"
+    }
+  },
+  "assets": [
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+      "bytes": 8964474,
+      "sha256": "c891fd9cace915ebba5d203dda326d31abfa2c0df4781510bee8bac221348c45"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz.spdx.json",
+      "bytes": 42492,
+      "sha256": "f3688f953775223c01b0c9994f7957733cc7651ec18f62a6f09126edcf3301c8"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+      "bytes": 8460390,
+      "sha256": "54f72e7089ddc9413ccb2bcaddb71dde13e6653c1a140a44ed6e4af08667ddda"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz.spdx.json",
+      "bytes": 42492,
+      "sha256": "92c20ce80c3d6ca6577fc367be050871cd2e51aba64364410ddd8f73e6201dab"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+      "bytes": 8927948,
+      "sha256": "cffec43116f559051fefb1ea5e01644b289d83c49e5b724e0d0a100e690bdcc6"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz.spdx.json",
+      "bytes": 40819,
+      "sha256": "a8b7ccb7fd19ce6a30d75e523caf6aa6e0d208dfcf7bcbe3ee27241c440d3a6f"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+      "bytes": 8253921,
+      "sha256": "d1c920f20d2f64ab8c22a6d56733c1c222232783982339e884ebd7c68d026e0c"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz.spdx.json",
+      "bytes": 40819,
+      "sha256": "9498eedb200b9d1b829f63c4c0e9200c099c7f1967697f4c44a4bae74fedf33c"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+      "bytes": 9009445,
+      "sha256": "4cc951db300d4d5bb24978658defaad9d74c860a0ac3153e3c19858037e93cb7"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip.spdx.json",
+      "bytes": 42110,
+      "sha256": "558325c3860cc175da857eab430f870542ef20226cf3cb1e3c16665cc95714fb"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+      "bytes": 8251546,
+      "sha256": "b66e38854c4312a2504316afddf56605eec59c1ea2d625424b8d1f585c645ed0"
+    },
+    {
+      "name": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip.spdx.json",
+      "bytes": 42110,
+      "sha256": "56ddbb4c06c6d599b8a84bcba82375a3a88ff91926bed28f354565c39fbb98d0"
+    }
+  ],
+  "checksums": {
+    "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/artifacts/checksums.txt",
+    "sha256": "ffacdf13f24ea267e016d354149ec39677893867664e0273e9c7e34f757f2fdd"
+  },
+  "archive_document_checks": [
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_amd64.tar.gz",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_darwin_arm64.tar.gz",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_amd64.tar.gz",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_linux_arm64.tar.gz",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_amd64.zip",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+      "member": "README.md",
+      "sha256": "cd969d234599d2c45c52823675e3160434a01f2953d9ea030dc6f261c8450636",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+      "member": "README.ru.md",
+      "sha256": "79877468db0faf7f0b9b933d2ede89091f5d7c8f9551380e6ede4560d4dc13b0",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+      "member": "LICENSE",
+      "sha256": "be68f59dc863485f2a4c288ae1186d9db04f357f59c185c195e2eea3588c6919",
+      "matches_source": true
+    },
+    {
+      "archive": "prowl_1.5.0-dev.c0c9099_windows_arm64.zip",
+      "member": "docs/README.md",
+      "sha256": "a286476aee2000b44e691d6287f9082538ec5027a8179dd48562eb7b2d55dc25",
+      "matches_source": true
+    }
+  ],
+  "formula": {
+    "artifact": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/prowl.rb",
+      "sha256": "b281f8c53f2c456c133a95e3ef7790b6b994685df6c5dd0efe5a4a13354231a3"
+    },
+    "syntax": "ruby -c: Syntax OK",
+    "installed": false,
+    "published": false
+  },
+  "logs": {
+    "snapshot.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/snapshot.log",
+      "sha256": "1ca8e313de9eb3d499913675e9fc5d5ddec6790be5185414176cc5811200aa48"
+    },
+    "verify.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/verify.log",
+      "sha256": "912da624a89962bfff37da0e62a218d4b8e7fe174b1fc7e010eeb503df2d8bfb"
+    },
+    "formula.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/formula.log",
+      "sha256": "bbafef10c22b9323fa5589564990f57fbf57f9a632381d5e765dc5a3b25b4a1b"
+    },
+    "helper-tests.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/helper-tests.log",
+      "sha256": "a9e0b56fd02f8cf9551c19bfa3659d24498361221c012770cb1a55211faecf9f"
+    },
+    "qualify-final.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/qualify-final.log",
+      "sha256": "8ff3d7b01d7925fdd910aeaacf32f3263077fce91a46fedd16552e74bad7aefd"
+    },
+    "docker-probe.log": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/docker-probe.log",
+      "sha256": "ad9dd1877ce3040acbae799d9bcbb056b838b1eca2de3df7436b27a28a1cfeb5"
+    }
+  },
+  "reproduction_scripts": {
+    "fetch_tools.py": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/fetch_tools.py",
+      "sha256": "be125d6473377f488c0344c82fc63f3d34ec6fda8dce1ea23562c9b653d89a79"
+    },
+    "qualify_final.py": {
+      "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/qualify_final.py",
+      "sha256": "d61d32a1dc29a3b01bf40e4327e6de5397de59485d60210205c2a458d48c5e26"
+    }
+  },
+  "excluded_attempts": {
+    "fetch-tools.log": "Initial harness used goreleaser version subcommand instead of --version; corrected without redownloading/replacing the verified existing archive/binary.",
+    "qualify.log": "Initial harness passed --bundled to selftest, which correctly rejected the command-inapplicable flag. Final attempt uses the existing selftest --ml contract in isolated PROWL_HOME; no product flags relaxed."
+  },
+  "cleanup": {
+    "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted/darwin-amd64/prowl",
+    "bytes": 21512176,
+    "sha256": "a6482b2d8d7be258cd5b2b2e4baa5dc5fb08759bcf8d90948299853a4be88642",
+    "owner_uid": 501,
+    "no_open_handles": true,
+    "duplicate_of": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/extracted-final/darwin-amd64/prowl",
+    "authorization": "User instruction to remove task-created unused temporary artifacts",
+    "reason": "Duplicate executable from failed qualification harness attempt; qualified archive and extracted copy retained."
+  },
+  "cleanup_receipt": {
+    "path": "/Users/sugar/dev/prowl-qualification/release-c0c9099-20261116/cleanup-receipt.json",
+    "sha256": "ba5b9f0ee040cb2ed93f0fb2937e5b5fed39c3c931f27c74786487991a1b6693"
+  },
+  "gates": {
+    "six_archives_six_sboms_checksums": true,
+    "all_six_buildinfo_expected_commit_goos_goarch_cgo0_trimpath_clean": true,
+    "source_documents_exact": 24,
+    "native_mac_arm64_smoke": true,
+    "mac_amd64_rosetta_smoke": true,
+    "selftest_each": 7,
+    "quality_each": {
+      "secret_hits": 1661,
+      "secrets": 2094,
+      "hard_negative_hits": 61,
+      "hard_negatives": 982,
+      "metrics_and_ids_equal_to_qualified_source": true
+    },
+    "release_helper_tests": 11,
+    "network": "OS deny-all for config/build/SBOM, verification and runtime/quality"
+  },
+  "limits": [
+    "Linux and Windows binaries built/inspected but not executed in this run; Docker daemon unavailable.",
+    "No new Dockerfile build, installation, signing/OIDC, hosted workflow, tag, upload, draft release, publication or tap mutation.",
+    "Snapshot binds exact c0c9099 source; later runtime changes need their own candidate. Existing historical evidence remains frozen."
+  ]
+}
