@@ -61,6 +61,22 @@
     Docker daemon недоступен: Linux/Windows runtime, новая Docker factory,
     signing/hosted CI/publication этим срезом не закрыты.
     `wiki/evidence/1.5.0-release-source-snapshot-c0c9099-20261116.json`.
+  - [x] Linux runtime и Docker factory на `edce41c`: snapshot из реального config
+    (шесть архивов + шесть SBOM + checksums). Архивы linux/arm64 и linux/amd64
+    (эмуляция) проходят `smoke_archive.py` в контейнере под `--network none`,
+    darwin/arm64 — нативно. Образ из `tool/Dockerfile` собран для обеих
+    архитектур: non-root 65532, `version --bundled`, `selftest --ml` и ML-скан
+    фикстуры без сети. Windows runtime, hosted CI, подпись/GHCR и публикация
+    по-прежнему открыты.
+    `wiki/evidence/1.5.0-release-linux-runtime-edce41c-20261116.json`.
+  - [x] Полный `go test -race ./...` (как в `ci.yml`/`release.yml`) падал по таймауту
+    10m: однопоточный `TestWindowedEqualsWholeTextRandom` с 200k итерациями под race
+    шёл >7 мин. Под race теперь используется short-бюджет 20k; обычный прогон — 200k.
+  - [x] `make ci` e2e — 80/80 (было 78/80). Возвращена released-формулировка
+    `unsupported bucket URI` без эха исходного target (в нём могут быть credentials).
+    `version` до установки ожидаемо показывает встроенный snapshot `bundled (offline)`
+    (контракт `--bundled`); e2e и `wiki/Installation.md` обновлены. Полный race,
+    fmt/vet и golangci-lint v2.15.0 проходят.
 
 
 - [x] **Вернуть совместимость `--stdin-name` с 1.4.0.** В `refs/tags/v1.4.0`

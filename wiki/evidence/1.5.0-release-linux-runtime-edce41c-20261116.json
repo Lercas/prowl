@@ -1,0 +1,42 @@
+{
+  "schema": "prowl-release-evidence/1",
+  "date": "2026-11-16",
+  "source": {"commit": "edce41c", "tree_state": "clean", "version": "1.5.0-dev.edce41c"},
+  "tools": {
+    "goreleaser": {"version": "2.20.2", "binary_sha256": "e96c6b05ef9fe272deba4a9b9c81b40051682b87e59bd3e6ab89303b5c546f51"},
+    "syft": {"version": "1.57.1", "binary_sha256": "d991548e2410d494c2a0da0bf0ac433111fe842f3475f59aee1904484a3aa549"},
+    "docker_server": "29.9.2"
+  },
+  "snapshot": {
+    "command": "python3 scripts/release/snapshot.py --dist <new dir> --version 1.5.0-dev.edce41c",
+    "checksums_txt_sha256": "a67cccc8328853b23f6075d9964ad1b777ace47eeb6ec0e9c7ab097341eff0f4",
+    "archives": 6,
+    "sboms": 6
+  },
+  "archive_runtime": [
+    {"platform": "darwin/arm64", "runner": "native host", "result": "OK"},
+    {"platform": "linux/arm64", "runner": "docker python:3.12-slim, --network none, native arch", "result": "OK"},
+    {"platform": "linux/amd64", "runner": "docker python:3.12-slim, --network none, emulated amd64", "result": "OK"}
+  ],
+  "archive_runtime_checks": "scripts/release/smoke_archive.py: verify_artifacts, version --bundled, smoke_static ML/redaction/legacy rejection, selftest --ml",
+  "docker_image": {
+    "dockerfile": "tool/Dockerfile",
+    "build": "docker buildx build --platform linux/<arch> --build-arg VERSION=1.5.0-dev.edce41c --load",
+    "images": [
+      {"platform": "linux/arm64", "id": "sha256:211371595a2f018c2ee03ae778b43cc30766fc2dc2bceefe45ec8cddb9d50109", "user": "65532:65532"},
+      {"platform": "linux/amd64", "id": "sha256:581f7cb43c0faf170441f23be86beeaf8f13ea404dc5452094f124bc07914b03", "user": "65532:65532"}
+    ],
+    "checks_per_platform": [
+      "version --bundled: prowl 1.5.0-dev.edce41c, 175 bundled rules (offline)",
+      "selftest --ml under --network none: passed",
+      "scan . --ml --format json on a mounted two-line AWS fixture under --network none: aws_access_key_id + aws_secret_access_key, truncated=false"
+    ],
+    "note": "Release workflow passes VERSION=${github.ref_name}, so the image reports a v-prefixed version while archives do not; identical to refs/tags/v1.4.0 release.yml and kept as-is."
+  },
+  "not_covered": [
+    "Windows amd64/arm64 runtime (requires hosted windows-latest job in ci.yml)",
+    "hosted GitHub Actions run of ci.yml/release.yml",
+    "cosign signing, SBOM attestation and GHCR push",
+    "publication of the final v1.5.0 tag, release and Homebrew formula"
+  ]
+}
