@@ -224,23 +224,27 @@ def main():
                     check(label + '-no-request', p.returncode == 2 and not complete and len(Handler.calls) == before)
                     check(label + '-baseline', baseline.read_bytes() == b'owned indexed baseline')
 
-        source = root / 'yaml-primary-alias'
-        source.mkdir()
-        (source / 'a.yaml').write_text(f'defaults: &d {{accessKeyId: {KEY}}}\nprod: *d\n')
-        (source / 'b.json').write_text('{"defaults":{"account":"tenant_a"},"prod":{"account":"tenant_b"}}')
-        for fmt in ('json', 'sarif'):
-            for ml in (False, True):
-                before = len(Handler.calls)
-                p = run([source], fmt=fmt, ml=ml)
-                fs, complete = report(p, fmt)
-                label = f'yaml-primary-alias-{fmt}-ml{ml}'
-                check(label + '-complete', p.returncode == 0 and complete and len(fs) == 1)
-                occurrences = fs[0]['occurrences']
-                check(label + '-verdicts', len(occurrences) == 2 and
-                      {o['verification']['status'] for o in occurrences} == {'verified', 'invalid'})
-                check(label + '-contexts', len(Handler.calls) == before + 2 and
-                      sorted(Handler.calls[before:]) == [False, True])
-                check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'tenant_b', 'accessKeyId')))
+        for name, primary, account in (
+            ('yaml-primary-alias', f'defaults: &d {{accessKeyId: {KEY}}}\nprod: *d\n', '{"defaults":{"account":"tenant_a"},"prod":{"account":"tenant_b"}}'),
+            ('indexed-primary-alias', f'rows: [ &d {{accessKeyId: {KEY}}}, *d ]\n', '{"rows":[{"account":"tenant_a"},{"account":"tenant_b"}]}'),
+        ):
+            source = root / name
+            source.mkdir()
+            (source / 'a.yaml').write_text(primary)
+            (source / 'b.json').write_text(account)
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([source], fmt=fmt, ml=ml)
+                    fs, complete = report(p, fmt)
+                    label = f'{name}-{fmt}-ml{ml}'
+                    check(label + '-complete', p.returncode == 0 and complete and len(fs) == 1)
+                    occurrences = fs[0]['occurrences']
+                    check(label + '-verdicts', len(occurrences) == 2 and
+                          {o['verification']['status'] for o in occurrences} == {'verified', 'invalid'})
+                    check(label + '-contexts', len(Handler.calls) == before + 2 and
+                          sorted(Handler.calls[before:]) == [False, True])
+                    check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'tenant_b', 'accessKeyId')))
 
         source = fixture('duplicates')
         (source / 'key.json').write_text(json.dumps({'accessKeyId': KEY, 'secondKey': KEY}))
