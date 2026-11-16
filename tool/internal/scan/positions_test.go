@@ -12,7 +12,13 @@ func referenceUTF16Col(text string, off int) int {
 	} else if off > len(text) {
 		off = len(text)
 	}
-	start := strings.LastIndexByte(text[:off], '\n') + 1
+	// Line breaks follow the released index: "\n", "\r\n" and a bare "\r".
+	start := 0
+	for i := 0; i < off; i++ {
+		if text[i] == '\n' || text[i] == '\r' && (i+1 >= len(text) || text[i+1] != '\n') {
+			start = i + 1
+		}
+	}
 	column := 1
 	for i, r := range text[start:] {
 		if i+start >= off {
@@ -27,7 +33,7 @@ func referenceUTF16Col(text string, off int) int {
 }
 
 func TestUTF16ColumnsMatchReference(t *testing.T) {
-	for _, text := range []string{"", "ascii\nsecond", "Ключ😀\r\n🙂 e\u0301", "\xff\xfe😀\x80\nЖ", strings.Repeat("Я😀x\n", 300), strings.Repeat("界🙂", 500)} {
+	for _, text := range []string{"", "\r", "a\rb\r\nc", "ascii\nsecond", "Ключ😀\r\n🙂 e\u0301", "\xff\xfe😀\x80\nЖ", strings.Repeat("Я😀x\n", 300), strings.Repeat("界🙂", 500)} {
 		index := newLineIndex(text)
 		for off := -2; off <= len(text)+2; off++ {
 			if got, want := index.utf16Col(off), referenceUTF16Col(text, off); got != want {
