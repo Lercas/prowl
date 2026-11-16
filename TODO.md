@@ -77,6 +77,11 @@
     `version` до установки ожидаемо показывает встроенный snapshot `bundled (offline)`
     (контракт `--bundled`); e2e и `wiki/Installation.md` обновлены. Полный race,
     fmt/vet и golangci-lint v2.15.0 проходят.
+  - [x] Перед первой публикацией истории 1.5.0 из сообщений 256 неопубликованных
+    коммитов убраны trailers `Co-Authored-By: Claude`. Деревья, авторы, даты и
+    заголовки совпадают (0 расхождений); ранее записанные commit id (например
+    `c0c9099` → `20c7559`, `edce41c` → `f6f19a0`) сопоставляются по карте
+    `wiki/evidence/1.5.0-history-trailer-rewrite-20261116.json`.
 
 
 - [x] **Вернуть совместимость `--stdin-name` с 1.4.0.** В `refs/tags/v1.4.0`
