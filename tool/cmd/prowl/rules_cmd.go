@@ -20,7 +20,9 @@ func cmdDetectors() int {
 	}
 	for _, t := range tax.Types {
 		ck := ""
-		if t.Checksum.Present {
+		if t.ID == "jwt" {
+			ck = " [structure]"
+		} else if t.Checksum.Present {
 			ck = " [checksum]"
 		}
 		fmt.Printf("%-26s %-14s%s\n", t.ID, t.Category, ck)

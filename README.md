@@ -299,11 +299,11 @@ you want them upstreamed).
 </p>
 
 - **L1, candidate detection (Go).** Per-type regexes anchored by a literal keyword, gated by an
-  Aho-Corasick pre-filter, then checksum (Luhn, GitHub CRC, JWT structure), Shannon entropy, and
+  Aho-Corasick pre-filter, then checksums (Luhn, GitHub CRC), JWT structure, Shannon entropy, and
   line-context cues. Filters out examples, placeholders, hashes, and public-key material. This stage
   ships in the binary and needs nothing else.
 - **L2, optional ML filter.** `--ml` scores L1/rule candidates with the embedded
-  `HistGradientBoosting` model over 49 value/context features; `--ml-url` delegates the same scoring
+  `HistGradientBoosting` model over 51 value/context features; `--ml-url` delegates the same scoring
   contract to a sidecar. Candidates below the threshold are dropped, while checksum-proven findings
   are exempt. L2 improves precision but does not generate new candidates.
 - **Optional live verification.** `--verify` runs after detection/filtering and checks supported

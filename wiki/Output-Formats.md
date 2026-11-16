@@ -70,7 +70,8 @@ Severity icons: `✖` critical/high, `⚠` medium, `•` low, `·` info.
 The trailing tag is conditional, in priority order:
 
 - With `--verify`, a confirmed-live secret is tagged `live` (bold red) and a provider-rejected one `dead` (dim). This is the strongest false-positive signal Prowl emits — see [Live Verification](Live-Verification.md).
-- A **checksum-verified** hit — one whose value passed a structural checksum (stage `L1-checksum`: GitHub CRC, JWT structure, Luhn, etc.; confidence ~`0.99`) — is tagged `✓ checksum` (green). It marks a hit as structurally proven, not a regex guess, without printing a near-meaningless `99%`.
+- A **checksum-verified** hit — one whose value passed a checksum (such as GitHub CRC, stage `L1-checksum`; confidence ~`0.99`) — is tagged `✓ checksum` (green). This is consistency evidence, not proof of provider liveness.
+- A parsed JWT uses structural nomination, without a checksum badge or an authenticity claim. Its signature is not verified by L1.
 - Without verification or a checksum, a finding whose confidence is below `0.7` shows that confidence as a percentage (e.g. `60%`).
 - High-confidence regex matches (`0.7`–`0.98`) carry no tag — a bare row already means a confident match.
 

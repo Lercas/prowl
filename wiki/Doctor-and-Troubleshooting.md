@@ -11,7 +11,7 @@ $ prowl doctor
 prowl doctor
   ✓ taxonomy                   N detectors loaded
   ✓ regex RE2 compatibility    all detector regexes compile
-  ✓ checksum validators        github CRC + jwt structural pass
+  ✓ checksum validators        GitHub CRC + JWT structure (no signature verification)
   ✓ detection self-test        5/5 representative secrets detected
   ✓ example/placeholder filter known example/placeholder values ignored
   ✓ config                     valid (or none — using defaults)
@@ -104,7 +104,7 @@ stripe_secret_key          payment
 slack_token                messaging
 telegram_bot_token         messaging
 private_key_pem            pki
-jwt                        auth           [checksum]
+jwt                        auth           [structure]
 db_connection_string       db
 generic_api_key            generic
 generic_password           generic

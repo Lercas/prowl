@@ -89,7 +89,7 @@ func checksumCheck() Check {
 	case !detect.JWTStructuralOK("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.sig"):
 		return Check{"checksum validators", StatusFail, "jwt structural check rejected a valid token"}
 	default:
-		return Check{"checksum validators", StatusOK, "github CRC + jwt structural pass"}
+		return Check{"checksum validators", StatusOK, "GitHub CRC + JWT structure (no signature verification)"}
 	}
 }
 
