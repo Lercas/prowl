@@ -2,6 +2,9 @@ package scan
 
 import (
 	"context"
+	"encoding/hex"
+
+	"github.com/Lercas/prowl/tool/internal/mlscore"
 
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/publicaudit"
@@ -89,6 +92,35 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) context.Context {
 		if err != nil {
 			c.Note("rules_policy_failed", "", true)
 		}
+	}
+	if o.ML != nil {
+		threshold := o.ML.Threshold()
+		var id string
+		if versioned, ok := o.ML.(interface{ PolicyID() string }); ok {
+			id = versioned.PolicyID()
+		}
+		validID := false
+		if len(id) == 64 {
+			_, err := hex.DecodeString(id)
+			validID = err == nil
+		}
+		kind := "ml_model"
+		var thresholdPolicy any = threshold
+		if !mlscore.ValidScore(threshold) {
+			thresholdPolicy = "invalid"
+		}
+		if !validID || !mlscore.ValidScore(threshold) {
+			kind = "unversioned_policy"
+			id = ""
+		}
+		c.RegisterScope(kind, "ml", map[string]any{"revision": "loaded-model-v1", "digest": id, "threshold": thresholdPolicy, "local": o.ML.Local()})
+	}
+	if o.Verifiers != nil {
+		digest, err := o.Verifiers.PolicyDigest()
+		if err != nil {
+			c.Note("verifier_policy_failed", "", true)
+		}
+		c.RegisterScope("verifiers", "", map[string]string{"revision": "loaded-verifiers-v1", "digest": digest})
 	}
 	c.RegisterScope("rules", "", rulePolicy)
 	return context.WithValue(ctx, policyRegistrationKey{}, policyRegistration{p, c})

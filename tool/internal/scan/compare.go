@@ -73,6 +73,13 @@ type comparisonScorer struct {
 	pool      *comparisonPool
 }
 
+func (s comparisonScorer) PolicyID() string {
+	if scorer, ok := s.scorer.(interface{ PolicyID() string }); ok {
+		return scorer.PolicyID()
+	}
+	return ""
+}
+
 func (s comparisonScorer) Local() bool        { return true }
 func (s comparisonScorer) Threshold() float64 { return s.threshold }
 func (s comparisonScorer) Score(ctx context.Context, records []mlscore.Record) (results []mlscore.Result, err error) {

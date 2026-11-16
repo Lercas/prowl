@@ -234,13 +234,17 @@ func Compare(before, after model.ScanResult) (RemediationReport, error) {
 	b, _ := json.Marshal(before.Scope)
 	a, _ := json.Marshal(after.Scope)
 	hasTarget := false
+	unversionedPolicy := false
 	for _, scope := range before.Scope {
+		if scope.Kind == "unversioned_policy" {
+			unversionedPolicy = true
+		}
 		switch scope.Kind {
 		case "filesystem", "stdin", "file-list", "git-worktree", "git-index", "git-history", "git-timeline", "mobile", "image", "agent-project", "agent-home":
 			hasTarget = hasTarget || scope.Target != ""
 		}
 	}
-	comparable := hasTarget && len(before.Scope) > 0 && string(b) == string(a) && !before.Filtered && !after.Filtered
+	comparable := !unversionedPolicy && hasTarget && len(before.Scope) > 0 && string(b) == string(a) && !before.Filtered && !after.Filtered
 	out := RemediationReport{"1.4", comparable, joined.Complete, []Remediation{}}
 	for _, g := range joined.Groups {
 		was := false

@@ -1,0 +1,211 @@
+{
+  "recorded_at": "2026-11-16T12:18:27.390095+00:00",
+  "scope": "Restore released loaded-model/verifier policy identity and deny absence certification for unversioned scorers. The full 1.5.0/P0 migration remains open.",
+  "runtime_source_commit": "92884b6b953e281ac45a83d2480cb6863ea88921",
+  "runtime_tool_tree": "7015402fc58da3cc55da05356e8e8f2d0f133e4a",
+  "released_reference": "f72ea02d0295e764bec5a32359240e77192073fc",
+  "released_source_pointers": [
+    "tool/internal/mlmodel/mlmodel.go:Model.Digest",
+    "tool/internal/mlscore/embedded.go:Embedded.PolicyID",
+    "tool/internal/verify/verify.go:Set.PolicyID",
+    "tool/cmd/prowl/main.go:ml_model and verifiers scope registration"
+  ],
+  "binary": {
+    "path": "/tmp/prowl-loaded-policy-qualified-20261116-bin",
+    "sha256": "3f12d0bcd59be2f77572ca580c0c4f518865f8ecf361b42639432cdc9c2046d5"
+  },
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-loaded-policy-go-20261116.log",
+      "sha256": "c85e11e876c614c06e82f5aa41debdde7da0824253813e424ab2e95a855a8aee"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-loaded-policy-targeted-qualified-20261116.log",
+      "sha256": "504ec14cf1a53f31a029b460aa87e5c199c9c076235230e632ceaa71a7d6a559"
+    },
+    "race": {
+      "path": "/tmp/prowl-loaded-policy-race-20261116.log",
+      "sha256": "1981f894ac940476423c3606faa46ba0acb00f7092db79d0d060b85a41ebc652"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-loaded-policy-min-go-20261116.log",
+      "sha256": "7372bde42dd5fee8a7224da4e272897891c904561d4d857ff380d2db2352d736"
+    },
+    "lint": {
+      "path": "/tmp/prowl-loaded-policy-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-loaded-policy-native-20261116.log",
+      "sha256": "b564a6e658d689162d5214e58de1659e162f15220d9a79d45f34954a88c9a736"
+    },
+    "correlation": {
+      "path": "/tmp/prowl-loaded-policy-correlation-native-20261116.log",
+      "sha256": "1de9046f3a6d263bbad057fd9431ac4c3333b1c395cf6f1a096bbc88e1d43fc3"
+    },
+    "default_corpus": {
+      "path": "/tmp/prowl-loaded-policy-corpus-20261116.log",
+      "sha256": "dc269b95d5bb5d78bbd9b669cbcc0367710cec21811bae615f23d202ca99ca9a"
+    },
+    "build_metadata": {
+      "path": "/tmp/prowl-loaded-policy-build-info-20261116.log",
+      "sha256": "d3c4b2dab7fc97bbbc2e0d5a0f66813e75b48ceee46014d3dceade1c01028a13"
+    }
+  },
+  "controlled_regression": {
+    "reproduction": {
+      "path": "/tmp/prowl-loaded-policy-legacy-20261116.json",
+      "sha256": "53d3f649a7abb6542355b17cb1b42e302d270904bbe014ffc9fb7cd03edc5009"
+    },
+    "reference_binary_sha256": "465cabc678432766e10c67d7e9a111d8d687f6a3559bd6cc56f7ea887166c37b",
+    "reference_source_commit": "cba5771097fc875a6f366dc25a438ab70d856964",
+    "reference_tool_tree_matches_parent": true,
+    "before_fix": {
+      "different_model_bytes_same_path": true,
+      "complete_unfiltered_reports": true,
+      "same_scope": true,
+      "comparable": true,
+      "presence": "absent_in_scope"
+    },
+    "fixture_boundary": "Synthetic secret was actually removed from selected file. This is lost policy identity, not a claim that an existing ML-filtered guard allowed a still-present secret to disappear."
+  },
+  "native": {
+    "runner": {
+      "path": "/tmp/prowl-loaded-policy-20261116/scripts/check_loaded_policy_native.py",
+      "sha256": "9371016363b845524e84f2f0b75e7700d63b14632bf5683168b9b7f01a0ad6f8"
+    },
+    "report": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-loaded-policy-native-j8ci62qh/evidence.json",
+      "sha256": "346fe94e48861fab3809899747512764f1cda7262744965cdad20ab332f4c64e"
+    },
+    "passed": 134,
+    "total": 134,
+    "network": "OS deny outside loopback, checked by denied bind; owned loopback verifier and sidecar only",
+    "verification_calls": 2,
+    "score_calls": 1,
+    "checks": [
+      "explicit and installed models at same selected path",
+      "loaded digest versus filename, threshold identity",
+      "JSON/SARIF metadata and privacy",
+      "verifier status/header/URL/method drift without candidates",
+      "matching-policy absence control",
+      "changed-policy absence remains inconclusive",
+      "unversioned sidecar is complete but incomparable",
+      "default L1 has no new loaded-policy scopes"
+    ]
+  },
+  "correlation_nonregression": {
+    "report": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-correlation-native-5onyqrgr/qualification.json",
+      "sha256": "e3afa8298e5ce2747d7d9f1ccb15df807bf0285b15f9715cc65ad5ba64c52a97"
+    },
+    "passed": 46,
+    "total": 46
+  },
+  "source_unit_contracts": [
+    "Model digest identifies validated raw bytes and survives source replacement",
+    "Verifier definitions include selectors/extraction/signing/request/matcher/capability fields; filename and YAML comments excluded",
+    "Binary request body bytes remain distinct in YAML policy encoding",
+    "Bundled and disk verifier definitions have equal policy digest",
+    "Embedded threshold copy shares model identity but changes registered policy",
+    "Comparison scorer forwards model snapshot identity",
+    "Unknown/invalid scorer identity or threshold remains unversioned without metadata leak",
+    "Policy registered once for shared workers; keyed policy hashes differ without exposing inner digest",
+    "Empty HTTP batch and empty item keep loaded model snapshot",
+    "Unversioned policy preserves observed presence but cannot certify absence"
+  ],
+  "quality": {
+    "report": {
+      "path": "/tmp/prowl-loaded-policy-quality-20261116.json",
+      "sha256": "cb3a89661ada53f0f5697e0753c40466e8717b4e8fc714829e63e80969346923"
+    },
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "false_positives": 61,
+    "hard_negatives": 982,
+    "all_keys_except_binary_sha_identical_to": {
+      "path": "/tmp/prowl-string-order-quality-20261116.json",
+      "sha256": "7c8e84f7d4d9d614bc50dac6381bfbb476b8ec6cc06c6f0b07bead42ad25f8ac"
+    }
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "model": {
+    "path": "/tmp/prowl-loaded-policy-20261116/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-loaded-policy-cross-build-20261116/builds.json",
+      "sha256": "0e6a6ccef58d79e969b10dfe628ba55cf4093e44e45e56f1bf5ed1cfddf74ec2"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "ec3f1ea0324e992dd92e52e8e116cd34622d9d1eb178970f56ff15415d94b09c",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "3f12d0bcd59be2f77572ca580c0c4f518865f8ecf361b42639432cdc9c2046d5",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "6c01664ab78dd6f9d75b0ca63fd70528ba33f5e62d78ad99a5ce4546e424b7a3",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "0279d24bef1371a5b16650e435f6e07fb1d10d03a15b7b97bdace8d1548d7d8d",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "22a09fa6e2627aebe13dab914f3e7d8b6c875f7712f87f4febd5d7002fef9700",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-loaded-policy-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "47f2e59eb764394e15bf775af1f4063ea6a403d34038e3f27d0c152848298eb8",
+        "executed": false
+      }
+    ],
+    "native_arm64_sha_matches": true,
+    "foreign_execution": false
+  },
+  "policy_revisions": {
+    "ml_model": "loaded-model-v1",
+    "verifiers": "loaded-verifiers-v1",
+    "unknown_scorer_scope_kind": "unversioned_policy",
+    "default_detection_revision": "1.5.0-released-ml-evidence-v1"
+  },
+  "limitations": [
+    "No retroactive identity or recertification for historical reports; frozen evidence remains unchanged.",
+    "Configuration/allow callback identity, including released detector_config, remains a separate open P0 audit.",
+    "PolicyID is an internal versioned-scorer contract, not authenticated remote model provenance.",
+    "Verifier definitions assume read-only access by internal callers; arbitrary memory mutation is outside this contract.",
+    "No provider requests beyond owned loopback fixtures.",
+    "Foreign targets compile only; no Windows runtime, current-source Docker rebuild, signing, publication, installation or hosted CI proof.",
+    "No new fuzz/parser algorithm or paired performance run; inference, weights, threshold defaults and default detection output are unchanged."
+  ],
+  "passed": true
+}

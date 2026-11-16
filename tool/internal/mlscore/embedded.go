@@ -28,6 +28,9 @@ type Embedded struct {
 	threshold float64
 }
 
+// PolicyID identifies the loaded snapshot, never a later read of its source file.
+func (e *Embedded) PolicyID() string { return e.model.Digest() }
+
 // NewEmbedded builds an in-process scorer, resolving which model to load (see resolveModel).
 // threshold is the score below which a non-checksum candidate is treated as not-a-secret.
 //

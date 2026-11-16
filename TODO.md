@@ -151,6 +151,20 @@
       Quality IDs прежние: 1661/2094, FP 61/982. Платформа этой квалификации —
       darwin/arm64; общий аудит runtime/release artifacts остаётся открытым.
       `wiki/evidence/1.5.0-same-name-assertion-map-20261116.json`.
+  - [x] Восстановлены loaded-policy scopes ML/verifiers, потерянные относительно
+    1.4.0: точные bytes модели + finalized L2 threshold и digest загруженных
+    verifier definitions. Замена по тому же пути не сохраняет comparison scope;
+    уже загруженный снимок не перечитывается. Empty HTTP batches тоже получают
+    identity через общий Pipeline. Для scorer/sidecar без model identity —
+    `unversioned_policy`: complete scan сохраняется, absence не сертифицируется.
+    Предыдущий binary воспроизвёл одинаковый scope для разных model bytes и
+    разрешал `absent_in_scope`; новый native — 134/134, correlation — 46/46.
+    Full Go/race/min-Go/lint, шесть static builds, прежние quality IDs и GOROOT
+    digest проходят. [Контракт](wiki/Loaded-Policy-Identity.md),
+    `wiki/evidence/1.5.0-loaded-policy-20261116.json`.
+  - [ ] Сопоставить остальные policy boundaries, включая released `detector_config`
+    и identity allow/config callbacks. Восстановление ML/verifiers не закрывает
+    их и не переквалифицирует старые отчёты без loaded digests.
   - [ ] Вернуть CLI-контракты релиза: в том числе `--ci`, structured stdin и проверки
     областей флагов; проверить фактическое поведение, а не только наличие файлов.
     - [x] Нативная локальная upgrade-матрица с неизменённым тегом 1.4.0 — 190/190,

@@ -4,7 +4,7 @@
 // Python as model_binary.json and embedded via go:embed, so the same classifier
 // runs inside the single Go binary with no external file.
 //
-// For a 49-element feature vector x, the raw score is baseline + sum of every
+// For a 51-element feature vector x, the raw score is baseline + sum of every
 // tree's leaf value and the probability is logistic(raw); this matches the Python
 // reference to ~4.4e-16 (validated row-for-row by the package test).
 package mlmodel
@@ -12,6 +12,8 @@ package mlmodel
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -85,6 +87,7 @@ func (t *rawTree) UnmarshalJSON(raw []byte) error {
 // contiguous slices indexed by a global node id, so Predict walks cache-friendly
 // arrays and allocates nothing.
 type Model struct {
+	digest       string
 	baseline     float64
 	featureNames []string
 
@@ -175,7 +178,9 @@ func parse(data []byte) (*Model, error) {
 		}
 	}
 
+	sum := sha256.Sum256(data)
 	m := &Model{
+		digest:       hex.EncodeToString(sum[:]),
 		baseline:     *rm.Baseline,
 		featureNames: rm.FeatureNames,
 		treeStart:    make([]int32, len(rm.Trees)),
@@ -227,6 +232,9 @@ func parse(data []byte) (*Model, error) {
 	return m, nil
 }
 
+// Digest identifies the exact validated bytes loaded into this immutable model.
+func (m *Model) Digest() string { return m.digest }
+
 // FeatureNames returns the model's ordered feature names so callers can assert
 // their extractor matches. The slice is shared; do not mutate it.
 func (m *Model) FeatureNames() []string { return m.featureNames }
@@ -236,7 +244,7 @@ func (m *Model) FeatureNames() []string { return m.featureNames }
 var ErrCyclicModel = errors.New("mlmodel: cyclic tree (child index revisits an ancestor) — model is malformed")
 
 // Predict returns the L2 probability for one feature vector: logistic(baseline +
-// sum of every tree's leaf value). x must have exactly NumFeatures (49) elements
+// sum of every tree's leaf value). x must have exactly NumFeatures (51) elements
 // in feature_names order; a NaN routes by each node's missing_left flag. It
 // allocates nothing, is safe for concurrent use, and returns ErrCyclicModel on a
 // malformed (cyclic) tree.
