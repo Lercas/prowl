@@ -27,10 +27,29 @@ JSON, YAML и TOML могут дополнять друг друга при од
 Dotenv принадлежит только корневому namespace.
 Non-string и пустой scalar сохраняются как неизвестная роль; потребовать её из
 другого файла нельзя. Объект, объявленный под именем роли, также оставляет
-эту роль неизвестной в родительском namespace. Массивы, TOML arrays of tables,
-YAML aliases/merge и несколько YAML documents не сопоставляются и дают неполноту.
+эту роль неизвестной в родительском namespace. Массивы, TOML arrays of tables
+и несколько YAML documents не сопоставляются и дают неполноту.
 Имена компонентных полей и namespace должны быть простыми
 идентификаторами, допустимыми в resolver.
+
+YAML scalar/mapping aliases и merge поддерживаются по явным ссылкам внутри одного
+документа. Namespace определяется местом использования: `prod: *defaults`
+дополняет именно `prod` в другом файле выбранного root. Совпадение anchor names
+в разных документах не устанавливает связь.
+Явное поле имеет приоритет над merge независимо от порядка ключей. В merge
+`<<: [*first, *second]` первое определение поля имеет приоритет. Явные null,
+число, пустая строка или container остаются неизвестными ролями и блокируют
+заимствование строкового значения из других файлов. Дубликаты полей/merge,
+неизвестные ссылки, циклы и выход за бюджет не разрешают composite probes.
+Вложенная sequence в merge и alias на sequence отвергаются, как и в используемом
+`yaml.Node.Decode`. Обычные array namespaces этим не включаются.
+
+Физическая декларация primary и её alias-use сохраняют свои namespace, component
+evidence и отдельные provider verdicts. Декларация сама по себе не наследует
+companions из места использования; ей нужны компоненты её собственной области.
+В результате отчёт может честно оставаться неполным, даже если один alias-use
+удалось проверить. При одинаковом значении LIVE и dead observations сохраняются
+в `occurrences` после группировки CLI.
 
 Dotenv поддерживает `export`, literal single quotes, double quotes без expansion,
 обычные bare values и комментарии. Подстановки `$...`, backticks, shell syntax и
@@ -126,8 +145,34 @@ unknown/container roles, index privacy и namespace budget до provider calls.
 Текущий отчёт: `evidence/1.5.0-cross-file-namespaces-20261116.json`.
 
 До закрытия общего пункта остаются остальные acquisition adapters/revisions,
-import relationships, массивы/индексированные namespace, aliases/overlays,
+import relationships, массивы/индексированные namespace и межфайловые overlays,
 а также отсутствующие
 реальные OAuth/DB verifiers. Текущая локальная матрица не квалифицирует эти области.
 Автоматически связывать исторические plaintext-значения нельзя:
 сквозной SQLite-индекс хранит только HMAC и metadata.
+
+## Квалификация YAML relationships
+
+Версия opt-in policy — `yaml-explicit-alias-merge-v1`. Она записывается только
+при `CrossFile`, вместе с configured stage. Default policy и обычный scan не меняются.
+Разрешение графа ограничено 100000 посещений, глубиной 64 и 32 MiB учитываемых
+строк; существующие parser/intake/namespace bounds могут остановить его раньше.
+Unknown и unsupported конструкции не превращаются в известные значения.
+
+Native CLI matrix расширена до 466/466: JSON/SARIF, ML, opaque index IDs и отсутствие
+plaintext в SQLite, overrides/merge order, invalid graphs и baseline guard.
+Primary declaration/alias-use дали по одному LIVE и dead на одном loopback verifier;
+отдельные verdicts сохранились при CLI dedupe в обоих форматах и с ML.
+Это собственный stub, а не проверка реального аккаунта.
+
+Дифференциальный fuzz строковых mappings против `yaml.Node.Decode` выполнил
+80908 проверок за 11,422s при лимите 10s. Он выявил лишнее разрешение вложенной
+sequence/alias на sequence в первоначальном варианте; эти формы теперь отказные
+тесты. Full Go, targeted race, Go 1.26.11 и полный lint проходят.
+Pinned quality metrics и ID совпали с parent: 1661/2094, FP 61/982. Полный JSON
+digest GOROOT совпал: 12044 файла, 132407542 байта, 420 findings, 85 incomplete,
+`c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6`.
+Это проверка результата, не новый performance gate.
+
+Точные source/binary hashes и логи:
+`evidence/1.5.0-cross-file-yaml-relationships-20261116.json`.

@@ -668,8 +668,15 @@
     Default quality IDs и полный GOROOT digest сохранены; финальный performance
     gate +14,94% времени при лимите +20%, без изменения модели/порогов.
     `wiki/evidence/1.5.0-cross-file-namespaces-20261116.json`.
-  - [ ] Остальные source adapters/revisions, import/overlay relationships,
-    arrays/aliases и сложные namespace
+  - [x] YAML scalar/mapping aliases и merge в одном документе: namespace места
+    использования, explicit override и порядок merge, отдельные verdicts primary
+    declaration/use. Циклы, неизвестные/неподдержанные связи, unknown roles и лимиты
+    не разрешают composite probes. Native CLI JSON/SARIF ±ML/index — 466/466;
+    differential fuzz — 80908, full Go/race/min-Go/lint проходят. Quality IDs
+    прежние; полный JSON digest GOROOT совпал с parent.
+    `wiki/evidence/1.5.0-cross-file-yaml-relationships-20261116.json`.
+  - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
+    arrays/индексированные и другие сложные namespace
     и реальные OAuth/DB verifiers; текущий local-filesystem этап их не закрывает.
 - [x] **Хронология наблюдений в Git.** Явный `--git-timeline` для `scan/repo/org` включает
   историю; все достижимые ветки и зафиксированный HEAD, события относительно первого родителя.
