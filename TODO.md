@@ -197,6 +197,14 @@
       общий пункт CLI остаётся открыт. `wiki/evidence/1.5.0-cli-upgrade-20261115.json`.
     - [x] Возвращены короткие формы запуска: без аргументов — cwd или piped stdin,
       локальный путь/флаги без слова `scan`; явные команды имеют приоритет над файлами.
+    - [x] Возвращены variadic limit и released 4 MiB defaults stdin API, включая
+      `StdinLimited(0/-1)`. CLI по-прежнему явно передаёт штатные 10 MiB или
+      `--max-size`: native pipe matrix — 112/112, CLI upgrade — 190/190;
+      две top-level/девять subcases выполнены на released source и candidate,
+      694 reference blobs неизменны. Подробные checks и отдельный bucket timing
+      failure с rechecks сохранены без заявления исправления его причины.
+      [Контракт](wiki/Stdin-API-Budgets.md),
+      `wiki/evidence/1.5.0-stdin-api-budget-20261116.json`.
     - [x] Возвращён `--ci`: порог high, явный `--fail-on` сильнее независимо от порядка
       аргументов и настроек файла. Неполнота по-прежнему даёт код 2 даже с `--ci=false`.
       Флаг не включает ML, OCR или проверку у провайдера.

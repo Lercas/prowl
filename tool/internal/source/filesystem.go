@@ -20,20 +20,23 @@ import (
 	"github.com/Lercas/prowl/tool/internal/resilience"
 )
 
-// Stdin scans bounded standard input with the default per-file cap.
-func Stdin(ctx context.Context) <-chan model.Item {
-	return StdinLimited(ctx, 10<<20)
+const defaultStdinMaxBytes int64 = 4 << 20
+
+// Stdin preserves the released bounded API, with an optional per-call byte cap.
+// The CLI passes its own --max-size explicitly through StdinLimited/StdinNamed.
+func Stdin(ctx context.Context, limits ...int64) <-chan model.Item {
+	return StdinNamed(ctx, "<stdin>", limits...)
 }
 
 // StdinLimited honors --max-size and closes stdin on cancellation to interrupt a blocked read.
 func StdinLimited(ctx context.Context, maxBytes int64) <-chan model.Item {
-	return stdinFrom(ctx, os.Stdin, maxBytes)
+	return StdinNamed(ctx, "<stdin>", maxBytes)
 }
 
 // StdinNamed treats name only as a logical label and format hint. It never opens
 // or resolves that path; all content still comes exclusively from standard input.
 func StdinNamed(ctx context.Context, name string, limits ...int64) <-chan model.Item {
-	maxBytes := int64(10 << 20)
+	maxBytes := defaultStdinMaxBytes
 	if len(limits) > 0 && limits[0] > 0 {
 		maxBytes = limits[0]
 	}
