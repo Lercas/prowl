@@ -151,6 +151,6 @@ func usageText() string {
 		}
 		fmt.Fprintf(&output, "  %-15s %s\n", command.name, command.summary)
 	}
-	output.WriteString("\nRun 'prowl <command> --help' for accepted flags and examples.\nFlags are command-scoped; -- ends flag parsing.\n")
+	output.WriteString("\nRun 'prowl <command> --help' for accepted flags and examples.\nRun 'prowl help all' for every command and flag.\nFlags are command-scoped; -- ends flag parsing.\n")
 	return output.String()
 }

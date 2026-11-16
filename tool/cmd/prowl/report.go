@@ -252,9 +252,8 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 	if c.failOnVerified {
 		findings = restoreMissingLive(findings, liveBeforeDisplayFilters)
 	}
-	summarize(findings, elapsed, interactiveReport(c))
-
 	if c.writeBaseline != "" {
+		summarize(findings, elapsed, interactiveReport(c))
 		for _, f := range findings {
 			if model.IsIncompleteFinding(f) {
 				logx.Error("cannot write a baseline from an incomplete scan")
@@ -342,6 +341,7 @@ func reportFindingsContext(ctx context.Context, c commonFlags, findings []model.
 		escalateLive(findings)
 	}
 	findings = markInterrupted(ctx, findings)
+	summarize(findings, elapsed, interactiveReport(c))
 	if err := writeReport(c, findings); err != nil {
 		return 2
 	}

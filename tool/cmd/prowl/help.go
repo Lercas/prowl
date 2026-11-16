@@ -324,6 +324,18 @@ func helpFor(name string) bool {
 		fmt.Print(usageText())
 		return true
 	}
+	if name == "all" {
+		fmt.Print(usageText())
+		for _, command := range commands {
+			fmt.Printf("\n%s flags:\n", command.name)
+			helpFor(command.name)
+			for _, child := range commandSubcommands[command.name] {
+				fmt.Printf("\n%s %s flags:\n", command.name, child)
+				helpFor(command.name + "." + child)
+			}
+		}
+		return true
+	}
 	parent, _, nested := strings.Cut(name, ".")
 	for _, command := range commands {
 		if command.name != parent {
