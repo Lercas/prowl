@@ -1,0 +1,197 @@
+{
+  "schema_version": "prowl-docker-action-v2",
+  "date": "2026-11-16",
+  "status": "local_linux_action_and_cli_contracts_qualified",
+  "build_source_commit": "d362d6be022666a61c8f539e77624f9da0d756cc",
+  "action_descriptor_and_harness_commit": "94723a0e4187972d27b9c389cf25427235f8b74b",
+  "reports": {
+    "arm64": {
+      "passed": 48,
+      "total": 48,
+      "scope": "native Linux/arm64",
+      "report": "wiki/evidence/1.5.0-docker-action-arm64-20261116.json",
+      "log": {
+        "path": "/tmp/prowl-action-arm64-complete-native-20261116.log",
+        "sha256": "0a20bb1eb7422d51c2169896467b177e9b1e349b45e707afae93415a04cef057"
+      }
+    },
+    "amd64": {
+      "passed": 48,
+      "total": 48,
+      "scope": "Linux/amd64 emulated on arm64 Docker Desktop",
+      "report": "wiki/evidence/1.5.0-docker-action-amd64-20261116.json",
+      "log": {
+        "path": "/tmp/prowl-action-amd64-complete-native-20261116.log",
+        "sha256": "3b4fe9ed3a4c9f8f35360cee00f671d13687492600d6c9e4899c98cbd247fcc3"
+      }
+    }
+  },
+  "images": {
+    "prowl-qualification:action-root-20261116-d362d6b": {
+      "id": "sha256:2aef9fb02c8e32f510a589883f5dcb6ea9249d08589d4d1e46554aaa0ab0dc89",
+      "architecture": "arm64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:action-tool-20261116-d362d6b": {
+      "id": "sha256:92caa454036760b56354ef36ae282bc43d7ee87bcae13b42cbffe39b89afaba0",
+      "architecture": "arm64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:cli-20261116-d362d6b": {
+      "id": "sha256:bde78d8e94d030b49ebbf5545cdd0b49acc85f8c14fd706b663b498a46b65a63",
+      "architecture": "arm64",
+      "user": "65532:65532",
+      "entrypoint": [
+        "/usr/local/bin/prowl"
+      ]
+    },
+    "prowl-qualification:action-root-amd64-20261116-d362d6b": {
+      "id": "sha256:8cca6d967c6c8a73031549dcc8eac368984ba65277f21098ba7f991e045f421b",
+      "architecture": "amd64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:action-tool-amd64-20261116-d362d6b": {
+      "id": "sha256:e61bb1581e4bf009edee0a7febac3c43bdbdab8311efad7f252c11336fb085a6",
+      "architecture": "amd64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:cli-amd64-20261116-d362d6b": {
+      "id": "sha256:914f3fb1b842cfed1ae2dea83f706c82309b10bf9f7bd0ad6a2d6e9999417513",
+      "architecture": "amd64",
+      "user": "65532:65532",
+      "entrypoint": [
+        "/usr/local/bin/prowl"
+      ]
+    }
+  },
+  "build_logs": {
+    "action-root": {
+      "path": "/tmp/prowl-action-root-build-20261116.log",
+      "sha256": "223bd23c0ff1dee18dfaca746ad080e2f8a8b7e6dae073cd04469d27bdbc6836"
+    },
+    "action-tool": {
+      "path": "/tmp/prowl-action-tool-build-20261116.log",
+      "sha256": "ffe30ff89cd4d57ef66514259ca314cb7330bf44ae9e73fe54e608928614759f"
+    },
+    "cli-image": {
+      "path": "/tmp/prowl-cli-image-build-20261116.log",
+      "sha256": "0634755542d04569dafca13969226bb4a2314a9a59cd491b661752d45793418b"
+    },
+    "action-root-amd64": {
+      "path": "/tmp/prowl-action-root-amd64-build-20261116.log",
+      "sha256": "75a162357a35f0a30f2ebcfed498398906e32679de21750693bdf5ff0ae8f737"
+    },
+    "action-tool-amd64": {
+      "path": "/tmp/prowl-action-tool-amd64-build-20261116.log",
+      "sha256": "820ad4e8eb32027662e7f0ab874ad9fb20bedbb762ee5d94a01da2fadb116c4d"
+    },
+    "cli-amd64": {
+      "path": "/tmp/prowl-cli-amd64-build-20261116.log",
+      "sha256": "4dd281e66a92c8700aaff42bb57c9fc92f34ef4f81e4db81e4b7f28f4e6d650d"
+    }
+  },
+  "regression": {
+    "source_descriptor_commit": "d362d6be022666a61c8f539e77624f9da0d756cc",
+    "container": "prowl-action-path-regression-vh01_dtl",
+    "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-action-path-regression-vh01_dtl",
+    "exit": 1,
+    "findings": 1,
+    "unexpected_raw_synthetic_value": true,
+    "scope": "Owned fixture named --show-secrets; old action path enabled disclosure flag instead of passing literal path; no network"
+  },
+  "source_equivalence": {
+    "go_modules_templates_models": "byte-identical to build source",
+    "docker_executable_instructions": "identical, ignoring comments",
+    "action_entrypoint": "byte-identical",
+    "action_descriptors": "safety flag/path layout updated after build and exercised against immutable images; metadata descriptions English"
+  },
+  "static_validation": {
+    "actionlint": {
+      "path": "/tmp/prowl-docker-action-actionlint-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "shellcheck": {
+      "path": "/tmp/prowl-docker-action-shellcheck-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "passed": true
+  },
+  "contracts": [
+    "Root and tool Docker actions preserve fixed safety flags and separate argument values",
+    "Path is after --; flag-looking paths do not enable secret disclosure",
+    "Workspace owner UID/GID receives private 0600 SARIF; explicit user is retained",
+    "Normal CLI image defaults to 65532:65532; includes Git and trusts only /src",
+    "All images pass seven-case static ML selftest with no network",
+    "Actual staged index and committed history blobs with ML are scanned, not clean working copies",
+    "Incomplete scan does not overwrite baseline"
+  ],
+  "resources": {
+    "containers_stopped_at_qualification": [
+      "prowl-action-native-luot48sf-1",
+      "prowl-action-native-luot48sf-2",
+      "prowl-action-native-luot48sf-3",
+      "prowl-action-native-luot48sf-4",
+      "prowl-action-native-luot48sf-5",
+      "prowl-action-native-luot48sf-6",
+      "prowl-action-native-luot48sf-7",
+      "prowl-action-native-luot48sf-8",
+      "prowl-action-native-luot48sf-9",
+      "prowl-action-native-luot48sf-10",
+      "prowl-action-native-luot48sf-11",
+      "prowl-action-native-luot48sf-12",
+      "prowl-action-native-luot48sf-13",
+      "prowl-action-native-luot48sf-14",
+      "prowl-action-native-luot48sf-15",
+      "prowl-action-native-luot48sf-16",
+      "prowl-action-native-luot48sf-17",
+      "prowl-action-native-luot48sf-18",
+      "prowl-action-native-luot48sf-19",
+      "prowl-action-native-d5joathu-1",
+      "prowl-action-native-d5joathu-2",
+      "prowl-action-native-d5joathu-3",
+      "prowl-action-native-d5joathu-4",
+      "prowl-action-native-d5joathu-5",
+      "prowl-action-native-d5joathu-6",
+      "prowl-action-native-d5joathu-7",
+      "prowl-action-native-d5joathu-8",
+      "prowl-action-native-d5joathu-9",
+      "prowl-action-native-d5joathu-10",
+      "prowl-action-native-d5joathu-11",
+      "prowl-action-native-d5joathu-12",
+      "prowl-action-native-d5joathu-13",
+      "prowl-action-native-d5joathu-14",
+      "prowl-action-native-d5joathu-15",
+      "prowl-action-native-d5joathu-16",
+      "prowl-action-native-d5joathu-17",
+      "prowl-action-native-d5joathu-18",
+      "prowl-action-native-d5joathu-19"
+    ],
+    "images_retained_for_review": [
+      "prowl-qualification:action-root-20261116-d362d6b",
+      "prowl-qualification:action-tool-20261116-d362d6b",
+      "prowl-qualification:cli-20261116-d362d6b",
+      "prowl-qualification:action-root-amd64-20261116-d362d6b",
+      "prowl-qualification:action-tool-amd64-20261116-d362d6b",
+      "prowl-qualification:cli-amd64-20261116-d362d6b"
+    ],
+    "host_mounts": "Owned synthetic fixture roots only; no production data or named volumes"
+  },
+  "limitations": [
+    "AMD64 was emulated locally; hosted GitHub Linux runner has not executed the new job",
+    "No GHCR publication, release tags/signatures or customer deployment",
+    "No claim of full OS-package vulnerability qualification",
+    "Git network/registry/provider behaviors are not exercised by this no-network matrix"
+  ]
+}

@@ -280,6 +280,14 @@
       [Контракт и границы](wiki/Web-Provenance.md),
       `wiki/evidence/1.5.0-web-provenance-20261115.json`.
 
+    - [x] Docker Action и Git runtime: root и `tool/` descriptors, UID/GID владельца
+      workspace и приватный SARIF `0600`, фиксированные `--strict --bundled --reconstruct`.
+      CLI image остаётся nonroot `65532:65532`, содержит Git и доверяет только `/src`.
+      `inputs.path` после `--` не включает флаги; disclosure-регрессия воспроизведена
+      и закрыта. Шесть локальных образов: 48/48 Linux/arm64 и 48/48 Linux/amd64
+      под эмуляцией, включая static ML, staged и history с ML. CI gate добавлен;
+      hosted runner, GHCR/tag и публикация этим не подтверждены.
+      `wiki/evidence/1.5.0-docker-action-20261116.json`.
     - [x] Восстановлены причины неполноты Git index и архивов, читаемый plaintext
       fallback повреждённого архива и context cancellation в unpack. Возвращены
       выпущенные source/unpack boundary regressions. Нативная матрица — 17/17:
@@ -804,8 +812,13 @@
     Python 3.12/3.14 × два seed — 4×41; распакованный архив — ещё 2×41, все 15 imports
     из нового каталога. Actionlint проходит. Исходники и CI сканера не менялись.
     `wiki/evidence/1.5.0-python-research-ci-handoff-20261115.json`.
-  - [ ] Выбрать каноническое место research-кода, применить пакет и подтвердить hosted CI;
-    текущая локальная подготовка не закрывает общий пункт. [Границы](wiki/Python-Research-CI.md).
+  - [x] По выбору владельца создан отдельный локальный `/Users/sugar/dev/prowl-research`,
+    commit `a3e5861`, 29 файлов без corpora/weights. Восстановлены 18 source/test файлов
+    и четыре byte-identical CI-файла; lock пересобран из прежних pins. Матрица 4×41
+    и 15 fresh imports в новом checkout под OS network deny проходят; scanner originals
+    не менялись. `wiki/evidence/1.5.0-python-research-canonical-20261116.json`.
+  - [ ] Отдельно разрешённая публикация research-репозитория и фактический hosted Linux CI;
+    локальная матрица общий пункт не закрывает. [Границы](wiki/Python-Research-CI.md).
 - [x] Убрать двойные прогоны: push запускается только для `main`, остальные ветки — через PR.
 - [x] Добавлены минимальные `permissions:`; все Actions в CI и релизном workflow закреплены
   по проверенным SHA. YAML, `actionlint` и ShellCheck прошли локально.

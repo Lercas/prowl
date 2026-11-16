@@ -1,0 +1,247 @@
+{
+  "passed": 48,
+  "total": 48,
+  "checks": [
+    {
+      "case": "action.yml/fixed-safety-flags",
+      "passed": true
+    },
+    {
+      "case": "action.yml/literal-path",
+      "passed": true
+    },
+    {
+      "case": "tool/action.yml/fixed-safety-flags",
+      "passed": true
+    },
+    {
+      "case": "tool/action.yml/literal-path",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:action-root-amd64-20261116-d362d6b/inspect",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:action-root-amd64-20261116-d362d6b/static-ml",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:action-tool-amd64-20261116-d362d6b/inspect",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:action-tool-amd64-20261116-d362d6b/static-ml",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:cli-amd64-20261116-d362d6b/inspect",
+      "passed": true
+    },
+    {
+      "case": "prowl-qualification:cli-amd64-20261116-d362d6b/static-ml",
+      "passed": true
+    },
+    {
+      "case": "cli-nonroot-default",
+      "passed": true
+    },
+    {
+      "case": "0-default/gate",
+      "passed": true
+    },
+    {
+      "case": "0-default/owner-private",
+      "passed": true
+    },
+    {
+      "case": "0-default/sarif-redacted",
+      "passed": true
+    },
+    {
+      "case": "0-explicit/gate",
+      "passed": true
+    },
+    {
+      "case": "0-explicit/owner-private",
+      "passed": true
+    },
+    {
+      "case": "0-explicit/sarif-redacted",
+      "passed": true
+    },
+    {
+      "case": "0/literal-path-gate",
+      "passed": true
+    },
+    {
+      "case": "0/literal-path-redacted",
+      "passed": true
+    },
+    {
+      "case": "0/literal-path-private",
+      "passed": true
+    },
+    {
+      "case": "0/reconstruction",
+      "passed": true
+    },
+    {
+      "case": "0/incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "1-default/gate",
+      "passed": true
+    },
+    {
+      "case": "1-default/owner-private",
+      "passed": true
+    },
+    {
+      "case": "1-default/sarif-redacted",
+      "passed": true
+    },
+    {
+      "case": "1-explicit/gate",
+      "passed": true
+    },
+    {
+      "case": "1-explicit/owner-private",
+      "passed": true
+    },
+    {
+      "case": "1-explicit/sarif-redacted",
+      "passed": true
+    },
+    {
+      "case": "1/literal-path-gate",
+      "passed": true
+    },
+    {
+      "case": "1/literal-path-redacted",
+      "passed": true
+    },
+    {
+      "case": "1/literal-path-private",
+      "passed": true
+    },
+    {
+      "case": "1/reconstruction",
+      "passed": true
+    },
+    {
+      "case": "1/incomplete-baseline",
+      "passed": true
+    },
+    {
+      "case": "0/host-init",
+      "passed": true
+    },
+    {
+      "case": "0/host-stage",
+      "passed": true
+    },
+    {
+      "case": "0/git-index",
+      "passed": true
+    },
+    {
+      "case": "0/host-commit",
+      "passed": true
+    },
+    {
+      "case": "0/git-history-ml",
+      "passed": true
+    },
+    {
+      "case": "1/host-init",
+      "passed": true
+    },
+    {
+      "case": "1/host-stage",
+      "passed": true
+    },
+    {
+      "case": "1/git-index",
+      "passed": true
+    },
+    {
+      "case": "1/host-commit",
+      "passed": true
+    },
+    {
+      "case": "1/git-history-ml",
+      "passed": true
+    },
+    {
+      "case": "2/host-init",
+      "passed": true
+    },
+    {
+      "case": "2/host-stage",
+      "passed": true
+    },
+    {
+      "case": "2/git-index",
+      "passed": true
+    },
+    {
+      "case": "2/host-commit",
+      "passed": true
+    },
+    {
+      "case": "2/git-history-ml",
+      "passed": true
+    }
+  ],
+  "images": {
+    "prowl-qualification:action-root-amd64-20261116-d362d6b": {
+      "id": "sha256:8cca6d967c6c8a73031549dcc8eac368984ba65277f21098ba7f991e045f421b",
+      "architecture": "amd64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:action-tool-amd64-20261116-d362d6b": {
+      "id": "sha256:e61bb1581e4bf009edee0a7febac3c43bdbdab8311efad7f252c11336fb085a6",
+      "architecture": "amd64",
+      "user": "",
+      "entrypoint": [
+        "/usr/local/bin/prowl-action"
+      ]
+    },
+    "prowl-qualification:cli-amd64-20261116-d362d6b": {
+      "id": "sha256:914f3fb1b842cfed1ae2dea83f706c82309b10bf9f7bd0ad6a2d6e9999417513",
+      "architecture": "amd64",
+      "user": "65532:65532",
+      "entrypoint": [
+        "/usr/local/bin/prowl"
+      ]
+    }
+  },
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-action-native-d5joathu",
+  "containers_retained": [
+    "prowl-action-native-d5joathu-1",
+    "prowl-action-native-d5joathu-2",
+    "prowl-action-native-d5joathu-3",
+    "prowl-action-native-d5joathu-4",
+    "prowl-action-native-d5joathu-5",
+    "prowl-action-native-d5joathu-6",
+    "prowl-action-native-d5joathu-7",
+    "prowl-action-native-d5joathu-8",
+    "prowl-action-native-d5joathu-9",
+    "prowl-action-native-d5joathu-10",
+    "prowl-action-native-d5joathu-11",
+    "prowl-action-native-d5joathu-12",
+    "prowl-action-native-d5joathu-13",
+    "prowl-action-native-d5joathu-14",
+    "prowl-action-native-d5joathu-15",
+    "prowl-action-native-d5joathu-16",
+    "prowl-action-native-d5joathu-17",
+    "prowl-action-native-d5joathu-18",
+    "prowl-action-native-d5joathu-19"
+  ],
+  "scope": "local Docker linux runtime, synthetic files and host-created Git index, no network/provider requests"
+}

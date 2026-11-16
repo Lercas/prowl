@@ -93,7 +93,7 @@ prowl scan . --fail-on high --silence
 ```
 
 `-o`/`--output` также сохраняет отчёт при `--silence`. Другие logging flags:
-`-q`/`--quiet` — только ошибки, отчёт сохраняется; `-v`/`--verbose` — debug;
+`-q`/`--quiet` — предупреждения и ошибки, отчёт сохраняется; `-v`/`--verbose` — debug;
 `--log-format json` — структурированные логи.
 
 ## Каталог pre-commit для 1.5.0

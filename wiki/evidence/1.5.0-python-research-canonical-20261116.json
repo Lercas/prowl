@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "status": "canonical_local_repository_qualified",
+  "canonical_repository": "/Users/sugar/dev/prowl-research",
+  "source_manifest_sha256": "fcadfadbe751ced433d040c4d4fc5341a2f34fd2084c41218f342b9fd77a47c7",
+  "matrix": {
+    "results": [
+      {
+        "python": "312",
+        "seed": "0",
+        "passed": 41,
+        "log": {
+          "path": "/tmp/prowl-research-312-seed0-20261116.log",
+          "sha256": "dcb5c6b0e4a47484182fe6ee727af8fa364a5305bfbbdeb01de21483bf6360e2"
+        }
+      },
+      {
+        "python": "312",
+        "seed": "1",
+        "passed": 41,
+        "log": {
+          "path": "/tmp/prowl-research-312-seed1-20261116.log",
+          "sha256": "8d41e5024de70eb0eb20d3df653af3317f3ff5fcb1aeaf557c904c02ad8bc648"
+        }
+      },
+      {
+        "python": "314",
+        "seed": "0",
+        "passed": 41,
+        "log": {
+          "path": "/tmp/prowl-research-314-seed0-20261116.log",
+          "sha256": "38e04e90030a42aeec43be6d78eadee81754cd4b8c92c011e393d7a89082b2db"
+        }
+      },
+      {
+        "python": "314",
+        "seed": "1",
+        "passed": 41,
+        "log": {
+          "path": "/tmp/prowl-research-314-seed1-20261116.log",
+          "sha256": "8d41e5024de70eb0eb20d3df653af3317f3ff5fcb1aeaf557c904c02ad8bc648"
+        }
+      }
+    ],
+    "fresh_imports": {
+      "312": {
+        "python": "3.12.13",
+        "modules": {
+          "src": "src/__init__.py",
+          "src.benchmark": "src/benchmark/__init__.py",
+          "src.benchmark.dataset": "src/benchmark/dataset.py",
+          "src.features": "src/features/__init__.py",
+          "src.features.entropy": "src/features/entropy.py",
+          "src.features.extract": "src/features/extract.py",
+          "src.generation": "src/generation/__init__.py",
+          "src.generation.secrets": "src/generation/secrets.py",
+          "src.ingest": "src/ingest/__init__.py",
+          "src.ingest.hf_pii_loader": "src/ingest/hf_pii_loader.py",
+          "src.ingest.schema": "src/ingest/schema.py",
+          "src.llm": "src/llm/__init__.py",
+          "src.llm.label_model": "src/llm/label_model.py",
+          "src.models": "src/models/__init__.py",
+          "src.models.rules": "src/models/rules.py"
+        },
+        "dependencies": {
+          "numpy": "2.4.6",
+          "PyYAML": "6.0.3",
+          "pytest": "9.1.0"
+        },
+        "venv": "/Users/sugar/dev/prowl-research/.venv312"
+      },
+      "314": {
+        "python": "3.14.9",
+        "modules": {
+          "src": "src/__init__.py",
+          "src.benchmark": "src/benchmark/__init__.py",
+          "src.benchmark.dataset": "src/benchmark/dataset.py",
+          "src.features": "src/features/__init__.py",
+          "src.features.entropy": "src/features/entropy.py",
+          "src.features.extract": "src/features/extract.py",
+          "src.generation": "src/generation/__init__.py",
+          "src.generation.secrets": "src/generation/secrets.py",
+          "src.ingest": "src/ingest/__init__.py",
+          "src.ingest.hf_pii_loader": "src/ingest/hf_pii_loader.py",
+          "src.ingest.schema": "src/ingest/schema.py",
+          "src.llm": "src/llm/__init__.py",
+          "src.llm.label_model": "src/llm/label_model.py",
+          "src.models": "src/models/__init__.py",
+          "src.models.rules": "src/models/rules.py"
+        },
+        "dependencies": {
+          "numpy": "2.4.6",
+          "PyYAML": "6.0.3",
+          "pytest": "9.1.0"
+        },
+        "venv": "/Users/sugar/dev/prowl-research/.venv314"
+      }
+    },
+    "network_profile": "(version 1)(allow default)(deny network*)"
+  },
+  "os_network_control": {
+    "unsandboxed_http_status": 200,
+    "sandboxed_returncode": 1,
+    "owned_requests": 1,
+    "profile": "(version 1)(allow default)(deny network*)"
+  },
+  "actionlint": {
+    "version": "1.7.12",
+    "status": "passed",
+    "log": {
+      "path": "/tmp/prowl-research-actionlint-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "restored_source_files": 18,
+  "restored_ci_files_byte_identical": [
+    "requirements-ci.in",
+    ".github/workflows/python.yml",
+    "tests/conftest.py",
+    "tests/test_ci_boundary.py"
+  ],
+  "previous_archive": "Unavailable; not claimed byte-identical. Source/CI reconstructed from current unchanged originals and retained command data, checked against old hashes.",
+  "lock": {
+    "sha256": "6341db9d030b0ae3702d07f82ac9388663f4f90c3face38e63a25a138e4455fe",
+    "direct_pins": [
+      "numpy==2.4.6",
+      "PyYAML==6.0.3",
+      "pytest==9.1.0"
+    ],
+    "regenerated": true
+  },
+  "scanner_originals_unchanged": true,
+  "limits": [
+    "No remote repository, push or hosted CI run",
+    "No corpora, trained weights or production scanner changes",
+    "Python legacy/zlib unit tests do not qualify Go-flate-v2, L2 business quality or sidecar parity"
+  ],
+  "canonical_local_commit": "a3e586151b8a5337b4a3e91ab5e18aa4e353f9e8",
+  "canonical_local_repository": "/Users/sugar/dev/prowl-research",
+  "repository_remote_at_qualification": "",
+  "local_source_receipt": {
+    "path": "/Users/sugar/dev/prowl-research/qualification/20261116.json",
+    "sha256": "8c24ada9f471749108f0d2b09311254c8359bfba851598bac572e84f28906af5"
+  },
+  "local_manifest": {
+    "path": "/Users/sugar/dev/prowl-research/package-manifest.json",
+    "sha256": "fcadfadbe751ced433d040c4d4fc5341a2f34fd2084c41218f342b9fd77a47c7"
+  },
+  "publication_status": "not performed; separate explicit approval requested"
+}
