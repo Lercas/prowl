@@ -24,6 +24,8 @@ import (
 const componentMaxItems = 10000
 const componentMaxBytes = 32 << 20
 const componentMaxLiterals = 100000
+const componentMaxNamespaceBytes = 32 << 20
+const invalidComponentNamespace = "\x00invalid-component-namespace"
 
 type componentBatch struct {
 	set     *credentialset.Set
@@ -58,6 +60,13 @@ func captureComponentNamespaces(ctx context.Context) bool {
 func componentNamespace(path []string) string {
 	if len(path) == 0 {
 		return ""
+	}
+	bytes := 0
+	for _, segment := range path {
+		bytes += len(segment)
+	}
+	if len(path) > 64 || bytes > 4096 {
+		return invalidComponentNamespace
 	}
 	raw, _ := json.Marshal(path)
 	return string(raw)
@@ -98,8 +107,12 @@ func componentFields(ctx context.Context, it model.Item) (map[string]map[string]
 		if ctx.Err() != nil || depth > 64 || len(out) >= componentMaxLiterals {
 			return false
 		}
+		namespace := componentNamespace(path)
+		if namespace == invalidComponentNamespace {
+			return false
+		}
 		values := make(map[string]*string, len(fields))
-		out[componentNamespace(path)] = values
+		out[namespace] = values
 		for name, v := range fields {
 			values[name] = nil
 			if child, ok := v.(map[string]any); ok {
@@ -183,7 +196,7 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 	}
 	collector := New(options)
 	var items []model.Item
-	bytes, literals, valid := 0, 0, true
+	bytes, literals, namespaceBytes, valid := 0, 0, 0, true
 	collecting := true
 	for collecting {
 		select {
@@ -242,6 +255,20 @@ func (p *Pipeline) runComponents(ctx context.Context, input <-chan model.Item) [
 				}
 				literals += len(doc.values)
 				batch.docs[it.CredentialEntry] = doc
+			}
+			for namespace := range fields {
+				namespaceBytes += len(namespace)
+			}
+			if doc != nil {
+				for _, namespace := range doc.componentNamespaces {
+					namespaceBytes += len(namespace)
+				}
+			}
+			if namespaceBytes > componentMaxNamespaceBytes {
+				model.Note(ctx, "cross_file_namespace_limit", it.Path, true)
+				valid = false
+				batch.discard()
+				continue
 			}
 			if it.CredentialScope == nil || doc == nil || doc.verificationUnsafe || len(it.Text) > 1<<20 || !supported {
 				model.Note(ctx, "cross_file_literal_unavailable", it.Path, true)

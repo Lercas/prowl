@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -85,6 +87,9 @@ func TestCrossFileNestedNamespacesNeverBorrow(t *testing.T) {
 }
 
 func TestComponentNamespaceSegmentsAreUnambiguous(t *testing.T) {
+	if componentNamespace([]string{strings.Repeat("x", 4097)}) != invalidComponentNamespace {
+		t.Fatal("oversized namespace accepted")
+	}
 	if componentNamespace([]string{"prod.service"}) == componentNamespace([]string{"prod", "service"}) {
 		t.Fatal("namespace segment boundary collapsed")
 	}
@@ -97,6 +102,39 @@ func TestComponentNamespaceSegmentsAreUnambiguous(t *testing.T) {
 		if doc == nil || len(doc.componentNamespaces) != 0 {
 			t.Fatal("default parser retained cross-file metadata", strings.TrimSpace(it.Path))
 		}
+	}
+}
+
+func TestCrossFileNamespaceMetadataBudget(t *testing.T) {
+	allowOrderFixture(t)
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { calls.Add(1); w.WriteHeader(200) }))
+	defer srv.Close()
+	leaf := make(map[string]any)
+	for i := 0; i < 500; i++ {
+		leaf[fmt.Sprintf("node%d", i)] = map[string]any{"account": "tenant_a"}
+	}
+	nested := leaf
+	for i := 0; i < 32; i++ {
+		nested = map[string]any{strings.Repeat("x", 100): nested}
+	}
+	raw, err := json.Marshal(nested)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scope := credentialset.NewScope()
+	items := componentItems(scope, ".json")
+	for i := 0; i < 12; i++ {
+		items = append(items, model.Item{Source: "code", Path: fmt.Sprintf("metadata-%d.json", i), Text: string(raw), CredentialScope: scope})
+	}
+	fs, coverage := runComponentItems(t, Options{Detector: detector(t), Verifiers: orderVerifier(t, srv.URL, "extract:\n  account: 'tenant_[ab]'\n"), CrossFile: true}, items)
+	complete, _, diagnostics := coverage.Snapshot()
+	limited := false
+	for _, diagnostic := range diagnostics {
+		limited = limited || diagnostic.Code == "cross_file_namespace_limit"
+	}
+	if complete || !limited || calls.Load() != 0 || !hasIncompleteFinding(fs) {
+		t.Fatal("namespace budget did not invalidate the complete inventory")
 	}
 }
 
