@@ -457,6 +457,8 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 			opts.CaptureVerificationContext = vset != nil
 			if literalDoc != nil {
 				opts.PasswordScalars = literalDoc.scalars
+			} else if origin := p.options.reconstruction; origin != nil && origin.value.Name != "" && det.RecognizesPasswordBinding(origin.value.Name) {
+				opts.PasswordScalars = map[int]detect.PasswordScalar{0: {Name: origin.value.Name, Value: origin.value.Text, End: len(origin.value.Text)}}
 			}
 			opts.PublicKeys = p.options.PublicAuditor != nil
 			if eng != nil && eng.Len() > 0 || p.options.ValueFingerprint != nil {
@@ -578,7 +580,11 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		// A reconstructed string is already proven by the expression parser.
 		// Its encoded JWT ranges are not identifiers in the original program.
 		provenJWTPayload := m.JWTPayload && p.options.reconstruction != nil
-		if pathIsFile && taxonomy.GenericLast[m.Type] && m.Stage != "semantic-candidate" && !provenJWTPayload && codeValues.NonLiteral(m.Start, m.End) {
+		provenReconstructedPassword := false
+		if origin := p.options.reconstruction; origin != nil {
+			provenReconstructedPassword = m.Type == "generic_password" && origin.value.Name != "" && m.ContextName == origin.value.Name && m.Start == 0 && m.End == len(origin.value.Text) && m.Value == origin.value.Text
+		}
+		if pathIsFile && taxonomy.GenericLast[m.Type] && m.Stage != "semantic-candidate" && !provenJWTPayload && !provenReconstructedPassword && codeValues.NonLiteral(m.Start, m.End) {
 			model.CoverageFrom(ctx).Filtered()
 			continue
 		}
@@ -629,6 +635,10 @@ func (p *Pipeline) findings(ctx context.Context, it model.Item, literalDoc *lite
 		p.annotateIdentity(ctx, &out[len(out)-1], m.Value, it)
 		if ml != nil {
 			record := recordForMatch(m, it)
+			if provenReconstructedPassword {
+				record.Context.Name, record.DirectBinding = p.options.reconstruction.value.Name, p.options.reconstruction.value.Name
+				record.Context.ParserLiteralSensitive = literalSensitive(m.Value)
+			}
 			if literalDoc != nil && m.DecodedText == "" {
 				record = literalDoc.recordFor(m.Value, it, m.Start, m.Type)
 			}

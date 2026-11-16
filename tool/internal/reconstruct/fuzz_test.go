@@ -3,7 +3,7 @@ package reconstruct
 import "testing"
 
 func FuzzExtract(f *testing.F) {
-	for _, seed := range []string{`const key=atob("c2VjcmV0");`, `const key=['a','b'].join('');`, "const p='key'; const x=`${p}suffix`;", `const x=unknown+'foo';`, "\x00\xff"} {
+	for _, seed := range []string{`const key=atob("c2VjcmV0");`, `const key=['a','b'].join('');`, "const p='key'; const x=`${p}suffix`;", `const x=unknown+'foo';`, "\x00\xff", `const password="!9terceSetom3R".split("").reverse().join("");`, `const key="prefix😀suffix".split("").reverse().join("");`} {
 		f.Add(seed)
 	}
 	f.Fuzz(func(t *testing.T, text string) {

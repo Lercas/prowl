@@ -1,0 +1,226 @@
+{
+  "recorded_at": "2026-11-16T11:51:21.763836+00:00",
+  "scope": "Local opt-in static JS split/reverse/join and parser-grounded const password nomination. The complete 1.5.0 migration remains open.",
+  "runtime_source_commit": "cba5771097fc875a6f366dc25a438ab70d856964",
+  "runtime_tool_tree": "062b46defcfe9fe6ce1e1768774ed5a50a4ed9d0",
+  "reconstruction_revision": "static-string-order-v2",
+  "default_detection_revision": "1.5.0-released-ml-evidence-v1",
+  "binary": {
+    "path": "/tmp/prowl-string-order-qualified-20261116-bin",
+    "sha256": "465cabc678432766e10c67d7e9a111d8d687f6a3559bd6cc56f7ea887166c37b"
+  },
+  "logs": {
+    "full_go": {
+      "path": "/tmp/prowl-string-order-go-20261116.log",
+      "sha256": "2b3631bdc27b567925e031ac3f3b67364f8940891cb06149aad01d1f30e37fb2"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-string-order-targeted-final-20261116.log",
+      "sha256": "01e5f6ed3d2c302c563b3c486ad8f05eca8c25367d1ede7567f880bcad0a5240"
+    },
+    "race": {
+      "path": "/tmp/prowl-string-order-race-20261116.log",
+      "sha256": "90d22c4c45f7b3b04e4efea613e033042f50c63a9ff5730c42a5a7b24839a613"
+    },
+    "minimum_go": {
+      "path": "/tmp/prowl-string-order-min-go-20261116.log",
+      "sha256": "5a295c165e52ae9996aec495f6013cb5047e3a7a8f633f085d3bee7775c19b5b"
+    },
+    "lint": {
+      "path": "/tmp/prowl-string-order-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "final_http_race": {
+      "path": "/tmp/prowl-string-order-verification-race-20261116.log",
+      "sha256": "1c866de872db8c0c8b3e8fd154fe3411cb65204f90c5a1b02fa821f17a5ec0a4"
+    },
+    "final_http_minimum_go": {
+      "path": "/tmp/prowl-string-order-final-tests-min-go-20261116.log",
+      "sha256": "7dc3156ff843d6a3910391342b9290e9a96c76e61a9b6ef7a15710b4104e042d"
+    },
+    "final_http_lint": {
+      "path": "/tmp/prowl-string-order-final-tests-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "fuzz": {
+      "path": "/tmp/prowl-string-order-fuzz-20261116.log",
+      "sha256": "d7c8476d5fd28ff22648c42e2ce84f3c4f8ef0ae19cc8ce080dbaf0f28d26146"
+    },
+    "native": {
+      "path": "/tmp/prowl-string-order-native-expanded-20261116.log",
+      "sha256": "226757dfd6dd76f80a2d903112dad856962f7deaef8e1062ccd49d2f56fc85e3"
+    },
+    "default_corpus": {
+      "path": "/tmp/prowl-string-order-corpus-20261116.log",
+      "sha256": "949babcc5cf15bf2b283d2fa50f8227a48afa758a617fa94531af6008b1c7d2b"
+    },
+    "build_metadata": {
+      "path": "/tmp/prowl-string-order-build-info-20261116.log",
+      "sha256": "1c4bdb4e638460abf3dccbd952abc3b69d3f457cd93124f8c24c0b2ee8966cf0"
+    }
+  },
+  "node_reference": {
+    "fixture": {
+      "path": "/tmp/prowl-string-order-20261116/tool/internal/reconstruct/testdata/string_order_reference.json",
+      "sha256": "9bcf91f02e1f8ea9b84d29ce4446adc43da89bee5dc641955f372c0e25a555a5"
+    },
+    "generator": {
+      "path": "/tmp/prowl-string-order-20261116/tool/internal/reconstruct/testdata/generate_string_order_reference.py",
+      "sha256": "e65c1eaf52064e4c178d4e5c62a7a1a9b1577991b038f69370e8c18c866a9b0f"
+    },
+    "node_version": "v22.23.4",
+    "new_cases": 288,
+    "well_formed_exact_values_and_source_ranges": 273,
+    "malformed_utf16_rejected_with_incomplete_coverage": 15,
+    "prior_fixtures_preserved_cases": 279,
+    "execution": "Trusted synthetic generator inputs only; no scanner-input execution."
+  },
+  "native": {
+    "runner": {
+      "path": "/tmp/prowl-string-order-20261116/scripts/check_string_order_native.py",
+      "sha256": "6942063616fc9a28aad4060ccad94d4564c457340505fdf42c47c1544b07c755"
+    },
+    "report": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-string-order-native-zgz9l0ft/evidence.json",
+      "sha256": "655249fadea59ca477c89f2f23f2a03c884a324dec7292bfb5995df348f304c6"
+    },
+    "passed": 467,
+    "total": 467,
+    "os_network_deny": "sandbox-exec deny network*, loopback bind explicitly rejected",
+    "cases": [
+      "typed AWS key and named generic passwords, reverse and spacing removal",
+      "Unicode/markup and newline passwords through actual canonical L2",
+      "file/stdin JSON/SARIF, mask, source evidence, byte/UTF16 report columns",
+      "pragma and opt-in boundaries",
+      "no name borrowing, unknown calls/arguments",
+      "malformed UTF16, split-parts bound, prototype uncertainty; exit 2 and baseline preservation"
+    ]
+  },
+  "controlled_regression": {
+    "report": {
+      "path": "/tmp/prowl-string-order-legacy-comparison-20261116.json",
+      "sha256": "1678cb5a7d131aa7af4eead1519a29e63b10b9255fb41bf6ffa79708d704f010"
+    },
+    "cases": 4,
+    "reference_source_commit": "b0a7670f97d53a9db9faf8a71c243cc9e34c4058",
+    "reference_runtime_matches_parent_tool_tree": true,
+    "before": 0,
+    "after": 1,
+    "per_case": true,
+    "ml": true,
+    "note": "Candidate reports come from the initial 283-check native run, same runtime binary SHA. Expanded final native run separately passes 467 checks."
+  },
+  "verification": {
+    "test": "tool/internal/scan/string_order_test.go:TestStringOrderVerificationKeepsOrderingAndOriginalCompanions",
+    "owned_loopback_http_cases": 4,
+    "checks": [
+      "source companion with logical key",
+      "decoded-only companion does not permit a request",
+      "default ML drop before provider",
+      "verify-all LIVE retention"
+    ],
+    "real_provider": false
+  },
+  "quality": {
+    "report": {
+      "path": "/tmp/prowl-string-order-quality-20261116.json",
+      "sha256": "7c8e84f7d4d9d614bc50dac6381bfbb476b8ec6cc06c6f0b07bead42ad25f8ac"
+    },
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "false_positives": 61,
+    "hard_negatives": 982,
+    "all_keys_except_binary_sha_identical_to": {
+      "path": "/tmp/prowl-algolia-xml-quality-20261116.json",
+      "sha256": "0d3b4c0534b4ece66539d49c872eca9b738dc3e24511cf55f11511269e5e7d2c"
+    }
+  },
+  "default_corpus": {
+    "files": 12044,
+    "bytes": 132407542,
+    "findings": 420,
+    "incomplete": 85,
+    "sha256": "c70f3622ace725e1c60bd80998747d1b1382ba8eb82a6fa2d3d96d0e0782dec6",
+    "unchanged": true
+  },
+  "model": {
+    "path": "/tmp/prowl-string-order-20261116/tool/internal/mlmodel/model_binary_go_literal_v1.json",
+    "sha256": "dc232e3c7b140845b935078cc63ac671bdfd72a21db7b56d41a4160cd2a010c3"
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-string-order-cross-build-20261116/builds.json",
+      "sha256": "da190a2848371e80583d694a58605d44f097061df82901a7cd9eefb3e6357af0"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "b788e971f52a617d5e93338ffcfa8fe4b94d43df19501eb5039e3ee3a005e047",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "465cabc678432766e10c67d7e9a111d8d687f6a3559bd6cc56f7ea887166c37b",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "74a13f1664cba4044c66163e87015b23873176281f2f1419085c40c8fc9521b3",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "119e78733de77999acadc998dd111fdf38e05b0435de0adee4540fc91f4d5b10",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "df5602ee089f224d65608ddeef9eb9af55dfc8baf695e9f93ab2cb9b39f6d8a2",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-string-order-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "ae5217021bc3ecef6e8b3917366257bf56bd70a12ebe49f63f0beeed616fb9b5",
+        "executed": false
+      }
+    ],
+    "native_arm64_sha_matches": true,
+    "foreign_execution": false
+  },
+  "fuzz": {
+    "target": "FuzzExtract",
+    "requested_seconds": 10,
+    "executions": 397199,
+    "crash": false
+  },
+  "bounds": {
+    "input_bytes": 1048576,
+    "value_bytes": 65536,
+    "results": 512,
+    "split_parts": 4096,
+    "spans_and_transform_steps": 128,
+    "expression_depth": 8
+  },
+  "limitations": [
+    "No runtime, imports, arbitrary eval, regex separator, callback, split limit, omitted arguments, computed method calls, separately mutable arrays, JWE, or consumer-free reversal/spacing heuristic.",
+    "Standard intrinsic semantics; observed String/Array prototype access rejects new operations. Hidden runtime/host monkeypatches are not modeled.",
+    "Full Go suite ran on the same runtime source. Four subsequently added HTTP tests passed targeted race, minimum Go, and lint.",
+    "Native runtime qualification is darwin/arm64; other targets compile only.",
+    "No hosted CI, current-source Docker image rebuild, release signing, publication, install or real-account provider qualification.",
+    "No new paired performance benchmark; this opt-in extension leaves all default quality keys and corpus digest unchanged.",
+    "Native runner expanded after the clean runtime build without changing tool tree."
+  ],
+  "passed": true
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Lercas/prowl/tool/internal/model"
 	"github.com/Lercas/prowl/tool/internal/publicaudit"
+	"github.com/Lercas/prowl/tool/internal/reconstruct"
 )
 
 // DetectionRevision changes when source interpretation or suppression semantics change.
@@ -63,6 +64,9 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) context.Context {
 		"revision": DetectionRevision, "taxonomy": taxonomy, "stages": stages,
 		"verify_all": o.VerifyAll, "ignore_pragmas": o.IgnorePragmas, "allow_callback": o.Allow != nil,
 		"all_occurrences": o.AllOccurrences,
+	}
+	if o.Reconstruct {
+		policy["reconstruction_revision"] = reconstruct.Revision
 	}
 	if o.CrossFile {
 		policy["cross_file"] = componentYAMLRevision

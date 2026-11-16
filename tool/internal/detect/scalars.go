@@ -17,6 +17,20 @@ type PasswordScalar struct {
 	Prose       bool // allow cues inside this value, never in its synthetic field presentation
 }
 
+// RecognizesPasswordBinding reports whether the selected taxonomy accepts a
+// parser-established field name. It does not inspect or nominate a value.
+func (d *Detector) RecognizesPasswordBinding(name string) bool {
+	if len(name) > 4096 {
+		return false
+	}
+	for _, ct := range d.types {
+		if ct.st.ID == "generic_password" && ct.st.RE.MatchString("\""+name+"\": \"Qx7vN8\"") {
+			return true
+		}
+	}
+	return false
+}
+
 // ScanWithScalars preserves parser-established values without asking a lexical
 // regex to interpret embedded quotes, newlines or template-looking data.
 func (d *Detector) ScanWithScalars(ctx context.Context, text string, scalars map[int]PasswordScalar) ([]Match, bool) {

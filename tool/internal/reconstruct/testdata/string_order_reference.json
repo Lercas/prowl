@@ -1,0 +1,2021 @@
+{
+  "node_version": "v22.23.4",
+  "rows": [
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"\");",
+      "start": 19,
+      "end": 60,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"\"));",
+      "start": 19,
+      "end": 62,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 79,
+      "end": 113,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"-\");",
+      "start": 19,
+      "end": 61,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"-\"));",
+      "start": 19,
+      "end": 63,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 80,
+      "end": 114,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 72,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 74,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 91,
+      "end": 125,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"\");",
+      "start": 19,
+      "end": 70,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 72,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 79,
+      "end": 123,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 71,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 73,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 80,
+      "end": 124,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 82,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 84,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 91,
+      "end": 135,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"\");",
+      "start": 19,
+      "end": 61,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"\"));",
+      "start": 19,
+      "end": 63,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 80,
+      "end": 114,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"-\");",
+      "start": 19,
+      "end": 62,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"-\"));",
+      "start": 19,
+      "end": 64,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 81,
+      "end": 115,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 73,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 75,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 92,
+      "end": 126,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"\");",
+      "start": 19,
+      "end": 71,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"\"));",
+      "start": 19,
+      "end": 73,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 80,
+      "end": 124,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"-\");",
+      "start": 19,
+      "end": 72,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 74,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 81,
+      "end": 125,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 83,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\" \").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 85,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 92,
+      "end": 136,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"\");",
+      "start": 19,
+      "end": 62,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"\"));",
+      "start": 19,
+      "end": 64,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 81,
+      "end": 115,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"-\");",
+      "start": 19,
+      "end": 63,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"-\"));",
+      "start": 19,
+      "end": 65,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 82,
+      "end": 116,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 74,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 76,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 93,
+      "end": 127,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"\");",
+      "start": 19,
+      "end": 72,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 74,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 81,
+      "end": 125,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 73,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 75,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 82,
+      "end": 126,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 84,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"::\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 86,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 93,
+      "end": 137,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"\");",
+      "start": 19,
+      "end": 72,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"\"));",
+      "start": 19,
+      "end": 74,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 91,
+      "end": 125,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"-\");",
+      "start": 19,
+      "end": 73,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"-\"));",
+      "start": 19,
+      "end": 75,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 92,
+      "end": 126,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 84,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 86,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 103,
+      "end": 137,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"\");",
+      "start": 19,
+      "end": 82,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 84,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 91,
+      "end": 135,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 83,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 85,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 92,
+      "end": 136,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 94,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"PYSD1UXPYEOYGFANAIKA\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 96,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"PYSD1UXPYEOYGFANAIKA\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 103,
+      "end": 147,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"\");",
+      "start": 19,
+      "end": 79,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"\"));",
+      "start": 19,
+      "end": 81,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 98,
+      "end": 132,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"-\");",
+      "start": 19,
+      "end": 80,
+      "value": "A- -K- -I- -A- -N- -A- -F- -G- -Y- -O- -E- -Y- -P- -X- -U- -1- -D- -S- -Y- -P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"-\"));",
+      "start": 19,
+      "end": 82,
+      "value": "A- -K- -I- -A- -N- -A- -F- -G- -Y- -O- -E- -Y- -P- -X- -U- -1- -D- -S- -Y- -P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 99,
+      "end": 133,
+      "value": "A- -K- -I- -A- -N- -A- -F- -G- -Y- -O- -E- -Y- -P- -X- -U- -1- -D- -S- -Y- -P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 91,
+      "value": "A\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 93,
+      "value": "A\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 110,
+      "end": 144,
+      "value": "A\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"\");",
+      "start": 19,
+      "end": 89,
+      "value": "P Y S D 1 U X P Y E O Y G F A N A I K A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 91,
+      "value": "P Y S D 1 U X P Y E O Y G F A N A I K A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 98,
+      "end": 142,
+      "value": "P Y S D 1 U X P Y E O Y G F A N A I K A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 90,
+      "value": "P- -Y- -S- -D- -1- -U- -X- -P- -Y- -E- -O- -Y- -G- -F- -A- -N- -A- -I- -K- -A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 92,
+      "value": "P- -Y- -S- -D- -1- -U- -X- -P- -Y- -E- -O- -Y- -G- -F- -A- -N- -A- -I- -K- -A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 99,
+      "end": 143,
+      "value": "P- -Y- -S- -D- -1- -U- -X- -P- -Y- -E- -O- -Y- -G- -F- -A- -N- -A- -I- -K- -A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 101,
+      "value": "P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 103,
+      "value": "P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 110,
+      "end": 154,
+      "value": "P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80S\ud83d\ude80 \ud83d\ude80D\ud83d\ude80 \ud83d\ude801\ud83d\ude80 \ud83d\ude80U\ud83d\ude80 \ud83d\ude80X\ud83d\ude80 \ud83d\ude80P\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80E\ud83d\ude80 \ud83d\ude80O\ud83d\ude80 \ud83d\ude80Y\ud83d\ude80 \ud83d\ude80G\ud83d\ude80 \ud83d\ude80F\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80N\ud83d\ude80 \ud83d\ude80A\ud83d\ude80 \ud83d\ude80I\ud83d\ude80 \ud83d\ude80K\ud83d\ude80 \ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"\");",
+      "start": 19,
+      "end": 80,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"\"));",
+      "start": 19,
+      "end": 82,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 99,
+      "end": 133,
+      "value": "AKIANAFGYOEYPXU1DSYP",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"-\");",
+      "start": 19,
+      "end": 81,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"-\"));",
+      "start": 19,
+      "end": 83,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 100,
+      "end": 134,
+      "value": "A-K-I-A-N-A-F-G-Y-O-E-Y-P-X-U-1-D-S-Y-P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 92,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 94,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 111,
+      "end": 145,
+      "value": "A\ud83d\ude80K\ud83d\ude80I\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80F\ud83d\ude80G\ud83d\ude80Y\ud83d\ude80O\ud83d\ude80E\ud83d\ude80Y\ud83d\ude80P\ud83d\ude80X\ud83d\ude80U\ud83d\ude801\ud83d\ude80D\ud83d\ude80S\ud83d\ude80Y\ud83d\ude80P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"\");",
+      "start": 19,
+      "end": 90,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"\"));",
+      "start": 19,
+      "end": 92,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 99,
+      "end": 143,
+      "value": "PYSD1UXPYEOYGFANAIKA",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"-\");",
+      "start": 19,
+      "end": 91,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 93,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 100,
+      "end": 144,
+      "value": "P-Y-S-D-1-U-X-P-Y-E-O-Y-G-F-A-N-A-I-K-A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 102,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\" \").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 104,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 111,
+      "end": 155,
+      "value": "P\ud83d\ude80Y\ud83d\ude80S\ud83d\ude80D\ud83d\ude801\ud83d\ude80U\ud83d\ude80X\ud83d\ude80P\ud83d\ude80Y\ud83d\ude80E\ud83d\ude80O\ud83d\ude80Y\ud83d\ude80G\ud83d\ude80F\ud83d\ude80A\ud83d\ude80N\ud83d\ude80A\ud83d\ude80I\ud83d\ude80K\ud83d\ude80A",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"\");",
+      "start": 19,
+      "end": 81,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"\"));",
+      "start": 19,
+      "end": 83,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 100,
+      "end": 134,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"-\");",
+      "start": 19,
+      "end": 82,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"-\"));",
+      "start": 19,
+      "end": 84,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 101,
+      "end": 135,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 93,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 95,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 112,
+      "end": 146,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"\");",
+      "start": 19,
+      "end": 91,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 93,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 100,
+      "end": 144,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 92,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 94,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 101,
+      "end": 145,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 103,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"::\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 105,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 112,
+      "end": 156,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"\");",
+      "start": 19,
+      "end": 91,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"\"));",
+      "start": 19,
+      "end": 93,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 110,
+      "end": 144,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"-\");",
+      "start": 19,
+      "end": 92,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"-\"));",
+      "start": 19,
+      "end": 94,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 111,
+      "end": 145,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 103,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 105,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 122,
+      "end": 156,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"\");",
+      "start": 19,
+      "end": 101,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 103,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 110,
+      "end": 154,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 102,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 104,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 111,
+      "end": 155,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 113,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"A K I A N A F G Y O E Y P X U 1 D S Y P\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 115,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"A K I A N A F G Y O E Y P X U 1 D S Y P\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 122,
+      "end": 166,
+      "value": "A K I A N A F G Y O E Y P X U 1 D S Y P",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").join(\"\");",
+      "start": 19,
+      "end": 64,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").join(\"\"));",
+      "start": 19,
+      "end": 66,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 83,
+      "end": 117,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").join(\"-\");",
+      "start": 19,
+      "end": 65,
+      "value": "l-e-f-t-:-:-m-i-d-d-l-e-:-:-r-i-g-h-t-:-:-e-n-d",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").join(\"-\"));",
+      "start": 19,
+      "end": 67,
+      "value": "l-e-f-t-:-:-m-i-d-d-l-e-:-:-r-i-g-h-t-:-:-e-n-d",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 84,
+      "end": 118,
+      "value": "l-e-f-t-:-:-m-i-d-d-l-e-:-:-r-i-g-h-t-:-:-e-n-d",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 76,
+      "value": "l\ud83d\ude80e\ud83d\ude80f\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80r\ud83d\ude80i\ud83d\ude80g\ud83d\ude80h\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80n\ud83d\ude80d",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 78,
+      "value": "l\ud83d\ude80e\ud83d\ude80f\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80r\ud83d\ude80i\ud83d\ude80g\ud83d\ude80h\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80n\ud83d\ude80d",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 95,
+      "end": 129,
+      "value": "l\ud83d\ude80e\ud83d\ude80f\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80r\ud83d\ude80i\ud83d\ude80g\ud83d\ude80h\ud83d\ude80t\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80n\ud83d\ude80d",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").reverse().join(\"\");",
+      "start": 19,
+      "end": 74,
+      "value": "dne::thgir::elddim::tfel",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 76,
+      "value": "dne::thgir::elddim::tfel",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 83,
+      "end": 127,
+      "value": "dne::thgir::elddim::tfel",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 75,
+      "value": "d-n-e-:-:-t-h-g-i-r-:-:-e-l-d-d-i-m-:-:-t-f-e-l",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 77,
+      "value": "d-n-e-:-:-t-h-g-i-r-:-:-e-l-d-d-i-m-:-:-t-f-e-l",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 84,
+      "end": 128,
+      "value": "d-n-e-:-:-t-h-g-i-r-:-:-e-l-d-d-i-m-:-:-t-f-e-l",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 86,
+      "value": "d\ud83d\ude80n\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80h\ud83d\ude80g\ud83d\ude80i\ud83d\ude80r\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80f\ud83d\ude80e\ud83d\ude80l",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 88,
+      "value": "d\ud83d\ude80n\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80h\ud83d\ude80g\ud83d\ude80i\ud83d\ude80r\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80f\ud83d\ude80e\ud83d\ude80l",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 95,
+      "end": 139,
+      "value": "d\ud83d\ude80n\ud83d\ude80e\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80h\ud83d\ude80g\ud83d\ude80i\ud83d\ude80r\ud83d\ude80:\ud83d\ude80:\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80:\ud83d\ude80:\ud83d\ude80t\ud83d\ude80f\ud83d\ude80e\ud83d\ude80l",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").join(\"\");",
+      "start": 19,
+      "end": 65,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").join(\"\"));",
+      "start": 19,
+      "end": 67,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 84,
+      "end": 118,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").join(\"-\");",
+      "start": 19,
+      "end": 66,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").join(\"-\"));",
+      "start": 19,
+      "end": 68,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 85,
+      "end": 119,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 77,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 79,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 96,
+      "end": 130,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").reverse().join(\"\");",
+      "start": 19,
+      "end": 75,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").reverse().join(\"\"));",
+      "start": 19,
+      "end": 77,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 84,
+      "end": 128,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").reverse().join(\"-\");",
+      "start": 19,
+      "end": 76,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 78,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 85,
+      "end": 129,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\" \").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 87,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\" \").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 89,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 96,
+      "end": 140,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").join(\"\");",
+      "start": 19,
+      "end": 66,
+      "value": "leftmiddlerightend",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").join(\"\"));",
+      "start": 19,
+      "end": 68,
+      "value": "leftmiddlerightend",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 85,
+      "end": 119,
+      "value": "leftmiddlerightend",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").join(\"-\");",
+      "start": 19,
+      "end": 67,
+      "value": "left-middle-right-end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").join(\"-\"));",
+      "start": 19,
+      "end": 69,
+      "value": "left-middle-right-end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 86,
+      "end": 120,
+      "value": "left-middle-right-end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 78,
+      "value": "left\ud83d\ude80middle\ud83d\ude80right\ud83d\ude80end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 80,
+      "value": "left\ud83d\ude80middle\ud83d\ude80right\ud83d\ude80end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 97,
+      "end": 131,
+      "value": "left\ud83d\ude80middle\ud83d\ude80right\ud83d\ude80end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").reverse().join(\"\");",
+      "start": 19,
+      "end": 76,
+      "value": "endrightmiddleleft",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 78,
+      "value": "endrightmiddleleft",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 85,
+      "end": 129,
+      "value": "endrightmiddleleft",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 77,
+      "value": "end-right-middle-left",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 79,
+      "value": "end-right-middle-left",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 86,
+      "end": 130,
+      "value": "end-right-middle-left",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"::\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 88,
+      "value": "end\ud83d\ude80right\ud83d\ude80middle\ud83d\ude80left",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"::\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 90,
+      "value": "end\ud83d\ude80right\ud83d\ude80middle\ud83d\ude80left",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 97,
+      "end": 141,
+      "value": "end\ud83d\ude80right\ud83d\ude80middle\ud83d\ude80left",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"\");",
+      "start": 19,
+      "end": 76,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"\"));",
+      "start": 19,
+      "end": 78,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 95,
+      "end": 129,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"-\");",
+      "start": 19,
+      "end": 77,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"-\"));",
+      "start": 19,
+      "end": 79,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 96,
+      "end": 130,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 88,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 90,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 107,
+      "end": 141,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"\");",
+      "start": 19,
+      "end": 86,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 88,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 95,
+      "end": 139,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 87,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 89,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 96,
+      "end": 140,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 98,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"left::middle::right::end\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 100,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"left::middle::right::end\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 107,
+      "end": 151,
+      "value": "left::middle::right::end",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"\");",
+      "start": 19,
+      "end": 82,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"\"));",
+      "start": 19,
+      "end": 84,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 101,
+      "end": 135,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"-\");",
+      "start": 19,
+      "end": 83,
+      "value": "p-r-e-f-i-x-\ud83d-\ude80-m-i-d-d-l-e-\ud83d-\ude00-s-u-f-f-i-x",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"-\"));",
+      "start": 19,
+      "end": 85,
+      "value": "p-r-e-f-i-x-\ud83d-\ude80-m-i-d-d-l-e-\ud83d-\ude00-s-u-f-f-i-x",
+      "well_formed": false
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 102,
+      "end": 136,
+      "value": "p-r-e-f-i-x-\ud83d-\ude80-m-i-d-d-l-e-\ud83d-\ude00-s-u-f-f-i-x",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 94,
+      "value": "p\ud83d\ude80r\ud83d\ude80e\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x\ud83d\ude80\ud83d\ud83d\ude80\ude80\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80\ud83d\ud83d\ude80\ude00\ud83d\ude80s\ud83d\ude80u\ud83d\ude80f\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 96,
+      "value": "p\ud83d\ude80r\ud83d\ude80e\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x\ud83d\ude80\ud83d\ud83d\ude80\ude80\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80\ud83d\ud83d\ude80\ude00\ud83d\ude80s\ud83d\ude80u\ud83d\ude80f\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x",
+      "well_formed": false
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 113,
+      "end": 147,
+      "value": "p\ud83d\ude80r\ud83d\ude80e\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x\ud83d\ude80\ud83d\ud83d\ude80\ude80\ud83d\ude80m\ud83d\ude80i\ud83d\ude80d\ud83d\ude80d\ud83d\ude80l\ud83d\ude80e\ud83d\ude80\ud83d\ud83d\ude80\ude00\ud83d\ude80s\ud83d\ude80u\ud83d\ude80f\ud83d\ude80f\ud83d\ude80i\ud83d\ude80x",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"\");",
+      "start": 19,
+      "end": 92,
+      "value": "xiffus\ude00\ud83delddim\ude80\ud83dxiferp",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 94,
+      "value": "xiffus\ude00\ud83delddim\ude80\ud83dxiferp",
+      "well_formed": false
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 101,
+      "end": 145,
+      "value": "xiffus\ude00\ud83delddim\ude80\ud83dxiferp",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 93,
+      "value": "x-i-f-f-u-s-\ude00-\ud83d-e-l-d-d-i-m-\ude80-\ud83d-x-i-f-e-r-p",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 95,
+      "value": "x-i-f-f-u-s-\ude00-\ud83d-e-l-d-d-i-m-\ude80-\ud83d-x-i-f-e-r-p",
+      "well_formed": false
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 102,
+      "end": 146,
+      "value": "x-i-f-f-u-s-\ude00-\ud83d-e-l-d-d-i-m-\ude80-\ud83d-x-i-f-e-r-p",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 104,
+      "value": "x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80f\ud83d\ude80u\ud83d\ude80s\ud83d\ude80\ude00\ud83d\ude80\ud83d\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80\ude80\ud83d\ude80\ud83d\ud83d\ude80x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80e\ud83d\ude80r\ud83d\ude80p",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 106,
+      "value": "x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80f\ud83d\ude80u\ud83d\ude80s\ud83d\ude80\ude00\ud83d\ude80\ud83d\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80\ude80\ud83d\ude80\ud83d\ud83d\ude80x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80e\ud83d\ude80r\ud83d\ude80p",
+      "well_formed": false
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 113,
+      "end": 157,
+      "value": "x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80f\ud83d\ude80u\ud83d\ude80s\ud83d\ude80\ude00\ud83d\ude80\ud83d\ud83d\ude80e\ud83d\ude80l\ud83d\ude80d\ud83d\ude80d\ud83d\ude80i\ud83d\ude80m\ud83d\ude80\ude80\ud83d\ude80\ud83d\ud83d\ude80x\ud83d\ude80i\ud83d\ude80f\ud83d\ude80e\ud83d\ude80r\ud83d\ude80p",
+      "well_formed": false
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"\");",
+      "start": 19,
+      "end": 83,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"\"));",
+      "start": 19,
+      "end": 85,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 102,
+      "end": 136,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"-\");",
+      "start": 19,
+      "end": 84,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"-\"));",
+      "start": 19,
+      "end": 86,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 103,
+      "end": 137,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 95,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 97,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 114,
+      "end": 148,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"\");",
+      "start": 19,
+      "end": 93,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"\"));",
+      "start": 19,
+      "end": 95,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 102,
+      "end": 146,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"-\");",
+      "start": 19,
+      "end": 94,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 96,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 103,
+      "end": 147,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 105,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\" \").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 107,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\" \";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 114,
+      "end": 158,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"\");",
+      "start": 19,
+      "end": 84,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"\"));",
+      "start": 19,
+      "end": 86,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 103,
+      "end": 137,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"-\");",
+      "start": 19,
+      "end": 85,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"-\"));",
+      "start": 19,
+      "end": 87,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 104,
+      "end": 138,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 96,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 98,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 115,
+      "end": 149,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"\");",
+      "start": 19,
+      "end": 94,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 96,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 103,
+      "end": 147,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 95,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 97,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 104,
+      "end": 148,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 106,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"::\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 108,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"::\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 115,
+      "end": 159,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"\");",
+      "start": 19,
+      "end": 94,
+      "value": "prefixmiddle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"\"));",
+      "start": 19,
+      "end": 96,
+      "value": "prefixmiddle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).join(joiner);",
+      "start": 113,
+      "end": 147,
+      "value": "prefixmiddle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"-\");",
+      "start": 19,
+      "end": 95,
+      "value": "prefix-middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"-\"));",
+      "start": 19,
+      "end": 97,
+      "value": "prefix-middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).join(joiner);",
+      "start": 114,
+      "end": 148,
+      "value": "prefix-middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 106,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 108,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).join(joiner);",
+      "start": 125,
+      "end": 159,
+      "value": "prefix\ud83d\ude80middle\ud83d\ude00suffix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"\");",
+      "start": 19,
+      "end": 104,
+      "value": "middle\ud83d\ude00suffixprefix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"\"));",
+      "start": 19,
+      "end": 106,
+      "value": "middle\ud83d\ude00suffixprefix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 113,
+      "end": 157,
+      "value": "middle\ud83d\ude00suffixprefix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"-\");",
+      "start": 19,
+      "end": 105,
+      "value": "middle\ud83d\ude00suffix-prefix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"-\"));",
+      "start": 19,
+      "end": 107,
+      "value": "middle\ud83d\ude00suffix-prefix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"-\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 114,
+      "end": 158,
+      "value": "middle\ud83d\ude00suffix-prefix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\");",
+      "start": 19,
+      "end": 116,
+      "value": "middle\ud83d\ude00suffix\ud83d\ude80prefix",
+      "well_formed": true
+    },
+    {
+      "code": "/*\ud83d\ude80*/ const key=(\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\".split(\"\\ud83d\\ude80\").reverse().join(\"\\ud83d\\ude80\"));",
+      "start": 19,
+      "end": 118,
+      "value": "middle\ud83d\ude00suffix\ud83d\ude80prefix",
+      "well_formed": true
+    },
+    {
+      "code": "const data=\"prefix\\ud83d\\ude80middle\\ud83d\\ude00suffix\";const separator=\"\\ud83d\\ude80\";const joiner=\"\\ud83d\\ude80\";const key=data.split(separator).reverse().join(joiner);",
+      "start": 125,
+      "end": 169,
+      "value": "middle\ud83d\ude00suffix\ud83d\ude80prefix",
+      "well_formed": true
+    }
+  ]
+}

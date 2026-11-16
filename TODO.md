@@ -889,8 +889,21 @@
   Типизированные значения и generic-значения под явным секретным именем, исходные позиции,
   маскирование и HMAC. Общий бюджет нормализации; повреждение UTF-16 остаётся неполнотой,
   изменённое при восстановлении значение не выдаётся. См. `wiki/Decoding.md`.
+- [x] **Статический JS consumer для перевёрнутых/разряженных строк.**
+  `--reconstruct` вычисляет полные `split(string).reverse().join(string)` и
+  `split(string).join(string)` над доказанными строками/immutable consts.
+  UTF-16 code units сохраняются до join; malformed UTF-16, prototype uncertainty
+  и лимиты не выдают выдуманное значение и сохраняют неполноту/baseline guard.
+  Возвращено доказанное const-имя для generic-пароля без заимствования соседних
+  cues; обычные taxonomy, ML и source-only verifier companions сохранены.
+  Node-reference — 288 новых + 279 прежних, native file/stdin JSON/SARIF ±ML —
+  467/467; четыре L2-пропуска воспроизведены на предыдущем binary и исправлены.
+  Full Go, targeted race/min-Go/lint, fuzz 397199 и шесть static builds проходят;
+  default quality IDs и GOROOT digest прежние. [Контракт](wiki/String-Order-Reconstruction.md),
+  `wiki/evidence/1.5.0-string-order-20261116.json`.
 - [ ] **Что по-прежнему не раскрывается**: generic-значения percent/HTML без знания
-  потребителя, перевёрнутые и разряженные строки; шифрованный JWE не расшифровывается.
+  потребителя, произвольные перевёрнутые/разряженные строки без доказанного consumer;
+  отдельные изменяемые массивы и шифрованный JWE.
 - [x] **Встроенный детектор в JSON payload JWT/JWS.** Контейнер не перекрывает вложенные typed
   и именованные generic-секреты; bare entropy claims не становятся находками.
   Поддержаны JSON whitespace, unsigned claims, escaped/duplicate fields и bounded

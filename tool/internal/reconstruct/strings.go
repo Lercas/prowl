@@ -19,6 +19,7 @@ const maxResults = 512
 type Span struct{ Start, End int }
 type Value struct {
 	Text       string
+	Name       string // Exact immutable declaration owning the expression, never an inferred cue.
 	Spans      []Span
 	Transform  string
 	Expression Span
@@ -32,12 +33,13 @@ type token struct {
 }
 type templatePart struct{ text, binding string }
 type parser struct {
-	tokens    []token
-	i, depth  int
-	constants map[string]Value
-	shadowed  map[string]bool
-	decoders  bool
-	limited   bool
+	tokens                []token
+	i, depth              int
+	constants             map[string]Value
+	shadowed              map[string]bool
+	decoders              bool
+	limited               bool
+	orderIntrinsicUnknown bool
 }
 
 // Extract returns only expressions fully proven by literals and immutable local constants.
@@ -56,6 +58,9 @@ func Extract(text string) (values []Value, limited bool) {
 	}
 	p := parser{tokens: ts, constants: map[string]Value{}, shadowed: shadowed, decoders: true}
 	for i, t := range ts {
+		if (t.text == "String" || t.text == "Array") && i+2 < len(ts) && (ts[i+1].text == "." && ts[i+2].text == "prototype" || ts[i+1].text == "[" && ts[i+2].kind == 's' && ts[i+2].literal == "prototype") {
+			p.orderIntrinsicUnknown = true
+		}
 		if (t.text == "atob" || t.text == "decodeURIComponent") && (i+1 >= len(ts) || ts[i+1].text != "(" || i > 0 && (ts[i-1].text == "." || ts[i-1].text == "const" || ts[i-1].text == "let" || ts[i-1].text == "var" || ts[i-1].text == "function")) {
 			p.decoders = false
 		}
@@ -77,6 +82,7 @@ func Extract(text string) (values []Value, limited bool) {
 				v.Expression = Span{ts[expressionStart].start, ts[p.i-1].end}
 				p.constants[name] = v
 				if v.Transform != "literal" {
+					v.Name = name
 					values = add(values, v, seen)
 				}
 				if len(values) >= maxResults {
@@ -168,6 +174,20 @@ func (p *parser) expr() (Value, bool) {
 	return v, true
 }
 func (p *parser) atom() (Value, bool) {
+	v, ok := p.primary()
+	if !ok {
+		return Value{}, false
+	}
+	for p.i < len(p.tokens) && p.tokens[p.i].text == "." {
+		v, ok = p.stringOrder(v)
+		if !ok {
+			return Value{}, false
+		}
+	}
+	return v, true
+}
+
+func (p *parser) primary() (Value, bool) {
 	if p.i >= len(p.tokens) {
 		return Value{}, false
 	}

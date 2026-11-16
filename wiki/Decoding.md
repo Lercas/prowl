@@ -632,3 +632,11 @@ JSON-значение, а воспроизводящий seed сохранён. 
 420 находок и 85 неполных файлов. Detection revision — `1.5.0-short-key-v1`.
 Квалификация локальная; финальные образы, hosted CI и реальные провайдеры
 не подтверждены. [Evidence](evidence/1.5.0-short-keys-20261115.json).
+
+
+### Статический порядок строки
+
+`--reconstruct` расширен полными статическими `split(string).reverse().join(string)`
+и `split(string).join(string)`, с UTF-16 semantics, исходными spans и доказанным
+const-именем для generic-пароля. [Контракт и ограничения](String-Order-Reconstruction.md).
+Произвольный разворот/разряжение данных без consumer и расшифровка JWE не добавлены.
