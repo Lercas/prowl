@@ -235,7 +235,7 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 	}
 	coverage := model.NewCoverage()
 	ctx := model.WithCoverage(r.Context(), coverage)
-	s.registerScope(ctx, []scanItem{in})
+	ctx = s.registerScope(ctx, []scanItem{in})
 	fs := s.pipeline.Findings(ctx, in.toModel())
 	atomic.AddInt64(&s.m.scanned, 1)
 	atomic.AddInt64(&s.m.findings, int64(len(fs)))
@@ -276,7 +276,7 @@ func (s *Server) handleBatch(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	coverage := model.NewCoverage()
 	ctx = model.WithCoverage(ctx, coverage)
-	s.registerScope(ctx, in)
+	ctx = s.registerScope(ctx, in)
 	// Initialize as empty (not nil) so a zero-hit batch serializes "findings": [] not null.
 	all := []model.Finding{}
 	batchTruncated := false

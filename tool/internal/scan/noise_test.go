@@ -181,7 +181,6 @@ func TestDetectionPolicyIsPresentForEmptyAndDirectScans(t *testing.T) {
 	for _, empty := range []bool{true, false} {
 		cov := model.NewCoverage()
 		ctx := model.WithCoverage(context.Background(), cov)
-		New(Options{Detector: detector(t)}).RegisterPolicy(ctx)
 		if empty {
 			New(Options{Detector: detector(t), Workers: 1}).Run(ctx, feed())
 		} else {

@@ -15,11 +15,12 @@ func (s *Server) handleCapabilities(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
-func (s *Server) registerScope(ctx context.Context, items []scanItem) {
-	s.pipeline.RegisterPolicy(ctx)
+func (s *Server) registerScope(ctx context.Context, items []scanItem) context.Context {
+	ctx = s.pipeline.RegisterPolicy(ctx)
 	for _, item := range items {
 		model.CoverageFrom(ctx).RegisterScope("http-input", item.Path, map[string]string{
 			"source": item.toModel().Source, "boundary": "caller-supplied content",
 		})
 	}
+	return ctx
 }

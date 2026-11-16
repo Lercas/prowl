@@ -24,10 +24,24 @@ func (p *Pipeline) Capabilities() (redacted bool, stages map[string]bool) {
 	return !o.RevealSecrets, stages
 }
 
-// RegisterPolicy stamps even empty HTTP batches with their configured detection profile.
+type policyRegistrationKey struct{}
+
+type policyRegistration struct {
+	pipeline *Pipeline
+	coverage *model.Coverage
+}
+
+// RegisterPolicy stamps even empty scans with their configured detection profile.
+// The returned context shares the registration with workers, avoiding per-item hashing.
 // Arbitrary callback and external service contents are not immutable revision evidence.
-func (p *Pipeline) RegisterPolicy(ctx context.Context) {
+func (p *Pipeline) RegisterPolicy(ctx context.Context) context.Context {
 	c := model.CoverageFrom(ctx)
+	if c == nil {
+		return ctx
+	}
+	if registered, ok := ctx.Value(policyRegistrationKey{}).(policyRegistration); ok && registered.pipeline == p && registered.coverage == c {
+		return ctx
+	}
 	o := p.options
 	c.SetIdentityScope(o.IdentityKey)
 	if o.RevealSecrets {
@@ -66,4 +80,5 @@ func (p *Pipeline) RegisterPolicy(ctx context.Context) {
 		}
 	}
 	c.RegisterScope("rules", "", rulePolicy)
+	return context.WithValue(ctx, policyRegistrationKey{}, policyRegistration{p, c})
 }
