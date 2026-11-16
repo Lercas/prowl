@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/Lercas/prowl/tool/internal/model"
@@ -12,6 +13,10 @@ import (
 func TestIndexUsesStagedBytesAndNames(t *testing.T) {
 	dir, git := gitRepo(t)
 	names := []string{"partially-staged.txt", "секрет\nname.txt"}
+	if runtime.GOOS == "windows" {
+		// Windows filenames cannot contain a newline; keep the non-ASCII quoted path.
+		names[1] = "секрет name.txt"
+	}
 	staged := "token = \x73k_live_Q5t7U9i2O4p6A8s0D3f5G7h9\n"
 	for _, name := range names {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(staged), 0600); err != nil {
