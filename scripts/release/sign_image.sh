@@ -8,17 +8,20 @@ root="$RUNNER_TEMP/prowl-image"
 mkdir "$root"
 
 cosign sign --yes "$IMAGE@$DIGEST"
+# Verification payloads go to /dev/null: a printed SPDX attestation is a multi-megabyte
+# single line that stalls the Actions log processor after the script has finished.
+# set -e still fails the step on any verification error.
 cosign verify --certificate-identity "$identity" \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMAGE@$DIGEST"
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMAGE@$DIGEST" >/dev/null
 docker buildx imagetools inspect "$IMAGE@$DIGEST" --raw > "$root/index.json"
 python3 scripts/release/platforms.py "$root/index.json" > "$root/platforms.txt"
 while read -r arch platform_digest; do
   sbom="$root/prowl-image-linux-$arch.spdx.json"
-  "$SYFT_CMD" scan "registry:$IMAGE@$platform_digest" --output "spdx-json=$sbom"
+  "$SYFT_CMD" scan --quiet "registry:$IMAGE@$platform_digest" --output "spdx-json=$sbom"
   python3 -c 'import sys; sys.path.insert(0,"scripts/release"); from pathlib import Path; from verify_artifacts import verify_sbom; verify_sbom(Path(sys.argv[1]))' "$sbom"
   cosign attest --yes --predicate "$sbom" --type spdxjson "$IMAGE@$platform_digest"
   cosign verify-attestation --type spdxjson --certificate-identity "$identity" \
-    --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMAGE@$platform_digest"
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com "$IMAGE@$platform_digest" >/dev/null
 done < "$root/platforms.txt"
 
 printf '%s\n' "$DIGEST" > "$root/prowl-image-digest.txt"

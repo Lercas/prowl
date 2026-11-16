@@ -115,6 +115,7 @@ jobs:
   docker:
     needs: binaries
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       packages: write
@@ -159,6 +160,7 @@ jobs:
   publish:
     needs: [binaries, docker]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
       packages: write
