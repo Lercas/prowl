@@ -1,0 +1,348 @@
+{
+  "passed": 60,
+  "checks": [
+    {
+      "case": "200-positiveTrue-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/tristate",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/request",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/status",
+      "passed": true
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse/redaction",
+      "passed": true
+    },
+    {
+      "case": "live-gate",
+      "passed": true
+    },
+    {
+      "case": "generic-candidate-retained",
+      "passed": true
+    },
+    {
+      "case": "generic-never-submitted",
+      "passed": true
+    },
+    {
+      "case": "generic-redaction",
+      "passed": true
+    }
+  ],
+  "root": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-verdict-native-dwf238t7",
+  "binary_sha256": "3c04238314d376d571e5d0c7b5d02e3b31c931f6df7e577bf8cb5baf24ada59c",
+  "observations": [
+    {
+      "case": "200-positiveTrue-json-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveTrue-sarif-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "verified"
+    },
+    {
+      "case": "200-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "200-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "301-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "400-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "401-positiveFalse-json-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "401-positiveFalse-sarif-mlFalse",
+      "complete": true,
+      "exit": 0,
+      "status": "invalid"
+    },
+    {
+      "case": "403-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "403-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "404-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-json-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    },
+    {
+      "case": "500-positiveFalse-sarif-mlFalse",
+      "complete": false,
+      "exit": 0,
+      "status": "error"
+    }
+  ],
+  "legacy_verdict_only": true,
+  "provider": "owned loopback stub only; no live account acceptance",
+  "requests": 17
+}

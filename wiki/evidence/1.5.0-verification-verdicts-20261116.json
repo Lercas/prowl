@@ -1,0 +1,115 @@
+{
+  "schema_version": "prowl-verification-verdicts-v1",
+  "date": "2026-11-16",
+  "status": "local_provider_contracts_qualified",
+  "source_base": "814e58d",
+  "qualified_runtime_commit": "6190ad9c2cdb0cadcceefcb7fe26093ebcc83173",
+  "binary": {
+    "path": "/tmp/prowl-verdict-final-20261116-bin",
+    "sha256": "72acb145b4e5f9005b2842695b43f633894cbafc164aa659f22a6f8c31660c39"
+  },
+  "buildinfo": "/tmp/prowl-verdict-final-20261116-bin: go1.27.4\n\tpath\tgithub.com/Lercas/prowl/tool/cmd/prowl\n\tmod\tgithub.com/Lercas/prowl/tool\t(devel)\t\n\tdep\tgithub.com/BurntSushi/toml\tv1.6.0\th1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=\n\tdep\tgithub.com/docker/cli\tv29.9.3+incompatible\th1:SBaMp7ecohadEHMDrUJg22t9I3awqsAVhnJ7GOcWpfE=\n\tdep\tgithub.com/docker/docker-credential-helpers\tv0.9.13\th1:yLE5jCyKJraJaBACIGqgpLX0UheWfZUwBkIeCu6WPFU=\n\tdep\tgithub.com/dustin/go-humanize\tv1.1.0\th1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=\n\tdep\tgithub.com/go-sourcemap/sourcemap\tv2.1.4+incompatible\th1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=\n\tdep\tgithub.com/google/go-containerregistry\tv0.22.1\th1:RZuuSYhTvlDvtsK+NkutoCZ//C0X2ebLK8X8l3ULs84=\n\tdep\tgithub.com/google/uuid\tv1.6.0\th1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=\n\tdep\tgithub.com/grafana/sobek\tv0.0.0-20261105103427-a5b602015248\th1:CbmhwJmn23e2wT6+P29WG5aMsdylVayH3AYjQoQ/l3Y=\n\tdep\tgithub.com/klauspost/compress\tv1.20.4\th1:dD0v/bvxtjCBqQu6sx1TNWkalEY5lNTIe+HY9w8TeNI=\n\tdep\tgithub.com/ledongthuc/pdf\tv0.0.0-20261020125853-5e46805f718e\th1:U2Z+V2xqvjJg0azbxHnhOmz2DrpYq0WKpItMPKR6FhY=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.24\th1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=\n\tdep\tgithub.com/ncruces/go-strftime\tv1.1.0\th1:vtPmPWMkb539RGV9WpWT9EwJGvrOCKvMNI4obWL47Hk=\n\tdep\tgithub.com/opencontainers/go-digest\tv1.0.0\th1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=\n\tdep\tgithub.com/opencontainers/image-spec\tv1.1.1\th1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=\n\tdep\tgithub.com/remyoudompheng/bigfft\tv0.0.0-20230129092748-24d4a6f8daec\th1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=\n\tdep\tgithub.com/sirupsen/logrus\tv1.10.2\th1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=\n\tdep\tgolang.org/x/net\tv0.62.0\th1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=\n\tdep\tgolang.org/x/sync\tv0.25.0\th1:dJnifr0nMV8/SBnBvdo4eSGGnrc3O4FFx6IqvtLcmRs=\n\tdep\tgolang.org/x/sys\tv0.50.0\th1:dkKZEFTEKaLr1sjhs0WiKqoi8Jj5nHbS3Njmx1UoMJs=\n\tdep\tgolang.org/x/text\tv0.44.0\th1:YItdp/mQNGnsmrgpcdA5yQ3bnRxCfo/Tj/iByGW9GGo=\n\tdep\tgopkg.in/yaml.v3\tv3.0.1\th1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=\n\tdep\tmodernc.org/libc\tv1.80.1\th1:ejn7HtTV3GknNKbklqWQ1nvUrfX8mTxs1D+xp/JQwy4=\n\tdep\tmodernc.org/mathutil\tv1.7.1\th1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=\n\tdep\tmodernc.org/memory\tv1.12.1\th1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=\n\tdep\tmodernc.org/sqlite\tv1.62.0\th1:gMaCjSM1qpl+iOjiWhR1LYP3zqrYDI+5GYLGt6veP2g=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=tracebacklabels=0,x509sslcertoverrideplatform=0\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=darwin\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=6190ad9c2cdb0cadcceefcb7fe26093ebcc83173\n\tbuild\tvcs.time=2026-11-16T02:32:13Z\n\tbuild\tvcs.modified=false\n",
+  "restored_release_tests_byte_identical": [
+    {
+      "path": "tool/internal/verify/cache_test.go",
+      "sha256": "f329d1a34b3a5e48b211a57981b5fe71ac535d23a98e7187a5f0af6483409cc9"
+    },
+    {
+      "path": "tool/internal/verify/verdict_contract_test.go",
+      "sha256": "0b959e9cfa61c04b804fad06ceb3c7f847e8599d96c878b81aa4510e5e547b1b"
+    }
+  ],
+  "release_reference": {
+    "commit": "f72ea02d0295e764bec5a32359240e77192073fc",
+    "binary": {
+      "path": "/tmp/prowl-integrity-v140-20261116-bin",
+      "sha256": "3c04238314d376d571e5d0c7b5d02e3b31c931f6df7e577bf8cb5baf24ada59c"
+    },
+    "scope": "60 provider-only checks; legacy coverage/exit policy recorded, not certified; new model not loaded"
+  },
+  "native": {
+    "passed": 172,
+    "reference_provider_only": 60,
+    "verification_order": 48,
+    "cross_file": 310,
+    "reports_prefix": "wiki/evidence/1.5.0-verification-verdicts-"
+  },
+  "default_quality": {
+    "exact_ids_unchanged": true,
+    "secret_hits": 1563,
+    "secrets": 2094,
+    "false_positive_hits": 57,
+    "hard_negatives": 982,
+    "report": "wiki/evidence/1.5.0-verification-verdicts-quality-20261116.json"
+  },
+  "logs": {
+    "regression-before": {
+      "path": "/tmp/prowl-verdict-regression-before-20261116.log",
+      "sha256": "08146563ac923dded06400b481d4f495dca72a7ea75ed87f3fb8023a7e876435"
+    },
+    "cache-regression-before": {
+      "path": "/tmp/prowl-verdict-cache-regression-before-20261116.log",
+      "sha256": "c5f95d3ead5aeaa142d2c128331e65a45c715e229078dcdb78d5317611b7ec25"
+    },
+    "full-go": {
+      "path": "/tmp/prowl-verdict-full-go-20261116.log",
+      "sha256": "be28f3ada794e5a2de4546ab16bf70c7301d5f8a6118feb6ec91e3911af0a8d6"
+    },
+    "race": {
+      "path": "/tmp/prowl-verdict-race-20261116.log",
+      "sha256": "f725500640fb2344e65835c2ebdf2b43cfd8f913c46ffda62b6971f38e54300b"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-verdict-min-go-20261116.log",
+      "sha256": "550d2fc96f3837f3d2cb4a1e34366092b56b43a2c63df2d9563dc136173afe3c"
+    },
+    "lint": {
+      "path": "/tmp/prowl-verdict-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "final-native": {
+      "path": "/tmp/prowl-verdict-final-native-20261116.log",
+      "sha256": "f5d489e452922c00bc83d277f2278eed887266969ce180a2d005391ced38fea2"
+    },
+    "final-order": {
+      "path": "/tmp/prowl-verdict-final-order-20261116.log",
+      "sha256": "4506a946ee1f005477f0af89bb0fcc5dacf7790b5f926cdb3ef0a9a5231ca700"
+    },
+    "final-cross-file": {
+      "path": "/tmp/prowl-verdict-final-cross-file-20261116.log",
+      "sha256": "9e7ce2ce6a401502308e3656afd9c43a6c89564991480c5e900adfbb54cda0bf"
+    },
+    "final-quality": {
+      "path": "/tmp/prowl-verdict-final-quality-20261116.log",
+      "sha256": "54ea3a54896a0acee3e9e2082e4581b339d4b32fdfcbbdb783b546628c7125c1"
+    },
+    "final-build": {
+      "path": "/tmp/prowl-verdict-final-build-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reference-verdicts": {
+      "path": "/tmp/prowl-verdict-reference-verdicts-20261116.log",
+      "sha256": "ef5b8d87633d7dbaa6d13a81e87e27520d2cfb216cf4f74b561e9ff147ea4597"
+    }
+  },
+  "regressions": {
+    "before": "First two restored regression tests fail on the unmodified base; cache regression reproduced after routing/verdict restoration while the raw-context extraction remained unchanged",
+    "after": "Non-matching provider response except 401 stays inconclusive; generic routing refused; ambiguous/excessive context rejected before cache",
+    "native_1_5_policy": "inconclusive -> incomplete, exit 2, baseline protected even with verified-only"
+  },
+  "validation_scope": {
+    "full_go": true,
+    "race": [
+      "verify",
+      "scan"
+    ],
+    "minimum_go": "1.26.11 verify/scan",
+    "lint": "0 issues",
+    "corpus_and_performance": "not rerun: only opt-in provider verification runtime changed; default detection/rules/ML/runtime parsers unchanged; current default quality passed"
+  },
+  "limits": [
+    "Owned loopback stub only; no real provider credentials/account acceptance",
+    "Rebuilt reference tag, not downloaded release asset",
+    "No publication, hosted CI or installed CLI switch"
+  ]
+}

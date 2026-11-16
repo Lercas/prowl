@@ -106,6 +106,15 @@
       сохраняет исходные binding/spans при сжатии массива; проигравший rule/builtin
       не вызывает провайдера. Нативная матрица запросов/gate/index — 48/48,
       `wiki/evidence/1.5.0-verification-order-20261114.json`.
+    - [x] Возвращены provider verdict/routing/cache guards из выпущенного тега:
+      несовпавший ответ кроме 401 остаётся inconclusive; generic password/API/semantic
+      не отправляется по тексту значения; неоднозначный companion и 1025-й match
+      отклоняются до cache lookup. Три регрессии воспроизведены до исправления.
+      Native JSON/SARIF/ML/coverage/baseline — 172/172; reference provider-only — 60/60,
+      порядок verification — 48/48, cross-file — 310/310. Full Go, race/min-Go/lint
+      проходят; default quality IDs прежние. Строгая отчётность 1.5 сохранена.
+      [Контракт](wiki/Verification-Verdicts.md),
+      `wiki/evidence/1.5.0-verification-verdicts-20261116.json`.
   - [ ] Восстановить structured literals, безопасное связывание частей для верификации,
     provenance/coverage и ограниченную реконструкцию строк с регрессиями из релиза.
     - [x] Producer provenance передаётся в Item/Finding; восстановлены report HMAC

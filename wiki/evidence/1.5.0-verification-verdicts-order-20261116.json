@@ -1,0 +1,439 @@
+{
+  "binary_sha256": "72acb145b4e5f9005b2842695b43f633894cbafc164aa659f22a6f8c31660c39",
+  "passed": 48,
+  "total": 48,
+  "checks": [
+    {
+      "status": "live",
+      "mode": "default",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "default",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "default",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "default",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "all",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "all",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "all",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "all",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "gate",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 1,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "gate",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 1,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "gate",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 1,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "gate",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 1,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "index",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "index",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "index",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "live",
+      "mode": "index",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "default",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "default",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "default",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "default",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "all",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "all",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "all",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "all",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "gate",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "gate",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "gate",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "gate",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "index",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "index",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "index",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "dead",
+      "mode": "index",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 1,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "default",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "default",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "default",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "default",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 0,
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "all",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "all",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "all",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "all",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "gate",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "gate",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "gate",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "gate",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "index",
+      "stdin": false,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "index",
+      "stdin": false,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "index",
+      "stdin": true,
+      "format": "json",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    },
+    {
+      "status": "error",
+      "mode": "index",
+      "stdin": true,
+      "format": "sarif",
+      "provider_calls": 2,
+      "exit": 2,
+      "passed": true
+    }
+  ]
+}
