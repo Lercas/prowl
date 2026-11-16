@@ -316,8 +316,11 @@ custom scorer, but it is not an automatic third runtime stage in the shipped bin
 
 **Running ML.** L1 ships in every binary and needs nothing. L2 does not run by default. The in-process
 model (`--ml`) runs in both static and source builds from 1.5.0. No cgo, Python or sidecar is needed.
-`--ml-url` remains available for an external scorer. Old zlib-trained external models are
-incompatible with the versioned portable extractor and require retraining.
+`--ml-url` sends raw candidates and their model context to the selected sidecar. By default,
+only a pinned loopback service is allowed; local requests ignore HTTP proxies and all redirects
+are refused. An authorized remote HTTPS sidecar requires `--ml-allow-remote`.
+Old zlib-trained external models are incompatible with the versioned portable extractor and
+require retraining.
 
 ## Rules and verifiers
 

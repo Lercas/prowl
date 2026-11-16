@@ -255,6 +255,7 @@ var cliFlags = []flagSpec{
 	boolFlag("--semantic-allow-remote", indexedCommands+" compare", "allow source text to be sent to the model over HTTPS", func(c *commonFlags) *bool { return &c.semanticAllowRemote }),
 	boolFlag("--reconstruct", scanCommands, "reconstruct bounded static JS/TS strings without executing code", func(c *commonFlags) *bool { return &c.reconstruct }),
 	stringFlag("--ml-model", scanCommands, "FILE", "load a compatible external model (implies ML)", func(c *commonFlags) *string { return &c.mlModel }),
+	boolFlag("--ml-allow-remote", indexedCommands, "allow raw candidates and context to be sent to an authorized HTTPS sidecar", func(c *commonFlags) *bool { return &c.mlAllowRemote }),
 	stringFlag("--ml-url", indexedCommands, "URL", "score candidates through an external sidecar", func(c *commonFlags) *string { return &c.mlURL }),
 	floatFlag("--ml-threshold", scanCommands, "L2 suppression threshold (default 0.3)", func(c *commonFlags) *float64 { return &c.mlThreshold }),
 	boolFlag("--ocr", ocrCommands, "OCR local images and image-only PDF pages", func(c *commonFlags) *bool { return &c.ocrEnabled }),
@@ -501,6 +502,12 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 		return c, nil, err
 	}
 	c.mlURL = strings.TrimRight(c.mlURL, "/")
+	if c.mlURL != "" && !c.mlEmbed && c.mlModel == "" {
+		if _, err := mlscore.NewWithPolicy(c.mlURL, c.mlThreshold, c.mlAllowRemote); err != nil {
+			return c, nil, fmt.Errorf("ML endpoint policy: %w; remote sidecars require --ml-allow-remote", err)
+		}
+	}
+
 	c.ocrURL = strings.TrimRight(c.ocrURL, "/")
 	if c.ocrAllowRemote || c.ocrAllPages || seen["--ocr-url"] || seen["--ocr-model"] || seen["--ocr-max-pages"] || seen["--ocr-timeout"] {
 		c.ocrEnabled = true
@@ -614,7 +621,8 @@ type commonFlags struct {
 	semanticAllowRemote                      bool
 	semanticEngine                           *semantic.Engine
 	reconstruct                              bool
-	mlModel                                  string            // load the in-process model from this file (implies --ml)
+	mlModel                                  string // load the in-process model from this file (implies --ml)
+	mlAllowRemote                            bool
 	mlURL                                    string            // ML sidecar URL for the L2 secret/not-secret stage (off if empty)
 	mlThreshold                              float64           // drop a non-checksum finding the ML scores below this
 	mlThresholdSet                           bool              // user passed --ml-threshold (so config must not override it)

@@ -1,0 +1,211 @@
+{
+  "recorded_at": "2026-11-16T13:42:33.594938+00:00",
+  "scope": "Restore released ML sidecar endpoint policy and explicit remote consent in CLI; full 1.5.0 migration remains open.",
+  "runtime_source_commit": "7b5482d1a36fb1feb09a2de2f9ec46e8fc40fe0b",
+  "runtime_tool_tree": "82c05cd003934a5e6c379f72aae31fe1f41cd0ac",
+  "binary": {
+    "path": "/tmp/prowl-ml-sidecar-policy-qualified-20261116-bin",
+    "sha256": "f0a0256af0527f5830ff0ad38932164eec383d81348b0ad74e52297fe57c5dfc"
+  },
+  "logs": {
+    "go": {
+      "path": "/tmp/prowl-ml-sidecar-policy-go-20261116.log",
+      "sha256": "5a960b27a08dec2c74decd1e3b321e41bdade09693a1794793c190c615681ed4"
+    },
+    "race": {
+      "path": "/tmp/prowl-ml-sidecar-policy-race-20261116.log",
+      "sha256": "b0f3c1706402e926b19b16ac2241618cf03eb6e53672f97164ec759176da38e6"
+    },
+    "min-go": {
+      "path": "/tmp/prowl-ml-sidecar-policy-min-go-20261116.log",
+      "sha256": "2f6866ebe8700eeffc95725e1d94f089fe7ead839cb7ca0b97ae75aae7983e20"
+    },
+    "lint": {
+      "path": "/tmp/prowl-ml-sidecar-policy-lint-20261116.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "native": {
+      "path": "/tmp/prowl-ml-sidecar-policy-native-20261116.log",
+      "sha256": "aa63a93029aaf28bb962f39de56df71699cacf94e67850eab5c609f2917ab7cb"
+    },
+    "loaded-native": {
+      "path": "/tmp/prowl-ml-sidecar-policy-loaded-native-20261116.log",
+      "sha256": "ad1ad2dff8042e1ff9dc0472d5743657e968c2ab291df9ce671e87b08e76bc4c"
+    },
+    "quality": {
+      "path": "/tmp/prowl-ml-sidecar-policy-quality-20261116.log",
+      "sha256": "15e398975e231332513801125f198c6b2bf040a6f1595a9b21830e9fc0abaade"
+    },
+    "build-info": {
+      "path": "/tmp/prowl-ml-sidecar-policy-build-info-20261116.log",
+      "sha256": "e554fd53383e1371b9745a2229f7a41c5ff4b149654a0df67585a3033c59f75a"
+    },
+    "cli-upgrade": {
+      "path": "/tmp/prowl-ml-sidecar-policy-cli-upgrade-20261116.log",
+      "sha256": "ac8919b3736e457e8e8b6fdc4b79557d66f485e737825e54e55fa0e544abea58"
+    },
+    "legacy": {
+      "path": "/tmp/prowl-ml-sidecar-policy-legacy-20261116.log",
+      "sha256": "d7764ede0388e51909e540683e5087fe43a86fc4914d37dca179349639f102a8"
+    },
+    "targeted": {
+      "path": "/tmp/prowl-ml-sidecar-policy-targeted-20261116.log",
+      "sha256": "1c4bc64f0f9ae028f0eb303c8cb49273a195db2341b102e6f3aae7eef862f262"
+    }
+  },
+  "controlled_regression": {
+    "source_parent": "6c0e6ab09ee4a01dea0bf9b7888d58fa1064a280",
+    "test": "TestLegacySidecarRejectsRemoteBeforeTransport",
+    "before": "Legacy New accepted remote HTTPS without consent; Health and Score each reached an owned substituted RoundTripper (2 calls).",
+    "after": "Initialization policy rejects both before transport (0 calls).",
+    "network": "No actual remote request; controlled in-process transport only.",
+    "log": {
+      "path": "/tmp/prowl-ml-sidecar-policy-legacy-20261116.log",
+      "sha256": "d7764ede0388e51909e540683e5087fe43a86fc4914d37dca179349639f102a8"
+    }
+  },
+  "contract": {
+    "api": "Restore NewWithPolicy; New retains signature and stores initialization errors for Health/Score.",
+    "local": "Selected loopback host/port pinning; ignores local proxy; does not change global AllowPrivate.",
+    "remote": "Explicit --ml-allow-remote plus HTTPS; normal TLS/SSRF constraints retained.",
+    "redirects": "All redirect responses refused for Health/Score, including same-origin.",
+    "preflight": "Selected invalid endpoint rejected during parsing before Config/source and report/baseline/index opening; errors withhold endpoint credentials.",
+    "scoring_failure": "Keep all L1 findings, preserve source completeness, retain unversioned_policy. No sidecar model identity or absence certification is inferred.",
+    "response_guards": "Existing bounded/strict score decoding and transport-cause sanitization retained; owned response transport fixtures now use a valid explicit-consent endpoint."
+  },
+  "validation": {
+    "full_go": "passed, Go 1.27.4",
+    "full_race_packages": [
+      "internal/mlscore",
+      "internal/safehttp",
+      "cmd/prowl"
+    ],
+    "minimum_go": "Go 1.26.11, same full package suites passed",
+    "full_lint": "passed, 0 issues",
+    "endpoint_matrix": "local/remote/scheme/credentials, explicit HTTPS with owned transport, actual owned loopback with global bypass disabled, Health/Score redirects 301/302/303/307/308 same/cross-origin"
+  },
+  "native": {
+    "endpoint_policy": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-ml-endpoint-native-5lmw8sg7/evidence.json",
+        "sha256": "85ff8f2b399be94088ecea37988e07c6828edf36e4e82a5348191e0887cf99fa"
+      },
+      "passed": 64,
+      "checks": 64,
+      "network": "OS denies all network except owned loopback"
+    },
+    "loaded_policy": {
+      "evidence": {
+        "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-loaded-policy-native-6yj3i73h/evidence.json",
+        "sha256": "71872adb6697c881cf456c14e92a3caa80057cf1d8fca5730d40f0bf470fe5b1"
+      },
+      "passed": 134,
+      "checks": 134,
+      "network": "OS deny outside loopback, checked by denied bind; owned loopback verifier and sidecar only"
+    }
+  },
+  "native_runner": {
+    "path": "scripts/check_ml_endpoint_policy_native.py",
+    "sha256": "ebac8d69a094f5f31993e1e2b93f162486fbaadb96c7666dbd63e71e9b3db7d3"
+  },
+  "cli_upgrade": {
+    "evidence": {
+      "path": "/var/folders/_l/sr0klx8j69jfdpztdgkw614h0000gn/T/prowl-cli-upgrade-native-_394xskm/qualification.json",
+      "sha256": "fd95c11afe31fb800707a04b36f9c7634340a0298fa0081a739b59e6cf4243eb"
+    },
+    "passed": 190,
+    "checks": 190,
+    "reference": {
+      "path": "/private/tmp/prowl-integrity-v140-20261116-bin",
+      "sha256": "3c04238314d376d571e5d0c7b5d02e3b31c931f6df7e577bf8cb5baf24ada59c"
+    },
+    "candidate": {
+      "path": "/private/tmp/prowl-ml-sidecar-policy-qualified-20261116-bin",
+      "sha256": "f0a0256af0527f5830ff0ad38932164eec383d81348b0ad74e52297fe57c5dfc"
+    },
+    "boundary": "Released local routing including real terminal stdin versus pipe, named JSON/YAML/TOML file/stdin, CI precedence, incomplete baseline guards and stdin scope/preflight. Explicit false is a declared candidate extension: 1.4 rejects it, 1.5 accepts it without weakening incomplete failure. No ML, provider, remote-source or full-product compatibility claim."
+  },
+  "released_flag_name_inventory": {
+    "artifact": {
+      "path": "/tmp/prowl-ml-sidecar-policy-flag-inventory-20261116.json",
+      "sha256": "447f3dda357aed7f30c14cc10931a41889df77264879f35e60da325690e5db68"
+    },
+    "verified_reference_tool_blobs": 694,
+    "released_common_names": 62,
+    "all_names_present": true,
+    "boundary": "Lexical inventory only; not a full CLI behavior certificate."
+  },
+  "quality": {
+    "artifact": {
+      "path": "/tmp/prowl-ml-sidecar-policy-quality-20261116.json",
+      "sha256": "9fac308f6dedca18288627ffc025acdbf93b2625f8caafc2ad0fb0d657121d8a"
+    },
+    "equal_to_parent_except_binary_sha256": true,
+    "secret_hits": 1661,
+    "secrets": 2094,
+    "hard_negative_hits": 61,
+    "hard_negatives": 982
+  },
+  "cross_builds": {
+    "manifest": {
+      "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/builds.json",
+      "sha256": "33506543dd5402911a0c5f432c7787d4dfe2ef9bf3ffd9dabd5c903d7c61d052"
+    },
+    "builds": [
+      {
+        "os": "darwin",
+        "arch": "amd64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-darwin-amd64",
+        "sha256": "3d423f601137332b79d759579c83c0d3a1a5958670862df62243503411c31b13",
+        "executed": false
+      },
+      {
+        "os": "darwin",
+        "arch": "arm64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-darwin-arm64",
+        "sha256": "f0a0256af0527f5830ff0ad38932164eec383d81348b0ad74e52297fe57c5dfc",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "amd64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-linux-amd64",
+        "sha256": "21673eb7db5555b49bc4b3fdb79b9cdc45c994bb55f29678834e82104fa52e65",
+        "executed": false
+      },
+      {
+        "os": "linux",
+        "arch": "arm64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-linux-arm64",
+        "sha256": "996887e51cdac76efaa1ffee5fa3a16dba9503597fbd9c5438955e9547e0df65",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-windows-amd64.exe",
+        "sha256": "7169af6cd6e9ef4d95474e08d3ad9779bb8ca03bec2497c105df5546a0d681fd",
+        "executed": false
+      },
+      {
+        "os": "windows",
+        "arch": "arm64",
+        "path": "/tmp/prowl-ml-sidecar-policy-cross-build-20261116/prowl-windows-arm64.exe",
+        "sha256": "7aabc29aba6046bd709b466d79b9c3d4e045d8ec3f86800a6e6bd6a06f018f65",
+        "executed": false
+      }
+    ],
+    "foreign_binaries_executed": false
+  },
+  "not_rerun": {
+    "GOROOT_digest_and_performance": "No detector/scan/model runtime changes. Sidecar transport and CLI preflight qualified directly; old corpus/performance records remain historical."
+  },
+  "remaining_boundaries": [
+    "full released CLI/runtime contract audit",
+    "real authorized remote HTTPS sidecar qualification",
+    "final-source Docker/release factory",
+    "native foreign-platform execution",
+    "full TODO 1.5.0 migration and publication"
+  ],
+  "publication": false
+}

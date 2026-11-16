@@ -472,7 +472,7 @@ func (c commonFlags) mlScorer() (mlscore.Scorer, error) {
 		}
 		return c.mlPrepared.WithThreshold(c.mlThreshold), nil
 	case c.mlURL != "":
-		return mlscore.New(c.mlURL, c.mlThreshold), nil
+		return mlscore.NewWithPolicy(c.mlURL, c.mlThreshold, c.mlAllowRemote)
 	default:
 		return nil, nil
 	}

@@ -14,7 +14,10 @@ type scoreRoundTripFunc func(*http.Request) (*http.Response, error)
 func (f scoreRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func responseClient(body io.ReadCloser) *Client {
-	c := New("https://owned.invalid", 0.3)
+	c, err := NewWithPolicy("https://owned.invalid", 0.3, true)
+	if err != nil {
+		panic(err)
+	}
 	c.http.Transport = scoreRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: body}, nil
 	})
@@ -103,7 +106,10 @@ func TestScoreResponseBudgetUsesActualDecodedBytes(t *testing.T) {
 func TestSidecarTransportErrorsWithholdCredentialsAndKeepCause(t *testing.T) {
 	for _, health := range []bool{false, true} {
 		cause := errors.New("PRIVATE_DIAGNOSTIC")
-		client := New("https://user:PRIVATE_DIAGNOSTIC@owned.invalid?token=PRIVATE_DIAGNOSTIC", 0.3)
+		client, setupErr := NewWithPolicy("https://owned.invalid", 0.3, true)
+		if setupErr != nil {
+			t.Fatal(setupErr)
+		}
 		client.http.Transport = scoreRoundTripFunc(func(r *http.Request) (*http.Response, error) { return nil, cause })
 		var err error
 		if health {

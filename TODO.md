@@ -200,6 +200,16 @@
     - [x] Возвращён `--ci`: порог high, явный `--fail-on` сильнее независимо от порядка
       аргументов и настроек файла. Неполнота по-прежнему даёт код 2 даже с `--ci=false`.
       Флаг не включает ML, OCR или проверку у провайдера.
+    - [x] Восстановлены `--ml-allow-remote` и `mlscore.NewWithPolicy`: loopback
+      host/port pinning по умолчанию, explicit opt-in + HTTPS для удалённого
+      sidecar, запрет redirect, preflight до report/baseline/index и исходников.
+      Reproduced transport regression без внешних запросов исправлена.
+      Native ML policy — 64/64, loaded-policy — 134/134, CLI upgrade — 190/190;
+      full Go/scoped race/min-Go/lint и шесть static builds проходят, quality IDs
+      прежние. 694 reference blobs сверены; 62 common flag names представлены,
+      lexical inventory не закрывает полный CLI audit.
+      [Контракт](wiki/ML-Endpoint-Policy.md),
+      `wiki/evidence/1.5.0-ml-endpoint-policy-20261116.json`.
     - [x] Восстановлены default-порядок L2 → verification и `--verify-all`
       из 1.4.0. `--fail-on-verified` также проверяет до ML и сохраняет live-вердикт.
       Подтверждённые ответы для нового индекса собираются до ML. Постфильтрация

@@ -69,23 +69,31 @@ type Client struct {
 	url       string
 	threshold float64
 	http      *http.Client
+	initError error
 }
 
 // New returns a client for the sidecar at url (e.g. http://127.0.0.1:8799). threshold is the score
 // below which a non-checksum candidate is treated as not-a-secret by the caller.
 //
-// The HTTP client is built by internal/safehttp (same as verify/forge/domain): its CheckRedirect
-// refuses any cross-origin redirect, so a malicious or misconfigured sidecar that 302s elsewhere
-// can never re-POST the raw candidate values and context to another host; its dialer also blocks
-// private/loopback targets unless safehttp.AllowPrivate is set. A real local sidecar is loopback,
-// so production deployments that point --ml-url at 127.0.0.1 must run with PROWL_ALLOW_PRIVATE_IPS=1
-// (the same toggle --verify against an internal endpoint needs).
+// New defaults to a pinned loopback service. Invalid endpoints remain inert and
+// report the initialization error from Health/Score for legacy API compatibility.
 func New(url string, threshold float64) *Client {
-	return &Client{
-		url:       url,
-		threshold: threshold,
-		http:      safehttp.Client(30 * time.Second),
+	c, err := NewWithPolicy(url, threshold, false)
+	if err != nil {
+		return &Client{initError: err, threshold: threshold}
 	}
+	return c
+}
+
+// NewWithPolicy allows remote inference only with explicit opt-in over HTTPS.
+// Local services are pinned to their selected loopback host/port without changing
+// the process-wide SSRF policy. Redirects are disabled for both endpoint modes.
+func NewWithPolicy(url string, threshold float64, allowRemote bool) (*Client, error) {
+	client, err := safehttp.InferenceClient(url, allowRemote, 30*time.Second)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{url: url, threshold: threshold, http: client}, nil
 }
 
 // Threshold is the drop cutoff the caller applies to scores.
@@ -96,6 +104,9 @@ func (c *Client) Local() bool { return false }
 // Health reports whether the sidecar answers /health, with a short timeout (used as a startup probe
 // so a misconfigured --ml-url fails fast and loudly instead of silently scoring nothing).
 func (c *Client) Health(ctx context.Context) (err error) {
+	if c.initError != nil {
+		return c.initError
+	}
 	rctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(rctx, http.MethodGet, c.url+"/health", nil)
@@ -121,6 +132,9 @@ func (c *Client) Health(ctx context.Context) (err error) {
 // open (keep every finding) — the ML stage is a precision aid, never a gate that can drop findings
 // just because the sidecar is unreachable.
 func (c *Client) Score(ctx context.Context, recs []Record) (results []Result, err error) {
+	if c.initError != nil {
+		return nil, c.initError
+	}
 	if len(recs) == 0 {
 		return nil, nil
 	}
