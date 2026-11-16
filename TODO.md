@@ -684,6 +684,15 @@
     Quality metrics/IDs и полный GOROOT digest сохранены. Fixed-reference performance
     gate +17,65% времени при лимите +20%, bytes -4,52%, allocations +1,94%.
     `wiki/evidence/1.5.0-cross-file-indexed-20261116.json`.
+  - [x] `scan --staged --cross-file --verify`: одна acquisition scope для выбранных
+    regular blobs одного захваченного index listing. Working copy и неизменённые
+    committed files не поставляют companions; symlinks/archive members не наследуют
+    scope. SHA-256 listing доступен в provenance и coverage. Изменение index после
+    первого item/probe не меняет уже наблюдённые компоненты; новый запуск видит новый
+    index. Native JSON/SARIF ±ML/index — 910/910, включая конфликтные entries,
+    baseline guard, empty selection и subdirectory. Full Go, targeted race,
+    Go 1.26.11/lint проходят; quality IDs и полный GOROOT digest сохранены.
+    `wiki/evidence/1.5.0-cross-file-staged-20261116.json`.
   - [ ] Остальные source adapters/revisions, межфайловые import/overlay relationships,
     другие сложные namespace и реальные OAuth/DB verifiers;
     текущий local-filesystem этап их не закрывает.

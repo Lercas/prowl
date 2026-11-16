@@ -24,14 +24,14 @@ func (p *Pipeline) annotateIdentity(ctx context.Context, f *model.Finding, raw s
 			f.SourceIdentity = hex.EncodeToString(sourceMAC.Sum(nil))
 		}
 	}
-	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "container_digest", "layer_digest", "image_digest", "config_digest", "layer_diff_id", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "source_transform", "git_index"} {
+	for _, k := range []string{"blob", "commit", "run_id", "artifact_id", "digest", "container_digest", "layer_digest", "image_digest", "config_digest", "layer_diff_id", "source_url", "source_version", "page_id", "issue_id", "history_id", "comment_id", "source_map", "original_source", "source_transform", "git_index", "git_index_snapshot"} {
 		if v, ok := it.Meta[k]; ok {
 			value := model.SafeLocator(fmt.Sprint(v))
 			if len(value) > 2048 {
 				model.Note(ctx, "provenance_limit", it.Path, true)
 				continue
 			}
-			if (k == "blob" || k == "commit" || k == "digest" || k == "container_digest" || k == "layer_digest" || k == "image_digest" || k == "config_digest" || k == "layer_diff_id") && !model.ValidImmutableMetadata(k, value) {
+			if (k == "git_index_snapshot" || k == "blob" || k == "commit" || k == "digest" || k == "container_digest" || k == "layer_digest" || k == "image_digest" || k == "config_digest" || k == "layer_diff_id") && !model.ValidImmutableMetadata(k, value) {
 				continue
 			}
 			if f.Provenance == nil {

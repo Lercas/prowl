@@ -63,7 +63,13 @@ func GitChangedFilesIn(ctx context.Context, dir, mode, rev string) ([]string, er
 	default:
 		return nil, nil
 	}
-	out, err := gitCmd(ctx, dir, args...).Output()
+	var out []byte
+	var err error
+	if components, _ := ctx.Value(credentialModeKey{}).(bool); components {
+		out, err = timelineOutput(ctx, dir, args...)
+	} else {
+		out, err = gitCmd(ctx, dir, args...).Output()
+	}
 	if err != nil {
 		// "exit status 128" alone does not say that the revision is unknown; git's own first line does.
 		var exit *exec.ExitError

@@ -59,14 +59,14 @@ def main():
     env = {k: v for k, v in os.environ.items() if not k.startswith('PROWL_')}
     env.update(PROWL_HOME=str(root / 'home'), PROWL_LIVE_TEST='', PROWL_ALLOW_PRIVATE_IPS='1', NO_PROXY='127.0.0.1,localhost')
 
-    def run(paths, extra=(), fmt='json', ml=False, cross=True):
+    def run(paths, extra=(), fmt='json', ml=False, cross=True, cwd=None):
         args = [str(binary), 'scan', *map(str, paths), '--verify', '--verifiers', str(verifiers),
                 '--format=' + fmt, '--silence', '--workers=1', '--max-per-file=0']
         if cross:
             args.append('--cross-file')
         if ml:
             args += ['--ml', '--ml-model', str(model)]
-        return subprocess.run([*args, *map(str, extra)], cwd=root, env=env, capture_output=True, timeout=40)
+        return subprocess.run([*args, *map(str, extra)], cwd=cwd or root, env=git_env if cwd else env, capture_output=True, timeout=40)
 
     def fixture(label, extension='json'):
         folder = root / label
@@ -89,7 +89,134 @@ def main():
         run = d['runs'][0]
         return [r['properties'] for r in run['results'] if r['ruleId'].replace('-', '_') == 'aws_access_key_id'], run['properties']['complete']
 
+    git_env = {k: v for k, v in env.items() if not k.startswith('GIT_')}
+    git_env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull)
+
+    def git(folder, *args, data=None):
+        p = subprocess.run(['git', *args], input=data, cwd=folder, env=git_env, capture_output=True, timeout=20)
+        assert p.returncode == 0, 'owned Git fixture setup failed'
+        return p.stdout
+
+    def staged_fixture(label, extension='json'):
+        folder = fixture('staged-' + label, extension)
+        git(folder, 'init', '-q')
+        git(folder, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid',
+            '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'empty base', '--allow-empty')
+        git(folder, 'add', '--all')
+        return folder
+
     try:
+        for extension in ('json', 'yaml', 'toml', 'env'):
+            source = staged_fixture(extension, extension)
+            # Conflicting worktree content must not replace staged components.
+            (source / ('account.' + extension)).write_text('account=tenant_b\n')
+            listing = git(source, 'ls-files', '--stage', '-z')
+            snapshot = hashlib.sha256(listing).hexdigest()
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--staged'], fmt=fmt, ml=ml, cwd=source)
+                    label = f'staged-{extension}-{fmt}-ml{ml}'
+                    assert p.returncode == 0, label + '-command-success'
+                    fs, complete = report(p, fmt)
+                    check(label + '-complete', p.returncode == 0 and complete and len(fs) == 1)
+                    check(label + '-verdict', fs[0]['verification']['status'] == 'verified')
+                    check(label + '-components', len(fs[0]['verification']['components']['fields']['account']) == 1)
+                    check(label + '-owned-request', len(Handler.calls) == before + 1 and Handler.calls[-1])
+                    check(label + '-private', all(v.encode() not in p.stdout + p.stderr for v in (KEY, 'tenant_a', 'tenant_b', 'accessKeyId')))
+                    if fmt == 'json':
+                        check(label + '-snapshot', fs[0]['provenance']['git_index_snapshot'] == snapshot and
+                              any(scope['kind'] == 'components' and scope['target'] == 'git-index' for scope in json.loads(p.stdout)['scope']) and
+                              any(scope['kind'] == 'components-index-snapshot' for scope in json.loads(p.stdout)['scope']))
+            index = root / ('staged-index-' + extension)
+            p = run([], extra=['--staged', '--index', index, '--scope', 'owned-staged'], cwd=source)
+            fs, complete = report(p, 'json')
+            ids = fs[0]['verification']['components']['primary']
+            indexed = subprocess.run([str(binary), 'index', '--index', str(index), '--format=json'], cwd=root, env=env, capture_output=True, timeout=20)
+            places = {p['id'] for s in json.loads(indexed.stdout)['secrets'] for p in s['locations']}
+            check(f'staged-{extension}-index-primary', p.returncode == 0 and complete and indexed.returncode == 0 and set(ids) <= places)
+            with sqlite3.connect(index / 'index.sqlite') as database:
+                raw = '\n'.join(database.iterdump()).encode()
+            check(f'staged-{extension}-index-private', all(v.encode() not in raw for v in (KEY, 'tenant_a', 'accessKeyId')))
+
+        for mode in ('unstaged', 'committed-unselected', 'conflict', 'symlink', 'archive', 'unknown'):
+            source = staged_fixture('negative-' + mode)
+            account = source / 'account.json'
+            if mode == 'unstaged':
+                # Put the companion only in the working copy; stage an unrelated empty object.
+                account.write_text('{}')
+                git(source, 'add', '--', account.name)
+                account.write_text('{"account":"tenant_a"}')
+            elif mode == 'committed-unselected':
+                git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid',
+                    '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'committed configuration')
+                (source / 'key.json').write_text(json.dumps({'accessKeyId': OTHER}))
+                git(source, 'add', '--', 'key.json')
+            elif mode == 'conflict':
+                blob = git(source, 'hash-object', '-w', '--stdin', data=account.read_bytes()).strip().decode()
+                git(source, 'update-index', '--index-info', data=(f'0 {"0" * 40}\taccount.json\n' +
+                    ''.join(f'100644 {blob} {stage}\taccount.json\n' for stage in (1, 2, 3))).encode())
+            elif mode == 'symlink':
+                git(source, 'update-index', '--force-remove', '--', account.name)
+                account.rename(source / 'unselected-companion.json')
+                (source / 'account.env').symlink_to('account=tenant_a')
+                git(source, 'add', '--', 'account.env')
+            elif mode == 'archive':
+                account.write_text('{}')
+                git(source, 'add', '--', account.name)
+                stream = io.BytesIO()
+                with zipfile.ZipFile(stream, 'w') as z:
+                    z.writestr('account.json', '{"account":"tenant_a"}')
+                (source / 'owned.zip').write_bytes(stream.getvalue())
+                git(source, 'add', '--', 'owned.zip')
+            else:
+                (source / 'key.json').write_text(json.dumps({'accessKeyId': KEY, 'account': None}))
+                git(source, 'add', '--', 'key.json')
+            baseline = root / ('staged-' + mode + '.baseline')
+            baseline.write_bytes(b'owned staged baseline')
+            for fmt in ('json', 'sarif'):
+                for ml in (False, True):
+                    before = len(Handler.calls)
+                    p = run([], extra=['--staged', '--verified-only', '--write-baseline', baseline], fmt=fmt, ml=ml, cwd=source)
+                    _, complete = report(p, fmt)
+                    label = f'staged-negative-{mode}-{fmt}-ml{ml}'
+                    check(label + '-no-request', p.returncode == 2 and not complete and len(Handler.calls) == before)
+                    check(label + '-baseline', baseline.read_bytes() == b'owned staged baseline')
+
+        source = staged_fixture('empty')
+        git(source, '-c', 'user.name=Owned Fixture', '-c', 'user.email=fixture@example.invalid',
+            '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'unchanged index')
+        for fmt in ('json', 'sarif'):
+            before = len(Handler.calls)
+            p = run([], extra=['--staged'], fmt=fmt, cwd=source)
+            fs, complete = report(p, fmt)
+            check('staged-empty-' + fmt, p.returncode == 0 and complete and not fs and len(Handler.calls) == before)
+
+        source = staged_fixture('subdirectory')
+        child = source / 'nested'
+        child.mkdir()
+        for fmt in ('json', 'sarif'):
+            before = len(Handler.calls)
+            p = run([], extra=['--staged'], fmt=fmt, cwd=child)
+            fs, complete = report(p, fmt)
+            check('staged-subdirectory-' + fmt, p.returncode == 0 and complete and len(fs) == 1 and
+                  fs[0]['verification']['status'] == 'verified' and len(Handler.calls) == before + 1 and Handler.calls[-1])
+
+        source = staged_fixture('mutation')
+        (source / 'other-key.json').write_text(json.dumps({'secondKey': OTHER}))
+        git(source, 'add', '--', 'other-key.json')
+        def mutate_index():
+            (source / 'account.json').write_text('{"account":"tenant_b"}')
+            git(source, 'add', '--', 'account.json')
+        Handler.mutate = mutate_index
+        before = len(Handler.calls)
+        p = run([], extra=['--staged'], cwd=source)
+        _, complete = report(p, 'json')
+        check('staged-sealed-before-probes', p.returncode == 0 and complete and len(Handler.calls) == before + 2 and all(Handler.calls[before:]))
+        p = run([], extra=['--staged'], cwd=source)
+        fs, complete = report(p, 'json')
+        check('staged-next-acquisition-observes-new-index', p.returncode == 0 and complete and len(fs) == 2 and all(f['verification']['status'] == 'invalid' for f in fs))
+
         for extension in ('json', 'toml', 'yaml', 'env'):
             source = fixture('positive-' + extension, extension)
             for fmt in ('json', 'sarif'):
@@ -325,7 +452,7 @@ def main():
         evidence = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'model_sha256': hashlib.sha256(model.read_bytes()).hexdigest(),
                     'passed': len(checks), 'failed': 0, 'checks': checks, 'fixture_root': str(root),
                     'provider': 'Owned loopback stub only; no real provider/account acceptance', 'owned_requests': len(Handler.calls),
-                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Other adapters are not qualified.'}
+                    'scope': 'Opt-in local configuration literals; JSON/SARIF, ML, occurrences, index, sealed snapshot and baseline guards. Staged Git index is qualified separately from local roots; other adapters are not qualified.'}
         (root / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
         print(json.dumps({'passed': len(checks), 'evidence': str(root / 'evidence.json')}))
     finally:

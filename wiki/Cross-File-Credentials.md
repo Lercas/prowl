@@ -1,18 +1,21 @@
 # Составные credentials между файлами
 
-CLI `scan --cross-file --verify` собирает компоненты из выбранных локальных корней.
+CLI `scan --cross-file --verify` собирает компоненты из выбранных локальных корней
+или выбранных staged blobs одного Git index (`--staged`).
 Включение явно разрешает связывание однозначных именованных ролей внутри каждого
-корня; выбирайте корень одной связанной конфигурации. Единственность значений сама
+корня или одного выбранного индекса; выбирайте область одной связанной конфигурации.
+Единственность значений сама
 по себе не доказывает, что приложение использует их вместе. Режим использует
 `credentialset` и `verify.Set.VerifyComponents`, не перебирает возможные пары.
 
 ```sh
 prowl scan ./config --cross-file --verify --ml --format json
+prowl scan --staged --cross-file --verify --ml --format json
 prowl scan ./config --cross-file --verify --index "$HOME/.prowl/index" --scope app:config
 ```
 
 Без `--cross-file` поведение `--verify` не меняется. Флаг доступен только у `scan`:
-stdin, Git modes, `repo/org`, remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
+stdin, history/`--since`, `repo/org`, remote adapters, image/mobile и MCP/HTTP/LSP этим этапом
 не включены. Общий пункт TODO остаётся открытым до остальных источников и форматов.
 
 ## Поддержанные входы CLI
@@ -208,3 +211,38 @@ race, Go 1.26.11 и lint проходят; differential YAML fuzz — 30699 ис
 +20%, bytes -4,52%, allocations +1,94%. Это сравнение с фиксированной policy
 reference, а не измерение стоимости одного array-расширения относительно parent.
 Квалификация: `evidence/1.5.0-cross-file-indexed-20261116.json`.
+
+## Staged Git index
+
+`scan --staged --cross-file --verify` рассматривает выбранные изменённые staged paths
+как одну явно разрешённую конфигурационную область. Companions берутся только из
+этих выбранных entries: неизменённый committed файл и unstaged рабочая копия не
+добавляются. Для проверки полной конфигурации используйте подходящий явный набор
+входов, а не предположение, что `--staged` читает весь repository tree.
+
+Один `git ls-files --stage -z` фиксирует mode/blob ID/stage/path до чтения объектов.
+Все последующие bytes читаются по этим immutable blob IDs. Редактирование index
+после первого item или во время verification не заменяет уже наблюдённые компоненты.
+Новый запуск получает новую acquisition scope, даже при одинаковом listing digest.
+Не существует связывания между двумя запусками или индексами репозиториев.
+
+SHA-256 listing сохраняется в `provenance.git_index_snapshot` и в policy scope
+`components-index-snapshot`; report принимает только корректный immutable hash.
+Это digest наблюдавшегося index listing, не commit ID и не утверждение о рабочей
+копии. В opt-in режиме Git selection/listing ограничены 64 MiB stdout до
+материализации; действуют прежние component intake/literal/namespace budgets.
+
+Роли разрешены только для regular modes `100644`/`100755`. Link text по-прежнему
+сканируется обычным L1, но не представляет содержимое конфигурационного файла.
+Archive members не наследуют index scope. Конфликтный/missing/oversize entry и
+неподдержанный config literal оставляют неполноту, запрещают composite probes и
+запись нового baseline. Empty selected index остаётся полным пустым выбранным сканом.
+
+Native CLI — 910/910: JSON/SARIF ±ML/index, конфликтующая рабочая копия,
+mutation во время provider call, отдельное последующее acquisition, запрет
+заимствования committed/unselected/symlink/archive ролей, unmerged entries,
+baseline guards, empty selection и subdirectory. Source unit test меняет index
+после первого из 80 items и подтверждает исходные blob IDs/scope/listing digest.
+Full Go, targeted race, Go 1.26.11 и lint проходят; pinned quality metrics/IDs и
+полный GOROOT digest сохранены. Новый performance gate этим этапом не заявляется.
+Квалификация: `evidence/1.5.0-cross-file-staged-20261116.json`.

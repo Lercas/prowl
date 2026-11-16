@@ -205,7 +205,7 @@ var cliFlags = []flagSpec{
 		return nil
 	}),
 	boolFlag("--verify", indexedCommands, "validate supported credentials against the provider", func(c *commonFlags) *bool { return &c.verify }),
-	boolFlag("--cross-file", "scan", "bind exact configuration literals within each selected local root (requires --verify)", func(c *commonFlags) *bool { return &c.crossFile }),
+	boolFlag("--cross-file", "scan", "bind exact configuration literals within each local root or selected staged snapshot (requires --verify)", func(c *commonFlags) *bool { return &c.crossFile }),
 	boolFlag("--verify-all", indexedCommands, "verify every accepted L1 candidate before ML (implies --verify)", func(c *commonFlags) *bool { return &c.verifyAll }),
 	boolFlag("--verified-only", indexedCommands, "report only provider-confirmed live findings (implies --verify)", func(c *commonFlags) *bool { return &c.verifiedOnly }),
 	boolFlag("--show-secrets", scanCommands, "emit full values for authorized triage; default masked", func(c *commonFlags) *bool { return &c.showSecrets }),
@@ -452,8 +452,8 @@ func parseCommand(command string, args []string) (commonFlags, []string, error) 
 	if c.verifiedOnly || c.verifyAll {
 		c.verify = true
 	}
-	if c.crossFile && (!c.verify || c.staged || c.since != "" || c.history || c.stdinName != "") {
-		return c, nil, errors.New("--cross-file requires --verify and local filesystem roots; Git modes and stdin are not supported")
+	if c.crossFile && (!c.verify || c.since != "" || c.history || c.stdinName != "") {
+		return c, nil, errors.New("--cross-file requires --verify and local roots or --staged; history, --since and stdin are not supported")
 	}
 	if len(c.auditCollections) > 0 && !c.auditPublic {
 		return c, nil, errors.New("--audit-firestore-collection requires --audit-public")

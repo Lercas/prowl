@@ -144,3 +144,20 @@ func TestReportOccurrenceSeparatesRepeatedPhysicalImageEntries(t *testing.T) {
 		t.Fatal("physical TAR entries did not retain separate opaque occurrence identities")
 	}
 }
+
+func TestStagedSnapshotProvenanceRequiresSHA256(t *testing.T) {
+	for _, value := range []string{"private-snapshot", strings.Repeat("a", 40), strings.Repeat("g", 64), strings.Repeat("a", 64)} {
+		fs := New(Options{Detector: detector(t)}).Findings(t.Context(), model.Item{Text: "AKIANAFGYOEYPXU1DSYP", Path: "a.txt", Meta: map[string]any{"git_index_snapshot": value}})
+		if len(fs) != 1 {
+			t.Fatal("lost primary")
+		}
+		got := fs[0].Provenance["git_index_snapshot"]
+		if value == strings.Repeat("a", 64) {
+			if got != value {
+				t.Fatal("lost immutable snapshot")
+			}
+		} else if got != "" {
+			t.Fatal("unvalidated snapshot reached report")
+		}
+	}
+}

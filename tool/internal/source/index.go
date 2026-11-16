@@ -3,6 +3,8 @@ package source
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -87,6 +89,7 @@ func GitIndexFilesIn(ctx context.Context, dir string, paths, exclude []string, m
 				send(ctx, ch, model.Item{Source: "code", Error: err})
 				return
 			}
+			ctx = credentialRootContext(ctx)
 			if path, err := readIndexFiles(ctx, ch, root, selected, maxBytes, exclude); err != nil {
 				model.Note(ctx, "git_index_read_failed", path, true)
 				send(ctx, ch, model.Item{Source: "code", Path: path, Error: err})
@@ -100,9 +103,23 @@ func GitIndexFilesIn(ctx context.Context, dir string, paths, exclude []string, m
 }
 
 func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, selected map[string]bool, maxBytes int64, exclude []string) (errPath string, err error) {
-	listing, err := gitCmd(ctx, root, "ls-files", "--stage", "-z").Output()
+	var listing []byte
+	components, _ := ctx.Value(credentialModeKey{}).(bool)
+	if components {
+		listing, err = timelineOutput(ctx, root, "ls-files", "--stage", "-z")
+	} else {
+		listing, err = gitCmd(ctx, root, "ls-files", "--stage", "-z").Output()
+	}
 	if err != nil {
 		return "", fmt.Errorf("list git index: %w", err)
+	}
+	// The listing fixes every selected blob ID before verification or later index edits.
+	// Only opt-in component acquisitions retain this snapshot identifier.
+	var snapshot string
+	if components {
+		digest := sha256.Sum256(listing)
+		snapshot = hex.EncodeToString(digest[:])
+		model.CoverageFrom(ctx).RegisterScope("components-index-snapshot", root, struct{ ListingSHA256 string }{snapshot})
 	}
 	processCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -175,7 +192,17 @@ func readIndexFiles(ctx context.Context, ch chan<- model.Item, root string, sele
 			}
 			continue
 		}
-		if !emitPayload(ctx, ch, path, data, maxBytes, exclude, map[string]any{"blob": fields[1], "git_index": true}) {
+		emitCtx := ctx
+		meta := map[string]any{"blob": fields[1], "git_index": true}
+		if snapshot != "" {
+			meta["git_index_snapshot"] = snapshot
+			meta["git_mode"] = fields[0]
+			// A symlink's link text is scannable, but is not configuration file content.
+			if fields[0] != "100644" && fields[0] != "100755" {
+				emitCtx = withoutCredentialScope(ctx)
+			}
+		}
+		if !emitPayload(emitCtx, ch, path, data, maxBytes, exclude, meta) {
 			return path, ctx.Err()
 		}
 	}
