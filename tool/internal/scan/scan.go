@@ -923,7 +923,8 @@ func recordFor(value string, it model.Item, start int) mlscore.Record {
 		value = value[:512]
 	}
 	return mlscore.Record{
-		Value: value,
+		Value:         value,
+		DirectBinding: detect.BindingName(it.Text, start),
 		Context: mlscore.Context{
 			Name:   contextBindingName(it.Text, start, line),
 			Line:   line,
@@ -1023,7 +1024,7 @@ func mlFilterSelected(ctx context.Context, ml mlscore.Scorer, out []model.Findin
 	kept := out[:0]
 	indices := make([]int, 0, len(out))
 	for i, f := range out {
-		if mlExempt(f) || results[i].Score >= threshold {
+		if mlExempt(f) || mlAnchoredEvidence(f, reqs[i]) || results[i].Score >= threshold {
 			kept = append(kept, f)
 			indices = append(indices, i)
 		} else {
@@ -1063,7 +1064,7 @@ func sevIndex(s string) int {
 }
 
 // isChecksumProven reports whether a finding passed a structural checksum (any "checksum" stage). Such
-// a hit is cryptographic proof and outranks a template's self-declared severity in the collision logic.
+// a hit is format evidence and outranks a template's self-declared severity in the collision logic.
 func isChecksumProven(f model.Finding) bool {
 	return strings.Contains(f.Stage, "checksum")
 }

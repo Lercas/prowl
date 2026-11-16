@@ -290,6 +290,7 @@ func (doc *literalDocument) recordFor(value string, it model.Item, start int, ty
 	r := recordFor(value, it, start)
 	if v := doc.locate(start, start); v != nil && !v.raw && validLiteralBinding(v.name) {
 		r.Context.Name = doc.binding(v)
+		r.DirectBinding = doc.binding(v)
 		if typ == "generic_password" && start == v.preparedStart && value == v.value && !v.noPassword && !v.uiPassword && doc.scalars[start].Name != "" {
 			r.Context.ParserLiteralSensitive = literalSensitive(r.Value) || !mlfeatures.HasSecretNameKeyword(r.Context.Name)
 			r.Context.UINamespace = doc.roles[v.group].ui

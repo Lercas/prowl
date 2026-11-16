@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,11 +14,11 @@ import (
 	bundledrules "github.com/Lercas/prowl/tool/rules"
 )
 
-func TestReleasedNoiseCorpusNomination(t *testing.T) {
+func TestReleasedNoiseCorpusDefaultAndML(t *testing.T) {
 	testNoiseCorpus(t, "testdata/noise-1.4.0.json")
 }
 
-func TestReleasedDeepNoiseCorpusNomination(t *testing.T) {
+func TestReleasedDeepNoiseCorpusDefaultAndML(t *testing.T) {
 	testNoiseCorpus(t, "testdata/noise-deep-1.4.0.json")
 }
 
@@ -43,11 +44,15 @@ func testNoiseCorpus(t *testing.T, filename string) {
 		t.Fatalf("bundled inventory changed: %d", eng.Len())
 	}
 	t.Setenv("PROWL_HOME", t.TempDir())
+	embeddedModel, err := mlscore.NewEmbedded(.3, filepath.Join("..", "mlmodel", "model_binary_go_literal_v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	det := detector(t)
 	for _, useML := range []bool{false, true} {
 		var scorer mlscore.Scorer
 		if useML {
-			scorer = keepAllReleasedNominees{}
+			scorer = embeddedModel
 		}
 		for _, c := range cases {
 			t.Run(c.Name+map[bool]string{false: "/default", true: "/ml"}[useML], func(t *testing.T) {
@@ -137,15 +142,18 @@ func TestMLEvidenceDoesNotProtectContextualOrSemanticGuesses(t *testing.T) {
 		{"linode-api-token", "rule", "linode_id", "abcdef"},
 		{"netlify-access-token", "rule", "value", "nfp_too_short"},
 	} {
-		if mlExempt(model.Finding{Type: c.typ, Stage: c.stage}) {
+		if mlAnchoredEvidence(model.Finding{Type: c.typ, Stage: c.stage}, mlscore.Record{Value: c.value, DirectBinding: c.name}) {
 			t.Fatalf("weak evidence bypassed ML: %s/%s/%s", c.typ, c.stage, c.name)
 		}
 	}
 }
 
-func TestReleasedMultilingualPasswordNomination(t *testing.T) {
+func TestReleasedMultilingualPasswordDefaultAndML(t *testing.T) {
 	t.Setenv("PROWL_HOME", t.TempDir())
-	ml := keepAllReleasedNominees{}
+	ml, err := mlscore.NewEmbedded(.3, filepath.Join("..", "mlmodel", "model_binary_go_literal_v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, text := range []string{
 		"{\"password\":\n\"required\"}",
 		`{"пароль":"required"}`, `{"contraseña":"required"}`, `PASS="required"`,
@@ -181,18 +189,4 @@ func TestDetectionPolicyIsPresentForEmptyAndDirectScans(t *testing.T) {
 			t.Fatal("detection heuristic revision missing from scope")
 		}
 	}
-}
-
-// This corpus qualifies nomination and ML transport, not the changed 1.5 model.
-// The pinned quality gate separately qualifies the actual embedded model.
-type keepAllReleasedNominees struct{}
-
-func (keepAllReleasedNominees) Local() bool        { return true }
-func (keepAllReleasedNominees) Threshold() float64 { return .3 }
-func (keepAllReleasedNominees) Score(_ context.Context, records []mlscore.Record) ([]mlscore.Result, error) {
-	results := make([]mlscore.Result, len(records))
-	for i := range results {
-		results[i].Score = 1
-	}
-	return results, nil
 }

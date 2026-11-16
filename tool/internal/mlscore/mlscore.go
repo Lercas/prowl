@@ -23,6 +23,9 @@ import (
 type Record struct {
 	Value   string  `json:"value"`
 	Context Context `json:"context"`
+	// DirectBinding is local parser/adjacent-binding evidence. It is not a model
+	// feature and is never sent to a sidecar or included in feedback JSON.
+	DirectBinding string `json:"-"`
 }
 
 // Context mirrors the python feature extractor's context dict (name/line/path/source).
