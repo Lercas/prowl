@@ -192,6 +192,49 @@ jobs:
           python3 scripts/release/homebrew.py --tag v0.0.0-ci --checksums "$RUNNER_TEMP/prowl-snapshot/checksums.txt" --output "$RUNNER_TEMP/prowl.rb"
           ruby -c "$RUNNER_TEMP/prowl.rb"
 
+      - name: retain verified snapshot for native runtime jobs
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: release-snapshot
+          path: |
+            ${{ runner.temp }}/prowl-snapshot/prowl_*.tar.gz
+            ${{ runner.temp }}/prowl-snapshot/prowl_*.zip
+            ${{ runner.temp }}/prowl-snapshot/prowl_*.spdx.json
+            ${{ runner.temp }}/prowl-snapshot/checksums.txt
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+
+  release-native:
+    needs: release-snapshot
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-24.04, os: linux, arch: amd64}
+          - {runner: ubuntu-24.04-arm, os: linux, arch: arm64}
+          - {runner: macos-15-intel, os: darwin, arch: amd64}
+          - {runner: macos-15, os: darwin, arch: arm64}
+          - {runner: windows-2025, os: windows, arch: amd64}
+          - {runner: windows-11-arm, os: windows, arch: arm64}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: release-snapshot
+          path: ${{ runner.temp }}/prowl-snapshot
+      - name: execute verified native archive without rebuilding
+        run: >-
+          python -I scripts/release/smoke_archive.py "${{ runner.temp }}/prowl-snapshot"
+          --version 0.0.0-ci --os ${{ matrix.os }} --arch ${{ matrix.arch }}
+
   static-ml:
     runs-on: ubuntu-latest
     strategy:

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-16",
+  "source_commit": "3520d2d15801f75a4515691a7e1185db2ade95cb",
+  "scope": "Native release archive CI runtime contract; local Darwin arm64 qualification only",
+  "snapshot": {
+    "directory": "/tmp/prowl-release-architecture-snapshot-20261116/artifacts",
+    "version": "1.5.0-dev.43ec325",
+    "source_commit": "43ec3252d0cf809d925ee27a35d5aa9091bf4d70",
+    "build": "previously qualified clean snapshot; no rebuild"
+  },
+  "ci": {
+    "producer": "release-snapshot",
+    "consumer": "release-native",
+    "platforms": [
+      "linux/amd64",
+      "linux/arm64",
+      "darwin/amd64",
+      "darwin/arm64",
+      "windows/amd64",
+      "windows/arm64"
+    ],
+    "upload_action": "actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f",
+    "download_action": "actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3",
+    "native_checks": [
+      "host OS/architecture",
+      "full six-archive checksums, members, headers, SBOM gate",
+      "exact snapshot executable version",
+      "embedded ML typed candidate and default redaction",
+      "legacy zlib model rejected with actionable retrain message",
+      "selftest --ml"
+    ],
+    "hosted_execution": "not performed"
+  },
+  "local": {
+    "platform": "darwin/arm64",
+    "network": "OS sandbox deny network*",
+    "release_helper_tests": 11,
+    "selftest_cases_passed": 7,
+    "actionlint": "pass",
+    "negative_cli_checks": [
+      "foreign host rejected before execution",
+      "absent expected version rejected before execution"
+    ],
+    "unit_negative_checks": [
+      "foreign host does not verify or execute",
+      "corrupt checksum prevents extraction and execution",
+      "foreign architectures rejected across host aliases"
+    ]
+  },
+  "limitations": [
+    "Windows runtime remains unqualified until hosted jobs execute",
+    "Other five native CI runner jobs were not executed locally",
+    "No signature or authenticity verification is provided by snapshot checksums",
+    "No push, hosted run, publication, install, deployment or Docker rebuild"
+  ],
+  "sources": [
+    "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "https://github.com/actions/upload-artifact/tree/bbbca2ddaa5d8feaa63e36b76fdaad77386f024f",
+    "https://github.com/actions/download-artifact/tree/70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3"
+  ],
+  "logs": [
+    {
+      "path": "/tmp/prowl-release-native-ci-tests-20261116.log",
+      "sha256": "a9508eb028a6fb46b5d451479bed8de03766f147ae509529458ee85b428d4b58"
+    },
+    {
+      "path": "/tmp/prowl-release-native-ci-runtime-20261116.log",
+      "sha256": "34704bb535b2abe913597448ba2b35f079e988369d660586b9edb9e3786d161a"
+    },
+    {
+      "path": "/tmp/prowl-release-native-ci-actionlint-20261116.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -58,6 +58,23 @@ Unix TAR-бинарник должен иметь executable bit. Синтети
 и фактическое исполнение проверяются отдельно. Generic SYSV ELF header сам по себе
 не устанавливает Linux GOOS.
 
+## Native runtime snapshot в CI
+
+Обычный CI передаёт проверенный комплект из `release-snapshot` через artifact
+в зависимую матрицу `release-native`: Linux/macOS/Windows × amd64/arm64.
+`scripts/release/smoke_archive.py` требует совпадения платформы runner, повторно
+проверяет весь комплект, извлекает только binary member в временный каталог,
+сверяет версию и запускает ML/redaction/legacy-model smoke и `selftest --ml`.
+Бинарник не пересобирается; конфигурация пользователя исключена через свежий
+`PROWL_HOME`. Snapshot checksums не заменяют подпись опубликованного релиза.
+Labels runner взяты из [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
+
+Локально этот runner проверен на macOS arm64 под OS deny-network с архивом
+`1.5.0-dev.43ec325`: selftest 7/7, ML/redaction/legacy rejection проходят.
+11 release-helper tests и actionlint проходят. Шесть hosted jobs, в том числе
+Windows, ещё не исполнялись; добавление workflow не является их успешным прогоном.
+Evidence: `wiki/evidence/1.5.0-release-native-ci-20261116.json`.
+
 ## Порядок релизного workflow
 
 1. `qualify`: проверка тегов и секрета tap, `go vet`, race-тесты, статическая сборка

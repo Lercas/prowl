@@ -45,6 +45,13 @@
     platform/malformed matrices, config/actionlint и formula syntax проходят.
     Windows runtime, signing, hosted CI и final-source publication остаются открыты.
     `wiki/evidence/1.5.0-release-platform-qualification-20261116.json`.
+  - [x] Добавлена зависимая CI-матрица native runtime для шести snapshot-архивов:
+    Linux/macOS/Windows × amd64/arm64. Consumer скачивает комплект producer job,
+    повторяет checksums/layout/header/SBOM gate, проверяет host и версию, затем
+    запускает архивный binary без пересборки: ML/redaction/legacy rejection и
+    selftest. Локально macOS arm64 проходит под OS deny-network, 11 helper tests
+    и actionlint зелёные. Hosted jobs, включая Windows, ещё не выполнены;
+    `wiki/evidence/1.5.0-release-native-ci-20261116.json`.
 
 
 - [x] **Вернуть совместимость `--stdin-name` с 1.4.0.** В `refs/tags/v1.4.0`
